@@ -1455,17 +1455,19 @@
     <script>
         // Main Initialization
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize components with error handling
-            initializeComponents();
+            console.log('DOM Content Loaded - Initializing components...');
+            // Initialize countdown timer first
+            initCountdownTimer();
+            // Then initialize other components
+            initSpotsCounter();
+            initializeOtherComponents();
         });
 
-        function initializeComponents() {
+        function initializeOtherComponents() {
             const components = [
                 { name: 'GSAP', fn: initGSAP },
                 { name: 'FloatingCards', fn: initFloatingCards },
                 { name: 'WaitlistForm', fn: initWaitlistForm },
-                { name: 'CountdownTimer', fn: initCountdownTimer },
-                { name: 'SpotsCounter', fn: initSpotsCounter },
                 { name: 'FloatingCTA', fn: initFloatingCTA },
                 { name: 'ExitIntent', fn: initExitIntent },
                 { name: 'BackToTop', fn: initBackToTop },
@@ -1480,144 +1482,13 @@
                     component.fn();
                 } catch (error) {
                     console.error(`Error initializing ${component.name}:`, error);
-                    showToast(`Failed to initialize ${component.name}`, 'error');
                 }
             });
         }
 
-        // Initialize GSAP with improved animations
-        function initGSAP() {
-            gsap.registerPlugin(ScrollTrigger);
-
-            // Logo hover animation
-            const logo = document.querySelector('.logo');
-            logo.addEventListener('mouseenter', () => {
-                gsap.to(logo, {
-                    scale: 1.1,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-                gsap.to(logo.querySelector('i'), {
-                    scale: 1.2,
-                    rotate: 10,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            });
-            logo.addEventListener('mouseleave', () => {
-                gsap.to(logo, {
-                    scale: 1,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-                gsap.to(logo.querySelector('i'), {
-                    scale: 1,
-                    rotate: 0,
-                    duration: 0.3,
-                    ease: 'power2.out'
-                });
-            });
-
-            // Common ScrollTrigger settings
-            const commonScrollTrigger = {
-                start: "top 80%",
-                end: "bottom 20%",
-                toggleActions: "play none none reverse"
-            };
-
-            // Hero section animations
-            const heroTimeline = gsap.timeline();
-            heroTimeline
-                .from('.hero h1', { 
-                    opacity: 0, 
-                    y: 30, 
-                    duration: 1,
-                    ease: "power2.out"
-                })
-                .from('.hero-subtitle', { 
-                    opacity: 0, 
-                    y: 20, 
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, '-=0.5')
-                .from('.countdown', { 
-                    opacity: 0, 
-                    y: 20, 
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, '-=0.5')
-                .from('.hero-stats', { 
-                    opacity: 0, 
-                    y: 20, 
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, '-=0.5')
-                .from('.signup-form', { 
-                    opacity: 0, 
-                    y: 20, 
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, '-=0.3')
-                .from('.trust-badge', { 
-                    opacity: 0, 
-                    scale: 0.8, 
-                    duration: 0.8,
-                    ease: "back.out(1.7)"
-                }, '-=0.3')
-                .from('.social-proof', { 
-                    opacity: 0, 
-                    y: 20, 
-                    duration: 0.8,
-                    ease: "power2.out"
-                }, '-=0.5');
-
-            // Floating cards animation with improved performance
-            gsap.to('.floating-card', {
-                y: 'random(-10, 10)',
-                duration: 'random(1.5, 2)',
-                repeat: -1,
-                yoyo: true,
-                ease: 'power1.inOut',
-                stagger: {
-                    amount: 0.5,
-                    from: 'random'
-                }
-            });
-
-            // Batch animations for better performance
-            ScrollTrigger.batch('.fade-in, .slide-up', {
-                ...commonScrollTrigger,
-                onEnter: batch => gsap.to(batch, {
-                    opacity: 1,
-                    y: 0,
-                    stagger: 0.15,
-                    duration: 0.8,
-                    ease: 'power2.out'
-                })
-            });
-
-            // Button hover animations
-            const buttons = document.querySelectorAll('.primary-button');
-            buttons.forEach(button => {
-                button.addEventListener('mouseenter', () => {
-                    gsap.to(button, {
-                        scale: 1.05,
-                        duration: 0.3,
-                        ease: 'power2.out'
-                    });
-                });
-                button.addEventListener('mouseleave', () => {
-                    gsap.to(button, {
-                        scale: 1,
-                        duration: 0.3,
-                        ease: 'power2.out'
-                    });
-                });
-            });
-        }
-
-        // Fix Countdown Timer implementation
+        // Updated Countdown Timer implementation
         function initCountdownTimer() {
+            console.log('Initializing countdown timer...');
             const timerElement = document.getElementById('timer');
             if (!timerElement) {
                 console.error('Timer element not found');
@@ -1631,14 +1502,13 @@
             console.log('Current time:', now.toString());
             console.log('Fixed countdown target:', new Date(fixedEndTimestamp).toString());
             
-            // Format function for adding leading zeros
-            const formatNumber = (num) => (num < 10 ? `0${num}` : num);
+            function formatNumber(num) {
+                return num < 10 ? `0${num}` : num;
+            }
 
             function updateTimer() {
                 const currentTime = new Date().getTime();
                 const distance = fixedEndTimestamp - currentTime;
-                
-                console.log('Time remaining (ms):', distance);
                 
                 if (distance <= 0) {
                     clearInterval(timerInterval);
@@ -1646,94 +1516,59 @@
                     return;
                 }
                 
-                // Calculate time components
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                console.log('Countdown values:', { days, hours, minutes, seconds });
-                
-                // Update the timer display
-                timerElement.innerHTML = `
+                const newHtml = `
                     <span class="time-unit">${formatNumber(days)}<small>d</small></span>
                     <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
                     <span class="time-unit">${formatNumber(minutes)}<small>m</small></span>
                     <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
                 `;
+                
+                if (timerElement.innerHTML !== newHtml) {
+                    timerElement.innerHTML = newHtml;
+                    console.log('Timer updated:', { days, hours, minutes, seconds });
+                }
             }
             
-            // Run updateTimer immediately
+            // Run updateTimer immediately and then every second
             updateTimer();
-            
-            // Set interval to update every second
             const timerInterval = setInterval(updateTimer, 1000);
+            
+            // Add this line to verify the timer is updating
+            console.log('Countdown timer initialized and running');
+            return timerInterval;
         }
 
-        // Fix Spots Counter Animation with persistence
+        // Updated Spots Counter implementation
         function initSpotsCounter() {
+            console.log('Initializing spots counter...');
             const counters = document.querySelectorAll('.stat-number[data-target]');
             
             counters.forEach(counter => {
                 const target = parseInt(counter.dataset.target);
                 
-                // For spots remaining, implement persistence
                 if (target === 200) {
-                    // Check if we have a stored value in localStorage
+                    // For spots remaining counter
                     let spotsRemaining = localStorage.getItem('spotsRemaining');
-                    
-                    // Force reset localStorage for testing
-                    // localStorage.removeItem('spotsRemaining');
-                    
-                    console.log("Initial spots from localStorage:", spotsRemaining);
-                    
-                    // If no stored value or invalid, start with 200
                     if (!spotsRemaining || isNaN(parseInt(spotsRemaining)) || parseInt(spotsRemaining) <= 0) {
                         spotsRemaining = '200';
                         localStorage.setItem('spotsRemaining', spotsRemaining);
-                        console.log("Reset spots to 200");
                     }
-                    
-                    // Set the counter to the stored value immediately
                     counter.textContent = spotsRemaining;
-                    console.log("Set spots counter to:", spotsRemaining);
-                    counter.classList.add('animate');
+                } else {
+                    // For other counters (like Early Access Signups)
+                    counter.textContent = target.toLocaleString();
                 }
                 
-                // For other counters, animate from 0 to target
-                const duration = 2000; // 2 seconds
-                const frames = 60; // 60 FPS
-                const increment = target / (duration / (1000 / frames));
-                let current = 0;
-
-                // Set initial state
-                counter.textContent = '0';
+                // Add animation class
                 counter.classList.add('animate');
-
-                const updateCounter = () => {
-                    current += increment;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(interval);
-                        
-                        // Add visual feedback when counter finishes
-                        gsap.to(counter.closest('.stat-item'), {
-                            scale: 1.05,
-                            duration: 0.2,
-                            yoyo: true,
-                            repeat: 1,
-                            ease: 'power2.out'
-                        });
-                    }
-                    
-                    // Format number with commas
-                    counter.textContent = Math.round(current).toLocaleString();
-                };
-
-                // Start counter after a small delay
-                setTimeout(() => {
-                    const interval = setInterval(updateCounter, 1000 / frames);
-                }, 500);
+                
+                // Log the counter initialization
+                console.log(`Counter initialized: ${counter.dataset.target} = ${counter.textContent}`);
             });
         }
 

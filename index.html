@@ -1286,22 +1286,6 @@
                 <p class="hero-subtitle slide-up delay-1">
                     Daily Steps to Deepen Connections
                 </p>
-                <div class="countdown slide-up delay-2" id="countdown">
-                    <i class="fas fa-clock"></i>
-                    <span id="timer"><span class="time-unit">00<small>d</small></span><span class="time-unit">00<small>h</small></span><span class="time-unit">00<small>m</small></span><span class="time-unit">00<small>s</small></span></span>
-                </div>
-                <div class="hero-stats slide-up delay-2">
-                    <div class="stat-item">
-                        <i class="custom-icon"><i class="fas fa-heart"></i></i>
-                        <span class="stat-number" data-target="2500">0</span>
-                        <span class="stat-label">Early Access Signups</span>
-                    </div>
-                    <div class="stat-item">
-                        <i class="custom-icon"><i class="fas fa-chart-line"></i></i>
-                        <span class="stat-number" data-target="200">0</span>
-                        <span class="stat-label">Spots Remaining</span>
-                    </div>
-                </div>
                 <div class="signup-form slide-up delay-3">
                     <form id="waitlistForm" class="waitlist-form">
                         <div class="form-group">
@@ -1315,16 +1299,15 @@
                     <p class="privacy-note">Your Privacy Matters – No Spam, Just Value</p>
                     <div class="trust-badge">
                         <i class="custom-icon"><i class="fas fa-comments"></i></i>
-                        Trusted by 2,500+ Users
+                        Trusted by Our Community
                     </div>
                     <div class="social-proof">
                         <div class="avatars">
                             <img src="https://ui-avatars.com/api/?name=User+1&background=007bff&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=007bff&color=fff'">
                             <img src="https://ui-avatars.com/api/?name=User+2&background=ffd700&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ffd700&color=fff'">
                             <img src="https://ui-avatars.com/api/?name=User+3&background=ff6f61&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ff6f61&color=fff'">
-                            <div class="avatar more">2.5k+</div>
                         </div>
-                        <p>Join 2,500+ people transforming their relationships!</p>
+                        <p>Join our growing community!</p>
                     </div>
                 </div>
             </div>
@@ -1456,10 +1439,6 @@
         // Main Initialization
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Initializing components...');
-            // Initialize countdown timer first
-            initCountdownTimer();
-            // Then initialize other components
-            initSpotsCounter();
             initializeOtherComponents();
         });
 
@@ -1486,138 +1465,6 @@
             });
         }
 
-        // Updated Countdown Timer implementation
-        function initCountdownTimer() {
-            console.log('Initializing countdown timer...');
-            const timerElement = document.getElementById('timer');
-            if (!timerElement) {
-                console.error('Timer element not found');
-                return;
-            }
-
-            // Set a fixed date exactly 10 days from right now
-            const now = new Date();
-            const fixedEndTimestamp = now.getTime() + (10 * 24 * 60 * 60 * 1000);
-            
-            console.log('Current time:', now.toString());
-            console.log('Fixed countdown target:', new Date(fixedEndTimestamp).toString());
-            
-            function formatNumber(num) {
-                return num < 10 ? `0${num}` : num;
-            }
-
-            function updateTimer() {
-                const currentTime = new Date().getTime();
-                const distance = fixedEndTimestamp - currentTime;
-                
-                if (distance <= 0) {
-                    clearInterval(timerInterval);
-                    timerElement.innerHTML = "OFFER EXPIRED";
-                    return;
-                }
-                
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                
-                const newHtml = `
-                    <span class="time-unit">${formatNumber(days)}<small>d</small></span>
-                    <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
-                    <span class="time-unit">${formatNumber(minutes)}<small>m</small></span>
-                    <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
-                `;
-                
-                if (timerElement.innerHTML !== newHtml) {
-                    timerElement.innerHTML = newHtml;
-                    console.log('Timer updated:', { days, hours, minutes, seconds });
-                }
-            }
-            
-            // Run updateTimer immediately and then every second
-            updateTimer();
-            const timerInterval = setInterval(updateTimer, 1000);
-            
-            // Add this line to verify the timer is updating
-            console.log('Countdown timer initialized and running');
-            return timerInterval;
-        }
-
-        // Updated Spots Counter implementation
-        function initSpotsCounter() {
-            console.log('Initializing spots counter...');
-            const counters = document.querySelectorAll('.stat-number[data-target]');
-            
-            counters.forEach(counter => {
-                const target = parseInt(counter.dataset.target);
-                
-                if (target === 200) {
-                    // For spots remaining counter
-                    let spotsRemaining = localStorage.getItem('spotsRemaining');
-                    if (!spotsRemaining || isNaN(parseInt(spotsRemaining)) || parseInt(spotsRemaining) <= 0) {
-                        spotsRemaining = '200';
-                        localStorage.setItem('spotsRemaining', spotsRemaining);
-                    }
-                    counter.textContent = spotsRemaining;
-                } else {
-                    // For other counters (like Early Access Signups)
-                    counter.textContent = target.toLocaleString();
-                }
-                
-                // Add animation class
-                counter.classList.add('animate');
-                
-                // Log the counter initialization
-                console.log(`Counter initialized: ${counter.dataset.target} = ${counter.textContent}`);
-            });
-        }
-
-        // Update CTA button handling
-        function initCTAButtons() {
-            const ctaButtons = document.querySelectorAll('.cta-button, .floating-cta, .primary-button');
-            const waitlistForm = document.getElementById('waitlistForm');
-            const emailInput = waitlistForm ? waitlistForm.querySelector('input[type="email"]') : null;
-
-            ctaButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-
-                    if (waitlistForm) {
-                        // Smooth scroll to form
-                        waitlistForm.scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-
-                        // Focus email input after scroll completes
-                        setTimeout(() => {
-                            if (emailInput) {
-                                emailInput.focus();
-                            }
-                        }, 800);
-                    }
-                });
-            });
-
-            // Update floating CTA visibility
-            const floatingCta = document.getElementById('floatingCta');
-            const heroSection = document.getElementById('hero');
-            
-            if (floatingCta && heroSection) {
-                window.addEventListener('scroll', () => {
-                    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-                    const scrollPosition = window.scrollY + window.innerHeight;
-                    
-                    if (window.scrollY > heroBottom) {
-                        floatingCta.classList.add('visible');
-                    } else {
-                        floatingCta.classList.remove('visible');
-                    }
-                });
-            }
-        }
-
         // Update Waitlist form handling
         function initWaitlistForm() {
             const forms = document.querySelectorAll('form.waitlist-form');
@@ -1631,7 +1478,7 @@
             });
         }
 
-        // Add new function for handling form submissions with persistence
+        // Add new function for handling form submissions
         async function handleFormSubmission(email, form, submitButton) {
             if (!isValidEmail(email)) {
                 showToast('Please enter a valid email address', 'error');
@@ -1647,38 +1494,12 @@
                 // For now, we'll simulate it with a delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                // Update spots counter with persistence
-                const spotsElement = document.querySelector('[data-target="200"]');
-                if (spotsElement) {
-                    // Get current spots from localStorage or element
-                    let currentSpots = localStorage.getItem('spotsRemaining');
-                    if (!currentSpots || isNaN(parseInt(currentSpots))) {
-                        currentSpots = spotsElement.textContent;
-                    }
-                    
-                    // Calculate new value and ensure it doesn't go below zero
-                    const newSpots = Math.max(0, parseInt(currentSpots) - 1);
-                    
-                    // Update both the display and localStorage
-                    spotsElement.textContent = newSpots.toString();
-                    localStorage.setItem('spotsRemaining', newSpots.toString());
-                    
-                    // Add a bounce animation to highlight the change
-                    gsap.to(spotsElement, {
-                        scale: 1.2,
-                        duration: 0.2,
-                        yoyo: true,
-                        repeat: 1,
-                        ease: "bounce.out"
-                    });
-                }
-
-                showToast('🎉 Welcome to the waitlist! Check your email for confirmation.', 'success');
+                showToast('🎉 Welcome! Check your email for confirmation.', 'success');
                 form.reset();
                 return true;
             } catch (error) {
                 console.error('Form submission error:', error);
-                showToast('Failed to join waitlist. Please try again.', 'error');
+                showToast('Failed to join. Please try again.', 'error');
                 return false;
             } finally {
                 submitButton.disabled = false;

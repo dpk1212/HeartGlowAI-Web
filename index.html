@@ -9,7 +9,7 @@
     <!-- Preconnect to external domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <!-- GSAP Loading -->
@@ -41,11 +41,11 @@
         }
 
         .toast.success {
-            border-left: 4px solid var(--success-color);
+            border-left: 4px solid var(--accent-color);
         }
 
         .toast.error {
-            border-left: 4px solid var(--error-color);
+            border-left: 4px solid var(--secondary-color);
         }
 
         .toast.show {
@@ -55,30 +55,141 @@
         /* Main Styles */
         :root {
             /* Brand Colors */
-            --primary-color: #007BFF;
-            --secondary-color: #E6B800;
-            --accent-gold: #FFD700;
-            --accent-coral: #FF6F61;
-            --gradient-start: #FFC1CC;
-            --gradient-end: #E6B800;
-            --text-warm: #666666;
+            --primary-color: #6A9FB5;
+            --secondary-color: #FF6F61;
+            --accent-color: #4CAEA0;
+            --background-light: #F5F5F5;
+            --background-white: #FCFCFC;
+            --text-dark: #333333;
+            --text-light: #666666;
             
             /* UI Colors */
-            --success-color: #28a745;
-            --error-color: #dc3545;
-            --background-light: #f8f9fa;
-            --text-dark: #212529;
-            --text-light: var(--text-warm);
-            --border-color: #dee2e6;
+            --success-color: var(--accent-color);
+            --error-color: var(--secondary-color);
+            --border-color: #E5E5E5;
             
             /* Shadows */
-            --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
-            --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
-            --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.15);
             
             /* Other */
-            --border-radius: 0.5rem;
+            --border-radius: 12px;
             --transition: all 0.3s ease;
+        }
+
+        /* Typography */
+        body {
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--background-white);
+        }
+
+        h1, h2, h3, h4, h5, h6, .logo, .cta-button, .primary-button {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            text-transform: none;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: none;
+        }
+
+        .hero-subtitle {
+            font-family: 'Lato', sans-serif;
+            font-size: 1.25rem;
+            line-height: 1.5;
+        }
+
+        /* Button Styles */
+        .primary-button, .cta-button {
+            background: var(--primary-color);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            border: none;
+            transition: var(--transition);
+        }
+
+        .secondary-button {
+            background: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--accent-color);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        /* Update existing styles */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .custom-icon {
+            background: var(--accent-color);
+        }
+
+        .trust-badge {
+            background: rgba(106, 159, 181, 0.1);
+            color: var(--primary-color);
+        }
+
+        .feature-card, .step {
+            background: var(--background-white);
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-card:hover, .step:hover {
+            border-color: var(--accent-color);
+        }
+
+        .step-number {
+            background: var(--accent-color);
+        }
+
+        /* Toast Updates */
+        .toast.success {
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        /* Navigation Updates */
+        nav {
+            background: rgba(252, 252, 252, 0.95);
+        }
+
+        .nav-links a::after {
+            background: var(--accent-color);
+        }
+
+        /* Hero Section Updates */
+        .hero {
+            background: linear-gradient(135deg, var(--background-light) 0%, var(--background-white) 100%);
+        }
+
+        /* Footer Updates */
+        .footer {
+            background: var(--text-dark);
         }
 
         /* Brand Typography */
@@ -88,23 +199,14 @@
             font-family: 'Montserrat', sans-serif;
             font-weight: 700;
             font-size: 28px;
-            color: var(--accent-gold) !important;
+            color: var(--accent-color) !important;
             transition: transform 0.3s ease;
         }
 
         .logo i {
             font-size: 32px;
-            color: var(--accent-gold);
+            color: var(--accent-color);
             transition: transform 0.3s ease;
-        }
-
-        /* Gradient Text */
-        .gradient-text {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            display: inline-block;
         }
 
         /* Image Styles */
@@ -132,7 +234,7 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: var(--accent-gold);
+            background: var(--accent-color);
             border-radius: 50%;
             margin-right: 0.5rem;
             color: white;
@@ -166,15 +268,15 @@
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: rgba(255, 215, 0, 0.1);
+            background: rgba(106, 159, 181, 0.1);
             border-radius: var(--border-radius);
-            color: var(--accent-gold);
+            color: var(--primary-color);
             font-weight: 600;
             margin-top: 1rem;
         }
 
         .trust-badge i {
-            color: var(--accent-gold);
+            color: var(--primary-color);
         }
 
         /* Floating CTA Button */
@@ -232,7 +334,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             opacity: 0;
             transition: var(--transition);
         }
@@ -307,7 +409,7 @@
 
         /* Countdown Timer */
         .countdown {
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             padding: 1rem;
             border-radius: var(--border-radius);
             color: white;
@@ -327,13 +429,6 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            line-height: 1.6;
-            color: var(--text-dark);
-            overflow-x: hidden;
-        }
-
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -346,7 +441,7 @@
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(252, 252, 252, 0.95);
             backdrop-filter: blur(10px);
             z-index: 1000;
             padding: 1rem 0;
@@ -389,7 +484,7 @@
             left: 0;
             width: 0;
             height: 2px;
-            background: var(--accent-gold);
+            background: var(--accent-color);
             transition: var(--transition);
         }
 
@@ -398,7 +493,7 @@
         }
 
         .cta-button {
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-coral));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             border: none;
             padding: 0.75rem 1.5rem;
             color: white !important;
@@ -409,7 +504,7 @@
         .cta-button:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-md);
-            background: linear-gradient(135deg, var(--accent-coral), var(--accent-gold));
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
         }
 
         .mobile-menu {
@@ -424,7 +519,7 @@
         /* Hero Section Styles */
         .hero {
             padding: 8rem 0 4rem;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            background: linear-gradient(135deg, var(--background-light) 0%, var(--background-white) 100%);
             position: relative;
             overflow: hidden;
         }
@@ -522,7 +617,7 @@
         .stat-number {
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-gold));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -540,7 +635,7 @@
             width: 48px;
             height: 48px;
             margin: 0 auto;
-            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
         }
 
         .stat-item .custom-icon i {
@@ -628,7 +723,7 @@
             width: 48px;
             height: 48px;
             margin: 0 auto 1.5rem;
-            background: var(--accent-gold);
+            background: var(--accent-color);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -699,7 +794,7 @@
         .step-number {
             width: 48px;
             height: 48px;
-            background: var(--accent-gold);
+            background: var(--accent-color);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -1127,7 +1222,7 @@
         .avatar.more {
             width: 32px;
             height: 32px;
-            background: var(--accent-gold);
+            background: var(--accent-color);
             color: white;
             display: flex;
             align-items: center;
@@ -1701,7 +1796,7 @@
                         rotate: 10,
                         duration: 0.3,
                         ease: 'power2.out',
-                        backgroundColor: 'var(--accent-coral)'
+                        backgroundColor: 'var(--accent-color)'
                     });
                 });
 
@@ -1718,7 +1813,7 @@
                         rotate: 0,
                         duration: 0.3,
                         ease: 'power2.out',
-                        backgroundColor: 'var(--accent-gold)'
+                        backgroundColor: 'var(--primary-color)'
                     });
                 });
             });

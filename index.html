@@ -1484,6 +1484,98 @@
             });
         }
 
+        // Update Countdown Timer
+        function initCountdownTimer() {
+            const timerElement = document.getElementById('timer');
+            if (!timerElement) return;
+
+            // Set end date to 7 days from now
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + 7);
+
+            function updateTimer() {
+                const now = new Date();
+                const distance = endDate - now;
+
+                // Calculate time units
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                // Update timer display
+                timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    timerElement.innerHTML = "EXPIRED";
+                }
+            }
+
+            // Initial call and set interval
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Update CTA button handling
+        function initCTAButtons() {
+            const ctaButtons = document.querySelectorAll('.cta-button, .floating-cta, .primary-button');
+            const waitlistForm = document.getElementById('waitlistForm');
+            const emailInput = waitlistForm ? waitlistForm.querySelector('input[type="email"]') : null;
+
+            ctaButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (waitlistForm) {
+                        // Smooth scroll to form
+                        waitlistForm.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+
+                        // Focus email input after scroll completes
+                        setTimeout(() => {
+                            if (emailInput) {
+                                emailInput.focus();
+                            }
+                        }, 800);
+                    }
+                });
+            });
+
+            // Update floating CTA visibility
+            const floatingCta = document.getElementById('floatingCta');
+            const heroSection = document.getElementById('hero');
+            
+            if (floatingCta && heroSection) {
+                window.addEventListener('scroll', () => {
+                    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+                    const scrollPosition = window.scrollY + window.innerHeight;
+                    
+                    if (window.scrollY > heroBottom) {
+                        floatingCta.classList.add('visible');
+                    } else {
+                        floatingCta.classList.remove('visible');
+                    }
+                });
+            }
+        }
+
+        // Update Waitlist form handling
+        function initWaitlistForm() {
+            const forms = document.querySelectorAll('form.waitlist-form');
+            forms.forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = form.querySelector('input[type="email"]').value.trim();
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    await handleFormSubmission(email, form, submitButton);
+                });
+            });
+        }
+
         // Add new function for handling form submissions
         async function handleFormSubmission(email, form, submitButton) {
             if (!isValidEmail(email)) {
@@ -1518,129 +1610,6 @@
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalText;
             }
-        }
-
-        // Update Waitlist form handling
-        function initWaitlistForm() {
-            const forms = document.querySelectorAll('form.waitlist-form');
-            forms.forEach(form => {
-                form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = form.querySelector('input[type="email"]').value.trim();
-                    const submitButton = form.querySelector('button[type="submit"]');
-                    await handleFormSubmission(email, form, submitButton);
-                });
-            });
-        }
-
-        // Update CTA button handling
-        function initCTAButtons() {
-            // Get all CTA buttons
-            const ctaButtons = document.querySelectorAll('.cta-button, .primary-button, .floating-cta');
-            
-            ctaButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    const waitlistForm = document.getElementById('waitlistForm');
-                    if (waitlistForm) {
-                        waitlistForm.scrollIntoView({ 
-                            behavior: 'smooth',
-                            block: 'center'
-                        });
-                        // Focus the email input after scrolling
-                        setTimeout(() => {
-                            const emailInput = waitlistForm.querySelector('input[type="email"]');
-                            if (emailInput) emailInput.focus();
-                        }, 800);
-                    }
-                });
-            });
-        }
-
-        // Update floating CTA button
-        function initFloatingCTA() {
-            const floatingCta = document.getElementById('floatingCta');
-            const heroSection = document.getElementById('hero');
-            
-            if (!floatingCta || !heroSection) return;
-
-            window.addEventListener('scroll', throttle(() => {
-                const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-                const scrollPosition = window.scrollY + window.innerHeight;
-                
-                if (scrollPosition > heroBottom) {
-                    floatingCta.classList.add('visible');
-                } else {
-                    floatingCta.classList.remove('visible');
-                }
-            }, 100));
-        }
-
-        // Update Exit Intent Modal
-        function initExitIntent() {
-            const modal = document.getElementById('exitModal');
-            const overlay = document.getElementById('exitModalOverlay');
-            let hasShown = false;
-
-            function showExitModal() {
-                if (!hasShown && !localStorage.getItem('exitModalShown')) {
-                    modal.classList.add('visible');
-                    overlay.classList.add('visible');
-                    hasShown = true;
-                    // Set a flag in localStorage that expires in 24 hours
-                    localStorage.setItem('exitModalShown', 'true');
-                    setTimeout(() => localStorage.removeItem('exitModalShown'), 24 * 60 * 60 * 1000);
-                }
-            }
-
-            function hideExitModal() {
-                modal.classList.remove('visible');
-                overlay.classList.remove('visible');
-            }
-
-            document.addEventListener('mouseleave', (e) => {
-                if (e.clientY <= 0) {
-                    showExitModal();
-                }
-            });
-
-            overlay.addEventListener('click', hideExitModal);
-            
-            // Close button for modal
-            const closeButtons = modal.querySelectorAll('.close-modal');
-            closeButtons.forEach(button => {
-                button.addEventListener('click', hideExitModal);
-            });
-
-            // Handle escape key
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && modal.classList.contains('visible')) {
-                    hideExitModal();
-                }
-            });
-        }
-
-        // Spots counter animation
-        function initSpotsCounter() {
-            const counters = document.querySelectorAll('.stat-number[data-target]');
-            
-            counters.forEach(counter => {
-                const target = parseInt(counter.dataset.target);
-                const duration = 2000; // 2 seconds
-                const step = target / duration * 10; // Update every 10ms
-                let current = 0;
-
-                const updateCounter = () => {
-                    current += step;
-                    if (current >= target) {
-                        current = target;
-                        clearInterval(interval);
-                    }
-                    counter.textContent = Math.round(current);
-                };
-
-                const interval = setInterval(updateCounter, 10);
-            });
         }
 
         // Email validation
@@ -1860,6 +1829,73 @@
             });
         }
 
+        // Spots counter animation
+        function initSpotsCounter() {
+            const counters = document.querySelectorAll('.stat-number[data-target]');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.dataset.target);
+                const duration = 2000; // 2 seconds
+                const step = target / duration * 10; // Update every 10ms
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(interval);
+                    }
+                    counter.textContent = Math.round(current);
+                };
+
+                const interval = setInterval(updateCounter, 10);
+            });
+        }
+
+        // Update Exit Intent Modal
+        function initExitIntent() {
+            const modal = document.getElementById('exitModal');
+            const overlay = document.getElementById('exitModalOverlay');
+            let hasShown = false;
+
+            function showExitModal() {
+                if (!hasShown && !localStorage.getItem('exitModalShown')) {
+                    modal.classList.add('visible');
+                    overlay.classList.add('visible');
+                    hasShown = true;
+                    // Set a flag in localStorage that expires in 24 hours
+                    localStorage.setItem('exitModalShown', 'true');
+                    setTimeout(() => localStorage.removeItem('exitModalShown'), 24 * 60 * 60 * 1000);
+                }
+            }
+
+            function hideExitModal() {
+                modal.classList.remove('visible');
+                overlay.classList.remove('visible');
+            }
+
+            document.addEventListener('mouseleave', (e) => {
+                if (e.clientY <= 0) {
+                    showExitModal();
+                }
+            });
+
+            overlay.addEventListener('click', hideExitModal);
+            
+            // Close button for modal
+            const closeButtons = modal.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', hideExitModal);
+            });
+
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('visible')) {
+                    hideExitModal();
+                }
+            });
+        }
+
         // Add toast notification function
         function showToast(message, type = 'success') {
             const toast = document.createElement('div');
@@ -1878,5 +1914,4 @@
         }
     </script>
 </body>
-</html>
 </html>

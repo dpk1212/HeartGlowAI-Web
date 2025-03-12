@@ -1413,6 +1413,106 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 3px rgba(106, 159, 181, 0.2);
         }
+
+        /* Thank You Modal Styles */
+        .thank-you-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: var(--background-white);
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1002;
+            max-width: 500px;
+            width: 90%;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .thank-you-modal.visible {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .thank-you-modal .modal-icon {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        .thank-you-modal .modal-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+        .thank-you-modal h2 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .thank-you-modal p {
+            font-family: 'Lato', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .thank-you-modal .next-steps {
+            background: var(--background-light);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .thank-you-modal .small-text {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .thank-you-modal ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .thank-you-modal ul li {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Lato', sans-serif;
+        }
+
+        .thank-you-modal ul li i {
+            color: var(--accent-color);
+        }
+
+        .thank-you-modal .primary-button {
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        #thankYouOverlay {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
     </style>
 </head>
 <body>
@@ -1592,6 +1692,27 @@
         <p class="privacy-note">🔒 Your relationship journey is private and secure</p>
     </div>
 
+    <!-- Add this modal HTML after your existing modals -->
+    <div class="thank-you-modal" id="thankYouModal">
+        <div class="modal-content">
+            <div class="modal-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h2>Welcome to Your Journey!</h2>
+            <p>Thank you for taking the first step toward stronger relationships. Check your inbox for personalized insights to begin your connection journey.</p>
+            <div class="next-steps">
+                <p class="small-text">What's Next:</p>
+                <ul>
+                    <li><i class="fas fa-check"></i> Personalized welcome email</li>
+                    <li><i class="fas fa-check"></i> Relationship insights guide</li>
+                    <li><i class="fas fa-check"></i> Daily connection tips</li>
+                </ul>
+            </div>
+            <button class="primary-button close-thank-you">Continue Your Journey</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="thankYouOverlay"></div>
+
     <script>
         // Main Initialization
         document.addEventListener('DOMContentLoaded', function() {
@@ -1648,10 +1769,11 @@
 
             try {
                 // Here you would typically make an API call to your backend
-                // For now, we'll simulate it with a delay
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                showToast('🎉 Welcome! Check your email for confirmation.', 'success');
+                // Show thank you modal
+                showThankYouModal();
+                
                 form.reset();
                 return true;
             } catch (error) {
@@ -1992,6 +2114,49 @@
                 });
             }
         }
+
+        // Add modal control functions
+        function showThankYouModal() {
+            const modal = document.getElementById('thankYouModal');
+            const overlay = document.getElementById('thankYouOverlay');
+            
+            modal.classList.add('visible');
+            overlay.classList.add('visible');
+
+            // Add event listeners for closing
+            const closeButton = modal.querySelector('.close-thank-you');
+            closeButton.addEventListener('click', hideThankYouModal);
+            overlay.addEventListener('click', hideThankYouModal);
+            
+            // Add escape key listener
+            document.addEventListener('keydown', handleEscKey);
+        }
+
+        function hideThankYouModal() {
+            const modal = document.getElementById('thankYouModal');
+            const overlay = document.getElementById('thankYouOverlay');
+            
+            modal.classList.remove('visible');
+            overlay.classList.remove('visible');
+            
+            // Remove escape key listener
+            document.removeEventListener('keydown', handleEscKey);
+        }
+
+        function handleEscKey(e) {
+            if (e.key === 'Escape') {
+                hideThankYouModal();
+            }
+        }
+
+        // Initialize modal functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handler for close button
+            const closeButton = document.querySelector('.close-thank-you');
+            if (closeButton) {
+                closeButton.addEventListener('click', hideThankYouModal);
+            }
+        });
     </script>
 </body>
 </html>

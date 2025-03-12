@@ -1510,8 +1510,22 @@
         }
 
         #thankYouOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(4px);
+            z-index: 1001;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #thankYouOverlay.visible {
+            opacity: 1;
+            visibility: visible;
         }
     </style>
 </head>
@@ -1544,7 +1558,7 @@
                     Daily AI-powered insights to help you connect, communicate, and grow.
                 </p>
                 <div class="signup-form slide-up delay-3">
-                    <form id="waitlistForm" class="waitlist-form">
+                    <form id="waitlistForm" class="waitlist-form" onsubmit="return false;">
                         <div class="form-group">
                             <input type="email" id="email" name="email" placeholder="Enter your email to begin your journey" required>
                         </div>
@@ -1748,15 +1762,19 @@
             const forms = document.querySelectorAll('form.waitlist-form');
             forms.forEach(form => {
                 form.addEventListener('submit', async (e) => {
-                    e.preventDefault();
+                    e.preventDefault(); // Prevent form submission
+                    e.stopPropagation(); // Stop event bubbling
+                    
                     const email = form.querySelector('input[type="email"]').value.trim();
                     const submitButton = form.querySelector('button[type="submit"]');
+                    
+                    // Call the form submission handler
                     await handleFormSubmission(email, form, submitButton);
                 });
             });
         }
 
-        // Add new function for handling form submissions
+        // Update form submission handler
         async function handleFormSubmission(email, form, submitButton) {
             if (!isValidEmail(email)) {
                 showToast('Please enter a valid email address', 'error');
@@ -1768,12 +1786,13 @@
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
 
             try {
-                // Here you would typically make an API call to your backend
+                // Simulate API call
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
                 // Show thank you modal
                 showThankYouModal();
                 
+                // Reset form
                 form.reset();
                 return true;
             } catch (error) {
@@ -1839,7 +1858,7 @@
                                 if (emailInput) {
                                     emailInput.focus();
                                 }
-                            }, 800); // Wait for scroll to complete
+                            }, 800);
                         }
                     }
                 });
@@ -2117,15 +2136,23 @@
 
         // Add modal control functions
         function showThankYouModal() {
+            console.log('Showing thank you modal...');
             const modal = document.getElementById('thankYouModal');
             const overlay = document.getElementById('thankYouOverlay');
             
+            if (!modal || !overlay) {
+                console.error('Modal or overlay elements not found');
+                return;
+            }
+            
             modal.classList.add('visible');
             overlay.classList.add('visible');
-
+            
             // Add event listeners for closing
             const closeButton = modal.querySelector('.close-thank-you');
-            closeButton.addEventListener('click', hideThankYouModal);
+            if (closeButton) {
+                closeButton.addEventListener('click', hideThankYouModal);
+            }
             overlay.addEventListener('click', hideThankYouModal);
             
             // Add escape key listener

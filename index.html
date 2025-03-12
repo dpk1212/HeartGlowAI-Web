@@ -1712,17 +1712,20 @@
             <div class="modal-icon">
                 <i class="fas fa-heart"></i>
             </div>
-            <h2>Welcome to Your Journey!</h2>
-            <p>Thank you for taking the first step toward stronger relationships. Check your inbox for personalized insights to begin your connection journey.</p>
+            <h2>Your Journey to Deeper Connections Begins!</h2>
+            <p>Thank you for taking the first step toward transforming your relationships. We're excited to be part of your journey to stronger, more meaningful connections.</p>
             <div class="next-steps">
-                <p class="small-text">What's Next:</p>
+                <p class="small-text">Your Journey Starts Here:</p>
                 <ul>
-                    <li><i class="fas fa-check"></i> Personalized welcome email</li>
-                    <li><i class="fas fa-check"></i> Relationship insights guide</li>
-                    <li><i class="fas fa-check"></i> Daily connection tips</li>
+                    <li><i class="fas fa-envelope"></i> Welcome guide with personalized insights</li>
+                    <li><i class="fas fa-lightbulb"></i> Daily connection prompts and tips</li>
+                    <li><i class="fas fa-star"></i> Early access to AI relationship tools</li>
                 </ul>
             </div>
-            <button class="primary-button close-thank-you">Continue Your Journey</button>
+            <button class="primary-button close-thank-you">
+                <i class="fas fa-heart"></i>
+                Begin Your Connection Journey
+            </button>
         </div>
     </div>
     <div class="modal-overlay" id="thankYouOverlay"></div>
@@ -1783,21 +1786,41 @@
 
             submitButton.disabled = true;
             const originalText = submitButton.innerHTML;
-            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+            submitButton.innerHTML = '<i class="fas fa-heart fa-spin"></i> Starting Your Journey...';
 
             try {
                 // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 1000));
                 
                 // Show thank you modal
-                showThankYouModal();
+                const modal = document.getElementById('thankYouModal');
+                const overlay = document.getElementById('thankYouOverlay');
+                
+                if (modal && overlay) {
+                    modal.classList.add('visible');
+                    overlay.classList.add('visible');
+                    
+                    // Add event listeners for closing
+                    const closeButton = modal.querySelector('.close-thank-you');
+                    if (closeButton) {
+                        closeButton.addEventListener('click', () => {
+                            modal.classList.remove('visible');
+                            overlay.classList.remove('visible');
+                        });
+                    }
+                    
+                    overlay.addEventListener('click', () => {
+                        modal.classList.remove('visible');
+                        overlay.classList.remove('visible');
+                    });
+                }
                 
                 // Reset form
                 form.reset();
                 return true;
             } catch (error) {
                 console.error('Form submission error:', error);
-                showToast('Failed to join. Please try again.', 'error');
+                showToast('Unable to join waitlist. Please try again.', 'error');
                 return false;
             } finally {
                 submitButton.disabled = false;

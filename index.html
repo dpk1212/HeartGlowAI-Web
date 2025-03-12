@@ -1166,6 +1166,93 @@
             will-change: transform;
             backface-visibility: hidden;
         }
+
+        /* Mobile optimizations for hero section */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 7rem 0 3rem;
+                min-height: 100vh;
+                display: flex;
+                align-items: center;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .countdown {
+                margin: 0.75rem 0;
+                padding: 0.75rem;
+            }
+            
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+                margin: 1.5rem 0;
+            }
+            
+            .stat-item {
+                min-width: 100%;
+                padding: 1rem;
+            }
+            
+            .waitlist-form {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .primary-button,
+            .secondary-button {
+                font-size: 1rem;
+                padding: 1rem 1.5rem;
+            }
+            
+            .social-proof {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .avatars {
+                margin-bottom: 0.5rem;
+            }
+
+            /* Improve form usability on mobile */
+            .form-group input {
+                padding: 1.25rem 1rem;
+                font-size: 1.1rem; 
+            }
+
+            /* Fix countdown timer display on mobile */
+            #timer {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Extra small devices */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1211,7 +1298,7 @@
                     </div>
                     <div class="stat-item">
                         <i class="custom-icon"><i class="fas fa-chart-line"></i></i>
-                        <span class="stat-number" data-target="50">0</span>
+                        <span class="stat-number" data-target="200">0</span>
                         <span class="stat-label">Spots Remaining</span>
                     </div>
                 </div>
@@ -1534,32 +1621,84 @@
             const timerElement = document.getElementById('timer');
             if (!timerElement) return;
 
-            // Set end date to 7 days from now
+            // Set countdown end date (7 days from now)
             const endDate = new Date();
             endDate.setDate(endDate.getDate() + 7);
+            
+            // Format function for adding leading zeros
+            const formatNumber = (num) => (num < 10 ? `0${num}` : num);
 
             function updateTimer() {
-                const now = new Date();
-                const distance = endDate - now;
-
-                // Calculate time units
+                const now = new Date().getTime();
+                const distance = endDate.getTime() - now;
+                
+                if (distance <= 0) {
+                    clearInterval(timerInterval);
+                    timerElement.innerHTML = "OFFER EXPIRED";
+                    return;
+                }
+                
+                // Calculate time components
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                // Update timer display
-                timerElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-                if (distance < 0) {
-                    clearInterval(timerInterval);
-                    timerElement.innerHTML = "EXPIRED";
+                
+                // Update timer display with formatted time
+                timerElement.innerHTML = `
+                    <span class="time-unit">${days}<small>d</small></span>
+                    <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
+                    <span class="time-unit">${formatNumber(minutes)}<small>m</small></span>
+                    <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
+                `;
+                
+                // Visual pulse effect when seconds change
+                if (seconds % 10 === 0) {
+                    gsap.to(timerElement, {
+                        scale: 1.05,
+                        duration: 0.2,
+                        yoyo: true,
+                        repeat: 1
+                    });
                 }
             }
-
-            // Initial call and set interval
+            
+            // Immediately update the timer (don't wait for the first interval)
             updateTimer();
+            
+            // Set interval to update every second
             const timerInterval = setInterval(updateTimer, 1000);
+            
+            // Add CSS for timer styling
+            const style = document.createElement('style');
+            style.textContent = `
+                .time-unit {
+                    display: inline-block;
+                    padding: 0.5rem 0.75rem;
+                    margin: 0 0.25rem;
+                    background: rgba(255, 255, 255, 0.2);
+                    border-radius: 0.3rem;
+                    font-weight: 700;
+                    min-width: 3rem;
+                    text-align: center;
+                }
+                
+                .time-unit small {
+                    font-size: 0.7em;
+                    font-weight: 400;
+                    margin-left: 2px;
+                }
+                
+                @media (max-width: 480px) {
+                    .time-unit {
+                        padding: 0.3rem 0.5rem;
+                        margin: 0 0.15rem;
+                        min-width: 2.5rem;
+                        font-size: 0.9rem;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
         }
 
         // Update CTA button handling
@@ -1638,7 +1777,7 @@
                 await new Promise(resolve => setTimeout(resolve, 1500));
                 
                 // Update spots counter
-                const spotsElement = document.querySelector('[data-target="50"]');
+                const spotsElement = document.querySelector('[data-target="200"]');
                 if (spotsElement) {
                     const currentSpots = parseInt(spotsElement.textContent);
                     spotsElement.textContent = Math.max(0, currentSpots - 1);

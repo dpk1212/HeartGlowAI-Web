@@ -1049,7 +1049,7 @@
             .hero h1 {
                 font-size: 2.5rem;
             }
-
+            
             .features-grid,
             .steps,
             .pricing-grid {
@@ -1288,7 +1288,7 @@
                 </p>
                 <div class="countdown slide-up delay-2" id="countdown">
                     <i class="fas fa-clock"></i>
-                    <span id="timer">Loading...</span>
+                    <span id="timer"><span class="time-unit">00<small>d</small></span><span class="time-unit">00<small>h</small></span><span class="time-unit">00<small>m</small></span><span class="time-unit">00<small>s</small></span></span>
                 </div>
                 <div class="hero-stats slide-up delay-2">
                     <div class="stat-item">
@@ -1298,7 +1298,7 @@
                     </div>
                     <div class="stat-item">
                         <i class="custom-icon"><i class="fas fa-chart-line"></i></i>
-                        <span class="stat-number" data-target="0">200</span>
+                        <span class="stat-number" data-target="200">0</span>
                         <span class="stat-label">Spots Remaining</span>
                     </div>
                 </div>
@@ -1616,14 +1616,13 @@
             });
         }
 
-        // Update Countdown Timer
+        // Fix Countdown Timer implementation
         function initCountdownTimer() {
             const timerElement = document.getElementById('timer');
             if (!timerElement) return;
 
-            // Set countdown end date (7 days from now)
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + 7);
+            // Set countdown to March 22 at 6:00 PM Eastern Standard Time
+            const endDate = new Date('March 22, 2024 18:00:00 EST');
             
             // Format function for adding leading zeros
             const formatNumber = (num) => (num < 10 ? `0${num}` : num);
@@ -1646,7 +1645,7 @@
                 
                 // Update timer display with formatted time
                 timerElement.innerHTML = `
-                    <span class="time-unit">${days}<small>d</small></span>
+                    <span class="time-unit">${formatNumber(days)}<small>d</small></span>
                     <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
                     <span class="time-unit">${formatNumber(minutes)}<small>m</small></span>
                     <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
@@ -1663,10 +1662,10 @@
                 }
             }
             
-            // Immediately update the timer (don't wait for the first interval)
+            // Run updateTimer immediately on page load (before the interval starts)
             updateTimer();
             
-            // Set interval to update every second
+            // Then set interval to update every second
             const timerInterval = setInterval(updateTimer, 1000);
             
             // Add CSS for timer styling

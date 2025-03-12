@@ -518,39 +518,7 @@
         }
 
         .floating-card {
-            position: absolute;
-            background: white;
-            padding: 1rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition);
-            cursor: pointer;
-            border: 2px solid transparent;
-            z-index: 1;
-        }
-
-        .floating-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--accent-gold);
-        }
-
-        .card-1 {
-            top: 20%;
-            right: 5%;
-        }
-
-        .card-2 {
-            bottom: 30%;
-            left: 5%;
-        }
-
-        .card-3 {
-            top: 40%;
-            right: 15%;
+            display: none;
         }
 
         /* Features Section Styles */
@@ -1213,12 +1181,12 @@
                 </div>
                 <div class="hero-stats slide-up delay-2">
                     <div class="stat-item">
-                        <i class="custom-icon icon-heart"></i>
+                        <i class="custom-icon"><i class="fas fa-heart"></i></i>
                         <span class="stat-number" data-target="2500">0</span>
                         <span class="stat-label">Early Access Signups</span>
                     </div>
                     <div class="stat-item">
-                        <i class="custom-icon icon-chart"></i>
+                        <i class="custom-icon"><i class="fas fa-chart-line"></i></i>
                         <span class="stat-number" data-target="50">0</span>
                         <span class="stat-label">Spots Remaining</span>
                     </div>
@@ -1229,13 +1197,13 @@
                             <input type="email" id="email" name="email" placeholder="Enter your email for early access" required>
                         </div>
                         <button type="submit" class="primary-button">
-                            <i class="custom-icon icon-heart"></i>
+                            <i class="custom-icon"><i class="fas fa-heart"></i></i>
                             Join Now & Get Free Guide
                         </button>
                     </form>
                     <p class="privacy-note">Your Privacy Matters – No Spam, Just Value</p>
                     <div class="trust-badge">
-                        <i class="custom-icon icon-chat"></i>
+                        <i class="custom-icon"><i class="fas fa-comments"></i></i>
                         Trusted by 2,500+ Users
                     </div>
                     <div class="social-proof">
@@ -1248,18 +1216,6 @@
                         <p>Join 2,500+ people transforming their relationships!</p>
                     </div>
                 </div>
-            </div>
-            <div class="floating-card card-1">
-                <i class="custom-icon icon-heart"></i>
-                <span>AI-Powered Insights</span>
-            </div>
-            <div class="floating-card card-2">
-                <i class="custom-icon icon-chat"></i>
-                <span>Smart Relationship Tips</span>
-            </div>
-            <div class="floating-card card-3">
-                <i class="custom-icon icon-chart"></i>
-                <span>Personalized Growth</span>
             </div>
         </div>
     </section>

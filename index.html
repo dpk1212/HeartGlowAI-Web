@@ -602,7 +602,7 @@
         /* How It Works Section Styles */
         .how-it-works {
             padding: 6rem 0;
-            background: var(--background-light);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.05), rgba(255, 193, 204, 0.05));
         }
 
         .steps {
@@ -612,22 +612,62 @@
         }
 
         .step {
+            background: white;
+            padding: 2.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
             text-align: center;
-            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" width="20" height="20" viewBox="0 0 20 20"><path fill="%23FFC1CC" fill-opacity="0.1" d="M10 3.22l-.61-.6a5.5 5.5 0 0 0-7.78 7.77L10 18.78l8.39-8.4a5.5 5.5 0 0 0-7.78-7.77l-.61.61z"/></svg>');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .step:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 193, 204, 0.1));
         }
 
         .step-number {
-            width: 3rem;
-            height: 3rem;
-            background: linear-gradient(135deg, var(--accent-gold), var(--accent-coral));
+            width: 48px;
+            height: 48px;
+            background: var(--accent-gold);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
+            font-size: 24px;
             font-weight: 700;
-            margin: 0 auto 1rem;
+            margin: 0 auto 1.5rem;
+            transition: var(--transition);
+        }
+
+        .step h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .step p {
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--text-warm);
         }
 
         /* Testimonials Section Styles */
@@ -1039,140 +1079,6 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
-
-        /* Value Proposition Section Styles */
-        .value-prop {
-            padding: 6rem 0;
-            background: var(--background-light);
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 2rem;
-            margin-bottom: 3rem;
-        }
-
-        .benefit-card {
-            background: white;
-            padding: 2rem;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-sm);
-            transition: var(--transition);
-            text-align: center;
-        }
-
-        .benefit-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .benefit-card i {
-            font-size: 2rem;
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-        }
-
-        .benefit-card h3 {
-            margin-bottom: 1rem;
-        }
-
-        .cta-center {
-            text-align: center;
-            margin-top: 3rem;
-        }
-
-        .urgency-note {
-            margin-top: 1rem;
-            color: var(--text-light);
-            font-size: 0.875rem;
-        }
-
-        /* Update Mobile Styles */
-        @media (max-width: 768px) {
-            .waitlist-form {
-                flex-direction: column;
-            }
-
-            .benefits-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1.125rem;
-            }
-
-            .hero-stats {
-                flex-direction: column;
-                align-items: center;
-                gap: 1.5rem;
-            }
-
-            .social-proof {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .avatars {
-                justify-content: center;
-            }
-        }
-
-        /* Add to existing mobile styles */
-        @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 2rem;
-            }
-
-            .hero-subtitle {
-                font-size: 1rem;
-            }
-
-            .waitlist-form input,
-            .waitlist-form button {
-                width: 100%;
-            }
-
-            .benefit-card {
-                padding: 1.5rem;
-            }
-
-            .social-proof {
-                margin-top: 1rem;
-            }
-        }
-
-        /* Update existing styles */
-        .primary-button {
-            background: var(--primary-color);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
-            text-decoration: none;
-            font-weight: 600;
-            transition: var(--transition);
-            border: none;
-            cursor: pointer;
-            display: inline-block;
-            text-align: center;
-        }
-
-        .primary-button:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
-            background: darken(var(--primary-color), 10%);
-        }
-
-        /* Update footer styles */
-        .privacy-pledge {
-            margin-top: 1rem;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 0.875rem;
-        }
     </style>
 </head>
 <body>
@@ -1289,51 +1195,18 @@
                 <div class="step slide-up">
                     <div class="step-number">1</div>
                     <h3>Join Waitlist</h3>
-                    <p>Secure your spot for early access to our AI relationship coach.</p>
+                    <p>Secure your exclusive spot and be first in line for our revolutionary AI relationship coach.</p>
                 </div>
                 <div class="step slide-up delay-1">
                     <div class="step-number">2</div>
                     <h3>Get Access</h3>
-                    <p>Receive exclusive access to our platform before public launch.</p>
+                    <p>Receive VIP early access and start your journey to deeper, more meaningful connections.</p>
                 </div>
                 <div class="step slide-up delay-2">
                     <div class="step-number">3</div>
                     <h3>Transform</h3>
-                    <p>Start improving your relationships with AI-powered insights.</p>
+                    <p>Experience the power of AI-driven insights to enhance all your relationships.</p>
                 </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Value Proposition Section -->
-    <section id="value-prop" class="value-prop">
-        <div class="container">
-            <h2 class="section-title slide-up">Exclusive Early Access Benefits</h2>
-            <div class="benefits-grid">
-                <div class="benefit-card slide-up">
-                    <i class="fas fa-rocket"></i>
-                    <h3>First Access</h3>
-                    <p>Be among the first to use our groundbreaking AI relationship technology.</p>
-                </div>
-                <div class="benefit-card slide-up delay-1">
-                    <i class="fas fa-star"></i>
-                    <h3>Premium Features</h3>
-                    <p>Get exclusive access to premium features at no additional cost.</p>
-                </div>
-                <div class="benefit-card slide-up delay-2">
-                    <i class="fas fa-comments"></i>
-                    <h3>Direct Support</h3>
-                    <p>Direct line to our team for personalized support and feature requests.</p>
-                </div>
-                <div class="benefit-card slide-up delay-3">
-                    <i class="fas fa-heart"></i>
-                    <h3>Lifetime Benefits</h3>
-                    <p>Special perks that will remain exclusive to our early supporters.</p>
-                </div>
-            </div>
-            <div class="cta-center slide-up">
-                <a href="#signup" class="primary-button">Join the Waitlist Now</a>
-                <p class="urgency-note">⏰ Limited spots available. Don't miss out!</p>
             </div>
         </div>
     </section>
@@ -1422,7 +1295,8 @@
                 { name: 'ExitIntent', fn: initExitIntent },
                 { name: 'BackToTop', fn: initBackToTop },
                 { name: 'SmoothScroll', fn: initSmoothScroll },
-                { name: 'FeatureCards', fn: initFeatureCards }
+                { name: 'FeatureCards', fn: initFeatureCards },
+                { name: 'StepCards', fn: initStepCards }
             ];
 
             components.forEach(component => {
@@ -1859,6 +1733,59 @@
 
             // Scroll animation
             ScrollTrigger.batch('.feature-card', {
+                start: 'top 80%',
+                onEnter: batch => {
+                    gsap.from(batch, {
+                        opacity: 0,
+                        y: 30,
+                        scale: 0.9,
+                        stagger: 0.15,
+                        duration: 0.8,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+        }
+
+        // Update step cards animation
+        function initStepCards() {
+            const steps = document.querySelectorAll('.step');
+            
+            steps.forEach(step => {
+                // Hover animation
+                step.addEventListener('mouseenter', () => {
+                    gsap.to(step, {
+                        scale: 1.02,
+                        y: -10,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                    gsap.to(step.querySelector('.step-number'), {
+                        scale: 1.1,
+                        rotate: 5,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+
+                step.addEventListener('mouseleave', () => {
+                    gsap.to(step, {
+                        scale: 1,
+                        y: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                    gsap.to(step.querySelector('.step-number'), {
+                        scale: 1,
+                        rotate: 0,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
+
+            // Scroll animation
+            ScrollTrigger.batch('.step', {
                 start: 'top 80%',
                 onEnter: batch => {
                     gsap.from(batch, {

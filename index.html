@@ -1168,12 +1168,14 @@
 
         .waitlist-form {
             display: flex;
+            flex-direction: column;
             gap: 1rem;
             margin-bottom: 1rem;
+            width: 100%;
         }
 
         .waitlist-form .form-group {
-            flex: 1;
+            width: 100%;
         }
 
         .waitlist-form input {
@@ -1183,6 +1185,10 @@
             border-radius: var(--border-radius);
             font-size: 1rem;
             transition: var(--transition);
+        }
+
+        .waitlist-form .primary-button {
+            width: 100%;
         }
 
         .waitlist-form input:focus {
@@ -1359,10 +1365,10 @@
                 ConnectlyAI
             </a>
             <div class="nav-links">
-                <a href="#features">Features</a>
-                <a href="#how-it-works">How It Works</a>
-                <a href="#value-prop">Why Join</a>
-                <a href="#signup" class="cta-button" id="navCta">Join Now</a>
+                <a href="#features">Benefits</a>
+                <a href="#how-it-works">Your Journey</a>
+                <a href="#value-prop">Why ConnectlyAI</a>
+                <a href="#signup" class="cta-button" id="navCta">Start Your Journey</a>
             </div>
             <button class="mobile-menu" aria-label="Toggle Menu">
                 <i class="fas fa-bars"></i>
@@ -1375,26 +1381,26 @@
         <div class="container">
             <div class="hero-content">
                 <h1 class="slide-up">
-                    <span class="gradient-text">Transform Your Relationships</span><br>
-                    with AI-Powered Insights
+                    <span class="gradient-text">Strengthen Your Relationships</span><br>
+                    with Personalized AI Coaching
                 </h1>
                 <p class="hero-subtitle slide-up delay-1">
-                    Daily Steps to Deepen Connections
+                    Daily AI-powered insights to help you connect, communicate, and grow.
                 </p>
                 <div class="signup-form slide-up delay-3">
                     <form id="waitlistForm" class="waitlist-form">
                         <div class="form-group">
-                            <input type="email" id="email" name="email" placeholder="Enter your email for early access" required>
+                            <input type="email" id="email" name="email" placeholder="Enter your email to begin your journey" required>
                         </div>
                         <button type="submit" class="primary-button">
                             <i class="custom-icon"><i class="fas fa-heart"></i></i>
-                            Join Now & Get Free Guide
+                            Start Your Journey Today
                         </button>
                     </form>
-                    <p class="privacy-note">Your Privacy Matters – No Spam, Just Value</p>
+                    <p class="privacy-note">Your privacy matters – we protect your relationship journey</p>
                     <div class="trust-badge">
                         <i class="custom-icon"><i class="fas fa-comments"></i></i>
-                        Trusted by Our Community
+                        Building Stronger Bonds Together
                     </div>
                     <div class="social-proof">
                         <div class="avatars">
@@ -1402,7 +1408,7 @@
                             <img src="https://ui-avatars.com/api/?name=User+2&background=ffd700&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ffd700&color=fff'">
                             <img src="https://ui-avatars.com/api/?name=User+3&background=ff6f61&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ff6f61&color=fff'">
                         </div>
-                        <p>Join our growing community!</p>
+                        <p>Join others strengthening their relationships daily</p>
                     </div>
                 </div>
             </div>
@@ -1412,28 +1418,28 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title slide-up">Why Join Now?</h2>
+            <h2 class="section-title slide-up">Transform Your Connections</h2>
             <div class="features-grid">
                 <div class="feature-card slide-up">
                     <div class="custom-icon">
                         <i class="fas fa-check"></i>
                     </div>
-                    <h3>Early Access</h3>
-                    <p>Be Part of a Pioneering Movement in Relationship Technology</p>
+                    <h3>AI-Powered Relationship Plans</h3>
+                    <p>Personalized action steps based on your unique relationship goals</p>
                 </div>
                 <div class="feature-card slide-up delay-1">
                     <div class="custom-icon">
                         <i class="fas fa-lightbulb"></i>
                     </div>
-                    <h3>Shape the Future</h3>
-                    <p>Your Input Will Define the Next Generation of AI Relationships</p>
+                    <h3>Daily Conversation Starters</h3>
+                    <p>Simple prompts to spark meaningful conversations with loved ones</p>
                 </div>
                 <div class="feature-card slide-up delay-2">
                     <div class="custom-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3>Exclusive Perks</h3>
-                    <p>Premium Access Reserved for Our Founding Members</p>
+                    <h3>Progress Tracking & Insights</h3>
+                    <p>See how small habits lead to lasting change in your relationships</p>
                 </div>
             </div>
         </div>
@@ -1442,22 +1448,22 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
         <div class="container">
-            <h2 class="section-title slide-up">How It Works</h2>
+            <h2 class="section-title slide-up">Your Journey to Stronger Bonds</h2>
             <div class="steps">
                 <div class="step slide-up">
                     <div class="step-number">1</div>
-                    <h3>Join Waitlist</h3>
-                    <p>Secure your exclusive spot and be first in line for our revolutionary AI relationship coach.</p>
+                    <h3>Begin Your Journey</h3>
+                    <p>Take the first step toward deeper connections with personalized guidance.</p>
                 </div>
                 <div class="step slide-up delay-1">
                     <div class="step-number">2</div>
-                    <h3>Get Access</h3>
-                    <p>Receive VIP early access and start your journey to deeper, more meaningful connections.</p>
+                    <h3>Get Daily Insights</h3>
+                    <p>Receive AI-powered recommendations tailored to your relationships.</p>
                 </div>
                 <div class="step slide-up delay-2">
                     <div class="step-number">3</div>
-                    <h3>Transform</h3>
-                    <p>Experience the power of AI-driven insights to enhance all your relationships.</p>
+                    <h3>Grow Together</h3>
+                    <p>Build stronger bonds through small, meaningful actions every day.</p>
                 </div>
             </div>
         </div>
@@ -1479,8 +1485,8 @@
                     <h4>Quick Links</h4>
                     <ul>
                         <li><a href="#features">Benefits</a></li>
-                        <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#value-prop">Why Join</a></li>
+                        <li><a href="#how-it-works">Your Journey</a></li>
+                        <li><a href="#value-prop">Why ConnectlyAI</a></li>
                         <li><a href="privacy.html">Privacy Policy</a></li>
                         <li><a href="terms.html">Terms of Service</a></li>
                     </ul>
@@ -1509,25 +1515,25 @@
     <!-- Floating CTA Button -->
     <button class="floating-cta" id="floatingCta">
         <i class="fas fa-heart"></i>
-        Join Waitlist
+        Begin Your Journey
     </button>
 
     <!-- Exit Intent Modal -->
     <div class="modal-overlay" id="exitModalOverlay"></div>
     <div class="exit-modal" id="exitModal">
         <button class="close-modal" aria-label="Close modal">×</button>
-        <h2 class="gradient-text">Don't Miss Out!</h2>
-        <p>Join our waitlist for a Free Relationship Guide – Spots Are Limited!</p>
+        <h2 class="gradient-text">Ready to Transform Your Relationships?</h2>
+        <p>Join now for personalized insights to strengthen your connections.</p>
         <form id="exitForm" class="waitlist-form">
             <div class="form-group">
-                <input type="email" name="email" placeholder="Enter your email" required>
+                <input type="email" name="email" placeholder="Enter your email to begin" required>
             </div>
             <button type="submit" class="primary-button">
                 <i class="fas fa-heart"></i>
-                Get Free Guide
+                Start Your Journey
             </button>
         </form>
-        <p class="privacy-note">🔒 Your privacy is our priority</p>
+        <p class="privacy-note">🔒 Your relationship journey is private and secure</p>
     </div>
 
     <script>

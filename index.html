@@ -1621,15 +1621,42 @@
             const timerElement = document.getElementById('timer');
             if (!timerElement) return;
 
-            // Set countdown to March 22 at 6:00 PM Eastern Standard Time
-            const endDate = new Date('March 22, 2024 18:00:00 EST');
+            // Set countdown to March 22 at 6:00 PM Eastern Time
+            // Use explicit year, month (0-based), day, hours, minutes, seconds
+            const endDate = new Date();
+            
+            // For March 22, 2024 at 6:00 PM ET (UTC-5)
+            endDate.setFullYear(2024);
+            endDate.setMonth(2); // 0-based, so 2 = March
+            endDate.setDate(22);
+            endDate.setHours(18);
+            endDate.setMinutes(0);
+            endDate.setSeconds(0);
+            endDate.setMilliseconds(0);
+            
+            // Adjust for Eastern Time (UTC-5) if needed
+            // If the user is in a different timezone, we need to ensure 
+            // the countdown is still to 6pm Eastern
+            const etOffsetHours = 5; // Eastern Time is UTC-5
+            const userTimezoneOffset = endDate.getTimezoneOffset() / 60;
+            const adjustmentHours = userTimezoneOffset - etOffsetHours;
+            
+            // Only adjust if user isn't already in Eastern Time
+            if (adjustmentHours !== 0) {
+                endDate.setHours(endDate.getHours() + adjustmentHours);
+            }
+            
+            console.log(`Countdown target: ${endDate.toString()}`);
             
             // Format function for adding leading zeros
             const formatNumber = (num) => (num < 10 ? `0${num}` : num);
 
             function updateTimer() {
-                const now = new Date().getTime();
-                const distance = endDate.getTime() - now;
+                const now = new Date();
+                const distance = endDate.getTime() - now.getTime();
+                
+                console.log(`Current time: ${now.toString()}`);
+                console.log(`Time remaining in ms: ${distance}`);
                 
                 if (distance <= 0) {
                     clearInterval(timerInterval);
@@ -1642,6 +1669,8 @@
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                console.log(`Countdown: ${days}d ${hours}h ${minutes}m ${seconds}s`);
                 
                 // Update timer display with formatted time
                 timerElement.innerHTML = `

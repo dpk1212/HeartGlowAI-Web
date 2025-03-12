@@ -1558,7 +1558,7 @@
                     Daily AI-powered insights to help you connect, communicate, and grow.
                 </p>
                 <div class="signup-form slide-up delay-3">
-                    <form id="waitlistForm" class="waitlist-form" onsubmit="return false;">
+                    <form id="waitlistForm" class="waitlist-form">
                         <div class="form-group">
                             <input type="email" id="email" name="email" placeholder="Enter your email to begin your journey" required>
                         </div>
@@ -1734,6 +1734,7 @@
         // Main Initialization
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM Content Loaded - Initializing components...');
+            initWaitlistForm();
             initializeOtherComponents();
         });
 
@@ -1760,63 +1761,106 @@
             });
         }
 
-        // Update Waitlist form handling
         function initWaitlistForm() {
+            console.log('Initializing waitlist forms...');
             const forms = document.querySelectorAll('form.waitlist-form');
+            
+            console.log('Found forms:', forms.length);
+            
             forms.forEach(form => {
+                console.log('Setting up form:', form.id);
                 form.addEventListener('submit', async (e) => {
-                    e.preventDefault(); // Prevent form submission
-                    e.stopPropagation(); // Stop event bubbling
+                    console.log('Form submit event triggered');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Form submission prevented');
                     
-                    const email = form.querySelector('input[type="email"]').value.trim();
+                    const emailInput = form.querySelector('input[type="email"]');
                     const submitButton = form.querySelector('button[type="submit"]');
                     
+                    console.log('Form elements:', {
+                        emailInput: !!emailInput,
+                        submitButton: !!submitButton
+                    });
+                    
+                    if (!emailInput || !submitButton) {
+                        console.error('Required form elements not found');
+                        return;
+                    }
+                    
+                    const email = emailInput.value.trim();
+                    console.log('Email submitted:', email);
+                    
                     // Call the form submission handler
-                    await handleFormSubmission(email, form, submitButton);
+                    const result = await handleFormSubmission(email, form, submitButton);
+                    console.log('Form submission result:', result);
                 });
             });
         }
 
-        // Update form submission handler
         async function handleFormSubmission(email, form, submitButton) {
+            console.log('Processing form submission...');
+            
             if (!isValidEmail(email)) {
+                console.log('Invalid email format');
                 showToast('Please enter a valid email address', 'error');
                 return false;
             }
 
+            console.log('Email validation passed');
             submitButton.disabled = true;
             const originalText = submitButton.innerHTML;
             submitButton.innerHTML = '<i class="fas fa-heart fa-spin"></i> Starting Your Journey...';
 
             try {
                 // Simulate API call
+                console.log('Simulating API call...');
                 await new Promise(resolve => setTimeout(resolve, 1000));
+                console.log('API call completed');
                 
-                // Show thank you modal
                 const modal = document.getElementById('thankYouModal');
                 const overlay = document.getElementById('thankYouOverlay');
                 
-                if (modal && overlay) {
-                    modal.classList.add('visible');
-                    overlay.classList.add('visible');
-                    
-                    // Add event listeners for closing
-                    const closeButton = modal.querySelector('.close-thank-you');
-                    if (closeButton) {
-                        closeButton.addEventListener('click', () => {
-                            modal.classList.remove('visible');
-                            overlay.classList.remove('visible');
-                        });
-                    }
-                    
-                    overlay.addEventListener('click', () => {
+                console.log('Modal elements:', {
+                    modal: !!modal,
+                    overlay: !!overlay
+                });
+                
+                if (!modal || !overlay) {
+                    console.error('Modal elements not found');
+                    return false;
+                }
+                
+                modal.classList.add('visible');
+                overlay.classList.add('visible');
+                console.log('Modal displayed');
+                
+                // Add event listeners for closing
+                const closeButton = modal.querySelector('.close-thank-you');
+                if (closeButton) {
+                    const closeModal = () => {
+                        console.log('Closing modal');
                         modal.classList.remove('visible');
                         overlay.classList.remove('visible');
-                    });
+                    };
+                    
+                    closeButton.addEventListener('click', closeModal, { once: true });
+                    overlay.addEventListener('click', closeModal, { once: true });
+                    
+                    // Add escape key listener
+                    const handleEsc = (e) => {
+                        if (e.key === 'Escape') {
+                            console.log('Escape key pressed - closing modal');
+                            closeModal();
+                            document.removeEventListener('keydown', handleEsc);
+                        }
+                    };
+                    document.addEventListener('keydown', handleEsc);
                 }
                 
                 // Reset form
                 form.reset();
+                console.log('Form reset completed');
                 return true;
             } catch (error) {
                 console.error('Form submission error:', error);
@@ -1825,6 +1869,7 @@
             } finally {
                 submitButton.disabled = false;
                 submitButton.innerHTML = originalText;
+                console.log('Form submission completed');
             }
         }
 

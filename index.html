@@ -500,22 +500,67 @@
         .hero-stats {
             display: flex;
             gap: 3rem;
+            justify-content: center;
+            margin: 2rem 0;
         }
 
         .stat-item {
             text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            min-width: 200px;
+            transition: var(--transition);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
         }
 
         .stat-number {
-            font-size: 2rem;
+            font-size: 2.5rem;
             font-weight: 700;
-            color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-gold));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
             display: block;
+            margin: 0.5rem 0;
         }
 
         .stat-label {
-            color: var(--text-light);
-            font-size: 0.875rem;
+            color: var(--text-dark);
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .stat-item .custom-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+        }
+
+        .stat-item .custom-icon i {
+            font-size: 20px;
+        }
+
+        /* Update Counter Animation */
+        @keyframes countUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .stat-number.animate {
+            animation: countUp 0.5s ease-out forwards;
         }
 
         .hero-image {
@@ -1829,26 +1874,45 @@
             });
         }
 
-        // Spots counter animation
+        // Update Spots Counter Animation
         function initSpotsCounter() {
             const counters = document.querySelectorAll('.stat-number[data-target]');
             
             counters.forEach(counter => {
                 const target = parseInt(counter.dataset.target);
                 const duration = 2000; // 2 seconds
-                const step = target / duration * 10; // Update every 10ms
+                const frames = 60; // 60 FPS
+                const increment = target / (duration / (1000 / frames));
                 let current = 0;
 
+                // Set initial state
+                counter.textContent = '0';
+                counter.classList.add('animate');
+
                 const updateCounter = () => {
-                    current += step;
+                    current += increment;
                     if (current >= target) {
                         current = target;
                         clearInterval(interval);
+                        
+                        // Add visual feedback when counter finishes
+                        gsap.to(counter.closest('.stat-item'), {
+                            scale: 1.05,
+                            duration: 0.2,
+                            yoyo: true,
+                            repeat: 1,
+                            ease: 'power2.out'
+                        });
                     }
-                    counter.textContent = Math.round(current);
+                    
+                    // Format number with commas
+                    counter.textContent = Math.round(current).toLocaleString();
                 };
 
-                const interval = setInterval(updateCounter, 10);
+                // Start counter after a small delay
+                setTimeout(() => {
+                    const interval = setInterval(updateCounter, 1000 / frames);
+                }, 500);
             });
         }
 

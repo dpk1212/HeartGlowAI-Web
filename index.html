@@ -728,6 +728,216 @@
                 flex-direction: column;
             }
         }
+
+        /* Add after the hero-stats styles */
+        .signup-form {
+            margin-top: 2rem;
+            max-width: 500px;
+        }
+
+        .waitlist-form {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .waitlist-form .form-group {
+            flex: 1;
+        }
+
+        .waitlist-form input {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .waitlist-form input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .privacy-note {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 1rem;
+        }
+
+        .social-proof {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .avatars {
+            display: flex;
+            align-items: center;
+        }
+
+        .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            margin-left: -10px;
+        }
+
+        .avatar:first-child {
+            margin-left: 0;
+        }
+
+        .avatar.more {
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .social-proof p {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin: 0;
+        }
+
+        /* Value Proposition Section Styles */
+        .value-prop {
+            padding: 6rem 0;
+            background: var(--background-light);
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .benefit-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .benefit-card i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .benefit-card h3 {
+            margin-bottom: 1rem;
+        }
+
+        .cta-center {
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .urgency-note {
+            margin-top: 1rem;
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        /* Update Mobile Styles */
+        @media (max-width: 768px) {
+            .waitlist-form {
+                flex-direction: column;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1.125rem;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                align-items: center;
+                gap: 1.5rem;
+            }
+
+            .social-proof {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .avatars {
+                justify-content: center;
+            }
+        }
+
+        /* Add to existing mobile styles */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-subtitle {
+                font-size: 1rem;
+            }
+
+            .waitlist-form input,
+            .waitlist-form button {
+                width: 100%;
+            }
+
+            .benefit-card {
+                padding: 1.5rem;
+            }
+
+            .social-proof {
+                margin-top: 1rem;
+            }
+        }
+
+        /* Update existing styles */
+        .primary-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: darken(var(--primary-color), 10%);
+        }
+
+        /* Update footer styles */
+        .privacy-pledge {
+            margin-top: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.875rem;
+        }
     </style>
 </head>
 <body>
@@ -769,34 +979,49 @@
     <section id="hero" class="hero">
         <div class="container">
             <div class="hero-content">
-                <h1 class="slide-up">Transform Your Relationships with <span class="highlight">AI-Powered</span> Insights</h1>
+                <h1 class="slide-up">Your AI Relationship Coach – <span class="highlight">Join the Waitlist Today!</span></h1>
                 <p class="hero-subtitle slide-up delay-1">
-                    Get personalized guidance to build stronger, more meaningful connections with the people who matter most.
+                    Get personalized AI-powered insights to build stronger, more meaningful connections. Early access closing soon!
                 </p>
-                <div class="cta-group slide-up delay-2">
-                    <a href="#signup" class="primary-button">Start Your Journey</a>
-                    <a href="#demo" class="secondary-button">Watch Demo</a>
-                </div>
-                <div class="hero-stats slide-up delay-3">
+                <div class="hero-stats slide-up delay-2">
                     <div class="stat-item">
-                        <span class="stat-number" id="userCount">2,500+</span>
-                        <span class="stat-label">Active Users</span>
+                        <span class="stat-number" data-target="2500">0</span>
+                        <span class="stat-label">Early Access Signups</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-number" id="relationshipCount">10,000+</span>
-                        <span class="stat-label">Relationships Improved</span>
+                        <span class="stat-number" data-target="50">0</span>
+                        <span class="stat-label">Spots Remaining</span>
+                    </div>
+                </div>
+                <div class="signup-form slide-up delay-3">
+                    <form id="waitlistForm" class="waitlist-form">
+                        <div class="form-group">
+                            <input type="email" id="email" name="email" placeholder="Enter your email for early access" required>
+                        </div>
+                        <button type="submit" class="primary-button">Join the Waitlist</button>
+                    </form>
+                    <p class="privacy-note">🔒 We respect your privacy. No spam, just valuable updates.</p>
+                    <div class="social-proof">
+                        <div class="avatars">
+                            <!-- Add a few small circular avatars here -->
+                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
+                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
+                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
+                            <span class="avatar more">+</span>
+                        </div>
+                        <p>Join 2,500+ early users already signed up!</p>
                     </div>
                 </div>
             </div>
             <div class="hero-image slide-left">
-                <img src="https://via.placeholder.com/600x400" alt="ConnectlyAI Dashboard" class="main-image">
+                <img src="https://via.placeholder.com/600x400" alt="ConnectlyAI Dashboard Preview" class="main-image">
                 <div class="floating-card card-1">
                     <i class="fas fa-heart"></i>
-                    <span>Relationship Score: 85%</span>
+                    <span>AI-Powered Insights</span>
                 </div>
                 <div class="floating-card card-2">
                     <i class="fas fa-chart-line"></i>
-                    <span>Progress Tracking</span>
+                    <span>Personalized Growth</span>
                 </div>
             </div>
         </div>
@@ -805,22 +1030,22 @@
     <!-- Features Section -->
     <section id="features" class="features">
         <div class="container">
-            <h2 class="section-title slide-up">Powerful Features for Better Relationships</h2>
+            <h2 class="section-title slide-up">Why Join Now?</h2>
             <div class="features-grid">
                 <div class="feature-card slide-up">
-                    <i class="fas fa-brain"></i>
-                    <h3>AI-Powered Insights</h3>
-                    <p>Get personalized recommendations based on your unique relationship dynamics.</p>
+                    <i class="fas fa-crown"></i>
+                    <h3>Early Access</h3>
+                    <p>Be among the first to experience our AI-powered relationship insights before public launch.</p>
                 </div>
                 <div class="feature-card slide-up delay-1">
-                    <i class="fas fa-chart-line"></i>
-                    <h3>Progress Tracking</h3>
-                    <p>Monitor your relationship growth with detailed analytics and metrics.</p>
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Shape the Future</h3>
+                    <p>Provide feedback that will help shape the future of relationship enhancement technology.</p>
                 </div>
                 <div class="feature-card slide-up delay-2">
-                    <i class="fas fa-comments"></i>
-                    <h3>Communication Tools</h3>
-                    <p>Enhance your dialogue with guided conversation starters and exercises.</p>
+                    <i class="fas fa-gift"></i>
+                    <h3>Exclusive Perks</h3>
+                    <p>Get lifetime benefits and special features available only to our early supporters.</p>
                 </div>
             </div>
         </div>
@@ -829,23 +1054,56 @@
     <!-- How It Works Section -->
     <section id="how-it-works" class="how-it-works">
         <div class="container">
-            <h2 class="section-title slide-up">How ConnectlyAI Works</h2>
+            <h2 class="section-title slide-up">How It Works</h2>
             <div class="steps">
                 <div class="step slide-up">
                     <div class="step-number">1</div>
-                    <h3>Sign Up</h3>
-                    <p>Create your account and tell us about your relationships.</p>
+                    <h3>Join Waitlist</h3>
+                    <p>Secure your spot for early access to our AI relationship coach.</p>
                 </div>
                 <div class="step slide-up delay-1">
                     <div class="step-number">2</div>
-                    <h3>Get Insights</h3>
-                    <p>Receive personalized recommendations and action steps.</p>
+                    <h3>Get Access</h3>
+                    <p>Receive exclusive access to our platform before public launch.</p>
                 </div>
                 <div class="step slide-up delay-2">
                     <div class="step-number">3</div>
-                    <h3>Take Action</h3>
-                    <p>Follow your customized plan to improve your relationships.</p>
+                    <h3>Transform</h3>
+                    <p>Start improving your relationships with AI-powered insights.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Value Proposition Section -->
+    <section id="value-prop" class="value-prop">
+        <div class="container">
+            <h2 class="section-title slide-up">Exclusive Early Access Benefits</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card slide-up">
+                    <i class="fas fa-rocket"></i>
+                    <h3>First Access</h3>
+                    <p>Be among the first to use our groundbreaking AI relationship technology.</p>
+                </div>
+                <div class="benefit-card slide-up delay-1">
+                    <i class="fas fa-star"></i>
+                    <h3>Premium Features</h3>
+                    <p>Get exclusive access to premium features at no additional cost.</p>
+                </div>
+                <div class="benefit-card slide-up delay-2">
+                    <i class="fas fa-comments"></i>
+                    <h3>Direct Support</h3>
+                    <p>Direct line to our team for personalized support and feature requests.</p>
+                </div>
+                <div class="benefit-card slide-up delay-3">
+                    <i class="fas fa-heart"></i>
+                    <h3>Lifetime Benefits</h3>
+                    <p>Special perks that will remain exclusive to our early supporters.</p>
+                </div>
+            </div>
+            <div class="cta-center slide-up">
+                <a href="#signup" class="primary-button">Join the Waitlist Now</a>
+                <p class="urgency-note">⏰ Limited spots available. Don't miss out!</p>
             </div>
         </div>
     </section>
@@ -866,81 +1124,6 @@
         </div>
     </section>
 
-    <!-- Pricing Section -->
-    <section id="pricing" class="pricing">
-        <div class="container">
-            <h2 class="section-title slide-up">Simple, Transparent Pricing</h2>
-            <div class="pricing-grid">
-                <div class="pricing-card slide-up">
-                    <h3>Basic</h3>
-                    <div class="price">$9.99<span>/month</span></div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> Basic AI Insights</li>
-                        <li><i class="fas fa-check"></i> 1 Relationship Track</li>
-                        <li><i class="fas fa-check"></i> Weekly Reports</li>
-                    </ul>
-                    <a href="#signup" class="cta-button">Get Started</a>
-                </div>
-                <div class="pricing-card featured slide-up delay-1">
-                    <h3>Pro</h3>
-                    <div class="price">$19.99<span>/month</span></div>
-                    <ul class="features-list">
-                        <li><i class="fas fa-check"></i> Advanced AI Insights</li>
-                        <li><i class="fas fa-check"></i> 3 Relationship Tracks</li>
-                        <li><i class="fas fa-check"></i> Daily Reports</li>
-                        <li><i class="fas fa-check"></i> Priority Support</li>
-                    </ul>
-                    <a href="#signup" class="cta-button">Get Started</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="section-title slide-up">Get Started Today</h2>
-            <div class="contact-grid">
-                <div class="contact-form slide-up">
-                    <form id="signupForm">
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="relationship">Relationship Focus</label>
-                            <select id="relationship" name="relationship" required>
-                                <option value="">Select a focus area</option>
-                                <option value="romantic">Romantic Relationship</option>
-                                <option value="family">Family</option>
-                                <option value="friendship">Friendship</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="submit-button">Start Your Journey</button>
-                    </form>
-                </div>
-                <div class="contact-info slide-up delay-1">
-                    <h3>Have Questions?</h3>
-                    <p>Our team is here to help you get started on your journey to better relationships.</p>
-                    <div class="contact-methods">
-                        <div class="contact-method">
-                            <i class="fas fa-envelope"></i>
-                            <span>support@connectlyai.com</span>
-                        </div>
-                        <div class="contact-method">
-                            <i class="fas fa-phone"></i>
-                            <span>1-800-CONNECT</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -951,14 +1134,16 @@
                         ConnectlyAI
                     </a>
                     <p>Building stronger relationships through AI-powered insights.</p>
+                    <p class="privacy-pledge">🔒 Your privacy is our priority. We never share your data.</p>
                 </div>
                 <div class="footer-links">
                     <h4>Quick Links</h4>
                     <ul>
-                        <li><a href="#features">Features</a></li>
+                        <li><a href="#features">Benefits</a></li>
                         <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#pricing">Pricing</a></li>
-                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#value-prop">Why Join</a></li>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
                     </ul>
                 </div>
                 <div class="footer-social">
@@ -973,10 +1158,6 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2024 ConnectlyAI. All rights reserved.</p>
-                <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
             </div>
         </div>
     </footer>
@@ -1017,46 +1198,17 @@
             // Update DOM loaded status
             document.getElementById('dom-loaded').textContent = 'Yes';
             
-            // Check GSAP availability with timeout
-            setTimeout(function() {
-                try {
-                    // Check GSAP
-                    const gsapAvailable = typeof gsap !== 'undefined';
-                    document.getElementById('gsap-available').textContent = gsapAvailable ? 'Yes' : 'No';
-                    
-                    // Register and check ScrollTrigger
-                    if (gsapAvailable && typeof ScrollTrigger !== 'undefined') {
-                        gsap.registerPlugin(ScrollTrigger);
-                        document.getElementById('scrolltrigger-available').textContent = 'Yes';
-                        
-                        // Initialize animations with performance optimizations
-                        initAnimations();
-                    } else {
-                        document.getElementById('scrolltrigger-available').textContent = 'No';
-                        console.error('ScrollTrigger not available');
-                        showToast('Animation libraries failed to load', 5000);
-                    }
-                    
-                    // Initialize other components
-                    initComponents();
-                } catch (error) {
-                    console.error('Initialization error:', error);
-                    document.getElementById('structure').textContent = 
-                        'Error during initialization: ' + error.message;
-                    showToast('Error during initialization', 5000);
-                }
-            }, 1000);
+            // Initialize components with error handling
+            initializeComponents();
         });
 
-        // Performance optimized initialization
-        function initComponents() {
+        function initializeComponents() {
             const components = [
-                { name: 'Counters', fn: initCounters },
-                { name: 'Accordion', fn: initAccordion },
-                { name: 'TestimonialSlider', fn: initTestimonialSlider },
-                { name: 'NavbarScroll', fn: initNavbarScroll },
+                { name: 'GSAP', fn: initGSAP },
+                { name: 'WaitlistForm', fn: initWaitlistForm },
+                { name: 'CountdownTimer', fn: initCountdownTimer },
+                { name: 'SpotsCounter', fn: initSpotsCounter },
                 { name: 'BackToTop', fn: initBackToTop },
-                { name: 'FormSubmission', fn: initFormSubmission },
                 { name: 'SmoothScroll', fn: initSmoothScroll }
             ];
 
@@ -1065,235 +1217,161 @@
                     component.fn();
                 } catch (error) {
                     console.error(`Error initializing ${component.name}:`, error);
-                    showToast(`Failed to initialize ${component.name}`, 3000);
+                    showToast(`Failed to initialize ${component.name}`, 'error');
                 }
             });
         }
 
-        // Throttled scroll handler for performance
-        function throttle(func, limit) {
-            let inThrottle;
-            return function() {
-                const args = arguments;
-                const context = this;
-                if (!inThrottle) {
-                    func.apply(context, args);
-                    inThrottle = true;
-                    setTimeout(() => inThrottle = false, limit);
-                }
-            }
-        }
-
-        // Improved animations with performance optimization
-        function initAnimations() {
+        // Initialize GSAP with improved animations
+        function initGSAP() {
             if (!window.gsap || !window.ScrollTrigger) {
-                console.warn('GSAP or ScrollTrigger not loaded');
-                return;
+                throw new Error('GSAP or ScrollTrigger not loaded');
             }
 
+            document.getElementById('gsap-available').textContent = 'Yes';
+            document.getElementById('scrolltrigger-available').textContent = 'Yes';
+            
             gsap.registerPlugin(ScrollTrigger);
 
-            // Common ScrollTrigger settings for better text visibility
+            // Common ScrollTrigger settings
             const commonScrollTrigger = {
-                start: "top 80%", // Trigger earlier
+                start: "top 80%",
                 end: "bottom 20%",
-                toggleActions: "play none none reverse",
-                markers: false, // Set to true for debugging
-                once: false // Allow re-triggering
+                toggleActions: "play none none reverse"
             };
 
-            // Batch similar animations together for performance
-            const fadeInElements = gsap.utils.toArray('.fade-in');
-            fadeInElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    y: 20,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: element,
-                        ...commonScrollTrigger
-                    }
-                });
-            });
+            // Hero section animations
+            const heroTimeline = gsap.timeline();
+            heroTimeline
+                .from('.hero h1', { opacity: 0, y: 30, duration: 1 })
+                .from('.hero-subtitle', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
+                .from('.hero-stats', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
+                .from('.signup-form', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
+                .from('.social-proof', { opacity: 0, y: 20, duration: 0.8 }, '-=0.3');
 
-            const slideUpElements = gsap.utils.toArray('.slide-up');
-            slideUpElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    y: 30,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: element,
-                        ...commonScrollTrigger
-                    }
-                });
-            });
-
-            const slideLeftElements = gsap.utils.toArray('.slide-left');
-            slideLeftElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    x: -30,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: element,
-                        ...commonScrollTrigger
-                    }
-                });
-            });
-
-            const slideRightElements = gsap.utils.toArray('.slide-right');
-            slideRightElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    x: 30,
-                    duration: 0.8,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: element,
-                        ...commonScrollTrigger
-                    }
-                });
-            });
-
-            // Hero section animations - no scroll trigger needed
-            gsap.from('.hero-content', {
-                opacity: 0,
-                y: 30,
-                duration: 1,
-                delay: 0.2,
-                ease: "power2.out"
-            });
-
-            gsap.from('.hero-image', {
-                opacity: 0,
-                x: 30,
-                duration: 1,
-                delay: 0.4,
-                ease: "power2.out"
-            });
-
-            // Floating cards animation
-            gsap.to('.card-1', {
-                y: -10,
-                duration: 1.5,
-                repeat: -1,
-                yoyo: true,
-                ease: 'power1.inOut'
-            });
-
-            gsap.to('.card-2', {
-                y: 10,
-                duration: 1.8,
+            // Floating cards animation with improved performance
+            gsap.to('.floating-card', {
+                y: 'random(-10, 10)',
+                duration: 'random(1.5, 2)',
                 repeat: -1,
                 yoyo: true,
                 ease: 'power1.inOut',
-                delay: 0.3
-            });
-
-            // Stats counter animation with improved trigger settings
-            const stats = gsap.utils.toArray('.stat-number');
-            stats.forEach(stat => {
-                const target = parseInt(stat.getAttribute('data-target'), 10);
-                gsap.to(stat, {
-                    innerHTML: target,
-                    duration: 2,
-                    snap: { innerHTML: 1 },
-                    scrollTrigger: {
-                        trigger: stat,
-                        start: "top 90%", // Start earlier
-                        end: "bottom 20%",
-                        toggleActions: "play none none none",
-                        once: true // Only play once
-                    }
-                });
-            });
-
-            // Section titles special treatment
-            const sectionTitles = gsap.utils.toArray('.section-title');
-            sectionTitles.forEach(title => {
-                gsap.from(title, {
-                    opacity: 0,
-                    y: 20,
-                    duration: 1,
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: title,
-                        start: "top 85%",
-                        end: "bottom 20%",
-                        toggleActions: "play none none none",
-                        once: true
-                    }
-                });
-            });
-
-            // Create a timeline for staggered card animations
-            const featureCards = gsap.utils.toArray('.feature-card');
-            gsap.from(featureCards, {
-                opacity: 0,
-                y: 30,
-                duration: 0.8,
-                stagger: 0.2,
-                ease: "power2.out",
-                scrollTrigger: {
-                    trigger: ".features-grid",
-                    start: "top 75%",
-                    end: "bottom 20%",
-                    toggleActions: "play none none none"
+                stagger: {
+                    amount: 0.5,
+                    from: 'random'
                 }
             });
 
-            // Ensure proper text rendering with will-change
-            gsap.set(['.fade-in', '.slide-up', '.slide-left', '.slide-right'], {
-                willChange: "transform, opacity"
+            // Batch animations for better performance
+            ScrollTrigger.batch('.fade-in, .slide-up', {
+                ...commonScrollTrigger,
+                onEnter: batch => gsap.to(batch, {
+                    opacity: 1,
+                    y: 0,
+                    stagger: 0.15,
+                    duration: 0.8,
+                    ease: 'power2.out'
+                })
             });
+        }
 
-            // Cleanup will-change after animation
-            const cleanupWillChange = (elements) => {
-                gsap.set(elements, {
-                    willChange: "auto",
-                    delay: 1
-                });
-            };
+        // Waitlist form handling
+        function initWaitlistForm() {
+            const form = document.getElementById('waitlistForm');
+            if (!form) return;
 
-            // Apply cleanup to all animated elements
-            ['.fade-in', '.slide-up', '.slide-left', '.slide-right'].forEach(selector => {
-                const elements = document.querySelectorAll(selector);
-                if (elements.length) {
-                    cleanupWillChange(elements);
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = form.email.value.trim();
+                
+                if (!isValidEmail(email)) {
+                    showToast('Please enter a valid email address', 'error');
+                    return;
+                }
+
+                const submitButton = form.querySelector('button');
+                submitButton.disabled = true;
+                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+
+                try {
+                    // Simulate API call
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    
+                    // Update spots counter
+                    const spotsElement = document.querySelector('[data-target="50"]');
+                    if (spotsElement) {
+                        const currentSpots = parseInt(spotsElement.textContent);
+                        spotsElement.textContent = Math.max(0, currentSpots - 1);
+                    }
+
+                    showToast('🎉 Welcome to the waitlist! Check your email for confirmation.', 'success');
+                    form.reset();
+                } catch (error) {
+                    showToast('Failed to join waitlist. Please try again.', 'error');
+                } finally {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Join the Waitlist';
                 }
             });
         }
 
-        // Smooth scroll implementation
-        function initSmoothScroll() {
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
+        // Countdown timer
+        function initCountdownTimer() {
+            // Set end date to 7 days from now
+            const endDate = new Date();
+            endDate.setDate(endDate.getDate() + 7);
+
+            function updateTimer() {
+                const now = new Date();
+                const distance = endDate - now;
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+
+                const urgencyNotes = document.querySelectorAll('.urgency-note');
+                urgencyNotes.forEach(note => {
+                    note.textContent = `⏰ Early access closes in ${days}d ${hours}h ${minutes}m`;
                 });
+
+                if (distance < 0) {
+                    clearInterval(timerInterval);
+                    urgencyNotes.forEach(note => {
+                        note.textContent = '⏰ Last chance to join!';
+                    });
+                }
+            }
+
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 60000); // Update every minute
+        }
+
+        // Spots counter animation
+        function initSpotsCounter() {
+            const counters = document.querySelectorAll('.stat-number[data-target]');
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.dataset.target);
+                const duration = 2000; // 2 seconds
+                const step = target / duration * 10; // Update every 10ms
+                let current = 0;
+
+                const updateCounter = () => {
+                    current += step;
+                    if (current >= target) {
+                        current = target;
+                        clearInterval(interval);
+                    }
+                    counter.textContent = Math.round(current);
+                };
+
+                const interval = setInterval(updateCounter, 10);
             });
         }
 
-        // Form submission handler
-        function initFormSubmission() {
-            const forms = document.querySelectorAll('form');
-            forms.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    // Add your form submission logic here
-                    showToast('Form submitted successfully!', 3000);
-                });
-            });
+        // Email validation
+        function isValidEmail(email) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
         }
 
         // Back to top functionality
@@ -1313,62 +1391,7 @@
             }
         }
 
-        // Initialize your other functions here
-        function initCounters() {
-            // Counter initialization code
-        }
-
-        function initAccordion() {
-            // Accordion initialization code
-        }
-
-        function initTestimonialSlider() {
-            // Slider initialization code
-        }
-
-        function initNavbarScroll() {
-            // Navbar scroll initialization code
-        }
-
-        // Debug Panel
-        function updateDebugPanel() {
-            document.getElementById('dom-loaded').textContent = 'Yes';
-            document.getElementById('gsap-available').textContent = window.gsap ? 'Yes' : 'No';
-            document.getElementById('scrolltrigger-available').textContent = window.ScrollTrigger ? 'Yes' : 'No';
-        }
-
-        // Toast Notifications
-        function showToast(message, type = 'info') {
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.textContent = message;
-            document.body.appendChild(toast);
-
-            // Trigger reflow
-            toast.offsetHeight;
-
-            // Add visible class for animation
-            toast.classList.add('visible');
-
-            // Remove after 3 seconds
-            setTimeout(() => {
-                toast.classList.remove('visible');
-                setTimeout(() => toast.remove(), 300);
-            }, 3000);
-        }
-
-        // Mobile Menu
-        function initMobileMenu() {
-            const mobileMenuBtn = document.querySelector('.mobile-menu');
-            const navLinks = document.querySelector('.nav-links');
-
-            mobileMenuBtn.addEventListener('click', () => {
-                navLinks.classList.toggle('active');
-                mobileMenuBtn.classList.toggle('active');
-            });
-        }
-
-        // Smooth Scroll
+        // Smooth scroll implementation
         function initSmoothScroll() {
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function(e) {
@@ -1384,120 +1407,19 @@
             });
         }
 
-        // Form Validation and Submission
-        function initContactForm() {
-            const form = document.querySelector('.contact-form');
-            if (!form) return;
-
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                // Basic validation
-                const name = form.querySelector('[name="name"]').value.trim();
-                const email = form.querySelector('[name="email"]').value.trim();
-                const message = form.querySelector('[name="message"]').value.trim();
-
-                if (!name || !email || !message) {
-                    showToast('Please fill in all required fields', 'error');
-                    return;
-                }
-
-                if (!isValidEmail(email)) {
-                    showToast('Please enter a valid email address', 'error');
-                    return;
-                }
-
-                // Simulate form submission
-                try {
-                    const submitButton = form.querySelector('.submit-button');
-                    submitButton.disabled = true;
-                    submitButton.textContent = 'Sending...';
-
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-
-                    showToast('Message sent successfully!', 'success');
-                    form.reset();
-                } catch (error) {
-                    showToast('Failed to send message. Please try again.', 'error');
-                } finally {
-                    const submitButton = form.querySelector('.submit-button');
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Send Message';
-                }
-            });
-        }
-
-        function isValidEmail(email) {
-            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-        }
-
-        // Back to Top Button
-        function initBackToTop() {
-            const backToTopBtn = document.querySelector('.back-to-top');
-            if (!backToTopBtn) return;
-
-            const toggleBackToTop = () => {
-                if (window.pageYOffset > 300) {
-                    backToTopBtn.classList.add('visible');
-                } else {
-                    backToTopBtn.classList.remove('visible');
-                }
-            };
-
-            window.addEventListener('scroll', throttle(toggleBackToTop, 100));
-
-            backToTopBtn.addEventListener('click', () => {
-                window.scrollTo({
-                    top: 0,
-                    behavior: 'smooth'
-                });
-            });
-        }
-
-        // Performance Utilities
+        // Throttled scroll handler for performance
         function throttle(func, limit) {
             let inThrottle;
-            return function(...args) {
+            return function() {
+                const args = arguments;
+                const context = this;
                 if (!inThrottle) {
-                    func.apply(this, args);
+                    func.apply(context, args);
                     inThrottle = true;
                     setTimeout(() => inThrottle = false, limit);
                 }
-            };
-        }
-
-        // Initialize everything when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            try {
-                updateDebugPanel();
-                initMobileMenu();
-                initSmoothScroll();
-                initContactForm();
-                initBackToTop();
-                
-                // Wait for GSAP to be available
-                const checkGSAP = setInterval(() => {
-                    if (window.gsap && window.ScrollTrigger) {
-                        clearInterval(checkGSAP);
-                        initAnimations();
-                        showToast('✨ Animations initialized successfully!', 'success');
-                    }
-                }, 100);
-
-                // Timeout after 5 seconds
-                setTimeout(() => {
-                    clearInterval(checkGSAP);
-                    if (!window.gsap || !window.ScrollTrigger) {
-                        showToast('⚠️ Failed to load animation libraries', 'error');
-                    }
-                }, 5000);
-
-            } catch (error) {
-                console.error('Initialization error:', error);
-                showToast('⚠️ Something went wrong during initialization', 'error');
             }
-        });
+        }
     </script>
 </body>
 </html>

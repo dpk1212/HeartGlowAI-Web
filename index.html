@@ -1,4 +1,55 @@
 <!DOCTYPE html>
+<html>
+<head>
+    <title>Debug</title>
+    <style>
+        .debug {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: black;
+            color: lime;
+            z-index: 10000;
+            padding: 10px;
+            font-family: monospace;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug">
+        DOM Loaded: <span id="loaded">No</span><br>
+        GSAP Available: <span id="gsap">Checking...</span><br>
+        ScrollTrigger Available: <span id="scrolltrigger">Checking...</span><br>
+        <button onclick="checkStructure()">Check HTML Structure</button>
+        <div id="structure"></div>
+    </div>
+
+<script>
+document.getElementById('loaded').textContent = 'Yes';
+
+setTimeout(function() {
+    document.getElementById('gsap').textContent = (typeof gsap !== 'undefined') ? 'Yes' : 'No';
+    document.getElementById('scrolltrigger').textContent = (typeof ScrollTrigger !== 'undefined') ? 'Yes' : 'No';
+}, 1000);
+
+function checkStructure() {
+    var missingClosingTags = [];
+    var forms = document.querySelectorAll('form');
+    document.getElementById('structure').textContent = 'Forms found: ' + forms.length;
+    
+    // Check for basic structure issues
+    if (!document.querySelector('nav')) missingClosingTags.push('nav');
+    if (!document.querySelector('.hero')) missingClosingTags.push('hero');
+    if (!document.querySelector('footer')) missingClosingTags.push('footer');
+    
+    if (missingClosingTags.length > 0) {
+        document.getElementById('structure').textContent += ' | Missing sections: ' + missingClosingTags.join(', ');
+    }
+}
+</script>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">

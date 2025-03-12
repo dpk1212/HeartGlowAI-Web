@@ -983,30 +983,25 @@
         }
 
         .avatar {
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             border: 2px solid white;
             margin-left: -10px;
-        }
-
-        .avatar:first-child {
-            margin-left: 0;
+            object-fit: cover;
+            background: var(--primary-color);
         }
 
         .avatar.more {
-            background: var(--primary-color);
+            width: 32px;
+            height: 32px;
+            background: var(--accent-gold);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 0.75rem;
             font-weight: 600;
-        }
-
-        .social-proof p {
-            font-size: 0.875rem;
-            color: var(--text-light);
-            margin: 0;
         }
 
         /* Value Proposition Section Styles */
@@ -1208,10 +1203,10 @@
                     </div>
                     <div class="social-proof">
                         <div class="avatars">
-                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
-                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
-                            <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
-                            <span class="avatar more">+</span>
+                            <img src="https://ui-avatars.com/api/?name=User+1&background=007bff&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=007bff&color=fff'">
+                            <img src="https://ui-avatars.com/api/?name=User+2&background=ffd700&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ffd700&color=fff'">
+                            <img src="https://ui-avatars.com/api/?name=User+3&background=ff6f61&color=fff" alt="User Avatar" class="avatar" onerror="this.src='https://ui-avatars.com/api/?name=User&background=ff6f61&color=fff'">
+                            <div class="avatar more">2.5k+</div>
                         </div>
                         <p>Join 2,500+ people transforming their relationships!</p>
                     </div>

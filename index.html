@@ -116,23 +116,19 @@
 
         /* Custom Icons */
         .custom-icon {
-            width: 32px;
-            height: 32px;
-            display: inline-block;
-            vertical-align: middle;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--accent-gold);
+            border-radius: 50%;
             margin-right: 0.5rem;
+            color: white;
         }
 
-        .icon-heart {
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FFD700" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center center;
-        }
-
-        .icon-chat {
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FFD700" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>') no-repeat center center;
-        }
-
-        .icon-chart {
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FFD700" d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>') no-repeat center center;
+        .custom-icon i {
+            font-size: 14px;
         }
 
         /* Background Patterns */
@@ -371,25 +367,38 @@
         .nav-links a {
             color: var(--text-dark);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gold);
             transition: var(--transition);
         }
 
-        .nav-links a:hover {
-            color: var(--primary-color);
+        .nav-links a:hover::after {
+            width: 100%;
         }
 
         .cta-button {
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-coral));
+            border: none;
+            padding: 0.75rem 1.5rem;
             color: white !important;
-            padding: 0.5rem 1.5rem;
-            border-radius: var(--border-radius);
+            font-weight: 600;
             transition: var(--transition);
         }
 
         .cta-button:hover {
-            background: darken(var(--primary-color), 10%);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            background: linear-gradient(135deg, var(--accent-coral), var(--accent-gold));
         }
 
         .mobile-menu {
@@ -511,6 +520,15 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            transition: var(--transition);
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .floating-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-gold);
         }
 
         .card-1 {
@@ -519,6 +537,12 @@
         }
 
         .card-2 {
+            top: 50%;
+            right: -3rem;
+            transform: translateY(-50%);
+        }
+
+        .card-3 {
             bottom: -2rem;
             left: -2rem;
         }
@@ -585,7 +609,7 @@
         .step-number {
             width: 3rem;
             height: 3rem;
-            background: var(--primary-color);
+            background: linear-gradient(135deg, var(--accent-gold), var(--accent-coral));
             color: white;
             border-radius: 50%;
             display: flex;
@@ -1157,9 +1181,8 @@
             <div class="nav-links">
                 <a href="#features">Features</a>
                 <a href="#how-it-works">How It Works</a>
-                <a href="#testimonials">Testimonials</a>
-                <a href="#pricing">Pricing</a>
-                <a href="#contact" class="cta-button">Get Started</a>
+                <a href="#value-prop">Why Join</a>
+                <a href="#signup" class="cta-button">Join Now</a>
             </div>
             <button class="mobile-menu" aria-label="Toggle Menu">
                 <i class="fas fa-bars"></i>
@@ -1227,6 +1250,10 @@
                     <span>AI-Powered Insights</span>
                 </div>
                 <div class="floating-card card-2">
+                    <i class="custom-icon icon-chat"></i>
+                    <span>Smart Relationship Tips</span>
+                </div>
+                <div class="floating-card card-3">
                     <i class="custom-icon icon-chart"></i>
                     <span>Personalized Growth</span>
                 </div>
@@ -1315,22 +1342,6 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section id="testimonials" class="testimonials">
-        <div class="container">
-            <h2 class="section-title slide-up">What Our Users Say</h2>
-            <div class="testimonials-slider">
-                <div class="testimonial slide-up">
-                    <img src="https://via.placeholder.com/100" alt="User Avatar" class="testimonial-avatar">
-                    <p class="testimonial-text">"ConnectlyAI has transformed how I approach my relationships. The insights are invaluable!"</p>
-                    <h4 class="testimonial-author">Sarah Johnson</h4>
-                    <p class="testimonial-role">User for 6 months</p>
-                </div>
-                <!-- More testimonials... -->
-            </div>
-        </div>
-    </section>
-
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
@@ -1407,6 +1418,7 @@
         function initializeComponents() {
             const components = [
                 { name: 'GSAP', fn: initGSAP },
+                { name: 'FloatingCards', fn: initFloatingCards },
                 { name: 'WaitlistForm', fn: initWaitlistForm },
                 { name: 'CountdownTimer', fn: initCountdownTimer },
                 { name: 'SpotsCounter', fn: initSpotsCounter },
@@ -1776,6 +1788,39 @@
                     setTimeout(() => inThrottle = false, limit);
                 }
             }
+        }
+
+        // Update floating cards animation
+        function initFloatingCards() {
+            const cards = document.querySelectorAll('.floating-card');
+            
+            cards.forEach((card, index) => {
+                gsap.to(card, {
+                    y: 'random(-10, 10)',
+                    duration: 2,
+                    repeat: -1,
+                    yoyo: true,
+                    ease: 'power1.inOut',
+                    delay: index * 0.2
+                });
+
+                // Add hover animation
+                card.addEventListener('mouseenter', () => {
+                    gsap.to(card, {
+                        scale: 1.05,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+
+                card.addEventListener('mouseleave', () => {
+                    gsap.to(card, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+            });
         }
     </script>
 </body>

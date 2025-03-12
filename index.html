@@ -1619,13 +1619,16 @@
         // Fix Countdown Timer implementation
         function initCountdownTimer() {
             const timerElement = document.getElementById('timer');
-            if (!timerElement) return;
+            if (!timerElement) {
+                console.error('Timer element not found');
+                return;
+            }
 
             // Set a fixed date exactly 10 days from right now
-            // Using a specific timestamp that's 10 days from now (86400000 ms = 10 days)
             const now = new Date();
             const fixedEndTimestamp = now.getTime() + (10 * 24 * 60 * 60 * 1000);
             
+            console.log('Current time:', now.toString());
             console.log('Fixed countdown target:', new Date(fixedEndTimestamp).toString());
             
             // Format function for adding leading zeros
@@ -1634,6 +1637,8 @@
             function updateTimer() {
                 const currentTime = new Date().getTime();
                 const distance = fixedEndTimestamp - currentTime;
+                
+                console.log('Time remaining (ms):', distance);
                 
                 if (distance <= 0) {
                     clearInterval(timerInterval);
@@ -1647,53 +1652,22 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                // Force update the timer display with formatted time
+                console.log('Countdown values:', { days, hours, minutes, seconds });
+                
+                // Update the timer display
                 timerElement.innerHTML = `
                     <span class="time-unit">${formatNumber(days)}<small>d</small></span>
                     <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
                     <span class="time-unit">${formatNumber(minutes)}<small>m</small></span>
                     <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
                 `;
-                
-                console.log("Timer updated:", days, hours, minutes, seconds);
             }
             
-            // Run updateTimer immediately on page load (before the interval starts)
+            // Run updateTimer immediately
             updateTimer();
             
-            // Then set interval to update every second
+            // Set interval to update every second
             const timerInterval = setInterval(updateTimer, 1000);
-            
-            // Add CSS for timer styling
-            const style = document.createElement('style');
-            style.textContent = `
-                .time-unit {
-                    display: inline-block;
-                    padding: 0.5rem 0.75rem;
-                    margin: 0 0.25rem;
-                    background: rgba(255, 255, 255, 0.2);
-                    border-radius: 0.3rem;
-                    font-weight: 700;
-                    min-width: 3rem;
-                    text-align: center;
-                }
-                
-                .time-unit small {
-                    font-size: 0.7em;
-                    font-weight: 400;
-                    margin-left: 2px;
-                }
-                
-                @media (max-width: 480px) {
-                    .time-unit {
-                        padding: 0.3rem 0.5rem;
-                        margin: 0.15rem;
-                        min-width: 2.5rem;
-                        font-size: 0.9rem;
-                    }
-                }
-            `;
-            document.head.appendChild(style);
         }
 
         // Fix Spots Counter Animation with persistence

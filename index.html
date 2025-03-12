@@ -414,17 +414,23 @@
         .hero {
             padding: 8rem 0 4rem;
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+            overflow: hidden;
         }
 
         .hero .container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
+            display: flex;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
+            position: relative;
         }
 
         .hero-content {
-            max-width: 600px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
         }
 
         .hero h1 {
@@ -523,6 +529,7 @@
             transition: var(--transition);
             cursor: pointer;
             border: 2px solid transparent;
+            z-index: 1;
         }
 
         .floating-card:hover {
@@ -532,19 +539,18 @@
         }
 
         .card-1 {
-            top: -2rem;
-            right: -2rem;
+            top: 20%;
+            right: 5%;
         }
 
         .card-2 {
-            top: 50%;
-            right: -3rem;
-            transform: translateY(-50%);
+            bottom: 30%;
+            left: 5%;
         }
 
         .card-3 {
-            bottom: -2rem;
-            left: -2rem;
+            top: 40%;
+            right: 15%;
         }
 
         /* Features Section Styles */
@@ -1243,20 +1249,17 @@
                     </div>
                 </div>
             </div>
-            <div class="hero-image slide-left">
-                <img src="https://via.placeholder.com/600x400" alt="ConnectlyAI Dashboard Preview" class="main-image brand-image">
-                <div class="floating-card card-1">
-                    <i class="custom-icon icon-heart"></i>
-                    <span>AI-Powered Insights</span>
-                </div>
-                <div class="floating-card card-2">
-                    <i class="custom-icon icon-chat"></i>
-                    <span>Smart Relationship Tips</span>
-                </div>
-                <div class="floating-card card-3">
-                    <i class="custom-icon icon-chart"></i>
-                    <span>Personalized Growth</span>
-                </div>
+            <div class="floating-card card-1">
+                <i class="custom-icon icon-heart"></i>
+                <span>AI-Powered Insights</span>
+            </div>
+            <div class="floating-card card-2">
+                <i class="custom-icon icon-chat"></i>
+                <span>Smart Relationship Tips</span>
+            </div>
+            <div class="floating-card card-3">
+                <i class="custom-icon icon-chart"></i>
+                <span>Personalized Growth</span>
             </div>
         </div>
     </section>

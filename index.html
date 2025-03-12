@@ -29,16 +29,27 @@
             left: 50%;
             transform: translateX(-50%);
             background: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            display: none;
+            padding: 12px 24px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 500;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success-color);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error-color);
         }
 
         .toast.show {
-            display: block;
-            animation: fadeIn 0.3s, fadeOut 0.3s 2.7s;
+            opacity: 1;
         }
 
         /* Main Styles */
@@ -1079,6 +1090,24 @@
             font-size: 0.75rem;
             font-weight: 600;
         }
+
+        /* Add close button styles */
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-light);
+            cursor: pointer;
+            padding: 5px 10px;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--text-dark);
+        }
     </style>
 </head>
 <body>
@@ -1093,7 +1122,7 @@
                 <a href="#features">Features</a>
                 <a href="#how-it-works">How It Works</a>
                 <a href="#value-prop">Why Join</a>
-                <a href="#signup" class="cta-button">Join Now</a>
+                <a href="#signup" class="cta-button" id="navCta">Join Now</a>
             </div>
             <button class="mobile-menu" aria-label="Toggle Menu">
                 <i class="fas fa-bars"></i>
@@ -1263,6 +1292,7 @@
     <!-- Exit Intent Modal -->
     <div class="modal-overlay" id="exitModalOverlay"></div>
     <div class="exit-modal" id="exitModal">
+        <button class="close-modal" aria-label="Close modal">×</button>
         <h2 class="gradient-text">Don't Miss Out!</h2>
         <p>Join our waitlist for a Free Relationship Guide – Spots Are Limited!</p>
         <form id="exitForm" class="waitlist-form">
@@ -1296,7 +1326,8 @@
                 { name: 'BackToTop', fn: initBackToTop },
                 { name: 'SmoothScroll', fn: initSmoothScroll },
                 { name: 'FeatureCards', fn: initFeatureCards },
-                { name: 'StepCards', fn: initStepCards }
+                { name: 'StepCards', fn: initStepCards },
+                { name: 'CTAButtons', fn: initCTAButtons }
             ];
 
             components.forEach(component => {
@@ -1440,76 +1471,80 @@
             });
         }
 
-        // Waitlist form handling
-        function initWaitlistForm() {
-            const form = document.getElementById('waitlistForm');
-            if (!form) return;
+        // Add new function for handling form submissions
+        async function handleFormSubmission(email, form, submitButton) {
+            if (!isValidEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return false;
+            }
 
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = form.email.value.trim();
+            submitButton.disabled = true;
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+
+            try {
+                // Here you would typically make an API call to your backend
+                // For now, we'll simulate it with a delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
                 
-                if (!isValidEmail(email)) {
-                    showToast('Please enter a valid email address', 'error');
-                    return;
+                // Update spots counter
+                const spotsElement = document.querySelector('[data-target="50"]');
+                if (spotsElement) {
+                    const currentSpots = parseInt(spotsElement.textContent);
+                    spotsElement.textContent = Math.max(0, currentSpots - 1);
                 }
 
-                const submitButton = form.querySelector('button');
-                submitButton.disabled = true;
-                submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Joining...';
+                showToast('🎉 Welcome to the waitlist! Check your email for confirmation.', 'success');
+                form.reset();
+                return true;
+            } catch (error) {
+                console.error('Form submission error:', error);
+                showToast('Failed to join waitlist. Please try again.', 'error');
+                return false;
+            } finally {
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalText;
+            }
+        }
 
-                try {
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    
-                    // Update spots counter
-                    const spotsElement = document.querySelector('[data-target="50"]');
-                    if (spotsElement) {
-                        const currentSpots = parseInt(spotsElement.textContent);
-                        spotsElement.textContent = Math.max(0, currentSpots - 1);
-                    }
-
-                    showToast('🎉 Welcome to the waitlist! Check your email for confirmation.', 'success');
-                    form.reset();
-                } catch (error) {
-                    showToast('Failed to join waitlist. Please try again.', 'error');
-                } finally {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Join the Waitlist';
-                }
+        // Update Waitlist form handling
+        function initWaitlistForm() {
+            const forms = document.querySelectorAll('form.waitlist-form');
+            forms.forEach(form => {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = form.querySelector('input[type="email"]').value.trim();
+                    const submitButton = form.querySelector('button[type="submit"]');
+                    await handleFormSubmission(email, form, submitButton);
+                });
             });
         }
 
-        // Countdown timer with enhanced UI
-        function initCountdownTimer() {
-            const endDate = new Date();
-            endDate.setDate(endDate.getDate() + 7);
-
-            function updateTimer() {
-                const now = new Date();
-                const distance = endDate - now;
-
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-
-                const timer = document.getElementById('timer');
-                if (timer) {
-                    timer.innerHTML = `Early access closes in ${days}d ${hours}h ${minutes}m ${seconds}s`;
-                }
-
-                if (distance < 0) {
-                    clearInterval(timerInterval);
-                    timer.innerHTML = "Last chance to join!";
-                }
-            }
-
-            updateTimer();
-            const timerInterval = setInterval(updateTimer, 1000);
+        // Update CTA button handling
+        function initCTAButtons() {
+            // Get all CTA buttons
+            const ctaButtons = document.querySelectorAll('.cta-button, .primary-button, .floating-cta');
+            
+            ctaButtons.forEach(button => {
+                button.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const waitlistForm = document.getElementById('waitlistForm');
+                    if (waitlistForm) {
+                        waitlistForm.scrollIntoView({ 
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        // Focus the email input after scrolling
+                        setTimeout(() => {
+                            const emailInput = waitlistForm.querySelector('input[type="email"]');
+                            if (emailInput) emailInput.focus();
+                        }, 800);
+                    }
+                });
+            });
         }
 
-        // Floating CTA button
+        // Update floating CTA button
         function initFloatingCTA() {
             const floatingCta = document.getElementById('floatingCta');
             const heroSection = document.getElementById('hero');
@@ -1526,26 +1561,22 @@
                     floatingCta.classList.remove('visible');
                 }
             }, 100));
-
-            floatingCta.addEventListener('click', () => {
-                document.getElementById('waitlistForm').scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'center'
-                });
-            });
         }
 
-        // Exit intent modal
+        // Update Exit Intent Modal
         function initExitIntent() {
             const modal = document.getElementById('exitModal');
             const overlay = document.getElementById('exitModalOverlay');
             let hasShown = false;
 
             function showExitModal() {
-                if (!hasShown) {
+                if (!hasShown && !localStorage.getItem('exitModalShown')) {
                     modal.classList.add('visible');
                     overlay.classList.add('visible');
                     hasShown = true;
+                    // Set a flag in localStorage that expires in 24 hours
+                    localStorage.setItem('exitModalShown', 'true');
+                    setTimeout(() => localStorage.removeItem('exitModalShown'), 24 * 60 * 60 * 1000);
                 }
             }
 
@@ -1561,29 +1592,19 @@
             });
 
             overlay.addEventListener('click', hideExitModal);
+            
+            // Close button for modal
+            const closeButtons = modal.querySelectorAll('.close-modal');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', hideExitModal);
+            });
 
-            const exitForm = document.getElementById('exitForm');
-            if (exitForm) {
-                exitForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = exitForm.email.value.trim();
-                    
-                    if (!isValidEmail(email)) {
-                        showToast('Please enter a valid email address', 'error');
-                        return;
-                    }
-
-                    try {
-                        // Simulate API call
-                        await new Promise(resolve => setTimeout(resolve, 1500));
-                        showToast('🎉 Your free guide is on its way!', 'success');
-                        hideExitModal();
-                        exitForm.reset();
-                    } catch (error) {
-                        showToast('Failed to send guide. Please try again.', 'error');
-                    }
-                });
-            }
+            // Handle escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && modal.classList.contains('visible')) {
+                    hideExitModal();
+                }
+            });
         }
 
         // Spots counter animation
@@ -1798,6 +1819,23 @@
                     });
                 }
             });
+        }
+
+        // Add toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            // Show toast
+            setTimeout(() => toast.classList.add('show'), 100);
+
+            // Hide and remove toast
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
     </script>
 </body>

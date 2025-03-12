@@ -93,19 +93,280 @@
 
         /* Main Styles */
         :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
+            /* Brand Colors */
+            --primary-color: #007BFF;
+            --secondary-color: #FF6F61;
+            --accent-gold: #FFD700;
+            --accent-coral: #FF6F61;
+            --gradient-start: #FFC1CC;
+            --gradient-end: #FFD700;
+            
+            /* UI Colors */
             --success-color: #28a745;
             --error-color: #dc3545;
             --background-light: #f8f9fa;
             --text-dark: #212529;
             --text-light: #6c757d;
             --border-color: #dee2e6;
+            
+            /* Shadows */
             --shadow-sm: 0 .125rem .25rem rgba(0,0,0,.075);
             --shadow-md: 0 .5rem 1rem rgba(0,0,0,.15);
             --shadow-lg: 0 1rem 3rem rgba(0,0,0,.175);
+            
+            /* Other */
             --border-radius: 0.5rem;
             --transition: all 0.3s ease;
+        }
+
+        /* Brand Typography */
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+
+        .logo {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: var(--accent-gold) !important;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo i {
+            color: var(--accent-coral);
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover i {
+            transform: scale(1.2) rotate(10deg);
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        /* Image Styles */
+        .brand-image {
+            filter: brightness(95%) saturate(110%);
+            position: relative;
+        }
+
+        .brand-image::after {
+            content: '';
+            position: absolute;
+            bottom: 1rem;
+            right: 1rem;
+            width: 50px;
+            height: 50px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FFD700" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center center;
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Custom Icons */
+        .custom-icon {
+            width: 24px;
+            height: 24px;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 0.5rem;
+        }
+
+        .icon-heart {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FFD700" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') no-repeat center center;
+        }
+
+        .icon-chat {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23FF6F61" d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>') no-repeat center center;
+        }
+
+        .icon-chart {
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" viewBox="0 0 24 24"><path fill="%23007BFF" d="M3.5 18.49l6-6.01 4 4L22 6.92l-1.41-1.41-7.09 7.97-4-4L2 16.99z"/></svg>') no-repeat center center;
+        }
+
+        /* Background Patterns */
+        .pattern-bg {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pattern-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/svg/2000" width="20" height="20" viewBox="0 0 20 20"><path fill="%23FFC1CC" fill-opacity="0.1" d="M10 0l3 7 7 3-7 3-3 7-3-7-7-3 7-3z"/></svg>');
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        /* Trust Badge */
+        .trust-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 215, 0, 0.1);
+            border-radius: var(--border-radius);
+            color: var(--accent-gold);
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+
+        .trust-badge i {
+            color: var(--accent-gold);
+        }
+
+        /* Floating CTA Button */
+        .floating-cta {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            transition: var(--transition);
+            display: none;
+        }
+
+        .floating-cta.visible {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .floating-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Update existing button styles */
+        .primary-button {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .primary-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .primary-button:hover::after {
+            opacity: 0.2;
+        }
+
+        .primary-button:active {
+            transform: translateY(1px);
+        }
+
+        /* Mobile Optimization */
+        @media (max-width: 768px) {
+            .primary-button,
+            .secondary-button {
+                font-size: 24px;
+                width: 100%;
+                text-align: center;
+                padding: 1.25rem 2rem;
+            }
+
+            .floating-cta {
+                bottom: 1rem;
+                right: 1rem;
+                left: 1rem;
+                width: auto;
+                text-align: center;
+            }
+        }
+
+        /* Exit Intent Modal */
+        .exit-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            z-index: 1001;
+            max-width: 500px;
+            width: 90%;
+            display: none;
+        }
+
+        .exit-modal.visible {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .modal-overlay.visible {
+            display: block;
+        }
+
+        /* Countdown Timer */
+        .countdown {
+            background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            color: white;
+            text-align: center;
+            margin: 1rem 0;
+            font-weight: 600;
+        }
+
+        .countdown span {
+            font-size: 1.25rem;
+            font-weight: 700;
         }
 
         * {
@@ -976,13 +1237,20 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="hero" class="hero">
+    <section id="hero" class="hero pattern-bg">
         <div class="container">
             <div class="hero-content">
-                <h1 class="slide-up">Your AI Relationship Coach – <span class="highlight">Join the Waitlist Today!</span></h1>
+                <h1 class="slide-up">
+                    <span class="gradient-text">Transform Your Relationships</span><br>
+                    with AI-Powered Insights
+                </h1>
                 <p class="hero-subtitle slide-up delay-1">
-                    Get personalized AI-powered insights to build stronger, more meaningful connections. Early access closing soon!
+                    Get personalized guidance to build deeper connections and strengthen your relationships using advanced AI technology.
                 </p>
+                <div class="countdown slide-up delay-2" id="countdown">
+                    <i class="fas fa-clock"></i>
+                    <span id="timer">Loading...</span>
+                </div>
                 <div class="hero-stats slide-up delay-2">
                     <div class="stat-item">
                         <span class="stat-number" data-target="2500">0</span>
@@ -998,29 +1266,35 @@
                         <div class="form-group">
                             <input type="email" id="email" name="email" placeholder="Enter your email for early access" required>
                         </div>
-                        <button type="submit" class="primary-button">Join the Waitlist</button>
+                        <button type="submit" class="primary-button">
+                            <i class="fas fa-heart"></i>
+                            Join Now & Get Free Guide
+                        </button>
                     </form>
                     <p class="privacy-note">🔒 We respect your privacy. No spam, just valuable updates.</p>
+                    <div class="trust-badge">
+                        <i class="fas fa-shield-alt"></i>
+                        Trusted by 2,500+ Users
+                    </div>
                     <div class="social-proof">
                         <div class="avatars">
-                            <!-- Add a few small circular avatars here -->
                             <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
                             <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
                             <img src="https://via.placeholder.com/30" alt="User Avatar" class="avatar">
                             <span class="avatar more">+</span>
                         </div>
-                        <p>Join 2,500+ early users already signed up!</p>
+                        <p>Join 2,500+ people already on the list!</p>
                     </div>
                 </div>
             </div>
             <div class="hero-image slide-left">
-                <img src="https://via.placeholder.com/600x400" alt="ConnectlyAI Dashboard Preview" class="main-image">
+                <img src="https://via.placeholder.com/600x400" alt="ConnectlyAI Dashboard Preview" class="main-image brand-image">
                 <div class="floating-card card-1">
-                    <i class="fas fa-heart"></i>
+                    <i class="custom-icon icon-heart"></i>
                     <span>AI-Powered Insights</span>
                 </div>
                 <div class="floating-card card-2">
-                    <i class="fas fa-chart-line"></i>
+                    <i class="custom-icon icon-chart"></i>
                     <span>Personalized Growth</span>
                 </div>
             </div>
@@ -1167,6 +1441,29 @@
         <i class="fas fa-arrow-up"></i>
     </button>
 
+    <!-- Floating CTA Button -->
+    <button class="floating-cta" id="floatingCta">
+        <i class="fas fa-heart"></i>
+        Join Waitlist
+    </button>
+
+    <!-- Exit Intent Modal -->
+    <div class="modal-overlay" id="exitModalOverlay"></div>
+    <div class="exit-modal" id="exitModal">
+        <h2 class="gradient-text">Don't Miss Out!</h2>
+        <p>Join our waitlist for a Free Relationship Guide – Spots Are Limited!</p>
+        <form id="exitForm" class="waitlist-form">
+            <div class="form-group">
+                <input type="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" class="primary-button">
+                <i class="fas fa-heart"></i>
+                Get Free Guide
+            </button>
+        </form>
+        <p class="privacy-note">🔒 Your privacy is our priority</p>
+    </div>
+
     <script>
         // Debug Functions
         function checkHTMLStructure() {
@@ -1186,11 +1483,33 @@
         }
 
         // Toast Function
-        function showToast(message, duration = 3000) {
+        function showToast(message, type = 'info') {
             const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), duration);
+            const toastMessage = document.getElementById('toastMessage');
+            
+            // Set type-specific styles
+            toast.className = `toast ${type}`;
+            toastMessage.textContent = message;
+            
+            // Show toast with GSAP animation
+            gsap.to(toast, {
+                opacity: 1,
+                y: 0,
+                duration: 0.3,
+                ease: "power2.out",
+                onStart: () => toast.classList.add('show')
+            });
+            
+            // Hide toast
+            setTimeout(() => {
+                gsap.to(toast, {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.3,
+                    ease: "power2.in",
+                    onComplete: () => toast.classList.remove('show')
+                });
+            }, 3000);
         }
 
         // Main Initialization
@@ -1208,6 +1527,8 @@
                 { name: 'WaitlistForm', fn: initWaitlistForm },
                 { name: 'CountdownTimer', fn: initCountdownTimer },
                 { name: 'SpotsCounter', fn: initSpotsCounter },
+                { name: 'FloatingCTA', fn: initFloatingCTA },
+                { name: 'ExitIntent', fn: initExitIntent },
                 { name: 'BackToTop', fn: initBackToTop },
                 { name: 'SmoothScroll', fn: initSmoothScroll }
             ];
@@ -1240,14 +1561,51 @@
                 toggleActions: "play none none reverse"
             };
 
-            // Hero section animations
+            // Hero section animations with enhanced timing
             const heroTimeline = gsap.timeline();
             heroTimeline
-                .from('.hero h1', { opacity: 0, y: 30, duration: 1 })
-                .from('.hero-subtitle', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
-                .from('.hero-stats', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
-                .from('.signup-form', { opacity: 0, y: 20, duration: 0.8 }, '-=0.5')
-                .from('.social-proof', { opacity: 0, y: 20, duration: 0.8 }, '-=0.3');
+                .from('.hero h1', { 
+                    opacity: 0, 
+                    y: 30, 
+                    duration: 1,
+                    ease: "power2.out"
+                })
+                .from('.hero-subtitle', { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, '-=0.5')
+                .from('.countdown', { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, '-=0.5')
+                .from('.hero-stats', { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, '-=0.5')
+                .from('.signup-form', { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, '-=0.3')
+                .from('.trust-badge', { 
+                    opacity: 0, 
+                    scale: 0.8, 
+                    duration: 0.8,
+                    ease: "back.out(1.7)"
+                }, '-=0.3')
+                .from('.social-proof', { 
+                    opacity: 0, 
+                    y: 20, 
+                    duration: 0.8,
+                    ease: "power2.out"
+                }, '-=0.5');
 
             // Floating cards animation with improved performance
             gsap.to('.floating-card', {
@@ -1272,6 +1630,25 @@
                     duration: 0.8,
                     ease: 'power2.out'
                 })
+            });
+
+            // Button hover animations
+            const buttons = document.querySelectorAll('.primary-button');
+            buttons.forEach(button => {
+                button.addEventListener('mouseenter', () => {
+                    gsap.to(button, {
+                        scale: 1.05,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
+                button.addEventListener('mouseleave', () => {
+                    gsap.to(button, {
+                        scale: 1,
+                        duration: 0.3,
+                        ease: 'power2.out'
+                    });
+                });
             });
         }
 
@@ -1315,9 +1692,8 @@
             });
         }
 
-        // Countdown timer
+        // Countdown timer with enhanced UI
         function initCountdownTimer() {
-            // Set end date to 7 days from now
             const endDate = new Date();
             endDate.setDate(endDate.getDate() + 7);
 
@@ -1328,22 +1704,98 @@
                 const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                 const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-                const urgencyNotes = document.querySelectorAll('.urgency-note');
-                urgencyNotes.forEach(note => {
-                    note.textContent = `⏰ Early access closes in ${days}d ${hours}h ${minutes}m`;
-                });
+                const timer = document.getElementById('timer');
+                if (timer) {
+                    timer.innerHTML = `Early access closes in ${days}d ${hours}h ${minutes}m ${seconds}s`;
+                }
 
                 if (distance < 0) {
                     clearInterval(timerInterval);
-                    urgencyNotes.forEach(note => {
-                        note.textContent = '⏰ Last chance to join!';
-                    });
+                    timer.innerHTML = "Last chance to join!";
                 }
             }
 
             updateTimer();
-            const timerInterval = setInterval(updateTimer, 60000); // Update every minute
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Floating CTA button
+        function initFloatingCTA() {
+            const floatingCta = document.getElementById('floatingCta');
+            const heroSection = document.getElementById('hero');
+            
+            if (!floatingCta || !heroSection) return;
+
+            window.addEventListener('scroll', throttle(() => {
+                const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+                const scrollPosition = window.scrollY + window.innerHeight;
+                
+                if (scrollPosition > heroBottom) {
+                    floatingCta.classList.add('visible');
+                } else {
+                    floatingCta.classList.remove('visible');
+                }
+            }, 100));
+
+            floatingCta.addEventListener('click', () => {
+                document.getElementById('waitlistForm').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            });
+        }
+
+        // Exit intent modal
+        function initExitIntent() {
+            const modal = document.getElementById('exitModal');
+            const overlay = document.getElementById('exitModalOverlay');
+            let hasShown = false;
+
+            function showExitModal() {
+                if (!hasShown) {
+                    modal.classList.add('visible');
+                    overlay.classList.add('visible');
+                    hasShown = true;
+                }
+            }
+
+            function hideExitModal() {
+                modal.classList.remove('visible');
+                overlay.classList.remove('visible');
+            }
+
+            document.addEventListener('mouseleave', (e) => {
+                if (e.clientY <= 0) {
+                    showExitModal();
+                }
+            });
+
+            overlay.addEventListener('click', hideExitModal);
+
+            const exitForm = document.getElementById('exitForm');
+            if (exitForm) {
+                exitForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = exitForm.email.value.trim();
+                    
+                    if (!isValidEmail(email)) {
+                        showToast('Please enter a valid email address', 'error');
+                        return;
+                    }
+
+                    try {
+                        // Simulate API call
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        showToast('🎉 Your free guide is on its way!', 'success');
+                        hideExitModal();
+                        exitForm.reset();
+                    } catch (error) {
+                        showToast('Failed to send guide. Please try again.', 'error');
+                    }
+                });
+            }
         }
 
         // Spots counter animation

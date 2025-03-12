@@ -1086,42 +1086,184 @@
 
         // Improved animations with performance optimization
         function initAnimations() {
-            const animations = [
-                {
-                    elements: '.fade-in',
-                    properties: { opacity: 0 },
-                    animation: { opacity: 1, duration: 1 }
-                },
-                {
-                    elements: '.slide-up',
-                    properties: { opacity: 0, y: 50 },
-                    animation: { opacity: 1, y: 0, duration: 1 }
-                },
-                {
-                    elements: '.slide-left',
-                    properties: { opacity: 0, x: 50 },
-                    animation: { opacity: 1, x: 0, duration: 1 }
-                },
-                {
-                    elements: '.slide-right',
-                    properties: { opacity: 0, x: -50 },
-                    animation: { opacity: 1, x: 0, duration: 1 }
-                }
-            ];
+            if (!window.gsap || !window.ScrollTrigger) {
+                console.warn('GSAP or ScrollTrigger not loaded');
+                return;
+            }
 
-            animations.forEach(({ elements, properties, animation }) => {
-                const targets = gsap.utils.toArray(elements);
-                if (targets.length) {
-                    gsap.set(targets, properties);
-                    ScrollTrigger.batch(targets, {
-                        onEnter: batch => gsap.to(batch, {
-                            ...animation,
-                            stagger: 0.15,
-                            overwrite: true
-                        }),
+            gsap.registerPlugin(ScrollTrigger);
+
+            // Common ScrollTrigger settings for better text visibility
+            const commonScrollTrigger = {
+                start: "top 80%", // Trigger earlier
+                end: "bottom 20%",
+                toggleActions: "play none none reverse",
+                markers: false, // Set to true for debugging
+                once: false // Allow re-triggering
+            };
+
+            // Batch similar animations together for performance
+            const fadeInElements = gsap.utils.toArray('.fade-in');
+            fadeInElements.forEach(element => {
+                gsap.from(element, {
+                    opacity: 0,
+                    y: 20,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        ...commonScrollTrigger
+                    }
+                });
+            });
+
+            const slideUpElements = gsap.utils.toArray('.slide-up');
+            slideUpElements.forEach(element => {
+                gsap.from(element, {
+                    opacity: 0,
+                    y: 30,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        ...commonScrollTrigger
+                    }
+                });
+            });
+
+            const slideLeftElements = gsap.utils.toArray('.slide-left');
+            slideLeftElements.forEach(element => {
+                gsap.from(element, {
+                    opacity: 0,
+                    x: -30,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        ...commonScrollTrigger
+                    }
+                });
+            });
+
+            const slideRightElements = gsap.utils.toArray('.slide-right');
+            slideRightElements.forEach(element => {
+                gsap.from(element, {
+                    opacity: 0,
+                    x: 30,
+                    duration: 0.8,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: element,
+                        ...commonScrollTrigger
+                    }
+                });
+            });
+
+            // Hero section animations - no scroll trigger needed
+            gsap.from('.hero-content', {
+                opacity: 0,
+                y: 30,
+                duration: 1,
+                delay: 0.2,
+                ease: "power2.out"
+            });
+
+            gsap.from('.hero-image', {
+                opacity: 0,
+                x: 30,
+                duration: 1,
+                delay: 0.4,
+                ease: "power2.out"
+            });
+
+            // Floating cards animation
+            gsap.to('.card-1', {
+                y: -10,
+                duration: 1.5,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+
+            gsap.to('.card-2', {
+                y: 10,
+                duration: 1.8,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut',
+                delay: 0.3
+            });
+
+            // Stats counter animation with improved trigger settings
+            const stats = gsap.utils.toArray('.stat-number');
+            stats.forEach(stat => {
+                const target = parseInt(stat.getAttribute('data-target'), 10);
+                gsap.to(stat, {
+                    innerHTML: target,
+                    duration: 2,
+                    snap: { innerHTML: 1 },
+                    scrollTrigger: {
+                        trigger: stat,
+                        start: "top 90%", // Start earlier
+                        end: "bottom 20%",
+                        toggleActions: "play none none none",
+                        once: true // Only play once
+                    }
+                });
+            });
+
+            // Section titles special treatment
+            const sectionTitles = gsap.utils.toArray('.section-title');
+            sectionTitles.forEach(title => {
+                gsap.from(title, {
+                    opacity: 0,
+                    y: 20,
+                    duration: 1,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: title,
                         start: "top 85%",
+                        end: "bottom 20%",
+                        toggleActions: "play none none none",
                         once: true
-                    });
+                    }
+                });
+            });
+
+            // Create a timeline for staggered card animations
+            const featureCards = gsap.utils.toArray('.feature-card');
+            gsap.from(featureCards, {
+                opacity: 0,
+                y: 30,
+                duration: 0.8,
+                stagger: 0.2,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: ".features-grid",
+                    start: "top 75%",
+                    end: "bottom 20%",
+                    toggleActions: "play none none none"
+                }
+            });
+
+            // Ensure proper text rendering with will-change
+            gsap.set(['.fade-in', '.slide-up', '.slide-left', '.slide-right'], {
+                willChange: "transform, opacity"
+            });
+
+            // Cleanup will-change after animation
+            const cleanupWillChange = (elements) => {
+                gsap.set(elements, {
+                    willChange: "auto",
+                    delay: 1
+                });
+            };
+
+            // Apply cleanup to all animated elements
+            ['.fade-in', '.slide-up', '.slide-left', '.slide-right'].forEach(selector => {
+                const elements = document.querySelectorAll(selector);
+                if (elements.length) {
+                    cleanupWillChange(elements);
                 }
             });
         }
@@ -1323,122 +1465,6 @@
                     setTimeout(() => inThrottle = false, limit);
                 }
             };
-        }
-
-        // Animations
-        function initAnimations() {
-            if (!window.gsap || !window.ScrollTrigger) {
-                console.warn('GSAP or ScrollTrigger not loaded');
-                return;
-            }
-
-            gsap.registerPlugin(ScrollTrigger);
-
-            // Batch similar animations together for performance
-            const fadeInElements = gsap.utils.toArray('.fade-in');
-            fadeInElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    y: 30,
-                    duration: 1,
-                    scrollTrigger: {
-                        trigger: element,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none reverse'
-                    }
-                });
-            });
-
-            const slideUpElements = gsap.utils.toArray('.slide-up');
-            slideUpElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    y: 50,
-                    duration: 1,
-                    scrollTrigger: {
-                        trigger: element,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none reverse'
-                    }
-                });
-            });
-
-            const slideLeftElements = gsap.utils.toArray('.slide-left');
-            slideLeftElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    x: -50,
-                    duration: 1,
-                    scrollTrigger: {
-                        trigger: element,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none reverse'
-                    }
-                });
-            });
-
-            const slideRightElements = gsap.utils.toArray('.slide-right');
-            slideRightElements.forEach(element => {
-                gsap.from(element, {
-                    opacity: 0,
-                    x: 50,
-                    duration: 1,
-                    scrollTrigger: {
-                        trigger: element,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none reverse'
-                    }
-                });
-            });
-
-            // Hero section animations
-            gsap.from('.hero-content', {
-                opacity: 0,
-                y: 30,
-                duration: 1,
-                delay: 0.5
-            });
-
-            gsap.from('.hero-image', {
-                opacity: 0,
-                x: 30,
-                duration: 1,
-                delay: 0.8
-            });
-
-            // Floating cards animation
-            gsap.to('.card-1', {
-                y: -10,
-                duration: 1.5,
-                repeat: -1,
-                yoyo: true,
-                ease: 'power1.inOut'
-            });
-
-            gsap.to('.card-2', {
-                y: 10,
-                duration: 1.8,
-                repeat: -1,
-                yoyo: true,
-                ease: 'power1.inOut',
-                delay: 0.3
-            });
-
-            // Stats counter animation
-            const stats = gsap.utils.toArray('.stat-number');
-            stats.forEach(stat => {
-                const target = parseInt(stat.getAttribute('data-target'), 10);
-                gsap.to(stat, {
-                    innerHTML: target,
-                    duration: 2,
-                    snap: { innerHTML: 1 },
-                    scrollTrigger: {
-                        trigger: stat,
-                        start: 'top bottom-=100',
-                        toggleActions: 'play none none reverse'
-                    }
-                });
-            });
         }
 
         // Initialize everything when DOM is loaded

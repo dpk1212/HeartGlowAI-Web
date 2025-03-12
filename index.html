@@ -1647,7 +1647,7 @@
                 const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
                 const seconds = Math.floor((distance % (1000 * 60)) / 1000);
                 
-                // Update timer display with formatted time
+                // Force update the timer display with formatted time
                 timerElement.innerHTML = `
                     <span class="time-unit">${formatNumber(days)}<small>d</small></span>
                     <span class="time-unit">${formatNumber(hours)}<small>h</small></span>
@@ -1655,15 +1655,7 @@
                     <span class="time-unit">${formatNumber(seconds)}<small>s</small></span>
                 `;
                 
-                // Visual pulse effect when seconds change
-                if (seconds % 10 === 0) {
-                    gsap.to(timerElement, {
-                        scale: 1.05,
-                        duration: 0.2,
-                        yoyo: true,
-                        repeat: 1
-                    });
-                }
+                console.log("Timer updated:", days, hours, minutes, seconds);
             }
             
             // Run updateTimer immediately on page load (before the interval starts)
@@ -1716,38 +1708,22 @@
                     // Check if we have a stored value in localStorage
                     let spotsRemaining = localStorage.getItem('spotsRemaining');
                     
+                    // Force reset localStorage for testing
+                    // localStorage.removeItem('spotsRemaining');
+                    
+                    console.log("Initial spots from localStorage:", spotsRemaining);
+                    
                     // If no stored value or invalid, start with 200
                     if (!spotsRemaining || isNaN(parseInt(spotsRemaining)) || parseInt(spotsRemaining) <= 0) {
                         spotsRemaining = '200';
                         localStorage.setItem('spotsRemaining', spotsRemaining);
+                        console.log("Reset spots to 200");
                     }
                     
                     // Set the counter to the stored value immediately
                     counter.textContent = spotsRemaining;
+                    console.log("Set spots counter to:", spotsRemaining);
                     counter.classList.add('animate');
-                    
-                    // Add a reset button for testing (hidden in production)
-                    const resetButton = document.createElement('button');
-                    resetButton.textContent = 'Reset Counter';
-                    resetButton.style.fontSize = '10px';
-                    resetButton.style.padding = '2px 5px';
-                    resetButton.style.marginTop = '5px';
-                    resetButton.style.display = 'none'; // Hidden by default
-                    resetButton.addEventListener('click', () => {
-                        localStorage.setItem('spotsRemaining', '200');
-                        counter.textContent = '200';
-                    });
-                    counter.parentNode.appendChild(resetButton);
-                    
-                    // For debugging - show reset button with Ctrl+Shift+R
-                    document.addEventListener('keydown', (e) => {
-                        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
-                            resetButton.style.display = resetButton.style.display === 'none' ? 'block' : 'none';
-                            e.preventDefault();
-                        }
-                    });
-                    
-                    return;
                 }
                 
                 // For other counters, animate from 0 to target

@@ -1358,7 +1358,7 @@
         /* Add smooth scroll behavior to html */
         html {
             scroll-behavior: smooth;
-            scroll-padding-top: 80px; /* Adjust based on your header height */
+            scroll-padding-top: 100px; /* Increased to ensure comfortable spacing */
         }
 
         /* Update navigation styles */
@@ -1401,6 +1401,18 @@
         .nav-links .cta-button::after {
             display: none;
         }
+
+        /* Ensure the email input field is visible */
+        #waitlistForm {
+            scroll-margin-top: 100px; /* Matches scroll-padding-top */
+        }
+
+        /* Update focus styles for email input */
+        #waitlistForm input[type="email"]:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(106, 159, 181, 0.2);
+        }
     </style>
 </head>
 <body>
@@ -1415,7 +1427,7 @@
                 <a href="#features">Benefits</a>
                 <a href="#how-it-works">Your Journey</a>
                 <a href="#features">Why Join</a>
-                <a href="#signup" class="cta-button" id="navCta">Get Early Access</a>
+                <a href="#waitlistForm" class="cta-button" id="navCta">Get Early Access</a>
             </div>
         </div>
     </nav>
@@ -1691,12 +1703,22 @@
                         
                         // Calculate position with offset
                         const elementPosition = target.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20; // Added extra padding
 
                         window.scrollTo({
                             top: offsetPosition,
                             behavior: 'smooth'
                         });
+
+                        // If clicking on CTA button, focus the email input
+                        if (this.classList.contains('cta-button')) {
+                            setTimeout(() => {
+                                const emailInput = target.querySelector('input[type="email"]');
+                                if (emailInput) {
+                                    emailInput.focus();
+                                }
+                            }, 800); // Wait for scroll to complete
+                        }
                     }
                 });
             });
@@ -1944,35 +1966,31 @@
 
         // Update CTA button handling
         function initCTAButtons() {
-            const ctaButtons = document.querySelectorAll('.cta-button, .floating-cta, .primary-button');
-            const signupSection = document.querySelector('#signup');
+            const floatingCta = document.querySelector('.floating-cta');
+            const waitlistForm = document.getElementById('waitlistForm');
             
-            ctaButtons.forEach(button => {
-                button.addEventListener('click', (e) => {
+            if (floatingCta && waitlistForm) {
+                floatingCta.addEventListener('click', (e) => {
                     e.preventDefault();
-                    e.stopPropagation();
+                    
+                    const header = document.querySelector('nav');
+                    const headerHeight = header ? header.offsetHeight : 0;
+                    const elementPosition = waitlistForm.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerHeight - 20;
 
-                    if (signupSection) {
-                        const header = document.querySelector('nav');
-                        const headerHeight = header ? header.offsetHeight : 0;
-                        const elementPosition = signupSection.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerHeight;
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
+                    });
 
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: 'smooth'
-                        });
-
-                        // Focus email input after scroll completes
-                        setTimeout(() => {
-                            const emailInput = signupSection.querySelector('input[type="email"]');
-                            if (emailInput) {
-                                emailInput.focus();
-                            }
-                        }, 800);
-                    }
+                    setTimeout(() => {
+                        const emailInput = waitlistForm.querySelector('input[type="email"]');
+                        if (emailInput) {
+                            emailInput.focus();
+                        }
+                    }, 800);
                 });
-            });
+            }
         }
     </script>
 </body>

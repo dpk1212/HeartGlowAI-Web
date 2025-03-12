@@ -1622,13 +1622,10 @@
             if (!timerElement) return;
 
             // Set a fixed date exactly 10 days from right now
-            // Calculate it once and hard-code it (this timestamp won't change with page loads)
+            // Using a specific timestamp that's 10 days from now (86400000 ms = 10 days)
             const now = new Date();
-            const tenDaysFromNow = new Date(now);
-            tenDaysFromNow.setDate(now.getDate() + 10);
+            const fixedEndTimestamp = now.getTime() + (10 * 24 * 60 * 60 * 1000);
             
-            // Convert to timestamp and hardcode it (this is the key change)
-            const fixedEndTimestamp = tenDaysFromNow.getTime();
             console.log('Fixed countdown target:', new Date(fixedEndTimestamp).toString());
             
             // Format function for adding leading zeros
@@ -1720,29 +1717,35 @@
                     let spotsRemaining = localStorage.getItem('spotsRemaining');
                     
                     // If no stored value or invalid, start with 200
-                    if (!spotsRemaining || isNaN(parseInt(spotsRemaining))) {
+                    if (!spotsRemaining || isNaN(parseInt(spotsRemaining)) || parseInt(spotsRemaining) <= 0) {
                         spotsRemaining = '200';
                         localStorage.setItem('spotsRemaining', spotsRemaining);
                     }
                     
-                    // Set the counter to the stored value
+                    // Set the counter to the stored value immediately
                     counter.textContent = spotsRemaining;
                     counter.classList.add('animate');
                     
-                    // For demonstration purposes, add a reset button to test
-                    // Uncomment this for testing, remove in production
-                    /*
+                    // Add a reset button for testing (hidden in production)
                     const resetButton = document.createElement('button');
                     resetButton.textContent = 'Reset Counter';
                     resetButton.style.fontSize = '10px';
                     resetButton.style.padding = '2px 5px';
                     resetButton.style.marginTop = '5px';
+                    resetButton.style.display = 'none'; // Hidden by default
                     resetButton.addEventListener('click', () => {
                         localStorage.setItem('spotsRemaining', '200');
                         counter.textContent = '200';
                     });
                     counter.parentNode.appendChild(resetButton);
-                    */
+                    
+                    // For debugging - show reset button with Ctrl+Shift+R
+                    document.addEventListener('keydown', (e) => {
+                        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                            resetButton.style.display = resetButton.style.display === 'none' ? 'block' : 'none';
+                            e.preventDefault();
+                        }
+                    });
                     
                     return;
                 }

@@ -1108,6 +1108,19 @@
         .close-modal:hover {
             color: var(--text-dark);
         }
+
+        /* Add CSS for improved card animations */
+        .feature-card, .step {
+            transform-origin: center;
+            will-change: transform, opacity;
+            backface-visibility: hidden;
+        }
+
+        .feature-card .custom-icon, .step .step-number {
+            transform-origin: center;
+            will-change: transform;
+            backface-visibility: hidden;
+        }
     </style>
 </head>
 <body>
@@ -1715,22 +1728,47 @@
             });
         }
 
-        // Update feature cards animation
+        // Update feature cards animation with improved loading
         function initFeatureCards() {
             const cards = document.querySelectorAll('.feature-card');
             
+            // Initial state for cards
+            gsap.set(cards, {
+                opacity: 0,
+                y: 30,
+                scale: 0.95
+            });
+            
+            // Create ScrollTrigger for feature cards
+            ScrollTrigger.create({
+                trigger: '.features-grid',
+                start: 'top 80%',
+                onEnter: () => {
+                    gsap.to(cards, {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.8,
+                        stagger: 0.2,
+                        ease: 'power3.out',
+                        clearProps: 'all' // Clear properties after animation
+                    });
+                }
+            });
+            
+            // Hover animations
             cards.forEach(card => {
-                // Hover animation
                 card.addEventListener('mouseenter', () => {
                     gsap.to(card, {
-                        scale: 1.02,
+                        scale: 1.03,
                         y: -10,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)'
                     });
                     gsap.to(card.querySelector('.custom-icon'), {
-                        scale: 1.1,
-                        rotate: 5,
+                        scale: 1.2,
+                        rotate: 10,
                         duration: 0.3,
                         ease: 'power2.out'
                     });
@@ -1741,7 +1779,8 @@
                         scale: 1,
                         y: 0,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                     });
                     gsap.to(card.querySelector('.custom-icon'), {
                         scale: 1,
@@ -1751,41 +1790,54 @@
                     });
                 });
             });
-
-            // Scroll animation
-            ScrollTrigger.batch('.feature-card', {
-                start: 'top 80%',
-                onEnter: batch => {
-                    gsap.from(batch, {
-                        opacity: 0,
-                        y: 30,
-                        scale: 0.9,
-                        stagger: 0.15,
-                        duration: 0.8,
-                        ease: 'power2.out'
-                    });
-                }
-            });
         }
 
-        // Update step cards animation
+        // Update step cards animation with improved loading
         function initStepCards() {
             const steps = document.querySelectorAll('.step');
             
+            // Initial state for steps
+            gsap.set(steps, {
+                opacity: 0,
+                y: 30,
+                scale: 0.95
+            });
+            
+            // Create ScrollTrigger for step cards
+            ScrollTrigger.create({
+                trigger: '.steps',
+                start: 'top 80%',
+                onEnter: () => {
+                    gsap.to(steps, {
+                        opacity: 1,
+                        y: 0,
+                        scale: 1,
+                        duration: 0.8,
+                        stagger: 0.2,
+                        ease: 'power3.out',
+                        clearProps: 'all' // Clear properties after animation
+                    });
+                }
+            });
+            
+            // Hover animations
             steps.forEach(step => {
-                // Hover animation
+                const stepNumber = step.querySelector('.step-number');
+                
                 step.addEventListener('mouseenter', () => {
                     gsap.to(step, {
-                        scale: 1.02,
+                        scale: 1.03,
                         y: -10,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        boxShadow: '0 10px 30px rgba(0,0,0,0.15)'
                     });
-                    gsap.to(step.querySelector('.step-number'), {
-                        scale: 1.1,
-                        rotate: 5,
+                    gsap.to(stepNumber, {
+                        scale: 1.2,
+                        rotate: 10,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        backgroundColor: 'var(--accent-coral)'
                     });
                 });
 
@@ -1794,30 +1846,17 @@
                         scale: 1,
                         y: 0,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
                     });
-                    gsap.to(step.querySelector('.step-number'), {
+                    gsap.to(stepNumber, {
                         scale: 1,
                         rotate: 0,
                         duration: 0.3,
-                        ease: 'power2.out'
+                        ease: 'power2.out',
+                        backgroundColor: 'var(--accent-gold)'
                     });
                 });
-            });
-
-            // Scroll animation
-            ScrollTrigger.batch('.step', {
-                start: 'top 80%',
-                onEnter: batch => {
-                    gsap.from(batch, {
-                        opacity: 0,
-                        y: 30,
-                        scale: 0.9,
-                        stagger: 0.15,
-                        duration: 0.8,
-                        ease: 'power2.out'
-                    });
-                }
             });
         }
 
@@ -1839,4 +1878,5 @@
         }
     </script>
 </body>
+</html>
 </html>

@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { 
-  CreditCardIcon, 
-  BanknotesIcon, 
-  ArrowTrendingUpIcon, 
-  HeartIcon 
+  HeartIcon,
+  ChatBubbleLeftRightIcon,
+  SparklesIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 
 export const Dashboard = () => {
@@ -15,9 +15,9 @@ export const Dashboard = () => {
   const renderTabs = () => {
     const tabs = [
       { id: 'today', label: 'Today' },
+      { id: 'weekly', label: 'Weekly' },
       { id: 'monthly', label: 'Monthly' },
       { id: 'yearly', label: 'Yearly' },
-      { id: 'future', label: 'Future' },
     ];
 
     return (
@@ -54,14 +54,14 @@ export const Dashboard = () => {
               ) : (
                 <div className="h-10 w-10 rounded-full bg-white/20 flex items-center justify-center">
                   <span className="text-lg font-bold text-white">
-                    {user?.displayName ? user.displayName[0].toUpperCase() : 'M'}
+                    {user?.displayName ? user.displayName[0].toUpperCase() : 'U'}
                   </span>
                 </div>
               )}
               
               <div>
-                <p className="text-white font-medium">Welcome back, Marvin</p>
-                <p className="text-xs text-white/70">Your financial situation is looking good!</p>
+                <p className="text-white font-medium">Welcome back, {user?.displayName || 'Friend'}</p>
+                <p className="text-xs text-white/70">Your relationship insights are looking good!</p>
               </div>
             </div>
             <button className="text-white">
@@ -91,15 +91,14 @@ export const Dashboard = () => {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center">
-                  <CreditCardIcon className="h-5 w-5 text-white mr-2" />
-                  <h3 className="text-lg font-semibold text-white">Small stuff adds up!</h3>
+                  <ChatBubbleLeftRightIcon className="h-5 w-5 text-white mr-2" />
+                  <h3 className="text-lg font-semibold text-white">Communication Insight</h3>
                 </div>
                 <div className="mt-2 text-sm text-white/90">
-                  <p>Last month, you made 42 transactions less than $5, spending a total of $147.</p>
-                  <p className="mt-1">Want to cut down on frivolous spending?</p>
+                  <p>Active listening improves relationships by 73%. Try repeating back what you hear to show understanding.</p>
                   
                   <button className="mt-4 bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-semibold">
-                    SETUP A GOAL
+                    LEARN MORE
                   </button>
                 </div>
               </div>
@@ -108,7 +107,7 @@ export const Dashboard = () => {
               </button>
             </div>
             <div className="text-right text-xs text-white/60 mt-2">
-              09-06-2018
+              Today
             </div>
           </div>
 
@@ -117,14 +116,14 @@ export const Dashboard = () => {
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center">
-                  <BanknotesIcon className="h-5 w-5 text-white mr-2" />
-                  <h3 className="text-lg font-semibold text-white">You're doing well paying off your loans</h3>
+                  <CalendarIcon className="h-5 w-5 text-white mr-2" />
+                  <h3 className="text-lg font-semibold text-white">Anniversary Reminder</h3>
                 </div>
                 <div className="mt-2 text-sm text-white/90">
-                  <p>Since this time last year, you've contributed $5,678 toward your Sallie Mae Student Loan. Great work!</p>
+                  <p>Your friend Sarah's birthday is coming up next week. Want to craft a special message for her?</p>
                   
                   <button className="mt-4 bg-white text-blue-600 px-4 py-2 rounded-lg text-xs font-semibold">
-                    VIEW DETAILS
+                    CREATE MESSAGE
                   </button>
                 </div>
               </div>
@@ -133,7 +132,7 @@ export const Dashboard = () => {
               </button>
             </div>
             <div className="text-right text-xs text-white/60 mt-2">
-              09-05-2018
+              3 days
             </div>
           </div>
 
@@ -143,7 +142,7 @@ export const Dashboard = () => {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center">
-                    <ArrowTrendingUpIcon className="h-5 w-5 text-white mr-2" />
+                    <SparklesIcon className="h-5 w-5 text-white mr-2" />
                     <h3 className="text-lg font-semibold text-white">Create New Message</h3>
                   </div>
                   <div className="mt-2 text-sm text-white/90">

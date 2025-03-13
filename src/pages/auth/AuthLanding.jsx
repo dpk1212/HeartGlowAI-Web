@@ -2,121 +2,134 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export default function AuthLanding() {
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { 
-      opacity: 1,
-      transition: { 
-        when: "beforeChildren",
-        staggerChildren: 0.1,
-        duration: 0.3
-      } 
-    }
-  };
-  
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
-  };
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-300 via-blue-400 to-blue-600 flex flex-col items-center justify-center p-5 overflow-hidden">
-      <motion.div
-        className="w-full max-w-md z-10"
-        initial="hidden"
-        animate="visible"
-        variants={containerVariants}
-      >
-        {/* App Logo and Name */}
-        <motion.div 
-          className="mb-12 flex flex-col items-center"
-          variants={itemVariants}
-        >
-          <motion.div
-            className="w-32 h-32 mb-6 relative"
-            initial={{ scale: 0.8 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            {/* Heart outline logo */}
-            <motion.div className="w-full h-full flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" className="w-full h-full">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-              </svg>
-            </motion.div>
-            
-            {/* Animated coins */}
-            <motion.div 
-              className="absolute w-6 h-6 bg-yellow-300 rounded-full"
-              style={{ top: '15%', right: '15%' }}
-              animate={{ 
-                y: [0, -10, 0],
-              }}
-              transition={{ 
-                duration: 2, 
-                repeat: Infinity,
-                ease: "easeInOut" 
-              }}
-            />
-            
-            <motion.div 
-              className="absolute w-4 h-4 bg-yellow-400 rounded-full"
-              style={{ top: '35%', right: '10%' }}
-              animate={{ 
-                y: [0, -8, 0],
-              }}
-              transition={{ 
-                duration: 1.5, 
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5
-              }}
-            />
-          </motion.div>
-          
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 tracking-wider text-center">HEARTGLOW</h1>
-        </motion.div>
-        
-        {/* Action Buttons */}
-        <div className="space-y-3">
-          <motion.div 
-            variants={itemVariants}
-          >
-            <Link to="/login">
-              <motion.button 
-                className="w-full py-4 px-4 bg-white text-blue-600 font-bold rounded-lg shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all duration-200 flex items-center justify-center text-lg"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                LOG IN
-              </motion.button>
-            </Link>
-          </motion.div>
-          
-          <motion.div 
-            variants={itemVariants}
-            className="text-center mt-6"
-          >
-            <p className="text-white/90">
-              Don't have an account?{' '}
-              <Link to="/signup" className="font-medium text-white hover:underline">
-                Sign up
-              </Link>
-            </p>
-          </motion.div>
-        </div>
-      </motion.div>
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-6" 
+         style={{ 
+           background: 'linear-gradient(to bottom, #FFC1CC, #B19CD9)',
+           fontFamily: "'Poppins', sans-serif"
+         }}>
       
-      {/* Version tag */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 0.7 }}
-        transition={{ delay: 1, duration: 1 }}
-        className="absolute bottom-4 text-white/70 text-xs"
+      {/* Main content container */}
+      <motion.div 
+        className="w-full max-w-[350px] flex flex-col items-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
-        v1.0.0
+        {/* Heart Icon with glow */}
+        <motion.div 
+          className="relative w-32 h-32 mb-6"
+          animate={{ 
+            boxShadow: ['0px 0px 15px 5px rgba(255,193,204,0.5)', '0px 0px 25px 10px rgba(255,193,204,0.7)', '0px 0px 15px 5px rgba(255,193,204,0.5)']
+          }}
+          transition={{ 
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        >
+          <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-lg">
+            <defs>
+              <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#ff6bcb" />
+                <stop offset="100%" stopColor="#B19CD9" />
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+            <path 
+              d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+              fill="url(#heartGradient)"
+              filter="url(#glow)"
+            />
+          </svg>
+        </motion.div>
+
+        {/* Brand name */}
+        <h1 className="text-2xl font-bold tracking-widest text-white mb-3 uppercase">
+          Heart Glow AI
+        </h1>
+        
+        {/* Tagline */}
+        <p className="text-white/80 text-center mb-10 max-w-xs">
+          Express your feelings with beautifully crafted messages
+        </p>
+
+        {/* Login Button */}
+        <motion.div
+          className="w-full mb-4"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Link 
+            to="/login" 
+            className="w-full bg-white text-[#B19CD9] font-bold py-3.5 px-4 rounded-lg shadow flex items-center justify-center transition-all duration-200 uppercase tracking-wide"
+          >
+            Sign In
+          </Link>
+        </motion.div>
+
+        {/* Sign Up Button */}
+        <motion.div
+          className="w-full mb-8"
+          whileHover={{ scale: 1.01 }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Link 
+            to="/signup" 
+            className="w-full bg-white/10 backdrop-blur-sm border border-white/30 text-white font-bold py-3.5 px-4 rounded-lg shadow-lg flex items-center justify-center transition-all duration-200 uppercase tracking-wide"
+          >
+            Sign Up
+          </Link>
+        </motion.div>
+
+        {/* Continue as Guest */}
+        <Link to="/dashboard" className="text-white/90 hover:text-white underline-offset-2 hover:underline transition-all duration-200">
+          Continue as Guest
+        </Link>
       </motion.div>
+
+      {/* Animated background hearts */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute opacity-20"
+            style={{
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+            }}
+            animate={{
+              y: [0, -30, 0],
+              x: [0, Math.random() * 15 - 7.5, 0],
+              scale: [1, 1.1, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{
+              duration: 5 + Math.random() * 5,
+              repeat: Infinity,
+              ease: "easeInOut",
+              delay: Math.random() * 5,
+            }}
+          >
+            <svg 
+              width={30 + Math.random() * 40} 
+              height={30 + Math.random() * 40} 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" 
+                fill="white"
+              />
+            </svg>
+          </motion.div>
+        ))}
+      </div>
     </div>
   );
 } 

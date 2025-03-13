@@ -27,7 +27,7 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     user: null,
     loading: true,
     error: null,
-    isDemo: import.meta.env.VITE_FIREBASE_API_KEY ? false : true
+    isDemo: false
   });
 
   // Listen for authentication state changes

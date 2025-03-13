@@ -19,6 +19,179 @@ html, body, #root {
   overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
+/* HeartGlowAI Gradient Backgrounds */
+.bg-heartglow-gradient {
+  background: linear-gradient(135deg, #7EB6FF 0%, #5EEAD4 100%);
+}
+
+.bg-heartglow-gradient-alt {
+  background: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
+}
+
+.bg-heartglow-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* Button styles */
+.app-btn-primary {
+  @apply relative overflow-hidden font-bold py-3 px-6 rounded-lg shadow-lg 
+  text-white bg-gradient-to-br from-blue-500 to-teal-400 hover:from-blue-600 
+  hover:to-teal-500 transition-all duration-300 ease-out transform hover:scale-[1.02] 
+  active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500
+  disabled:opacity-60 disabled:cursor-not-allowed w-full text-center;
+}
+
+.app-btn-primary:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s;
+}
+
+.app-btn-primary:hover:before {
+  left: 100%;
+}
+
+.app-btn-secondary {
+  @apply font-medium py-2.5 px-5 rounded-lg border border-gray-300 text-gray-700
+  hover:bg-gray-50 transition-all duration-200 ease-out transform hover:scale-[1.02] 
+  active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400
+  w-full text-center;
+}
+
+/* Input styles */
+.app-input {
+  @apply w-full px-4 py-3 rounded-lg bg-white/90 backdrop-blur-sm border border-gray-200
+  focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+  placeholder:text-gray-400 text-gray-800 transition-all duration-200;
+}
+
+.app-input.error {
+  @apply border-red-400 focus:ring-red-500;
+}
+
+.app-input-label {
+  @apply block text-sm font-medium text-gray-700 mb-1;
+}
+
+.app-error-message {
+  @apply text-sm text-red-500 mt-1;
+}
+
+/* Card and container styles */
+.app-card {
+  @apply bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-6 
+  border border-gray-100 transition-all duration-300 hover:shadow-xl;
+}
+
+.app-gradient-card {
+  @apply rounded-xl p-6 shadow-lg relative overflow-hidden
+  border border-white/20 transition-all duration-300 hover:shadow-xl;
+  background: linear-gradient(135deg, rgba(126, 182, 255, 0.9) 0%, rgba(94, 234, 212, 0.9) 100%);
+}
+
+.page-container {
+  @apply min-h-[100vh] w-full px-4 py-6 md:px-6 md:py-8 max-w-md mx-auto;
+}
+
+/* Animation classes */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, #f6f7f8 0%, #edeef1 50%, #f6f7f8 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Loading animation */
+.app-loading-dots {
+  @apply flex items-center justify-center space-x-1;
+}
+
+.app-loading-dots div {
+  @apply w-2 h-2 bg-blue-500 rounded-full;
+  animation: app-loading-dots 1.4s infinite ease-in-out;
+}
+
+.app-loading-dots div:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.app-loading-dots div:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes app-loading-dots {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1); }
+}
+
+/* Ghost heartbeat animation for HeartGlowAI */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  14% { transform: scale(1.2); }
+  28% { transform: scale(1); }
+  42% { transform: scale(1.2); }
+  70% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s infinite;
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply h-1.5 bg-blue-100 rounded-full overflow-hidden;
+}
+
+.progress-bar-fill {
+  @apply h-full bg-gradient-to-r from-blue-500 to-teal-400 transition-all duration-500 ease-in-out;
+}
+
+/* Mobile-specific adjustments */
+@media (max-width: 640px) {
+  .app-btn-primary, .app-btn-secondary {
+    @apply py-3.5 text-base;
+  }
+  
+  .app-input {
+    @apply py-3.5 text-base;
+  }
+}
+
+/* Focus visible utility for accessibility */
+.focus-visible:focus {
+  @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+}
+
 /* Mobile-first utility classes */
 @layer components {
   /* Backgrounds */
@@ -84,30 +257,6 @@ html, body, #root {
   }
 }
 
-/* Heart animation */
-@keyframes heartbeat {
-  0% { transform: scale(1); opacity: 0.8; }
-  15% { transform: scale(1.12); opacity: 1; }
-  30% { transform: scale(1); opacity: 0.8; }
-  45% { transform: scale(1.12); opacity: 1; }
-  60% { transform: scale(1); opacity: 0.8; }
-}
-
-.animate-heartbeat {
-  animation: heartbeat 2s ease-in-out infinite;
-}
-
-/* Floating Animation */
-@keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
-  100% { transform: translateY(0px); }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
 /* Soft Pulse Animation */
 @keyframes softPulse {
   0% { opacity: 0.6; }
@@ -117,30 +266,6 @@ html, body, #root {
 
 .animate-soft-pulse {
   animation: softPulse 2s ease-in-out infinite;
-}
-
-/* Shimmer Animation */
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
-}
-
-.animate-shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Type Animation */
-@keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
-}
-
-.animate-typing {
-  overflow: hidden;
-  white-space: nowrap;
-  animation: typing 1.5s steps(40, end);
 }
 
 /* Floating Elements */

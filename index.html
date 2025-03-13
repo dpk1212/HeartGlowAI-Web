@@ -304,28 +304,68 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .relationship-type {
-            font-size: 1.2rem;
-            font-weight: 600;
-            color: var(--primary-color);
+        .slide-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
             margin-bottom: 0.5rem;
         }
 
-        .scenario {
-            font-size: 1.4rem;
-            font-weight: 500;
+        .slide-header h3 {
+            font-size: 1.8rem;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: #666;
             margin-bottom: 2rem;
+            font-style: italic;
         }
 
-        .message-box {
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 1.5rem;
-            transition: transform 0.3s ease;
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
         }
 
-        .message-box:hover {
-            transform: translateY(-5px);
+        .message-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .message-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .emotional-impact {
+            background: rgba(255, 0, 0, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        .emotional-impact h4 {
+            margin: 0.5rem 0;
+            color: #d32f2f;
+        }
+
+        .emotional-impact ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            color: #666;
+        }
+
+        .emotional-impact li {
+            margin-bottom: 0.5rem;
+        }
+
+        .emoji {
+            font-size: 1.5rem;
         }
 
         .message-box.poor {
@@ -338,28 +378,25 @@
             border: 1px solid #b3e5fc;
         }
 
-        .message-box h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-
-        .message-box p {
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-
         .outcome {
             background: #f3f4f6;
             padding: 1.5rem;
             border-radius: 12px;
             margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
 
         .outcome h3 {
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
+            margin: 0.5rem 0;
             color: #333;
+        }
+
+        .outcome p {
+            margin: 0;
+            color: #666;
         }
 
         .carousel-nav {
@@ -420,11 +457,15 @@
                 padding: 1.5rem;
             }
 
-            .scenario {
-                font-size: 1.2rem;
+            .slide-header h3 {
+                font-size: 1.5rem;
             }
 
-            .message-box p {
+            .slide-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .message-text {
                 font-size: 1rem;
             }
         }
@@ -455,55 +496,200 @@
             <div class="carousel">
                 <div class="carousel-slide active">
                     <div class="slide-content">
-                        <div class="relationship-type">Romantic</div>
-                        <div class="scenario">Jealousy over social media</div>
+                        <div class="slide-header">
+                            <span class="emoji">🎠</span>
+                            <h3>Feeling Unheard in a Relationship</h3>
+                        </div>
+                        <div class="slide-subtitle">"Struggling to Be Heard? Try This Instead."</div>
+                        
                         <div class="message-box poor">
-                            <h3>Poorly Written Message</h3>
-                            <p>"Who was that girl in your photo last night?"</p>
+                            <div class="message-header">
+                                <span class="emoji">💬</span>
+                                <h3>Frustrated Message</h3>
+                            </div>
+                            <p class="message-text">"You never listen to me! It's like I'm talking to a wall!"</p>
+                            <div class="emotional-impact">
+                                <span class="emoji">🔴</span>
+                                <h4>Emotional Impact:</h4>
+                                <ul>
+                                    <li>Makes your partner defensive instead of receptive</li>
+                                    <li>Shuts down communication instead of opening it up</li>
+                                </ul>
+                            </div>
                         </div>
+
                         <div class="message-box improved">
-                            <h3>Connectly's Suggested Message</h3>
-                            <p>"Hey, I saw your photo from last night. Who were you with? Just curious."</p>
+                            <div class="message-header">
+                                <span class="emoji">💡</span>
+                                <h3>AI-Guided Solution</h3>
+                            </div>
+                            <p class="message-text">"I feel unheard, and that's frustrating for me. I'd love for us to really listen to each other—can we take a moment to connect?"</p>
                         </div>
+
                         <div class="outcome">
+                            <span class="emoji">❤️</span>
                             <h3>Outcome</h3>
-                            <p>Partner feels less accused, more likely to share.</p>
+                            <p>Your partner feels respected and is more likely to listen calmly.</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="carousel-slide">
                     <div class="slide-content">
-                        <div class="relationship-type">Friendship</div>
-                        <div class="scenario">Feeling left out of group activities</div>
+                        <div class="slide-header">
+                            <span class="emoji">🎠</span>
+                            <h3>Reconnecting with a Distant Friend</h3>
+                        </div>
+                        <div class="slide-subtitle">"Miss Your Friend? Here's a Better Way to Reach Out."</div>
+                        
                         <div class="message-box poor">
-                            <h3>Poorly Written Message</h3>
-                            <p>"Why didn't you invite me to the party?"</p>
+                            <div class="message-header">
+                                <span class="emoji">💬</span>
+                                <h3>Frustrated Message</h3>
+                            </div>
+                            <p class="message-text">"Wow, I guess I don't matter to you anymore since you never text me back."</p>
+                            <div class="emotional-impact">
+                                <span class="emoji">🔴</span>
+                                <h4>Emotional Impact:</h4>
+                                <ul>
+                                    <li>Makes your friend feel guilty or pressured instead of valued</li>
+                                    <li>May cause more avoidance rather than bringing them closer</li>
+                                </ul>
+                            </div>
                         </div>
+
                         <div class="message-box improved">
-                            <h3>Connectly's Suggested Message</h3>
-                            <p>"Hey, I heard there was a party last night. I wish I knew about it! Maybe next time we can plan something together."</p>
+                            <div class="message-header">
+                                <span class="emoji">💡</span>
+                                <h3>AI-Guided Solution</h3>
+                            </div>
+                            <p class="message-text">"Hey, I know life gets busy, but I really miss catching up. Hope you're doing okay—let's chat soon!"</p>
                         </div>
+
                         <div class="outcome">
+                            <span class="emoji">❤️</span>
                             <h3>Outcome</h3>
-                            <p>Friend appreciates concern, plans future hangout.</p>
+                            <p>Your friend feels valued and is more likely to reconnect.</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="carousel-slide">
                     <div class="slide-content">
-                        <div class="relationship-type">Family</div>
-                        <div class="scenario">Disagreement over holiday plans</div>
+                        <div class="slide-header">
+                            <span class="emoji">🎠</span>
+                            <h3>Parenting Conflict Over Responsibilities</h3>
+                        </div>
+                        <div class="slide-subtitle">"Tired of Reminding Your Child? Try This Approach."</div>
+                        
                         <div class="message-box poor">
-                            <h3>Poorly Written Message</h3>
-                            <p>"You always have to have your way!"</p>
+                            <div class="message-header">
+                                <span class="emoji">💬</span>
+                                <h3>Frustrated Message</h3>
+                            </div>
+                            <p class="message-text">"I'm so tired of reminding you—why can't you just do what I ask?!"</p>
+                            <div class="emotional-impact">
+                                <span class="emoji">🔴</span>
+                                <h4>Emotional Impact:</h4>
+                                <ul>
+                                    <li>Feels like nagging, leading to resistance</li>
+                                    <li>Creates resentment instead of responsibility</li>
+                                </ul>
+                            </div>
                         </div>
+
                         <div class="message-box improved">
-                            <h3>Connectly's Suggested Message</h3>
-                            <p>"I understand we have different ideas about the holidays. Maybe we can find a compromise that works for everyone."</p>
+                            <div class="message-header">
+                                <span class="emoji">💡</span>
+                                <h3>AI-Guided Solution</h3>
+                            </div>
+                            <p class="message-text">"I know we both have a lot going on, but it would mean a lot if we could work together on this. What's a way we can make this easier for both of us?"</p>
                         </div>
+
                         <div class="outcome">
+                            <span class="emoji">❤️</span>
                             <h3>Outcome</h3>
-                            <p>Family member is open to finding middle ground.</p>
+                            <p>Your child feels respected and more willing to cooperate.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="slide-header">
+                            <span class="emoji">🎠</span>
+                            <h3>Feeling Unappreciated in a Relationship</h3>
+                        </div>
+                        <div class="slide-subtitle">"Feeling Unappreciated? Here's How to Express It."</div>
+                        
+                        <div class="message-box poor">
+                            <div class="message-header">
+                                <span class="emoji">💬</span>
+                                <h3>Frustrated Message</h3>
+                            </div>
+                            <p class="message-text">"I do everything for you, and you don't even notice!"</p>
+                            <div class="emotional-impact">
+                                <span class="emoji">🔴</span>
+                                <h4>Emotional Impact:</h4>
+                                <ul>
+                                    <li>Sounds accusatory, making your partner defensive</li>
+                                    <li>Creates tension instead of appreciation</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="message-box improved">
+                            <div class="message-header">
+                                <span class="emoji">💡</span>
+                                <h3>AI-Guided Solution</h3>
+                            </div>
+                            <p class="message-text">"I love doing things for us, but I sometimes feel unnoticed. It would mean a lot if we took a moment to appreciate each other more."</p>
+                        </div>
+
+                        <div class="outcome">
+                            <span class="emoji">❤️</span>
+                            <h3>Outcome</h3>
+                            <p>Your partner feels encouraged to show appreciation more often.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="slide-header">
+                            <span class="emoji">🎠</span>
+                            <h3>Dealing with Conflict Without Making It Worse</h3>
+                        </div>
+                        <div class="slide-subtitle">"Want to Resolve Conflict Instead of Escalate It?"</div>
+                        
+                        <div class="message-box poor">
+                            <div class="message-header">
+                                <span class="emoji">💬</span>
+                                <h3>Frustrated Message</h3>
+                            </div>
+                            <p class="message-text">"You always overreact! Why do you make everything such a big deal?"</p>
+                            <div class="emotional-impact">
+                                <span class="emoji">🔴</span>
+                                <h4>Emotional Impact:</h4>
+                                <ul>
+                                    <li>Invalidates the other person's feelings, making them shut down</li>
+                                    <li>Creates a bigger argument instead of a solution</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="message-box improved">
+                            <div class="message-header">
+                                <span class="emoji">💡</span>
+                                <h3>AI-Guided Solution</h3>
+                            </div>
+                            <p class="message-text">"I can tell this is really important to you. Can we talk about it so I can understand better?"</p>
+                        </div>
+
+                        <div class="outcome">
+                            <span class="emoji">❤️</span>
+                            <h3>Outcome</h3>
+                            <p>The conversation shifts toward problem-solving instead of conflict.</p>
                         </div>
                     </div>
                 </div>

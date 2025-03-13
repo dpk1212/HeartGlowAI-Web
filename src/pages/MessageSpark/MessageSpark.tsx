@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { ClipboardDocumentIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
-import { createMessage } from '../../services/messages';
+import { createMessage, generateMessage } from '../../services/messages';
+import { LoadingOverlay } from '../../components/TypingIndicator';
 
 type Step = 'type' | 'status' | 'challenges' | 'message' | 'result';
 
@@ -76,18 +77,21 @@ export const MessageSpark = () => {
     setLoading(true);
     
     try {
-      // TODO: Replace with real AI message generation
-      // This is just a placeholder for now
-      setTimeout(() => {
-        const generatedContent = 
-          "I've been thinking about our relationship and wanted to express how much I value our connection. Despite the challenges we face, I'm committed to making this work and growing together.";
-        
-        setGeneratedMessage(generatedContent);
-        setCurrentStep('result');
-        setLoading(false);
-      }, 2000);
+      // Call our OpenAI integration through Firebase Functions
+      const generatedContent = await generateMessage({
+        relationshipType: formData.relationshipType,
+        status: formData.status,
+        frequency: formData.frequency,
+        challenges: formData.challenges,
+        message: formData.message
+      });
+      
+      setGeneratedMessage(generatedContent);
+      setCurrentStep('result');
     } catch (error) {
       console.error('Error generating message:', error);
+      // Show error to user
+    } finally {
       setLoading(false);
     }
   };
@@ -263,7 +267,12 @@ export const MessageSpark = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto relative">
+      <LoadingOverlay 
+        isLoading={loading} 
+        message={currentStep === 'message' ? "AI is crafting your heartfelt message" : "Processing"} 
+      />
+      
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">MessageSpark</h1>
         <p className="mt-2 text-gray-600">

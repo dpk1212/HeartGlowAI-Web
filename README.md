@@ -83,6 +83,33 @@ service cloud.firestore {
 firebase deploy --only firestore:rules
 ```
 
+### 7. Set Up Firebase Functions for OpenAI Integration
+
+1. Install Firebase CLI if you haven't already:
+```
+npm install -g firebase-tools
+```
+
+2. Log in to Firebase:
+```
+firebase login
+```
+
+3. Initialize Firebase Functions:
+```
+firebase init functions
+```
+
+4. Set OpenAI API key in Firebase config:
+```
+firebase functions:config:set openai.key="your_openai_api_key"
+```
+
+5. Deploy Firebase Functions:
+```
+firebase deploy --only functions
+```
+
 ## Running the Application
 
 After setting up Firebase, you can run the application:
@@ -103,6 +130,7 @@ npm run build
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Vite Documentation](https://vitejs.dev/guide/)
 - [React Documentation](https://react.dev/)
+- [OpenAI API Documentation](https://platform.openai.com/docs/api-reference)
 
 ## Testing
 
@@ -128,3 +156,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Firebase for authentication and database services
 - React and Vite for the frontend framework
 - Tailwind CSS for styling
+- OpenAI for the AI message generation

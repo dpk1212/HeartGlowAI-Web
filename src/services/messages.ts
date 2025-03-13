@@ -13,6 +13,7 @@ import {
   updateDoc,
   Timestamp
 } from 'firebase/firestore';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { db } from '../firebase/config';
 import { auth } from '../firebase/config';
 
@@ -26,6 +27,36 @@ export interface Message {
   createdAt: Date;
   userId: string;
 }
+
+export interface MessageGenerationParams {
+  relationshipType: string;
+  status: string;
+  frequency: string;
+  challenges: string[];
+  message: string;
+}
+
+// Generate message using OpenAI via Firebase Functions
+export const generateMessage = async (params: MessageGenerationParams): Promise<string> => {
+  try {
+    const functions = getFunctions();
+    const generateMessageFn = httpsCallable<MessageGenerationParams, {success: boolean, message: string}>(
+      functions, 
+      'generateMessage'
+    );
+    
+    const result = await generateMessageFn(params);
+    
+    if (!result.data.success) {
+      throw new Error('Failed to generate message');
+    }
+    
+    return result.data.message;
+  } catch (error) {
+    console.error('Error generating message:', error);
+    throw error;
+  }
+};
 
 export const createMessage = async (messageData: Omit<Message, 'id' | 'createdAt' | 'userId'>): Promise<string> => {
   try {

@@ -258,6 +258,176 @@
         .close-button.visible {
             opacity: 1;
         }
+
+        .how-it-works {
+            padding: 6rem 2rem;
+            background: #f8f9fa;
+            color: #333;
+        }
+
+        .how-it-works h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #333;
+        }
+
+        .carousel-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .carousel {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .carousel-slide {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease;
+        }
+
+        .carousel-slide.active {
+            position: relative;
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .slide-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .relationship-type {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .scenario {
+            font-size: 1.4rem;
+            font-weight: 500;
+            margin-bottom: 2rem;
+        }
+
+        .message-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+
+        .message-box:hover {
+            transform: translateY(-5px);
+        }
+
+        .message-box.poor {
+            background: #fff5f5;
+            border: 1px solid #ffcdd2;
+        }
+
+        .message-box.improved {
+            background: #f0f9ff;
+            border: 1px solid #b3e5fc;
+        }
+
+        .message-box h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .message-box p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .outcome {
+            background: #f3f4f6;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 2rem;
+        }
+
+        .outcome h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .carousel-nav {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .nav-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .nav-dot.active {
+            background: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .how-it-works {
+                padding: 4rem 1rem;
+            }
+
+            .how-it-works h2 {
+                font-size: 2rem;
+            }
+
+            .slide-content {
+                padding: 1.5rem;
+            }
+
+            .scenario {
+                font-size: 1.2rem;
+            }
+
+            .message-box p {
+                font-size: 1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -278,6 +448,73 @@
             </form>
         </div>
     </main>
+
+    <section class="how-it-works">
+        <h2>How Connectly Works</h2>
+        <div class="carousel-container">
+            <div class="carousel">
+                <div class="carousel-slide active">
+                    <div class="slide-content">
+                        <div class="relationship-type">Romantic</div>
+                        <div class="scenario">Jealousy over social media</div>
+                        <div class="message-box poor">
+                            <h3>Poorly Written Message</h3>
+                            <p>"Who was that girl in your photo last night?"</p>
+                        </div>
+                        <div class="message-box improved">
+                            <h3>Connectly's Suggested Message</h3>
+                            <p>"Hey, I saw your photo from last night. Who were you with? Just curious."</p>
+                        </div>
+                        <div class="outcome">
+                            <h3>Outcome</h3>
+                            <p>Partner feels less accused, more likely to share.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="relationship-type">Friendship</div>
+                        <div class="scenario">Feeling left out of group activities</div>
+                        <div class="message-box poor">
+                            <h3>Poorly Written Message</h3>
+                            <p>"Why didn't you invite me to the party?"</p>
+                        </div>
+                        <div class="message-box improved">
+                            <h3>Connectly's Suggested Message</h3>
+                            <p>"Hey, I heard there was a party last night. I wish I knew about it! Maybe next time we can plan something together."</p>
+                        </div>
+                        <div class="outcome">
+                            <h3>Outcome</h3>
+                            <p>Friend appreciates concern, plans future hangout.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="carousel-slide">
+                    <div class="slide-content">
+                        <div class="relationship-type">Family</div>
+                        <div class="scenario">Disagreement over holiday plans</div>
+                        <div class="message-box poor">
+                            <h3>Poorly Written Message</h3>
+                            <p>"You always have to have your way!"</p>
+                        </div>
+                        <div class="message-box improved">
+                            <h3>Connectly's Suggested Message</h3>
+                            <p>"I understand we have different ideas about the holidays. Maybe we can find a compromise that works for everyone."</p>
+                        </div>
+                        <div class="outcome">
+                            <h3>Outcome</h3>
+                            <p>Family member is open to finding middle ground.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-nav">
+                <button class="nav-btn prev">←</button>
+                <div class="nav-dots"></div>
+                <button class="nav-btn next">→</button>
+            </div>
+        </div>
+    </section>
 
     <div id="successAnimation">
         <div class="heart-container">
@@ -367,6 +604,77 @@
 
         // Handle close button
         document.querySelector('.close-button').addEventListener('click', hideSuccessAnimation);
+
+        // Carousel functionality
+        const slides = document.querySelectorAll('.carousel-slide');
+        const dots = document.querySelector('.nav-dots');
+        const prevBtn = document.querySelector('.nav-btn.prev');
+        const nextBtn = document.querySelector('.nav-btn.next');
+        let currentSlide = 0;
+        let slideInterval;
+
+        // Create dots
+        slides.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('nav-dot');
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(index));
+            dots.appendChild(dot);
+        });
+
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Update dots
+            document.querySelectorAll('.nav-dot').forEach((dot, index) => {
+                if (index === currentSlide) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function goToSlide(index) {
+            currentSlide = index;
+            updateSlides();
+            resetInterval();
+        }
+
+        function nextSlide() {
+            currentSlide = (currentSlide + 1) % slides.length;
+            updateSlides();
+        }
+
+        function prevSlide() {
+            currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+            updateSlides();
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 5000);
+        }
+
+        // Event listeners
+        prevBtn.addEventListener('click', () => {
+            prevSlide();
+            resetInterval();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            nextSlide();
+            resetInterval();
+        });
+
+        // Start automatic rotation
+        slideInterval = setInterval(nextSlide, 5000);
     </script>
 </body>
 </html>

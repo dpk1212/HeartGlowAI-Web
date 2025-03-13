@@ -1438,37 +1438,37 @@
     <div class="modal-overlay" id="thankYouOverlay"></div>
 
     <script>
-        // Main Initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOM Content Loaded - Initializing components...');
-            initWaitlistForm();
-            initializeOtherComponents();
-        });
-
         function initializeOtherComponents() {
+            console.log('Initializing components...');
             const components = [
-                { name: 'MobileMenu', fn: initMobileMenu },
-                { name: 'GSAP', fn: initGSAP },
-                { name: 'FloatingCards', fn: initFloatingCards },
-                { name: 'WaitlistForm', fn: initWaitlistForm },
-                { name: 'FloatingCTA', fn: initFloatingCTA },
-                { name: 'ExitIntent', fn: initExitIntent },
-                { name: 'BackToTop', fn: initBackToTop },
-                { name: 'SmoothScroll', fn: initSmoothScroll },
-                { name: 'FeatureCards', fn: initFeatureCards },
-                { name: 'StepCards', fn: initStepCards },
-                { name: 'CTAButtons', fn: initCTAButtons },
-                { name: 'ThreeJS', fn: initThreeJS }
+                initMobileMenu,
+                initFloatingCTA,
+                initBackToTop,
+                initSmoothScroll,
+                initThreeJS
             ];
 
             components.forEach(component => {
                 try {
-                    component.fn();
+                    console.log('Initializing component:', component.name);
+                    component();
                 } catch (error) {
-                    console.error(`Error initializing ${component.name}:`, error);
+                    console.error(`Error initializing component:`, error);
                 }
             });
         }
+
+        // Main Initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM Content Loaded - Starting initialization...');
+            try {
+                initWaitlistForm();
+                initializeOtherComponents();
+                initExitIntent();
+            } catch (error) {
+                console.error('Error during initialization:', error);
+            }
+        });
 
         function initMobileMenu() {
             const mobileMenuButton = document.querySelector('.mobile-menu');

@@ -2,7 +2,7 @@ import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { Layout } from './components/Layout/Layout'
 import { Home } from './pages/Home/Home'
-import { SignUp } from './pages/auth/SignUp'
+import { Signup } from './pages/auth/SignUp'
 import { Login } from './pages/auth/Login'
 import { PasswordReset } from './pages/auth/PasswordReset'
 import { Dashboard } from './pages/Dashboard/Dashboard'
@@ -13,11 +13,11 @@ import './App.css'
 function App() {
   return (
     <Router>
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Home />} />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/signup" element={<Signup />} />
           <Route path="/reset-password" element={<PasswordReset />} />
           <Route
             path="/dashboard"
@@ -36,8 +36,8 @@ function App() {
             }
           />
           <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Layout>
+        </Route>
+      </Routes>
     </Router>
   )
 }

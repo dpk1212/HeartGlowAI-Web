@@ -32,25 +32,47 @@ export const FirebaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 
   // Listen for authentication state changes
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(
-      (user) => {
-        setState((prev) => ({
-          ...prev,
-          user,
-          loading: false
-        }));
-      },
-      (error) => {
-        setState((prev) => ({
-          ...prev,
-          error: error.message,
-          loading: false
-        }));
-      }
-    );
+    // Add error handling
+    try {
+      const unsubscribe = auth.onAuthStateChanged(
+        (user) => {
+          setState((prev) => ({
+            ...prev,
+            user,
+            loading: false
+          }));
+        },
+        (error) => {
+          console.error("Auth state change error:", error);
+          setState((prev) => ({
+            ...prev,
+            error: error.message,
+            loading: false,
+            // Automatically switch to demo mode if Firebase auth fails
+            isDemo: true
+          }));
+        }
+      );
 
-    // Cleanup the listener
-    return () => unsubscribe();
+      // Cleanup the listener
+      return () => {
+        try {
+          unsubscribe();
+        } catch (err) {
+          console.error("Error unsubscribing from auth:", err);
+        }
+      };
+    } catch (err) {
+      console.error("Firebase initialization error:", err);
+      // If Firebase initialization fails, set demo mode
+      setState({
+        user: null,
+        loading: false,
+        error: err instanceof Error ? err.message : "Failed to initialize Firebase",
+        isDemo: true
+      });
+      return () => {}; // Return empty cleanup function
+    }
   }, []);
 
   return (

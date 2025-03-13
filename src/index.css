@@ -309,6 +309,8 @@ html, body, #root {
 /* Remove any conflicting styles */
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --primary-gradient: linear-gradient(135deg, #7EB6FF 0%, #5EEAD4 100%);
+  --secondary-gradient: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
 }
 
 /* Make sure body doesn't have any margin or padding that could interfere with layouts */

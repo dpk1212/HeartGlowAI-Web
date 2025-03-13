@@ -293,18 +293,20 @@
             cursor: pointer;
             transition: var(--transition);
             display: block;
-            opacity: 0;
-            transform: translateY(100%);
-        }
-
-        .floating-cta.visible {
             opacity: 1;
             transform: translateY(0);
         }
 
-        .floating-cta:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+        @media (min-width: 769px) {
+            .floating-cta {
+                opacity: 0;
+                transform: translateY(100%);
+            }
+
+            .floating-cta.visible {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @keyframes slideIn {
@@ -1109,6 +1111,18 @@
                 display: none;
             }
 
+            .nav-links.active {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: rgba(252, 252, 252, 0.98);
+                padding: 1rem;
+                box-shadow: var(--shadow-md);
+            }
+
             .mobile-menu {
                 display: block;
             }
@@ -1539,6 +1553,9 @@
                 <i class="fas fa-heart"></i>
                 ConnectlyAI
             </a>
+            <button class="mobile-menu" aria-label="Toggle menu">
+                <i class="fas fa-bars"></i>
+            </button>
             <div class="nav-links">
                 <a href="#features">Benefits</a>
                 <a href="#how-it-works">Your Journey</a>
@@ -1737,6 +1754,7 @@
 
         function initializeOtherComponents() {
             const components = [
+                { name: 'MobileMenu', fn: initMobileMenu },
                 { name: 'GSAP', fn: initGSAP },
                 { name: 'FloatingCards', fn: initFloatingCards },
                 { name: 'WaitlistForm', fn: initWaitlistForm },
@@ -1756,6 +1774,35 @@
                     console.error(`Error initializing ${component.name}:`, error);
                 }
             });
+        }
+
+        function initMobileMenu() {
+            const mobileMenuButton = document.querySelector('.mobile-menu');
+            const navLinks = document.querySelector('.nav-links');
+            
+            if (mobileMenuButton && navLinks) {
+                mobileMenuButton.addEventListener('click', () => {
+                    navLinks.classList.toggle('active');
+                    const isExpanded = navLinks.classList.contains('active');
+                    mobileMenuButton.setAttribute('aria-expanded', isExpanded);
+                });
+
+                // Close menu when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuButton.contains(e.target) && !navLinks.contains(e.target)) {
+                        navLinks.classList.remove('active');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close menu when clicking on a link
+                navLinks.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('active');
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                    });
+                });
+            }
         }
 
         function initWaitlistForm() {
@@ -2253,11 +2300,30 @@
         function initFloatingCTA() {
             const floatingCta = document.getElementById('floatingCta');
             if (floatingCta) {
-                window.addEventListener('scroll', () => {
-                    if (window.scrollY > 300) {
+                // Only apply scroll behavior on desktop
+                if (window.innerWidth > 768) {
+                    window.addEventListener('scroll', () => {
+                        if (window.scrollY > 300) {
+                            floatingCta.classList.add('visible');
+                        } else {
+                            floatingCta.classList.remove('visible');
+                        }
+                    });
+                } else {
+                    // On mobile, make it visible immediately
+                    floatingCta.classList.add('visible');
+                }
+
+                // Update visibility on resize
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth <= 768) {
                         floatingCta.classList.add('visible');
                     } else {
                         floatingCta.classList.remove('visible');
+                        // Recheck scroll position
+                        if (window.scrollY > 300) {
+                            floatingCta.classList.add('visible');
+                        }
                     }
                 });
             }

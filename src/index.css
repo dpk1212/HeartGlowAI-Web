@@ -309,7 +309,7 @@ html, body, #root {
 /* Remove any conflicting styles */
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
-  --primary-gradient: linear-gradient(135deg, #7EB6FF 0%, #5EEAD4 100%);
+  --primary-gradient: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
   --secondary-gradient: linear-gradient(135deg, #6366F1 0%, #EC4899 100%);
 }
 
@@ -459,4 +459,79 @@ button:focus-visible {
   .premium-gradient-card-purple {
     @apply bg-gradient-to-br from-purple-400/80 to-purple-500/80 backdrop-blur-sm;
   }
+}
+
+/* Custom Animations */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 10px 2px rgba(236, 72, 153, 0.4); }
+  50% { box-shadow: 0 0 20px 5px rgba(139, 92, 246, 0.6); }
+}
+
+.animate-pulse {
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 640px) {
+  .p-5 {
+    padding: 1rem;
+  }
+  
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+  
+  .p-8 {
+    padding: 1.5rem;
+  }
+}
+
+/* Focus styles for better a11y */
+*:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+/* Custom classes */
+.bg-primary-gradient {
+  background: var(--primary-gradient);
+}
+
+.backdrop-blur-md {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Remove iOS input styling */
+input, textarea, select, button {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
 }

@@ -1,9 +1,29 @@
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { SparklesIcon, ChatBubbleLeftRightIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { getMessages, Message } from '../../services/messages';
 
 export const Dashboard = () => {
   const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const recentMessages = await getMessages(5);
+        setMessages(recentMessages);
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, []);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -75,12 +95,40 @@ export const Dashboard = () => {
       {/* Recent Messages */}
       <div className="card">
         <h2 className="text-xl font-semibold text-gray-900 mb-4">Recent Messages</h2>
-        <div className="space-y-4">
-          {/* Placeholder for recent messages */}
+        {loading ? (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+          </div>
+        ) : error ? (
+          <div className="p-4 bg-red-50 text-red-600 rounded-lg">
+            {error}
+          </div>
+        ) : messages.length > 0 ? (
+          <div className="space-y-4">
+            {messages.map((message) => (
+              <div key={message.id} className="p-4 border rounded-lg hover:bg-gray-50">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {message.relationshipType}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {message.status} • {message.frequency}
+                    </p>
+                    <p className="mt-2 text-gray-600 line-clamp-2">{message.content}</p>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {new Date(message.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
           <div className="p-4 border rounded-lg">
             <p className="text-gray-600">No messages yet. Start by creating one!</p>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

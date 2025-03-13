@@ -65,10 +65,10 @@ export const useAuth = () => {
     }
   };
 
-  const signup = async (email: string, password: string) => {
+  const signup = async (email: string, password: string, displayName: string) => {
     try {
       setAuthState(prev => ({ ...prev, loading: true, error: null }));
-      await authService.signUp(email, password);
+      await authService.signUp(email, password, displayName);
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

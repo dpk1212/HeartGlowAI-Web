@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-gray-50 text-gray-900 min-h-screen;
   }
 }
 
@@ -24,6 +24,16 @@
   .card {
     @apply bg-white rounded-lg shadow-md p-6;
   }
+}
+
+/* Custom gradient for accent colors */
+.bg-gradient-accent {
+  @apply bg-gradient-to-r from-[#FFD700] to-[#FF69B4];
+}
+
+/* Custom text gradient */
+.text-gradient-accent {
+  @apply bg-gradient-to-r from-[#FFD700] to-[#FF69B4] bg-clip-text text-transparent;
 }
 
 :root {

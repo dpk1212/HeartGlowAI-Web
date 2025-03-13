@@ -174,13 +174,71 @@
             transform: translateY(0);
         }
 
-        #heartCanvas {
+        .heart-container {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .heart-container.visible {
+            opacity: 1;
+        }
+
+        .heart {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+        }
+
+        .heart::before,
+        .heart::after {
+            content: '';
+            position: absolute;
+            width: 100px;
+            height: 160px;
+            background-color: var(--primary-color);
+            border-radius: 50px 50px 0 0;
+        }
+
+        .heart::before {
+            left: 50px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .heart::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .share-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .share-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
         }
 
         .close-button {
@@ -222,132 +280,81 @@
     </main>
 
     <div id="successAnimation">
-        <canvas id="heartCanvas"></canvas>
+        <div class="heart-container">
+            <div class="heart"></div>
+        </div>
         <div class="success-message">
             <h2>Welcome to Connectly!</h2>
             <p>We're excited to help you build stronger relationships.</p>
             <p>Check your email for next steps.</p>
+            <button class="share-button" onclick="sharePage()">Share with a Friend</button>
         </div>
         <button class="close-button">×</button>
     </div>
 
     <script>
-        let scene, camera, renderer, particles;
-        let isAnimating = false;
-
-        function initThreeJS() {
-            scene = new THREE.Scene();
-            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            renderer = new THREE.WebGLRenderer({
-                canvas: document.getElementById('heartCanvas'),
-                alpha: true,
-                antialias: true
-            });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-            // Create particles
-            const particleCount = 1000;
-            const geometry = new THREE.BufferGeometry();
-            const positions = new Float32Array(particleCount * 3);
-            const colors = new Float32Array(particleCount * 3);
-
-            for (let i = 0; i < particleCount; i++) {
-                const i3 = i * 3;
-                // Heart shape parametric equations
-                const t = Math.random() * Math.PI * 2;
-                const u = Math.random() * Math.PI;
-                const x = 16 * Math.pow(Math.sin(t), 3);
-                const y = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
-                const z = 0;
-
-                positions[i3] = x * 0.1;
-                positions[i3 + 1] = y * 0.1;
-                positions[i3 + 2] = z;
-
-                // Gradient from primary color to white
-                const color = new THREE.Color('#6246EA');
-                color.lerp(new THREE.Color('#FFFFFF'), Math.random());
-                colors[i3] = color.r;
-                colors[i3 + 1] = color.g;
-                colors[i3 + 2] = color.b;
-            }
-
-            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-            const material = new THREE.PointsMaterial({
-                size: 0.05,
-                vertexColors: true,
-                transparent: true,
-                opacity: 0
-            });
-
-            particles = new THREE.Points(geometry, material);
-            scene.add(particles);
-
-            camera.position.z = 5;
-        }
-
-        function animate() {
-            if (!isAnimating) return;
-            requestAnimationFrame(animate);
-
-            particles.rotation.y += 0.001;
-            particles.rotation.x += 0.0005;
-
-            renderer.render(scene, camera);
-        }
-
         function showSuccessAnimation() {
             const successAnimation = document.getElementById('successAnimation');
             const successMessage = document.querySelector('.success-message');
             const closeButton = document.querySelector('.close-button');
+            const heartContainer = document.querySelector('.heart-container');
 
             successAnimation.classList.add('active');
             setTimeout(() => {
                 successMessage.classList.add('visible');
                 closeButton.classList.add('visible');
+                heartContainer.classList.add('visible');
             }, 100);
-
-            // Fade in particles
-            gsap.to(particles.material, {
-                opacity: 1,
-                duration: 2,
-                ease: "power2.out"
-            });
-
-            isAnimating = true;
-            animate();
         }
 
         function hideSuccessAnimation() {
             const successAnimation = document.getElementById('successAnimation');
             const successMessage = document.querySelector('.success-message');
             const closeButton = document.querySelector('.close-button');
+            const heartContainer = document.querySelector('.heart-container');
 
             successMessage.classList.remove('visible');
             closeButton.classList.remove('visible');
+            heartContainer.classList.remove('visible');
 
-            gsap.to(particles.material, {
-                opacity: 0,
-                duration: 1,
-                ease: "power2.in",
-                onComplete: () => {
-                    successAnimation.classList.remove('active');
-                    isAnimating = false;
-                }
-            });
+            setTimeout(() => {
+                successAnimation.classList.remove('active');
+            }, 500);
         }
 
-        // Initialize Three.js
-        initThreeJS();
+        async function sharePage() {
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: 'Connectly - Build Better Relationships',
+                        text: 'Join me on Connectly - the better way to build relationships!',
+                        url: window.location.href
+                    });
+                } catch (error) {
+                    console.log('Error sharing:', error);
+                    // Fallback to clipboard copy
+                    copyToClipboard();
+                }
+            } else {
+                // Fallback to clipboard copy
+                copyToClipboard();
+            }
+        }
 
-        // Handle window resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
+        function copyToClipboard() {
+            navigator.clipboard.writeText(window.location.href)
+                .then(() => {
+                    const shareButton = document.querySelector('.share-button');
+                    const originalText = shareButton.textContent;
+                    shareButton.textContent = 'Link Copied!';
+                    setTimeout(() => {
+                        shareButton.textContent = originalText;
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy:', err);
+                });
+        }
 
         // Handle form submission
         document.querySelector('.waitlist-form').addEventListener('submit', function(e) {

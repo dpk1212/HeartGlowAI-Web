@@ -145,7 +145,7 @@ export const MessageSpark = () => {
       : 'Processing your request...';
   };
 
-  return (
+        return (
     <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-400 py-8 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 shadow-xl mb-6">
@@ -268,7 +268,7 @@ export const MessageSpark = () => {
                     className="w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
                     placeholder="Reconnect, Express Love, Resolve Conflict, etc."
                   />
-                </div>
+            </div>
 
                 <div className="md:col-span-2">
                   <label htmlFor="messageLength" className="block text-sm font-medium text-white mb-1">
@@ -312,7 +312,7 @@ export const MessageSpark = () => {
                   <PaperAirplaneIcon className="h-6 w-6 mr-2" />
                   {loading ? 'Generating...' : 'Generate Message'}
                 </button>
-              </div>
+            </div>
             </form>
           </div>
         ) : (
@@ -355,7 +355,7 @@ export const MessageSpark = () => {
                     <div className="bg-white/20 p-5 rounded-xl whitespace-pre-wrap text-white leading-relaxed">
                       {parsedMessage.explanation}
                     </div>
-                  </div>
+          </div>
                 )}
 
                 {parsedMessage.examples && (
@@ -371,16 +371,16 @@ export const MessageSpark = () => {
               <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 shadow-xl">
                 <h2 className="text-xl font-bold text-white mb-4">Generated Message</h2>
                 <div className="bg-white/20 p-5 rounded-xl mb-4 whitespace-pre-wrap text-white">
-                  {generatedMessage}
-                </div>
+              {generatedMessage}
+            </div>
                 <div className="flex justify-end">
-                  <button
+              <button
                     onClick={copyToClipboard}
                     className="flex items-center px-4 py-2 bg-white/30 hover:bg-white/40 rounded-xl text-white font-medium"
-                  >
+              >
                     <ClipboardDocumentIcon className="h-5 w-5 mr-2" />
                     {copied ? 'Copied!' : 'Copy to Clipboard'}
-                  </button>
+              </button>
                 </div>
               </div>
             )}

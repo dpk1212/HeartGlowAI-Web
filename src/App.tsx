@@ -1,44 +1,30 @@
 import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import { Layout } from './components/Layout/Layout'
-import { Home } from './pages/Home/Home'
-import { Signup } from './pages/auth/SignUp'
-import { Login } from './pages/auth/Login'
-import { PasswordReset } from './pages/auth/PasswordReset'
-import { Dashboard } from './pages/Dashboard/Dashboard'
 import { MessageSpark } from './pages/MessageSpark/MessageSpark'
-import { NotFound } from './pages/NotFound/NotFound'
-import './App.css'
+import Login from './pages/auth/Login.jsx'
+import SignUp from './pages/auth/SignUp.jsx'
+import { AuthProvider } from './contexts/AuthContext'
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/reset-password" element={<PasswordReset />} />
+          <Route path="/signup" element={<SignUp />} />
           <Route
-            path="/dashboard"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/messagespark"
+            path="/message"
             element={
               <ProtectedRoute>
                 <MessageSpark />
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<NotFound />} />
-        </Route>
-      </Routes>
-    </Router>
+          <Route path="*" element={<Login />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   )
 }
 

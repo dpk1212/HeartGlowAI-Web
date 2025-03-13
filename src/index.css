@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Reset core styles */
+/* Core reset styles */
 * {
   margin: 0;
   padding: 0;
@@ -12,7 +12,54 @@
 html, body, #root {
   height: 100%;
   width: 100%;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mobile-first utility classes */
+@layer components {
+  /* Backgrounds */
+  .app-gradient {
+    @apply bg-gradient-to-br from-blue-500 to-teal-400;
+  }
+  
+  /* Cards */
+  .app-card {
+    @apply bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl p-6;
+  }
+  
+  /* Container */
+  .app-container {
+    @apply px-4 py-6 mx-auto max-w-md md:max-w-2xl lg:max-w-4xl;
+  }
+  
+  /* Form elements */
+  .app-input {
+    @apply w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white;
+  }
+  
+  /* Buttons */
+  .app-btn-primary {
+    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-blue-600 bg-white hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white;
+  }
+  
+  .app-btn-secondary {
+    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-white/30 hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-white;
+  }
+}
+
+/* Heart animation */
+@keyframes heartbeat {
+  0% { transform: scale(1); }
+  15% { transform: scale(1.15); }
+  30% { transform: scale(1); }
+  45% { transform: scale(1.15); }
+  60% { transform: scale(1); }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s infinite;
 }
 
 /* Custom utility classes and components */
@@ -56,29 +103,6 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-}
-
-/* Optional animation for heart icon */
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  15% {
-    transform: scale(1.15);
-  }
-  30% {
-    transform: scale(1);
-  }
-  45% {
-    transform: scale(1.15);
-  }
-  60% {
-    transform: scale(1);
-  }
-}
-
-.animate-heartbeat {
-  animation: heartbeat 1.5s infinite;
 }
 
 @layer base {

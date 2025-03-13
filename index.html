@@ -119,6 +119,58 @@
             font-weight: 600;
             cursor: pointer;
             transition: transform 0.2s ease;
+            position: relative;
+        }
+
+        .waitlist-form button:disabled {
+            cursor: not-allowed;
+            opacity: 0.8;
+        }
+
+        .spinning-heart {
+            display: none;
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            animation: spin 1s linear infinite;
+        }
+
+        .spinning-heart::before,
+        .spinning-heart::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 32px;
+            background-color: white;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .spinning-heart::before {
+            left: 10px;
+            transform: rotate(-45deg);
+            transform-origin: 0 100%;
+        }
+
+        .spinning-heart::after {
+            left: 0;
+            transform: rotate(45deg);
+            transform-origin: 100% 100%;
+        }
+
+        @keyframes spin {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            100% { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        .waitlist-form button.loading .spinning-heart {
+            display: block;
+        }
+
+        .waitlist-form button.loading {
+            padding-right: 3rem;
         }
 
         .waitlist-form button:hover {
@@ -486,7 +538,10 @@
             
             <form class="waitlist-form" action="https://formspree.io/f/mjkyvdal" method="POST">
                 <input type="email" name="email" placeholder="Enter your email address here" required>
-                <button type="submit">Join Waitlist</button>
+                <button type="submit">
+                    Join Waitlist
+                    <div class="spinning-heart"></div>
+                </button>
             </form>
         </div>
     </main>
@@ -789,7 +844,7 @@
             
             // Disable submit button and show loading state
             submitButton.disabled = true;
-            submitButton.textContent = 'Sending...';
+            submitButton.classList.add('loading');
             
             try {
                 const response = await fetch('https://formspree.io/f/mjkyvdal', {
@@ -812,9 +867,9 @@
                 console.error('Error:', error);
                 alert('Sorry, there was an error submitting the form. Please try again.');
             } finally {
-                // Re-enable submit button and restore text
+                // Re-enable submit button and remove loading state
                 submitButton.disabled = false;
-                submitButton.textContent = 'Join Waitlist';
+                submitButton.classList.remove('loading');
             }
         });
 

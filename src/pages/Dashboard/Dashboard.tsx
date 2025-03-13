@@ -13,10 +13,13 @@ export const Dashboard = () => {
   useEffect(() => {
     const fetchMessages = async () => {
       try {
+        setLoading(true);
         const recentMessages = await getMessages(5);
         setMessages(recentMessages);
+        setError(null);
       } catch (err: any) {
-        setError(err.message);
+        console.error('Error fetching messages:', err);
+        setError(err.message || 'Failed to load messages');
       } finally {
         setLoading(false);
       }

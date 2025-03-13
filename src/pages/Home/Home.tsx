@@ -3,70 +3,79 @@ import { HeartIcon, SparklesIcon, ChatBubbleLeftRightIcon } from '@heroicons/rea
 
 export const Home = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 sm:px-6 lg:px-8">
-      <div className="text-center max-w-3xl">
-        <div className="flex justify-center mb-6">
-          <HeartIcon className="h-16 w-16 text-red-500 animate-heartbeat" />
-        </div>
-        
-        <h1 className="text-5xl tracking-tight font-extrabold text-gray-900 sm:text-6xl">
-          <span className="text-primary">HeartGlow</span>
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-start to-secondary-end">AI</span>
-        </h1>
-        
-        <p className="mt-6 text-xl text-gray-600 leading-relaxed">
-          Create meaningful connections through heartfelt messages crafted with the help of AI. Express your emotions with clarity and authenticity.
-        </p>
-        
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
-            to="/signup"
-            className="w-full sm:w-auto px-8 py-4 text-white bg-gradient-to-r from-secondary-start to-secondary-end hover:opacity-90 rounded-lg shadow-lg transition-all duration-200 font-medium text-lg flex items-center justify-center gap-2"
-          >
-            <SparklesIcon className="h-5 w-5" />
-            Get Started
-          </Link>
-          
-          <Link
-            to="/login"
-            className="w-full sm:w-auto mt-4 sm:mt-0 px-8 py-4 text-primary border-2 border-primary hover:bg-primary/5 rounded-lg font-medium text-lg flex items-center justify-center gap-2"
-          >
-            <ChatBubbleLeftRightIcon className="h-5 w-5" />
-            Sign In
-          </Link>
-        </div>
-      </div>
-      
-      <div className="mt-24 max-w-6xl w-full">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-          <div className="card bg-white shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 p-8 rounded-xl">
-            <div className="rounded-full bg-gradient-to-r from-primary to-primary/70 p-4 w-16 h-16 flex items-center justify-center mb-6">
-              <HeartIcon className="h-8 w-8 text-white" />
+    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-400">
+      <div className="container mx-auto px-4 py-12">
+        <div className="flex flex-col items-center justify-center mb-12">
+          <div className="relative mb-4">
+            <div className="absolute inset-0 flex items-center justify-center">
+              <HeartIcon className="h-24 w-24 text-white/30" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Emotional Intelligence</h3>
-            <p className="mt-3 text-gray-600 leading-relaxed">
-              Our AI helps you express emotions in a way that resonates with your recipient's needs and feelings.
+            <div className="relative z-10 p-2">
+              <h1 className="text-5xl font-extrabold text-white text-center">
+                HeartGlow<span className="font-light">AI</span>
+              </h1>
+            </div>
+          </div>
+          <p className="text-xl text-white text-center max-w-2xl">
+            Nurture your relationships with AI-powered insights and thoughtful message crafting
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl transform transition-all duration-300 hover:scale-105">
+            <div className="flex items-center mb-6">
+              <div className="bg-blue-600/30 p-3 rounded-2xl mr-4">
+                <SparklesIcon className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">Message Spark</h2>
+            </div>
+            <p className="text-white/90 mb-6">
+              Generate thoughtful, personalized messages for your loved ones with AI assistance. Perfect for special occasions or just to show you care.
             </p>
+            <Link
+              to="/message-spark"
+              className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center"
+            >
+              Craft a Message
+            </Link>
           </div>
 
-          <div className="card bg-white shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 p-8 rounded-xl">
-            <div className="rounded-full bg-gradient-to-r from-secondary-start to-secondary-end p-4 w-16 h-16 flex items-center justify-center mb-6">
-              <SparklesIcon className="h-8 w-8 text-white" />
+          <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl transform transition-all duration-300 hover:scale-105">
+            <div className="flex items-center mb-6">
+              <div className="bg-pink-600/30 p-3 rounded-2xl mr-4">
+                <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">Relationship Coach</h2>
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Perfect Messaging</h3>
-            <p className="mt-3 text-gray-600 leading-relaxed">
-              Create perfectly crafted messages for any relationship or situation in seconds.
+            <p className="text-white/90 mb-6">
+              Get personalized advice and insights to strengthen your relationships. Learn effective communication strategies and emotional intelligence.
             </p>
+            <Link
+              to="/dashboard"
+              className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center"
+            >
+              Get Insights
+            </Link>
           </div>
+        </div>
 
-          <div className="card bg-white shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-300 p-8 rounded-xl">
-            <div className="rounded-full bg-gradient-to-r from-primary/70 to-secondary-start p-4 w-16 h-16 flex items-center justify-center mb-6">
-              <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
+        <div className="mt-16 text-center">
+          <div className="max-w-md mx-auto bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
+            <h2 className="text-2xl font-bold text-white mb-4">Ready to get started?</h2>
+            <div className="grid grid-cols-2 gap-4">
+              <Link
+                to="/login"
+                className="bg-white text-blue-600 hover:bg-white/90 font-medium py-3 px-4 rounded-xl text-center"
+              >
+                Sign In
+              </Link>
+              <Link
+                to="/signup"
+                className="bg-blue-600/70 text-white hover:bg-blue-600/60 font-medium py-3 px-4 rounded-xl text-center"
+              >
+                Sign Up
+              </Link>
             </div>
-            <h3 className="text-xl font-bold text-gray-900">Communication Growth</h3>
-            <p className="mt-3 text-gray-600 leading-relaxed">
-              Learn how to improve your communication skills with insights from every message you create.
-            </p>
           </div>
         </div>
       </div>

@@ -40,15 +40,25 @@ export interface MessageGenerationParams {
   relationship: string;
   occasion: string;
   tone: string;
-  emotionalState: string;
-  desiredOutcome: string;
-  additionalInfo: string;
+  additionalContext?: string;
+  messageLength?: string;
+  emotionalState?: string;
+  desiredOutcome?: string;
 }
 
-interface SavedMessage extends MessageGenerationParams {
-  message: string;
-  userId: string;
-  createdAt: Date;
+export interface SavedMessage {
+  id?: string;
+  recipient: string;
+  relationship: string;
+  occasion: string;
+  tone?: string;
+  additionalContext?: string;
+  messageLength?: string;
+  emotionalState?: string;
+  desiredOutcome?: string;
+  content: string;
+  userId?: string;
+  createdAt?: Date;
 }
 
 // Generate message using OpenAI via Firebase Functions

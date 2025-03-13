@@ -16,65 +16,83 @@ const openai = new OpenAI({
  * 
  * Expected data format:
  * {
- *   relationshipType: string,
- *   status: string,
- *   frequency: string,
- *   challenges: string[],
- *   message: string (additional context)
+ *   recipient: string,
+ *   relationship: string,
+ *   occasion: string,
+ *   tone: string,
+ *   emotionalState: string,
+ *   desiredOutcome: string,
+ *   additionalInfo: string
  * }
  */
 exports.generateMessage = functions.https.onCall(async (data, context) => {
   // Check if user is authenticated
   if (!context.auth) {
+    console.error("Authentication error: User not authenticated");
     throw new functions.https.HttpsError(
       'unauthenticated',
       'User must be authenticated to generate messages.'
     );
   }
 
+  console.log("generateMessage function called with data:", JSON.stringify(data));
+  console.log("User ID:", context.auth.uid);
+
   try {
-    const { relationshipType, status, frequency, challenges, message } = data;
+    const { 
+      recipient, 
+      relationship, 
+      occasion, 
+      tone,
+      emotionalState = "Hopeful & Motivated", // Default if not provided
+      desiredOutcome = "Strengthen the Bond", // Default if not provided
+      additionalInfo = "" // Additional context
+    } = data;
     
     // Validation
-    if (!relationshipType || !status || !frequency) {
+    if (!recipient || !relationship || !occasion) {
+      console.error("Validation error: Missing required parameters", { recipient, relationship, occasion });
       throw new functions.https.HttpsError(
         'invalid-argument',
         'Required parameters missing'
       );
     }
 
-    // Format challenges for the prompt
-    const challengesText = challenges && challenges.length > 0 
-      ? `The relationship faces these challenges: ${challenges.join(', ')}. ` 
-      : '';
-    
     // Format additional context
-    const additionalContext = message 
-      ? `Additional context: ${message}. ` 
-      : '';
+    const additionalContext = additionalInfo ? `Additional context: ${additionalInfo}` : '';
 
-    // Create the prompt for OpenAI
-    const prompt = `
-      Create a heartfelt message for my ${relationshipType}. 
-      Our relationship status is ${status} and we communicate ${frequency}. 
-      ${challengesText}
-      ${additionalContext}
-      The message should be personal, positive, and express care and understanding. 
-      It should address any challenges mentioned but maintain a constructive tone.
-      The message should be 2-3 paragraphs long and feel genuine, not artificial.
-    `;
+    // Create the system prompt
+    const systemPrompt = `You are HeartGlowAI, an AI-powered relationship coach designed to help users improve communication and strengthen relationships with their romantic partners, friends, or family members. Your goal is to provide empathetic, non-judgmental, and actionable advice that helps users feel understood and empowered. Always validate the user's emotions, offer practical communication strategies, and suggest how they can improve their situation. Keep responses warm, uplifting, and solution-focused. Responses should be concise, approximately 100-200 words in length, ensuring they provide value without overwhelming the user.`;
 
+    // Create the user prompt
+    const userPrompt = `A user is seeking help with communicating with their ${recipient} who is their ${relationship}. 
+The occasion is: ${occasion}.
+They want to use a ${tone} tone.
+They are feeling ${emotionalState} and want to ${desiredOutcome}. 
+${additionalContext}
+
+Provide a response in the following format:
+
+1️⃣ Empathy & Validation – Acknowledge their feelings in 1-2 sentences.
+2️⃣ Insight into the Issue (if necessary) – Explain in 1-2 sentences why this may be happening.
+3️⃣ Heartfelt Message Suggestion – Provide a clear, empathetic, and effective message they could send. Ensure it aligns with their desired outcome.
+4️⃣ Encouragement & Next Steps – Offer 1-2 sentences to reinforce their confidence and suggest a next step.
+
+Keep responses warm, uplifting, and under 200 words so they are easy to read and apply. Avoid jargon or complex explanations.`;
+
+    console.log("Calling OpenAI API with prompts");
+    
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo", // Use GPT-4 for best quality
       messages: [
         {
           role: "system", 
-          content: "You are a relationship communication expert who helps people express their feelings in heartfelt, authentic ways."
+          content: systemPrompt
         },
         {
           role: "user", 
-          content: prompt
+          content: userPrompt
         }
       ],
       temperature: 0.7, // Balance creativity and coherence
@@ -85,9 +103,9 @@ exports.generateMessage = functions.https.onCall(async (data, context) => {
     const generatedMessage = completion.choices[0].message.content.trim();
 
     // Log for analytics (without personal details)
-    console.log(`Generated message for relationship type: ${relationshipType}`);
+    console.log(`Generated message for recipient type: ${recipient}, message length: ${generatedMessage.length}`);
 
-    // Return the generated message
+    // Return the generated message in a consistent format
     return {
       success: true,
       message: generatedMessage,
@@ -116,10 +134,19 @@ exports.saveMessage = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    const { relationshipType, status, frequency, challenges, content } = data;
+    const { 
+      recipient, 
+      relationship, 
+      occasion, 
+      tone,
+      emotionalState,
+      desiredOutcome,
+      additionalInfo,
+      message 
+    } = data;
     
     // Validation
-    if (!relationshipType || !status || !content) {
+    if (!recipient || !relationship || !message) {
       throw new functions.https.HttpsError(
         'invalid-argument',
         'Required message data missing'
@@ -129,11 +156,14 @@ exports.saveMessage = functions.https.onCall(async (data, context) => {
     // Add message to Firestore
     const messageRef = await admin.firestore().collection('messages').add({
       userId: context.auth.uid,
-      relationshipType,
-      status,
-      frequency,
-      challenges: challenges || [],
-      content,
+      recipient,
+      relationship,
+      occasion,
+      tone,
+      emotionalState,
+      desiredOutcome,
+      additionalInfo,
+      content: message,
       createdAt: admin.firestore.FieldValue.serverTimestamp(),
     });
 

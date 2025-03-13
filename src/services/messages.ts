@@ -29,33 +29,54 @@ export interface Message {
 }
 
 export interface MessageGenerationParams {
-  relationshipType: string;
-  status: string;
-  frequency: string;
-  challenges: string[];
+  recipient: string;
+  relationship: string;
+  occasion: string;
+  tone: string;
+  emotionalState: string;
+  desiredOutcome: string;
+  additionalInfo: string;
+}
+
+interface SavedMessage extends MessageGenerationParams {
   message: string;
+  userId: string;
+  createdAt: Date;
 }
 
 // Generate message using OpenAI via Firebase Functions
 export const generateMessage = async (params: MessageGenerationParams): Promise<string> => {
   try {
+    console.log("Calling Firebase function with params:", params);
     const functions = getFunctions();
-    const generateMessageFn = httpsCallable<MessageGenerationParams, {success: boolean, message: string}>(
-      functions, 
-      'generateMessage'
-    );
+    const generateMessageFunction = httpsCallable(functions, 'generateMessage');
+    const result = await generateMessageFunction(params);
     
-    const result = await generateMessageFn(params);
+    console.log("Firebase function response:", result.data);
     
-    if (!result.data.success) {
-      throw new Error('Failed to generate message');
+    // Handle different response formats
+    if (typeof result.data === 'string') {
+      return result.data;
+    } else if (result.data && typeof result.data === 'object') {
+      // If it's the old format with {success: true, message: "..."}
+      if ('message' in result.data) {
+        return (result.data as any).message;
+      }
+      // If we got an object but no message property, stringify it
+      return JSON.stringify(result.data);
     }
     
-    return result.data.message;
+    throw new Error('Invalid response format from message generation service');
   } catch (error) {
-    console.error('Error generating message:', error);
+    console.error("Error in generateMessage service:", error);
     throw error;
   }
+};
+
+export const saveMessage = async (message: SavedMessage): Promise<void> => {
+  const functions = getFunctions();
+  const saveMessageFunction = httpsCallable(functions, 'saveMessage');
+  await saveMessageFunction(message);
 };
 
 export const createMessage = async (messageData: Omit<Message, 'id' | 'createdAt' | 'userId'>): Promise<string> => {

@@ -10,11 +10,15 @@
 
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors duration-200;
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
   }
   
   .btn-secondary {
-    @apply bg-gradient-accent text-white px-6 py-2 rounded-lg hover:opacity-90 transition-opacity duration-200;
+    @apply inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-secondary-start to-secondary-end hover:from-secondary-start/90 hover:to-secondary-end/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-start;
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
   }
 
   .input-field {
@@ -22,13 +26,29 @@
   }
 
   .card {
-    @apply bg-white rounded-lg shadow-md p-6;
+    @apply bg-white shadow-sm rounded-xl p-6 border border-gray-200;
+  }
+
+  .card-title {
+    @apply text-xl font-bold text-gray-900 mb-4;
+  }
+
+  .form-input {
+    @apply block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1;
+  }
+
+  .form-error {
+    @apply mt-2 text-sm text-red-600;
   }
 }
 
 /* Custom gradient for accent colors */
 .bg-gradient-accent {
-  @apply bg-gradient-to-r from-[#FFD700] to-[#FF69B4];
+  @apply bg-gradient-to-r from-secondary-start to-secondary-end;
 }
 
 /* Custom text gradient */
@@ -103,4 +123,39 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+/* Custom animations */
+@keyframes ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Add a smooth pulse animation for the heart */
+@keyframes heartbeat {
+  0% {
+    transform: scale(0.95);
+  }
+  25% {
+    transform: scale(1.05);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  75% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s ease-in-out infinite;
 }

@@ -3,23 +3,24 @@ import { motion } from 'framer-motion';
 
 export default function AuthLanding() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-6 bg-heart-gradient"> 
-      {/* Main content container - fixed width with better sizing */}
-      <div className="w-full max-w-[320px] sm:max-w-[380px] mx-auto">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-6 bg-heart-gradient overflow-hidden"> 
+      {/* Main content container */}
+      <div className="w-full max-w-[320px] sm:max-w-[380px] mx-auto z-10 relative">
         <motion.div 
           className="flex flex-col items-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          {/* Heart Icon with controlled size */}
+          {/* Heart Icon with heartbeat animation */}
           <motion.div 
-            className="relative w-20 h-20 mb-5"
+            className="relative w-24 h-24 mb-8"
             animate={{ 
-              boxShadow: ['0px 0px 15px 5px rgba(255,193,204,0.3)', '0px 0px 20px 8px rgba(255,193,204,0.5)', '0px 0px 15px 5px rgba(255,193,204,0.3)']
+              scale: [1, 1.05, 1],
+              boxShadow: ['0px 0px 15px 5px rgba(255,193,204,0.2)', '0px 0px 20px 8px rgba(255,193,204,0.4)', '0px 0px 15px 5px rgba(255,193,204,0.2)']
             }}
             transition={{ 
-              duration: 2,
+              duration: 1.5,
               repeat: Infinity,
               ease: "easeInOut"
             }}
@@ -47,76 +48,73 @@ export default function AuthLanding() {
           </motion.div>
 
           {/* Brand name */}
-          <h1 className="text-2xl font-bold tracking-wider text-white mb-2 uppercase">
+          <h1 className="text-2xl font-bold tracking-wider text-white mb-3 uppercase text-center">
             Heart Glow AI
           </h1>
           
           {/* Tagline */}
-          <p className="text-white/80 text-center mb-8 text-sm">
+          <p className="text-white/80 text-center mb-10 text-sm">
             Express your feelings with beautifully crafted messages
           </p>
 
-          {/* Buttons Container - Tighter spacing */}
-          <div className="w-full space-y-3">
-            {/* Login Button */}
+          {/* Buttons Container - centered with proper spacing */}
+          <div className="w-full space-y-4 px-2">
+            {/* Sign In Button - secondary outlined style */}
             <motion.div
-              whileHover={{ scale: 1.01 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="w-full"
             >
               <Link 
                 to="/login" 
-                className="w-full bg-white text-[#B19CD9] font-bold py-3 px-4 rounded-lg shadow flex items-center justify-center transition-all duration-200 text-sm uppercase tracking-wide"
+                className="w-full flex items-center justify-center py-3.5 px-6 rounded-xl border-2 border-white/30 text-white font-semibold text-base tracking-wide transition-all duration-200 hover:bg-white/10 hover:border-white/50"
               >
                 Sign In
               </Link>
             </motion.div>
 
-            {/* Sign Up Button */}
+            {/* Sign Up Button - primary filled gradient style */}
             <motion.div
-              whileHover={{ scale: 1.01 }}
+              whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              className="w-full"
             >
               <Link 
                 to="/signup" 
-                className="w-full bg-white/10 backdrop-blur-sm border border-white/30 text-white font-bold py-3 px-4 rounded-lg shadow-lg flex items-center justify-center transition-all duration-200 text-sm uppercase tracking-wide"
+                className="w-full flex items-center justify-center py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#ff6bcb] to-[#B19CD9] text-white font-bold text-base tracking-wide shadow-lg transition-all duration-200 hover:shadow-xl"
               >
                 Sign Up
               </Link>
             </motion.div>
           </div>
-
-          {/* Continue as Guest - Better spacing */}
-          <Link to="/dashboard" className="text-white/90 hover:text-white underline-offset-2 hover:underline transition-all duration-200 text-sm mt-7">
-            Continue as Guest
-          </Link>
         </motion.div>
       </div>
 
-      {/* Simplified background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
-        {[...Array(4)].map((_, i) => (
+      {/* Expanded floating heart background elements - centered */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {[...Array(12)].map((_, i) => (
           <motion.div
             key={i}
             className="absolute opacity-20"
             style={{
-              left: `${20 + Math.random() * 60}%`,
+              left: `${30 + Math.random() * 40}%`,
               top: `${20 + Math.random() * 60}%`,
             }}
             animate={{
               y: [0, -15, 0],
-              x: [0, Math.random() * 8 - 4, 0],
-              opacity: [0.1, 0.15, 0.1],
+              x: [0, Math.random() * 10 - 5, 0],
+              opacity: [0.1, 0.2, 0.1],
             }}
             transition={{
-              duration: 5 + Math.random() * 3,
+              duration: 4 + Math.random() * 4,
               repeat: Infinity,
               ease: "easeInOut",
-              delay: Math.random() * 2,
+              delay: Math.random() * 3,
             }}
           >
             <svg 
-              width={20 + Math.random() * 20} 
-              height={20 + Math.random() * 20} 
+              width={15 + Math.random() * 15} 
+              height={15 + Math.random() * 15} 
               viewBox="0 0 24 24"
             >
               <path 

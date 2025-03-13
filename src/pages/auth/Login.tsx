@@ -27,8 +27,8 @@ export const Login = () => {
   };
 
   return (
-    <div className="gradient-bg min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full glass-card p-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-400 to-teal-400 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <div className="relative">
@@ -60,7 +60,7 @@ export const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
-              className="input-field"
+              className="w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
             />
           </div>
 
@@ -72,7 +72,7 @@ export const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Password"
               required
-              className="input-field"
+              className="w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white"
             />
           </div>
 
@@ -80,7 +80,7 @@ export const Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-blue-600 bg-white hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
               {isLoading ? 'Signing in...' : 'LOG IN'}
             </button>

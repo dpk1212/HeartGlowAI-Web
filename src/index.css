@@ -7,6 +7,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
 }
 
 html, body, #root {
@@ -15,6 +16,7 @@ html, body, #root {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden; /* Prevent horizontal scroll */
 }
 
 /* Mobile-first utility classes */
@@ -26,7 +28,11 @@ html, body, #root {
   
   /* Cards */
   .app-card {
-    @apply bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl p-6;
+    @apply bg-white/20 backdrop-blur-sm rounded-3xl shadow-lg p-6 border border-white/10 transition-all duration-300;
+  }
+  
+  .app-card:active {
+    @apply transform scale-[0.98] transition-all duration-150;
   }
   
   /* Container */
@@ -36,56 +42,146 @@ html, body, #root {
   
   /* Form elements */
   .app-input {
-    @apply w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white;
+    @apply w-full px-4 py-4 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm border border-white/10
+    focus:outline-none focus:ring-2 focus:ring-white/50 focus:bg-white/40
+    transition-all duration-200 text-base min-h-[56px]; /* 56px min height for touch targets */
+  }
+  
+  .app-input-icon-wrapper {
+    @apply relative flex items-center;
+  }
+  
+  .app-input-icon {
+    @apply absolute right-4 text-white/70 h-5 w-5 pointer-events-none;
+  }
+  
+  .app-input-with-icon {
+    @apply pr-12; /* Extra padding for icon */
   }
   
   /* Buttons */
   .app-btn-primary {
-    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-blue-600 bg-white hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-white;
+    @apply w-full flex justify-center items-center py-4 px-4 min-h-[56px]
+    border border-transparent rounded-xl shadow-md
+    text-base font-bold text-[#5B7CFA] bg-white
+    hover:bg-white/90 hover:shadow-lg active:scale-[0.98]
+    focus:outline-none focus:ring-2 focus:ring-white/70
+    transition-all duration-200 transform;
   }
   
   .app-btn-secondary {
-    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-white bg-white/30 hover:bg-white/40 focus:outline-none focus:ring-2 focus:ring-white;
+    @apply w-full flex justify-center items-center py-4 px-4 min-h-[56px]
+    border border-white/20 rounded-xl shadow-md
+    text-base font-bold text-white bg-white/20
+    hover:bg-white/30 active:scale-[0.98]
+    focus:outline-none focus:ring-2 focus:ring-white/50
+    transition-all duration-200 transform;
+  }
+
+  /* Form Validation */
+  .form-error {
+    @apply mt-2 text-sm font-medium text-red-200 bg-red-500/20 px-3 py-1 rounded-lg;
   }
 }
 
 /* Heart animation */
 @keyframes heartbeat {
-  0% { transform: scale(1); }
-  15% { transform: scale(1.15); }
-  30% { transform: scale(1); }
-  45% { transform: scale(1.15); }
-  60% { transform: scale(1); }
+  0% { transform: scale(1); opacity: 0.8; }
+  15% { transform: scale(1.12); opacity: 1; }
+  30% { transform: scale(1); opacity: 0.8; }
+  45% { transform: scale(1.12); opacity: 1; }
+  60% { transform: scale(1); opacity: 0.8; }
 }
 
 .animate-heartbeat {
-  animation: heartbeat 1.5s infinite;
+  animation: heartbeat 2s ease-in-out infinite;
 }
 
-/* Custom utility classes and components */
-@layer components {
-  .gradient-bg {
-    @apply bg-gradient-to-br from-blue-400 to-teal-400;
+/* Floating Animation */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Soft Pulse Animation */
+@keyframes softPulse {
+  0% { opacity: 0.6; }
+  50% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
+.animate-soft-pulse {
+  animation: softPulse 2s ease-in-out infinite;
+}
+
+/* Shimmer Animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Type Animation */
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+.animate-typing {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typing 1.5s steps(40, end);
+}
+
+/* Floating Elements */
+.floating-coin {
+  @apply absolute z-10 w-6 h-6 rounded-full bg-yellow-400 shadow-lg;
+}
+
+.floating-coin-1 {
+  @apply animate-float left-[20%] top-[30%] delay-0;
+}
+
+.floating-coin-2 {
+  @apply animate-float left-[60%] top-[40%] delay-100;
+}
+
+/* Toast and Notification Styles */
+.toast {
+  @apply fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white text-gray-900 px-4 py-2 rounded-xl shadow-lg z-50;
+}
+
+.toast-success {
+  @apply bg-green-500 text-white;
+}
+
+/* Mobile Optimization */
+@media (max-width: 428px) {
+  .app-card {
+    @apply p-4; /* Smaller padding on small screens */
   }
   
-  .glass-card {
-    @apply bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl;
-  }
-  
-  .input-field {
-    @apply w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white;
-  }
-  
-  .btn-primary {
-    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-blue-600 bg-white hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
-  }
-  
-  .btn-secondary {
-    @apply block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center;
+  h1 {
+    @apply text-3xl; /* Smaller headings on mobile */
   }
 }
 
-/* Remove conflicting styles */
+/* Add touch spring effect for mobile interactions */
+.touch-spring {
+  @apply active:scale-95 transition-transform duration-150;
+}
+
+/* Remove any conflicting styles */
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
@@ -163,6 +259,7 @@ a {
   font-weight: 500;
   color: #646cff;
   text-decoration: inherit;
+  @apply no-underline;
 }
 a:hover {
   color: #535bf2;
@@ -183,6 +280,7 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+  @apply bg-transparent border-0 cursor-pointer;
 }
 button:hover {
   border-color: #646cff;
@@ -214,5 +312,24 @@ button:focus-visible {
   75%, 100% {
     transform: scale(2);
     opacity: 0;
+  }
+}
+
+/* ===== Premium Gradient Backgrounds ===== */
+@layer components {
+  .premium-gradient {
+    @apply bg-gradient-to-br from-[#7EB6FF] to-[#5EEAD4]; /* Premium blue to teal gradient */
+  }
+  
+  .premium-gradient-card-blue {
+    @apply bg-gradient-to-br from-blue-500/80 to-blue-600/80 backdrop-blur-sm;
+  }
+  
+  .premium-gradient-card-teal {
+    @apply bg-gradient-to-br from-teal-400/80 to-teal-500/80 backdrop-blur-sm;
+  }
+  
+  .premium-gradient-card-purple {
+    @apply bg-gradient-to-br from-purple-400/80 to-purple-500/80 backdrop-blur-sm;
   }
 }

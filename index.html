@@ -292,12 +292,14 @@
             box-shadow: var(--shadow-md);
             cursor: pointer;
             transition: var(--transition);
-            display: none;
+            display: block;
+            opacity: 0;
+            transform: translateY(100%);
         }
 
         .floating-cta.visible {
-            display: block;
-            animation: slideIn 0.3s ease;
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .floating-cta:hover {
@@ -1541,7 +1543,7 @@
                 <a href="#features">Benefits</a>
                 <a href="#how-it-works">Your Journey</a>
                 <a href="#features">Why Join</a>
-                <a href="#waitlistForm" class="cta-button" id="navCta">Get Early Access</a>
+                <a href="#waitlistForm" class="cta-button">Join the Waitlist</a>
             </div>
         </div>
     </nav>
@@ -2247,6 +2249,19 @@
                 closeButton.addEventListener('click', hideThankYouModal);
             }
         });
+
+        function initFloatingCTA() {
+            const floatingCta = document.getElementById('floatingCta');
+            if (floatingCta) {
+                window.addEventListener('scroll', () => {
+                    if (window.scrollY > 300) {
+                        floatingCta.classList.add('visible');
+                    } else {
+                        floatingCta.classList.remove('visible');
+                    }
+                });
+            }
+        }
     </script>
 </body>
 </html>

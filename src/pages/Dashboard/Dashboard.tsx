@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
-import { SparklesIcon, ChatBubbleLeftRightIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { SparklesIcon, ChatBubbleLeftRightIcon, UserCircleIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { getMessages, Message } from '../../services/messages';
 
 export const Dashboard = () => {
@@ -37,33 +37,46 @@ export const Dashboard = () => {
             <h1 className="text-3xl font-bold text-gray-900">
               Welcome back, {user?.displayName || 'User'}!
             </h1>
-            <p className="mt-1 text-gray-600">Here's what's happening with your messages</p>
+            <p className="mt-1 text-gray-600">What would you like to do today?</p>
           </div>
           <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 text-xs font-medium bg-gradient-accent text-white rounded-full">
+            <span className="px-3 py-1 text-xs font-medium bg-gradient-to-r from-secondary-start to-secondary-end text-white rounded-full">
               Beta User
             </span>
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      {/* Create Message - Main Action */}
+      <div className="mb-10">
         <Link
           to="/messagespark"
-          className="card hover:shadow-lg transition-shadow duration-200"
+          className="block transition-transform duration-300 transform hover:scale-[1.02]"
         >
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-accent p-3 rounded-lg">
-              <SparklesIcon className="h-6 w-6 text-white" />
+          <div className="bg-gradient-to-r from-secondary-start to-secondary-end rounded-xl p-8 shadow-lg text-white">
+            <div className="flex items-center space-x-4 mb-4">
+              <div className="bg-white/20 p-4 rounded-full">
+                <HeartIcon className="h-8 w-8 text-white animate-heartbeat" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold">Create Message Spark</h3>
+                <p className="text-white/90">Craft a heartfelt message for someone special</p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">MessageSpark</h3>
-              <p className="text-sm text-gray-600">Create a new message</p>
+            <p className="text-white/80 mt-2">
+              Express your feelings with the perfect words, guided by AI
+            </p>
+            <div className="mt-4 text-right">
+              <span className="bg-white/20 px-4 py-2 rounded-lg inline-block font-medium">
+                Start Creating →
+              </span>
             </div>
           </div>
         </Link>
+      </div>
 
+      {/* Other Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <Link
           to="/saved-messages"
           className="card hover:shadow-lg transition-shadow duration-200"
@@ -113,10 +126,10 @@ export const Dashboard = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="font-medium text-gray-900">
-                      {message.relationshipType}
+                      {message.relationshipType || message.recipient}
                     </h3>
                     <p className="text-sm text-gray-500 mt-1">
-                      {message.status} • {message.frequency}
+                      {message.status || message.relationship} • {message.occasion || "Personal Message"}
                     </p>
                     <p className="mt-2 text-gray-600 line-clamp-2">{message.content}</p>
                   </div>

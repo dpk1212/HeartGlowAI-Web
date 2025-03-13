@@ -19,13 +19,20 @@ import { auth } from '../firebase/config';
 
 export interface Message {
   id: string;
-  relationshipType: string;
-  status: string;
-  frequency: string;
-  challenges: string[];
+  relationshipType?: string;
+  status?: string;
+  frequency?: string;
+  challenges?: string[];
   content: string;
   createdAt: Date;
   userId: string;
+  recipient?: string;
+  relationship?: string;
+  occasion?: string;
+  tone?: string;
+  emotionalState?: string;
+  desiredOutcome?: string;
+  additionalInfo?: string;
 }
 
 export interface MessageGenerationParams {

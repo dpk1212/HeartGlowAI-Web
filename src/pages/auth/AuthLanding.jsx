@@ -58,16 +58,16 @@ export default function AuthLanding() {
           </p>
 
           {/* Buttons Container - centered with proper spacing */}
-          <div className="w-full space-y-4 px-2">
+          <div className="flex flex-col items-center space-y-4 w-full">
             {/* Sign In Button - secondary outlined style */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full"
+              className="w-64"
             >
               <Link 
                 to="/login" 
-                className="w-full flex items-center justify-center py-3.5 px-6 rounded-xl border-2 border-white/30 text-white font-semibold text-base tracking-wide transition-all duration-200 hover:bg-white/10 hover:border-white/50"
+                className="block text-center py-3.5 px-6 rounded-2xl border-2 border-white/30 text-white font-semibold text-base tracking-wide transition-all duration-200 hover:bg-white/10 hover:border-white/50"
               >
                 Sign In
               </Link>
@@ -77,11 +77,11 @@ export default function AuthLanding() {
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full"
+              className="w-64"
             >
               <Link 
                 to="/signup" 
-                className="w-full flex items-center justify-center py-3.5 px-6 rounded-xl bg-gradient-to-r from-[#ff6bcb] to-[#B19CD9] text-white font-bold text-base tracking-wide shadow-lg transition-all duration-200 hover:shadow-xl"
+                className="block text-center py-3.5 px-6 rounded-2xl bg-gradient-to-r from-[#ff6bcb] to-[#B19CD9] text-white font-bold text-base tracking-wide shadow-lg transition-all duration-200 hover:shadow-xl"
               >
                 Sign Up
               </Link>

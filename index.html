@@ -781,12 +781,41 @@
         }
 
         // Handle form submission
-        document.querySelector('.waitlist-form').addEventListener('submit', function(e) {
+        document.querySelector('.waitlist-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = this.querySelector('input[type="email"]').value;
-            // Add your waitlist submission logic here
-            showSuccessAnimation();
-            this.reset();
+            const form = this;
+            const submitButton = form.querySelector('button[type="submit"]');
+            const email = form.querySelector('input[type="email"]').value;
+            
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.textContent = 'Sending...';
+            
+            try {
+                const response = await fetch('https://formspree.io/f/mjkyvdal', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        email: email
+                    })
+                });
+
+                if (response.ok) {
+                    showSuccessAnimation();
+                    form.reset();
+                } else {
+                    throw new Error('Form submission failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Sorry, there was an error submitting the form. Please try again.');
+            } finally {
+                // Re-enable submit button and restore text
+                submitButton.disabled = false;
+                submitButton.textContent = 'Join Waitlist';
+            }
         });
 
         // Handle close button

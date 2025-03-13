@@ -3,7 +3,7 @@ import { HeartIcon, SparklesIcon, ChatBubbleLeftRightIcon } from '@heroicons/rea
 
 export const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-400">
+    <div className="gradient-bg min-h-screen w-full">
       <div className="container mx-auto px-4 py-12">
         <div className="flex flex-col items-center justify-center mb-12">
           <div className="relative mb-4">
@@ -22,7 +22,7 @@ export const Home = () => {
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-          <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl transform transition-all duration-300 hover:scale-105">
+          <div className="glass-card p-8 transform transition-all duration-300 hover:scale-105">
             <div className="flex items-center mb-6">
               <div className="bg-blue-600/30 p-3 rounded-2xl mr-4">
                 <SparklesIcon className="h-8 w-8 text-white" />
@@ -33,14 +33,14 @@ export const Home = () => {
               Generate thoughtful, personalized messages for your loved ones with AI assistance. Perfect for special occasions or just to show you care.
             </p>
             <Link
-              to="/message-spark"
-              className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center"
+              to="/messagespark"
+              className="btn-secondary"
             >
               Craft a Message
             </Link>
           </div>
 
-          <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl transform transition-all duration-300 hover:scale-105">
+          <div className="glass-card p-8 transform transition-all duration-300 hover:scale-105">
             <div className="flex items-center mb-6">
               <div className="bg-pink-600/30 p-3 rounded-2xl mr-4">
                 <ChatBubbleLeftRightIcon className="h-8 w-8 text-white" />
@@ -52,7 +52,7 @@ export const Home = () => {
             </p>
             <Link
               to="/dashboard"
-              className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center"
+              className="btn-secondary"
             >
               Get Insights
             </Link>
@@ -60,7 +60,7 @@ export const Home = () => {
         </div>
 
         <div className="mt-16 text-center">
-          <div className="max-w-md mx-auto bg-white/20 backdrop-blur-sm rounded-3xl p-8 shadow-xl">
+          <div className="max-w-md mx-auto glass-card p-8">
             <h2 className="text-2xl font-bold text-white mb-4">Ready to get started?</h2>
             <div className="grid grid-cols-2 gap-4">
               <Link

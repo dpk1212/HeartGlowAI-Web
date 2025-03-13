@@ -44,9 +44,9 @@ export const Dashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-400 to-teal-400 py-8 px-4">
+    <div className="gradient-bg min-h-screen py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white/20 backdrop-blur-sm rounded-3xl p-6 mb-6 shadow-xl">
+        <div className="glass-card p-6 mb-6">
           <div className="flex items-center">
             <div className="bg-blue-600/30 p-3 rounded-full mr-4">
               {user?.photoURL ? (
@@ -88,7 +88,7 @@ export const Dashboard = () => {
         {renderTabs()}
 
         <div className="space-y-6">
-          <div className="bg-blue-500/30 backdrop-blur-sm rounded-3xl p-6 shadow-xl">
+          <div className="bg-blue-500/30 backdrop-blur-sm rounded-3xl p-6 shadow-xl relative">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
                 <SparklesIcon className="h-6 w-6 text-white mr-2" />
@@ -103,7 +103,7 @@ export const Dashboard = () => {
             </p>
             <Link
               to="/messagespark"
-              className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center"
+              className="btn-secondary"
             >
               Craft a New Message
             </Link>
@@ -112,7 +112,7 @@ export const Dashboard = () => {
             </button>
           </div>
 
-          <div className="bg-teal-500/30 backdrop-blur-sm rounded-3xl p-6 shadow-xl">
+          <div className="bg-teal-500/30 backdrop-blur-sm rounded-3xl p-6 shadow-xl relative">
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
                 <ChatBubbleLeftRightIcon className="h-6 w-6 text-white mr-2" />
@@ -125,7 +125,7 @@ export const Dashboard = () => {
             <p className="text-white/90 mb-4">
               Active listening is key to deeper relationships. Try reflecting back what you hear to show understanding.
             </p>
-            <button className="block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center">
+            <button className="btn-secondary">
               Get More Tips
             </button>
             <button className="absolute top-4 right-4 text-white hover:text-white/80">

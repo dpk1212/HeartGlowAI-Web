@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Reset core styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+/* Custom utility classes and components */
+@layer components {
+  .gradient-bg {
+    @apply bg-gradient-to-br from-blue-400 to-teal-400;
+  }
+  
+  .glass-card {
+    @apply bg-white/20 backdrop-blur-sm rounded-3xl shadow-xl;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white/30 text-white placeholder-white/70 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-white;
+  }
+  
+  .btn-primary {
+    @apply w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-blue-600 bg-white hover:bg-white/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500;
+  }
+  
+  .btn-secondary {
+    @apply block w-full bg-white/30 hover:bg-white/40 text-white font-medium py-3 px-4 rounded-xl text-center;
+  }
+}
+
 /* Remove conflicting styles */
 :root {
   font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;

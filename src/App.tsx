@@ -3,6 +3,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { MessageSpark } from './pages/MessageSpark/MessageSpark'
 import Login from './pages/auth/Login.jsx'
 import SignUp from './pages/auth/SignUp.jsx'
+import AuthLanding from './pages/auth/AuthLanding.jsx'
 import { AuthProvider } from './contexts/AuthContext'
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Login />} />
+          <Route path="/" element={<AuthLanding />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route
@@ -21,7 +22,7 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="*" element={<Login />} />
+          <Route path="*" element={<AuthLanding />} />
         </Routes>
       </Router>
     </AuthProvider>

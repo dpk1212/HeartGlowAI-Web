@@ -2,13 +2,52 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Remove conflicting styles */
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+/* Make sure body doesn't have any margin or padding that could interfere with layouts */
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Remove any max-width restrictions from default layouts */
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Optional animation for heart icon */
+@keyframes heartbeat {
+  0% {
+    transform: scale(1);
+  }
+  15% {
+    transform: scale(1.15);
+  }
+  30% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.15);
+  }
+  60% {
+    transform: scale(1);
+  }
+}
+
+.animate-heartbeat {
+  animation: heartbeat 1.5s infinite;
+}
+
 @layer base {
   body {
     @apply bg-gray-50 text-gray-900 min-h-screen;
-    margin: 0;
-    min-width: 320px;
-    min-height: 100vh;
-    font-family: 'Inter', sans-serif;
   }
 }
 
@@ -60,21 +99,6 @@
   @apply bg-gradient-to-r from-[#FFD700] to-[#FF69B4] bg-clip-text text-transparent;
 }
 
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 a {
   font-weight: 500;
   color: #646cff;
@@ -82,13 +106,6 @@ a {
 }
 a:hover {
   color: #535bf2;
-}
-
-/* Remove the problematic body styling */
-body {
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
 }
 
 h1 {
@@ -138,33 +155,4 @@ button:focus-visible {
     transform: scale(2);
     opacity: 0;
   }
-}
-
-/* Add a smooth pulse animation for the heart */
-@keyframes heartbeat {
-  0% {
-    transform: scale(1);
-  }
-  15% {
-    transform: scale(1.15);
-  }
-  30% {
-    transform: scale(1);
-  }
-  45% {
-    transform: scale(1.15);
-  }
-  60% {
-    transform: scale(1);
-  }
-}
-
-.animate-heartbeat {
-  animation: heartbeat 1.5s infinite;
-}
-
-/* Remove any max-width restrictions from default layouts */
-#root {
-  width: 100%;
-  min-height: 100vh;
 }

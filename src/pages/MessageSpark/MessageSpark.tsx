@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ClipboardDocumentIcon, HeartIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../hooks/useAuth';
+import { createMessage } from '../../services/messages';
 
 type Step = 'type' | 'status' | 'challenges' | 'message' | 'result';
 
@@ -73,14 +74,22 @@ export const MessageSpark = () => {
 
   const handleGenerateMessage = async () => {
     setLoading(true);
-    // TODO: Implement actual message generation with AI
-    setTimeout(() => {
-      setGeneratedMessage(
-        "I've been thinking about our relationship and wanted to express how much I value our connection. Despite the challenges we face, I'm committed to making this work and growing together."
-      );
+    
+    try {
+      // TODO: Replace with real AI message generation
+      // This is just a placeholder for now
+      setTimeout(() => {
+        const generatedContent = 
+          "I've been thinking about our relationship and wanted to express how much I value our connection. Despite the challenges we face, I'm committed to making this work and growing together.";
+        
+        setGeneratedMessage(generatedContent);
+        setCurrentStep('result');
+        setLoading(false);
+      }, 2000);
+    } catch (error) {
+      console.error('Error generating message:', error);
       setLoading(false);
-      setCurrentStep('result');
-    }, 2000);
+    }
   };
 
   const handleCopyMessage = () => {
@@ -88,8 +97,27 @@ export const MessageSpark = () => {
     // TODO: Add toast notification
   };
 
-  const handleSaveMessage = () => {
-    // TODO: Implement message saving to database
+  const handleSaveMessage = async () => {
+    if (!generatedMessage) return;
+    
+    setLoading(true);
+    
+    try {
+      await createMessage({
+        relationshipType: formData.relationshipType,
+        status: formData.status,
+        frequency: formData.frequency,
+        challenges: formData.challenges,
+        content: generatedMessage,
+      });
+      
+      // Show success message or notification
+      console.log('Message saved successfully!');
+    } catch (error) {
+      console.error('Error saving message:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const renderStep = () => {

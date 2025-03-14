@@ -50,9 +50,6 @@ const MessageSpark: React.FC = () => {
     additionalInfo: ''
   });
 
-  // Add state to force re-renders when input values change
-  const [inputsChanged, setInputsChanged] = useState(0);
-
   const [hearts, setHearts] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -94,12 +91,6 @@ const MessageSpark: React.FC = () => {
       opacity: Math.random() * 0.3 + 0.1, // Lower max opacity
     }));
     setHearts(newHearts);
-  };
-  
-  // Event handler to trigger re-renders when input values change
-  const handleInputChange = () => {
-    // Increment the counter to trigger a re-render
-    setInputsChanged(prev => prev + 1);
   };
   
   // When moving to the next step, we capture values from the DOM refs
@@ -175,13 +166,8 @@ const MessageSpark: React.FC = () => {
     navigate("/welcome");
   };
 
-  // Check form validity based on current DOM values
-  const isStepValid = () => {
-    // Include inputsChanged in the dependency to ensure it re-evaluates
-    // with each input change
-    // eslint-disable-next-line
-    const _ = inputsChanged;
-    
+  // Check form validity based on current DOM values directly
+  const isStepValid = () => {    
     switch (currentStep) {
       case Step.Relationship:
         return !!(recipientInputRef.current?.value && 
@@ -234,7 +220,6 @@ const MessageSpark: React.FC = () => {
             type="text"
             placeholder="E.g., Sarah, Mom, John"
             ref={recipientInputRef}
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -265,7 +250,6 @@ const MessageSpark: React.FC = () => {
             id="relationship"
             name="relationship"
             ref={relationshipSelectRef}
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -310,7 +294,6 @@ const MessageSpark: React.FC = () => {
             type="text"
             placeholder="E.g., Birthday, Anniversary, Apology"
             ref={occasionInputRef}
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -415,7 +398,6 @@ const MessageSpark: React.FC = () => {
             id="tone"
             name="tone"
             ref={toneSelectRef}
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -461,7 +443,6 @@ const MessageSpark: React.FC = () => {
             name="emotionalState"
             ref={emotionalStateSelectRef}
             defaultValue="Hopeful"
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -506,7 +487,6 @@ const MessageSpark: React.FC = () => {
             name="desiredOutcome"
             ref={desiredOutcomeSelectRef}
             defaultValue="Strengthen the relationship"
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -551,7 +531,6 @@ const MessageSpark: React.FC = () => {
             rows={4}
             placeholder="Add any specific details you'd like to include in your message..."
             ref={additionalInfoTextareaRef}
-            onChange={handleInputChange}
             style={{
               width: "100%",
               padding: "0.85rem",

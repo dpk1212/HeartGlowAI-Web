@@ -51,8 +51,8 @@ export default function Login() {
       // Use Firebase authentication
       await signIn(email, password);
       
-      // If successful, navigate to welcome page
-      navigate("/welcome");
+      // If successful, navigate to message spark page instead of welcome
+      navigate("/message");
     } catch (err) {
       console.error("Login error:", err);
       

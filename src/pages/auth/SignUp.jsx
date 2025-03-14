@@ -64,8 +64,8 @@ export default function SignUp() {
       // Use Firebase signUp function
       await signUp(email, password, name);
       
-      // If successful, navigate to welcome page
-      navigate("/welcome");
+      // If successful, navigate to message spark page instead of welcome
+      navigate("/message");
     } catch (err) {
       console.error("Signup error:", err);
       

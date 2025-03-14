@@ -49,7 +49,7 @@ export default function WelcomeHome() {
   };
 
   const handleStartChat = () => {
-    navigate("/dashboard");
+    navigate("/message");
   };
 
   const handleProfile = () => {
@@ -359,7 +359,7 @@ export default function WelcomeHome() {
               maxWidth: "600px",
             }}
           >
-            Express your emotions with the perfect words, powered by AI. Start a new conversation or explore your previous chats.
+            Express your emotions with the perfect words using MessageSpark, our advanced AI message generator. Create beautiful messages for your loved ones.
           </motion.p>
         </motion.div>
 
@@ -397,8 +397,8 @@ export default function WelcomeHome() {
               backdropFilter: "blur(5px)",
             }}
           >
-            <FaComment size={20} />
-            Start New Conversation
+            <FaHeart size={20} />
+            Create AI Message with MessageSpark
           </motion.button>
 
           {/* Featured templates or suggested prompts */}
@@ -412,7 +412,7 @@ export default function WelcomeHome() {
             }}
           >
             <h3 style={{ color: "#fff", fontSize: "1.2rem", marginBottom: "1rem", textAlign: "center" }}>
-              Suggested Templates
+              Message Templates
             </h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", justifyContent: "center" }}>
               {["Love Letter", "Apology Note", "Anniversary Message", "Congratulations"].map((template, index) => (
@@ -423,6 +423,7 @@ export default function WelcomeHome() {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 + index * 0.1 }}
+                  onClick={handleStartChat}
                   style={{
                     padding: "0.75rem 1.25rem",
                     backgroundColor: "rgba(255, 255, 255, 0.1)",

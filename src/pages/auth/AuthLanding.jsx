@@ -1,17 +1,52 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
 
 export default function AuthLanding() {
+  // Add debug mode to see container boundaries
+  const [debug, setDebug] = useState(false);
+  
+  // Toggle debug mode with D key
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'd' || e.key === 'D') {
+        setDebug(prev => !prev);
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
-    <div className="min-h-screen w-full flex justify-center items-center bg-gradient-to-b from-pink-500 via-purple-500 to-indigo-500 overflow-hidden relative px-2"> 
-      {/* Simplified main container structure - single container with strict centering */}
-      <motion.div 
-        className="flex flex-col items-center justify-center w-full max-w-[280px] z-10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+    // Main container - full screen with flex centering
+    <div 
+      style={{
+        minHeight: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        background: 'linear-gradient(to bottom, #ec4899, #a855f7, #6366f1)',
+        overflow: 'hidden',
+        position: 'relative',
+        padding: '0'
+      }}
+    > 
+      {/* Content container with fixed width and debug border */}
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '270px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 10,
+          border: debug ? '1px solid yellow' : 'none'
+        }}
       >
-        {/* Heart Icon with heartbeat animation */}
+        {/* Heart Icon */}
         <motion.div 
           className="w-20 h-20 mb-6"
           animate={{ 
@@ -22,6 +57,9 @@ export default function AuthLanding() {
             duration: 1.5,
             repeat: Infinity,
             ease: "easeInOut"
+          }}
+          style={{
+            border: debug ? '1px solid red' : 'none'
           }}
         >
           <svg viewBox="0 0 24 24" className="w-full h-full drop-shadow-md">
@@ -46,47 +84,123 @@ export default function AuthLanding() {
           </svg>
         </motion.div>
 
-        {/* Brand name - simplified text classes */}
-        <h1 className="text-2xl font-bold tracking-wider text-white mb-2 uppercase text-center w-full">
+        {/* Brand name */}
+        <h1 
+          style={{
+            fontSize: '1.5rem', 
+            fontWeight: 'bold', 
+            letterSpacing: '0.05em', 
+            color: 'white', 
+            marginBottom: '0.5rem',
+            textTransform: 'uppercase',
+            textAlign: 'center',
+            width: '100%',
+            border: debug ? '1px solid green' : 'none'
+          }}
+        >
           Heart Glow AI
         </h1>
         
-        {/* Tagline - simplified text classes */}
-        <p className="text-white/80 text-center mb-8 text-sm w-full">
+        {/* Tagline */}
+        <p 
+          style={{
+            color: 'rgba(255, 255, 255, 0.8)',
+            textAlign: 'center',
+            marginBottom: '2rem',
+            fontSize: '0.875rem',
+            width: '100%',
+            border: debug ? '1px solid blue' : 'none'
+          }}
+        >
           Express your feelings with beautifully crafted messages
         </p>
 
-        {/* Buttons - direct inclusion without nested container for better centering */}
-        {/* Sign In Button */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full mb-4"
+        {/* Buttons container with strict width control */}
+        <div 
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '1rem',
+            border: debug ? '1px solid purple' : 'none'
+          }}
         >
-          <Link 
-            to="/login" 
-            className="block text-center py-3 px-6 rounded-2xl border-2 border-white/30 text-white font-semibold text-base tracking-wide transition-all duration-200 hover:bg-white/10 hover:border-white/50"
+          {/* Sign In Button */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              width: '100%',
+              border: debug ? '1px solid cyan' : 'none'
+            }}
           >
-            Sign In
-          </Link>
-        </motion.div>
+            <Link 
+              to="/login" 
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '1rem',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                color: 'white',
+                fontWeight: '600',
+                fontSize: '1rem',
+                letterSpacing: '0.025em',
+                transition: 'all 200ms',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent';
+                e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.3)';
+              }}
+            >
+              Sign In
+            </Link>
+          </motion.div>
 
-        {/* Sign Up Button */}
-        <motion.div
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full"
-        >
-          <Link 
-            to="/signup" 
-            className="block text-center py-3 px-6 rounded-2xl bg-gradient-to-r from-[#ff6bcb] to-[#B19CD9] text-white font-bold text-base tracking-wide shadow-lg transition-all duration-200 hover:shadow-xl"
+          {/* Sign Up Button */}
+          <motion.div
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            style={{
+              width: '100%',
+              border: debug ? '1px solid orange' : 'none'
+            }}
           >
-            Sign Up
-          </Link>
-        </motion.div>
-      </motion.div>
+            <Link 
+              to="/signup" 
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'center',
+                padding: '0.75rem 1.5rem',
+                borderRadius: '1rem',
+                background: 'linear-gradient(to right, #ff6bcb, #B19CD9)',
+                color: 'white',
+                fontWeight: '700',
+                fontSize: '1rem',
+                letterSpacing: '0.025em',
+                boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                transition: 'all 200ms',
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)';
+              }}
+            >
+              Sign Up
+            </Link>
+          </motion.div>
+        </div>
+      </div>
 
-      {/* Expanded floating heart background elements - centered */}
+      {/* Background floating hearts */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {[...Array(12)].map((_, i) => (
           <motion.div

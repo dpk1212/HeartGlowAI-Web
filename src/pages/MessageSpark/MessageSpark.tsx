@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes, FaPlus, FaChevronDown, FaChevronUp, FaReply } from 'react-icons/fa';
+import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes, FaPlus, FaChevronDown, FaChevronUp, FaReply, FaTrash } from 'react-icons/fa';
 import { generateMessage } from '../../services/messages';
 import { useFirebase } from '../../contexts/FirebaseContext';
 import './MessageSpark.css';
@@ -74,6 +74,7 @@ const MessageSpark: React.FC = () => {
   const [selectedExchange, setSelectedExchange] = useState<Exchange | null>(null);
   const [showHistory, setShowHistory] = useState(false);
   const [expandedConversation, setExpandedConversation] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   
   // UI state
   const [isGenerating, setIsGenerating] = useState(false);
@@ -178,7 +179,38 @@ const MessageSpark: React.FC = () => {
     }
   };
   
-  // Handle generating a reply to a message
+  // Handle deleting a conversation
+  const handleDeleteConversation = (conversationId: string) => {
+    // If this is just a confirmation request
+    if (showDeleteConfirm !== conversationId) {
+      setShowDeleteConfirm(conversationId);
+      return;
+    }
+    
+    // Actually delete the conversation
+    setConversations(prev => prev.filter(c => c.id !== conversationId));
+    
+    // If the deleted conversation was selected, clear the selection
+    if (selectedConversation?.id === conversationId) {
+      setSelectedConversation(null);
+      setSelectedExchange(null);
+      setConversationName('');
+      setOriginalMessage('');
+      setGeneratedReply('');
+      setIsCreatingNewExchange(true);
+    }
+    
+    // Reset delete confirmation
+    setShowDeleteConfirm(null);
+  };
+  
+  // Cancel delete confirmation
+  const handleCancelDelete = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent triggering the conversation item click
+    setShowDeleteConfirm(null);
+  };
+  
+  // Two-step process for generating a properly formatted reply
   const handleGenerateReply = async () => {
     if (isCreatingNewExchange && !conversationName.trim()) {
       setError('Please provide a conversation name.');
@@ -194,47 +226,64 @@ const MessageSpark: React.FC = () => {
     setError('');
     
     try {
-      // Use a structured JSON output format for more reliable parsing
-      const systemPrompt = `System Prompt for OpenAI (JSON Output Format)
-You are HeartGlowAI, an AI-powered relationship coach that helps users improve communication in romantic, friendship, and family relationships. Your goal is to provide warm, thoughtful, and emotionally intelligent responses to messages, ensuring that users can express themselves clearly and effectively.
+      // Step 1: Generate the initial text response
+      const initialPrompt = `You are HeartGlowAI, an AI-powered relationship coach that helps users improve communication in romantic, friendship, and family relationships. Your goal is to provide warm, thoughtful, and emotionally intelligent responses to messages, ensuring that users can express themselves clearly and effectively.
 
-Generate a JSON object in the following format:
+When generating a response, follow this format with THREE sections:
 
-{
-  "try_this_response": "<Craft a concise, empathetic, and clear response to the given message. Ensure the tone matches the context (e.g., supportive, reassuring, lighthearted, firm but kind). If the message contains conflict, de-escalate tension while maintaining honesty. If the message is emotionally charged, acknowledge feelings before responding.>",
-  "why_this_could_work": "<Explain why the suggested response is effective in strengthening communication. Highlight how the response encourages positive interaction, avoids misinterpretation, and fosters understanding. If applicable, reference emotional intelligence principles (e.g., active listening, avoiding blame, validating feelings).>",
-  "common_mistakes": "<Identify common errors people make when replying to similar messages. Explain why these responses might lead to misunderstandings, conflict, or missed opportunities for connection. Keep this section brief but impactful, offering insight into what to avoid.>"
-}
+1. Try This Response: Craft a concise, empathetic, and clear response to the given message. Ensure the tone matches the context.
 
-Guidelines for Output Generation:
-Ensure the response is warm, natural, and emotionally intelligent.
-Each field must contain structured, high-quality content that aligns with HeartGlowAI's relationship coaching principles.
-The total response should not exceed 200 words for clarity and readability.
-Do not modify the JSON structure—the output must follow this exact format.
-No additional explanations or extraneous text should be included in the response.
+2. Why This Could Work Insights: Explain why the suggested response is effective in strengthening communication.
+
+3. Common Mistakes: Identify common errors people make when replying to similar messages.
 
 The message you need to reply to is:
 "${originalMessage}"
 
-Please provide a JSON response following the format above. Make sure it is valid JSON that can be parsed.`;
-      
-      const reply = await generateMessage({
+Please respond with ONLY these three sections clearly labeled.`;
+
+      const initialReply = await generateMessage({
         recipient: "Reply",
         relationship: "MessageReply",
         occasion: "ReplyToMessage",
         tone: "Authentic",
         emotionalState: "Thoughtful",
         desiredOutcome: "MeaningfulConversation",
-        additionalContext: systemPrompt
+        additionalContext: initialPrompt
       });
       
-      setGeneratedReply(reply);
+      // Step 2: Convert the text response to JSON format
+      const jsonFormatPrompt = `Convert the following text response into a valid JSON object with the following structure exactly:
+
+{
+  "try_this_response": "the text from the 'Try This Response' section",
+  "why_this_could_work": "the text from the 'Why This Could Work Insights' section",
+  "common_mistakes": "the text from the 'Common Mistakes' section"
+}
+
+The text to convert is:
+
+${initialReply}
+
+Return ONLY the JSON object with no additional text before or after. Make sure it is valid JSON.`;
+
+      const jsonReply = await generateMessage({
+        recipient: "FormatJSON",
+        relationship: "TextToJSON",
+        occasion: "FormatConversion",
+        tone: "Technical",
+        emotionalState: "Precise",
+        desiredOutcome: "ValidJSON",
+        additionalContext: jsonFormatPrompt
+      });
+      
+      setGeneratedReply(jsonReply);
       
       // Create a new exchange
       const newExchange: Exchange = {
         id: Date.now().toString(),
         originalMessage,
-        reply,
+        reply: jsonReply,
         timestamp: new Date()
       };
       
@@ -374,6 +423,42 @@ Please provide a JSON response following the format above. Make sure it is valid
     return sections;
   };
 
+  // Render the structured reply with formatting
+  const renderStructuredReply = (reply: string) => {
+    const sections = formatStructuredReply(reply);
+    
+    return (
+      <div className="structured-reply">
+        {sections.response && (
+          <div className="reply-section response-section">
+            <h4>Try This Response</h4>
+            <div className="section-content">
+              {sections.response}
+            </div>
+          </div>
+        )}
+        
+        {sections.insights && (
+          <div className="reply-section insights-section">
+            <h4>Why This Could Work</h4>
+            <div className="section-content">
+              {sections.insights}
+            </div>
+          </div>
+        )}
+        
+        {sections.mistakes && (
+          <div className="reply-section mistakes-section">
+            <h4>Common Mistakes</h4>
+            <div className="section-content">
+              {sections.mistakes}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+  
   // Handle copying reply to clipboard - only copy the response section
   const handleCopyReply = () => {
     // Format the reply and get just the response section to copy
@@ -432,42 +517,6 @@ ${sections.mistakes}`;
       hour: 'numeric',
       minute: 'numeric'
     }).format(date);
-  };
-  
-  // Render the structured reply with formatting
-  const renderStructuredReply = (reply: string) => {
-    const sections = formatStructuredReply(reply);
-    
-    return (
-      <div className="structured-reply">
-        {sections.response && (
-          <div className="reply-section response-section">
-            <h4>Try This Response</h4>
-            <div className="section-content">
-              {sections.response}
-            </div>
-          </div>
-        )}
-        
-        {sections.insights && (
-          <div className="reply-section insights-section">
-            <h4>Why This Could Work</h4>
-            <div className="section-content">
-              {sections.insights}
-            </div>
-          </div>
-        )}
-        
-        {sections.mistakes && (
-          <div className="reply-section mistakes-section">
-            <h4>Common Mistakes</h4>
-            <div className="section-content">
-              {sections.mistakes}
-            </div>
-          </div>
-        )}
-      </div>
-    );
   };
   
   // The landing page view
@@ -571,9 +620,42 @@ ${sections.mistakes}`;
                     <div className="conversation-date">
                       Last updated: {formatDate(conversation.lastUpdated)}
                     </div>
-                    <button className="expand-button">
-                      {expandedConversation === conversation.id ? <FaChevronUp /> : <FaChevronDown />}
-                    </button>
+                    <div className="conversation-actions">
+                      {showDeleteConfirm === conversation.id ? (
+                        <div className="delete-confirm">
+                          <span>Delete?</span>
+                          <button 
+                            className="confirm-yes" 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteConversation(conversation.id);
+                            }}
+                          >
+                            Yes
+                          </button>
+                          <button 
+                            className="confirm-no"
+                            onClick={handleCancelDelete}
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <button 
+                          className="delete-button" 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteConversation(conversation.id);
+                          }}
+                          title="Delete conversation"
+                        >
+                          <FaTrash />
+                        </button>
+                      )}
+                      <button className="expand-button">
+                        {expandedConversation === conversation.id ? <FaChevronUp /> : <FaChevronDown />}
+                      </button>
+                    </div>
                   </div>
                   
                   {/* Expanded view showing all exchanges in this conversation */}

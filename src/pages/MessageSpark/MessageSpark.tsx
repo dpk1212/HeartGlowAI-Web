@@ -39,6 +39,14 @@ const MessageSpark: React.FC = () => {
   const desiredOutcomeSelectRef = useRef<HTMLSelectElement>(null);
   const additionalInfoTextareaRef = useRef<HTMLTextAreaElement>(null);
   
+  // Add a state to track if inputs have been filled
+  const [inputsValid, setInputsValid] = useState({
+    recipient: false,
+    relationship: false,
+    occasion: false,
+    tone: false
+  });
+  
   const [hearts, setHearts] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
   const [formData, setFormData] = useState<MessageFormData>({
@@ -80,7 +88,36 @@ const MessageSpark: React.FC = () => {
     if (emotionalStateSelectRef.current) emotionalStateSelectRef.current.value = formData.emotionalState;
     if (desiredOutcomeSelectRef.current) desiredOutcomeSelectRef.current.value = formData.desiredOutcome;
     if (additionalInfoTextareaRef.current) additionalInfoTextareaRef.current.value = formData.additionalInfo;
+    
+    // Set initial input validity based on values
+    setInputsValid({
+      recipient: !!formData.recipient,
+      relationship: !!formData.relationship,
+      occasion: !!formData.occasion,
+      tone: !!formData.tone
+    });
   }, []);
+
+  // Add event handlers for tracking input validity
+  const handleRecipientChange = () => {
+    const value = recipientInputRef.current?.value || '';
+    setInputsValid(prev => ({ ...prev, recipient: value.trim().length > 0 }));
+  };
+
+  const handleRelationshipChange = () => {
+    const value = relationshipSelectRef.current?.value || '';
+    setInputsValid(prev => ({ ...prev, relationship: value.trim().length > 0 }));
+  };
+
+  const handleOccasionChange = () => {
+    const value = occasionInputRef.current?.value || '';
+    setInputsValid(prev => ({ ...prev, occasion: value.trim().length > 0 }));
+  };
+
+  const handleToneChange = () => {
+    const value = toneSelectRef.current?.value || '';
+    setInputsValid(prev => ({ ...prev, tone: value.trim().length > 0 }));
+  };
 
   // Function to generate random floating hearts with fewer hearts
   const generateHearts = () => {
@@ -185,11 +222,9 @@ const MessageSpark: React.FC = () => {
   const isStepValid = () => {
     switch (currentStep) {
       case Step.Relationship:
-        return !!(recipientInputRef.current?.value && 
-                 relationshipSelectRef.current?.value && 
-                 occasionInputRef.current?.value);
+        return inputsValid.recipient && inputsValid.relationship && inputsValid.occasion;
       case Step.Message:
-        return !!toneSelectRef.current?.value;
+        return inputsValid.tone;
       default:
         return true;
     }
@@ -236,6 +271,7 @@ const MessageSpark: React.FC = () => {
             placeholder="E.g., Sarah, Mom, John"
             defaultValue={formData.recipient}
             ref={recipientInputRef}
+            onChange={handleRecipientChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -267,6 +303,7 @@ const MessageSpark: React.FC = () => {
             name="relationship"
             defaultValue={formData.relationship}
             ref={relationshipSelectRef}
+            onChange={handleRelationshipChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -312,6 +349,7 @@ const MessageSpark: React.FC = () => {
             placeholder="E.g., Birthday, Anniversary, Apology"
             defaultValue={formData.occasion}
             ref={occasionInputRef}
+            onChange={handleOccasionChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -417,6 +455,7 @@ const MessageSpark: React.FC = () => {
             name="tone"
             defaultValue={formData.tone}
             ref={toneSelectRef}
+            onChange={handleToneChange}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -837,9 +876,9 @@ const MessageSpark: React.FC = () => {
           >
             Return to Home
           </motion.button>
-        </div>
+          </div>
       </motion.div>
-    );
+        );
   };
 
   return (

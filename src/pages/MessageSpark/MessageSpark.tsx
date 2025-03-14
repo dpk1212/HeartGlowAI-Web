@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaUser, FaCopy, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -30,6 +30,15 @@ interface MessageResult {
 }
 
 const MessageSpark: React.FC = () => {
+  // Input refs to handle inputs without re-rendering
+  const recipientInputRef = useRef<HTMLInputElement>(null);
+  const relationshipSelectRef = useRef<HTMLSelectElement>(null);
+  const occasionInputRef = useRef<HTMLInputElement>(null);
+  const toneSelectRef = useRef<HTMLSelectElement>(null);
+  const emotionalStateSelectRef = useRef<HTMLSelectElement>(null);
+  const desiredOutcomeSelectRef = useRef<HTMLSelectElement>(null);
+  const additionalInfoTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
   const [hearts, setHearts] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
   const [formData, setFormData] = useState<MessageFormData>({
@@ -76,15 +85,40 @@ const MessageSpark: React.FC = () => {
     setHearts(newHearts);
   };
   
-  // Optimized handleChange function with useCallback to maintain reference stability
-  const handleChange = useCallback((
+  // Handle direct DOM input updates without re-rendering
+  const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }, []);
+    
+    // Only update React state when really needed
+    window.requestAnimationFrame(() => {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    });
+  };
   
   const goToNextStep = () => {
+    // Synchronize form state with current input values
+    if (currentStep === Step.Relationship) {
+      setFormData(prev => ({
+        ...prev,
+        recipient: recipientInputRef.current?.value || prev.recipient,
+        relationship: relationshipSelectRef.current?.value || prev.relationship,
+        occasion: occasionInputRef.current?.value || prev.occasion
+      }));
+    } else if (currentStep === Step.Message) {
+      setFormData(prev => ({
+        ...prev,
+        tone: toneSelectRef.current?.value || prev.tone,
+        emotionalState: emotionalStateSelectRef.current?.value || prev.emotionalState,
+        desiredOutcome: desiredOutcomeSelectRef.current?.value || prev.desiredOutcome,
+        additionalInfo: additionalInfoTextareaRef.current?.value || prev.additionalInfo
+      }));
+    }
+    
     setCurrentStep(prev => prev + 1 as Step);
   };
 
@@ -192,6 +226,7 @@ const MessageSpark: React.FC = () => {
             value={formData.recipient}
             onChange={handleChange}
             required
+            ref={recipientInputRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -224,6 +259,7 @@ const MessageSpark: React.FC = () => {
             value={formData.relationship}
             onChange={handleChange}
             required
+            ref={relationshipSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -270,6 +306,7 @@ const MessageSpark: React.FC = () => {
             value={formData.occasion}
             onChange={handleChange}
             required
+            ref={occasionInputRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -376,6 +413,7 @@ const MessageSpark: React.FC = () => {
             value={formData.tone}
             onChange={handleChange}
             required
+            ref={toneSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -421,6 +459,7 @@ const MessageSpark: React.FC = () => {
             name="emotionalState"
             value={formData.emotionalState}
             onChange={handleChange}
+            ref={emotionalStateSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -465,6 +504,7 @@ const MessageSpark: React.FC = () => {
             name="desiredOutcome"
             value={formData.desiredOutcome}
             onChange={handleChange}
+            ref={desiredOutcomeSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -510,6 +550,7 @@ const MessageSpark: React.FC = () => {
             placeholder="Add any specific details you'd like to include in your message..."
             value={formData.additionalInfo}
             onChange={handleChange}
+            ref={additionalInfoTextareaRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -591,6 +632,51 @@ const MessageSpark: React.FC = () => {
     // Reference to store the message content to prevent re-rendering
     const [messageContent] = useState(generatedMessage?.content || "");
     
+    // Parse message into sections for better readability
+    const getMessageSections = () => {
+      if (!messageContent) return [];
+      
+      // Split message by paragraph breaks
+      const paragraphs = messageContent.split(/\n\n+/);
+      
+      // If only one paragraph, just display it as a single section
+      if (paragraphs.length <= 1) {
+        return [{title: "Your Message", content: messageContent}];
+      }
+      
+      // Create meaningful sections from the paragraphs
+      const sections = [];
+      
+      // First paragraph is usually an introduction
+      if (paragraphs[0]) {
+        sections.push({
+          title: "Introduction",
+          content: paragraphs[0]
+        });
+      }
+      
+      // Middle paragraphs form the main message
+      const bodyParagraphs = paragraphs.slice(1, paragraphs.length - 1);
+      if (bodyParagraphs.length > 0) {
+        sections.push({
+          title: "Main Message",
+          content: bodyParagraphs.join('\n\n')
+        });
+      }
+      
+      // Last paragraph is typically a closing
+      if (paragraphs.length > 1) {
+        sections.push({
+          title: "Closing",
+          content: paragraphs[paragraphs.length - 1]
+        });
+      }
+      
+      return sections;
+    };
+    
+    const messageSections = getMessageSections();
+    
     // Local copy function that uses the stored message content
     const handleCopy = () => {
       navigator.clipboard.writeText(messageContent);
@@ -636,11 +722,53 @@ const MessageSpark: React.FC = () => {
               marginBottom: "1.5rem",
               position: "relative",
               boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
+              overflowY: "auto",
+              maxHeight: "50vh"
             }}
           >
-            <p style={{ whiteSpace: "pre-line", lineHeight: 1.6 }}>
-              {messageContent}
-            </p>
+            {messageSections.map((section, index) => (
+              <div 
+                key={index} 
+                style={{ 
+                  marginBottom: index < messageSections.length - 1 ? "1.5rem" : 0,
+                  borderBottom: index < messageSections.length - 1 ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
+                  paddingBottom: index < messageSections.length - 1 ? "1.5rem" : 0
+                }}
+              >
+                <h3 style={{ 
+                  fontSize: "1.2rem", 
+                  fontWeight: "bold", 
+                  marginBottom: "0.75rem",
+                  color: "rgba(255, 255, 255, 0.95)",
+                  letterSpacing: "0.5px"
+                }}>
+                  {section.title}
+                </h3>
+                <p style={{ 
+                  whiteSpace: "pre-line", 
+                  lineHeight: 1.7, 
+                  fontSize: "1.05rem",
+                  color: "rgba(255, 255, 255, 0.9)"
+                }}>
+                  {section.content}
+                </p>
+              </div>
+            ))}
+            
+            {/* Message metadata */}
+            <div style={{ 
+              marginTop: "1.5rem", 
+              fontSize: "0.85rem", 
+              color: "rgba(255, 255, 255, 0.6)",
+              display: "flex",
+              justifyContent: "space-between",
+              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+              paddingTop: "1rem"
+            }}>
+              <span>For: {formData.recipient}</span>
+              <span>Occasion: {formData.occasion}</span>
+              <span>Tone: {formData.tone}</span>
+            </div>
           </motion.div>
         )}
         

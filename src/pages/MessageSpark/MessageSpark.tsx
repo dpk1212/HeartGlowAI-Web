@@ -71,6 +71,17 @@ const MessageSpark: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  // Initialize refs with initial form data
+  useEffect(() => {
+    if (recipientInputRef.current) recipientInputRef.current.value = formData.recipient;
+    if (relationshipSelectRef.current) relationshipSelectRef.current.value = formData.relationship;
+    if (occasionInputRef.current) occasionInputRef.current.value = formData.occasion;
+    if (toneSelectRef.current) toneSelectRef.current.value = formData.tone;
+    if (emotionalStateSelectRef.current) emotionalStateSelectRef.current.value = formData.emotionalState;
+    if (desiredOutcomeSelectRef.current) desiredOutcomeSelectRef.current.value = formData.desiredOutcome;
+    if (additionalInfoTextareaRef.current) additionalInfoTextareaRef.current.value = formData.additionalInfo;
+  }, []);
+
   // Function to generate random floating hearts with fewer hearts
   const generateHearts = () => {
     const newHearts = Array.from({ length: 6 }, (_, i) => ({
@@ -85,38 +96,23 @@ const MessageSpark: React.FC = () => {
     setHearts(newHearts);
   };
   
-  // Handle direct DOM input updates without re-rendering
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    
-    // Only update React state when really needed
-    window.requestAnimationFrame(() => {
-      setFormData(prev => ({
-        ...prev,
-        [name]: value
-      }));
-    });
-  };
-  
   const goToNextStep = () => {
     // Synchronize form state with current input values
     if (currentStep === Step.Relationship) {
-      setFormData(prev => ({
-        ...prev,
-        recipient: recipientInputRef.current?.value || prev.recipient,
-        relationship: relationshipSelectRef.current?.value || prev.relationship,
-        occasion: occasionInputRef.current?.value || prev.occasion
-      }));
+      setFormData({
+        ...formData,
+        recipient: recipientInputRef.current?.value || '',
+        relationship: relationshipSelectRef.current?.value || '',
+        occasion: occasionInputRef.current?.value || ''
+      });
     } else if (currentStep === Step.Message) {
-      setFormData(prev => ({
-        ...prev,
-        tone: toneSelectRef.current?.value || prev.tone,
-        emotionalState: emotionalStateSelectRef.current?.value || prev.emotionalState,
-        desiredOutcome: desiredOutcomeSelectRef.current?.value || prev.desiredOutcome,
-        additionalInfo: additionalInfoTextareaRef.current?.value || prev.additionalInfo
-      }));
+      setFormData({
+        ...formData,
+        tone: toneSelectRef.current?.value || '',
+        emotionalState: emotionalStateSelectRef.current?.value || '',
+        desiredOutcome: desiredOutcomeSelectRef.current?.value || '',
+        additionalInfo: additionalInfoTextareaRef.current?.value || ''
+      });
     }
     
     setCurrentStep(prev => prev + 1 as Step);
@@ -127,19 +123,32 @@ const MessageSpark: React.FC = () => {
   };
 
   const handleSubmit = async () => {
+    // Update form data with current input values
+    const currentFormData = {
+      ...formData,
+      recipient: recipientInputRef.current?.value || '',
+      relationship: relationshipSelectRef.current?.value || '',
+      occasion: occasionInputRef.current?.value || '',
+      tone: toneSelectRef.current?.value || '',
+      emotionalState: emotionalStateSelectRef.current?.value || '',
+      desiredOutcome: desiredOutcomeSelectRef.current?.value || '',
+      additionalInfo: additionalInfoTextareaRef.current?.value || ''
+    };
+    
+    setFormData(currentFormData);
     setIsGenerating(true);
     setError(null);
     
     try {
       // Call the actual API service to generate message
       const result = await generateMessage({
-        recipient: formData.recipient,
-        relationship: formData.relationship,
-        occasion: formData.occasion,
-        tone: formData.tone,
-        emotionalState: formData.emotionalState,
-        desiredOutcome: formData.desiredOutcome,
-        additionalContext: formData.additionalInfo
+        recipient: currentFormData.recipient,
+        relationship: currentFormData.relationship,
+        occasion: currentFormData.occasion,
+        tone: currentFormData.tone,
+        emotionalState: currentFormData.emotionalState,
+        desiredOutcome: currentFormData.desiredOutcome,
+        additionalContext: currentFormData.additionalInfo
       });
       
       setGeneratedMessage({
@@ -176,9 +185,11 @@ const MessageSpark: React.FC = () => {
   const isStepValid = () => {
     switch (currentStep) {
       case Step.Relationship:
-        return !!formData.recipient && !!formData.relationship && !!formData.occasion;
+        return !!(recipientInputRef.current?.value && 
+                 relationshipSelectRef.current?.value && 
+                 occasionInputRef.current?.value);
       case Step.Message:
-        return !!formData.tone;
+        return !!toneSelectRef.current?.value;
       default:
         return true;
     }
@@ -223,9 +234,7 @@ const MessageSpark: React.FC = () => {
             name="recipient"
             type="text"
             placeholder="E.g., Sarah, Mom, John"
-            value={formData.recipient}
-            onChange={handleChange}
-            required
+            defaultValue={formData.recipient}
             ref={recipientInputRef}
             style={{
               width: "100%",
@@ -256,9 +265,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="relationship"
             name="relationship"
-            value={formData.relationship}
-            onChange={handleChange}
-            required
+            defaultValue={formData.relationship}
             ref={relationshipSelectRef}
             style={{
               width: "100%",
@@ -303,9 +310,7 @@ const MessageSpark: React.FC = () => {
             name="occasion"
             type="text"
             placeholder="E.g., Birthday, Anniversary, Apology"
-            value={formData.occasion}
-            onChange={handleChange}
-            required
+            defaultValue={formData.occasion}
             ref={occasionInputRef}
             style={{
               width: "100%",
@@ -410,9 +415,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="tone"
             name="tone"
-            value={formData.tone}
-            onChange={handleChange}
-            required
+            defaultValue={formData.tone}
             ref={toneSelectRef}
             style={{
               width: "100%",
@@ -457,8 +460,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="emotionalState"
             name="emotionalState"
-            value={formData.emotionalState}
-            onChange={handleChange}
+            defaultValue={formData.emotionalState}
             ref={emotionalStateSelectRef}
             style={{
               width: "100%",
@@ -502,8 +504,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="desiredOutcome"
             name="desiredOutcome"
-            value={formData.desiredOutcome}
-            onChange={handleChange}
+            defaultValue={formData.desiredOutcome}
             ref={desiredOutcomeSelectRef}
             style={{
               width: "100%",
@@ -548,8 +549,7 @@ const MessageSpark: React.FC = () => {
             name="additionalInfo"
             rows={4}
             placeholder="Add any specific details you'd like to include in your message..."
-            value={formData.additionalInfo}
-            onChange={handleChange}
+            defaultValue={formData.additionalInfo}
             ref={additionalInfoTextareaRef}
             style={{
               width: "100%",

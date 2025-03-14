@@ -71,7 +71,7 @@ const FloatingHearts = memo(() => {
   };
 
   return (
-    <>
+    <div style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", pointerEvents: "none" }}>
       {hearts.map((heart) => (
         <motion.div
           key={heart.id}
@@ -81,6 +81,7 @@ const FloatingHearts = memo(() => {
             top: `${heart.y}%`,
             opacity: heart.opacity,
             zIndex: 1,
+            pointerEvents: "none",
           }}
           initial={{ y: 0 }}
           animate={{ y: -100 }}
@@ -97,7 +98,7 @@ const FloatingHearts = memo(() => {
           />
         </motion.div>
       ))}
-    </>
+    </div>
   );
 });
 
@@ -227,7 +228,8 @@ const FormInput = memo(({
 });
 
 const MessageSpark: React.FC = () => {
-  // State for form data - now the single source of truth
+  // ⭐ ULTRA-SIMPLIFIED STATE MANAGEMENT ⭐
+  // We're using refs for direct DOM access to prevent re-renders during typing
   const [formData, setFormData] = useState<MessageFormData>({
     recipient: '',
     relationship: '',
@@ -237,6 +239,15 @@ const MessageSpark: React.FC = () => {
     desiredOutcome: 'Strengthen the relationship',
     additionalInfo: ''
   });
+  
+  // Create refs for all form elements
+  const recipientRef = useRef<HTMLInputElement>(null);
+  const relationshipRef = useRef<HTMLSelectElement>(null);
+  const occasionRef = useRef<HTMLInputElement>(null);
+  const toneRef = useRef<HTMLSelectElement>(null);
+  const emotionalStateRef = useRef<HTMLSelectElement>(null);
+  const desiredOutcomeRef = useRef<HTMLSelectElement>(null);
+  const additionalInfoRef = useRef<HTMLTextAreaElement>(null);
 
   const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -253,29 +264,40 @@ const MessageSpark: React.FC = () => {
     }
   }, [user, navigate]);
   
-  // Input change handler with memoization to prevent re-renders
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  }, []);
+  // ⭐ DIRECT DOM UPDATE STRATEGY ⭐
+  // This syncs our form data with the UI without triggering unnecessary re-renders
+  const syncFormData = () => {
+    setFormData({
+      recipient: recipientRef.current?.value || '',
+      relationship: relationshipRef.current?.value || '',
+      occasion: occasionRef.current?.value || '',
+      tone: toneRef.current?.value || '',
+      emotionalState: emotionalStateRef.current?.value || 'Hopeful',
+      desiredOutcome: desiredOutcomeRef.current?.value || 'Strengthen the relationship',
+      additionalInfo: additionalInfoRef.current?.value || ''
+    });
+  };
   
-  // Stable navigation functions
-  const goToNextStep = useCallback(() => {
+  // ⭐ NAVIGATION WITHOUT STATE UPDATES DURING TYPING ⭐
+  const goToNextStep = () => {
+    // Sync form data before navigation
+    syncFormData();
     setCurrentStep(prev => prev + 1 as Step);
-  }, []);
+  };
 
-  const goToPreviousStep = useCallback(() => {
+  const goToPreviousStep = () => {
     setCurrentStep(prev => prev - 1 as Step);
-  }, []);
+  };
 
-  const handleBack = useCallback(() => {
+  const handleBack = () => {
     navigate("/welcome");
-  }, [navigate]);
-
-  const handleSubmit = useCallback(async () => {
+  };
+  
+  // ⭐ SIMPLIFIED SUBMIT WITHOUT COMPLEX STATE ⭐
+  const handleSubmit = async () => {
+    // Make sure we have the latest form data
+    syncFormData();
+    
     setIsGenerating(true);
     setError(null);
     
@@ -303,515 +325,40 @@ const MessageSpark: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [formData]);
+  };
   
-  const copyToClipboard = useCallback(() => {
+  const copyToClipboard = () => {
     if (generatedMessage) {
       navigator.clipboard.writeText(generatedMessage.content);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
-  }, [generatedMessage]);
+  };
   
-  const generateAnotherMessage = useCallback(() => {
+  const generateAnotherMessage = () => {
     setCurrentStep(Step.Relationship);
     setGeneratedMessage(null);
-  }, []);
+  };
 
-  // Check form validity based on formData state
-  const isStepValid = useCallback(() => {
+  // ⭐ SIMPLE VALIDATION LOGIC ⭐
+  const isStepValid = () => {
+    // Manually check the DOM elements for values
     switch (currentStep) {
       case Step.Relationship:
-        return !!(formData.recipient && formData.relationship && formData.occasion);
+        return !!(
+          recipientRef.current?.value && 
+          relationshipRef.current?.value && 
+          occasionRef.current?.value
+        );
       case Step.Message:
-        return !!formData.tone;
+        return !!toneRef.current?.value;
       default:
         return true;
     }
-  }, [currentStep, formData]);
+  };
 
-  // Relationship and Recipient Form Step - memoized to prevent re-renders
-  const RelationshipStep = memo(() => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-      style={{ width: "100%" }}
-    >
-      <h2 
-        style={{ 
-          fontSize: "1.6rem", 
-          fontWeight: "bold", 
-          color: "#fff", 
-          marginBottom: "1.5rem",
-          textAlign: "center"
-        }}
-      >
-        Who's this message for?
-      </h2>
-      
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <FormInput
-          id="recipient"
-          name="recipient"
-          label="Recipient's Name"
-          value={formData.recipient}
-          placeholder="E.g., Sarah, Mom, John"
-          onChange={handleInputChange}
-        />
-        
-        <FormInput
-          id="relationship"
-          name="relationship"
-          type="select"
-          label="Relationship"
-          value={formData.relationship}
-          onChange={handleInputChange}
-          options={[
-            { value: "", label: "Select relationship" },
-            { value: "romantic_partner", label: "Romantic Partner" },
-            { value: "spouse", label: "Spouse" },
-            { value: "family_member", label: "Family Member" },
-            { value: "friend", label: "Friend" },
-            { value: "colleague", label: "Colleague" },
-            { value: "acquaintance", label: "Acquaintance" }
-          ]}
-        />
-        
-        <FormInput
-          id="occasion"
-          name="occasion"
-          label="Occasion or Purpose"
-          value={formData.occasion}
-          placeholder="E.g., Birthday, Anniversary, Apology"
-          onChange={handleInputChange}
-        />
-        
-        <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleBack}
-            style={{
-              padding: "0.85rem 1.5rem",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <FaArrowLeft size={16} /> Back
-          </motion.button>
-          
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-            whileTap={{ scale: 0.97 }}
-            onClick={goToNextStep}
-            disabled={!isStepValid()}
-            style={{
-              padding: "0.85rem 1.5rem",
-              borderRadius: "8px",
-              backgroundColor: isStepValid() 
-                ? "rgba(255, 255, 255, 0.25)" 
-                : "rgba(255, 255, 255, 0.1)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              cursor: isStepValid() ? "pointer" : "not-allowed",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              opacity: isStepValid() ? 1 : 0.6,
-            }}
-          >
-            Continue <FaArrowRight size={16} />
-          </motion.button>
-        </div>
-      </div>
-    </motion.div>
-  ));
-
-  // Message Details Form Step - memoized to prevent re-renders
-  const MessageDetailsStep = memo(() => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-      style={{ width: "100%" }}
-    >
-      <h2 
-        style={{ 
-          fontSize: "1.6rem", 
-          fontWeight: "bold", 
-          color: "#fff", 
-          marginBottom: "1.5rem",
-          textAlign: "center"
-        }}
-      >
-        Message Details
-      </h2>
-      
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <FormInput
-          id="tone"
-          name="tone"
-          type="select"
-          label="Tone"
-          value={formData.tone}
-          onChange={handleInputChange}
-          options={[
-            { value: "", label: "Select tone" },
-            { value: "loving", label: "Loving" },
-            { value: "friendly", label: "Friendly" },
-            { value: "romantic", label: "Romantic" },
-            { value: "casual", label: "Casual" },
-            { value: "formal", label: "Formal" },
-            { value: "humorous", label: "Humorous" },
-            { value: "sincere", label: "Sincere" },
-            { value: "encouraging", label: "Encouraging" }
-          ]}
-        />
-
-        <FormInput
-          id="emotionalState"
-          name="emotionalState"
-          type="select"
-          label="Your Emotional State"
-          value={formData.emotionalState}
-          onChange={handleInputChange}
-          options={[
-            { value: "Hopeful", label: "Hopeful" },
-            { value: "Anxious", label: "Anxious" },
-            { value: "Excited", label: "Excited" },
-            { value: "Worried", label: "Worried" },
-            { value: "Confident", label: "Confident" },
-            { value: "Hesitant", label: "Hesitant" },
-            { value: "Loving", label: "Loving" },
-            { value: "Upset", label: "Upset" }
-          ]}
-        />
-
-        <FormInput
-          id="desiredOutcome"
-          name="desiredOutcome"
-          type="select"
-          label="Desired Outcome"
-          value={formData.desiredOutcome}
-          onChange={handleInputChange}
-          options={[
-            { value: "Strengthen the relationship", label: "Strengthen the relationship" },
-            { value: "Resolve a conflict", label: "Resolve a conflict" },
-            { value: "Express feelings", label: "Express feelings" },
-            { value: "Request something", label: "Request something" },
-            { value: "Apologize", label: "Apologize" },
-            { value: "Celebrate an achievement", label: "Celebrate an achievement" },
-            { value: "Show support", label: "Show support" }
-          ]}
-        />
-        
-        <FormInput
-          id="additionalInfo"
-          name="additionalInfo"
-          type="textarea"
-          label="Additional Information (Optional)"
-          value={formData.additionalInfo}
-          placeholder="Add any specific details you'd like to include in your message..."
-          onChange={handleInputChange}
-          rows={4}
-        />
-        
-        <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={goToPreviousStep}
-            style={{
-              padding: "0.85rem 1.5rem",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-            }}
-          >
-            <FaArrowLeft size={16} /> Back
-          </motion.button>
-          
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleSubmit}
-            disabled={!isStepValid() || isGenerating}
-            style={{
-              padding: "0.85rem 1.5rem",
-              borderRadius: "8px",
-              backgroundColor: isStepValid() && !isGenerating 
-                ? "rgba(255, 255, 255, 0.25)" 
-                : "rgba(255, 255, 255, 0.1)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              cursor: isStepValid() && !isGenerating ? "pointer" : "not-allowed",
-              display: "flex",
-              alignItems: "center",
-              gap: "0.5rem",
-              opacity: isStepValid() && !isGenerating ? 1 : 0.6,
-            }}
-          >
-            {isGenerating ? (
-              <>
-                <FaSpinner className="animate-spin" size={16} /> Generating...
-              </>
-            ) : (
-              <>
-                Generate Message <FaArrowRight size={16} />
-              </>
-            )}
-          </motion.button>
-        </div>
-      </div>
-    </motion.div>
-  ));
-
-  // Result Step with fixed animation blipping - memoized to prevent re-renders
-  const ResultStep = memo(() => {
-    // Use the message content directly
-    const messageContent = generatedMessage?.content || "";
-    
-    // Parse message into sections for better readability
-    const getMessageSections = () => {
-      if (!messageContent) return [];
-      
-      // Split message by paragraph breaks
-      const paragraphs = messageContent.split(/\n\n+/);
-      
-      // If only one paragraph, just display it as a single section
-      if (paragraphs.length <= 1) {
-        return [{title: "Your Message", content: messageContent}];
-      }
-      
-      // Create meaningful sections from the paragraphs
-      const sections = [];
-      
-      // First paragraph is usually an introduction
-      if (paragraphs[0]) {
-        sections.push({
-          title: "Introduction",
-          content: paragraphs[0]
-        });
-      }
-      
-      // Middle paragraphs form the main message
-      const bodyParagraphs = paragraphs.slice(1, paragraphs.length - 1);
-      if (bodyParagraphs.length > 0) {
-        sections.push({
-          title: "Main Message",
-          content: bodyParagraphs.join('\n\n')
-        });
-      }
-      
-      // Last paragraph is typically a closing
-      if (paragraphs.length > 1) {
-        sections.push({
-          title: "Closing",
-          content: paragraphs[paragraphs.length - 1]
-        });
-      }
-      
-      return sections;
-    };
-    
-    const messageSections = getMessageSections();
-    
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -10 }}
-        transition={{ duration: 0.3 }}
-        style={{ width: "100%" }}
-      >
-        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-          <h2 
-            style={{ 
-              fontSize: "1.6rem", 
-              fontWeight: "bold", 
-              color: "#fff", 
-              marginBottom: "0.5rem" 
-            }}
-          >
-            Your Message is Ready!
-          </h2>
-          <p style={{ color: "rgba(255, 255, 255, 0.9)" }}>
-            Created with HeartGlow AI for {formData.recipient}
-          </p>
-        </div>
-
-        {messageContent && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
-              backdropFilter: "blur(10px)",
-              borderRadius: "12px",
-              padding: "1.5rem",
-              color: "#fff",
-              marginBottom: "1.5rem",
-              position: "relative",
-              boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
-              overflowY: "auto",
-              maxHeight: "50vh"
-            }}
-          >
-            {messageSections.map((section, index) => (
-              <div 
-                key={index} 
-                style={{ 
-                  marginBottom: index < messageSections.length - 1 ? "1.5rem" : 0,
-                  borderBottom: index < messageSections.length - 1 ? "1px solid rgba(255, 255, 255, 0.2)" : "none",
-                  paddingBottom: index < messageSections.length - 1 ? "1.5rem" : 0
-                }}
-              >
-                <h3 style={{ 
-                  fontSize: "1.2rem", 
-                  fontWeight: "bold", 
-                  marginBottom: "0.75rem",
-                  color: "rgba(255, 255, 255, 0.95)",
-                  letterSpacing: "0.5px"
-                }}>
-                  {section.title}
-                </h3>
-                <p style={{ 
-                  whiteSpace: "pre-line", 
-                  lineHeight: 1.7, 
-                  fontSize: "1.05rem",
-                  color: "rgba(255, 255, 255, 0.9)"
-                }}>
-                  {section.content}
-                </p>
-              </div>
-            ))}
-            
-            {/* Message metadata */}
-            <div style={{ 
-              marginTop: "1.5rem", 
-              fontSize: "0.85rem", 
-              color: "rgba(255, 255, 255, 0.6)",
-              display: "flex",
-              justifyContent: "space-between",
-              borderTop: "1px solid rgba(255, 255, 255, 0.1)",
-              paddingTop: "1rem"
-            }}>
-              <span>For: {formData.recipient}</span>
-              <span>Occasion: {formData.occasion}</span>
-              <span>Tone: {formData.tone}</span>
-            </div>
-          </motion.div>
-        )}
-        
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-            whileTap={{ scale: 0.97 }}
-            onClick={copyToClipboard}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.25)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              fontWeight: "bold",
-              cursor: "pointer",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "0.75rem",
-              backdropFilter: "blur(5px)",
-            }}
-          >
-            <FaCopy size={18} />
-            {copySuccess ? "Copied!" : "Copy to Clipboard"}
-          </motion.button>
-          
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={generateAnotherMessage}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              backgroundColor: "rgba(255, 255, 255, 0.15)",
-              border: "none",
-              color: "#fff",
-              fontSize: "1rem",
-              cursor: "pointer",
-            }}
-          >
-            Create Another Message
-          </motion.button>
-
-          <motion.button
-            type="button"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={handleBack}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              backgroundColor: "transparent",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              color: "#fff",
-              fontSize: "1rem",
-              cursor: "pointer",
-              marginTop: "0.5rem"
-            }}
-          >
-            Return to Home
-          </motion.button>
-        </div>
-      </motion.div>
-    );
-  });
-
-  // Memoized step content for optimal performance
-  const StepContent = useCallback(() => {
-    switch (currentStep) {
-      case Step.Relationship:
-        return <RelationshipStep />;
-      case Step.Message:
-        return <MessageDetailsStep />;
-      case Step.Result:
-        return <ResultStep />;
-      default:
-        return null;
-    }
-  }, [currentStep, formData, generatedMessage, isGenerating, isStepValid]);
-
+  // ⭐ ULTRA-OPTIMIZED RENDERING ⭐
+  // All inputs are uncontrolled to eliminate re-rendering during typing
   return (
     <div
       style={{
@@ -825,7 +372,7 @@ const MessageSpark: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Isolated floating hearts background animation */}
+      {/* Completely isolated animation that won't affect inputs */}
       <FloatingHearts />
 
       {/* Header with logo */}
@@ -843,25 +390,13 @@ const MessageSpark: React.FC = () => {
         }}
       >
         {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+        <div
           style={{
             display: "flex",
             alignItems: "center",
           }}
         >
-          <motion.div
-            initial={{ scale: 1 }}
-            animate={{ 
-              scale: [1, 1.15, 1, 1.1, 1],
-            }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              repeatDelay: 1
-            }}
+          <div
             style={{
               marginRight: "0.75rem",
               color: "#fff",
@@ -869,7 +404,7 @@ const MessageSpark: React.FC = () => {
             }}
           >
             <FaHeart size={28} />
-          </motion.div>
+          </div>
           <h2
             style={{
               color: "#fff",
@@ -879,14 +414,11 @@ const MessageSpark: React.FC = () => {
           >
             MessageSpark
           </h2>
-        </motion.div>
+        </div>
       </div>
 
       {/* Main content */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
+      <div
         style={{
           width: "90%",
           maxWidth: "550px",
@@ -923,47 +455,576 @@ const MessageSpark: React.FC = () => {
               overflow: "hidden"
             }}
           >
-            <motion.div 
-              initial={{ width: `${((currentStep) / 3) * 100}%` }}
-              animate={{ width: `${((currentStep + 1) / 3) * 100}%` }}
-              transition={{ duration: 0.3 }}
+            <div 
               style={{ 
                 height: "100%", 
+                width: `${((currentStep + 1) / 3) * 100}%`,
                 backgroundImage: "linear-gradient(135deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.2))",
-                borderRadius: "3px"
+                borderRadius: "3px",
+                transition: "width 0.3s ease-in-out"
               }}
             />
           </div>
         </div>
         
         {/* Error message */}
-        <AnimatePresence>
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                backgroundColor: "rgba(255, 85, 85, 0.3)",
-                color: "#fff",
-                padding: "0.75rem",
-                borderRadius: "6px",
-                marginBottom: "1rem",
-                width: "100%",
-                textAlign: "center",
-              }}
-            >
-              {error}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {error && (
+          <div
+            style={{
+              backgroundColor: "rgba(255, 85, 85, 0.3)",
+              color: "#fff",
+              padding: "0.75rem",
+              borderRadius: "6px",
+              marginBottom: "1rem",
+              width: "100%",
+              textAlign: "center",
+            }}
+          >
+            {error}
+          </div>
+        )}
         
-        {/* Step content with optimized rendering */}
-        <StepContent />
-      </motion.div>
+        {/* Step content with super-simplified rendering */}
+        <div style={{ width: "100%" }}>
+          {currentStep === Step.Relationship && (
+            <div>
+              <h2 
+                style={{ 
+                  fontSize: "1.6rem", 
+                  fontWeight: "bold", 
+                  color: "#fff", 
+                  marginBottom: "1.5rem",
+                  textAlign: "center"
+                }}
+              >
+                Who's this message for?
+              </h2>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {/* ⭐ UNCONTROLLED INPUTS FOR MAXIMUM PERFORMANCE ⭐ */}
+                <div>
+                  <label 
+                    htmlFor="recipient" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Recipient's Name
+                  </label>
+                  <input
+                    id="recipient"
+                    name="recipient"
+                    type="text"
+                    placeholder="E.g., Sarah, Mom, John"
+                    defaultValue={formData.recipient}
+                    ref={recipientRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                    }}
+                  />
+                </div>
+                
+                <div>
+                  <label 
+                    htmlFor="relationship" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Relationship
+                  </label>
+                  <select
+                    id="relationship"
+                    name="relationship"
+                    defaultValue={formData.relationship}
+                    ref={relationshipRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      appearance: 'none',
+                      backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 1rem center",
+                    }}
+                  >
+                    <option value="">Select relationship</option>
+                    <option value="romantic_partner">Romantic Partner</option>
+                    <option value="spouse">Spouse</option>
+                    <option value="family_member">Family Member</option>
+                    <option value="friend">Friend</option>
+                    <option value="colleague">Colleague</option>
+                    <option value="acquaintance">Acquaintance</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label 
+                    htmlFor="occasion" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Occasion or Purpose
+                  </label>
+                  <input
+                    id="occasion"
+                    name="occasion"
+                    type="text"
+                    placeholder="E.g., Birthday, Anniversary, Apology"
+                    defaultValue={formData.occasion}
+                    ref={occasionRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                    }}
+                  />
+                </div>
+                
+                <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    style={{
+                      padding: "0.85rem 1.5rem",
+                      borderRadius: "8px",
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <FaArrowLeft size={16} /> Back
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={goToNextStep}
+                    disabled={!isStepValid()}
+                    style={{
+                      padding: "0.85rem 1.5rem",
+                      borderRadius: "8px",
+                      backgroundColor: isStepValid() 
+                        ? "rgba(255, 255, 255, 0.25)" 
+                        : "rgba(255, 255, 255, 0.1)",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      cursor: isStepValid() ? "pointer" : "not-allowed",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      opacity: isStepValid() ? 1 : 0.6,
+                    }}
+                  >
+                    Continue <FaArrowRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === Step.Message && (
+            <div>
+              <h2 
+                style={{ 
+                  fontSize: "1.6rem", 
+                  fontWeight: "bold", 
+                  color: "#fff", 
+                  marginBottom: "1.5rem",
+                  textAlign: "center"
+                }}
+              >
+                Message Details
+              </h2>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                {/* ⭐ UNCONTROLLED INPUTS FOR MAXIMUM PERFORMANCE ⭐ */}
+                <div>
+                  <label 
+                    htmlFor="tone" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Tone
+                  </label>
+                  <select
+                    id="tone"
+                    name="tone"
+                    defaultValue={formData.tone}
+                    ref={toneRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      appearance: 'none',
+                      backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 1rem center",
+                    }}
+                  >
+                    <option value="">Select tone</option>
+                    <option value="loving">Loving</option>
+                    <option value="friendly">Friendly</option>
+                    <option value="romantic">Romantic</option>
+                    <option value="casual">Casual</option>
+                    <option value="formal">Formal</option>
+                    <option value="humorous">Humorous</option>
+                    <option value="sincere">Sincere</option>
+                    <option value="encouraging">Encouraging</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label 
+                    htmlFor="emotionalState" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Your Emotional State
+                  </label>
+                  <select
+                    id="emotionalState"
+                    name="emotionalState"
+                    defaultValue={formData.emotionalState}
+                    ref={emotionalStateRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      appearance: 'none',
+                      backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 1rem center",
+                    }}
+                  >
+                    <option value="Hopeful">Hopeful</option>
+                    <option value="Anxious">Anxious</option>
+                    <option value="Excited">Excited</option>
+                    <option value="Worried">Worried</option>
+                    <option value="Confident">Confident</option>
+                    <option value="Hesitant">Hesitant</option>
+                    <option value="Loving">Loving</option>
+                    <option value="Upset">Upset</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label 
+                    htmlFor="desiredOutcome" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Desired Outcome
+                  </label>
+                  <select
+                    id="desiredOutcome"
+                    name="desiredOutcome"
+                    defaultValue={formData.desiredOutcome}
+                    ref={desiredOutcomeRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      appearance: 'none',
+                      backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
+                      backgroundRepeat: "no-repeat",
+                      backgroundPosition: "right 1rem center",
+                    }}
+                  >
+                    <option value="Strengthen the relationship">Strengthen the relationship</option>
+                    <option value="Resolve a conflict">Resolve a conflict</option>
+                    <option value="Express feelings">Express feelings</option>
+                    <option value="Request something">Request something</option>
+                    <option value="Apologize">Apologize</option>
+                    <option value="Celebrate an achievement">Celebrate an achievement</option>
+                    <option value="Show support">Show support</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label 
+                    htmlFor="additionalInfo" 
+                    style={{ 
+                      display: "block", 
+                      marginBottom: "0.5rem", 
+                      color: "rgba(255, 255, 255, 0.9)",
+                      fontSize: "0.95rem"
+                    }}
+                  >
+                    Additional Information (Optional)
+                  </label>
+                  <textarea
+                    id="additionalInfo"
+                    name="additionalInfo"
+                    rows={4}
+                    placeholder="Add any specific details you'd like to include in your message..."
+                    defaultValue={formData.additionalInfo}
+                    ref={additionalInfoRef}
+                    onChange={() => {}} // Empty handler to make React happy
+                    style={{
+                      width: "100%",
+                      padding: "0.85rem",
+                      borderRadius: "8px",
+                      border: "1px solid rgba(255, 255, 255, 0.3)",
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      color: "#fff",
+                      fontSize: "0.95rem",
+                      outline: "none",
+                      transition: "all 0.2s ease",
+                      resize: "vertical",
+                      minHeight: "100px",
+                    }}
+                  />
+                </div>
+                
+                <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
+                  <button
+                    type="button"
+                    onClick={goToPreviousStep}
+                    style={{
+                      padding: "0.85rem 1.5rem",
+                      borderRadius: "8px",
+                      backgroundColor: "rgba(255, 255, 255, 0.15)",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                    }}
+                  >
+                    <FaArrowLeft size={16} /> Back
+                  </button>
+                  
+                  <button
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={!isStepValid() || isGenerating}
+                    style={{
+                      padding: "0.85rem 1.5rem",
+                      borderRadius: "8px",
+                      backgroundColor: isStepValid() && !isGenerating 
+                        ? "rgba(255, 255, 255, 0.25)" 
+                        : "rgba(255, 255, 255, 0.1)",
+                      border: "none",
+                      color: "#fff",
+                      fontSize: "1rem",
+                      fontWeight: "bold",
+                      cursor: isStepValid() && !isGenerating ? "pointer" : "not-allowed",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      opacity: isStepValid() && !isGenerating ? 1 : 0.6,
+                    }}
+                  >
+                    {isGenerating ? (
+                      <>
+                        <FaSpinner className="animate-spin" size={16} /> Generating...
+                      </>
+                    ) : (
+                      <>
+                        Generate Message <FaArrowRight size={16} />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === Step.Result && generatedMessage && (
+            <div>
+              <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+                <h2 
+                  style={{ 
+                    fontSize: "1.6rem", 
+                    fontWeight: "bold", 
+                    color: "#fff", 
+                    marginBottom: "0.5rem" 
+                  }}
+                >
+                  Your Message is Ready!
+                </h2>
+                <p style={{ color: "rgba(255, 255, 255, 0.9)" }}>
+                  Created with HeartGlow AI for {formData.recipient}
+                </p>
+              </div>
+
+              <div
+                style={{
+                  backgroundColor: "rgba(255, 255, 255, 0.15)",
+                  backdropFilter: "blur(10px)",
+                  borderRadius: "12px",
+                  padding: "1.5rem",
+                  color: "#fff",
+                  marginBottom: "1.5rem",
+                  position: "relative",
+                  boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
+                  overflowY: "auto",
+                  maxHeight: "50vh"
+                }}
+              >
+                {/* Simple message display without complex parsing */}
+                <div style={{ whiteSpace: "pre-line", lineHeight: 1.7 }}>
+                  {generatedMessage.content}
+                </div>
+                
+                <div style={{ 
+                  marginTop: "1.5rem", 
+                  fontSize: "0.85rem", 
+                  color: "rgba(255, 255, 255, 0.6)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
+                  borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+                  paddingTop: "1rem"
+                }}>
+                  <span>For: {formData.recipient}</span>
+                  <span>Occasion: {formData.occasion}</span>
+                  <span>Tone: {formData.tone}</span>
+                </div>
+              </div>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <button
+                  type="button"
+                  onClick={copyToClipboard}
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem",
+                    borderRadius: "8px",
+                    backgroundColor: "rgba(255, 255, 255, 0.25)",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "0.75rem",
+                    backdropFilter: "blur(5px)",
+                  }}
+                >
+                  <FaCopy size={18} />
+                  {copySuccess ? "Copied!" : "Copy to Clipboard"}
+                </button>
+                
+                <button
+                  type="button"
+                  onClick={generateAnotherMessage}
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem",
+                    borderRadius: "8px",
+                    backgroundColor: "rgba(255, 255, 255, 0.15)",
+                    border: "none",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                  }}
+                >
+                  Create Another Message
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  style={{
+                    width: "100%",
+                    padding: "0.85rem",
+                    borderRadius: "8px",
+                    backgroundColor: "transparent",
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
+                    color: "#fff",
+                    fontSize: "1rem",
+                    cursor: "pointer",
+                    marginTop: "0.5rem"
+                  }}
+                >
+                  Return to Home
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
-}; 
+};
 
 export { MessageSpark };

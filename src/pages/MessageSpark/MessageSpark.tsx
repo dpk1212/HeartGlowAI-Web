@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaUser, FaCopy, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -76,15 +76,13 @@ const MessageSpark: React.FC = () => {
     setHearts(newHearts);
   };
   
-  const handleChange = (
+  // Optimized handleChange function with useCallback to maintain reference stability
+  const handleChange = useCallback((
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value
-    }));
-  };
+    setFormData(prev => ({ ...prev, [name]: value }));
+  }, []);
   
   const goToNextStep = () => {
     setCurrentStep(prev => prev + 1 as Step);

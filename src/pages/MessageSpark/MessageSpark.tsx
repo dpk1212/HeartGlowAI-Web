@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes } from 'react-icons/fa';
+import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes, FaPlus, FaChevronDown, FaChevronUp, FaReply } from 'react-icons/fa';
 import { generateMessage } from '../../services/messages';
 import { useFirebase } from '../../contexts/FirebaseContext';
 import './MessageSpark.css';
@@ -28,13 +28,21 @@ interface Heart {
   opacity: number;
 }
 
-// Conversation interface for storing reply history
-interface Conversation {
+// Exchange interface for a single message-reply pair
+interface Exchange {
   id: string;
-  name: string;
   originalMessage: string;
   reply?: string;
   timestamp: Date;
+}
+
+// Enhanced conversation interface for storing multiple exchanges
+interface Conversation {
+  id: string;
+  name: string;
+  exchanges: Exchange[];
+  lastUpdated: Date;
+  created: Date;
 }
 
 const MessageSpark: React.FC = () => {
@@ -63,13 +71,16 @@ const MessageSpark: React.FC = () => {
   // Conversation history
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
+  const [selectedExchange, setSelectedExchange] = useState<Exchange | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [expandedConversation, setExpandedConversation] = useState<string | null>(null);
   
   // UI state
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedMessage, setGeneratedMessage] = useState('');
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
+  const [isCreatingNewExchange, setIsCreatingNewExchange] = useState(false);
   
   const navigate = useNavigate();
   const { user } = useFirebase();
@@ -88,10 +99,15 @@ const MessageSpark: React.FC = () => {
       if (savedConversations) {
         try {
           const parsedConversations = JSON.parse(savedConversations);
-          // Convert timestamp strings back to Date objects
+          // Convert timestamp strings back to Date objects for all dates
           const conversations = parsedConversations.map((conv: any) => ({
             ...conv,
-            timestamp: new Date(conv.timestamp)
+            created: new Date(conv.created),
+            lastUpdated: new Date(conv.lastUpdated),
+            exchanges: conv.exchanges.map((ex: any) => ({
+              ...ex,
+              timestamp: new Date(ex.timestamp)
+            }))
           }));
           setConversations(conversations);
         } catch (err) {
@@ -137,9 +153,11 @@ const MessageSpark: React.FC = () => {
   const handleReplyToMessage = () => {
     setView('reply');
     setSelectedConversation(null);
+    setSelectedExchange(null);
     setOriginalMessage('');
     setConversationName('');
     setGeneratedReply('');
+    setIsCreatingNewExchange(true);
   };
   
   const handleBackToHome = () => {
@@ -151,10 +169,24 @@ const MessageSpark: React.FC = () => {
     setError('');
   };
   
+  // Toggle conversation expansion in history view
+  const toggleConversationExpansion = (conversationId: string) => {
+    if (expandedConversation === conversationId) {
+      setExpandedConversation(null);
+    } else {
+      setExpandedConversation(conversationId);
+    }
+  };
+  
   // Handle generating a reply to a message
   const handleGenerateReply = async () => {
-    if (!conversationName.trim() || !originalMessage.trim()) {
-      setError('Please provide both a conversation name and the message you want to reply to.');
+    if (isCreatingNewExchange && !conversationName.trim()) {
+      setError('Please provide a conversation name.');
+      return;
+    }
+    
+    if (!originalMessage.trim()) {
+      setError('Please provide the message you want to reply to.');
       return;
     }
     
@@ -182,17 +214,44 @@ const MessageSpark: React.FC = () => {
       
       setGeneratedReply(reply);
       
-      // Save the conversation
-      const newConversation: Conversation = {
+      // Create a new exchange
+      const newExchange: Exchange = {
         id: Date.now().toString(),
-        name: conversationName,
         originalMessage,
         reply,
         timestamp: new Date()
       };
       
-      setConversations(prev => [newConversation, ...prev]);
-      setSelectedConversation(newConversation);
+      // Handle different scenarios: new conversation vs. adding to existing one
+      if (isCreatingNewExchange) {
+        // Creating a brand new conversation
+        const newConversation: Conversation = {
+          id: Date.now().toString(),
+          name: conversationName,
+          exchanges: [newExchange],
+          created: new Date(),
+          lastUpdated: new Date()
+        };
+        
+        setConversations(prev => [newConversation, ...prev]);
+        setSelectedConversation(newConversation);
+        setSelectedExchange(newExchange);
+      } else if (selectedConversation) {
+        // Adding a new exchange to an existing conversation
+        const updatedConversation: Conversation = {
+          ...selectedConversation,
+          exchanges: [...selectedConversation.exchanges, newExchange],
+          lastUpdated: new Date()
+        };
+        
+        setConversations(prev => 
+          prev.map(c => c.id === updatedConversation.id ? updatedConversation : c)
+        );
+        setSelectedConversation(updatedConversation);
+        setSelectedExchange(newExchange);
+      }
+      
+      setIsCreatingNewExchange(false);
     } catch (err) {
       console.error('Error generating reply:', err);
       setError('Failed to generate reply. Please try again.');
@@ -204,10 +263,36 @@ const MessageSpark: React.FC = () => {
   // Handle selecting a conversation from history
   const handleSelectConversation = (conversation: Conversation) => {
     setSelectedConversation(conversation);
+    
+    // Select the most recent exchange by default
+    const latestExchange = conversation.exchanges[conversation.exchanges.length - 1];
+    setSelectedExchange(latestExchange);
+    
+    // Load the exchange data into the form
     setConversationName(conversation.name);
-    setOriginalMessage(conversation.originalMessage);
-    setGeneratedReply(conversation.reply || '');
+    setOriginalMessage(latestExchange.originalMessage);
+    setGeneratedReply(latestExchange.reply || '');
+    
+    setIsCreatingNewExchange(false);
     setShowHistory(false);
+  };
+  
+  // Handle selecting a specific exchange within a conversation
+  const handleSelectExchange = (exchange: Exchange) => {
+    setSelectedExchange(exchange);
+    setOriginalMessage(exchange.originalMessage);
+    setGeneratedReply(exchange.reply || '');
+    setIsCreatingNewExchange(false);
+  };
+  
+  // Start a new exchange in the current conversation
+  const handleStartNewExchange = () => {
+    if (!selectedConversation) return;
+    
+    setOriginalMessage('');
+    setGeneratedReply('');
+    setIsCreatingNewExchange(true);
+    setSelectedExchange(null);
   };
   
   // Handle copying reply to clipboard
@@ -215,6 +300,17 @@ const MessageSpark: React.FC = () => {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+  
+  // Format timestamp for display
+  const formatDate = (date: Date): string => {
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric'
+    }).format(date);
   };
   
   // The landing page view
@@ -278,7 +374,11 @@ const MessageSpark: React.FC = () => {
         <button className="icon-button" onClick={handleBackToLanding}>
           <FaArrowLeft /> Back
         </button>
-        <h1>Reply to a Message</h1>
+        <h1>
+          {isCreatingNewExchange && !selectedConversation 
+            ? 'New Conversation' 
+            : selectedConversation?.name || 'Reply to a Message'}
+        </h1>
         {conversations.length > 0 && (
           <button 
             className="icon-button"
@@ -292,23 +392,64 @@ const MessageSpark: React.FC = () => {
       {error && <div className="error-message">{error}</div>}
       
       {showHistory ? (
-        // Conversation History View
+        // Conversation History View with expandable exchanges
         <div className="conversation-history">
-          <h2>Your Past Conversations</h2>
+          <h2>Your Conversations</h2>
           {conversations.length === 0 ? (
             <p className="no-conversations">No saved conversations yet.</p>
           ) : (
             <ul className="conversation-list">
               {conversations.map(conversation => (
-                <li 
-                  key={conversation.id} 
-                  className={`conversation-item ${selectedConversation?.id === conversation.id ? 'selected' : ''}`}
-                  onClick={() => handleSelectConversation(conversation)}
-                >
-                  <div className="conversation-name">{conversation.name}</div>
-                  <div className="conversation-date">
-                    {conversation.timestamp.toLocaleDateString()}
+                <li key={conversation.id} className="conversation-group">
+                  <div 
+                    className={`conversation-item ${selectedConversation?.id === conversation.id ? 'selected' : ''}`}
+                    onClick={() => toggleConversationExpansion(conversation.id)}
+                  >
+                    <div className="conversation-header">
+                      <div className="conversation-name">{conversation.name}</div>
+                      <div className="conversation-count">
+                        {conversation.exchanges.length} {conversation.exchanges.length === 1 ? 'exchange' : 'exchanges'}
+                      </div>
+                    </div>
+                    <div className="conversation-date">
+                      Last updated: {formatDate(conversation.lastUpdated)}
+                    </div>
+                    <button className="expand-button">
+                      {expandedConversation === conversation.id ? <FaChevronUp /> : <FaChevronDown />}
+                    </button>
                   </div>
+                  
+                  {/* Expanded view showing all exchanges in this conversation */}
+                  {expandedConversation === conversation.id && (
+                    <ul className="exchanges-list">
+                      {conversation.exchanges.map((exchange, index) => (
+                        <li 
+                          key={exchange.id}
+                          className={`exchange-item ${selectedExchange?.id === exchange.id ? 'selected' : ''}`}
+                          onClick={() => {
+                            handleSelectConversation(conversation);
+                            handleSelectExchange(exchange);
+                          }}
+                        >
+                          <div className="exchange-number">Exchange {index + 1}</div>
+                          <div className="exchange-preview">
+                            {exchange.originalMessage.substring(0, 50)}
+                            {exchange.originalMessage.length > 50 ? '...' : ''}
+                          </div>
+                          <div className="exchange-date">{formatDate(exchange.timestamp)}</div>
+                        </li>
+                      ))}
+                      <li 
+                        className="new-exchange-button"
+                        onClick={() => {
+                          handleSelectConversation(conversation);
+                          handleStartNewExchange();
+                        }}
+                      >
+                        <FaPlus /> New Exchange
+                      </li>
+                    </ul>
+                  )}
                 </li>
               ))}
             </ul>
@@ -318,22 +459,66 @@ const MessageSpark: React.FC = () => {
           </button>
         </div>
       ) : (
-        // Reply Form View
+        // Reply Form View with conversation context
         <div className="reply-form">
-          <div className="form-group">
-            <label htmlFor="conversationName">Conversation Name</label>
-            <input 
-              type="text"
-              id="conversationName"
-              value={conversationName}
-              onChange={(e) => setConversationName(e.target.value)}
-              placeholder="E.g., Reply to Mom, Work Discussion, Friend Chat"
-              required
-            />
-          </div>
+          {/* Only show conversation name input for brand new conversations */}
+          {isCreatingNewExchange && !selectedConversation && (
+            <div className="form-group">
+              <label htmlFor="conversationName">Conversation Name</label>
+              <input 
+                type="text"
+                id="conversationName"
+                value={conversationName}
+                onChange={(e) => setConversationName(e.target.value)}
+                placeholder="E.g., Partner, Mom, Work Friend"
+                required
+              />
+            </div>
+          )}
+          
+          {/* Context information when in an existing conversation */}
+          {selectedConversation && (
+            <div className="conversation-context">
+              <h3>{selectedConversation.name}</h3>
+              <div className="context-details">
+                <span>Started {formatDate(selectedConversation.created)}</span>
+                <span>•</span>
+                <span>{selectedConversation.exchanges.length} {selectedConversation.exchanges.length === 1 ? 'exchange' : 'exchanges'}</span>
+              </div>
+              
+              {/* Show exchange navigation if not creating a new exchange */}
+              {!isCreatingNewExchange && selectedConversation.exchanges.length > 1 && (
+                <div className="exchange-navigation">
+                  <label>View Exchange:</label>
+                  <select 
+                    value={selectedExchange?.id || ''} 
+                    onChange={(e) => {
+                      const exchange = selectedConversation.exchanges.find(ex => ex.id === e.target.value);
+                      if (exchange) handleSelectExchange(exchange);
+                    }}
+                  >
+                    {selectedConversation.exchanges.map((exchange, index) => (
+                      <option key={exchange.id} value={exchange.id}>
+                        Exchange {index + 1} - {formatDate(exchange.timestamp)}
+                      </option>
+                    ))}
+                  </select>
+                  <button 
+                    className="icon-button new-exchange-button"
+                    onClick={handleStartNewExchange}
+                    title="Start a new exchange in this conversation"
+                  >
+                    <FaPlus /> New
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
           
           <div className="form-group">
-            <label htmlFor="originalMessage">Message to Reply To</label>
+            <label htmlFor="originalMessage">
+              {isCreatingNewExchange ? 'Message to Reply To' : 'Original Message'}
+            </label>
             <textarea
               id="originalMessage"
               value={originalMessage}
@@ -341,20 +526,13 @@ const MessageSpark: React.FC = () => {
               rows={8}
               placeholder="Paste the message you want to reply to here..."
               required
+              readOnly={!isCreatingNewExchange}
+              className={!isCreatingNewExchange ? 'read-only' : ''}
             />
           </div>
           
-          {!generatedReply ? (
-            <div className="form-actions">
-              <button
-                className="primary-button generate-button"
-                onClick={handleGenerateReply}
-                disabled={isGenerating || !conversationName.trim() || !originalMessage.trim()}
-              >
-                {isGenerating ? 'Generating...' : 'Generate Reply'}
-              </button>
-            </div>
-          ) : (
+          {!isCreatingNewExchange && generatedReply ? (
+            // View mode for existing exchange
             <div className="reply-result">
               <h3>Generated Reply</h3>
               <div className="reply-content">
@@ -369,19 +547,65 @@ const MessageSpark: React.FC = () => {
                   {copied ? 'Copied!' : 'Copy Reply'}
                 </button>
                 
-                <button
-                  className="secondary-button"
-                  onClick={() => {
-                    setGeneratedReply('');
-                    setOriginalMessage('');
-                    setConversationName('');
-                  }}
-                >
-                  New Reply
-                </button>
+                {selectedConversation && (
+                  <button
+                    className="secondary-button"
+                    onClick={handleStartNewExchange}
+                  >
+                    <FaReply /> New Exchange
+                  </button>
+                )}
               </div>
             </div>
-          )}
+          ) : isCreatingNewExchange ? (
+            // Create mode for new exchange
+            generatedReply ? (
+              // Show generated reply for new exchange
+              <div className="reply-result">
+                <h3>Generated Reply</h3>
+                <div className="reply-content">
+                  <pre>{generatedReply}</pre>
+                </div>
+                
+                <div className="reply-actions">
+                  <button 
+                    className="primary-button"
+                    onClick={handleCopyReply}
+                  >
+                    {copied ? 'Copied!' : 'Copy Reply'}
+                  </button>
+                  
+                  <button
+                    className="secondary-button"
+                    onClick={() => {
+                      setGeneratedReply('');
+                      setOriginalMessage('');
+                      if (!selectedConversation) {
+                        setConversationName('');
+                      }
+                    }}
+                  >
+                    New Reply
+                  </button>
+                </div>
+              </div>
+            ) : (
+              // Generate button for new exchange
+              <div className="form-actions">
+                <button
+                  className="primary-button generate-button"
+                  onClick={handleGenerateReply}
+                  disabled={
+                    isGenerating || 
+                    !originalMessage.trim() || 
+                    (isCreatingNewExchange && !selectedConversation && !conversationName.trim())
+                  }
+                >
+                  {isGenerating ? 'Generating...' : 'Generate Reply'}
+                </button>
+              </div>
+            )
+          ) : null}
         </div>
       )}
     </div>

@@ -194,31 +194,29 @@ const MessageSpark: React.FC = () => {
     setError('');
     
     try {
-      // Use the new structured system prompt for more effective and educational replies
-      const systemPrompt = `You are HeartGlowAI, an AI-powered relationship coach that helps users improve communication in romantic, friendship, and family relationships. Your goal is to provide warm, thoughtful, and emotionally intelligent responses to messages, ensuring that users can express themselves clearly and effectively.
+      // Use a structured JSON output format for more reliable parsing
+      const systemPrompt = `System Prompt for OpenAI (JSON Output Format)
+You are HeartGlowAI, an AI-powered relationship coach that helps users improve communication in romantic, friendship, and family relationships. Your goal is to provide warm, thoughtful, and emotionally intelligent responses to messages, ensuring that users can express themselves clearly and effectively.
 
-When generating a response, follow this structured format:
+Generate a JSON object in the following format:
 
-Try This Response
-Craft a concise, empathetic, and clear response to the given message.
-Ensure the tone matches the context (e.g., supportive, reassuring, lighthearted, firm but kind).
-If the message contains conflict, de-escalate tension while maintaining honesty.
-If the message is emotionally charged, acknowledge feelings before responding.
+{
+  "try_this_response": "<Craft a concise, empathetic, and clear response to the given message. Ensure the tone matches the context (e.g., supportive, reassuring, lighthearted, firm but kind). If the message contains conflict, de-escalate tension while maintaining honesty. If the message is emotionally charged, acknowledge feelings before responding.>",
+  "why_this_could_work": "<Explain why the suggested response is effective in strengthening communication. Highlight how the response encourages positive interaction, avoids misinterpretation, and fosters understanding. If applicable, reference emotional intelligence principles (e.g., active listening, avoiding blame, validating feelings).>",
+  "common_mistakes": "<Identify common errors people make when replying to similar messages. Explain why these responses might lead to misunderstandings, conflict, or missed opportunities for connection. Keep this section brief but impactful, offering insight into what to avoid.>"
+}
 
-Why This Could Work Insights
-Explain why the suggested response is effective in strengthening communication.
-Highlight how the response encourages positive interaction, avoids misinterpretation, and fosters understanding.
-If applicable, reference emotional intelligence principles (e.g., active listening, avoiding blame, validating feelings).
-
-Common Mistakes
-Identify common errors people make when replying to similar messages.
-Explain why these responses might lead to misunderstandings, conflict, or missed opportunities for connection.
-Keep this section brief but impactful, offering insight into what to avoid.
+Guidelines for Output Generation:
+Ensure the response is warm, natural, and emotionally intelligent.
+Each field must contain structured, high-quality content that aligns with HeartGlowAI's relationship coaching principles.
+The total response should not exceed 200 words for clarity and readability.
+Do not modify the JSON structure—the output must follow this exact format.
+No additional explanations or extraneous text should be included in the response.
 
 The message you need to reply to is:
 "${originalMessage}"
 
-Please provide a structured response following the format above.`;
+Please provide a JSON response following the format above. Make sure it is valid JSON that can be parsed.`;
       
       const reply = await generateMessage({
         recipient: "Reply",
@@ -315,7 +313,7 @@ Please provide a structured response following the format above.`;
   
   // Format the structured reply for display
   const formatStructuredReply = (reply: string) => {
-    // Break the reply into sections based on the headings
+    // Default structure with empty sections
     const sections = {
       response: '',
       insights: '',
@@ -323,23 +321,53 @@ Please provide a structured response following the format above.`;
     };
 
     try {
-      // Use regex to find each section with its heading
-      const responseMatch = reply.match(/Try This Response\s*([\s\S]*?)(?=Why This Could Work Insights|$)/i);
-      const insightsMatch = reply.match(/Why This Could Work Insights\s*([\s\S]*?)(?=Common Mistakes|$)/i);
-      const mistakesMatch = reply.match(/Common Mistakes\s*([\s\S]*?)(?=$)/i);
+      // Try to parse the reply as JSON first
+      let parsedReply;
       
-      // Extract content from each section, excluding the heading
-      if (responseMatch && responseMatch[1]) sections.response = responseMatch[1].trim();
-      if (insightsMatch && insightsMatch[1]) sections.insights = insightsMatch[1].trim();
-      if (mistakesMatch && mistakesMatch[1]) sections.mistakes = mistakesMatch[1].trim();
+      // Extract just the JSON part if there's text around it
+      const jsonMatch = reply.match(/\{[\s\S]*\}/);
+      const jsonString = jsonMatch ? jsonMatch[0] : reply;
       
-      // If we couldn't parse the format, just return the whole reply as the response
+      try {
+        parsedReply = JSON.parse(jsonString);
+        
+        // If parsed successfully, extract the sections
+        if (parsedReply.try_this_response) {
+          sections.response = parsedReply.try_this_response;
+        }
+        if (parsedReply.why_this_could_work) {
+          sections.insights = parsedReply.why_this_could_work;
+        }
+        if (parsedReply.common_mistakes) {
+          sections.mistakes = parsedReply.common_mistakes;
+        }
+        
+        // If all sections are empty, fall back to regex parsing
+        if (!sections.response && !sections.insights && !sections.mistakes) {
+          throw new Error('JSON parsing successful but no expected fields found');
+        }
+        
+        return sections;
+      } catch (jsonError) {
+        console.warn('Failed to parse as JSON, falling back to regex:', jsonError);
+        // Fall back to regex parsing for backward compatibility with older responses
+        const responseMatch = reply.match(/Try This Response\s*([\s\S]*?)(?=Why This Could Work Insights|$)/i);
+        const insightsMatch = reply.match(/Why This Could Work Insights\s*([\s\S]*?)(?=Common Mistakes|$)/i);
+        const mistakesMatch = reply.match(/Common Mistakes\s*([\s\S]*?)(?=$)/i);
+        
+        // Extract content from each section, excluding the heading
+        if (responseMatch && responseMatch[1]) sections.response = responseMatch[1].trim();
+        if (insightsMatch && insightsMatch[1]) sections.insights = insightsMatch[1].trim();
+        if (mistakesMatch && mistakesMatch[1]) sections.mistakes = mistakesMatch[1].trim();
+      }
+      
+      // If we still couldn't parse the format, just return the whole reply as the response
       if (!sections.response && !sections.insights && !sections.mistakes) {
         sections.response = reply;
       }
     } catch (err) {
-      // Fallback if regex fails
-      console.error('Error parsing structured reply:', err);
+      // Fallback if all parsing fails
+      console.error('Error parsing reply:', err);
       sections.response = reply;
     }
     
@@ -352,16 +380,47 @@ Please provide a structured response following the format above.`;
     const sections = formatStructuredReply(generatedReply);
     const textToCopy = sections.response || generatedReply;
     
-    navigator.clipboard.writeText(textToCopy);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    navigator.clipboard.writeText(textToCopy)
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy response:', err);
+        setError('Failed to copy to clipboard. Please try again.');
+      });
   };
   
   // Copy the full reply with all sections (insights and mistakes)
   const handleCopyFullReply = () => {
-    navigator.clipboard.writeText(generatedReply);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      // Try to extract nicely formatted text instead of raw JSON
+      const sections = formatStructuredReply(generatedReply);
+      const formattedText = `${sections.response}
+
+Why This Could Work:
+${sections.insights}
+
+Common Mistakes:
+${sections.mistakes}`;
+
+      navigator.clipboard.writeText(formattedText)
+        .then(() => {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        })
+        .catch(() => {
+          // Fall back to copying the original reply if formatting fails
+          navigator.clipboard.writeText(generatedReply);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        });
+    } catch (err) {
+      // Last resort - just copy the raw reply
+      navigator.clipboard.writeText(generatedReply);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
   
   // Format timestamp for display

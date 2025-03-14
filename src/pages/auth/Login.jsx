@@ -1,7 +1,1 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-
-export default function Login() {
-  return <div>Login Component</div>;
-}
+import React from "react"; import { Link } from "react-router-dom"; export default function Login() { return (<div style={{minHeight: "100vh", background: "linear-gradient(to bottom, #ec4899, #a855f7, #6366f1)", display: "flex", justifyContent: "center", alignItems: "center", padding: "20px"}}><div style={{maxWidth: "270px", width: "100%", display: "flex", flexDirection: "column", alignItems: "center"}}><h1 style={{color: "white", marginBottom: "20px"}}>Sign In</h1><form style={{width: "100%", marginBottom: "15px"}}><div style={{marginBottom: "10px"}}><input type="email" placeholder="Email" style={{width: "100%", padding: "10px", borderRadius: "8px", border: "none"}} /></div><div style={{marginBottom: "10px"}}><input type="password" placeholder="Password" style={{width: "100%", padding: "10px", borderRadius: "8px", border: "none"}} /></div><button type="submit" style={{width: "100%", background: "linear-gradient(to right, #ff6bcb, #B19CD9)", color: "white", padding: "10px", borderRadius: "8px", border: "none", fontWeight: "bold"}}>Sign In</button></form><Link to="/signup" style={{color: "white", fontSize: "14px"}}>Create account</Link></div></div>); }

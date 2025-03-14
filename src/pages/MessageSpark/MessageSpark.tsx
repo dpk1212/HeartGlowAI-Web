@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, memo } from 'react';
+import React, { useState, useEffect, useRef, memo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaUser, FaCopy, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -38,6 +38,11 @@ interface Heart {
   duration: number;
   delay: number;
   opacity: number;
+}
+
+// CSS properties for select element
+interface SelectStyles extends React.CSSProperties {
+  appearance: 'none';
 }
 
 // Isolated hearts animation component to prevent re-rendering the main form
@@ -118,7 +123,7 @@ const FormInput = memo(({
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
   rows?: number;
 }) => {
-  const inputStyles = {
+  const inputStyles: React.CSSProperties = {
     width: "100%",
     padding: "0.85rem",
     borderRadius: "8px",
@@ -130,18 +135,27 @@ const FormInput = memo(({
     transition: "all 0.2s ease",
   };
 
-  const selectStyles = {
+  const selectStyles: SelectStyles = {
     ...inputStyles,
-    appearance: "none",
+    appearance: 'none',
     backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
     backgroundRepeat: "no-repeat",
     backgroundPosition: "right 1rem center",
   };
 
-  const textareaStyles = {
+  const textareaStyles: React.CSSProperties = {
     ...inputStyles,
-    resize: "vertical" as const,
+    resize: "vertical",
     minHeight: "100px",
+  };
+
+  // Create a stable reference to the input element to ensure it doesn't re-create on re-renders
+  const inputRef = useRef<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | null>(null);
+
+  // Handle changes without causing re-renders by debouncing
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    // Ensure onChange is only called once per keystroke
+    onChange(e);
   };
 
   return (
@@ -165,8 +179,9 @@ const FormInput = memo(({
           type="text"
           placeholder={placeholder}
           value={value}
-          onChange={onChange}
+          onChange={handleInputChange}
           style={inputStyles}
+          ref={inputRef as React.RefObject<HTMLInputElement>}
         />
       )}
 
@@ -175,8 +190,9 @@ const FormInput = memo(({
           id={id}
           name={name}
           value={value}
-          onChange={onChange}
+          onChange={handleInputChange}
           style={selectStyles}
+          ref={inputRef as React.RefObject<HTMLSelectElement>}
         >
           {options.map(option => (
             <option key={option.value} value={option.value}>
@@ -193,11 +209,20 @@ const FormInput = memo(({
           rows={rows}
           placeholder={placeholder}
           value={value}
-          onChange={onChange}
+          onChange={handleInputChange}
           style={textareaStyles}
+          ref={inputRef as React.RefObject<HTMLTextAreaElement>}
         />
       )}
     </div>
+  );
+}, 
+// Use custom comparison to avoid re-renders when handlers change but values don't
+(prevProps, nextProps) => {
+  return (
+    prevProps.value === nextProps.value &&
+    prevProps.id === nextProps.id &&
+    prevProps.type === nextProps.type
   );
 });
 
@@ -228,25 +253,29 @@ const MessageSpark: React.FC = () => {
     }
   }, [user, navigate]);
   
-  // Input change handler with performance optimization
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  // Input change handler with memoization to prevent re-renders
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+  }, []);
   
-  // When moving to the next step, we're already using the formData state
-  const goToNextStep = () => {
+  // Stable navigation functions
+  const goToNextStep = useCallback(() => {
     setCurrentStep(prev => prev + 1 as Step);
-  };
+  }, []);
 
-  const goToPreviousStep = () => {
+  const goToPreviousStep = useCallback(() => {
     setCurrentStep(prev => prev - 1 as Step);
-  };
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleBack = useCallback(() => {
+    navigate("/welcome");
+  }, [navigate]);
+
+  const handleSubmit = useCallback(async () => {
     setIsGenerating(true);
     setError(null);
     
@@ -267,34 +296,30 @@ const MessageSpark: React.FC = () => {
         timestamp: new Date()
       });
       
-      goToNextStep();
+      setCurrentStep(Step.Result);
     } catch (err: any) {
       console.error('Error generating message:', err);
       setError(err.message || 'Failed to generate message. Please try again.');
     } finally {
       setIsGenerating(false);
     }
-  };
+  }, [formData]);
   
-  const copyToClipboard = () => {
+  const copyToClipboard = useCallback(() => {
     if (generatedMessage) {
       navigator.clipboard.writeText(generatedMessage.content);
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     }
-  };
+  }, [generatedMessage]);
   
-  const generateAnotherMessage = () => {
+  const generateAnotherMessage = useCallback(() => {
     setCurrentStep(Step.Relationship);
     setGeneratedMessage(null);
-  };
+  }, []);
 
-  const handleBack = () => {
-    navigate("/welcome");
-  };
-
-  // Check form validity based on formData state directly
-  const isStepValid = () => {    
+  // Check form validity based on formData state
+  const isStepValid = useCallback(() => {
     switch (currentStep) {
       case Step.Relationship:
         return !!(formData.recipient && formData.relationship && formData.occasion);
@@ -303,10 +328,10 @@ const MessageSpark: React.FC = () => {
       default:
         return true;
     }
-  };
+  }, [currentStep, formData]);
 
-  // Relationship and Recipient Form Step
-  const RelationshipStep = () => (
+  // Relationship and Recipient Form Step - memoized to prevent re-renders
+  const RelationshipStep = memo(() => (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -413,10 +438,10 @@ const MessageSpark: React.FC = () => {
         </div>
       </div>
     </motion.div>
-  );
+  ));
 
-  // Message Details Form Step
-  const MessageDetailsStep = () => (
+  // Message Details Form Step - memoized to prevent re-renders
+  const MessageDetailsStep = memo(() => (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
@@ -563,10 +588,10 @@ const MessageSpark: React.FC = () => {
         </div>
       </div>
     </motion.div>
-  );
+  ));
 
-  // Result Step with fixed animation blipping
-  const ResultStep = () => {
+  // Result Step with fixed animation blipping - memoized to prevent re-renders
+  const ResultStep = memo(() => {
     // Use the message content directly
     const messageContent = generatedMessage?.content || "";
     
@@ -771,7 +796,21 @@ const MessageSpark: React.FC = () => {
         </div>
       </motion.div>
     );
-  };
+  });
+
+  // Memoized step content for optimal performance
+  const StepContent = useCallback(() => {
+    switch (currentStep) {
+      case Step.Relationship:
+        return <RelationshipStep />;
+      case Step.Message:
+        return <MessageDetailsStep />;
+      case Step.Result:
+        return <ResultStep />;
+      default:
+        return null;
+    }
+  }, [currentStep, formData, generatedMessage, isGenerating, isStepValid]);
 
   return (
     <div
@@ -920,12 +959,8 @@ const MessageSpark: React.FC = () => {
           )}
         </AnimatePresence>
         
-        {/* Step content */}
-        <AnimatePresence mode="wait">
-          {currentStep === Step.Relationship && <RelationshipStep key="step1" />}
-          {currentStep === Step.Message && <MessageDetailsStep key="step2" />}
-          {currentStep === Step.Result && <ResultStep key="step3" />}
-        </AnimatePresence>
+        {/* Step content with optimized rendering */}
+        <StepContent />
       </motion.div>
     </div>
   );

@@ -55,23 +55,23 @@ const MessageSpark: React.FC = () => {
     }
   }, [user, navigate]);
 
-  // Generate random heart positions initially and every 10 seconds
+  // Generate random heart positions initially and every 30 seconds instead of 10
   useEffect(() => {
     generateHearts();
-    const interval = setInterval(generateHearts, 10000);
+    const interval = setInterval(generateHearts, 30000);
     return () => clearInterval(interval);
   }, []);
 
-  // Function to generate random floating hearts
+  // Function to generate random floating hearts with fewer hearts
   const generateHearts = () => {
-    const newHearts = Array.from({ length: 10 }, (_, i) => ({
+    const newHearts = Array.from({ length: 6 }, (_, i) => ({
       id: `heart-${Date.now()}-${i}`,
       x: Math.random() * 100,
       y: Math.random() * 100,
       size: Math.random() * 15 + 8,
-      duration: Math.random() * 15 + 10,
+      duration: Math.random() * 15 + 15, // Longer duration
       delay: Math.random() * 5,
-      opacity: Math.random() * 0.4 + 0.1,
+      opacity: Math.random() * 0.3 + 0.1, // Lower max opacity
     }));
     setHearts(newHearts);
   };
@@ -80,7 +80,10 @@ const MessageSpark: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: value
+    }));
   };
   
   const goToNextStep = () => {
@@ -203,7 +206,7 @@ const MessageSpark: React.FC = () => {
               transition: "all 0.2s ease",
             }}
           />
-        </div>
+            </div>
         
         <div>
           <label 
@@ -247,7 +250,7 @@ const MessageSpark: React.FC = () => {
             <option value="colleague">Colleague</option>
             <option value="acquaintance">Acquaintance</option>
           </select>
-        </div>
+          </div>
         
         <div>
           <label 
@@ -281,7 +284,7 @@ const MessageSpark: React.FC = () => {
               transition: "all 0.2s ease",
             }}
           />
-        </div>
+            </div>
         
         <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
           <motion.button
@@ -330,8 +333,8 @@ const MessageSpark: React.FC = () => {
           >
             Continue <FaArrowRight size={16} />
           </motion.button>
-        </div>
-      </div>
+              </div>
+            </div>
     </motion.div>
   );
 
@@ -445,7 +448,7 @@ const MessageSpark: React.FC = () => {
             <option value="Loving">Loving</option>
             <option value="Upset">Upset</option>
           </select>
-        </div>
+            </div>
 
         <div>
           <label 
@@ -488,7 +491,7 @@ const MessageSpark: React.FC = () => {
             <option value="Celebrate an achievement">Celebrate an achievement</option>
             <option value="Show support">Show support</option>
           </select>
-        </div>
+          </div>
         
         <div>
           <label 
@@ -502,7 +505,7 @@ const MessageSpark: React.FC = () => {
           >
             Additional Information (Optional)
           </label>
-          <textarea
+            <textarea
             id="additionalInfo"
             name="additionalInfo"
             rows={4}
@@ -522,8 +525,8 @@ const MessageSpark: React.FC = () => {
               resize: "vertical",
               minHeight: "100px",
             }}
-          />
-        </div>
+            />
+          </div>
         
         <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
           <motion.button
@@ -580,126 +583,138 @@ const MessageSpark: React.FC = () => {
               </>
             )}
           </motion.button>
-        </div>
-      </div>
+            </div>
+          </div>
     </motion.div>
   );
 
-  // Result Step
-  const ResultStep = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10 }}
-      transition={{ duration: 0.3 }}
-      style={{ width: "100%" }}
-    >
-      <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
-        <h2 
-          style={{ 
-            fontSize: "1.6rem", 
-            fontWeight: "bold", 
-            color: "#fff", 
-            marginBottom: "0.5rem" 
-          }}
-        >
-          Your Message is Ready!
-        </h2>
-        <p style={{ color: "rgba(255, 255, 255, 0.9)" }}>
-          Created with HeartGlow AI for {formData.recipient}
-        </p>
-      </div>
-      
-      {generatedMessage && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.15)",
-            backdropFilter: "blur(10px)",
-            borderRadius: "12px",
-            padding: "1.5rem",
-            color: "#fff",
-            marginBottom: "1.5rem",
-            position: "relative",
-            boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
-          }}
-        >
-          <p style={{ whiteSpace: "pre-line", lineHeight: 1.6 }}>
-            {generatedMessage.content}
+  // Result Step with fixed animation blipping
+  const ResultStep = () => {
+    // Reference to store the message content to prevent re-rendering
+    const [messageContent] = useState(generatedMessage?.content || "");
+    
+    // Local copy function that uses the stored message content
+    const handleCopy = () => {
+      navigator.clipboard.writeText(messageContent);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    };
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.3 }}
+        style={{ width: "100%" }}
+      >
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <h2 
+            style={{ 
+              fontSize: "1.6rem", 
+              fontWeight: "bold", 
+              color: "#fff", 
+              marginBottom: "0.5rem" 
+            }}
+          >
+            Your Message is Ready!
+          </h2>
+          <p style={{ color: "rgba(255, 255, 255, 0.9)" }}>
+            Created with HeartGlow AI for {formData.recipient}
           </p>
-        </motion.div>
-      )}
-      
-      <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-          whileTap={{ scale: 0.97 }}
-          onClick={copyToClipboard}
-          style={{
-            width: "100%",
-            padding: "0.85rem",
-            borderRadius: "8px",
-            backgroundColor: "rgba(255, 255, 255, 0.25)",
-            border: "none",
-            color: "#fff",
-            fontSize: "1rem",
-            fontWeight: "bold",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "0.75rem",
-            backdropFilter: "blur(5px)",
-          }}
-        >
-          <FaCopy size={18} />
-          {copySuccess ? "Copied!" : "Copy to Clipboard"}
-        </motion.button>
-        
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={generateAnotherMessage}
-          style={{
-            width: "100%",
-            padding: "0.85rem",
-            borderRadius: "8px",
-            backgroundColor: "rgba(255, 255, 255, 0.15)",
-            border: "none",
-            color: "#fff",
-            fontSize: "1rem",
-            cursor: "pointer",
-          }}
-        >
-          Create Another Message
-        </motion.button>
+        </div>
 
-        <motion.button
-          type="button"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          onClick={handleBack}
-          style={{
-            width: "100%",
-            padding: "0.85rem",
-            borderRadius: "8px",
-            backgroundColor: "transparent",
-            border: "1px solid rgba(255, 255, 255, 0.3)",
-            color: "#fff",
-            fontSize: "1rem",
-            cursor: "pointer",
-            marginTop: "0.5rem"
-          }}
-        >
-          Return to Home
-        </motion.button>
-      </div>
-    </motion.div>
-  );
+        {messageContent && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            style={{
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              backdropFilter: "blur(10px)",
+              borderRadius: "12px",
+              padding: "1.5rem",
+              color: "#fff",
+              marginBottom: "1.5rem",
+              position: "relative",
+              boxShadow: "0 8px 32px rgba(31, 38, 135, 0.2)",
+            }}
+          >
+            <p style={{ whiteSpace: "pre-line", lineHeight: 1.6 }}>
+              {messageContent}
+            </p>
+          </motion.div>
+        )}
+        
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handleCopy}
+            style={{
+              width: "100%",
+              padding: "0.85rem",
+              borderRadius: "8px",
+              backgroundColor: "rgba(255, 255, 255, 0.25)",
+              border: "none",
+              color: "#fff",
+              fontSize: "1rem",
+              fontWeight: "bold",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.75rem",
+              backdropFilter: "blur(5px)",
+            }}
+          >
+            <FaCopy size={18} />
+            {copySuccess ? "Copied!" : "Copy to Clipboard"}
+          </motion.button>
+          
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={generateAnotherMessage}
+            style={{
+              width: "100%",
+              padding: "0.85rem",
+              borderRadius: "8px",
+              backgroundColor: "rgba(255, 255, 255, 0.15)",
+              border: "none",
+              color: "#fff",
+              fontSize: "1rem",
+              cursor: "pointer",
+            }}
+          >
+            Create Another Message
+          </motion.button>
+
+          <motion.button
+            type="button"
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            onClick={handleBack}
+            style={{
+              width: "100%",
+              padding: "0.85rem",
+              borderRadius: "8px",
+              backgroundColor: "transparent",
+              border: "1px solid rgba(255, 255, 255, 0.3)",
+              color: "#fff",
+              fontSize: "1rem",
+              cursor: "pointer",
+              marginTop: "0.5rem"
+            }}
+          >
+            Return to Home
+          </motion.button>
+        </div>
+      </motion.div>
+    );
+  };
 
   return (
     <div
@@ -881,6 +896,6 @@ const MessageSpark: React.FC = () => {
       </motion.div>
     </div>
   );
-};
+}; 
 
 export { MessageSpark };

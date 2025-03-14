@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaUser, FaCopy, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -29,35 +29,22 @@ interface MessageResult {
   timestamp: Date;
 }
 
-const MessageSpark: React.FC = () => {
-  // State for form data - now the single source of truth
-  const [formData, setFormData] = useState<MessageFormData>({
-    recipient: '',
-    relationship: '',
-    occasion: '',
-    tone: '',
-    emotionalState: 'Hopeful',
-    desiredOutcome: 'Strengthen the relationship',
-    additionalInfo: ''
-  });
+// Heart animation properties
+interface Heart {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  duration: number;
+  delay: number;
+  opacity: number;
+}
 
-  const [hearts, setHearts] = useState<any[]>([]);
-  const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedMessage, setGeneratedMessage] = useState<MessageResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [copySuccess, setCopySuccess] = useState(false);
-  const navigate = useNavigate();
-  const { user } = useFirebase();
-  
-  // Redirect if not logged in
-  useEffect(() => {
-    if (!user) {
-      navigate("/login");
-    }
-  }, [user, navigate]);
+// Isolated hearts animation component to prevent re-rendering the main form
+const FloatingHearts = memo(() => {
+  const [hearts, setHearts] = useState<Heart[]>([]);
 
-  // Generate random heart positions initially and every 30 seconds instead of 10
+  // Generate random heart positions initially and every 30 seconds
   useEffect(() => {
     generateHearts();
     const interval = setInterval(generateHearts, 30000);
@@ -77,8 +64,171 @@ const MessageSpark: React.FC = () => {
     }));
     setHearts(newHearts);
   };
+
+  return (
+    <>
+      {hearts.map((heart) => (
+        <motion.div
+          key={heart.id}
+          style={{
+            position: "absolute",
+            left: `${heart.x}%`,
+            top: `${heart.y}%`,
+            opacity: heart.opacity,
+            zIndex: 1,
+          }}
+          initial={{ y: 0 }}
+          animate={{ y: -100 }}
+          transition={{
+            duration: heart.duration,
+            repeat: Infinity,
+            delay: heart.delay,
+          }}
+        >
+          <FaHeart
+            size={heart.size}
+            color="#fff"
+            style={{ filter: "blur(1px)" }}
+          />
+        </motion.div>
+      ))}
+    </>
+  );
+});
+
+// Isolated form input component to optimize rendering
+const FormInput = memo(({ 
+  id, 
+  name, 
+  type = "text", 
+  label, 
+  value, 
+  placeholder = "", 
+  options = [], 
+  onChange,
+  rows = 1 
+}: {
+  id: string;
+  name: string;
+  type?: "text" | "select" | "textarea";
+  label: string;
+  value: string;
+  placeholder?: string;
+  options?: Array<{value: string, label: string}>;
+  onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
+  rows?: number;
+}) => {
+  const inputStyles = {
+    width: "100%",
+    padding: "0.85rem",
+    borderRadius: "8px",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    color: "#fff",
+    fontSize: "0.95rem",
+    outline: "none",
+    transition: "all 0.2s ease",
+  };
+
+  const selectStyles = {
+    ...inputStyles,
+    appearance: "none",
+    backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
+    backgroundRepeat: "no-repeat",
+    backgroundPosition: "right 1rem center",
+  };
+
+  const textareaStyles = {
+    ...inputStyles,
+    resize: "vertical" as const,
+    minHeight: "100px",
+  };
+
+  return (
+    <div>
+      <label 
+        htmlFor={id} 
+        style={{ 
+          display: "block", 
+          marginBottom: "0.5rem", 
+          color: "rgba(255, 255, 255, 0.9)",
+          fontSize: "0.95rem"
+        }}
+      >
+        {label}
+      </label>
+
+      {type === "text" && (
+        <input
+          id={id}
+          name={name}
+          type="text"
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          style={inputStyles}
+        />
+      )}
+
+      {type === "select" && (
+        <select
+          id={id}
+          name={name}
+          value={value}
+          onChange={onChange}
+          style={selectStyles}
+        >
+          {options.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      )}
+
+      {type === "textarea" && (
+        <textarea
+          id={id}
+          name={name}
+          rows={rows}
+          placeholder={placeholder}
+          value={value}
+          onChange={onChange}
+          style={textareaStyles}
+        />
+      )}
+    </div>
+  );
+});
+
+const MessageSpark: React.FC = () => {
+  // State for form data - now the single source of truth
+  const [formData, setFormData] = useState<MessageFormData>({
+    recipient: '',
+    relationship: '',
+    occasion: '',
+    tone: '',
+    emotionalState: 'Hopeful',
+    desiredOutcome: 'Strengthen the relationship',
+    additionalInfo: ''
+  });
+
+  const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedMessage, setGeneratedMessage] = useState<MessageResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
+  const navigate = useNavigate();
+  const { user } = useFirebase();
   
-  // New handler for input changes - updates formData state directly
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
+  
+  // Input change handler with performance optimization
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -177,114 +327,41 @@ const MessageSpark: React.FC = () => {
       </h2>
       
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div>
-          <label 
-            htmlFor="recipient" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Recipient's Name
-          </label>
-          <input
-            id="recipient"
-            name="recipient"
-            type="text"
-            placeholder="E.g., Sarah, Mom, John"
-            value={formData.recipient}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-            }}
-          />
-            </div>
+        <FormInput
+          id="recipient"
+          name="recipient"
+          label="Recipient's Name"
+          value={formData.recipient}
+          placeholder="E.g., Sarah, Mom, John"
+          onChange={handleInputChange}
+        />
         
-        <div>
-          <label 
-            htmlFor="relationship" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Relationship
-          </label>
-          <select
-            id="relationship"
-            name="relationship"
-            value={formData.relationship}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-              appearance: "none",
-              backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 1rem center",
-            }}
-          >
-            <option value="">Select relationship</option>
-            <option value="romantic_partner">Romantic Partner</option>
-            <option value="spouse">Spouse</option>
-            <option value="family_member">Family Member</option>
-            <option value="friend">Friend</option>
-            <option value="colleague">Colleague</option>
-            <option value="acquaintance">Acquaintance</option>
-          </select>
-          </div>
+        <FormInput
+          id="relationship"
+          name="relationship"
+          type="select"
+          label="Relationship"
+          value={formData.relationship}
+          onChange={handleInputChange}
+          options={[
+            { value: "", label: "Select relationship" },
+            { value: "romantic_partner", label: "Romantic Partner" },
+            { value: "spouse", label: "Spouse" },
+            { value: "family_member", label: "Family Member" },
+            { value: "friend", label: "Friend" },
+            { value: "colleague", label: "Colleague" },
+            { value: "acquaintance", label: "Acquaintance" }
+          ]}
+        />
         
-        <div>
-          <label 
-            htmlFor="occasion" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Occasion or Purpose
-          </label>
-          <input
-            id="occasion"
-            name="occasion"
-            type="text"
-            placeholder="E.g., Birthday, Anniversary, Apology"
-            value={formData.occasion}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-            }}
-          />
-            </div>
+        <FormInput
+          id="occasion"
+          name="occasion"
+          label="Occasion or Purpose"
+          value={formData.occasion}
+          placeholder="E.g., Birthday, Anniversary, Apology"
+          onChange={handleInputChange}
+        />
         
         <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
           <motion.button
@@ -333,8 +410,8 @@ const MessageSpark: React.FC = () => {
           >
             Continue <FaArrowRight size={16} />
           </motion.button>
-              </div>
-            </div>
+        </div>
+      </div>
     </motion.div>
   );
 
@@ -360,172 +437,73 @@ const MessageSpark: React.FC = () => {
       </h2>
       
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-        <div>
-          <label 
-            htmlFor="tone" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Tone
-          </label>
-          <select
-            id="tone"
-            name="tone"
-            value={formData.tone}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-              appearance: "none",
-              backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 1rem center",
-            }}
-          >
-            <option value="">Select tone</option>
-            <option value="loving">Loving</option>
-            <option value="friendly">Friendly</option>
-            <option value="romantic">Romantic</option>
-            <option value="casual">Casual</option>
-            <option value="formal">Formal</option>
-            <option value="humorous">Humorous</option>
-            <option value="sincere">Sincere</option>
-            <option value="encouraging">Encouraging</option>
-          </select>
-        </div>
+        <FormInput
+          id="tone"
+          name="tone"
+          type="select"
+          label="Tone"
+          value={formData.tone}
+          onChange={handleInputChange}
+          options={[
+            { value: "", label: "Select tone" },
+            { value: "loving", label: "Loving" },
+            { value: "friendly", label: "Friendly" },
+            { value: "romantic", label: "Romantic" },
+            { value: "casual", label: "Casual" },
+            { value: "formal", label: "Formal" },
+            { value: "humorous", label: "Humorous" },
+            { value: "sincere", label: "Sincere" },
+            { value: "encouraging", label: "Encouraging" }
+          ]}
+        />
 
-        <div>
-          <label 
-            htmlFor="emotionalState" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Your Emotional State
-          </label>
-          <select
-            id="emotionalState"
-            name="emotionalState"
-            value={formData.emotionalState}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-              appearance: "none",
-              backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 1rem center",
-            }}
-          >
-            <option value="Hopeful">Hopeful</option>
-            <option value="Anxious">Anxious</option>
-            <option value="Excited">Excited</option>
-            <option value="Worried">Worried</option>
-            <option value="Confident">Confident</option>
-            <option value="Hesitant">Hesitant</option>
-            <option value="Loving">Loving</option>
-            <option value="Upset">Upset</option>
-          </select>
-            </div>
+        <FormInput
+          id="emotionalState"
+          name="emotionalState"
+          type="select"
+          label="Your Emotional State"
+          value={formData.emotionalState}
+          onChange={handleInputChange}
+          options={[
+            { value: "Hopeful", label: "Hopeful" },
+            { value: "Anxious", label: "Anxious" },
+            { value: "Excited", label: "Excited" },
+            { value: "Worried", label: "Worried" },
+            { value: "Confident", label: "Confident" },
+            { value: "Hesitant", label: "Hesitant" },
+            { value: "Loving", label: "Loving" },
+            { value: "Upset", label: "Upset" }
+          ]}
+        />
 
-        <div>
-          <label 
-            htmlFor="desiredOutcome" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Desired Outcome
-          </label>
-          <select
-            id="desiredOutcome"
-            name="desiredOutcome"
-            value={formData.desiredOutcome}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-              appearance: "none",
-              backgroundImage: "url('data:image/svg+xml;utf8,<svg fill=\"white\" xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\"><path d=\"M7 10l5 5 5-5z\"/></svg>')",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "right 1rem center",
-            }}
-          >
-            <option value="Strengthen the relationship">Strengthen the relationship</option>
-            <option value="Resolve a conflict">Resolve a conflict</option>
-            <option value="Express feelings">Express feelings</option>
-            <option value="Request something">Request something</option>
-            <option value="Apologize">Apologize</option>
-            <option value="Celebrate an achievement">Celebrate an achievement</option>
-            <option value="Show support">Show support</option>
-          </select>
-          </div>
+        <FormInput
+          id="desiredOutcome"
+          name="desiredOutcome"
+          type="select"
+          label="Desired Outcome"
+          value={formData.desiredOutcome}
+          onChange={handleInputChange}
+          options={[
+            { value: "Strengthen the relationship", label: "Strengthen the relationship" },
+            { value: "Resolve a conflict", label: "Resolve a conflict" },
+            { value: "Express feelings", label: "Express feelings" },
+            { value: "Request something", label: "Request something" },
+            { value: "Apologize", label: "Apologize" },
+            { value: "Celebrate an achievement", label: "Celebrate an achievement" },
+            { value: "Show support", label: "Show support" }
+          ]}
+        />
         
-        <div>
-          <label 
-            htmlFor="additionalInfo" 
-            style={{ 
-              display: "block", 
-              marginBottom: "0.5rem", 
-              color: "rgba(255, 255, 255, 0.9)",
-              fontSize: "0.95rem"
-            }}
-          >
-            Additional Information (Optional)
-          </label>
-            <textarea
-            id="additionalInfo"
-            name="additionalInfo"
-            rows={4}
-            placeholder="Add any specific details you'd like to include in your message..."
-            value={formData.additionalInfo}
-            onChange={handleInputChange}
-            style={{
-              width: "100%",
-              padding: "0.85rem",
-              borderRadius: "8px",
-              border: "1px solid rgba(255, 255, 255, 0.3)",
-              backgroundColor: "rgba(255, 255, 255, 0.1)",
-              color: "#fff",
-              fontSize: "0.95rem",
-              outline: "none",
-              transition: "all 0.2s ease",
-              resize: "vertical",
-              minHeight: "100px",
-            }}
-            />
-          </div>
+        <FormInput
+          id="additionalInfo"
+          name="additionalInfo"
+          type="textarea"
+          label="Additional Information (Optional)"
+          value={formData.additionalInfo}
+          placeholder="Add any specific details you'd like to include in your message..."
+          onChange={handleInputChange}
+          rows={4}
+        />
         
         <div style={{ marginTop: "1rem", display: "flex", justifyContent: "space-between" }}>
           <motion.button
@@ -582,8 +560,8 @@ const MessageSpark: React.FC = () => {
               </>
             )}
           </motion.button>
-            </div>
-          </div>
+        </div>
+      </div>
     </motion.div>
   );
 
@@ -790,9 +768,9 @@ const MessageSpark: React.FC = () => {
           >
             Return to Home
           </motion.button>
-          </div>
+        </div>
       </motion.div>
-        );
+    );
   };
 
   return (
@@ -808,32 +786,8 @@ const MessageSpark: React.FC = () => {
         overflow: "hidden",
       }}
     >
-      {/* Floating hearts background animation */}
-      {hearts.map((heart) => (
-        <motion.div
-          key={heart.id}
-          style={{
-            position: "absolute",
-            left: `${heart.x}%`,
-            top: `${heart.y}%`,
-            opacity: heart.opacity,
-            zIndex: 1,
-          }}
-          initial={{ y: 0 }}
-          animate={{ y: -100 }}
-          transition={{
-            duration: heart.duration,
-            repeat: Infinity,
-            delay: heart.delay,
-          }}
-        >
-          <FaHeart
-            size={heart.size}
-            color="#fff"
-            style={{ filter: "blur(1px)" }}
-          />
-        </motion.div>
-      ))}
+      {/* Isolated floating hearts background animation */}
+      <FloatingHearts />
 
       {/* Header with logo */}
       <div

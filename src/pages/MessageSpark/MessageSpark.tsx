@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaUser, FaCopy, FaArrowLeft, FaArrowRight, FaSpinner } from "react-icons/fa";
@@ -30,8 +30,17 @@ interface MessageResult {
 }
 
 const MessageSpark: React.FC = () => {
-  // Local form state that's only updated when needed
-  const [localForm, setLocalForm] = useState<MessageFormData>({
+  // Native DOM references for inputs
+  const recipientInputRef = useRef<HTMLInputElement>(null);
+  const relationshipSelectRef = useRef<HTMLSelectElement>(null);
+  const occasionInputRef = useRef<HTMLInputElement>(null);
+  const toneSelectRef = useRef<HTMLSelectElement>(null);
+  const emotionalStateSelectRef = useRef<HTMLSelectElement>(null);
+  const desiredOutcomeSelectRef = useRef<HTMLSelectElement>(null);
+  const additionalInfoTextareaRef = useRef<HTMLTextAreaElement>(null);
+  
+  // State for form data - only used for validation and submission, not for controlling inputs
+  const [formData, setFormData] = useState<MessageFormData>({
     recipient: '',
     relationship: '',
     occasion: '',
@@ -40,10 +49,7 @@ const MessageSpark: React.FC = () => {
     desiredOutcome: 'Strengthen the relationship',
     additionalInfo: ''
   });
-  
-  // This state is used for form submission and validation, but not during typing
-  const [formData, setFormData] = useState<MessageFormData>(localForm);
-  
+
   const [hearts, setHearts] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState<Step>(Step.Relationship);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -59,6 +65,12 @@ const MessageSpark: React.FC = () => {
       navigate("/login");
     }
   }, [user, navigate]);
+
+  // Initialize the default values of inputs using direct DOM manipulation
+  useEffect(() => {
+    if (emotionalStateSelectRef.current) emotionalStateSelectRef.current.value = 'Hopeful';
+    if (desiredOutcomeSelectRef.current) desiredOutcomeSelectRef.current.value = 'Strengthen the relationship';
+  }, []);
 
   // Generate random heart positions initially and every 30 seconds instead of 10
   useEffect(() => {
@@ -81,21 +93,10 @@ const MessageSpark: React.FC = () => {
     setHearts(newHearts);
   };
   
-  // This function updates only the local form state without triggering validations or re-renders
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    
-    // Update only the local form for immediate UI feedback
-    setLocalForm(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-  
-  // When moving to the next step, we synchronize the localForm with formData
+  // When moving to the next step, we capture values from the DOM refs
   const goToNextStep = () => {
-    // Update the formData state with the current localForm values
-    setFormData(localForm);
+    const currentFormValues = getFormValues();
+    setFormData(currentFormValues);
     setCurrentStep(prev => prev + 1 as Step);
   };
 
@@ -103,22 +104,35 @@ const MessageSpark: React.FC = () => {
     setCurrentStep(prev => prev - 1 as Step);
   };
 
+  // Get all form values from DOM refs
+  const getFormValues = (): MessageFormData => {
+    return {
+      recipient: recipientInputRef.current?.value || '',
+      relationship: relationshipSelectRef.current?.value || '',
+      occasion: occasionInputRef.current?.value || '',
+      tone: toneSelectRef.current?.value || '',
+      emotionalState: emotionalStateSelectRef.current?.value || '',
+      desiredOutcome: desiredOutcomeSelectRef.current?.value || '',
+      additionalInfo: additionalInfoTextareaRef.current?.value || ''
+    };
+  };
+
   const handleSubmit = async () => {
-    // Update the formData state with the current localForm values
-    setFormData(localForm);
+    const currentFormValues = getFormValues();
+    setFormData(currentFormValues);
     setIsGenerating(true);
     setError(null);
     
     try {
       // Call the actual API service to generate message
       const result = await generateMessage({
-        recipient: localForm.recipient,
-        relationship: localForm.relationship,
-        occasion: localForm.occasion,
-        tone: localForm.tone,
-        emotionalState: localForm.emotionalState,
-        desiredOutcome: localForm.desiredOutcome,
-        additionalContext: localForm.additionalInfo
+        recipient: currentFormValues.recipient,
+        relationship: currentFormValues.relationship,
+        occasion: currentFormValues.occasion,
+        tone: currentFormValues.tone,
+        emotionalState: currentFormValues.emotionalState,
+        desiredOutcome: currentFormValues.desiredOutcome,
+        additionalContext: currentFormValues.additionalInfo
       });
       
       setGeneratedMessage({
@@ -152,14 +166,15 @@ const MessageSpark: React.FC = () => {
     navigate("/welcome");
   };
 
+  // Check form validity based on current DOM values
   const isStepValid = () => {
     switch (currentStep) {
       case Step.Relationship:
-        return localForm.recipient.trim() !== '' && 
-               localForm.relationship.trim() !== '' && 
-               localForm.occasion.trim() !== '';
+        return !!(recipientInputRef.current?.value && 
+                 relationshipSelectRef.current?.value && 
+                 occasionInputRef.current?.value);
       case Step.Message:
-        return localForm.tone.trim() !== '';
+        return !!toneSelectRef.current?.value;
       default:
         return true;
     }
@@ -204,8 +219,7 @@ const MessageSpark: React.FC = () => {
             name="recipient"
             type="text"
             placeholder="E.g., Sarah, Mom, John"
-            value={localForm.recipient}
-            onChange={handleInputChange}
+            ref={recipientInputRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -235,8 +249,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="relationship"
             name="relationship"
-            value={localForm.relationship}
-            onChange={handleInputChange}
+            ref={relationshipSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -280,8 +293,7 @@ const MessageSpark: React.FC = () => {
             name="occasion"
             type="text"
             placeholder="E.g., Birthday, Anniversary, Apology"
-            value={localForm.occasion}
-            onChange={handleInputChange}
+            ref={occasionInputRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -385,8 +397,7 @@ const MessageSpark: React.FC = () => {
           <select
             id="tone"
             name="tone"
-            value={localForm.tone}
-            onChange={handleInputChange}
+            ref={toneSelectRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -430,8 +441,8 @@ const MessageSpark: React.FC = () => {
           <select
             id="emotionalState"
             name="emotionalState"
-            value={localForm.emotionalState}
-            onChange={handleInputChange}
+            ref={emotionalStateSelectRef}
+            defaultValue="Hopeful"
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -474,8 +485,8 @@ const MessageSpark: React.FC = () => {
           <select
             id="desiredOutcome"
             name="desiredOutcome"
-            value={localForm.desiredOutcome}
-            onChange={handleInputChange}
+            ref={desiredOutcomeSelectRef}
+            defaultValue="Strengthen the relationship"
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -519,8 +530,7 @@ const MessageSpark: React.FC = () => {
             name="additionalInfo"
             rows={4}
             placeholder="Add any specific details you'd like to include in your message..."
-            value={localForm.additionalInfo}
-            onChange={handleInputChange}
+            ref={additionalInfoTextareaRef}
             style={{
               width: "100%",
               padding: "0.85rem",
@@ -599,7 +609,7 @@ const MessageSpark: React.FC = () => {
 
   // Result Step with fixed animation blipping
   const ResultStep = () => {
-    // Use the actual message content directly from the generatedMessage state
+    // Use the message content directly
     const messageContent = generatedMessage?.content || "";
     
     // Parse message into sections for better readability

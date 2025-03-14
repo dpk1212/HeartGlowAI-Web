@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { signUp } from "../../services/auth";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
@@ -51,16 +52,41 @@ export default function SignUp() {
       return;
     }
 
+    // Check password strength
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      // Simulate API call for user registration
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Use Firebase signUp function
+      await signUp(email, password, name);
       
-      // For demo, navigate to welcome page
+      // If successful, navigate to welcome page
       navigate("/welcome");
     } catch (err) {
-      setError("Failed to create account. Please try again.");
+      console.error("Signup error:", err);
+      
+      // Handle different Firebase error codes
+      const errorCode = err?.code;
+      switch (errorCode) {
+        case 'auth/email-already-in-use':
+          setError("An account with this email already exists");
+          break;
+        case 'auth/invalid-email':
+          setError("Invalid email address format");
+          break;
+        case 'auth/operation-not-allowed':
+          setError("Account creation is disabled at this time");
+          break;
+        case 'auth/weak-password':
+          setError("Password is too weak. Please use a stronger password");
+          break;
+        default:
+          setError("Failed to create account. Please try again");
+      }
     } finally {
       setLoading(false);
     }

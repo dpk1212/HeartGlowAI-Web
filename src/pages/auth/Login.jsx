@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart } from "react-icons/fa";
 import { IoMdClose } from "react-icons/io";
+import { signIn } from "../../services/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -47,13 +48,35 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // Simulate API call for login
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Use Firebase authentication
+      await signIn(email, password);
       
-      // For demo, navigate to welcome page
+      // If successful, navigate to welcome page
       navigate("/welcome");
     } catch (err) {
-      setError("Invalid email or password");
+      console.error("Login error:", err);
+      
+      // Handle different Firebase error codes
+      const errorCode = err?.code;
+      switch (errorCode) {
+        case 'auth/invalid-email':
+          setError("Invalid email address format");
+          break;
+        case 'auth/user-disabled':
+          setError("This account has been disabled");
+          break;
+        case 'auth/user-not-found':
+          setError("No account found with this email");
+          break;
+        case 'auth/wrong-password':
+          setError("Invalid password");
+          break;
+        case 'auth/too-many-requests':
+          setError("Too many failed login attempts. Please try again later");
+          break;
+        default:
+          setError("Failed to sign in. Please try again");
+      }
     } finally {
       setLoading(false);
     }

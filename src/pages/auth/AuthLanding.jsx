@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 
 export default function AuthLanding() {
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-6 bg-heart-gradient overflow-hidden"> 
-      {/* Main content container */}
-      <div className="w-full max-w-[320px] sm:max-w-[380px] mx-auto z-10 relative">
+    <div className="min-h-screen flex flex-col justify-center items-center px-4 py-6 overflow-hidden bg-gradient-to-b from-pink-500 via-purple-500 to-indigo-500"> 
+      {/* Main content container - strictly limited to max-w-xs on all devices */}
+      <div className="w-full max-w-xs mx-auto z-10 flex flex-col items-center justify-center">
         <motion.div 
-          className="flex flex-col items-center"
+          className="w-full flex flex-col items-center"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
@@ -57,13 +57,13 @@ export default function AuthLanding() {
             Express your feelings with beautifully crafted messages
           </p>
 
-          {/* Buttons Container - centered with proper spacing */}
-          <div className="flex flex-col items-center space-y-4 w-full">
-            {/* Sign In Button - secondary outlined style */}
+          {/* Buttons Container - strictly centered buttons */}
+          <div className="w-full flex flex-col items-center justify-center space-y-4">
+            {/* Sign In Button - secondary outlined style with fixed width */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-64"
+              className="w-full max-w-xs"
             >
               <Link 
                 to="/login" 
@@ -73,11 +73,11 @@ export default function AuthLanding() {
               </Link>
             </motion.div>
 
-            {/* Sign Up Button - primary filled gradient style */}
+            {/* Sign Up Button - primary filled gradient style with fixed width */}
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-64"
+              className="w-full max-w-xs"
             >
               <Link 
                 to="/signup" 

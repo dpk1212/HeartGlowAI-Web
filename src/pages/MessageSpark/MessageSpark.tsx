@@ -313,7 +313,40 @@ Please provide a structured response following the format above.`;
     setSelectedExchange(null);
   };
   
-  // Handle copying reply to clipboard
+  // Format the structured reply for display
+  const formatStructuredReply = (reply: string) => {
+    // Break the reply into sections based on the headings
+    const sections = {
+      response: '',
+      insights: '',
+      mistakes: ''
+    };
+
+    try {
+      // Use regex to find each section with its heading
+      const responseMatch = reply.match(/Try This Response\s*([\s\S]*?)(?=Why This Could Work Insights|$)/i);
+      const insightsMatch = reply.match(/Why This Could Work Insights\s*([\s\S]*?)(?=Common Mistakes|$)/i);
+      const mistakesMatch = reply.match(/Common Mistakes\s*([\s\S]*?)(?=$)/i);
+      
+      // Extract content from each section, excluding the heading
+      if (responseMatch && responseMatch[1]) sections.response = responseMatch[1].trim();
+      if (insightsMatch && insightsMatch[1]) sections.insights = insightsMatch[1].trim();
+      if (mistakesMatch && mistakesMatch[1]) sections.mistakes = mistakesMatch[1].trim();
+      
+      // If we couldn't parse the format, just return the whole reply as the response
+      if (!sections.response && !sections.insights && !sections.mistakes) {
+        sections.response = reply;
+      }
+    } catch (err) {
+      // Fallback if regex fails
+      console.error('Error parsing structured reply:', err);
+      sections.response = reply;
+    }
+    
+    return sections;
+  };
+
+  // Handle copying reply to clipboard - only copy the response section
   const handleCopyReply = () => {
     // Format the reply and get just the response section to copy
     const sections = formatStructuredReply(generatedReply);
@@ -342,38 +375,6 @@ Please provide a structured response following the format above.`;
     }).format(date);
   };
   
-  // Format the structured reply for display
-  const formatStructuredReply = (reply: string) => {
-    // Break the reply into sections based on the headings
-    const sections = {
-      response: '',
-      insights: '',
-      mistakes: ''
-    };
-
-    // Check if the reply has the expected format
-    if (reply.includes('Try This Response') && 
-        reply.includes('Why This Could Work Insights') && 
-        reply.includes('Common Mistakes')) {
-      
-      // Extract the sections
-      const parts = reply.split(/(?:Try This Response|Why This Could Work Insights|Common Mistakes)/);
-      
-      // Remove empty parts and trim
-      const cleanParts = parts.filter(part => part.trim().length > 0).map(part => part.trim());
-      
-      // Assign parts to corresponding sections
-      if (cleanParts.length >= 1) sections.response = cleanParts[0];
-      if (cleanParts.length >= 2) sections.insights = cleanParts[1];
-      if (cleanParts.length >= 3) sections.mistakes = cleanParts[2];
-    } else {
-      // If the format doesn't match, just return the whole reply
-      sections.response = reply;
-    }
-    
-    return sections;
-  };
-
   // Render the structured reply with formatting
   const renderStructuredReply = (reply: string) => {
     const sections = formatStructuredReply(reply);
@@ -639,14 +640,14 @@ Please provide a structured response following the format above.`;
                   className="primary-button"
                   onClick={handleCopyReply}
                 >
-                  {copied ? 'Copied!' : 'Copy Response'}
+                  {copied ? 'Copied!' : 'Copy Response Message'}
                 </button>
                 
                 <button 
                   className="secondary-button"
                   onClick={handleCopyFullReply}
                 >
-                  Copy Full Reply
+                  Copy Full Response with Insights
                 </button>
                 
                 {selectedConversation && (
@@ -672,14 +673,14 @@ Please provide a structured response following the format above.`;
                     className="primary-button"
                     onClick={handleCopyReply}
                   >
-                    {copied ? 'Copied!' : 'Copy Response'}
+                    {copied ? 'Copied!' : 'Copy Response Message'}
                   </button>
                   
                   <button 
                     className="secondary-button"
                     onClick={handleCopyFullReply}
                   >
-                    Copy Full Reply
+                    Copy Full Response with Insights
                   </button>
                   
                   <button

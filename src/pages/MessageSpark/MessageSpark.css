@@ -410,8 +410,8 @@ button {
   padding: 1.5rem;
   border-radius: 12px;
   color: white;
-  min-height: 200px;
-  max-height: 300px;
+  min-height: 100px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
@@ -662,4 +662,49 @@ textarea.read-only {
   .exchange-navigation select {
     width: 100%;
   }
+}
+
+/* Structured reply formatting */
+.structured-reply {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 0.5rem;
+}
+
+.reply-section {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 1rem;
+  border-left: 4px solid transparent;
+}
+
+.reply-section h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: white;
+}
+
+.section-content {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+/* Section-specific styling */
+.response-section {
+  border-left-color: #64b5f6; /* Blue for response */
+  background-color: rgba(100, 181, 246, 0.1);
+}
+
+.insights-section {
+  border-left-color: #81c784; /* Green for insights */
+  background-color: rgba(129, 199, 132, 0.1);
+}
+
+.mistakes-section {
+  border-left-color: #e57373; /* Red for common mistakes */
+  background-color: rgba(229, 115, 115, 0.1);
 } 

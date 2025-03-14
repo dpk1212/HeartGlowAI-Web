@@ -194,13 +194,31 @@ const MessageSpark: React.FC = () => {
     setError('');
     
     try {
-      // For now, we'll use the generateMessage service with a simple prompt
-      // Later, this will be replaced with the specific system prompt from the user
-      const prompt = `Reply to the following message in a thoughtful, personalized way:
-      
-      "${originalMessage}"
-      
-      Make the reply warm, authentic, and responsive to the content of the original message.`;
+      // Use the new structured system prompt for more effective and educational replies
+      const systemPrompt = `You are HeartGlowAI, an AI-powered relationship coach that helps users improve communication in romantic, friendship, and family relationships. Your goal is to provide warm, thoughtful, and emotionally intelligent responses to messages, ensuring that users can express themselves clearly and effectively.
+
+When generating a response, follow this structured format:
+
+Try This Response
+Craft a concise, empathetic, and clear response to the given message.
+Ensure the tone matches the context (e.g., supportive, reassuring, lighthearted, firm but kind).
+If the message contains conflict, de-escalate tension while maintaining honesty.
+If the message is emotionally charged, acknowledge feelings before responding.
+
+Why This Could Work Insights
+Explain why the suggested response is effective in strengthening communication.
+Highlight how the response encourages positive interaction, avoids misinterpretation, and fosters understanding.
+If applicable, reference emotional intelligence principles (e.g., active listening, avoiding blame, validating feelings).
+
+Common Mistakes
+Identify common errors people make when replying to similar messages.
+Explain why these responses might lead to misunderstandings, conflict, or missed opportunities for connection.
+Keep this section brief but impactful, offering insight into what to avoid.
+
+The message you need to reply to is:
+"${originalMessage}"
+
+Please provide a structured response following the format above.`;
       
       const reply = await generateMessage({
         recipient: "Reply",
@@ -209,7 +227,7 @@ const MessageSpark: React.FC = () => {
         tone: "Authentic",
         emotionalState: "Thoughtful",
         desiredOutcome: "MeaningfulConversation",
-        additionalContext: prompt
+        additionalContext: systemPrompt
       });
       
       setGeneratedReply(reply);
@@ -297,6 +315,17 @@ const MessageSpark: React.FC = () => {
   
   // Handle copying reply to clipboard
   const handleCopyReply = () => {
+    // Format the reply and get just the response section to copy
+    const sections = formatStructuredReply(generatedReply);
+    const textToCopy = sections.response || generatedReply;
+    
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+  
+  // Copy the full reply with all sections (insights and mistakes)
+  const handleCopyFullReply = () => {
     navigator.clipboard.writeText(generatedReply);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -311,6 +340,74 @@ const MessageSpark: React.FC = () => {
       hour: 'numeric',
       minute: 'numeric'
     }).format(date);
+  };
+  
+  // Format the structured reply for display
+  const formatStructuredReply = (reply: string) => {
+    // Break the reply into sections based on the headings
+    const sections = {
+      response: '',
+      insights: '',
+      mistakes: ''
+    };
+
+    // Check if the reply has the expected format
+    if (reply.includes('Try This Response') && 
+        reply.includes('Why This Could Work Insights') && 
+        reply.includes('Common Mistakes')) {
+      
+      // Extract the sections
+      const parts = reply.split(/(?:Try This Response|Why This Could Work Insights|Common Mistakes)/);
+      
+      // Remove empty parts and trim
+      const cleanParts = parts.filter(part => part.trim().length > 0).map(part => part.trim());
+      
+      // Assign parts to corresponding sections
+      if (cleanParts.length >= 1) sections.response = cleanParts[0];
+      if (cleanParts.length >= 2) sections.insights = cleanParts[1];
+      if (cleanParts.length >= 3) sections.mistakes = cleanParts[2];
+    } else {
+      // If the format doesn't match, just return the whole reply
+      sections.response = reply;
+    }
+    
+    return sections;
+  };
+
+  // Render the structured reply with formatting
+  const renderStructuredReply = (reply: string) => {
+    const sections = formatStructuredReply(reply);
+    
+    return (
+      <div className="structured-reply">
+        {sections.response && (
+          <div className="reply-section response-section">
+            <h4>Try This Response</h4>
+            <div className="section-content">
+              {sections.response}
+            </div>
+          </div>
+        )}
+        
+        {sections.insights && (
+          <div className="reply-section insights-section">
+            <h4>Why This Could Work</h4>
+            <div className="section-content">
+              {sections.insights}
+            </div>
+          </div>
+        )}
+        
+        {sections.mistakes && (
+          <div className="reply-section mistakes-section">
+            <h4>Common Mistakes</h4>
+            <div className="section-content">
+              {sections.mistakes}
+            </div>
+          </div>
+        )}
+      </div>
+    );
   };
   
   // The landing page view
@@ -535,16 +632,21 @@ const MessageSpark: React.FC = () => {
             // View mode for existing exchange
             <div className="reply-result">
               <h3>Generated Reply</h3>
-              <div className="reply-content">
-                <pre>{generatedReply}</pre>
-              </div>
+              {renderStructuredReply(generatedReply)}
               
               <div className="reply-actions">
                 <button 
                   className="primary-button"
                   onClick={handleCopyReply}
                 >
-                  {copied ? 'Copied!' : 'Copy Reply'}
+                  {copied ? 'Copied!' : 'Copy Response'}
+                </button>
+                
+                <button 
+                  className="secondary-button"
+                  onClick={handleCopyFullReply}
+                >
+                  Copy Full Reply
                 </button>
                 
                 {selectedConversation && (
@@ -563,16 +665,21 @@ const MessageSpark: React.FC = () => {
               // Show generated reply for new exchange
               <div className="reply-result">
                 <h3>Generated Reply</h3>
-                <div className="reply-content">
-                  <pre>{generatedReply}</pre>
-                </div>
+                {renderStructuredReply(generatedReply)}
                 
                 <div className="reply-actions">
                   <button 
                     className="primary-button"
                     onClick={handleCopyReply}
                   >
-                    {copied ? 'Copied!' : 'Copy Reply'}
+                    {copied ? 'Copied!' : 'Copy Response'}
+                  </button>
+                  
+                  <button 
+                    className="secondary-button"
+                    onClick={handleCopyFullReply}
+                  >
+                    Copy Full Reply
                   </button>
                   
                   <button

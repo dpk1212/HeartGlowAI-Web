@@ -4,11 +4,19 @@ import { db } from '../firebase/config';
 import { auth } from '../firebase/config';
 import OpenAI from 'openai';
 
-// Export the OpenAI instance for server-side use only
-export let openai = new OpenAI({
-  apiKey: process.env.REACT_APP_OPENAI_API_KEY || '',
-  dangerouslyAllowBrowser: false
-});
+// For server-side usage only - API keys should be managed in secure environment variables
+// and NEVER directly included in the code
+// This setup relies on Firebase Functions for secure API access
+export let openai: OpenAI | null = null;
+
+// Initialize OpenAI only on server environments if needed
+// Client-side code should use Firebase Functions instead
+if (typeof window === 'undefined') {
+  openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || '',
+    dangerouslyAllowBrowser: false
+  });
+}
 
 // Pydantic Schema Types
 export interface MessageInsight {
@@ -171,4 +179,5 @@ export const getMessageVariations = async (messageText: string, context: Partial
   }
 }; 
 
-// Updated to use secure Firebase Functions for all API calls 
+// All sensitive API keys should be stored in environment variables
+// and accessed securely through Firebase Functions 

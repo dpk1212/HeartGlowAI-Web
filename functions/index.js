@@ -11,6 +11,14 @@ const openai = new OpenAI({
   apiKey: functions.config().openai?.key || 'YOUR_OPENAI_API_KEY', // REPLACE WITH ACTUAL KEY IN PRODUCTION
 });
 
+// Import advanced message generation functions
+const advancedMessageFunctions = require('./src/advancedMessage');
+
+// Export advanced message functions
+exports.generateAdvancedMessage = advancedMessageFunctions.generateAdvancedMessage;
+exports.saveMessageFeedback = advancedMessageFunctions.saveMessageFeedback;
+exports.getMessageVariations = advancedMessageFunctions.getMessageVariations;
+
 /**
  * Generates a relationship message using OpenAI
  * 

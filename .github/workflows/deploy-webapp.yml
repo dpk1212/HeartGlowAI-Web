@@ -41,8 +41,11 @@ jobs:
           # Copy assets
           cp -r assets web-build/
           
-          # Use the existing index.html file
-          cp web-build/index.html web-build/index.html || echo "Creating new index.html from repository"
+          # Create .nojekyll file to prevent GitHub Pages from using Jekyll
+          touch web-build/.nojekyll
+          
+          # Remove any potential README or index.md files that might take precedence
+          rm -f web-build/README.md web-build/index.md || true
 
       - name: Create CNAME file
         run: echo "heartglowai.com" > web-build/CNAME
@@ -52,4 +55,5 @@ jobs:
         with:
           branch: gh-pages
           folder: web-build
+          clean: true
           token: ${{ secrets.GITHUB_TOKEN }} 

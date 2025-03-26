@@ -38,6 +38,7 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    console.log("Login submit clicked with email:", email);
 
     // Simple validation
     if (!email || !password) {
@@ -49,9 +50,11 @@ export default function Login() {
 
     try {
       // Use Firebase authentication
+      console.log("Attempting to sign in...");
       await signIn(email, password);
       
       // If successful, navigate to message spark page instead of welcome
+      console.log("Sign-in successful, navigating to /message-spark");
       navigate("/message-spark");
     } catch (err) {
       console.error("Login error:", err);
@@ -83,6 +86,7 @@ export default function Login() {
   };
 
   const handleClose = () => {
+    console.log("Close button clicked, navigating to /");
     navigate("/");
   };
 

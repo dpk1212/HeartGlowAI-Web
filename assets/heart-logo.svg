@@ -1,0 +1,37 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient definitions -->
+  <defs>
+    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B7F" />
+      <stop offset="100%" stop-color="#0AB5FF" />
+    </linearGradient>
+    <linearGradient id="circuitGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF3B7F" />
+      <stop offset="100%" stop-color="#0AB5FF" />
+    </linearGradient>
+  </defs>
+
+  <!-- Heart outline -->
+  <path d="M100 180C94.8 180 89.7 178 85.6 174L30.6 119C11.2 99.6 11.2 68.4 30.6 49C40.1 39.5 52.8 34 66.3 34C79.8 34 92.5 39.5 102 49L100 51L98 49C117.4 29.6 148.6 29.6 168 49C187.4 68.4 187.4 99.6 168 119L113 174C108.9 178 103.8 180 100 180Z" 
+        stroke="url(#heartGradient)" 
+        stroke-width="4" 
+        fill="none" />
+
+  <!-- Circuit board paths -->
+  <path d="M65 90 L110 90 L110 130 L140 130" stroke="url(#circuitGradient)" stroke-width="2" />
+  <path d="M60 110 L90 110 L90 70 L120 70" stroke="url(#circuitGradient)" stroke-width="2" />
+  <path d="M80 150 L80 120 L140 120" stroke="url(#circuitGradient)" stroke-width="2" />
+
+  <!-- Circuit nodes -->
+  <circle cx="65" cy="90" r="5" fill="#0AB5FF" />
+  <circle cx="110" cy="90" r="5" fill="#FF3B7F" />
+  <circle cx="110" cy="130" r="5" fill="#0AB5FF" />
+  <circle cx="140" cy="130" r="5" fill="#0AB5FF" />
+  <circle cx="60" cy="110" r="5" fill="#FF3B7F" />
+  <circle cx="90" cy="110" r="5" fill="#0AB5FF" />
+  <circle cx="90" cy="70" r="5" fill="#FF3B7F" />
+  <circle cx="120" cy="70" r="5" fill="#0AB5FF" />
+  <circle cx="80" cy="150" r="5" fill="#FF3B7F" />
+  <circle cx="80" cy="120" r="5" fill="#0AB5FF" />
+  <circle cx="140" cy="120" r="5" fill="#FF3B7F" />
+</svg> 

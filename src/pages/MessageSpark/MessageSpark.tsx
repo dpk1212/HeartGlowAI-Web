@@ -1432,7 +1432,7 @@ ${sections.mistakes}`;
     );
   };
   
-  // New Conversation View with Card-Based Flow - significantly improved
+  // New Conversation View with Card-Based Flow - enhanced for content visibility
   const renderNewConversationView = () => {
     return (
       <div className="new-conversation-container">
@@ -1452,20 +1452,19 @@ ${sections.mistakes}`;
           <div className={`progress-step ${conversationContext.currentStep >= 3 ? 'active' : ''}`}>3</div>
         </div>
         
-        {/* MAJOR IMPROVEMENT: Use layout="position" to maintain position during transitions */}
+        {/* IMPROVED: Use simpler animations with only one card visible at a time */}
         <div className="card-container">
-          <AnimatePresence mode="wait" initial={false} presenceAffectsLayout={false}>
+          <AnimatePresence initial={false}>
             {conversationContext.currentStep === 1 && (
               <motion.div 
                 key="relationship" 
                 className="card-wrapper"
-                initial={{ opacity: 0, x: -30 }} 
+                initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 30 }}
+                exit={{ opacity: 0, x: 20 }}
                 transition={{ 
-                  duration: 0.4, 
-                  ease: [0.25, 1, 0.5, 1],
-                  opacity: { duration: 0.25 }
+                  duration: 0.3, 
+                  ease: [0.25, 1, 0.5, 1]
                 }}
               >
                 <RelationshipTypeCard />
@@ -1475,13 +1474,12 @@ ${sections.mistakes}`;
               <motion.div 
                 key="scenario" 
                 className="card-wrapper"
-                initial={{ opacity: 0, x: -30 }} 
+                initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 30 }}
+                exit={{ opacity: 0, x: 20 }}
                 transition={{ 
-                  duration: 0.4, 
-                  ease: [0.25, 1, 0.5, 1],
-                  opacity: { duration: 0.25 }
+                  duration: 0.3, 
+                  ease: [0.25, 1, 0.5, 1]
                 }}
               >
                 <CommunicationScenarioCard />
@@ -1491,13 +1489,12 @@ ${sections.mistakes}`;
               <motion.div 
                 key="emotional" 
                 className="card-wrapper"
-                initial={{ opacity: 0, x: -30 }} 
+                initial={{ opacity: 0, x: -20 }} 
                 animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 30 }}
+                exit={{ opacity: 0, x: 20 }}
                 transition={{ 
-                  duration: 0.4, 
-                  ease: [0.25, 1, 0.5, 1],
-                  opacity: { duration: 0.25 }
+                  duration: 0.3, 
+                  ease: [0.25, 1, 0.5, 1]
                 }}
               >
                 <EmotionalContextCard />

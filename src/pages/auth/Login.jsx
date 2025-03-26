@@ -52,7 +52,7 @@ export default function Login() {
       await signIn(email, password);
       
       // If successful, navigate to message spark page instead of welcome
-      navigate("/message");
+      navigate("/message-spark");
     } catch (err) {
       console.error("Login error:", err);
       
@@ -83,7 +83,7 @@ export default function Login() {
   };
 
   const handleClose = () => {
-    navigate("/authlanding");
+    navigate("/");
   };
 
   return (

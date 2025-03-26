@@ -65,7 +65,7 @@ export default function SignUp() {
       await signUp(email, password, name);
       
       // If successful, navigate to message spark page instead of welcome
-      navigate("/message");
+      navigate("/message-spark");
     } catch (err) {
       console.error("Signup error:", err);
       
@@ -93,7 +93,7 @@ export default function SignUp() {
   };
 
   const handleClose = () => {
-    navigate("/authlanding");
+    navigate("/");
   };
 
   return (

@@ -917,26 +917,20 @@ textarea.read-only {
   background: linear-gradient(to right, rgba(255, 107, 203, 0.7), rgba(177, 156, 217, 0.7));
 }
 
-/* Card Container - Optimized for animations */
+/* Card Container - Fixed for visibility */
 .card-container {
   position: relative;
-  min-height: 400px;
+  min-height: 450px; /* Increased to fit all content */
   height: auto;
+  overflow: visible; /* Allow content to overflow */
   margin-bottom: 2rem;
-  perspective: 1200px;
   width: 100%;
-  transform-style: preserve-3d;
-  overflow: hidden;
-  contain: layout style;
 }
 
-/* Card wrapper for animations */
+/* Card wrapper for animations - Fixed positioning */
 .card-wrapper {
   width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative; /* Changed back to relative for proper content flow */
   transform-style: preserve-3d;
   will-change: transform, opacity;
   transform: translateZ(0);
@@ -948,7 +942,7 @@ textarea.read-only {
   z-index: 1;
 }
 
-/* Message Card */
+/* Message Card - Ensured visibility */
 .message-card {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
@@ -960,12 +954,13 @@ textarea.read-only {
   transform: translateZ(0);
   will-change: transform, opacity;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  contain: content;
+  contain: style paint;
   transition: box-shadow 0.3s ease, transform 0.3s ease;
-  height: 100%;
+  height: auto; /* Changed from 100% to auto */
+  min-height: 350px;
   display: flex;
   flex-direction: column;
-  min-height: 350px;
+  overflow: visible; /* Ensure content is not cut off */
 }
 
 .message-card:hover {
@@ -1170,18 +1165,23 @@ body.animating {
   }
 }
 
-.card-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 1rem;
-}
-
+/* Card content - Ensured visibility */
 .card-content {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   flex-grow: 1;
+  overflow: visible; /* Ensure content is not cut off */
+}
+
+/* Ensure card actions are always visible at bottom */
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 /* Text input styles for cards */

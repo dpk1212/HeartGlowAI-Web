@@ -1,55 +1,75 @@
-import firebase from '@react-native-firebase/app';
-import '@react-native-firebase/auth';
-import '@react-native-firebase/firestore';
-import {
-  FIREBASE_API_KEY,
-  FIREBASE_AUTH_DOMAIN,
-  FIREBASE_PROJECT_ID,
-  FIREBASE_STORAGE_BUCKET,
-  FIREBASE_MESSAGING_SENDER_ID,
-  FIREBASE_APP_ID,
-  FIREBASE_MEASUREMENT_ID
-} from '@env';
+import { Platform } from 'react-native';
+import { isWeb } from './platform';
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: FIREBASE_API_KEY,
-  authDomain: FIREBASE_AUTH_DOMAIN,
-  projectId: FIREBASE_PROJECT_ID,
-  storageBucket: FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: FIREBASE_MESSAGING_SENDER_ID,
-  appId: FIREBASE_APP_ID,
-  measurementId: FIREBASE_MEASUREMENT_ID
-};
+let firebase, auth, firestore, isFirebaseConfigured;
 
-console.log('Initializing Firebase with config:', JSON.stringify({
-  projectId: firebaseConfig.projectId,
-  authDomain: firebaseConfig.authDomain
-}));
-
-// Initialize Firebase if it hasn't been initialized already
-if (!firebase.apps.length) {
+// Use the appropriate Firebase implementation based on platform
+if (isWeb) {
   try {
-    // Check if we have the required configuration values
-    if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-      console.error('Firebase configuration missing. Please check your environment variables.');
-      throw new Error('Firebase configuration incomplete. Please provide required environment variables.');
-    } else {
-      firebase.initializeApp(firebaseConfig);
-      console.log('Firebase initialized successfully');
-    }
+    // Import web-specific Firebase implementation
+    const webFirebase = require('./firebase-web');
+    firebase = webFirebase.default;
+    auth = webFirebase.auth;
+    firestore = webFirebase.firestore;
+    isFirebaseConfigured = webFirebase.isFirebaseConfigured;
+    console.log('Using web Firebase implementation');
   } catch (error) {
-    console.error('Firebase initialization error:', error);
+    console.error('Error importing web Firebase:', error);
+  }
+} else {
+  try {
+    // Import React Native Firebase implementation (this is the existing code)
+    const nativeFirebase = require('@react-native-firebase/app');
+    const nativeAuth = require('@react-native-firebase/auth');
+    const nativeFirestore = require('@react-native-firebase/firestore');
+    
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: process.env.FIREBASE_API_KEY || "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+      authDomain: process.env.FIREBASE_AUTH_DOMAIN || "heartglowai.firebaseapp.com", 
+      projectId: process.env.FIREBASE_PROJECT_ID || "heartglowai",
+      storageBucket: process.env.FIREBASE_STORAGE_BUCKET || "heartglowai.firebasestorage.app",
+      messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID || "196565711798",
+      appId: process.env.FIREBASE_APP_ID || "1:196565711798:web:79e2b0320fd8e74ab0df17",
+      measurementId: process.env.FIREBASE_MEASUREMENT_ID || "G-KJMPL1DNPY"
+    };
+    
+    console.log('Initializing Firebase with config:', JSON.stringify({
+      projectId: firebaseConfig.projectId,
+      authDomain: firebaseConfig.authDomain
+    }));
+    
+    // Initialize Firebase if it hasn't been initialized already
+    if (!nativeFirebase.apps.length) {
+      try {
+        // Check if we have the required configuration values
+        if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+          console.error('Firebase configuration missing. Please check your environment variables.');
+          throw new Error('Firebase configuration incomplete. Please provide required environment variables.');
+        } else {
+          nativeFirebase.initializeApp(firebaseConfig);
+          console.log('Firebase initialized successfully');
+        }
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
+      }
+    }
+    
+    firebase = nativeFirebase;
+    auth = nativeAuth().auth();
+    firestore = nativeFirestore().firestore();
+    
+    // Helper function to check if Firebase is properly configured
+    isFirebaseConfigured = () => {
+      return !!process.env.FIREBASE_API_KEY && !!process.env.FIREBASE_PROJECT_ID && 
+             !!process.env.FIREBASE_AUTH_DOMAIN && !!process.env.FIREBASE_APP_ID;
+    };
+    
+    console.log('Using native Firebase implementation');
+  } catch (error) {
+    console.error('Error importing native Firebase:', error);
   }
 }
 
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
-
-// Helper function to check if Firebase is properly configured
-export const isFirebaseConfigured = () => {
-  return !!FIREBASE_API_KEY && !!FIREBASE_PROJECT_ID && 
-         !!FIREBASE_AUTH_DOMAIN && !!FIREBASE_APP_ID;
-};
-
+export { firebase, auth, firestore, isFirebaseConfigured };
 export default firebase; 

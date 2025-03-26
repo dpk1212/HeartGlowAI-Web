@@ -4,10 +4,10 @@
     "slug": "heartglowai",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/placeholder-icon.png",
     "userInterfaceStyle": "dark",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/placeholder-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#050A14"
     },
@@ -22,12 +22,24 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/placeholder-adaptive-icon.png",
         "backgroundColor": "#050A14"
       }
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/heart-logo.png",
+      "bundler": "metro",
+      "output": "static",
+      "name": "HeartGlowAI",
+      "description": "AI-powered heartfelt message generation",
+      "lang": "en",
+      "scope": "/HeartGlowAI/",
+      "themeColor": "#050A14",
+      "backgroundColor": "#050A14",
+      "startUrl": "/HeartGlowAI/",
+      "shortName": "HeartGlowAI",
+      "display": "standalone",
+      "orientation": "portrait"
     }
   }
 } 

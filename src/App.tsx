@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import './App.css'
 import AuthLanding from './pages/auth/AuthLanding.jsx'
 import { MessageSpark } from './pages/MessageSpark/MessageSpark'

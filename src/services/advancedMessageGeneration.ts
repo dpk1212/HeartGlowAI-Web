@@ -170,3 +170,5 @@ export const getMessageVariations = async (messageText: string, context: Partial
     throw new Error(`Failed to generate variations: ${error.message}`);
   }
 }; 
+
+// Updated to use secure Firebase Functions for all API calls 

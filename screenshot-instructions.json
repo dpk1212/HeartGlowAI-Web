@@ -1,0 +1,38 @@
+{
+  "screenshots": [
+    {
+      "name": "login-screen",
+      "description": "The login screen showing the HeartGlowAI logo and authentication form"
+    },
+    {
+      "name": "message-generation-screen",
+      "description": "The main screen showing the scenario input, relationship type dropdown, and generated message display"
+    },
+    {
+      "name": "message-result",
+      "description": "Example of a generated message with the copy to clipboard button"
+    }
+  ],
+  "required-assets": [
+    {
+      "name": "heart-logo.png",
+      "description": "The HeartGlowAI heart-shaped logo with circuit board design, matching the branding in the screenshots"
+    },
+    {
+      "name": "icon.png",
+      "description": "App icon (1024x1024) with the HeartGlowAI logo"
+    },
+    {
+      "name": "splash.png",
+      "description": "Splash screen with the HeartGlowAI logo and name"
+    },
+    {
+      "name": "adaptive-icon.png",
+      "description": "Adaptive icon for Android with the HeartGlowAI logo"
+    },
+    {
+      "name": "favicon.png",
+      "description": "Favicon for web (16x16) with the HeartGlowAI logo"
+    }
+  ]
+} 

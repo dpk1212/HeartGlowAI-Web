@@ -1,7 +1,9 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import { getAnalytics, isSupported } from 'firebase/analytics';
 
-// Firebase configuration
+// Firebase configuration with your actual project details
 const firebaseConfig = {
   apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
   authDomain: "heartglowai.firebaseapp.com",
@@ -15,7 +17,16 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 
-// Initialize Firebase auth
+// Initialize Firebase services
 export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+// Only initialize analytics if supported
+export const analytics = async () => {
+  if (await isSupported()) {
+    return getAnalytics(app);
+  }
+  return null;
+};
 
 export default app; 

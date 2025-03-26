@@ -2,6 +2,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  sendPasswordResetEmail,
   updateProfile,
   User,
   UserCredential
@@ -35,6 +36,30 @@ export const signOutUser = async (): Promise<void> => {
   }
 };
 
+export const resetPassword = async (email: string): Promise<void> => {
+  try {
+    await sendPasswordResetEmail(auth, email);
+  } catch (error) {
+    throw error;
+  }
+};
+
 export const getCurrentUser = (): User | null => {
   return auth.currentUser;
+};
+
+export const updateUserProfile = async (
+  displayName: string,
+  photoURL?: string
+): Promise<void> => {
+  try {
+    if (!auth.currentUser) throw new Error('No user logged in');
+    
+    await updateProfile(auth.currentUser, {
+      displayName,
+      photoURL
+    });
+  } catch (error) {
+    throw error;
+  }
 }; 

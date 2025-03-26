@@ -9,14 +9,8 @@ import OpenAI from 'openai';
 // This setup relies on Firebase Functions for secure API access
 export let openai: OpenAI | null = null;
 
-// Initialize OpenAI only on server environments if needed
-// Client-side code should use Firebase Functions instead
-if (typeof window === 'undefined') {
-  openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || '',
-    dangerouslyAllowBrowser: false
-  });
-}
+// IMPORTANT: Client-side code should NEVER initialize OpenAI directly
+// All API calls must go through Firebase Functions for security
 
 // Pydantic Schema Types
 export interface MessageInsight {

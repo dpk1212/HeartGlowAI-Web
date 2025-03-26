@@ -1,27 +1,52 @@
 import React, { useState } from 'react';
 import { generateMessages, MessageGeneration } from '../services/advancedMessageGeneration';
 import StructuredMessageDisplay from '../components/StructuredMessageDisplay';
+import OpenAI from 'openai';
 
 const TestMessageGeneration: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MessageGeneration | null>(null);
+  const [apiKey, setApiKey] = useState<string>('');
+  
+  // Test request form state
+  const [testRequest, setTestRequest] = useState({
+    relationship_type: 'romantic_partner',
+    communication_scenario: 'I want to express appreciation for their support',
+    emotional_intensity: 70,
+    recipient_name: 'Alex',
+    conversation_name: 'Test Conversation',
+    additional_context: 'We have been together for 2 years and recently went through a challenging time where they supported me during a career change.'
+  });
+
+  // Update OpenAI instance with the user's API key
+  const updateApiKey = (key: string) => {
+    // This is for testing purposes only and should not be used in production
+    if (key) {
+      (window as any).openai = new OpenAI({
+        apiKey: key,
+        dangerouslyAllowBrowser: true
+      });
+      
+      // Replace the imported OpenAI instance
+      const openaiModule = require('../services/advancedMessageGeneration');
+      openaiModule.openai = (window as any).openai;
+    }
+    
+    setApiKey(key);
+  };
 
   const handleTestGeneration = async () => {
     setLoading(true);
     setError(null);
     
+    if (!apiKey) {
+      setError('Please enter your OpenAI API key first');
+      setLoading(false);
+      return;
+    }
+    
     try {
-      // Test message generation with sample data
-      const testRequest = {
-        relationship_type: 'romantic_partner',
-        communication_scenario: 'I want to express appreciation for their support',
-        emotional_intensity: 70,
-        recipient_name: 'Alex',
-        conversation_name: 'Test Conversation',
-        additional_context: 'We have been together for 2 years and recently went through a challenging time where they supported me during a career change.'
-      };
-      
       console.log('Sending test request:', testRequest);
       
       const response = await generateMessages(testRequest);
@@ -40,6 +65,14 @@ const TestMessageGeneration: React.FC = () => {
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setTestRequest(prev => ({
+      ...prev,
+      [name]: name === 'emotional_intensity' ? parseInt(value) : value
+    }));
+  };
+
   const handleSelectMessage = (message: string) => {
     console.log('Selected message:', message);
   };
@@ -56,12 +89,93 @@ const TestMessageGeneration: React.FC = () => {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-3xl font-bold mb-6">Test Message Generation</h1>
       
+      <div className="mb-8 p-4 bg-yellow-50 border border-yellow-300 rounded-md">
+        <h2 className="text-xl font-semibold mb-2">OpenAI API Key</h2>
+        <p className="mb-4 text-sm text-yellow-800">
+          This is for testing purposes only. Never store your API key in client-side code in production.
+        </p>
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => updateApiKey(e.target.value)}
+          placeholder="Enter your OpenAI API key"
+          className="w-full p-2 border border-gray-300 rounded"
+        />
+      </div>
+      
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold mb-4">Test Request Configuration</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block mb-1 font-medium">Relationship Type</label>
+            <input
+              type="text"
+              name="relationship_type"
+              value={testRequest.relationship_type}
+              onChange={handleInputChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          
+          <div>
+            <label className="block mb-1 font-medium">Communication Scenario</label>
+            <input
+              type="text"
+              name="communication_scenario"
+              value={testRequest.communication_scenario}
+              onChange={handleInputChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          
+          <div>
+            <label className="block mb-1 font-medium">Emotional Intensity (0-100)</label>
+            <input
+              type="range"
+              name="emotional_intensity"
+              min="0"
+              max="100"
+              value={testRequest.emotional_intensity}
+              onChange={handleInputChange}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs">
+              <span>Subtle (0)</span>
+              <span>Moderate (50)</span>
+              <span>Intense (100)</span>
+            </div>
+          </div>
+          
+          <div>
+            <label className="block mb-1 font-medium">Recipient Name</label>
+            <input
+              type="text"
+              name="recipient_name"
+              value={testRequest.recipient_name}
+              onChange={handleInputChange}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+          
+          <div>
+            <label className="block mb-1 font-medium">Additional Context</label>
+            <textarea
+              name="additional_context"
+              value={testRequest.additional_context}
+              onChange={handleInputChange}
+              rows={4}
+              className="w-full p-2 border border-gray-300 rounded"
+            />
+          </div>
+        </div>
+      </div>
+      
       <button
         onClick={handleTestGeneration}
-        disabled={loading}
+        disabled={loading || !apiKey}
         className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
       >
-        {loading ? 'Generating...' : 'Test Generation'}
+        {loading ? 'Generating...' : 'Generate Messages'}
       </button>
 
       {error && (
@@ -73,7 +187,7 @@ const TestMessageGeneration: React.FC = () => {
 
       {result && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Test Results</h2>
+          <h2 className="text-2xl font-semibold mb-4">Generation Results</h2>
           
           <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg mb-6">
             <h3 className="font-semibold mb-2">Raw Response</h3>

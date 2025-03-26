@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { generateMessages, MessageGeneration } from '../services/advancedMessageGeneration';
 import StructuredMessageDisplay from '../components/StructuredMessageDisplay';
-import OpenAI from 'openai';
 
 const TestMessageGeneration: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MessageGeneration | null>(null);
-  const [apiKey, setApiKey] = useState<string>('');
   
   // Test request form state
   const [testRequest, setTestRequest] = useState({
@@ -19,36 +17,14 @@ const TestMessageGeneration: React.FC = () => {
     additional_context: 'We have been together for 2 years and recently went through a challenging time where they supported me during a career change.'
   });
 
-  // Update OpenAI instance with the user's API key
-  const updateApiKey = (key: string) => {
-    // This is for testing purposes only and should not be used in production
-    if (key) {
-      (window as any).openai = new OpenAI({
-        apiKey: key,
-        dangerouslyAllowBrowser: true
-      });
-      
-      // Replace the imported OpenAI instance
-      const openaiModule = require('../services/advancedMessageGeneration');
-      openaiModule.openai = (window as any).openai;
-    }
-    
-    setApiKey(key);
-  };
-
   const handleTestGeneration = async () => {
     setLoading(true);
     setError(null);
     
-    if (!apiKey) {
-      setError('Please enter your OpenAI API key first');
-      setLoading(false);
-      return;
-    }
-    
     try {
       console.log('Sending test request:', testRequest);
       
+      // This will use Firebase Functions securely
       const response = await generateMessages(testRequest);
       console.log('Received response:', response);
       
@@ -90,17 +66,11 @@ const TestMessageGeneration: React.FC = () => {
       <h1 className="text-3xl font-bold mb-6">Test Message Generation</h1>
       
       <div className="mb-8 p-4 bg-yellow-50 border border-yellow-300 rounded-md">
-        <h2 className="text-xl font-semibold mb-2">OpenAI API Key</h2>
+        <h2 className="text-xl font-semibold mb-2">Secure API Access</h2>
         <p className="mb-4 text-sm text-yellow-800">
-          This is for testing purposes only. Never store your API key in client-side code in production.
+          This test page uses Firebase Functions to securely access the OpenAI API. 
+          No API keys are used in client-side code.
         </p>
-        <input
-          type="password"
-          value={apiKey}
-          onChange={(e) => updateApiKey(e.target.value)}
-          placeholder="Enter your OpenAI API key"
-          className="w-full p-2 border border-gray-300 rounded"
-        />
       </div>
       
       <div className="mb-8">
@@ -172,7 +142,7 @@ const TestMessageGeneration: React.FC = () => {
       
       <button
         onClick={handleTestGeneration}
-        disabled={loading || !apiKey}
+        disabled={loading}
         className="px-6 py-3 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
       >
         {loading ? 'Generating...' : 'Generate Messages'}

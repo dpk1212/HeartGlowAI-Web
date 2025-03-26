@@ -345,6 +345,8 @@ When generating a response, follow this format with THREE sections:
 The message you need to reply to is:
 "${originalMessage}"
 
+${formData.additionalContext ? `Additional context provided by the user: "${formData.additionalContext}"` : ''}
+
 Please respond with ONLY these three sections clearly labeled.`;
 
       const initialReply = await generateMessage({
@@ -805,7 +807,7 @@ ${sections.mistakes}`;
                 id="conversationName"
                 value={conversationName}
                 onChange={(e) => setConversationName(e.target.value)}
-                placeholder="E.g., Partner, Mom, Work Friend"
+                placeholder="Enter Name"
                 required
               />
             </div>
@@ -852,19 +854,64 @@ ${sections.mistakes}`;
           
           <div className="form-group">
             <label htmlFor="originalMessage">
-              {isCreatingNewExchange ? 'Message to Reply To' : 'Original Message'}
+              {isCreatingNewExchange ? 'Your Message Details' : 'Original Message'}
             </label>
             <textarea
               id="originalMessage"
               value={originalMessage}
               onChange={(e) => setOriginalMessage(e.target.value)}
               rows={8}
-              placeholder="Paste the message you want to reply to here..."
+              placeholder={getMessagePlaceholder()}
               required
               readOnly={!isCreatingNewExchange}
               className={!isCreatingNewExchange ? 'read-only' : ''}
             />
           </div>
+          
+          {isCreatingNewExchange && (
+            <div className="form-group">
+              <label htmlFor="additionalContext">Additional Context</label>
+              <textarea
+                id="additionalContext"
+                value={formData.additionalContext}
+                onChange={(e) => setFormData({...formData, additionalContext: e.target.value})}
+                rows={4}
+                placeholder="Tell us anything else that is important to know when creating a reply."
+              />
+            </div>
+          )}
+          
+          {/* Display selected variables */}
+          {isCreatingNewExchange && (
+            <div className="selected-variables">
+              <h3>Your Selected Information</h3>
+              <div className="variables-grid">
+                <div className="variable-item">
+                  <span className="variable-label">Relationship:</span>
+                  <span className="variable-value">
+                    {conversationContext.relationship.type === 'other' 
+                      ? conversationContext.relationship.customType 
+                      : conversationContext.relationship.type.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="variable-item">
+                  <span className="variable-label">Communication Context:</span>
+                  <span className="variable-value">
+                    {conversationContext.scenario.scenarioType === 'other'
+                      ? conversationContext.scenario.scenario
+                      : conversationContext.scenario.scenarioType.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="variable-item">
+                  <span className="variable-label">Emotion:</span>
+                  <span className="variable-value">
+                    {conversationContext.emotionalContext.primaryEmotion} 
+                    (Intensity: {conversationContext.emotionalContext.emotionalIntensity}/10)
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
           
           {!isCreatingNewExchange && generatedReply ? (
             // View mode for existing exchange
@@ -1136,6 +1183,25 @@ ${sections.mistakes}`;
   const EmotionalContextCard = () => {
     const emotions = ['Hopeful', 'Frustrated', 'Anxious', 'Excited', 'Uncertain', 'Calm', 'Worried', 'Happy', 'Sad', 'Angry'];
     
+    // Add local state to track the slider value without causing rerenders
+    const [sliderValue, setSliderValue] = useState(conversationContext.emotionalContext.emotionalIntensity);
+    
+    // Update the parent state only when the user stops sliding
+    const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSliderValue(parseInt(e.target.value));
+    };
+    
+    // Update the parent state when the slider interaction ends
+    const handleSliderChangeComplete = () => {
+      setConversationContext(prev => ({
+        ...prev,
+        emotionalContext: {
+          ...prev.emotionalContext,
+          emotionalIntensity: sliderValue
+        }
+      }));
+    };
+    
     return (
       <motion.div 
         className="message-card"
@@ -1169,7 +1235,7 @@ ${sections.mistakes}`;
           
           <div className="form-group mt-4">
             <label>
-              Intensity: {conversationContext.emotionalContext.emotionalIntensity}
+              Intensity: {sliderValue}
             </label>
             <div className="slider-container">
               <input
@@ -1177,14 +1243,10 @@ ${sections.mistakes}`;
                 min="1"
                 max="10"
                 step="1"
-                value={conversationContext.emotionalContext.emotionalIntensity}
-                onChange={(e) => setConversationContext(prev => ({
-                  ...prev,
-                  emotionalContext: {
-                    ...prev.emotionalContext,
-                    emotionalIntensity: parseInt(e.target.value)
-                  }
-                }))}
+                value={sliderValue}
+                onChange={handleSliderChange}
+                onMouseUp={handleSliderChangeComplete}
+                onTouchEnd={handleSliderChangeComplete}
                 className="slider"
               />
               <div className="slider-labels">
@@ -1243,14 +1305,62 @@ ${sections.mistakes}`;
         
         {/* Card content with AnimatePresence for smooth transitions */}
         <div className="card-container">
-          <AnimatePresence mode="popLayout">
-            {conversationContext.currentStep === 1 && <RelationshipTypeCard key="relationship" />}
-            {conversationContext.currentStep === 2 && <CommunicationScenarioCard key="scenario" />}
-            {conversationContext.currentStep === 3 && <EmotionalContextCard key="emotional" />}
+          <AnimatePresence mode="sync" initial={false}>
+            {conversationContext.currentStep === 1 && (
+              <motion.div 
+                key="relationship" 
+                initial={{ opacity: 0, x: -50 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="card-wrapper"
+              >
+                <RelationshipTypeCard key="relationship-card" />
+              </motion.div>
+            )}
+            {conversationContext.currentStep === 2 && (
+              <motion.div 
+                key="scenario" 
+                initial={{ opacity: 0, x: -50 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="card-wrapper"
+              >
+                <CommunicationScenarioCard key="scenario-card" />
+              </motion.div>
+            )}
+            {conversationContext.currentStep === 3 && (
+              <motion.div 
+                key="emotional" 
+                initial={{ opacity: 0, x: -50 }} 
+                animate={{ opacity: 1, x: 0 }} 
+                exit={{ opacity: 0, x: 50 }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="card-wrapper"
+              >
+                <EmotionalContextCard key="emotional-card" />
+              </motion.div>
+            )}
           </AnimatePresence>
         </div>
       </div>
     );
+  };
+  
+  // Helper function to get dynamic placeholder text based on context
+  const getMessagePlaceholder = () => {
+    if (!isCreatingNewExchange) return '';
+    
+    const relationship = conversationContext.relationship.type === 'other'
+      ? conversationContext.relationship.customType
+      : conversationContext.relationship.type.replace('_', ' ');
+      
+    const scenario = conversationContext.scenario.scenarioType === 'other'
+      ? conversationContext.scenario.scenario
+      : conversationContext.scenario.scenarioType.replace('_', ' ');
+      
+    return `Describe your situation with your ${relationship}. What are the specifics of the ${scenario} that you need help with?`;
   };
   
   return (

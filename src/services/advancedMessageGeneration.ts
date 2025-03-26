@@ -4,10 +4,10 @@ import { db } from '../firebase/config';
 import { auth } from '../firebase/config';
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || '', // This should be set on the server side
-  dangerouslyAllowBrowser: true // Only for development, use Firebase Functions in production
+// Export the OpenAI instance so it can be updated at runtime for testing
+export let openai = new OpenAI({
+  apiKey: 'YOUR_OPENAI_API_KEY_HERE', // Will be replaced at runtime
+  dangerouslyAllowBrowser: true // Only for development testing
 });
 
 // Pydantic Schema Types
@@ -73,45 +73,102 @@ const feedbackConverter: FirestoreDataConverter<MessageFeedback> = {
  * @returns Structured response with messages and insights
  */
 export const generateMessages = async (context: MessageGenerationRequest): Promise<MessageGeneration | { error: boolean, refusalReason?: string, details?: string }> => {
-  // For testing purpose, return mock data to verify UI integration
   console.log('Generating messages with context:', context);
   
   try {
-    // Try to use the OpenAI API directly if it's available
+    // In production, use Firebase Functions
     if (process.env.NODE_ENV === 'production') {
       return generateMessagesViaFirebase(context);
     }
 
-    // For development/testing, return mock data
-    console.log('Using mock data for testing');
+    // For development, use direct API call
+    console.log('Making direct API call to OpenAI');
     
-    // Generate a unique ID for the conversation
-    const conversationId = `test-${Date.now()}`;
+    // Generate a unique conversation ID
+    const conversationId = `direct-${Date.now()}`;
     
-    return {
-      conversation_id: conversationId,
-      messages: [
-        `Hey ${context.recipient_name}, I just wanted to take a moment to express how deeply grateful I am for your unwavering support during my recent career change. These past two years together have been incredible, but the way you stood by me during this challenging time has meant more than words can express. Your belief in me gave me the courage to take that leap of faith. Thank you for being my rock.`,
-        `${context.recipient_name}, I've been reflecting on our journey together over these past two years, and I'm overwhelmed with gratitude for how you supported me through my career transition. During those uncertain moments when I doubted myself, your encouragement never wavered. You listened to my concerns, celebrated my small victories, and reminded me of my strengths when I forgot them. Your support has meant everything to me.`
+    // System prompt for the AI
+    const systemPrompt = `You are an advanced communication coach. Generate two nuanced, contextually appropriate messages based on the given relationship and scenario information.
+    
+    Your response MUST be in the following JSON format:
+    {
+      "messages": [
+        "First full message text",
+        "Second full message text"
       ],
-      insights: [
+      "insights": [
         {
-          communication_strategy: "Personal Appreciation",
-          emotional_intelligence_score: 8.5,
-          potential_impact: "Likely to strengthen the emotional bond and make the recipient feel valued for their specific supportive actions."
+          "communication_strategy": "Strategy for first message",
+          "emotional_intelligence_score": 8.5,
+          "potential_impact": "Impact description for first message"
         },
         {
-          communication_strategy: "Reflective Gratitude",
-          emotional_intelligence_score: 9.2,
-          potential_impact: "May help the recipient understand the significant impact of their support and deepen mutual trust."
+          "communication_strategy": "Strategy for second message",
+          "emotional_intelligence_score": 9.2,
+          "potential_impact": "Impact description for second message"
         }
       ],
-      previous_variations: [
-        "I wanted to tell you how much your support has meant to me during my career change.",
-        "Thank you for believing in me when I was making this difficult transition.",
-        "I couldn't have made it through this career shift without your constant encouragement."
+      "previous_variations": [
+        "Alternative phrasing 1",
+        "Alternative phrasing 2",
+        "Alternative phrasing 3"
       ]
-    };
+    }
+    
+    Key Guidelines:
+    - Analyze relationship dynamics and adapt message to the specified relationship type
+    - Tune emotional intensity to match the given level (${context.emotional_intensity}/100)
+    - Add personalization using the recipient's name (${context.recipient_name})
+    - Incorporate any additional context provided
+    - Provide distinct communication strategies for each message
+    - Rate each message's emotional intelligence on a scale of 0-10
+    - Describe the potential impact in 1-2 sentences`;
+    
+    // Make the direct API call
+    const response = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: 'system',
+          content: systemPrompt
+        },
+        {
+          role: 'user',
+          content: JSON.stringify({
+            relationship_type: context.relationship_type,
+            communication_scenario: context.communication_scenario,
+            emotional_intensity: context.emotional_intensity,
+            recipient_name: context.recipient_name,
+            additional_context: context.additional_context || ''
+          })
+        }
+      ],
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+      max_tokens: 1000
+    });
+    
+    console.log('OpenAI API response:', response);
+    
+    if (!response.choices || !response.choices[0] || !response.choices[0].message || !response.choices[0].message.content) {
+      throw new Error('Invalid response from OpenAI API');
+    }
+    
+    // Parse the response content
+    const parsed = JSON.parse(response.choices[0].message.content);
+    
+    // Add conversation ID to the response
+    parsed.conversation_id = conversationId;
+    
+    // Validate the response structure
+    if (!parsed.messages || !Array.isArray(parsed.messages) || parsed.messages.length < 2) {
+      return {
+        error: true,
+        details: 'Invalid response format: messages array missing or incomplete'
+      };
+    }
+    
+    return parsed as MessageGeneration;
   } catch (error: any) {
     // Comprehensive error handling
     console.error('Message Generation Error', error);

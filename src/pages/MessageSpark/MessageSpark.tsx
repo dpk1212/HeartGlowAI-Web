@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes, FaPlus, FaChevronDown, FaChevronUp, FaReply, FaTrash } from 'react-icons/fa';
 import { generateMessage } from '../../services/messages';
 import { useFirebase } from '../../contexts/FirebaseContext';
@@ -15,6 +15,30 @@ interface FormData {
   emotionalState: string;
   desiredOutcome: string;
   additionalContext: string;
+}
+
+// Card-based conversation creation interfaces
+interface RelationshipTypeCard {
+  type: 'romantic_partner' | 'family_member' | 'friend' | 'professional_contact' | 'other';
+  customType?: string;
+}
+
+interface ScenarioCard {
+  scenario: string;
+  scenarioType: 'conflict_resolution' | 'emotional_expression' | 'seeking_support' | 'giving_feedback' | 'other';
+}
+
+interface EmotionalContextCard {
+  primaryEmotion: string;
+  emotionalIntensity: number; // 1-10
+}
+
+// Combined conversation context from all cards
+interface ConversationContext {
+  relationship: RelationshipTypeCard;
+  scenario: ScenarioCard;
+  emotionalContext: EmotionalContextCard;
+  currentStep: number;
 }
 
 // Heart animation type
@@ -51,6 +75,22 @@ const MessageSpark: React.FC = () => {
   
   // For floating hearts animation
   const [hearts, setHearts] = useState<Heart[]>([]);
+  
+  // New card-based conversation creation state
+  const [conversationContext, setConversationContext] = useState<ConversationContext>({
+    relationship: {
+      type: 'romantic_partner',
+    },
+    scenario: {
+      scenario: '',
+      scenarioType: 'emotional_expression'
+    },
+    emotionalContext: {
+      primaryEmotion: 'Hopeful',
+      emotionalIntensity: 5
+    },
+    currentStep: 1
+  });
   
   // Form state - will be used later
   const [formData, setFormData] = useState<FormData>({
@@ -148,16 +188,69 @@ const MessageSpark: React.FC = () => {
   
   // Button handlers
   const handleCreateNewConversation = () => {
-    // Since we don't have a dedicated new conversation view yet,
-    // we'll reuse the reply view but clear all fields
+    // Set view to new-conversation for our card-based interface
+    setView('new-conversation');
+    
+    // Reset the conversation context
+    setConversationContext({
+      relationship: {
+        type: 'romantic_partner',
+      },
+      scenario: {
+        scenario: '',
+        scenarioType: 'emotional_expression'
+      },
+      emotionalContext: {
+        primaryEmotion: 'Hopeful',
+        emotionalIntensity: 5
+      },
+      currentStep: 1
+    });
+    
+    // Clear any previous errors
+    setError('');
+  };
+  
+  // Navigation functions for card-based flow
+  const handleNextStep = () => {
+    setConversationContext(prev => ({
+      ...prev,
+      currentStep: Math.min(prev.currentStep + 1, 3) // We have 3 cards total
+    }));
+  };
+  
+  const handlePrevStep = () => {
+    setConversationContext(prev => ({
+      ...prev,
+      currentStep: Math.max(prev.currentStep - 1, 1)
+    }));
+  };
+  
+  // Handle finishing the card flow
+  const handleFinishCardFlow = () => {
+    // Use the collected information to create a conversation
+    const relationshipType = conversationContext.relationship.type === 'other' 
+      ? conversationContext.relationship.customType || 'Custom' 
+      : conversationContext.relationship.type.replace('_', ' ');
+      
+    const scenarioDesc = conversationContext.scenario.scenarioType === 'other'
+      ? conversationContext.scenario.scenario
+      : conversationContext.scenario.scenarioType.replace('_', ' ');
+      
+    // Set conversation name based on relationship
+    setConversationName(relationshipType);
+    
+    // Use the scenario as the original message prompt
+    setOriginalMessage(`I need help with a ${relationshipType} relationship. 
+Context: ${scenarioDesc}
+Emotional state: ${conversationContext.emotionalContext.primaryEmotion} (intensity: ${conversationContext.emotionalContext.emotionalIntensity}/10)`);
+    
+    // Switch to reply view to complete the flow
     setView('reply');
     setSelectedConversation(null);
     setSelectedExchange(null);
-    setOriginalMessage('');
-    setConversationName('');
     setGeneratedReply('');
     setIsCreatingNewExchange(true);
-    setError(''); // Clear any previous errors
   };
   
   const handleReplyToMessage = () => {
@@ -860,6 +953,283 @@ ${sections.mistakes}`;
     </div>
   );
   
+  // Relationship Type Card Component
+  const RelationshipTypeCard = () => {
+    const relationshipTypes = [
+      { id: 'romantic_partner', label: 'Romantic Partner' },
+      { id: 'family_member', label: 'Family Member' },
+      { id: 'friend', label: 'Friend' },
+      { id: 'professional_contact', label: 'Professional Contact' },
+      { id: 'other', label: 'Other' }
+    ];
+    
+    return (
+      <motion.div 
+        className="message-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h2 className="card-title">Who are you communicating with?</h2>
+        <div className="card-content">
+          <div className="button-group">
+            {relationshipTypes.map(type => (
+              <button
+                key={type.id}
+                className={`card-button ${conversationContext.relationship.type === type.id ? 'selected' : ''}`}
+                onClick={() => setConversationContext(prev => ({
+                  ...prev,
+                  relationship: {
+                    ...prev.relationship,
+                    type: type.id as RelationshipTypeCard['type']
+                  }
+                }))}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+          
+          {conversationContext.relationship.type === 'other' && (
+            <div className="form-group mt-4">
+              <input
+                type="text"
+                className="text-input"
+                placeholder="Describe your relationship"
+                value={conversationContext.relationship.customType || ''}
+                onChange={(e) => setConversationContext(prev => ({
+                  ...prev,
+                  relationship: {
+                    ...prev.relationship,
+                    customType: e.target.value
+                  }
+                }))}
+              />
+            </div>
+          )}
+          
+          <div className="card-actions">
+            <button 
+              className="secondary-button"
+              onClick={handleBackToLanding}
+            >
+              Back
+            </button>
+            <button 
+              className="primary-button"
+              onClick={handleNextStep}
+              disabled={conversationContext.relationship.type === 'other' && 
+                        (!conversationContext.relationship.customType || 
+                         conversationContext.relationship.customType.trim() === '')}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+  
+  // Communication Scenario Card Component
+  const CommunicationScenarioCard = () => {
+    const scenarioTypes = [
+      { id: 'conflict_resolution', label: 'Resolving a Conflict' },
+      { id: 'emotional_expression', label: 'Expressing Feelings' },
+      { id: 'seeking_support', label: 'Seeking Support' },
+      { id: 'giving_feedback', label: 'Giving Feedback' },
+      { id: 'other', label: 'Something Else' }
+    ];
+    
+    return (
+      <motion.div 
+        className="message-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h2 className="card-title">What's the context of your communication?</h2>
+        <div className="card-content">
+          <div className="button-group">
+            {scenarioTypes.map(type => (
+              <button
+                key={type.id}
+                className={`card-button ${conversationContext.scenario.scenarioType === type.id ? 'selected' : ''}`}
+                onClick={() => setConversationContext(prev => ({
+                  ...prev,
+                  scenario: {
+                    ...prev.scenario,
+                    scenarioType: type.id as ScenarioCard['scenarioType']
+                  }
+                }))}
+              >
+                {type.label}
+              </button>
+            ))}
+          </div>
+          
+          {conversationContext.scenario.scenarioType === 'other' && (
+            <div className="form-group mt-4">
+              <textarea
+                className="text-input"
+                placeholder="Describe your specific scenario"
+                value={conversationContext.scenario.scenario}
+                onChange={(e) => setConversationContext(prev => ({
+                  ...prev,
+                  scenario: {
+                    ...prev.scenario,
+                    scenario: e.target.value
+                  }
+                }))}
+                rows={3}
+              />
+            </div>
+          )}
+          
+          <div className="card-actions">
+            <button 
+              className="secondary-button"
+              onClick={handlePrevStep}
+            >
+              Back
+            </button>
+            <button 
+              className="primary-button"
+              onClick={handleNextStep}
+              disabled={conversationContext.scenario.scenarioType === 'other' && 
+                       (!conversationContext.scenario.scenario || 
+                        conversationContext.scenario.scenario.trim() === '')}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+  
+  // Emotional Context Card Component
+  const EmotionalContextCard = () => {
+    const emotions = ['Hopeful', 'Frustrated', 'Anxious', 'Excited', 'Uncertain', 'Calm', 'Worried', 'Happy', 'Sad', 'Angry'];
+    
+    return (
+      <motion.div 
+        className="message-card"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.3 }}
+      >
+        <h2 className="card-title">How are you feeling?</h2>
+        <div className="card-content">
+          <div className="form-group">
+            <label>Primary Emotion</label>
+            <select
+              className="select-input"
+              value={conversationContext.emotionalContext.primaryEmotion}
+              onChange={(e) => setConversationContext(prev => ({
+                ...prev,
+                emotionalContext: {
+                  ...prev.emotionalContext,
+                  primaryEmotion: e.target.value
+                }
+              }))}
+            >
+              {emotions.map(emotion => (
+                <option key={emotion} value={emotion}>
+                  {emotion}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="form-group mt-4">
+            <label>
+              Intensity: {conversationContext.emotionalContext.emotionalIntensity}
+            </label>
+            <div className="slider-container">
+              <input
+                type="range"
+                min="1"
+                max="10"
+                step="1"
+                value={conversationContext.emotionalContext.emotionalIntensity}
+                onChange={(e) => setConversationContext(prev => ({
+                  ...prev,
+                  emotionalContext: {
+                    ...prev.emotionalContext,
+                    emotionalIntensity: parseInt(e.target.value)
+                  }
+                }))}
+                className="slider"
+              />
+              <div className="slider-labels">
+                <span>1</span>
+                <span>2</span>
+                <span>3</span>
+                <span>4</span>
+                <span>5</span>
+                <span>6</span>
+                <span>7</span>
+                <span>8</span>
+                <span>9</span>
+                <span>10</span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="card-actions">
+            <button 
+              className="secondary-button"
+              onClick={handlePrevStep}
+            >
+              Back
+            </button>
+            <button 
+              className="primary-button"
+              onClick={handleFinishCardFlow}
+            >
+              Create Conversation
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    );
+  };
+  
+  // New Conversation View with Card-Based Flow
+  const renderNewConversationView = () => {
+    return (
+      <div className="new-conversation-container">
+        <div className="new-conversation-header">
+          <button className="icon-button" onClick={handleBackToLanding}>
+            <FaArrowLeft /> Back
+          </button>
+          <h1>Create a New Conversation</h1>
+        </div>
+        
+        {/* Progress indicator */}
+        <div className="progress-indicator">
+          <div className={`progress-step ${conversationContext.currentStep >= 1 ? 'active' : ''}`}>1</div>
+          <div className="progress-line"></div>
+          <div className={`progress-step ${conversationContext.currentStep >= 2 ? 'active' : ''}`}>2</div>
+          <div className="progress-line"></div>
+          <div className={`progress-step ${conversationContext.currentStep >= 3 ? 'active' : ''}`}>3</div>
+        </div>
+        
+        {/* Card content with AnimatePresence for smooth transitions */}
+        <div className="card-container">
+          <AnimatePresence mode="wait">
+            {conversationContext.currentStep === 1 && <RelationshipTypeCard />}
+            {conversationContext.currentStep === 2 && <CommunicationScenarioCard />}
+            {conversationContext.currentStep === 3 && <EmotionalContextCard />}
+          </AnimatePresence>
+        </div>
+      </div>
+    );
+  };
+  
   return (
     <div className="message-spark-container">
       {/* Floating hearts background animation */}
@@ -892,7 +1262,7 @@ ${sections.mistakes}`;
       {/* Render the appropriate view based on state */}
       {view === 'landing' && renderLandingPage()}
       {view === 'reply' && renderReplyView()}
-      {view === 'new-conversation' && renderReplyView()} {/* Reuse reply view for now */}
+      {view === 'new-conversation' && renderNewConversationView()} {/* Reuse reply view for now */}
     </div>
   );
 };

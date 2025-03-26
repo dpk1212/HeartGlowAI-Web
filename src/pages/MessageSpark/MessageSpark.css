@@ -765,4 +765,258 @@ textarea.read-only {
 .confirm-no {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
+}
+
+/* New Conversation View Styles */
+.new-conversation-container {
+  width: 90%;
+  max-width: 600px;
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+  position: relative;
+  z-index: 10;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.new-conversation-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.new-conversation-header h1 {
+  font-size: 1.5rem;
+  color: white;
+  margin: 0;
+  flex-grow: 1;
+  text-align: center;
+}
+
+/* Progress Indicator */
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.progress-step {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.progress-step.active {
+  background: linear-gradient(to right, #ff6bcb, #B19CD9);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.progress-line {
+  height: 3px;
+  width: 60px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin: 0 5px;
+}
+
+/* Card Container */
+.card-container {
+  position: relative;
+  min-height: 350px;
+  overflow: hidden;
+}
+
+/* Message Card */
+.message-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.card-button {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.2s ease;
+  text-align: left;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.card-button:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.card-button.selected {
+  background: linear-gradient(to right, rgba(255, 107, 203, 0.4), rgba(177, 156, 217, 0.4));
+  border-color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+/* Text input styles for cards */
+.text-input {
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+}
+
+.text-input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.text-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Select dropdown */
+.select-input {
+  appearance: none;
+  background-color: rgba(255, 255, 255, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 16px;
+  cursor: pointer;
+}
+
+.select-input:focus {
+  outline: none;
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Slider container */
+.slider-container {
+  width: 100%;
+  padding: 0.5rem 0;
+  position: relative;
+}
+
+.slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mt-4 {
+  margin-top: 1rem;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .new-conversation-container {
+    padding: 1.5rem;
+    width: 95%;
+  }
+
+  .new-conversation-header h1 {
+    font-size: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+
+  .progress-step {
+    width: 30px;
+    height: 30px;
+    font-size: 0.9rem;
+  }
+
+  .progress-line {
+    width: 40px;
+  }
+
+  .card-button {
+    padding: 0.75rem;
+  }
 } 

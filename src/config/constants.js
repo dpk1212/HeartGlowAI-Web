@@ -1,15 +1,18 @@
-// Application color scheme
+// Color scheme
 export const COLORS = {
-  background: '#050A14',
-  cardBackground: '#1C1C1E',
-  primary: '#0A84FF',
-  accent1: '#FF3B7F',
-  accent2: '#8862FC', 
-  text: '#FFFFFF',
-  textSecondary: '#8E8E93',
+  background: '#121212',
+  text: '#F5F5F5',
+  accent1: '#FF4081',  // Pink
+  accent2: '#2196F3',  // Blue
+  accent3: '#7C4DFF',  // Purple
+  error: '#F44336',
+  success: '#4CAF50',
+  card: '#1E1E1E',
+  border: '#333333',
+  gradient: ['#FF4081', '#7C4DFF', '#2196F3'] // Pink to Purple to Blue gradient
 };
 
-// Relationship types for message generation
+// Relationship types
 export const RELATIONSHIP_TYPES = [
   'Romantic Partner',
   'Friend',
@@ -48,9 +51,22 @@ export const MESSAGE_TEMPLATES = [
 
 // OpenAI configuration
 export const OPENAI_CONFIG = {
-  model: 'gpt-3.5-turbo',
+  model: "gpt-3.5-turbo",
   temperature: 0.7,
-  maxTokens: 150,
+  maxTokens: 300
+};
+
+// Form validation
+export const FORM_VALIDATION = {
+  MIN_SCENARIO_LENGTH: 10,
+  MAX_SCENARIO_LENGTH: 500
+};
+
+// Storage keys
+export const STORAGE_KEYS = {
+  API_KEY: 'openai_api_key',
+  USER_SETTINGS: 'user_settings',
+  MESSAGE_HISTORY: 'message_history'
 };
 
 // App information

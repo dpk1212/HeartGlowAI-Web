@@ -69,67 +69,6 @@ interface Conversation {
   created: Date;
 }
 
-// Add this custom hook for card transitions
-const useCardTransition = (totalCards: number) => {
-  const [currentCardIndex, setCurrentCardIndex] = useState(1);
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
-  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Clear any pending transitions when unmounting
-  useEffect(() => {
-    return () => {
-      if (transitionTimeoutRef.current) {
-        clearTimeout(transitionTimeoutRef.current);
-      }
-    };
-  }, []);
-
-  const transitionToNextCard = useCallback(() => {
-    if (isTransitioning || currentCardIndex >= totalCards) return;
-    
-    setIsTransitioning(true);
-    setDirection('next');
-    
-    // Add class to body for visual indication
-    document.body.classList.add('animating');
-    
-    // Use timeout to ensure animations complete before state changes
-    transitionTimeoutRef.current = setTimeout(() => {
-      setCurrentCardIndex(prev => Math.min(prev + 1, totalCards));
-      setIsTransitioning(false);
-      setDirection(null);
-      document.body.classList.remove('animating');
-    }, 300); // Match this to animation duration
-  }, [currentCardIndex, totalCards, isTransitioning]);
-
-  const transitionToPreviousCard = useCallback(() => {
-    if (isTransitioning || currentCardIndex <= 1) return;
-    
-    setIsTransitioning(true);
-    setDirection('prev');
-    
-    // Add class to body for visual indication
-    document.body.classList.add('animating');
-    
-    // Use timeout to ensure animations complete before state changes
-    transitionTimeoutRef.current = setTimeout(() => {
-      setCurrentCardIndex(prev => Math.max(prev - 1, 1));
-      setIsTransitioning(false);
-      setDirection(null);
-      document.body.classList.remove('animating');
-    }, 300); // Match this to animation duration
-  }, [currentCardIndex, isTransitioning]);
-
-  return {
-    currentCardIndex,
-    isTransitioning,
-    direction,
-    transitionToNextCard,
-    transitionToPreviousCard
-  };
-};
-
 const MessageSpark: React.FC = () => {
   // Track whether we're on the landing page or showing a form
   const [view, setView] = useState<'landing' | 'new-conversation' | 'reply'>('landing');
@@ -137,11 +76,7 @@ const MessageSpark: React.FC = () => {
   // For floating hearts animation
   const [hearts, setHearts] = useState<Heart[]>([]);
   
-  // Replace conversationContext with cardTransition hook
-  const { currentCardIndex, isTransitioning, direction, transitionToNextCard, transitionToPreviousCard } = 
-    useCardTransition(3); // 3 total cards
-  
-  // Combine the conversationContext with the new transition system
+  // Keep the existing conversationContext state
   const [conversationContext, setConversationContext] = useState<ConversationContext>({
     relationship: {
       type: 'romantic_partner',
@@ -156,16 +91,6 @@ const MessageSpark: React.FC = () => {
     },
     currentStep: 1
   });
-
-  // Synchronize the currentCardIndex with conversationContext.currentStep
-  useEffect(() => {
-    if (!isTransitioning) {
-      setConversationContext(prev => ({
-        ...prev,
-        currentStep: currentCardIndex
-      }));
-    }
-  }, [currentCardIndex, isTransitioning]);
   
   // Form state - will be used later
   const [formData, setFormData] = useState<FormData>({
@@ -295,16 +220,32 @@ const MessageSpark: React.FC = () => {
     setError('');
   };
   
-  // Replace the existing navigation functions
+  // Update the navigation functions to use simpler approach
   const handleNextStep = useCallback(() => {
-    if (isTransitioning) return;
-    transitionToNextCard();
-  }, [isTransitioning, transitionToNextCard]);
+    // Add visual indication that we're transitioning
+    addLoadingClass();
+    
+    // Short delay to allow visual feedback
+    setTimeout(() => {
+      setConversationContext(prev => ({
+        ...prev,
+        currentStep: Math.min(prev.currentStep + 1, 3) // We have 3 cards total
+      }));
+    }, 50);
+  }, []);
   
   const handlePrevStep = useCallback(() => {
-    if (isTransitioning) return;
-    transitionToPreviousCard();
-  }, [isTransitioning, transitionToPreviousCard]);
+    // Add visual indication that we're transitioning
+    addLoadingClass();
+    
+    // Short delay to allow visual feedback
+    setTimeout(() => {
+      setConversationContext(prev => ({
+        ...prev,
+        currentStep: Math.max(prev.currentStep - 1, 1)
+      }));
+    }, 50);
+  }, []);
   
   // Handle finishing the card flow
   const handleFinishCardFlow = () => {
@@ -1080,7 +1021,124 @@ ${sections.mistakes}`;
     </div>
   );
   
-  // Relationship Type Card Component - optimized animations
+  // Update the renderNewConversationView function with simpler animations
+  const renderNewConversationView = () => {
+    // Track direction of transition for animations
+    const [direction, setDirection] = useState<'next' | 'prev' | null>(null);
+    
+    // Update direction based on step changes
+    useEffect(() => {
+      const currentStep = conversationContext.currentStep;
+      const handleStepChange = (e: CustomEvent) => {
+        const { oldStep, newStep } = e.detail;
+        if (newStep > oldStep) setDirection('next');
+        else if (newStep < oldStep) setDirection('prev');
+      };
+      
+      // Create a custom event listener to track direction
+      window.addEventListener('stepChange' as any, handleStepChange);
+      return () => window.removeEventListener('stepChange' as any, handleStepChange);
+    }, []);
+    
+    // Helper to create custom event when step changes
+    useEffect(() => {
+      const event = new CustomEvent('stepChange', { 
+        detail: { 
+          oldStep: conversationContext.currentStep, 
+          newStep: conversationContext.currentStep 
+        } 
+      });
+      window.dispatchEvent(event);
+    }, [conversationContext.currentStep]);
+
+    return (
+      <div className="new-conversation-container">
+        <div className="new-conversation-header">
+          <button className="icon-button" onClick={handleBackToLanding}>
+            <FaArrowLeft /> Back
+          </button>
+          <h1>Create a New Conversation</h1>
+        </div>
+        
+        {/* Progress indicator */}
+        <div className="progress-indicator">
+          <div className={`progress-step ${conversationContext.currentStep >= 1 ? 'active' : ''}`}>1</div>
+          <div className={`progress-line ${conversationContext.currentStep >= 2 ? 'active' : ''}`}></div>
+          <div className={`progress-step ${conversationContext.currentStep >= 2 ? 'active' : ''}`}>2</div>
+          <div className={`progress-line ${conversationContext.currentStep >= 3 ? 'active' : ''}`}></div>
+          <div className={`progress-step ${conversationContext.currentStep >= 3 ? 'active' : ''}`}>3</div>
+        </div>
+        
+        {/* Card content with SIMPLER animations */}
+        <div className="card-container">
+          <AnimatePresence initial={false} mode="sync">
+            {conversationContext.currentStep === 1 && (
+              <motion.div 
+                key="relationship" 
+                className="card-wrapper"
+                initial={{ opacity: 0, x: direction === 'prev' ? 30 : -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction === 'prev' ? -30 : 30 }}
+                transition={{ 
+                  duration: 0.25,
+                  ease: "easeInOut"
+                }}
+              >
+                <RelationshipTypeCard />
+              </motion.div>
+            )}
+            {conversationContext.currentStep === 2 && (
+              <motion.div 
+                key="scenario" 
+                className="card-wrapper"
+                initial={{ opacity: 0, x: direction === 'prev' ? 30 : -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction === 'prev' ? -30 : 30 }}
+                transition={{ 
+                  duration: 0.25,
+                  ease: "easeInOut"
+                }}
+              >
+                <CommunicationScenarioCard />
+              </motion.div>
+            )}
+            {conversationContext.currentStep === 3 && (
+              <motion.div 
+                key="emotional" 
+                className="card-wrapper"
+                initial={{ opacity: 0, x: direction === 'prev' ? 30 : -30 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: direction === 'prev' ? -30 : 30 }}
+                transition={{ 
+                  duration: 0.25,
+                  ease: "easeInOut"
+                }}
+              >
+                <EmotionalContextCard />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    );
+  };
+  
+  // Helper function to get dynamic placeholder text based on context
+  const getMessagePlaceholder = () => {
+    if (!isCreatingNewExchange) return '';
+    
+    const relationship = conversationContext.relationship.type === 'other'
+      ? conversationContext.relationship.customType
+      : conversationContext.relationship.type.replace('_', ' ');
+      
+    const scenario = conversationContext.scenario.scenarioType === 'other'
+      ? conversationContext.scenario.scenario
+      : conversationContext.scenario.scenarioType.replace('_', ' ');
+      
+    return `Describe your situation with your ${relationship}. What are the specifics of the ${scenario} that you need help with?`;
+  };
+  
+  // Update the RelationshipTypeCard component for cleaner transitions
   const RelationshipTypeCard = () => {
     const relationshipTypes = [
       { id: 'romantic_partner', label: 'Romantic Partner' },
@@ -1090,11 +1148,12 @@ ${sections.mistakes}`;
       { id: 'other', label: 'Other' }
     ];
     
-    // Optimized handler for selecting relationship type and auto-advancing
+    // Simpler handler for selection that prevents double-transitions
     const handleSelectType = useCallback((typeId: RelationshipTypeCard['type']) => {
-      if (isTransitioning) return;
+      // Prevent selection during transitions
+      if (document.body.classList.contains('animating')) return;
       
-      // First update the relationship value
+      // Update state immediately
       setConversationContext(prev => ({
         ...prev,
         relationship: {
@@ -1112,11 +1171,9 @@ ${sections.mistakes}`;
       // Auto-advance to next step unless it's "other" which needs additional input
       if (typeId !== 'other') {
         // Slight delay for visual feedback before transition
-        setTimeout(() => {
-          transitionToNextCard();
-        }, 150);
+        setTimeout(handleNextStep, 150);
       }
-    }, [isTransitioning, transitionToNextCard]);
+    }, [handleNextStep]);
     
     return (
       <motion.div 
@@ -1198,7 +1255,7 @@ ${sections.mistakes}`;
     );
   };
   
-  // Communication Scenario Card Component - optimized animations
+  // Similarly update the CommunicationScenarioCard component
   const CommunicationScenarioCard = () => {
     const scenarioTypes = [
       { id: 'conflict_resolution', label: 'Resolving a Conflict' },
@@ -1208,11 +1265,12 @@ ${sections.mistakes}`;
       { id: 'other', label: 'Something Else' }
     ];
     
-    // Optimized handler for selecting scenario type and auto-advancing
+    // Simpler handler that prevents double-transitions
     const handleSelectType = useCallback((typeId: ScenarioCard['scenarioType']) => {
-      if (isTransitioning) return;
+      // Prevent selection during transitions
+      if (document.body.classList.contains('animating')) return;
       
-      // First update the scenario value
+      // Update state immediately
       setConversationContext(prev => ({
         ...prev,
         scenario: {
@@ -1230,11 +1288,9 @@ ${sections.mistakes}`;
       // Auto-advance to next step unless it's "other" which needs additional input
       if (typeId !== 'other') {
         // Slight delay for visual feedback before transition
-        setTimeout(() => {
-          transitionToNextCard();
-        }, 150);
+        setTimeout(handleNextStep, 150);
       }
-    }, [isTransitioning, transitionToNextCard]);
+    }, [handleNextStep]);
     
     return (
       <motion.div 
@@ -1483,120 +1539,6 @@ ${sections.mistakes}`;
         </div>
       </motion.div>
     );
-  };
-  
-  // Update the renderNewConversationView function with optimized transitions
-  const renderNewConversationView = () => {
-    // Generate transition variables for animations
-    const cardVariants = {
-      enter: (direction: 'next' | 'prev' | null) => ({
-        x: direction === 'next' ? 100 : direction === 'prev' ? -100 : 0,
-        opacity: 0
-      }),
-      center: {
-        x: 0,
-        opacity: 1
-      },
-      exit: (direction: 'next' | 'prev' | null) => ({
-        x: direction === 'next' ? -100 : direction === 'prev' ? 100 : 0,
-        opacity: 0
-      })
-    };
-
-    return (
-      <div className="new-conversation-container">
-        <div className="new-conversation-header">
-          <button className="icon-button" onClick={handleBackToLanding}>
-            <FaArrowLeft /> Back
-          </button>
-          <h1>Create a New Conversation</h1>
-        </div>
-        
-        {/* Progress indicator */}
-        <div className="progress-indicator">
-          <div className={`progress-step ${currentCardIndex >= 1 ? 'active' : ''}`}>1</div>
-          <div className={`progress-line ${currentCardIndex >= 2 ? 'active' : ''}`}></div>
-          <div className={`progress-step ${currentCardIndex >= 2 ? 'active' : ''}`}>2</div>
-          <div className={`progress-line ${currentCardIndex >= 3 ? 'active' : ''}`}></div>
-          <div className={`progress-step ${currentCardIndex >= 3 ? 'active' : ''}`}>3</div>
-        </div>
-        
-        {/* Card content with optimized animations */}
-        <div className="card-container">
-          <AnimatePresence initial={false} custom={direction} mode="wait">
-            {currentCardIndex === 1 && (
-              <motion.div 
-                key="relationship" 
-                className="card-wrapper"
-                custom={direction}
-                variants={cardVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ 
-                  type: "tween",
-                  ease: "easeInOut",
-                  duration: 0.3
-                }}
-              >
-                <RelationshipTypeCard />
-              </motion.div>
-            )}
-            {currentCardIndex === 2 && (
-              <motion.div 
-                key="scenario" 
-                className="card-wrapper"
-                custom={direction}
-                variants={cardVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ 
-                  type: "tween",
-                  ease: "easeInOut",
-                  duration: 0.3
-                }}
-              >
-                <CommunicationScenarioCard />
-              </motion.div>
-            )}
-            {currentCardIndex === 3 && (
-              <motion.div 
-                key="emotional" 
-                className="card-wrapper"
-                custom={direction}
-                variants={cardVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                transition={{ 
-                  type: "tween",
-                  ease: "easeInOut", 
-                  duration: 0.3
-                }}
-              >
-                <EmotionalContextCard />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    );
-  };
-  
-  // Helper function to get dynamic placeholder text based on context
-  const getMessagePlaceholder = () => {
-    if (!isCreatingNewExchange) return '';
-    
-    const relationship = conversationContext.relationship.type === 'other'
-      ? conversationContext.relationship.customType
-      : conversationContext.relationship.type.replace('_', ' ');
-      
-    const scenario = conversationContext.scenario.scenarioType === 'other'
-      ? conversationContext.scenario.scenario
-      : conversationContext.scenario.scenarioType.replace('_', ' ');
-      
-    return `Describe your situation with your ${relationship}. What are the specifics of the ${scenario} that you need help with?`;
   };
   
   return (

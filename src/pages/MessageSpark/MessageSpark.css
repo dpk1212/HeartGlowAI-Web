@@ -778,7 +778,7 @@ textarea.read-only {
   box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
   position: relative;
   z-index: 10;
-  max-height: 85vh;
+  max-height: 90vh;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -836,19 +836,21 @@ textarea.read-only {
 /* Card Container */
 .card-container {
   position: relative;
-  min-height: 350px;
-  overflow: hidden;
+  min-height: 300px;
+  height: auto;
+  overflow: visible;
+  margin-bottom: 2rem;
 }
 
 /* Message Card */
 .message-card {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 1.5rem 1.5rem 2rem 1.5rem;
   width: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  top: auto;
+  left: auto;
 }
 
 .card-title {

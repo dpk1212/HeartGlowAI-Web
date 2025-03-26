@@ -165,11 +165,14 @@ const MessageSpark: React.FC = () => {
     }
   }, [conversations, user]);
   
-  // Generate random heart positions
+  // Modify the useEffect to disable the periodic heart animation
   useEffect(() => {
+    // Generate hearts only once on mount, not repeatedly
     generateHearts();
-    const interval = setInterval(generateHearts, 10000);
-    return () => clearInterval(interval);
+    
+    // Comment out the interval to prevent periodic refreshing
+    // const interval = setInterval(generateHearts, 10000);
+    // return () => clearInterval(interval);
   }, []);
 
   // Function to generate random floating hearts
@@ -963,6 +966,22 @@ ${sections.mistakes}`;
       { id: 'other', label: 'Other' }
     ];
     
+    // Handler for selecting relationship type and auto-advancing
+    const handleSelectType = (typeId: RelationshipTypeCard['type']) => {
+      setConversationContext(prev => ({
+        ...prev,
+        relationship: {
+          ...prev.relationship,
+          type: typeId
+        }
+      }));
+      
+      // Auto-advance to next step unless it's "other" which needs additional input
+      if (typeId !== 'other') {
+        setTimeout(() => handleNextStep(), 100);
+      }
+    };
+    
     return (
       <motion.div 
         className="message-card"
@@ -978,13 +997,7 @@ ${sections.mistakes}`;
               <button
                 key={type.id}
                 className={`card-button ${conversationContext.relationship.type === type.id ? 'selected' : ''}`}
-                onClick={() => setConversationContext(prev => ({
-                  ...prev,
-                  relationship: {
-                    ...prev.relationship,
-                    type: type.id as RelationshipTypeCard['type']
-                  }
-                }))}
+                onClick={() => handleSelectType(type.id as RelationshipTypeCard['type'])}
               >
                 {type.label}
               </button>
@@ -1041,6 +1054,22 @@ ${sections.mistakes}`;
       { id: 'other', label: 'Something Else' }
     ];
     
+    // Handler for selecting scenario type and auto-advancing
+    const handleSelectType = (typeId: ScenarioCard['scenarioType']) => {
+      setConversationContext(prev => ({
+        ...prev,
+        scenario: {
+          ...prev.scenario,
+          scenarioType: typeId
+        }
+      }));
+      
+      // Auto-advance to next step unless it's "other" which needs additional input
+      if (typeId !== 'other') {
+        setTimeout(() => handleNextStep(), 100);
+      }
+    };
+    
     return (
       <motion.div 
         className="message-card"
@@ -1056,13 +1085,7 @@ ${sections.mistakes}`;
               <button
                 key={type.id}
                 className={`card-button ${conversationContext.scenario.scenarioType === type.id ? 'selected' : ''}`}
-                onClick={() => setConversationContext(prev => ({
-                  ...prev,
-                  scenario: {
-                    ...prev.scenario,
-                    scenarioType: type.id as ScenarioCard['scenarioType']
-                  }
-                }))}
+                onClick={() => handleSelectType(type.id as ScenarioCard['scenarioType'])}
               >
                 {type.label}
               </button>
@@ -1220,10 +1243,10 @@ ${sections.mistakes}`;
         
         {/* Card content with AnimatePresence for smooth transitions */}
         <div className="card-container">
-          <AnimatePresence mode="wait">
-            {conversationContext.currentStep === 1 && <RelationshipTypeCard />}
-            {conversationContext.currentStep === 2 && <CommunicationScenarioCard />}
-            {conversationContext.currentStep === 3 && <EmotionalContextCard />}
+          <AnimatePresence mode="popLayout">
+            {conversationContext.currentStep === 1 && <RelationshipTypeCard key="relationship" />}
+            {conversationContext.currentStep === 2 && <CommunicationScenarioCard key="scenario" />}
+            {conversationContext.currentStep === 3 && <EmotionalContextCard key="emotional" />}
           </AnimatePresence>
         </div>
       </div>

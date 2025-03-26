@@ -4,10 +4,10 @@ import { db } from '../firebase/config';
 import { auth } from '../firebase/config';
 import OpenAI from 'openai';
 
-// Export the OpenAI instance so it can be updated at runtime for testing
+// Export the OpenAI instance for server-side use only
 export let openai = new OpenAI({
-  apiKey: 'YOUR_OPENAI_API_KEY_HERE', // Will be replaced at runtime
-  dangerouslyAllowBrowser: true // Only for development testing
+  apiKey: process.env.REACT_APP_OPENAI_API_KEY || '',
+  dangerouslyAllowBrowser: false
 });
 
 // Pydantic Schema Types
@@ -76,99 +76,8 @@ export const generateMessages = async (context: MessageGenerationRequest): Promi
   console.log('Generating messages with context:', context);
   
   try {
-    // In production, use Firebase Functions
-    if (process.env.NODE_ENV === 'production') {
-      return generateMessagesViaFirebase(context);
-    }
-
-    // For development, use direct API call
-    console.log('Making direct API call to OpenAI');
-    
-    // Generate a unique conversation ID
-    const conversationId = `direct-${Date.now()}`;
-    
-    // System prompt for the AI
-    const systemPrompt = `You are an advanced communication coach. Generate two nuanced, contextually appropriate messages based on the given relationship and scenario information.
-    
-    Your response MUST be in the following JSON format:
-    {
-      "messages": [
-        "First full message text",
-        "Second full message text"
-      ],
-      "insights": [
-        {
-          "communication_strategy": "Strategy for first message",
-          "emotional_intelligence_score": 8.5,
-          "potential_impact": "Impact description for first message"
-        },
-        {
-          "communication_strategy": "Strategy for second message",
-          "emotional_intelligence_score": 9.2,
-          "potential_impact": "Impact description for second message"
-        }
-      ],
-      "previous_variations": [
-        "Alternative phrasing 1",
-        "Alternative phrasing 2",
-        "Alternative phrasing 3"
-      ]
-    }
-    
-    Key Guidelines:
-    - Analyze relationship dynamics and adapt message to the specified relationship type
-    - Tune emotional intensity to match the given level (${context.emotional_intensity}/100)
-    - Add personalization using the recipient's name (${context.recipient_name})
-    - Incorporate any additional context provided
-    - Provide distinct communication strategies for each message
-    - Rate each message's emotional intelligence on a scale of 0-10
-    - Describe the potential impact in 1-2 sentences`;
-    
-    // Make the direct API call
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: 'system',
-          content: systemPrompt
-        },
-        {
-          role: 'user',
-          content: JSON.stringify({
-            relationship_type: context.relationship_type,
-            communication_scenario: context.communication_scenario,
-            emotional_intensity: context.emotional_intensity,
-            recipient_name: context.recipient_name,
-            additional_context: context.additional_context || ''
-          })
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 1000
-    });
-    
-    console.log('OpenAI API response:', response);
-    
-    if (!response.choices || !response.choices[0] || !response.choices[0].message || !response.choices[0].message.content) {
-      throw new Error('Invalid response from OpenAI API');
-    }
-    
-    // Parse the response content
-    const parsed = JSON.parse(response.choices[0].message.content);
-    
-    // Add conversation ID to the response
-    parsed.conversation_id = conversationId;
-    
-    // Validate the response structure
-    if (!parsed.messages || !Array.isArray(parsed.messages) || parsed.messages.length < 2) {
-      return {
-        error: true,
-        details: 'Invalid response format: messages array missing or incomplete'
-      };
-    }
-    
-    return parsed as MessageGeneration;
+    // Always use Firebase Functions for security
+    return generateMessagesViaFirebase(context);
   } catch (error: any) {
     // Comprehensive error handling
     console.error('Message Generation Error', error);
@@ -180,7 +89,7 @@ export const generateMessages = async (context: MessageGenerationRequest): Promi
 };
 
 /**
- * Generate messages via Firebase Functions (for production)
+ * Generate messages via Firebase Functions
  */
 const generateMessagesViaFirebase = async (context: MessageGenerationRequest): Promise<MessageGeneration | { error: boolean, refusalReason?: string, details?: string }> => {
   try {

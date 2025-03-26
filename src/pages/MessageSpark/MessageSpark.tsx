@@ -5,6 +5,7 @@ import { FaHeart, FaArrowLeft, FaCopy, FaHistory, FaSave, FaTimes, FaPlus, FaChe
 import { generateMessage } from '../../services/messages';
 import { useFirebase } from '../../contexts/FirebaseContext';
 import './MessageSpark.css';
+import { v4 as uuidv4 } from 'uuid';
 
 // Interface for form data (will be used later when user clicks buttons)
 interface FormData {
@@ -31,6 +32,7 @@ interface ScenarioCard {
 interface EmotionalContextCard {
   primaryEmotion: string;
   emotionalIntensity: number; // 1-10
+  additionalContext: string;
 }
 
 // Combined conversation context from all cards
@@ -81,18 +83,20 @@ const MessageSpark: React.FC = () => {
   
   // Keep the existing conversationContext state
   const [conversationContext, setConversationContext] = useState<ConversationContext>({
+    currentStep: 1,
     relationship: {
-      type: 'romantic_partner',
+      type: '',
+      customType: ''
     },
     scenario: {
-      scenario: '',
-      scenarioType: 'emotional_expression'
+      scenarioType: '',
+      scenario: ''
     },
     emotionalContext: {
-      primaryEmotion: 'Hopeful',
-      emotionalIntensity: 5
-    },
-    currentStep: 1
+      primaryEmotion: '',
+      emotionalIntensity: 50,
+      additionalContext: ''
+    }
   });
   
   // Form state - will be used later
@@ -205,18 +209,20 @@ const MessageSpark: React.FC = () => {
     
     // Reset the conversation context
     setConversationContext({
+      currentStep: 1,
       relationship: {
-        type: 'romantic_partner',
+        type: '',
+        customType: ''
       },
       scenario: {
-        scenario: '',
-        scenarioType: 'emotional_expression'
+        scenarioType: '',
+        scenario: ''
       },
       emotionalContext: {
-        primaryEmotion: 'Hopeful',
-        emotionalIntensity: 5
-      },
-      currentStep: 1
+        primaryEmotion: '',
+        emotionalIntensity: 50,
+        additionalContext: ''
+      }
     });
     
     // Clear any previous errors
@@ -232,61 +238,73 @@ const MessageSpark: React.FC = () => {
     
     setIsTransitioning(true);
     setDirection('next');
+    document.body.classList.add('animating');
     
-    setConversationContext(prev => ({
-      ...prev,
-      currentStep: Math.min(prev.currentStep + 1, 3)
-    }));
-    
-    // Release transition lock after animation duration
     setTimeout(() => {
+      if (conversationContext.currentStep < 3) {
+        setConversationContext(prev => ({
+          ...prev,
+          currentStep: Math.min(prev.currentStep + 1, 3)
+        }));
+      } else {
+        handleFinishCardFlow();
+      }
+      document.body.classList.remove('animating');
       setIsTransitioning(false);
-    }, 500); // Slightly longer than animation duration for safety
-  }, [isTransitioning]);
+    }, 500);
+  }, [isTransitioning, conversationContext.currentStep]);
   
-  const handlePrevStep = useCallback(() => {
+  const handlePrevStep = () => {
     if (isTransitioning) return;
     
     setIsTransitioning(true);
     setDirection('prev');
+    document.body.classList.add('animating');
     
-    setConversationContext(prev => ({
-      ...prev,
-      currentStep: Math.max(prev.currentStep - 1, 1)
-    }));
-    
-    // Release transition lock after animation duration
     setTimeout(() => {
+      setConversationContext(prev => ({
+        ...prev,
+        currentStep: Math.max(prev.currentStep - 1, 1)
+      }));
+      document.body.classList.remove('animating');
       setIsTransitioning(false);
-    }, 500); // Slightly longer than animation duration for safety
-  }, [isTransitioning]);
+    }, 500);
+  };
   
   // Handle finishing the card flow
-  const handleFinishCardFlow = () => {
-    // Use the collected information to create a conversation
-    const relationshipType = conversationContext.relationship.type === 'other' 
-      ? conversationContext.relationship.customType || 'Custom' 
-      : conversationContext.relationship.type.replace('_', ' ');
-      
-    const scenarioDesc = conversationContext.scenario.scenarioType === 'other'
-      ? conversationContext.scenario.scenario
-      : conversationContext.scenario.scenarioType.replace('_', ' ');
-      
-    // Set conversation name based on relationship
-    setConversationName(relationshipType);
+  const handleFinishCardFlow = useCallback(() => {
+    // Generate a unique conversation ID
+    const conversationId = uuidv4();
     
-    // Use the scenario as the original message prompt
-    setOriginalMessage(`I need help with a ${relationshipType} relationship. 
-Context: ${scenarioDesc}
-Emotional state: ${conversationContext.emotionalContext.primaryEmotion} (intensity: ${conversationContext.emotionalContext.emotionalIntensity}/10)`);
+    // Create MessageGenerationRequest from collected data
+    const messageRequest = {
+      relationship_type: conversationContext.relationship.type,
+      communication_scenario: conversationContext.scenario.scenario,
+      emotional_intensity: conversationContext.emotionalContext.emotionalIntensity,
+      recipient_name: conversationContext.relationship.customType || conversationContext.relationship.type,
+      conversation_name: conversationContext.relationship.type === 'other' 
+        ? conversationContext.relationship.customType || 'New Conversation' 
+        : conversationContext.relationship.type.replace('_', ' '),
+      additional_context: conversationContext.emotionalContext.additionalContext || ''
+    };
     
-    // Switch to reply view to complete the flow
-    setView('reply');
-    setSelectedConversation(null);
-    setSelectedExchange(null);
-    setGeneratedReply('');
-    setIsCreatingNewExchange(true);
-  };
+    // Save conversation to local storage
+    const conversationKey = user ? `conversations_${user.uid}` : 'conversations';
+    const conversations = JSON.parse(localStorage.getItem(conversationKey) || '[]');
+    conversations.push({
+      id: conversationId,
+      ...messageRequest,
+      createdAt: new Date().toISOString()
+    });
+    localStorage.setItem(conversationKey, JSON.stringify(conversations));
+    
+    // Navigate to the message results page
+    navigate(`/message-results/${conversationId}`, { 
+      state: { 
+        messageRequest 
+      } 
+    });
+  }, [conversationContext, navigate, user]);
   
   const handleReplyToMessage = () => {
     setView('reply');
@@ -1274,6 +1292,7 @@ ${sections.mistakes}`;
     // Separate slider value tracking for smooth UI updates
     const [sliderValue, setSliderValue] = useState(conversationContext.emotionalContext.emotionalIntensity);
     const [isSelecting, setIsSelecting] = useState(false);
+    const [additionalContext, setAdditionalContext] = useState('');
     
     // Update the emotion state without causing re-renders
     const handleEmotionChange = (emotion: string) => {
@@ -1323,6 +1342,14 @@ ${sections.mistakes}`;
       }, 300);
     };
     
+    const getIntensityLabel = (value: number) => {
+      if (value <= 20) return "Very Low";
+      if (value <= 40) return "Low";
+      if (value <= 60) return "Moderate";
+      if (value <= 80) return "High";
+      return "Very High";
+    };
+    
     return (
       <motion.div 
         className="message-card"
@@ -1353,7 +1380,7 @@ ${sections.mistakes}`;
           
           <div className="form-group mt-4">
             <label>
-              Intensity: <strong>{sliderValue}</strong>
+              Intensity: <strong>{getIntensityLabel(sliderValue)}</strong>
             </label>
             <div className="slider-container" style={{ '--value': sliderValue } as React.CSSProperties}>
               <input
@@ -1381,6 +1408,20 @@ ${sections.mistakes}`;
                 <span>10</span>
               </div>
             </div>
+          </div>
+          
+          <div className="form-group mt-6">
+            <label htmlFor="additionalContext" className="text-white text-lg mb-2">
+              Tell us anything else that is important to know when creating a reply:
+            </label>
+            <textarea
+              id="additionalContext"
+              className="w-full p-3 rounded-lg bg-white/10 border border-white/30 text-white resize-y"
+              rows={4}
+              placeholder="Add any additional context here..."
+              value={additionalContext}
+              onChange={(e) => setAdditionalContext(e.target.value)}
+            />
           </div>
           
           <div className="card-actions">

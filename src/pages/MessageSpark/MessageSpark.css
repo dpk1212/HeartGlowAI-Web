@@ -917,33 +917,172 @@ textarea.read-only {
   background: linear-gradient(to right, rgba(255, 107, 203, 0.7), rgba(177, 156, 217, 0.7));
 }
 
-/* Card Container */
+/* Card Container - Optimized for animations */
 .card-container {
   position: relative;
   min-height: 400px;
   height: auto;
-  overflow: visible;
   margin-bottom: 2rem;
-  perspective: 1000px;
-  transform-style: flat;
-  contain: layout;
-  isolation: isolate;
+  perspective: 1200px;
   width: 100%;
+  transform-style: preserve-3d;
+  overflow: hidden;
+  contain: layout style;
 }
 
 /* Card wrapper for animations */
 .card-wrapper {
   width: 100%;
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   transform-style: preserve-3d;
   will-change: transform, opacity;
   transform: translateZ(0);
-  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  min-height: 360px;
+  min-height: 400px;
   display: flex;
   flex-direction: column;
+  z-index: 1;
+}
+
+/* Message Card */
+.message-card {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem 1.5rem 2rem 1.5rem;
+  width: 100%;
+  position: relative;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  contain: content;
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 350px;
+}
+
+.message-card:hover {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Card title with improved styling */
+.card-title {
+  font-size: 1.5rem;
+  color: white;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Better button styling for improved UX */
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  transform: translateZ(0);
+  will-change: transform;
+  transition: transform 0.2s ease;
+}
+
+.card-button {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+  padding: 1rem;
+  transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+  text-align: left;
+  font-weight: 500;
+  font-size: 1rem;
+  transform: translateZ(0);
+  will-change: transform, background-color;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+}
+
+.card-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255, 107, 203, 0.2), rgba(177, 156, 217, 0.2));
+  opacity: 0;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.card-button:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-button:hover::after {
+  opacity: 1;
+}
+
+.card-button.selected {
+  background: linear-gradient(to right, rgba(255, 107, 203, 0.4), rgba(177, 156, 217, 0.4));
+  border-color: white;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+}
+
+/* Transitional state when button is clicked but before navigation */
+.card-button.selecting {
+  background: linear-gradient(to right, rgba(255, 107, 203, 0.6), rgba(177, 156, 217, 0.6));
+  border-color: white;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px) scale(0.98);
+  transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Optimize transitions with will-change */
+.new-conversation-container {
+  will-change: transform, opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+
+/* Ensure stable UI during state transitions */
+body.animating {
+  pointer-events: none !important;
+  cursor: wait !important;
+}
+
+/* Optimize progress indicator */
+.progress-indicator {
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition: opacity 0.3s ease;
+  opacity: 1;
+}
+
+.progress-step {
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  transform: translateZ(0);
+}
+
+.progress-step.active {
+  transform: scale(1.1);
 }
 
 /* Selected variables display */
@@ -1008,30 +1147,34 @@ textarea.read-only {
   text-transform: capitalize;
 }
 
-/* Message Card */
-.message-card {
-  background-color: rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1.5rem 1.5rem 2rem 1.5rem;
-  width: 100%;
-  position: relative;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform: translateZ(0);
-  will-change: transform, opacity;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  contain: content;
-  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+/* Animation for page transitions */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.card-title {
-  font-size: 1.5rem;
-  color: white;
-  margin-bottom: 1.5rem;
-  text-align: center;
+@keyframes page-exit {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+.card-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 1rem;
 }
 
 .card-content {
@@ -1039,104 +1182,6 @@ textarea.read-only {
   flex-direction: column;
   gap: 1.5rem;
   flex-grow: 1;
-}
-
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.card-button {
-  background-color: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 10px;
-  padding: 1rem;
-  transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
-  text-align: left;
-  font-weight: 500;
-  font-size: 1rem;
-  transform: translateZ(0);
-  will-change: transform, background-color;
-}
-
-.card-button:hover {
-  background-color: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
-}
-
-.card-button.selected {
-  background: linear-gradient(to right, rgba(255, 107, 203, 0.4), rgba(177, 156, 217, 0.4));
-  border-color: white;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-3px);
-}
-
-/* Transitional state when button is clicked but before navigation */
-.card-button.selecting {
-  background: linear-gradient(to right, rgba(255, 107, 203, 0.6), rgba(177, 156, 217, 0.6));
-  border-color: white;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px) scale(0.98);
-  transition: all 0.15s cubic-bezier(0.25, 1, 0.5, 1);
-}
-
-/* Create a spinner effect for loading states */
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.loading-spinner {
-  display: inline-block;
-  width: 20px;
-  height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: white;
-  animation: spin 0.8s linear infinite;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-
-/* Optimize transitions with will-change */
-.new-conversation-container {
-  will-change: transform, opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.progress-indicator {
-  will-change: opacity;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-/* Ensure stable UI during state transitions */
-body.animating {
-  pointer-events: none;
-  cursor: wait;
-}
-
-.primary-button:disabled,
-.secondary-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-/* GPU acceleration for all animations */
-.motion-div {
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  will-change: transform, opacity;
 }
 
 /* Text input styles for cards */
@@ -1148,6 +1193,7 @@ body.animating {
   border-radius: 8px;
   font-size: 1rem;
   width: 100%;
+  transition: all 0.2s ease;
 }
 
 .text-input::placeholder {
@@ -1157,6 +1203,8 @@ body.animating {
 .text-input:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Select dropdown */
@@ -1306,32 +1354,28 @@ body.animating {
   white-space: nowrap;
 }
 
-/* Animation for page transitions */
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Create a spinner effect for loading states */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-@keyframes page-exit {
-  from {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 0.8s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
 }
 
-.card-actions {
-  display: flex;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 1rem;
+.primary-button:disabled,
+.secondary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
 } 

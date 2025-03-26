@@ -1025,7 +1025,7 @@ ${sections.mistakes}`;
       
       // Auto-advance to next step unless it's "other" which needs additional input
       if (typeId !== 'other') {
-        setTimeout(() => handleNextStep(), 100);
+        setTimeout(() => handleNextStep(), 300);
       }
     };
     
@@ -1035,24 +1035,37 @@ ${sections.mistakes}`;
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
       >
         <h2 className="card-title">Who are you communicating with?</h2>
         <div className="card-content">
           <div className="button-group">
-            {relationshipTypes.map(type => (
-              <button
+            {relationshipTypes.map((type, index) => (
+              <motion.button
                 key={type.id}
                 className={`card-button ${conversationContext.relationship.type === type.id ? 'selected' : ''}`}
                 onClick={() => handleSelectType(type.id as RelationshipTypeCard['type'])}
+                whileHover={{ scale: 1.02, x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: { delay: index * 0.05, duration: 0.3 }
+                }}
               >
                 {type.label}
-              </button>
+              </motion.button>
             ))}
           </div>
           
           {conversationContext.relationship.type === 'other' && (
-            <div className="form-group mt-4">
+            <motion.div 
+              className="form-group mt-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.3 }}
+            >
               <input
                 type="text"
                 className="text-input"
@@ -1066,25 +1079,29 @@ ${sections.mistakes}`;
                   }
                 }))}
               />
-            </div>
+            </motion.div>
           )}
           
           <div className="card-actions">
-            <button 
+            <motion.button 
               className="secondary-button"
               onClick={handleBackToLanding}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
               Back
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
               className="primary-button"
               onClick={handleNextStep}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               disabled={conversationContext.relationship.type === 'other' && 
                         (!conversationContext.relationship.customType || 
                          conversationContext.relationship.customType.trim() === '')}
             >
               Next
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>
@@ -1113,7 +1130,7 @@ ${sections.mistakes}`;
       
       // Auto-advance to next step unless it's "other" which needs additional input
       if (typeId !== 'other') {
-        setTimeout(() => handleNextStep(), 100);
+        setTimeout(() => handleNextStep(), 300);
       }
     };
     
@@ -1123,24 +1140,37 @@ ${sections.mistakes}`;
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
       >
         <h2 className="card-title">What's the context of your communication?</h2>
         <div className="card-content">
           <div className="button-group">
-            {scenarioTypes.map(type => (
-              <button
+            {scenarioTypes.map((type, index) => (
+              <motion.button
                 key={type.id}
                 className={`card-button ${conversationContext.scenario.scenarioType === type.id ? 'selected' : ''}`}
                 onClick={() => handleSelectType(type.id as ScenarioCard['scenarioType'])}
+                whileHover={{ scale: 1.02, x: 5 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: 0,
+                  transition: { delay: index * 0.05, duration: 0.3 }
+                }}
               >
                 {type.label}
-              </button>
+              </motion.button>
             ))}
           </div>
           
           {conversationContext.scenario.scenarioType === 'other' && (
-            <div className="form-group mt-4">
+            <motion.div 
+              className="form-group mt-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              transition={{ duration: 0.3 }}
+            >
               <textarea
                 className="text-input"
                 placeholder="Describe your specific scenario"
@@ -1154,25 +1184,31 @@ ${sections.mistakes}`;
                 }))}
                 rows={3}
               />
-            </div>
+            </motion.div>
           )}
           
           <div className="card-actions">
-            <button 
+            <motion.button 
               className="secondary-button"
               onClick={handlePrevStep}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.1 }}
             >
               Back
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
               className="primary-button"
               onClick={handleNextStep}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.1 }}
               disabled={conversationContext.scenario.scenarioType === 'other' && 
                        (!conversationContext.scenario.scenario || 
                         conversationContext.scenario.scenario.trim() === '')}
             >
               Next
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>
@@ -1185,14 +1221,27 @@ ${sections.mistakes}`;
     
     // Add local state to track the slider value without causing rerenders
     const [sliderValue, setSliderValue] = useState(conversationContext.emotionalContext.emotionalIntensity);
+    const [isDragging, setIsDragging] = useState(false);
     
     // Update the parent state only when the user stops sliding
     const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSliderValue(parseInt(e.target.value));
+      const newValue = parseInt(e.target.value);
+      setSliderValue(newValue);
+      
+      // Optional: Update a CSS variable to position the value label
+      if (e.target.parentElement) {
+        e.target.parentElement.style.setProperty('--value', e.target.value);
+      }
+    };
+    
+    // Track when slider interaction starts
+    const handleSliderStart = () => {
+      setIsDragging(true);
     };
     
     // Update the parent state when the slider interaction ends
     const handleSliderChangeComplete = () => {
+      setIsDragging(false);
       setConversationContext(prev => ({
         ...prev,
         emotionalContext: {
@@ -1202,19 +1251,37 @@ ${sections.mistakes}`;
       }));
     };
     
+    // Apply slider value to parent state with debounce for smoother experience
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        // Only update parent state if we're not actively dragging
+        if (!isDragging && sliderValue !== conversationContext.emotionalContext.emotionalIntensity) {
+          setConversationContext(prev => ({
+            ...prev,
+            emotionalContext: {
+              ...prev.emotionalContext,
+              emotionalIntensity: sliderValue
+            }
+          }));
+        }
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    }, [sliderValue, isDragging]);
+    
     return (
       <motion.div 
         className="message-card"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
-        transition={{ duration: 0.3 }}
+        transition={{ duration: 0.4, ease: [0.19, 1, 0.22, 1] }}
       >
         <h2 className="card-title">How are you feeling?</h2>
         <div className="card-content">
           <div className="form-group">
             <label>Primary Emotion</label>
-            <select
+            <motion.select
               className="select-input"
               value={conversationContext.emotionalContext.primaryEmotion}
               onChange={(e) => setConversationContext(prev => ({
@@ -1224,20 +1291,22 @@ ${sections.mistakes}`;
                   primaryEmotion: e.target.value
                 }
               }))}
+              whileTap={{ scale: 0.98 }}
+              transition={{ duration: 0.1 }}
             >
               {emotions.map(emotion => (
                 <option key={emotion} value={emotion}>
                   {emotion}
                 </option>
               ))}
-            </select>
+            </motion.select>
           </div>
           
           <div className="form-group mt-4">
             <label>
-              Intensity: {sliderValue}
+              Intensity: <strong>{sliderValue}</strong>
             </label>
-            <div className="slider-container">
+            <div className="slider-container" style={{ '--value': sliderValue } as React.CSSProperties}>
               <input
                 type="range"
                 min="1"
@@ -1245,10 +1314,18 @@ ${sections.mistakes}`;
                 step="1"
                 value={sliderValue}
                 onChange={handleSliderChange}
+                onMouseDown={handleSliderStart}
+                onTouchStart={handleSliderStart}
                 onMouseUp={handleSliderChangeComplete}
                 onTouchEnd={handleSliderChangeComplete}
+                onMouseLeave={isDragging ? handleSliderChangeComplete : undefined}
                 className="slider"
               />
+              {isDragging && (
+                <div className="slider-value-label">
+                  {sliderValue}
+                </div>
+              )}
               <div className="slider-labels">
                 <span>1</span>
                 <span>2</span>
@@ -1265,18 +1342,24 @@ ${sections.mistakes}`;
           </div>
           
           <div className="card-actions">
-            <button 
+            <motion.button 
               className="secondary-button"
               onClick={handlePrevStep}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.1 }}
             >
               Back
-            </button>
-            <button 
+            </motion.button>
+            <motion.button 
               className="primary-button"
               onClick={handleFinishCardFlow}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              transition={{ duration: 0.1 }}
             >
               Create Conversation
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>
@@ -1297,22 +1380,22 @@ ${sections.mistakes}`;
         {/* Progress indicator */}
         <div className="progress-indicator">
           <div className={`progress-step ${conversationContext.currentStep >= 1 ? 'active' : ''}`}>1</div>
-          <div className="progress-line"></div>
+          <div className={`progress-line ${conversationContext.currentStep >= 2 ? 'active' : ''}`}></div>
           <div className={`progress-step ${conversationContext.currentStep >= 2 ? 'active' : ''}`}>2</div>
-          <div className="progress-line"></div>
+          <div className={`progress-line ${conversationContext.currentStep >= 3 ? 'active' : ''}`}></div>
           <div className={`progress-step ${conversationContext.currentStep >= 3 ? 'active' : ''}`}>3</div>
         </div>
         
         {/* Card content with AnimatePresence for smooth transitions */}
         <div className="card-container">
-          <AnimatePresence mode="sync" initial={false}>
+          <AnimatePresence mode="wait" initial={false}>
             {conversationContext.currentStep === 1 && (
               <motion.div 
                 key="relationship" 
-                initial={{ opacity: 0, x: -50 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0, x: -50, rotateY: -5 }} 
+                animate={{ opacity: 1, x: 0, rotateY: 0 }} 
+                exit={{ opacity: 0, x: 50, rotateY: 5 }}
+                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
                 className="card-wrapper"
               >
                 <RelationshipTypeCard key="relationship-card" />
@@ -1321,10 +1404,10 @@ ${sections.mistakes}`;
             {conversationContext.currentStep === 2 && (
               <motion.div 
                 key="scenario" 
-                initial={{ opacity: 0, x: -50 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0, x: -50, rotateY: -5 }} 
+                animate={{ opacity: 1, x: 0, rotateY: 0 }} 
+                exit={{ opacity: 0, x: 50, rotateY: 5 }}
+                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
                 className="card-wrapper"
               >
                 <CommunicationScenarioCard key="scenario-card" />
@@ -1333,10 +1416,10 @@ ${sections.mistakes}`;
             {conversationContext.currentStep === 3 && (
               <motion.div 
                 key="emotional" 
-                initial={{ opacity: 0, x: -50 }} 
-                animate={{ opacity: 1, x: 0 }} 
-                exit={{ opacity: 0, x: 50 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0, x: -50, rotateY: -5 }} 
+                animate={{ opacity: 1, x: 0, rotateY: 0 }} 
+                exit={{ opacity: 0, x: 50, rotateY: 5 }}
+                transition={{ duration: 0.5, ease: [0.19, 1, 0.22, 1] }}
                 className="card-wrapper"
               >
                 <EmotionalContextCard key="emotional-card" />

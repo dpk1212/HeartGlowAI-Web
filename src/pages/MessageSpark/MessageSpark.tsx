@@ -148,7 +148,16 @@ const MessageSpark: React.FC = () => {
   
   // Button handlers
   const handleCreateNewConversation = () => {
-    setView('new-conversation');
+    // Since we don't have a dedicated new conversation view yet,
+    // we'll reuse the reply view but clear all fields
+    setView('reply');
+    setSelectedConversation(null);
+    setSelectedExchange(null);
+    setOriginalMessage('');
+    setConversationName('');
+    setGeneratedReply('');
+    setIsCreatingNewExchange(true);
+    setError(''); // Clear any previous errors
   };
   
   const handleReplyToMessage = () => {
@@ -539,7 +548,7 @@ ${sections.mistakes}`;
       </motion.div>
       
       <h1 className="app-title">MessageSpark</h1>
-      <p className="app-tagline">Express your feelings with beautifully crafted messages</p>
+      <p className="app-tagline">Express your feelings with beautifully crafted heartfelt messages</p>
       
       {/* Main buttons */}
       <div className="action-buttons">
@@ -549,16 +558,7 @@ ${sections.mistakes}`;
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
-          Create New Conversation
-        </motion.button>
-        
-        <motion.button
-          className="secondary-button"
-          onClick={handleReplyToMessage}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          Reply To A Message
+          Create New Message
         </motion.button>
       </div>
       
@@ -582,8 +582,8 @@ ${sections.mistakes}`;
         </button>
         <h1>
           {isCreatingNewExchange && !selectedConversation 
-            ? 'New Conversation' 
-            : selectedConversation?.name || 'Reply to a Message'}
+            ? 'Create a New Message' 
+            : selectedConversation?.name || 'Create a New Message'}
         </h1>
         {conversations.length > 0 && (
           <button 
@@ -892,8 +892,7 @@ ${sections.mistakes}`;
       {/* Render the appropriate view based on state */}
       {view === 'landing' && renderLandingPage()}
       {view === 'reply' && renderReplyView()}
-      
-      {/* Note: The new-conversation view will be implemented later */}
+      {view === 'new-conversation' && renderReplyView()} {/* Reuse reply view for now */}
     </div>
   );
 };

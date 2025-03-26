@@ -21,8 +21,6 @@ jobs:
       - name: Install dependencies
         run: |
           npm install --legacy-peer-deps
-          npm install --save-dev gh-pages
-          npm install --legacy-peer-deps react-dom react-native-web @expo/webpack-config
 
       - name: Create env file
         run: |
@@ -34,11 +32,124 @@ jobs:
           echo "FIREBASE_APP_ID=1:196565711798:web:79e2b0320fd8e74ab0df17" >> .env
           echo "FIREBASE_MEASUREMENT_ID=G-KJMPL1DNPY" >> .env
 
-      - name: Build web app
-        run: npx expo export:web
-
-      - name: Create CNAME file
-        run: echo "heartglowai.com" > web-build/CNAME
+      - name: Create simple web page
+        run: |
+          mkdir -p web-build
+          cat > web-build/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>HeartGlowAI</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #050A14;
+                color: #fff;
+                line-height: 1.6;
+              }
+              .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+                text-align: center;
+              }
+              .hero {
+                padding: 60px 0;
+              }
+              .hero h1 {
+                font-size: 48px;
+                margin-bottom: 20px;
+                color: #ff6b9d;
+              }
+              .hero p {
+                font-size: 20px;
+                margin-bottom: 40px;
+              }
+              .logo {
+                max-width: 200px;
+                margin-bottom: 30px;
+              }
+              .features {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 30px;
+                margin: 60px 0;
+              }
+              .feature {
+                flex: 1;
+                min-width: 300px;
+                background-color: #101426;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+              }
+              .feature h3 {
+                font-size: 24px;
+                margin-bottom: 15px;
+                color: #64d2ff;
+              }
+              .cta {
+                background: linear-gradient(45deg, #ff6b9d, #64d2ff);
+                color: white;
+                padding: 15px 30px;
+                font-size: 18px;
+                border: none;
+                border-radius: 30px;
+                cursor: pointer;
+                transition: transform 0.3s;
+              }
+              .cta:hover {
+                transform: translateY(-3px);
+              }
+              footer {
+                margin-top: 80px;
+                padding: 20px;
+                text-align: center;
+                font-size: 14px;
+                color: #888;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="hero">
+                <img src="heart-logo.png" alt="HeartGlowAI Logo" class="logo">
+                <h1>HeartGlowAI</h1>
+                <p>AI-powered heartfelt message generation for your relationships</p>
+                <p>Download our mobile app for the full experience</p>
+                <button class="cta">Get Started</button>
+              </div>
+              
+              <div class="features">
+                <div class="feature">
+                  <h3>Firebase Authentication</h3>
+                  <p>Secure login and user management powered by Firebase.</p>
+                </div>
+                <div class="feature">
+                  <h3>OpenAI Integration</h3>
+                  <p>Advanced AI technology generates personalized messages for any situation.</p>
+                </div>
+                <div class="feature">
+                  <h3>Intuitive UI</h3>
+                  <p>User-friendly interface makes it easy to create the perfect message.</p>
+                </div>
+              </div>
+              
+              <footer>
+                &copy; 2025 HeartGlowAI. All rights reserved.
+              </footer>
+            </div>
+          </body>
+          </html>
+          EOL
+          cp assets/heart-logo.png web-build/
+          # If you have other assets, copy them here
+          echo "heartglowai.com" > web-build/CNAME
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.1.5

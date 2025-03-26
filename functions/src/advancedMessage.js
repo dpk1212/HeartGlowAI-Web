@@ -2,9 +2,9 @@ const functions = require('firebase-functions');
 const { OpenAI } = require('openai');
 const admin = require('firebase-admin');
 
-// Initialize OpenAI API
+// Initialize OpenAI API with securely stored key from Firebase config
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: functions.config().openai.key || functions.config().openai.apikey,
 });
 
 /**

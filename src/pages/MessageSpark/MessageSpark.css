@@ -920,31 +920,30 @@ textarea.read-only {
 /* Card Container */
 .card-container {
   position: relative;
-  min-height: 350px;
+  min-height: 400px;
   height: auto;
   overflow: visible;
   margin-bottom: 2rem;
   perspective: 1000px;
-  /* Ensure the container maintains position during transitions */
   transform-style: flat;
   contain: layout;
   isolation: isolate;
+  width: 100%;
 }
 
 /* Card wrapper for animations */
 .card-wrapper {
   width: 100%;
-  position: absolute; /* Changed from relative to absolute for better positioning */
-  left: 0;
-  top: 0;
+  position: relative;
   transform-style: preserve-3d;
   will-change: transform, opacity;
   transform: translateZ(0);
   transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
-  /* Prevent layout shifts */
-  contain: content;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Selected variables display */
@@ -1016,16 +1015,16 @@ textarea.read-only {
   padding: 1.5rem 1.5rem 2rem 1.5rem;
   width: 100%;
   position: relative;
-  top: auto;
-  left: auto;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform: translateZ(0);
   will-change: transform, opacity;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  /* Ensure smooth animations with hardware acceleration */
   contain: content;
-  transition: all 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+  transition: all 0.25s cubic-bezier(0.25, 1, 0.5, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .card-title {
@@ -1039,12 +1038,14 @@ textarea.read-only {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  flex-grow: 1;
 }
 
 .button-group {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .card-button {
@@ -1331,5 +1332,6 @@ body.animating {
 .card-actions {
   display: flex;
   justify-content: space-between;
-  margin-top: 1rem;
+  margin-top: auto;
+  padding-top: 1rem;
 } 

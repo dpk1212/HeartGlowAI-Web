@@ -6,9 +6,9 @@ const cors = require('cors')({ origin: true });
 // Initialize Firebase Admin
 admin.initializeApp();
 
-// Initialize OpenAI client - you'll need to set this in Firebase Functions config
+// Initialize OpenAI client with securely stored API key from Firebase config
 const openai = new OpenAI({
-  apiKey: functions.config().openai?.key || 'YOUR_OPENAI_API_KEY', // REPLACE WITH ACTUAL KEY IN PRODUCTION
+  apiKey: functions.config().openai?.key || functions.config().openai?.apikey,
 });
 
 // Import advanced message generation functions

@@ -6,6 +6,7 @@ import SignUp from './pages/auth/SignUp.jsx'
 import AuthLanding from './pages/auth/AuthLanding.jsx'
 import WelcomeHome from './pages/auth/WelcomeHome.jsx'
 import { AuthProvider } from './contexts/AuthContext'
+import TestMessageGeneration from './pages/TestMessageGeneration'
 
 function App() {
   return (
@@ -32,6 +33,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="/test-generation" element={<TestMessageGeneration />} />
           <Route path="*" element={<AuthLanding />} />
         </Routes>
       </Router>

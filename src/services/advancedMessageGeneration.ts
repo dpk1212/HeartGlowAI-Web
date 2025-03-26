@@ -73,53 +73,51 @@ const feedbackConverter: FirestoreDataConverter<MessageFeedback> = {
  * @returns Structured response with messages and insights
  */
 export const generateMessages = async (context: MessageGenerationRequest): Promise<MessageGeneration | { error: boolean, refusalReason?: string, details?: string }> => {
-  // In production, use Firebase Functions instead of direct API call
-  // This is for development purposes
-  if (process.env.NODE_ENV === 'production') {
-    return generateMessagesViaFirebase(context);
-  }
-
+  // For testing purpose, return mock data to verify UI integration
+  console.log('Generating messages with context:', context);
+  
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-turbo",
-      messages: [
-        {
-          role: 'system',
-          content: `You are an advanced communication coach. Generate two nuanced, contextually appropriate messages.
-          
-          Key Guidelines:
-          - Analyze relationship dynamics
-          - Balance emotional intelligence
-          - Provide clear, constructive communication`
-        },
-        {
-          role: 'user',
-          content: JSON.stringify(context)
-        }
-      ],
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-      max_tokens: 500
-    });
-
-    // Parse response as MessageGeneration type
-    const parsed = JSON.parse(response.choices[0].message.content || '{}') as MessageGeneration;
-    
-    // Validate the response structure
-    if (!parsed.messages || !Array.isArray(parsed.messages) || parsed.messages.length < 2) {
-      return {
-        error: true,
-        details: 'Invalid response format: messages array missing or incomplete'
-      };
+    // Try to use the OpenAI API directly if it's available
+    if (process.env.NODE_ENV === 'production') {
+      return generateMessagesViaFirebase(context);
     }
 
-    return parsed;
+    // For development/testing, return mock data
+    console.log('Using mock data for testing');
+    
+    // Generate a unique ID for the conversation
+    const conversationId = `test-${Date.now()}`;
+    
+    return {
+      conversation_id: conversationId,
+      messages: [
+        `Hey ${context.recipient_name}, I just wanted to take a moment to express how deeply grateful I am for your unwavering support during my recent career change. These past two years together have been incredible, but the way you stood by me during this challenging time has meant more than words can express. Your belief in me gave me the courage to take that leap of faith. Thank you for being my rock.`,
+        `${context.recipient_name}, I've been reflecting on our journey together over these past two years, and I'm overwhelmed with gratitude for how you supported me through my career transition. During those uncertain moments when I doubted myself, your encouragement never wavered. You listened to my concerns, celebrated my small victories, and reminded me of my strengths when I forgot them. Your support has meant everything to me.`
+      ],
+      insights: [
+        {
+          communication_strategy: "Personal Appreciation",
+          emotional_intelligence_score: 8.5,
+          potential_impact: "Likely to strengthen the emotional bond and make the recipient feel valued for their specific supportive actions."
+        },
+        {
+          communication_strategy: "Reflective Gratitude",
+          emotional_intelligence_score: 9.2,
+          potential_impact: "May help the recipient understand the significant impact of their support and deepen mutual trust."
+        }
+      ],
+      previous_variations: [
+        "I wanted to tell you how much your support has meant to me during my career change.",
+        "Thank you for believing in me when I was making this difficult transition.",
+        "I couldn't have made it through this career shift without your constant encouragement."
+      ]
+    };
   } catch (error: any) {
     // Comprehensive error handling
     console.error('Message Generation Error', error);
     return {
       error: true,
-      details: error.message
+      details: error.message || 'Unknown error generating messages'
     };
   }
 };

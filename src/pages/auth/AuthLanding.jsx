@@ -200,6 +200,7 @@ export default function AuthLanding() {
                 letterSpacing: '0.025em',
                 transition: 'all 200ms',
               }}
+              onClick={() => console.log("Sign In button clicked")}
               onMouseOver={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
                 e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.5)';
@@ -238,6 +239,7 @@ export default function AuthLanding() {
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
                 transition: 'all 200ms',
               }}
+              onClick={() => console.log("Sign Up button clicked")}
               onMouseOver={(e) => {
                 e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
               }}

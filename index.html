@@ -1139,7 +1139,7 @@
           <div class="btn-group">
             <button class="btn" onclick="copyMessage()">Copy Message</button>
             <button class="btn" onclick="tweakMessage()">Tweak Message</button>
-            <button class="preview-button" onclick="showPreview()">✨ Preview Impact</button>
+            <button class="preview-button" onclick="window.showPreview()">✨ Preview Impact</button>
           </div>
           <div class="preview-section" id="previewSection">
             <h3 style="margin-bottom: 12px;">Tell us about the recipient</h3>
@@ -1851,11 +1851,14 @@
       });
     });
 
-    function showPreview() {
+    // Make showPreview globally accessible
+    window.showPreview = function() {
+      console.log('showPreview called');
       const previewSection = document.getElementById('previewSection');
+      previewSection.style.display = 'block';
       previewSection.classList.add('active');
       document.getElementById('recipientContext').focus();
-    }
+    };
 
     window.generatePreview = async function() {
       console.log('generatePreview called');

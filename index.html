@@ -1188,10 +1188,9 @@
         }
       });
       
-      // Current message tracking
+      // Global variables and functions
       let currentMessage = '';
 
-      // Feedback handling functions
       function showFeedback() {
         const feedbackSection = document.getElementById('feedbackSection');
         feedbackSection.style.display = 'block';
@@ -1274,6 +1273,16 @@
           showAlert(error.message || 'Failed to generate message', 'error');
           loadingSpinner.style.display = "none";
         }
+      }
+
+      function copyMessage() {
+        const messageText = document.getElementById('messageText').textContent;
+        navigator.clipboard.writeText(messageText).then(() => {
+          showAlert('Message copied to clipboard!', 'success');
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+          showAlert('Failed to copy message', 'error');
+        });
       }
 
       // Update the generateMessage function to store the current message

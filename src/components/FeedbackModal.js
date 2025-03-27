@@ -10,6 +10,8 @@ import {
   ActivityIndicator
 } from 'react-native';
 import { COLORS } from '../config/constants';
+import { auth } from '../services/firebase';
+import { markFeedbackSubmitted } from '../services/firebase';
 
 const FeedbackModal = ({ visible, onClose }) => {
   const [email, setEmail] = useState('');
@@ -24,6 +26,7 @@ const FeedbackModal = ({ visible, onClose }) => {
 
     setLoading(true);
     try {
+      // Submit feedback to Formspree
       const response = await fetch('https://formspree.io/f/xwplnpbl', {
         method: 'POST',
         headers: {
@@ -36,6 +39,12 @@ const FeedbackModal = ({ visible, onClose }) => {
       });
 
       if (response.ok) {
+        // Mark feedback as submitted in Firebase
+        const user = auth.currentUser;
+        if (user) {
+          await markFeedbackSubmitted(user.uid);
+        }
+
         Alert.alert(
           'Thank You!',
           'Your feedback has been submitted successfully.',

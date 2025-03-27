@@ -71,5 +71,30 @@ if (isWeb) {
   }
 }
 
+// Function to mark user as having submitted feedback
+export const markFeedbackSubmitted = async (userId) => {
+  try {
+    await firestore.collection('users').doc(userId).update({
+      hasFeedbackSubmitted: true,
+      feedbackSubmittedAt: firestore.FieldValue.serverTimestamp()
+    });
+    return true;
+  } catch (error) {
+    console.error('Error marking feedback as submitted:', error);
+    return false;
+  }
+};
+
+// Function to check if user has submitted feedback
+export const hasUserSubmittedFeedback = async (userId) => {
+  try {
+    const userDoc = await firestore.collection('users').doc(userId).get();
+    return userDoc.exists && userDoc.data().hasFeedbackSubmitted === true;
+  } catch (error) {
+    console.error('Error checking feedback status:', error);
+    return false;
+  }
+};
+
 export { firebase, auth, firestore, isFirebaseConfigured };
 export default firebase; 

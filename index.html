@@ -1053,6 +1053,7 @@
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
+    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
 
     // Screen transition function
     function showScreen(screen) {
@@ -1070,6 +1071,25 @@
           }, 500);
         }
       });
+    }
+
+    // Initialize app function
+    function initializeApp() {
+      // Initialize screen elements
+      welcomeScreen = document.getElementById('welcome-screen');
+      authScreen = document.getElementById('auth-screen');
+      homeScreen = document.getElementById('home-screen');
+      generatorScreen = document.getElementById('generator-screen');
+
+      // Add favicon
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
+      favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
+      document.head.appendChild(favicon);
+
+      // Show welcome screen by default
+      showScreen(welcomeScreen);
     }
 
     // Save message to history function
@@ -1235,6 +1255,9 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the app first
+      initializeApp();
+
       // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
@@ -1259,11 +1282,6 @@
       });
       
       // Get elements
-      const welcomeScreen = document.getElementById('welcome-screen');
-      const authScreen = document.getElementById('auth-screen');
-      const homeScreen = document.getElementById('home-screen');
-      const generatorScreen = document.getElementById('generator-screen');
-      
       const getStartedBtn = document.getElementById('get-started-btn');
       const loginRegisterBtn = document.getElementById('login-register-btn');
       
@@ -1684,9 +1702,6 @@
           showAlert(`Error: ${errorMessage}. Please try again.`, 'error');
         }
       });
-      
-      // Initialize
-      initializeApp();
     });
   </script>
 </body>

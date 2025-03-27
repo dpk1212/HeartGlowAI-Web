@@ -992,8 +992,56 @@
       border-radius: 16px;
       width: 90%;
       max-width: 500px;
+      max-height: 85vh;
+      overflow-y: auto;
       z-index: 1000;
       box-shadow: var(--box-shadow);
+    }
+
+    .feedback-form {
+      margin-top: 20px;
+    }
+
+    .rating-group {
+      margin-bottom: 15px;
+    }
+
+    .rating-group label {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
+    }
+
+    .star-rating input {
+      display: none;
+    }
+
+    .star-rating label {
+      font-size: 24px;
+      color: var(--text-secondary);
+      margin-right: 5px;
+      cursor: pointer;
+    }
+
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+      color: var(--accent-pink);
+    }
+
+    .checkbox-options label {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .checkbox-options input {
+      margin-right: 8px;
     }
 
     .feedback-overlay {
@@ -1104,31 +1152,6 @@
       font-weight: 600;
       margin-bottom: 16px;
       color: var(--text-primary);
-    }
-
-    .star-rating {
-      display: flex;
-      flex-direction: row-reverse;
-      justify-content: flex-end;
-      gap: 8px;
-      margin: 8px 0 16px;
-    }
-
-    .star-rating input {
-      display: none;
-    }
-
-    .star-rating label {
-      font-size: 24px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      transition: color 0.2s ease;
-    }
-
-    .star-rating label:hover,
-    .star-rating label:hover ~ label,
-    .star-rating input:checked ~ label {
-      color: var(--accent-pink);
     }
 
     .checkbox-group {
@@ -2360,14 +2383,31 @@
 
       // Function to show feedback modal
       function showFeedbackModal() {
-        document.getElementById('feedbackOverlay').style.display = 'block';
-        document.getElementById('feedbackModal').style.display = 'block';
+        const overlay = document.getElementById('feedbackOverlay');
+        const modal = document.getElementById('feedbackModal');
+        
+        // Show overlay and modal
+        overlay.style.display = 'block';
+        modal.style.display = 'block';
+        
+        // Prevent body scrolling
+        document.body.style.overflow = 'hidden';
+        
+        // Make sure modal is scrolled to top
+        modal.scrollTop = 0;
       }
 
       // Function to hide feedback modal
       function hideFeedbackModal() {
-        document.getElementById('feedbackOverlay').style.display = 'none';
-        document.getElementById('feedbackModal').style.display = 'none';
+        const overlay = document.getElementById('feedbackOverlay');
+        const modal = document.getElementById('feedbackModal');
+        
+        // Hide overlay and modal
+        overlay.style.display = 'none';
+        modal.style.display = 'none';
+        
+        // Restore body scrolling
+        document.body.style.overflow = '';
       }
 
       // Check if user has submitted feedback

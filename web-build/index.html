@@ -1259,8 +1259,28 @@
           throw new Error(data.error || 'Failed to generate message');
         }
       } catch (error) {
-        console.error('Error:', error);
-        showAlert(error.message || 'Failed to generate message', 'error');
+        console.error('Error details:', {
+          error: error,
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
+        if (error.response) {
+          console.error('Response error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        }
+        
+        // Check if it's a network error
+        if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+          showAlert('Network error - please check your connection', 'error');
+        } else {
+          showAlert(error.message || 'Failed to generate message', 'error');
+        }
+        
         loadingSpinner.style.display = "none";
       }
     };

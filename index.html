@@ -313,39 +313,79 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      margin-bottom: 30px;
+      gap: 12px;
+    }
+    
+    .section-title {
+      font-size: 20px;
+      font-weight: 600;
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      color: var(--text-primary);
+    }
+    
+    .section-title:after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-color);
+      margin-left: 15px;
     }
     
     .settings-btn {
-      background: none;
-      border: none;
-      color: var(--accent-blue);
-      font-size: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      font-size: 15px;
       cursor: pointer;
       display: flex;
       align-items: center;
+      justify-content: center;
+      padding: 12px;
+      border-radius: 12px;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-fast);
+      flex: 1;
     }
     
     .settings-btn:hover {
-      text-decoration: underline;
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+      background-color: rgba(255, 255, 255, 0.05);
     }
     
     .settings-icon {
-      margin-right: 5px;
+      margin-right: 8px;
+      font-size: 16px;
     }
     
     .new-conversation-btn {
       background: var(--primary-gradient);
       color: white;
       border: none;
-      border-radius: 100px;
-      padding: 16px 32px;
+      border-radius: 12px;
+      padding: 16px;
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
       margin-bottom: 30px;
       text-align: center;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .new-conversation-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .new-conversation-icon {
+      margin-right: 10px;
+      font-size: 18px;
     }
     
     .templates-title {
@@ -1148,21 +1188,31 @@
     }
 
     .feedback-button {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
+      background: var(--card-bg);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
       padding: 12px 24px;
-      border-radius: 8px;
+      border-radius: 12px;
       font-weight: 600;
       cursor: pointer;
       margin-top: 24px;
-      transition: transform var(--transition-smooth);
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), background-color var(--transition-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      font-size: 15px;
     }
 
-    .feedback-button:hover,
-    .feedback-submit:hover,
-    .feedback-cancel:hover {
+    .feedback-button:hover {
       transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+    
+    .feedback-icon {
+      margin-right: 8px;
+      font-size: 16px;
     }
 
     /* Template Card Additional Styles */
@@ -1258,15 +1308,17 @@
       
       <div class="home-actions">
         <button id="history-btn" class="settings-btn">
-          <span class="settings-icon">📝</span> History
+          <span class="settings-icon">📋</span> History
         </button>
         
         <button id="logout-btn" class="settings-btn">
-          <span class="settings-icon">🚪</span> Logout
+          <span class="settings-icon">👤</span> Logout
         </button>
       </div>
       
-      <button id="new-conversation-btn" class="new-conversation-btn">Start a New Conversation</button>
+      <button id="new-conversation-btn" class="new-conversation-btn">
+        <span class="new-conversation-icon">💬</span> Start a New Conversation
+      </button>
       
       <!-- Templates Section -->
       <div id="templates-section" class="templates-section">
@@ -1305,7 +1357,9 @@
             <div class="template-name">Sympathy</div>
           </div>
         </div>
-        <button id="feedbackButton" class="feedback-button">Submit Feedback</button>
+        <button id="feedbackButton" class="feedback-button">
+          <span class="feedback-icon">⭐</span> Submit Feedback
+        </button>
       </div>
     </div>
     

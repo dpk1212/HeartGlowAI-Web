@@ -866,6 +866,55 @@
       transform: scale(0.95) translateY(1px);
       transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
     }
+
+    /* Add Google Sign In button styles */
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      color: #333;
+      border: none;
+      border-radius: 100px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin: 20px 0;
+      width: 100%;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    
+    .google-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .google-btn img {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--text-secondary);
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .auth-divider span {
+      padding: 0 10px;
+      font-size: 14px;
+    }
   </style>
 </head>
 <body>
@@ -886,6 +935,17 @@
       <div class="auth-container">
         <div class="auth-logo"></div>
         <h1 class="auth-title">Log in or sign up</h1>
+        
+        <!-- Add Google Sign In button -->
+        <button id="google-sign-in" class="google-btn">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" alt="Google logo">
+          Continue with Google
+        </button>
+        
+        <div class="auth-divider">
+          <span>or continue with email</span>
+        </div>
+        
         <form id="auth-form" class="auth-form">
           <label class="input-label" for="email">Email</label>
           <input type="email" id="email" class="input-field" placeholder="Enter your email">
@@ -1701,6 +1761,41 @@
           
           showAlert(`Error: ${errorMessage}. Please try again.`, 'error');
         }
+      });
+
+      // Add Google Sign In functionality
+      document.getElementById('google-sign-in').addEventListener('click', function() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        firebase.auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            // Check if it's a new user
+            const isNewUser = result.additionalUserInfo.isNewUser;
+            
+            if (isNewUser) {
+              // Create user document in Firestore
+              return firebase.firestore().collection('users').doc(result.user.uid).set({
+                email: result.user.email,
+                displayName: result.user.displayName,
+                photoURL: result.user.photoURL,
+                createdAt: new Date(),
+                authProvider: 'google'
+              }).then(() => {
+                showAlert('Account created successfully!', 'success');
+                showScreen(homeScreen);
+              });
+            } else {
+              showScreen(homeScreen);
+            }
+          })
+          .catch((error) => {
+            console.error('Google Sign In Error:', error);
+            showAlert(`Error: ${error.message}`, 'error');
+          });
       });
     });
   </script>

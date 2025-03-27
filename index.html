@@ -1137,21 +1137,21 @@
         <div id="result" class="result-card" style="display: none;">
           <div class="message-text" id="messageText"></div>
           <div class="btn-group">
-            <button class="btn" onclick="copyMessage()">Copy Message</button>
-            <button class="btn" onclick="showFeedback()">Tweak Message</button>
-            <button class="preview-button" onclick="showPreview()">✨ Preview Impact</button>
+            <button class="btn" onclick="window.copyMessage()">Copy Message</button>
+            <button class="btn" onclick="window.showFeedback()">Tweak Message</button>
+            <button class="preview-button" onclick="window.showPreview()">✨ Preview Impact</button>
           </div>
           <div class="feedback-section" id="feedbackSection" style="display: none;">
             <h3 style="margin-bottom: 12px;">How would you like to improve this message?</h3>
             <textarea id="feedback" class="input-field" style="margin-bottom: 12px;" 
               placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
-            <button class="btn" onclick="tweakMessage()">Generate New Version</button>
+            <button class="btn" onclick="window.tweakMessage()">Generate New Version</button>
           </div>
-          <div class="preview-section" id="previewSection">
+          <div class="preview-section" id="previewSection" style="display: none;">
             <h3 style="margin-bottom: 12px;">Tell us about the recipient</h3>
             <textarea id="recipientContext" class="input-field" style="margin-bottom: 12px;" 
               placeholder="Describe who they are, their personality, and your relationship with them..."></textarea>
-            <button class="btn" onclick="generatePreview()">Generate Preview</button>
+            <button class="btn" onclick="window.generatePreview()">Generate Preview</button>
             <div id="previewResult" style="margin-top: 16px; color: var(--text-secondary);"></div>
           </div>
         </div>
@@ -1236,12 +1236,18 @@
     };
 
     window.showPreview = function() {
+      console.log('showPreview called');
       const previewSection = document.getElementById('previewSection');
-      previewSection.classList.add('active');
+      if (!previewSection) {
+        console.error('Preview section not found');
+        return;
+      }
+      previewSection.style.display = 'block';
       document.getElementById('recipientContext').focus();
     };
 
     window.generatePreview = async function() {
+      console.log('generatePreview called');
       const recipientContext = document.getElementById('recipientContext').value;
       const message = document.getElementById('messageText').textContent;
       const previewResult = document.getElementById('previewResult');

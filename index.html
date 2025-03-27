@@ -1138,8 +1138,14 @@
           <div class="message-text" id="messageText"></div>
           <div class="btn-group">
             <button class="btn" onclick="copyMessage()">Copy Message</button>
-            <button class="btn" onclick="tweakMessage()">Tweak Message</button>
+            <button class="btn" onclick="showFeedback()">Tweak Message</button>
             <button class="preview-button" onclick="showPreview()">✨ Preview Impact</button>
+          </div>
+          <div class="feedback-section" id="feedbackSection" style="display: none;">
+            <h3 style="margin-bottom: 12px;">How would you like to improve this message?</h3>
+            <textarea id="feedback" class="input-field" style="margin-bottom: 12px;" 
+              placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
+            <button class="btn" onclick="tweakMessage()">Generate New Version</button>
           </div>
           <div class="preview-section" id="previewSection">
             <h3 style="margin-bottom: 12px;">Tell us about the recipient</h3>
@@ -1236,42 +1242,20 @@
         return;
       }
 
-      if (!currentUser) {
-        showAlert("Please sign in to generate messages", 'error');
-        return;
-      }
-
-      const scenario = document.getElementById('scenario').value.trim();
-      const relationship = document.getElementById('relationship').value;
-      const tone = document.getElementById('tone').value;
-      const intensity = document.getElementById('intensity').value;
-      const duration = document.getElementById('duration').value;
-      const circumstances = document.getElementById('circumstances').value.trim();
-      
       const loadingSpinner = document.getElementById('loading');
       const resultCard = document.getElementById('result');
       
       loadingSpinner.style.display = "flex";
-      resultCard.style.display = "none";
       
       try {
-        // Get the current user's ID token
-        const idToken = await currentUser.getIdToken();
-
+        const idToken = await firebase.auth().currentUser.getIdToken();
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
             'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            scenario,
-            relationshipType: relationship,
-            tone,
-            toneIntensity: intensity,
-            relationshipDuration: duration,
-            specialCircumstances: circumstances,
             previousMessage: currentMessage,
             userFeedback: feedback
           })
@@ -1279,41 +1263,22 @@
 
         const data = await response.json();
         
-        if (response.ok) {
-          const messageText = document.getElementById('messageText');
-          const insightsList = document.getElementById('insightsList');
-          const feedbackSection = document.getElementById('feedbackSection');
-          
-          messageText.textContent = data.message;
-          currentMessage = data.message;
-          
-          // Clear and populate insights
-          insightsList.innerHTML = '';
-          if (data.insights && data.insights.length > 0) {
-            data.insights.forEach(insight => {
-              const li = document.createElement('li');
-              li.className = 'insight-item';
-              li.textContent = insight;
-              insightsList.appendChild(li);
-            });
-          }
-          
-          // Reset feedback
-          document.getElementById('feedback').value = '';
-          feedbackSection.style.display = 'none';
-          
-          loadingSpinner.style.display = "none";
-          resultCard.style.display = "block";
-          resultCard.style.opacity = "1";
-          resultCard.style.transform = "translateY(0)";
-          
-          // Save message to history if user is authenticated
-          if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
-          }
-        } else {
+        if (!response.ok) {
           throw new Error(data.error || 'Failed to generate message');
         }
+
+        // Update the message
+        const messageText = document.getElementById('messageText');
+        messageText.textContent = data.message;
+        currentMessage = data.message;
+        
+        // Hide feedback section
+        document.getElementById('feedbackSection').style.display = 'none';
+        document.getElementById('feedback').value = '';
+        
+        loadingSpinner.style.display = "none";
+        resultCard.style.display = "block";
+        
       } catch (error) {
         console.error('Error:', error);
         showAlert(error.message || 'Failed to generate message', 'error');

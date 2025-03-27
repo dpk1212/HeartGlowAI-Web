@@ -1162,7 +1162,7 @@
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+    let welcomeScreen, authScreen, homeScreen, generatorScreen;
 
     // Screen transition function
     function showScreen(screen) {
@@ -1854,84 +1854,61 @@
       });
     });
 
-    // Make showPreview globally accessible
+    // Preview functionality
     window.showPreview = function() {
-      console.log('showPreview called');
-      const previewSection = document.getElementById('previewSection');
-      if (!previewSection) {
-        console.error('Preview section not found');
-        return;
-      }
-      previewSection.style.display = 'block';
-      previewSection.classList.add('active');
-      const recipientContext = document.getElementById('recipientContext');
-      if (recipientContext) {
-        recipientContext.focus();
-      }
+        console.log('showPreview called');
+        const previewSection = document.getElementById('previewSection');
+        previewSection.style.display = 'block';
+        document.getElementById('recipientContext').focus();
     };
 
     window.generatePreview = async function() {
-      console.log('generatePreview called');
-      const recipientContext = document.getElementById('recipientContext');
-      const messageText = document.getElementById('messageText');
-      const previewResult = document.getElementById('previewResult');
-      
-      if (!recipientContext || !messageText || !previewResult) {
-        console.error('Required elements not found');
-        return;
-      }
+        console.log('generatePreview called');
+        if (!currentMessage) {
+            showAlert('No message to preview', 'error');
+            return;
+        }
 
-      const context = recipientContext.value.trim();
-      const message = messageText.textContent;
-      
-      if (!context) {
-        showAlert('Please describe the recipient first', 'error');
-        return;
-      }
+        const recipientContext = document.getElementById('recipientContext').value.trim();
+        if (!recipientContext) {
+            showAlert('Please describe the recipient first', 'error');
+            return;
+        }
 
-      if (!message) {
-        showAlert('No message to preview', 'error');
-        return;
-      }
+        const previewResult = document.getElementById('previewResult');
+        previewResult.innerHTML = '<div class="loading-spinner"></div>';
 
-      previewResult.innerHTML = '<div class="loading-spinner"></div>';
-      
-      try {
-        const idToken = await firebase.auth().currentUser.getIdToken();
-        console.log('Sending preview request:', {
-          message,
-          recipientContext: context
-        });
-        
-        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-          },
-          body: JSON.stringify({
-            scenario: `Generate a preview of how this message will be received: ${message}`,
-            relationshipType: 'Preview',
-            tone: 'analytical',
-            toneIntensity: '3',
-            specialCircumstances: context,
-            isPreview: true
-          })
-        });
+        try {
+            const idToken = await firebase.auth().currentUser.getIdToken();
+            
+            const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${idToken}`
+                },
+                body: JSON.stringify({
+                    scenario: `Analyze how this message would be received by the recipient. Message: "${currentMessage}" Recipient context: "${recipientContext}"`,
+                    relationshipType: 'Preview',
+                    tone: 'analytical',
+                    toneIntensity: '3',
+                    specialCircumstances: recipientContext,
+                    isPreview: true
+                })
+            });
 
-        console.log('Preview response status:', response.status);
-        const data = await response.json();
-        console.log('Preview response data:', data);
+            const data = await response.json();
+            console.log('Preview response:', data);
 
-        if (!response.ok) throw new Error('Failed to generate preview');
-        
-        previewResult.textContent = data.message || 'No preview available';
-        previewResult.style.animation = 'fadeIn 0.3s ease-out';
-      } catch (error) {
-        console.error('Preview error:', error);
-        showAlert(error.message || 'Failed to generate preview. Please try again.', 'error');
-        previewResult.textContent = '';
-      }
+            if (!response.ok) throw new Error('Failed to generate preview');
+            
+            previewResult.textContent = data.message;
+            previewResult.style.animation = 'fadeIn 0.3s ease-out';
+        } catch (error) {
+            console.error('Preview error:', error);
+            showAlert('Failed to generate preview. Please try again.', 'error');
+            previewResult.textContent = '';
+        }
     };
   </script>
 </body>

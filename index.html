@@ -466,65 +466,9 @@
       overflow: hidden;
     }
     
-    .preview-button {
-      background: linear-gradient(135deg, #9C3FE4 0%, #C084FC 100%);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-size: 14px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 16px;
-      transition: all 0.2s ease;
-    }
-    
-    .preview-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(156, 63, 228, 0.2);
-    }
-    
-    .preview-section {
-      display: none;
-      margin-top: 20px;
-      padding: 16px;
-      background: rgba(156, 63, 228, 0.1);
-      border-radius: 8px;
-      border: 1px solid rgba(156, 63, 228, 0.2);
-    }
-    
-    .preview-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      color: #9C3FE4;
-      font-weight: 600;
-    }
-    
-    .preview-input {
-      width: 100%;
-      min-height: 80px;
-      background-color: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 8px;
-      padding: 12px;
-      font-size: 14px;
-      color: white;
-      margin-bottom: 12px;
-      resize: none;
-    }
-    
-    .preview-result {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      padding: 16px;
-      font-size: 14px;
-      line-height: 1.6;
-      margin-top: 16px;
-      display: none;
+    .result-card[style*="display: block"] {
+      opacity: 1;
+      transform: translateY(0);
     }
     
     .message-text {
@@ -959,6 +903,63 @@
       padding: 0 10px;
       font-size: 14px;
     }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .btn-group .btn {
+      flex: 1;
+      margin: 0;
+      font-size: 14px;
+      padding: 12px 20px;
+    }
+
+    .preview-button {
+      background: linear-gradient(135deg, #9460fb 0%, #64d2ff 100%);
+      color: white;
+      border: none;
+      border-radius: 100px;
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+      box-shadow: var(--box-shadow);
+      flex: 1;
+      margin: 0;
+    }
+
+    .preview-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+
+    .preview-button:active {
+      transform: scale(0.95) translateY(1px);
+    }
+
+    .preview-section {
+      display: none;
+      margin-top: 20px;
+      background: rgba(148, 96, 251, 0.1);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid rgba(148, 96, 251, 0.2);
+    }
+
+    .preview-section.active {
+      display: block;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -1135,38 +1136,17 @@
         
         <div id="result" class="result-card" style="display: none;">
           <div class="message-text" id="messageText"></div>
-          <div class="button-group">
-            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
-            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
-            <button class="preview-button" onclick="showPreview()">
-              <span>🌟</span>
-              Preview Impact
-            </button>
+          <div class="btn-group">
+            <button class="btn" onclick="copyMessage()">Copy Message</button>
+            <button class="btn" onclick="tweakMessage()">Tweak Message</button>
+            <button class="preview-button" onclick="showPreview()">✨ Preview Impact</button>
           </div>
-          
           <div class="preview-section" id="previewSection">
-            <div class="preview-header">
-              <span>✨</span>
-              Tell us about the recipient
-            </div>
-            <textarea
-              id="recipientContext"
-              class="preview-input"
-              placeholder="Help us understand who will receive this message. For example: Their personality, current situation, your history together, or anything that might affect how they'd receive this message..."
-            ></textarea>
-            <button class="preview-button" onclick="generatePreview()">Show Preview</button>
-            <div class="preview-result" id="previewResult"></div>
-          </div>
-
-          <div class="feedback-section" id="feedbackSection">
-            <label for="feedback">How would you like to improve this message?</label>
-            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
-            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
-          </div>
-          
-          <div class="insights-section">
-            <div class="insights-title">Why this message works:</div>
-            <ul class="insights-list" id="insightsList"></ul>
+            <h3 style="margin-bottom: 12px;">Tell us about the recipient</h3>
+            <textarea id="recipientContext" class="input-field" style="margin-bottom: 12px;" 
+              placeholder="Describe who they are, their personality, and your relationship with them..."></textarea>
+            <button class="btn" onclick="generatePreview()">Generate Preview</button>
+            <div id="previewResult" style="margin-top: 16px; color: var(--text-secondary);"></div>
           </div>
         </div>
       </div>
@@ -1881,64 +1861,51 @@
             showAlert(`Error: ${error.message}`, 'error');
           });
       });
-
-      // Add these functions to your JavaScript
-      window.showPreview = function() {
-        const previewSection = document.getElementById('previewSection');
-        previewSection.style.display = 'block';
-        document.getElementById('recipientContext').focus();
-      };
-
-      window.generatePreview = async function() {
-        const recipientContext = document.getElementById('recipientContext').value.trim();
-        if (!recipientContext) {
-          showAlert("Please tell us about the recipient", 'error');
-          return;
-        }
-
-        const loadingSpinner = document.getElementById('loading');
-        loadingSpinner.style.display = "flex";
-
-        try {
-          // Get the current user's ID token
-          const idToken = await currentUser.getIdToken();
-          
-          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify({
-              scenario: document.getElementById('scenario').value.trim(),
-              relationshipType: document.getElementById('relationship').value,
-              tone: document.getElementById('tone').value,
-              toneIntensity: document.getElementById('intensity').value,
-              relationshipDuration: document.getElementById('duration').value,
-              specialCircumstances: document.getElementById('circumstances').value.trim(),
-              recipientContext: recipientContext
-            })
-          });
-
-          const data = await response.json();
-          
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to generate preview');
-          }
-
-          const previewResult = document.getElementById('previewResult');
-          previewResult.textContent = data.preview;
-          previewResult.style.display = 'block';
-
-        } catch (error) {
-          console.error('Error:', error);
-          showAlert(error.message || 'Failed to generate preview', 'error');
-        } finally {
-          loadingSpinner.style.display = "none";
-        }
-      };
     });
+
+    function showPreview() {
+      const previewSection = document.getElementById('previewSection');
+      previewSection.classList.add('active');
+      document.getElementById('recipientContext').focus();
+    }
+
+    async function generatePreview() {
+      const recipientContext = document.getElementById('recipientContext').value;
+      const message = document.getElementById('messageText').textContent;
+      const previewResult = document.getElementById('previewResult');
+      
+      if (!recipientContext) {
+        showAlert('Please describe the recipient first', 'error');
+        return;
+      }
+
+      previewResult.innerHTML = '<div class="loading-spinner"></div>';
+      
+      try {
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${await firebase.auth().currentUser.getIdToken()}`
+          },
+          body: JSON.stringify({
+            message,
+            recipientContext,
+            isPreview: true
+          })
+        });
+
+        if (!response.ok) throw new Error('Failed to generate preview');
+        
+        const data = await response.json();
+        previewResult.textContent = data.preview;
+        previewResult.style.animation = 'fadeIn 0.3s ease-out';
+      } catch (error) {
+        console.error('Preview error:', error);
+        showAlert('Failed to generate preview. Please try again.', 'error');
+        previewResult.textContent = '';
+      }
+    }
   </script>
 </body>
 </html> 

@@ -193,6 +193,83 @@ For issues or questions:
 
 [Your License Information]
 
+## 🔄 Version Control & Restoration
+
+### Stable Versions
+- `v1.0.0-stable`: Initial stable release with working message generation
+  - Full documentation
+  - Working message generation
+  - Proper CORS configuration
+  - Rate limiting implemented
+  - Firebase integration complete
+
+### Restoring Previous Versions
+
+If you need to restore the stable version, you have several options:
+
+1. **Using the Tag** (Recommended):
+```bash
+# View all tags
+git tag -l
+
+# Restore to stable version
+git checkout v1.0.0-stable
+```
+
+2. **Using Commit Hash**:
+```bash
+# View commit history
+git log --oneline
+
+# Restore to specific commit
+git checkout 6109b79
+```
+
+3. **Complete Reset**:
+```bash
+# Hard reset to stable version
+git reset --hard v1.0.0-stable
+
+# Force push if needed (use with caution)
+git push -f origin main
+```
+
+### Branch Management
+```bash
+# Create new feature branch
+git checkout -b feature/your-feature-name
+
+# Switch back to main branch
+git checkout main
+
+# Update main branch
+git pull origin main
+```
+
+### Emergency Restoration
+If something goes wrong and you need to quickly restore the stable version:
+
+1. Save any uncommitted changes:
+```bash
+git stash
+```
+
+2. Reset to stable version:
+```bash
+git checkout v1.0.0-stable
+```
+
+3. Create new branch from stable (optional):
+```bash
+git checkout -b recovery/$(date +%Y%m%d)
+```
+
+⚠️ **Important Notes**:
+- Always create a backup branch before major changes
+- Use `git stash` to save uncommitted changes
+- Test after restoration to ensure everything works
+- Check Firebase deployment status after restoration
+
 ---
 
 Made with ❤️ by HeartGlowAI Team 

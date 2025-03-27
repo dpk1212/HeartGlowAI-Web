@@ -53,17 +53,42 @@ jobs:
           
       - name: Copy HTML template to web-build
         run: |
-          cp -f index.html web-build/ || echo "No index.html found in root directory"
+          # Copy from the tmp directory if it exists, otherwise try the root directory
+          if [ -f "tmp/index.html" ]; then
+            cp -f tmp/index.html web-build/
+            echo "Copied index.html from tmp directory"
+          else
+            cp -f index.html web-build/ || echo "No index.html found in root directory"
+          fi
 
       - name: Update API key in HTML file
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           if [ -n "$OPENAI_API_KEY" ]; then
-            # Use a more reliable sed pattern to avoid escaping issues
-            sed -i "s|__OPENAI_API_KEY__|$OPENAI_API_KEY|g" web-build/index.html
-            echo "OpenAI API key has been set in the HTML file"
-            grep -q "$OPENAI_API_KEY" web-build/index.html && echo "Key successfully injected" || echo "WARNING: Key may not have been injected properly"
+            # Debugging
+            echo "Attempting to inject API key into HTML file"
+            echo "File before replacement:"
+            grep "openai-api-key" web-build/index.html || echo "Meta tag not found"
+            
+            # Use a more reliable method to replace the placeholder
+            # First, escape any special characters in the API key
+            ESCAPED_KEY=$(printf '%s\n' "$OPENAI_API_KEY" | sed -e 's/[\/&]/\\&/g')
+            
+            # Replace the placeholder using the escaped key
+            sed -i "s/__OPENAI_API_KEY__/$ESCAPED_KEY/g" web-build/index.html
+            
+            # Verify replacement
+            echo "File after replacement:"
+            grep "openai-api-key" web-build/index.html || echo "Meta tag not found"
+            
+            # Check if the key was injected (without printing the full key)
+            if grep -q "content=\"sk-" web-build/index.html; then
+              echo "✓ API key successfully injected into the HTML file"
+            else
+              echo "✗ WARNING: API key may not have been injected properly"
+              echo "Placeholder still present: $(grep -o "__OPENAI_API_KEY__" web-build/index.html || echo "No")"
+            fi
           else
             echo "WARNING: No OpenAI API key found in secrets. The application will use mock responses only."
             echo "Please add your OpenAI API key to the repository secrets as OPENAI_API_KEY."

@@ -1,146 +1,103 @@
 import React from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  Image, 
-  TouchableOpacity, 
-  SafeAreaView, 
-  ScrollView 
-} from 'react-native';
-import FeaturesSection from '../components/FeaturesSection';
-import { COLORS, APP_INFO } from '../config/constants';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
-const WelcomeScreen = ({ onStartConversation, onPressAuth }) => {
+export default function WelcomeScreen({ navigation }) {
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Image
-            source={require('../../assets/heart-logo.png')}
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          <Text style={styles.title}>{APP_INFO.name}</Text>
-        </View>
-
-        <View style={styles.messageContainer}>
-          <Text style={styles.messageTitle}>
-            Say what you feel, the way they'll hear it.
-          </Text>
-          
-          <FeaturesSection />
-
-          <View style={styles.phonePreview}>
-            <Image
-              source={require('../../assets/heart-logo.png')}
-              style={styles.previewLogo}
-              resizeMode="contain"
-            />
-            <View style={styles.progressBar}>
-              <View style={styles.progress} />
-            </View>
-          </View>
-        </View>
-
-        <TouchableOpacity 
-          style={styles.startButton}
-          onPress={onStartConversation}
+    <View style={styles.container}>
+      <View style={styles.heroContainer}>
+        <LinearGradient
+          colors={['#ff6b9d', '#64d2ff']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroGradient}
         >
-          <Text style={styles.startButtonText}>Start a New Conversation</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.authButton}
-          onPress={onPressAuth}
+          <View style={styles.heroIcon} />
+        </LinearGradient>
+      </View>
+      
+      <Text style={styles.title}>Say what you feel, the way they'll hear it.</Text>
+      <Text style={styles.subtitle}>AI-powered heartfelt message generator for all your relationships</Text>
+      
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => navigation.navigate('Auth')}
+      >
+        <LinearGradient
+          colors={['#ff6b9d', '#64d2ff']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.buttonGradient}
         >
-          <Text style={styles.authButtonText}>Log in or sign up</Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={styles.buttonText}>Log in or Register to Begin</Text>
+        </LinearGradient>
+      </TouchableOpacity>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  scrollContent: {
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#050A14',
+  },
+  heroContainer: {
+    width: 120,
+    height: 120,
     marginBottom: 40,
   },
-  logo: {
-    width: 40,
-    height: 40,
-    marginRight: 10,
+  heroGradient: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 60,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroIcon: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#050A14',
+    borderRadius: 30,
   },
   title: {
-    fontSize: 20,
+    fontSize: 32,
     fontWeight: 'bold',
-    color: COLORS.text,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 16,
+    lineHeight: 40,
   },
-  messageContainer: {
+  subtitle: {
+    fontSize: 18,
+    color: '#B7BAC1',
+    textAlign: 'center',
     marginBottom: 40,
+    lineHeight: 24,
   },
-  messageTitle: {
-    fontSize: 36,
-    fontWeight: 'bold',
-    color: COLORS.text,
-    marginBottom: 30,
-  },
-  phonePreview: {
+  loginButton: {
     width: '100%',
-    height: 200,
-    backgroundColor: COLORS.cardBackground,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 20,
+    maxWidth: 300,
+    height: 56,
+    borderRadius: 28,
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
   },
-  previewLogo: {
-    width: 100,
-    height: 100,
-    marginBottom: 20,
-  },
-  progressBar: {
-    width: '50%',
-    height: 4,
-    backgroundColor: '#2C2C2E',
-    borderRadius: 2,
-  },
-  progress: {
-    width: '70%',
+  buttonGradient: {
+    width: '100%',
     height: '100%',
-    backgroundColor: COLORS.primary,
-    borderRadius: 2,
-  },
-  startButton: {
-    backgroundColor: COLORS.primary,
-    padding: 16,
-    borderRadius: 10,
     alignItems: 'center',
-    marginBottom: 15,
+    justifyContent: 'center',
   },
-  startButtonText: {
-    color: COLORS.text,
-    fontSize: 16,
-    fontWeight: 'bold',
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '600',
   },
-  authButton: {
-    padding: 16,
-    borderRadius: 10,
-    alignItems: 'center',
-  },
-  authButtonText: {
-    color: COLORS.primary,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
-
-export default WelcomeScreen; 
+}); 

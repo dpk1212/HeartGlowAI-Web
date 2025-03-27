@@ -4,12 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HeartGlowAI</title>
+  <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
   <style>
     :root {
       --primary-gradient: linear-gradient(135deg, #ff6b9d 0%, #64d2ff 100%);
@@ -20,6 +22,12 @@
       --accent-pink: #ff6b9d;
       --accent-blue: #64d2ff;
       --accent-purple: #9460fb;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(255, 255, 255, 0.05);
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --box-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
     
     * {
@@ -51,10 +59,22 @@
       flex-direction: column;
       height: 100%;
       padding: 20px;
+      opacity: 0;
+      transform: scale(0.98) translateY(10px);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
     }
     
     .screen.active {
       display: flex;
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      pointer-events: all;
     }
     
     .header {
@@ -77,6 +97,7 @@
       background: var(--primary-gradient);
       mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
       -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
+      animation: glow 4s ease-in-out infinite alternate;
     }
     
     .logo-text {
@@ -100,6 +121,7 @@
       height: 300px;
       background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 100 100'%3E%3Cpath d='M50 85l-1.45-1.32C31.4 69.36 20 58.28 20 45c0-10 8-18 18-18 5.5 0 11 3 12 8 1-5 6.5-8 12-8 10 0 18 8 18 18 0 13.28-11.4 24.36-28.55 38.68L50 85z' fill='none' stroke='url(%23grad)' stroke-width='3'/%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23ff6b9d;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%2364d2ff;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3C/svg%3E") center/contain no-repeat;
       margin-bottom: 40px;
+      animation: float 6s ease-in-out infinite alternate;
     }
     
     .welcome-title {
@@ -125,17 +147,41 @@
       font-size: 16px;
       font-weight: 600;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
       width: 100%;
       max-width: 280px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(150, 50, 250, 0.3);
+      box-shadow: var(--box-shadow);
       margin: 8px 0;
+      position: relative;
+      overflow: hidden;
     }
     
     .btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(150, 50, 250, 0.4);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .btn:active {
+      transform: translateY(0);
+    }
+    
+    .btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    .btn:active::after {
+      animation: ripple 0.5s ease-out;
     }
     
     .btn-outline {
@@ -179,7 +225,7 @@
       font-weight: 500;
     }
     
-    .input-field {
+    .input-field, select, textarea {
       width: 100%;
       background-color: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
@@ -188,10 +234,19 @@
       font-size: 16px;
       color: white;
       margin-bottom: 20px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+      backdrop-filter: blur(8px);
     }
     
-    .input-field::placeholder {
+    .input-field::placeholder, select option, textarea::placeholder {
       color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .input-field:focus, select:focus, textarea:focus {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.2);
+      outline: none;
+      animation: focusPulse 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
     }
     
     .auth-links {
@@ -224,6 +279,31 @@
     .home-subtitle {
       font-size: 16px;
       color: var(--text-secondary);
+    }
+    
+    .home-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--accent-blue);
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+    }
+    
+    .settings-btn:hover {
+      text-decoration: underline;
+    }
+    
+    .settings-icon {
+      margin-right: 5px;
     }
     
     .new-conversation-btn {
@@ -259,12 +339,33 @@
       padding: 20px;
       text-align: center;
       cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      backdrop-filter: blur(8px);
+      position: relative;
+      overflow: hidden;
     }
     
     .template-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .template-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(255, 107, 157, 0.1) 0%, 
+        rgba(100, 210, 255, 0.1) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    
+    .template-card:hover::before {
+      opacity: 1;
     }
     
     .template-icon {
@@ -275,6 +376,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: transform var(--transition-fast);
     }
     
     .template-icon.apology {
@@ -296,6 +398,10 @@
     .template-name {
       font-size: 15px;
       font-weight: 500;
+    }
+    
+    .template-card:hover .template-icon {
+      transform: scale(1.1);
     }
     
     /* Message Generator Screen */
@@ -347,52 +453,455 @@
     }
     
     .result-card {
-      background-color: var(--card-bg);
-      border-radius: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      position: relative;
+      overflow: hidden;
     }
     
-    .result-message {
+    .result-card[style*="display: block"] {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .message-text {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 20px;
       white-space: pre-wrap;
-      line-height: 1.5;
-      margin-bottom: 16px;
+      color: var(--text-primary);
     }
     
-    .copy-btn {
-      background-color: rgba(255, 255, 255, 0.1);
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+      width: 100%;
+    }
+    
+    .copy-button, .tweak-button {
+      all: unset; /* Reset all styles first */
+      background: var(--primary-gradient);
       color: white;
-      border: none;
-      border-radius: 100px;
-      padding: 8px 16px;
-      font-size: 14px;
+      padding: 12px 20px;
+      border-radius: 8px;
       cursor: pointer;
-      display: inline-flex;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      flex: 1;
+      display: flex;
       align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+      width: 100%;
+      height: 44px;
+      position: relative;
+      overflow: hidden;
     }
     
-    .copy-icon {
-      margin-right: 8px;
+    .copy-button:hover, .tweak-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .copy-button:active, .tweak-button:active {
+      transform: scale(0.95) translateY(1px);
+      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .copy-button::after, .tweak-button::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.5);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    
+    .copy-button:active::after, .tweak-button:active::after {
+      animation: ripple 0.5s ease-out;
+    }
+    
+    .feedback-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: none;
+      max-height: 0;
+      opacity: 0;
+      overflow: hidden;
+      transition: max-height var(--transition-smooth), opacity var(--transition-smooth);
+    }
+    
+    .feedback-section[style*="display: block"] {
+      max-height: 500px;
+      opacity: 1;
+    }
+    
+    .feedback-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      margin: 10px 0;
+      font-family: inherit;
+      resize: vertical;
+    }
+    
+    .feedback-section label {
+      display: block;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    
+    .feedback-section .tweak-button {
+      width: 100%;
+      margin-top: 10px;
+    }
+    
+    .insights-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .insights-title {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .insights-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .insight-item {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .insight-item:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
     }
     
     .loading-spinner {
       display: flex;
       justify-content: center;
       margin: 40px 0;
+      position: relative;
     }
     
     .spinner {
       width: 40px;
       height: 40px;
-      border: 4px solid rgba(255, 255, 255, 0.1);
-      border-top: 4px solid var(--accent-blue);
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid var(--accent-blue);
+      border-right: 3px solid var(--accent-pink);
+      animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
     }
     
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    
+    /* Message Generation Form */
+    .form-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      animation: slideUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    label {
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    select, textarea {
+      background-color: var(--card-bg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: var(--text-primary);
+      padding: 12px;
+      font-size: 16px;
+      font-family: inherit;
+    }
+    
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+    
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    
+    #circumstances {
+      min-height: 80px;
+    }
+
+    .slider-container {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--primary-gradient);
+      outline: none;
+      transition: background var(--transition-fast);
+    }
+
+    .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      border: none;
+    }
+
+    .slider-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 12px;
+      padding: 0 2px;
+    }
+
+    .slider::-webkit-slider-thumb:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 10px rgba(100, 210, 255, 0.4);
+    }
+
+    /* Animated background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(100, 210, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--bg-dark) 0%, var(--bg-dark) 100%);
+      z-index: -1;
+      animation: gradientMove 20s ease-in-out infinite alternate;
+    }
+
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 0%;
+      }
+      100% {
+        background-position: 100% 100%;
+      }
+    }
+
+    /* Floating animation for the welcome hero */
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    /* Glowing effect for the logo */
+    @keyframes glow {
+      0% {
+        filter: drop-shadow(0 0 2px rgba(255, 107, 157, 0.5));
+      }
+      100% {
+        filter: drop-shadow(0 0 10px rgba(100, 210, 255, 0.5));
+      }
+    }
+
+    /* Generator screen animations */
+    @keyframes slideUp {
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Input field focus animation */
+    @keyframes focusPulse {
+      0% {
+        box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.2);
+      }
+      50% {
+        box-shadow: 0 0 0 4px rgba(100, 210, 255, 0.1);
+      }
+      100% {
+        box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.2);
+      }
+    }
+
+    /* Enhanced loading animation */
+    .loading-spinner::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60px;
+      height: 60px;
+      margin: -30px 0 0 -30px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      opacity: 0.1;
+      animation: pulseLoader 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
+
+    @keyframes pulseLoader {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.1;
+      }
+      50% {
+        transform: scale(1.2);
+        opacity: 0.2;
+      }
+      100% {
+        transform: scale(0.8);
+        opacity: 0.1;
+      }
+    }
+
+    /* Result card appearance animation */
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg,
+        rgba(255, 107, 157, 0.05) 0%,
+        rgba(100, 210, 255, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .result-card[style*="display: block"]::before {
+      opacity: 1;
+    }
+
+    /* Button press effect enhancement */
+    .btn:active, .copy-button:active, .tweak-button:active {
+      transform: scale(0.95) translateY(1px);
+      transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Add Google Sign In button styles */
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      color: #333;
+      border: none;
+      border-radius: 100px;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      margin: 20px 0;
+      width: 100%;
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    
+    .google-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .google-btn img {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+
+    .auth-divider {
+      display: flex;
+      align-items: center;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--text-secondary);
+    }
+
+    .auth-divider::before,
+    .auth-divider::after {
+      content: '';
+      flex: 1;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .auth-divider span {
+      padding: 0 10px;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -414,6 +923,17 @@
       <div class="auth-container">
         <div class="auth-logo"></div>
         <h1 class="auth-title">Log in or sign up</h1>
+        
+        <!-- Add Google Sign In button -->
+        <button id="google-sign-in" class="google-btn">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" alt="Google logo">
+          Continue with Google
+        </button>
+        
+        <div class="auth-divider">
+          <span>or continue with email</span>
+        </div>
+        
         <form id="auth-form" class="auth-form">
           <label class="input-label" for="email">Email</label>
           <input type="email" id="email" class="input-field" placeholder="Enter your email">
@@ -447,6 +967,16 @@
         <p class="home-subtitle">What would you like to say today?</p>
       </div>
       
+      <div class="home-actions">
+        <button id="history-btn" class="settings-btn">
+          <span class="settings-icon">📝</span> History
+        </button>
+        
+        <button id="logout-btn" class="settings-btn">
+          <span class="settings-icon">🚪</span> Logout
+        </button>
+      </div>
+      
       <button id="new-conversation-btn" class="new-conversation-btn">Start a New Conversation</button>
       
       <h2 class="templates-title">Templates</h2>
@@ -477,35 +1007,316 @@
       </button>
       
       <div class="generator-container">
-        <label class="input-label" for="scenario">Communication Scenario</label>
-        <textarea id="scenario" class="scenario-textarea" placeholder="Describe your situation (e.g., 'I need to apologize to my partner for forgetting our anniversary')"></textarea>
-        
-        <label class="input-label" for="relationship">Relationship Type</label>
-        <select id="relationship" class="relationship-select">
-          <option value="romantic">Romantic Partner</option>
-          <option value="friend">Friend</option>
-          <option value="family">Family Member</option>
-          <option value="professional">Professional Contact</option>
-        </select>
-        
-        <button id="generate-btn" class="btn">Generate Message</button>
+        <div class="form-container">
+          <div class="input-group">
+            <label for="scenario">What would you like to say?</label>
+            <textarea id="scenario" placeholder="Example: I want to express my gratitude for their support during a difficult time"></textarea>
+          </div>
+          
+          <div class="input-group">
+            <label for="relationship">Relationship Type</label>
+            <select id="relationship">
+              <option value="Friend">Friend</option>
+              <option value="Romantic Partner">Romantic Partner</option>
+              <option value="Family Member">Family Member</option>
+              <option value="Professional">Professional</option>
+              <option value="Mentor">Mentor</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="tone">Message Tone</label>
+            <select id="tone">
+              <option value="casual">Casual</option>
+              <option value="formal">Formal</option>
+              <option value="humorous">Humorous</option>
+              <option value="serious">Serious</option>
+              <option value="poetic">Poetic</option>
+              <option value="professional">Professional</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="intensity">Tone Intensity</label>
+            <div class="slider-container">
+              <input type="range" id="intensity" min="1" max="5" value="3" class="slider">
+              <div class="slider-labels">
+                <span>Subtle</span>
+                <span>Balanced</span>
+                <span>Strong</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="duration">Relationship Duration</label>
+            <select id="duration">
+              <option value="unspecified">Not specified</option>
+              <option value="new">New/Recent</option>
+              <option value="few months">Few months</option>
+              <option value="1-5 years">1-5 years</option>
+              <option value="5+ years">5+ years</option>
+              <option value="lifelong">Lifelong</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="circumstances">Special Circumstances (Optional)</label>
+            <textarea id="circumstances" placeholder="Example: We recently had an argument, or They're going through a tough time"></textarea>
+          </div>
+          
+          <button id="generateBtn" class="primary-button">
+            <span class="button-content">
+              Generate Message
+              <span class="button-icon">✨</span>
+            </span>
+          </button>
+        </div>
         
         <div id="loading" class="loading-spinner" style="display: none;">
           <div class="spinner"></div>
         </div>
         
         <div id="result" class="result-card" style="display: none;">
-          <p id="result-message" class="result-message"></p>
-          <button id="copy-btn" class="copy-btn">
-            <span class="copy-icon">📋</span> Copy to Clipboard
-          </button>
+          <div class="message-text" id="messageText"></div>
+          <div class="button-group">
+            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
+            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
+          </div>
+          <div class="feedback-section" id="feedbackSection">
+            <label for="feedback">How would you like to improve this message?</label>
+            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
+            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
+          </div>
+          <div class="insights-section">
+            <div class="insights-title">Why this message works:</div>
+            <ul class="insights-list" id="insightsList"></ul>
+          </div>
         </div>
       </div>
     </div>
   </div>
   
   <script>
+    // Global variables and functions
+    let currentMessage = '';
+    let currentUser = null;
+    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+
+    // Screen transition function
+    function showScreen(screen) {
+      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen];
+      screens.forEach(s => {
+        if (s === screen) {
+          s.style.display = 'flex';
+          setTimeout(() => s.classList.add('active'), 50);
+        } else {
+          s.classList.remove('active');
+          setTimeout(() => {
+            if (!s.classList.contains('active')) {
+              s.style.display = 'none';
+            }
+          }, 500);
+        }
+      });
+    }
+
+    // Initialize app function
+    function initializeApp() {
+      // Initialize screen elements
+      welcomeScreen = document.getElementById('welcome-screen');
+      authScreen = document.getElementById('auth-screen');
+      homeScreen = document.getElementById('home-screen');
+      generatorScreen = document.getElementById('generator-screen');
+
+      // Add favicon
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
+      favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
+      document.head.appendChild(favicon);
+
+      // Show welcome screen by default
+      showScreen(welcomeScreen);
+    }
+
+    // Save message to history function
+    async function saveMessage(scenario, relationshipType, message) {
+      if (!currentUser) return false;
+      
+      try {
+        const timestamp = new Date();
+        
+        await firebase.firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('messages')
+          .add({
+            scenario,
+            relationshipType,
+            message,
+            timestamp
+          });
+        
+        console.log('Message saved to history');
+        return true;
+      } catch (error) {
+        console.error('Error saving message:', error);
+        return false;
+      }
+    }
+
+    // Global functions for feedback and copy functionality
+    window.showFeedback = function() {
+      const feedbackSection = document.getElementById('feedbackSection');
+      feedbackSection.style.display = 'block';
+      document.getElementById('feedback').focus();
+    };
+
+    window.tweakMessage = async function() {
+      const feedback = document.getElementById('feedback').value.trim();
+      if (!feedback) {
+        showAlert("Please provide feedback for the message", 'error');
+        return;
+      }
+
+      if (!currentUser) {
+        showAlert("Please sign in to generate messages", 'error');
+        return;
+      }
+
+      const scenario = document.getElementById('scenario').value.trim();
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value.trim();
+      
+      const loadingSpinner = document.getElementById('loading');
+      const resultCard = document.getElementById('result');
+      
+      loadingSpinner.style.display = "flex";
+      resultCard.style.display = "none";
+      
+      try {
+        // Get the current user's ID token
+        const idToken = await currentUser.getIdToken();
+
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            scenario,
+            relationshipType: relationship,
+            tone,
+            toneIntensity: intensity,
+            relationshipDuration: duration,
+            specialCircumstances: circumstances,
+            previousMessage: currentMessage,
+            userFeedback: feedback
+          })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          const messageText = document.getElementById('messageText');
+          const insightsList = document.getElementById('insightsList');
+          const feedbackSection = document.getElementById('feedbackSection');
+          
+          messageText.textContent = data.message;
+          currentMessage = data.message;
+          
+          // Clear and populate insights
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
+          // Reset feedback
+          document.getElementById('feedback').value = '';
+          feedbackSection.style.display = 'none';
+          
+          loadingSpinner.style.display = "none";
+          resultCard.style.display = "block";
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
+          
+          // Save message to history if user is authenticated
+          if (currentUser) {
+            await saveMessage(scenario, relationship, data.message);
+          }
+        } else {
+          throw new Error(data.error || 'Failed to generate message');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(error.message || 'Failed to generate message', 'error');
+        loadingSpinner.style.display = "none";
+      }
+    };
+
+    window.copyMessage = function() {
+      const messageText = document.getElementById('messageText').textContent;
+      navigator.clipboard.writeText(messageText).then(() => {
+        showAlert('Message copied to clipboard!', 'success');
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        showAlert('Failed to copy message', 'error');
+      });
+    };
+
+    // Global function for showing alerts
+    function showAlert(message, type = 'error') {
+      const alertEl = document.createElement('div');
+      alertEl.style.position = 'fixed';
+      alertEl.style.top = '20px';
+      alertEl.style.left = '50%';
+      alertEl.style.transform = 'translateX(-50%)';
+      alertEl.style.padding = '12px 24px';
+      alertEl.style.borderRadius = '8px';
+      alertEl.style.color = 'white';
+      alertEl.style.zIndex = '1000';
+      alertEl.style.maxWidth = '90%';
+      alertEl.style.textAlign = 'center';
+      alertEl.style.animation = 'slideIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+      alertEl.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+      alertEl.style.backdropFilter = 'blur(8px)';
+      
+      if (type === 'error') {
+        alertEl.style.backgroundColor = 'rgba(255, 87, 87, 0.9)';
+      } else if (type === 'success') {
+        alertEl.style.backgroundColor = 'rgba(88, 214, 141, 0.9)';
+      } else {
+        alertEl.style.backgroundColor = 'rgba(52, 152, 219, 0.9)';
+      }
+      
+      alertEl.textContent = message;
+      document.body.appendChild(alertEl);
+      
+      setTimeout(() => {
+        alertEl.style.transform = 'translateX(-50%) translateY(-20px)';
+        alertEl.style.opacity = '0';
+        alertEl.style.transition = 'all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+        setTimeout(() => {
+          document.body.removeChild(alertEl);
+        }, 300);
+      }, 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the app first
+      initializeApp();
+
       // Firebase configuration
       const firebaseConfig = {
         apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
@@ -520,12 +1331,16 @@
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
       
-      // Get elements
-      const welcomeScreen = document.getElementById('welcome-screen');
-      const authScreen = document.getElementById('auth-screen');
-      const homeScreen = document.getElementById('home-screen');
-      const generatorScreen = document.getElementById('generator-screen');
+      // Initialize Firebase Analytics
+      const analytics = firebase.analytics();
       
+      // Track page view
+      analytics.logEvent('page_view', {
+        page_title: document.title,
+        page_location: window.location.href
+      });
+      
+      // Get elements
       const getStartedBtn = document.getElementById('get-started-btn');
       const loginRegisterBtn = document.getElementById('login-register-btn');
       
@@ -533,59 +1348,58 @@
       const authSubmitBtn = document.getElementById('auth-submit-btn');
       const authToggleText = document.getElementById('auth-toggle-text');
       const authToggleLink = document.getElementById('auth-toggle-link');
+      const forgotPasswordLink = document.getElementById('forgot-password-link');
       
       const newConversationBtn = document.getElementById('new-conversation-btn');
       const templateCards = document.querySelectorAll('.template-card');
+      const settingsBtn = document.getElementById('history-btn');
+      const logoutBtn = document.getElementById('logout-btn');
       
       const backToHomeBtn = document.getElementById('back-to-home-btn');
       const scenarioInput = document.getElementById('scenario');
       const relationshipSelect = document.getElementById('relationship');
-      const generateBtn = document.getElementById('generate-btn');
+      const generateBtn = document.getElementById('generateBtn');
       const loadingSpinner = document.getElementById('loading');
       const resultCard = document.getElementById('result');
-      const resultMessage = document.getElementById('result-message');
-      const copyBtn = document.getElementById('copy-btn');
+      const resultMessage = document.getElementById('messageText');
+      
+      // Storage keys
+      const STORAGE_KEYS = {
+        USER_SETTINGS: 'user_settings',
+        MESSAGE_HISTORY: 'message_history'
+      };
+      
+      // Constants
+      const RELATIONSHIP_TYPES = [
+        "Romantic Partner",
+        "Friend",
+        "Family Member",
+        "Professional Contact"
+      ];
       
       // Auth state
       let isLogin = true;
-      let currentUser = null;
+      let openaiApiKey = null;
       
       // Check auth state
-      firebase.auth().onAuthStateChanged(function(user) {
+      firebase.auth().onAuthStateChanged(async function(user) {
         currentUser = user;
         if (user) {
           // User is signed in
+          try {
+            const doc = await firebase.firestore().collection('config').doc('openai').get();
+            if (doc.exists) {
+              openaiApiKey = doc.data().apiKey;
+              console.log('OpenAI API key retrieved successfully');
+            } else {
+              console.error('OpenAI API key document not found');
+            }
+          } catch (error) {
+            console.error('Error fetching OpenAI API key:', error);
+          }
           showScreen(homeScreen);
         }
       });
-      
-      // Template presets
-      const templates = {
-        apology: {
-          scenario: "I need to apologize to someone for missing an important event",
-          relationship: "friend"
-        },
-        romantic: {
-          scenario: "I want to express my love and appreciation to my partner",
-          relationship: "romantic"
-        },
-        tough: {
-          scenario: "I need to have a difficult conversation about boundaries",
-          relationship: "friend"
-        },
-        checkin: {
-          scenario: "I want to check in with someone I haven't spoken to in a while",
-          relationship: "family"
-        }
-      };
-      
-      // Show specific screen
-      function showScreen(screen) {
-        [welcomeScreen, authScreen, homeScreen, generatorScreen].forEach(s => {
-          s.classList.remove('active');
-        });
-        screen.classList.add('active');
-      }
       
       // Event Listeners
       getStartedBtn.addEventListener('click', function() {
@@ -614,10 +1428,29 @@
         }
       });
       
+      forgotPasswordLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        const email = prompt("Please enter your email address to reset your password:");
+        if (email) {
+          firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+              showAlert('Password reset email sent!', 'success');
+            })
+            .catch((error) => {
+              showAlert(`Error: ${error.message}`, 'error');
+            });
+        }
+      });
+      
       authForm.addEventListener('submit', function(e) {
         e.preventDefault();
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
+        
+        if (!email || !password) {
+          showAlert('Please enter both email and password', 'error');
+          return;
+        }
         
         if (isLogin) {
           // Login
@@ -626,38 +1459,78 @@
               showScreen(homeScreen);
             })
             .catch((error) => {
-              alert(`Login error: ${error.message}`);
+              showAlert(`Login error: ${error.message}`, 'error');
             });
         } else {
           // Register
           firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
+              // Create user document in Firestore
+              firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+                email: email,
+                createdAt: new Date()
+              });
+              
               showScreen(homeScreen);
+              showAlert('Account created successfully!', 'success');
             })
             .catch((error) => {
-              alert(`Registration error: ${error.message}`);
+              showAlert(`Registration error: ${error.message}`, 'error');
             });
         }
       });
       
       newConversationBtn.addEventListener('click', function() {
         scenarioInput.value = "";
-        relationshipSelect.value = "romantic";
+        relationshipSelect.value = "Romantic Partner";
         resultCard.style.display = "none";
         showScreen(generatorScreen);
       });
       
-      templateCards.forEach(card => {
-        card.addEventListener('click', function() {
-          const templateType = this.getAttribute('data-template');
-          if (templates[templateType]) {
-            scenarioInput.value = templates[templateType].scenario;
-            relationshipSelect.value = templates[templateType].relationship;
-            resultCard.style.display = "none";
-            showScreen(generatorScreen);
-          }
+      // Template presets
+      const templates = {
+        apology: {
+          scenario: "I need to apologize to someone for missing an important event",
+          relationship: "Friend",
+          tone: "serious",
+          intensity: "4"
+        },
+        romantic: {
+          scenario: "I want to express my love and appreciation to my partner",
+          relationship: "Romantic Partner",
+          tone: "poetic",
+          intensity: "5"
+        },
+        tough: {
+          scenario: "I need to have a difficult conversation about boundaries",
+          relationship: "Friend",
+          tone: "formal",
+          intensity: "3"
+        },
+        checkin: {
+          scenario: "I want to check in with someone I haven't spoken to in a while",
+          relationship: "Family Member",
+          tone: "casual",
+          intensity: "2"
+        }
+      };
+
+      if (templateCards) {
+        templateCards.forEach(card => {
+          card.addEventListener('click', function() {
+            const templateType = this.getAttribute('data-template');
+            if (templates[templateType]) {
+              const template = templates[templateType];
+              document.getElementById('scenario').value = template.scenario;
+              document.getElementById('relationship').value = template.relationship;
+              document.getElementById('tone').value = template.tone;
+              document.getElementById('intensity').value = template.intensity;
+              document.getElementById('result').style.display = "none";
+              showScreen(document.getElementById('generator-screen'));
+            }
+          });
         });
-      });
+      }
       
       backToHomeBtn.addEventListener('click', function() {
         if (currentUser) {
@@ -667,45 +1540,269 @@
         }
       });
       
-      generateBtn.addEventListener('click', function() {
-        const scenario = scenarioInput.value.trim();
-        const relationship = relationshipSelect.value;
+      settingsBtn.addEventListener('click', async function() {
+        if (!currentUser) {
+          showAlert('Please log in to view message history', 'error');
+          return;
+        }
+        
+        try {
+          const messagesRef = firebase.firestore()
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('messages')
+            .orderBy('timestamp', 'desc')
+            .limit(10);
+            
+          const snapshot = await messagesRef.get();
+          
+          if (snapshot.empty) {
+            showAlert('No messages in history yet', 'info');
+            return;
+          }
+          
+          // Create and show history modal
+          const modal = document.createElement('div');
+          modal.style.position = 'fixed';
+          modal.style.top = '50%';
+          modal.style.left = '50%';
+          modal.style.transform = 'translate(-50%, -50%)';
+          modal.style.backgroundColor = 'var(--card-bg)';
+          modal.style.padding = '20px';
+          modal.style.borderRadius = '16px';
+          modal.style.maxWidth = '90%';
+          modal.style.width = '400px';
+          modal.style.maxHeight = '80vh';
+          modal.style.overflowY = 'auto';
+          modal.style.zIndex = '1000';
+          
+          // Add close button
+          const closeBtn = document.createElement('button');
+          closeBtn.textContent = '×';
+          closeBtn.style.position = 'absolute';
+          closeBtn.style.right = '10px';
+          closeBtn.style.top = '10px';
+          closeBtn.style.background = 'none';
+          closeBtn.style.border = 'none';
+          closeBtn.style.color = 'white';
+          closeBtn.style.fontSize = '24px';
+          closeBtn.style.cursor = 'pointer';
+          closeBtn.onclick = () => modal.remove();
+          modal.appendChild(closeBtn);
+          
+          // Add title
+          const title = document.createElement('h2');
+          title.textContent = 'Message History';
+          title.style.marginBottom = '20px';
+          title.style.fontSize = '20px';
+          title.style.fontWeight = '600';
+          modal.appendChild(title);
+          
+          // Add messages
+          snapshot.forEach(doc => {
+            const data = doc.data();
+            const messageDiv = document.createElement('div');
+            messageDiv.style.marginBottom = '20px';
+            messageDiv.style.padding = '15px';
+            messageDiv.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+            messageDiv.style.borderRadius = '8px';
+            
+            const header = document.createElement('div');
+            header.style.marginBottom = '10px';
+            header.style.fontSize = '14px';
+            header.style.color = 'var(--text-secondary)';
+            header.textContent = `${data.relationshipType} - ${new Date(data.timestamp.toDate()).toLocaleDateString()}`;
+            messageDiv.appendChild(header);
+            
+            const scenario = document.createElement('div');
+            scenario.style.marginBottom = '10px';
+            scenario.style.fontSize = '14px';
+            scenario.style.fontStyle = 'italic';
+            scenario.textContent = data.scenario;
+            messageDiv.appendChild(scenario);
+            
+            const message = document.createElement('div');
+            message.style.fontSize = '15px';
+            message.style.lineHeight = '1.5';
+            message.textContent = data.message;
+            messageDiv.appendChild(message);
+            
+            modal.appendChild(messageDiv);
+          });
+          
+          // Add overlay
+          const overlay = document.createElement('div');
+          overlay.style.position = 'fixed';
+          overlay.style.top = '0';
+          overlay.style.left = '0';
+          overlay.style.width = '100%';
+          overlay.style.height = '100%';
+          overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          overlay.style.zIndex = '999';
+          overlay.onclick = () => {
+            modal.remove();
+            overlay.remove();
+          };
+          
+          document.body.appendChild(overlay);
+          document.body.appendChild(modal);
+          
+        } catch (error) {
+          console.error('Error fetching message history:', error);
+          showAlert('Error loading message history', 'error');
+        }
+      });
+      
+      logoutBtn.addEventListener('click', function() {
+        if (confirm("Are you sure you want to log out?")) {
+          firebase.auth().signOut()
+            .then(() => {
+              showScreen(welcomeScreen);
+              showAlert('Logged out successfully', 'success');
+            })
+            .catch((error) => {
+              showAlert(`Error logging out: ${error.message}`, 'error');
+            });
+        }
+      });
+      
+      // Update the generateMessage function to store the current message
+      generateBtn.addEventListener('click', async function() {
+        // Track message generation attempt
+        analytics.logEvent('generate_message', {
+          relationship_type: relationshipSelect.value
+        });
+        
+        const scenario = document.getElementById('scenario').value.trim();
+        const relationship = document.getElementById('relationship').value;
+        const tone = document.getElementById('tone').value;
+        const intensity = document.getElementById('intensity').value;
+        const duration = document.getElementById('duration').value;
+        const circumstances = document.getElementById('circumstances').value.trim();
         
         if (!scenario) {
-          alert("Please enter a communication scenario");
+          showAlert("Please enter a communication scenario", 'error');
+          return;
+        }
+        
+        if (!currentUser) {
+          showAlert("Please sign in to generate messages", 'error');
           return;
         }
         
         loadingSpinner.style.display = "flex";
         resultCard.style.display = "none";
         
-        // In a real implementation, this would call your OpenAI integration
-        // For now, we'll simulate with sample messages
-        setTimeout(() => {
-          const messages = {
-            romantic: `My dear,\n\nI wanted to take a moment to express how deeply I cherish having you in my life. Every day with you fills my heart with joy and gratitude.\n\nYour kindness, strength, and the way you understand me better than anyone else continues to amaze me. You've made my life richer in ways I never thought possible.\n\nThank you for being my partner, my confidant, and my best friend. I love you more than words can express.\n\nWith all my heart,`,
-            friend: `Hey there,\n\nI just wanted to reach out and let you know how much your friendship means to me. You've been there through thick and thin, and I truly appreciate your support and understanding.\n\nOur conversations and laughs together are some of the brightest parts of my days. Thank you for being the amazing person you are.\n\nLooking forward to making more memories together soon!\n\nYours truly,`,
-            family: `Dear family,\n\nI've been reflecting lately on how fortunate I am to have you in my life. The love, support, and understanding you've always given me has shaped who I am today.\n\nFamily is our foundation, and I want you to know how deeply grateful I am for the bond we share. Even when we're apart, I carry your love with me.\n\nThank you for everything. I love you dearly.\n\nWith love and appreciation,`,
-            professional: `Hello,\n\nI wanted to express my appreciation for our professional relationship. Your expertise, reliability, and commitment to excellence have made working together a truly positive experience.\n\nI value the insights and perspectives you bring to the table, and I look forward to our continued collaboration on future projects.\n\nThank you for your contributions and professionalism.\n\nBest regards,`
-          };
+        try {
+          // Get the current user's ID token
+          const idToken = await currentUser.getIdToken();
           
+          console.log('Sending request to Cloud Function:', {
+            scenario,
+            relationshipType: relationship,
+            tone,
+            toneIntensity: intensity,
+            relationshipDuration: duration,
+            specialCircumstances: circumstances
+          });
+          
+          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+              scenario,
+              relationshipType: relationship,
+              tone,
+              toneIntensity: intensity,
+              relationshipDuration: duration,
+              specialCircumstances: circumstances
+            })
+          });
+          
+          console.log('Response status:', response.status);
+          const data = await response.json();
+          console.log('Response data:', data);
+          
+          if (!response.ok) {
+            throw new Error(data.error || 'Failed to generate message');
+          }
+          
+          if (!data.message) {
+            throw new Error('No message received from server');
+          }
+          
+          // Store current message for feedback
+          currentMessage = data.message;
+          
+          // Display the message
+          const messageText = document.getElementById('messageText');
+          messageText.textContent = data.message;
+          
+          // Clear and populate insights
+          const insightsList = document.getElementById('insightsList');
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
+          // Hide loading spinner and show result card
           loadingSpinner.style.display = "none";
           resultCard.style.display = "block";
-          resultMessage.textContent = messages[relationship];
-        }, 2000);
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
+          
+          // Save to history if logged in
+          if (currentUser) {
+            await saveMessage(scenario, relationship, data.message);
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showAlert(error.message || 'Failed to generate message', 'error');
+          loadingSpinner.style.display = "none";
+        }
       });
-      
-      copyBtn.addEventListener('click', function() {
-        navigator.clipboard.writeText(resultMessage.textContent)
-          .then(() => {
-            const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<span class="copy-icon">✓</span> Copied!';
-            setTimeout(() => {
-              copyBtn.innerHTML = originalText;
-            }, 2000);
+
+      // Add Google Sign In functionality
+      document.getElementById('google-sign-in').addEventListener('click', function() {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        firebase.auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            // Check if it's a new user
+            const isNewUser = result.additionalUserInfo.isNewUser;
+            
+            if (isNewUser) {
+              // Create user document in Firestore
+              return firebase.firestore().collection('users').doc(result.user.uid).set({
+                email: result.user.email,
+                displayName: result.user.displayName,
+                photoURL: result.user.photoURL,
+                createdAt: new Date(),
+                authProvider: 'google'
+              }).then(() => {
+                showAlert('Account created successfully!', 'success');
+                showScreen(homeScreen);
+              });
+            } else {
+              showScreen(homeScreen);
+            }
           })
-          .catch(err => {
-            console.error('Could not copy text: ', err);
+          .catch((error) => {
+            console.error('Google Sign In Error:', error);
+            showAlert(`Error: ${error.message}`, 'error');
           });
       });
     });

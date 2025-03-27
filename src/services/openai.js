@@ -71,6 +71,8 @@ async function getApiKey() {
 // Generate a message using OpenAI
 export async function generateMessage(scenario, relationshipType) {
   try {
+    console.log('Starting message generation with:', { scenario, relationshipType });
+    
     const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
       method: 'POST',
       headers: {
@@ -79,26 +81,37 @@ export async function generateMessage(scenario, relationshipType) {
       body: JSON.stringify({ scenario, relationshipType })
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Failed to generate message');
-    }
+    console.log('Response received:', {
+      status: response.status,
+      ok: response.ok
+    });
 
     const data = await response.json();
-    
+    console.log('Response data:', data);
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to generate message');
+    }
+
     if (!data.message) {
       throw new Error('No message received from server');
     }
 
     return data.message;
   } catch (error) {
-    console.error('Error generating message:', error);
+    console.error('Error details:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
     
-    // Enhance error message based on the type of error
+    // Enhanced error handling
     if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
       throw new Error('Network error - please check your internet connection and try again');
     } else if (error.message.includes('API key')) {
       throw new Error('OpenAI API key error - please contact support');
+    } else if (error instanceof TypeError) {
+      throw new Error('Invalid request format - please try again');
     }
     
     throw error;

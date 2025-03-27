@@ -1798,18 +1798,6 @@
           const messageText = document.getElementById('messageText');
           messageText.textContent = data.message;
           
-          // Clear and populate insights
-          const insightsList = document.getElementById('insightsList');
-          insightsList.innerHTML = '';
-          if (data.insights && data.insights.length > 0) {
-            data.insights.forEach(insight => {
-              const li = document.createElement('li');
-              li.className = 'insight-item';
-              li.textContent = insight;
-              insightsList.appendChild(li);
-            });
-          }
-          
           // Hide loading spinner and show result card
           loadingSpinner.style.display = "none";
           resultCard.style.display = "block";

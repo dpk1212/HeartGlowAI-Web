@@ -1406,96 +1406,13 @@
     </div>
   </div>
   
-  <!-- Add Feedback Modal -->
-  <div id="feedbackOverlay" class="feedback-overlay"></div>
-  <div id="feedbackModal" class="feedback-modal">
-    <h2 class="feedback-title">Help Us Improve HeartGlowAI</h2>
-    <p class="feedback-subtitle">Your feedback helps us create better experiences</p>
-    
-    <form id="feedbackForm" class="feedback-form">
-      <!-- User Information -->
-      <div class="feedback-section">
-        <h3 class="feedback-section-title">About You (Optional)</h3>
-        <input type="email" id="feedbackEmail" class="feedback-input" placeholder="Your email" />
-        <select id="feedbackUserType" class="feedback-input">
-          <option value="">How often do you use HeartGlowAI?</option>
-          <option value="first_time">First time user</option>
-          <option value="occasional">Occasional user</option>
-          <option value="regular">Regular user</option>
-          <option value="frequent">Frequent user</option>
-        </select>
-      </div>
-
-      <!-- Usage Experience -->
-      <div class="feedback-section">
-        <h3 class="feedback-section-title">Your Experience</h3>
-        <div class="rating-group">
-          <label>How satisfied are you with the message quality?</label>
-          <div class="star-rating">
-            <input type="radio" name="messageQuality" value="5" id="quality5"><label for="quality5">★</label>
-            <input type="radio" name="messageQuality" value="4" id="quality4"><label for="quality4">★</label>
-            <input type="radio" name="messageQuality" value="3" id="quality3"><label for="quality3">★</label>
-            <input type="radio" name="messageQuality" value="2" id="quality2"><label for="quality2">★</label>
-            <input type="radio" name="messageQuality" value="1" id="quality1"><label for="quality1">★</label>
-          </div>
-        </div>
-
-        <div class="rating-group">
-          <label>How easy was it to use HeartGlowAI?</label>
-          <div class="star-rating">
-            <input type="radio" name="easeOfUse" value="5" id="ease5"><label for="ease5">★</label>
-            <input type="radio" name="easeOfUse" value="4" id="ease4"><label for="ease4">★</label>
-            <input type="radio" name="easeOfUse" value="3" id="ease3"><label for="ease3">★</label>
-            <input type="radio" name="easeOfUse" value="2" id="ease2"><label for="ease2">★</label>
-            <input type="radio" name="easeOfUse" value="1" id="ease1"><label for="ease1">★</label>
-          </div>
-        </div>
-
-        <div class="checkbox-group">
-          <label>What features did you use? (Select all that apply)</label>
-          <div class="checkbox-options">
-            <label><input type="checkbox" name="features" value="templates"> Message Templates</label>
-            <label><input type="checkbox" name="features" value="custom"> Custom Messages</label>
-            <label><input type="checkbox" name="features" value="tone"> Tone Adjustment</label>
-            <label><input type="checkbox" name="features" value="relationship"> Relationship Types</label>
-            <label><input type="checkbox" name="features" value="history"> Message History</label>
-          </div>
-        </div>
-      </div>
-
-      <!-- Detailed Feedback -->
-      <div class="feedback-section">
-        <h3 class="feedback-section-title">Your Thoughts</h3>
-        <textarea id="feedbackStrengths" class="feedback-input feedback-textarea" placeholder="What did you like most about HeartGlowAI?"></textarea>
-        <textarea id="feedbackImprovements" class="feedback-input feedback-textarea" placeholder="What could we improve?"></textarea>
-        <textarea id="feedbackFeatures" class="feedback-input feedback-textarea" placeholder="What additional features would you like to see?"></textarea>
-      </div>
-
-      <!-- Net Promoter Score -->
-      <div class="feedback-section">
-        <h3 class="feedback-section-title">Final Thoughts</h3>
-        <label>How likely are you to recommend HeartGlowAI to others?</label>
-        <div class="nps-scale">
-          <input type="range" id="npsScore" min="0" max="10" value="8" class="nps-slider">
-          <div class="nps-labels">
-            <span>Not likely</span>
-            <span>Very likely</span>
-          </div>
-        </div>
-      </div>
-    </form>
-
-    <div class="feedback-button-container">
-      <button id="feedbackCancel" class="feedback-cancel">Maybe Later</button>
-      <button id="feedbackSubmit" class="feedback-submit">Submit Feedback</button>
-    </div>
-  </div>
-
   <script>
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
     let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+    let messageCount = 0;
+    let hasSubmittedFeedback = false;
 
     // Screen transition function
     function showScreen(screen) {
@@ -2353,49 +2270,7 @@
           });
       });
 
-      // Feedback functionality
-      let messageCount = 0;
-      let hasSubmittedFeedback = false;
-
-      // Function to show feedback modal
-      function showFeedbackModal() {
-        // Get elements
-        const overlay = document.getElementById('feedbackOverlay');
-        const modal = document.getElementById('feedbackModal');
-        
-        // Log for debugging
-        console.log('Opening feedback modal');
-        console.log('Overlay element:', overlay);
-        console.log('Modal element:', modal);
-        
-        // Force block display 
-        overlay.style.display = 'block';
-        modal.style.display = 'block';
-        
-        // Prevent body scrolling
-        document.body.style.overflow = 'hidden';
-        
-        // Reset scroll position
-        modal.scrollTop = 0;
-      }
-
-      // Function to hide feedback modal
-      function hideFeedbackModal() {
-        const overlay = document.getElementById('feedbackOverlay');
-        const modal = document.getElementById('feedbackModal');
-        
-        // Log for debugging
-        console.log('Closing feedback modal');
-        
-        // Hide elements
-        overlay.style.display = 'none';
-        modal.style.display = 'none';
-        
-        // Restore body scrolling
-        document.body.style.overflow = '';
-      }
-
-      // Check if user has submitted feedback
+      // Check for and redirect to feedback.html after a certain number of messages
       async function checkFeedbackStatus() {
         if (currentUser) {
           try {
@@ -2423,7 +2298,8 @@
             });
 
             if (messageCount >= 3) {
-              showFeedbackModal();
+              // Instead of showing the modal, suggest visiting the feedback page
+              showAlert('We value your feedback! Please click the "Submit Feedback" button when you have a moment.', 'info');
             }
           } catch (error) {
             console.error('Error updating message count:', error);
@@ -2432,7 +2308,9 @@
       }
 
       // Event Listeners for Feedback
-      document.getElementById('feedbackButton').addEventListener('click', showFeedbackModal);
+      document.getElementById('feedbackButton').addEventListener('click', function() {
+        window.location.href = 'feedback.html';
+      });
       document.getElementById('feedbackCancel').addEventListener('click', hideFeedbackModal);
       document.getElementById('feedbackSubmit').addEventListener('click', handleFeedbackSubmit);
       document.getElementById('feedbackOverlay').addEventListener('click', hideFeedbackModal);

@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Feedback - HeartGlowAI</title>
+  <meta name="description" content="Submit your feedback to help us improve HeartGlowAI">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #ff6b9d 0%, #64d2ff 100%);
+      --bg-dark: #050A14;
+      --card-bg: #101426;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B7BAC1;
+      --accent-pink: #ff6b9d;
+      --accent-blue: #64d2ff;
+      --accent-purple: #9460fb;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --input-bg: rgba(255, 255, 255, 0.05);
+      --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --box-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html, body {
+      width: 100%;
+      height: 100%;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overscroll-behavior: none;
+    }
+    
+    .main-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      padding-top: 10px;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .logo-heart {
+      width: 36px;
+      height: 36px;
+      margin-right: 10px;
+      background: var(--primary-gradient);
+      mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
+      -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
+      animation: glow 4s ease-in-out infinite alternate;
+    }
+    
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .back-link {
+      display: flex;
+      align-items: center;
+      color: var(--accent-blue);
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 500;
+      transition: transform var(--transition-fast);
+    }
+    
+    .back-link:hover {
+      transform: translateX(-4px);
+    }
+    
+    .back-icon {
+      margin-right: 8px;
+    }
+    
+    /* Form Styles */
+    .feedback-container {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+    
+    .feedback-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-align: center;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .feedback-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      text-align: center;
+    }
+    
+    .feedback-section {
+      margin-bottom: 32px;
+      padding-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .feedback-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    
+    .feedback-section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+    }
+    
+    .input-group {
+      margin-bottom: 16px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+    }
+    
+    .input-field {
+      width: 100%;
+      background-color: var(--input-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 12px 16px;
+      color: var(--text-primary);
+      font-size: 16px;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    
+    .input-field:focus {
+      border-color: var(--accent-blue);
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.2);
+    }
+    
+    select.input-field {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 40px;
+    }
+    
+    textarea.input-field {
+      min-height: 120px;
+      resize: vertical;
+    }
+    
+    /* Star Rating */
+    .star-rating {
+      display: flex;
+      flex-direction: row-reverse;
+      justify-content: flex-end;
+      margin-bottom: 16px;
+    }
+    
+    .star-rating input {
+      display: none;
+    }
+    
+    .star-rating label {
+      font-size: 30px;
+      color: var(--text-secondary);
+      margin-right: 8px;
+      cursor: pointer;
+      transition: color var(--transition-fast);
+    }
+    
+    .star-rating label:hover,
+    .star-rating label:hover ~ label,
+    .star-rating input:checked ~ label {
+      color: var(--accent-pink);
+    }
+    
+    /* Checkbox Group */
+    .checkbox-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 8px;
+    }
+    
+    .checkbox-options label {
+      display: flex;
+      align-items: center;
+      color: var(--text-primary);
+      font-size: 15px;
+      cursor: pointer;
+    }
+    
+    .checkbox-options input[type="checkbox"] {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent-pink);
+    }
+    
+    /* NPS Slider */
+    .nps-scale {
+      margin: 16px 0;
+    }
+    
+    .nps-slider {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--primary-gradient);
+      outline: none;
+      margin: 16px 0 8px;
+    }
+    
+    .nps-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+    }
+    
+    .nps-slider::-webkit-slider-thumb:hover {
+      transform: scale(1.2);
+      box-shadow: 0 0 10px rgba(255, 107, 157, 0.6);
+    }
+    
+    .nps-labels {
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+    
+    /* Submit Button */
+    .submit-button {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      margin-top: 16px;
+    }
+    
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    
+    .submit-button:active {
+      transform: scale(0.98);
+    }
+    
+    /* Animations */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes glow {
+      0% {
+        filter: drop-shadow(0 0 2px rgba(255, 107, 157, 0.5));
+      }
+      100% {
+        filter: drop-shadow(0 0 10px rgba(100, 210, 255, 0.5));
+      }
+    }
+    
+    /* Background Style */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 20%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(100, 210, 255, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, var(--bg-dark) 0%, var(--bg-dark) 100%);
+      z-index: -1;
+      animation: gradientMove 20s ease-in-out infinite alternate;
+    }
+    
+    @keyframes gradientMove {
+      0% {
+        background-position: 0% 0%;
+      }
+      100% {
+        background-position: 100% 100%;
+      }
+    }
+
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      .main-container {
+        padding: 20px 15px;
+      }
+      
+      .feedback-container {
+        padding: 24px 18px;
+      }
+      
+      .feedback-title {
+        font-size: 24px;
+      }
+    }
+
+    /* Loading and success states */
+    .loading-spinner {
+      display: none;
+      justify-content: center;
+      margin: 30px 0;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
+      border-top: 3px solid var(--accent-blue);
+      border-right: 3px solid var(--accent-pink);
+      border-radius: 50%;
+      animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .success-message {
+      display: none;
+      text-align: center;
+      animation: fadeIn 0.5s ease-out forwards;
+      margin-top: 30px;
+    }
+
+    .success-icon {
+      font-size: 60px;
+      color: var(--accent-blue);
+      margin-bottom: 20px;
+    }
+
+    .success-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .success-text {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .return-home {
+      display: inline-block;
+      background: var(--primary-gradient);
+      color: white;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .return-home:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo-heart"></div>
+        <span class="logo-text">HeartGlowAI</span>
+      </div>
+      <a href="index.html" class="back-link"><span class="back-icon">←</span> Back to Home</a>
+    </header>
+    
+    <div id="feedbackForm" class="feedback-container">
+      <h1 class="feedback-title">Help Us Improve HeartGlowAI</h1>
+      <p class="feedback-subtitle">Your feedback helps us create better experiences</p>
+      
+      <form id="userFeedbackForm">
+        <!-- User Information -->
+        <div class="feedback-section">
+          <h3 class="feedback-section-title">About You (Optional)</h3>
+          <div class="input-group">
+            <label for="feedbackEmail">Your email</label>
+            <input type="email" id="feedbackEmail" class="input-field" placeholder="example@email.com" />
+          </div>
+          <div class="input-group">
+            <label for="feedbackUserType">How often do you use HeartGlowAI?</label>
+            <select id="feedbackUserType" class="input-field">
+              <option value="" disabled selected>Select an option</option>
+              <option value="first_time">First time user</option>
+              <option value="occasional">Occasional user</option>
+              <option value="regular">Regular user</option>
+              <option value="frequent">Frequent user</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Usage Experience -->
+        <div class="feedback-section">
+          <h3 class="feedback-section-title">Your Experience</h3>
+          <div class="input-group">
+            <label>How satisfied are you with the message quality?</label>
+            <div class="star-rating">
+              <input type="radio" name="messageQuality" value="5" id="quality5"><label for="quality5">★</label>
+              <input type="radio" name="messageQuality" value="4" id="quality4"><label for="quality4">★</label>
+              <input type="radio" name="messageQuality" value="3" id="quality3"><label for="quality3">★</label>
+              <input type="radio" name="messageQuality" value="2" id="quality2"><label for="quality2">★</label>
+              <input type="radio" name="messageQuality" value="1" id="quality1"><label for="quality1">★</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>How easy was it to use HeartGlowAI?</label>
+            <div class="star-rating">
+              <input type="radio" name="easeOfUse" value="5" id="ease5"><label for="ease5">★</label>
+              <input type="radio" name="easeOfUse" value="4" id="ease4"><label for="ease4">★</label>
+              <input type="radio" name="easeOfUse" value="3" id="ease3"><label for="ease3">★</label>
+              <input type="radio" name="easeOfUse" value="2" id="ease2"><label for="ease2">★</label>
+              <input type="radio" name="easeOfUse" value="1" id="ease1"><label for="ease1">★</label>
+            </div>
+          </div>
+
+          <div class="input-group">
+            <label>What features did you use? (Select all that apply)</label>
+            <div class="checkbox-options">
+              <label><input type="checkbox" name="features" value="templates"> Message Templates</label>
+              <label><input type="checkbox" name="features" value="custom"> Custom Messages</label>
+              <label><input type="checkbox" name="features" value="tone"> Tone Adjustment</label>
+              <label><input type="checkbox" name="features" value="relationship"> Relationship Types</label>
+              <label><input type="checkbox" name="features" value="history"> Message History</label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed Feedback -->
+        <div class="feedback-section">
+          <h3 class="feedback-section-title">Your Thoughts</h3>
+          <div class="input-group">
+            <label for="feedbackStrengths">What did you like most about HeartGlowAI?</label>
+            <textarea id="feedbackStrengths" class="input-field" placeholder="Tell us what you enjoyed about the app"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="feedbackImprovements">What could we improve?</label>
+            <textarea id="feedbackImprovements" class="input-field" placeholder="Any areas where we can do better?"></textarea>
+          </div>
+          <div class="input-group">
+            <label for="feedbackFeatures">What additional features would you like to see?</label>
+            <textarea id="feedbackFeatures" class="input-field" placeholder="Any features you wish we had?"></textarea>
+          </div>
+        </div>
+
+        <!-- Net Promoter Score -->
+        <div class="feedback-section">
+          <h3 class="feedback-section-title">Final Thoughts</h3>
+          <div class="input-group">
+            <label for="npsScore">How likely are you to recommend HeartGlowAI to others?</label>
+            <div class="nps-scale">
+              <input type="range" id="npsScore" min="0" max="10" value="8" class="nps-slider">
+              <div class="nps-labels">
+                <span>Not likely</span>
+                <span>Very likely</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-button">Submit Feedback</button>
+      </form>
+    </div>
+    
+    <div id="loadingSpinner" class="loading-spinner">
+      <div class="spinner"></div>
+    </div>
+    
+    <div id="successMessage" class="success-message">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">Thank You for Your Feedback!</h2>
+      <p class="success-text">Your input helps us make HeartGlowAI better for everyone.</p>
+      <a href="index.html" class="return-home">Return to Home</a>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Firebase
+    document.addEventListener('DOMContentLoaded', function() {
+      const firebaseConfig = {
+        apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+        authDomain: "heartglowai.firebaseapp.com",
+        projectId: "heartglowai",
+        storageBucket: "heartglowai.firebasestorage.app",
+        messagingSenderId: "196565711798",
+        appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+        measurementId: "G-KJMPL1DNPY"
+      };
+      
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig);
+      
+      // Initialize Firebase Analytics
+      const analytics = firebase.analytics();
+      
+      // Get current user
+      let currentUser = null;
+      
+      // Check auth state
+      firebase.auth().onAuthStateChanged((user) => {
+        currentUser = user;
+        if (user) {
+          // Pre-fill email if the user is signed in
+          document.getElementById('feedbackEmail').value = user.email || '';
+        }
+      });
+      
+      // Form submission
+      const feedbackForm = document.getElementById('userFeedbackForm');
+      const loadingSpinner = document.getElementById('loadingSpinner');
+      const successMessage = document.getElementById('successMessage');
+      const feedbackContainer = document.getElementById('feedbackForm');
+      
+      feedbackForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Get form data
+        const formData = {
+          email: document.getElementById('feedbackEmail').value,
+          userType: document.getElementById('feedbackUserType').value,
+          messageQuality: document.querySelector('input[name="messageQuality"]:checked')?.value,
+          easeOfUse: document.querySelector('input[name="easeOfUse"]:checked')?.value,
+          features: Array.from(document.querySelectorAll('input[name="features"]:checked')).map(cb => cb.value),
+          strengths: document.getElementById('feedbackStrengths').value.trim(),
+          improvements: document.getElementById('feedbackImprovements').value.trim(),
+          featureRequests: document.getElementById('feedbackFeatures').value.trim(),
+          npsScore: document.getElementById('npsScore').value,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Basic validation
+        if (!formData.messageQuality || !formData.easeOfUse) {
+          alert('Please rate the message quality and ease of use.');
+          return;
+        }
+        
+        // Show loading spinner
+        feedbackContainer.style.display = 'none';
+        loadingSpinner.style.display = 'flex';
+        
+        try {
+          // Submit to Formspree
+          const response = await fetch('https://formspree.io/f/xwplnpbl', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+          });
+          
+          if (response.ok) {
+            // Update Firestore if user is logged in
+            if (currentUser) {
+              try {
+                await firebase.firestore().collection('users').doc(currentUser.uid).update({
+                  hasFeedbackSubmitted: true,
+                  lastFeedbackSubmittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  feedbackData: formData
+                });
+                
+                console.log('User feedback status updated in Firestore');
+              } catch (error) {
+                console.error('Error updating user feedback status:', error);
+              }
+            }
+            
+            // Log analytics event
+            analytics.logEvent('feedback_submitted', {
+              user_type: formData.userType,
+              message_quality: formData.messageQuality,
+              nps_score: formData.npsScore
+            });
+            
+            // Show success message
+            loadingSpinner.style.display = 'none';
+            successMessage.style.display = 'block';
+            
+            // Auto-redirect after 3 seconds
+            setTimeout(() => {
+              window.location.href = 'index.html';
+            }, 3000);
+          } else {
+            throw new Error('Failed to submit feedback');
+          }
+        } catch (error) {
+          console.error('Feedback submission error:', error);
+          alert('There was an error submitting your feedback. Please try again.');
+          
+          // Hide loading, show form again
+          loadingSpinner.style.display = 'none';
+          feedbackContainer.style.display = 'block';
+        }
+      });
+      
+      // Real-time NPS score display
+      const npsSlider = document.getElementById('npsScore');
+      npsSlider.addEventListener('input', function() {
+        // Could add visual feedback based on the score
+        const score = parseInt(this.value);
+        if (score >= 9) {
+          this.style.boxShadow = '0 0 8px rgba(255, 107, 157, 0.8)';
+        } else if (score >= 7) {
+          this.style.boxShadow = '0 0 8px rgba(255, 193, 7, 0.8)';
+        } else {
+          this.style.boxShadow = '0 0 8px rgba(100, 210, 255, 0.8)';
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

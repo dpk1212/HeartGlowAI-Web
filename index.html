@@ -395,24 +395,26 @@
       display: flex;
       gap: 10px;
       margin: 15px 0;
-      justify-content: space-between;
+      width: 100%;
     }
     
     .copy-button, .tweak-button {
+      all: unset; /* Reset all styles first */
       background: var(--primary-gradient);
       color: white;
-      border: none;
       padding: 12px 20px;
       border-radius: 8px;
       cursor: pointer;
       font-size: 14px;
       font-weight: 600;
-      transition: opacity 0.2s;
-      width: calc(50% - 5px); /* Each button takes up half the space minus half the gap */
+      text-align: center;
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      white-space: nowrap;
+      box-sizing: border-box;
+      width: 100%;
+      height: 44px;
     }
     
     .copy-button:hover, .tweak-button:hover {
@@ -483,22 +485,6 @@
       position: absolute;
       left: 0;
       color: var(--primary-color);
-    }
-    
-    .copy-button {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 0.9em;
-      transition: opacity 0.2s;
-      margin-top: 12px;
-    }
-    
-    .copy-button:hover {
-      opacity: 0.9;
     }
     
     .loading-spinner {
@@ -1010,7 +996,6 @@
       const loadingSpinner = document.getElementById('loading');
       const resultCard = document.getElementById('result');
       const resultMessage = document.getElementById('messageText');
-      const copyBtn = document.getElementById('copy-btn');
       
       // Storage keys
       const STORAGE_KEYS = {
@@ -1417,21 +1402,6 @@
           
           showAlert(`Error: ${errorMessage}. Please try again.`, 'error');
         }
-      });
-      
-      copyBtn.addEventListener('click', function() {
-        navigator.clipboard.writeText(resultMessage.textContent)
-          .then(() => {
-            const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<span class="copy-icon">✓</span> Copied!';
-            setTimeout(() => {
-              copyBtn.innerHTML = originalText;
-            }, 2000);
-          })
-          .catch(err => {
-            console.error('Could not copy text: ', err);
-            showAlert('Could not copy to clipboard', 'error');
-          });
       });
       
       // Initialize

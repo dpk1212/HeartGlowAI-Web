@@ -1137,9 +1137,9 @@
         <div id="result" class="result-card" style="display: none;">
           <div class="message-text" id="messageText"></div>
           <div class="btn-group">
-            <button class="btn" onclick="window.copyMessage()">Copy Message</button>
-            <button class="btn" onclick="window.showFeedback()">Tweak Message</button>
-            <button class="preview-button" onclick="window.showPreview()">✨ Preview Impact</button>
+            <button class="btn" onclick="copyMessage()">Copy Message</button>
+            <button class="btn" onclick="showFeedback()">Tweak Message</button>
+            <button class="btn preview-button" onclick="showPreview()">✨ Preview Impact</button>
           </div>
           <div class="feedback-section" id="feedbackSection" style="display: none;">
             <h3 style="margin-bottom: 12px;">How would you like to improve this message?</h3>
@@ -1242,8 +1242,14 @@
         console.error('Preview section not found');
         return;
       }
-      previewSection.style.display = 'block';
-      document.getElementById('recipientContext').focus();
+      
+      // Toggle visibility
+      if (previewSection.style.display === 'none' || !previewSection.style.display) {
+        previewSection.style.display = 'block';
+        document.getElementById('recipientContext').focus();
+      } else {
+        previewSection.style.display = 'none';
+      }
     };
 
     window.generatePreview = async function() {
@@ -1260,11 +1266,18 @@
       previewResult.innerHTML = '<div class="loading-spinner"></div>';
       
       try {
+        const idToken = await firebase.auth().currentUser.getIdToken();
+        console.log('Sending preview request:', {
+          message,
+          recipientContext,
+          isPreview: true
+        });
+        
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${await firebase.auth().currentUser.getIdToken()}`
+            'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
             message,
@@ -1273,14 +1286,21 @@
           })
         });
 
+        console.log('Preview response status:', response.status);
+        const data = await response.json();
+        console.log('Preview response data:', data);
+
         if (!response.ok) throw new Error('Failed to generate preview');
         
-        const data = await response.json();
+        if (!data.preview) {
+          throw new Error('No preview received from server');
+        }
+        
         previewResult.textContent = data.preview;
         previewResult.style.animation = 'fadeIn 0.3s ease-out';
       } catch (error) {
         console.error('Preview error:', error);
-        showAlert('Failed to generate preview. Please try again.', 'error');
+        showAlert(error.message || 'Failed to generate preview. Please try again.', 'error');
         previewResult.textContent = '';
       }
     };
@@ -1328,7 +1348,13 @@
         
         loadingSpinner.style.display = "none";
         resultCard.style.display = "block";
+        resultCard.style.opacity = "1";
+        resultCard.style.transform = "translateY(0)";
         
+        // Save to history if logged in
+        if (currentUser) {
+          await saveMessage(scenario, relationship, data.message);
+        }
       } catch (error) {
         console.error('Error:', error);
         showAlert(error.message || 'Failed to generate message', 'error');

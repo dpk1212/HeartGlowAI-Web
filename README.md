@@ -1,127 +1,198 @@
-# HeartGlowAI
+# HeartGlowAI - AI-Powered Message Generation Platform
 
-A React Native mobile application that helps users create heartfelt messages for their relationships using AI.
+HeartGlowAI is a web application that helps users craft thoughtful, personalized messages for their relationships using advanced AI technology. Whether you're reaching out to family, friends, or loved ones, HeartGlowAI helps you express yourself authentically and meaningfully.
 
-## Features
+## 🌟 Features
 
+- **AI-Powered Message Generation**: Uses GPT-4 to create personalized messages
+- **Relationship Context**: Tailors messages based on relationship type and duration
+- **Customizable Tone**: Adjust the emotional intensity and tone of messages
+- **Message Insights**: Provides analysis of why each message is effective
+- **User Authentication**: Secure Firebase-based authentication
+- **Rate Limiting**: Prevents abuse with smart request limiting
+- **Mobile-Friendly**: Responsive design works on all devices
+
+## 🏗 Technical Architecture
+
+### Frontend
+- **Web Application**: Built with HTML, CSS, and JavaScript
+- **Authentication**: Firebase Authentication for user management
+- **Real-time Updates**: Firebase Realtime Database for message history
+- **Responsive Design**: Modern, mobile-first UI approach
+
+### Backend
+- **Cloud Functions**: Firebase Cloud Functions (Node.js)
+- **AI Integration**: OpenAI GPT-4 API
+- **Database**: Firebase Firestore
+- **Security**: Firebase Security Rules
+
+## 🔧 Core Components
+
+### 1. Message Generation Service
+Located in `functions/index.js`, this is the heart of HeartGlowAI. It:
+- Validates user authentication
+- Enforces rate limiting
+- Processes message requests
+- Communicates with OpenAI's API
+- Returns formatted messages with insights
+
+### 2. User Interface
+The main interface allows users to specify:
+- Communication scenario
+- Relationship type (family, friend, etc.)
+- Message tone (casual, formal, etc.)
+- Tone intensity (1-5 scale)
+- Relationship duration
+- Special circumstances
+
+### 3. Security Features
 - Firebase Authentication
-- OpenAI API integration for message generation
-- Intuitive UI for:
-  - Text input for current communication scenario
-  - Relationship type selection
-  - Generated message display
-  - Copy to clipboard functionality
+- Request rate limiting (10 requests per minute)
+- Secure API key storage
+- CORS protection
+- Input validation
 
-## Screenshots
+## 🚀 How It Works
 
-![HeartGlowAI Screenshots](./assets/screenshots.png)
+1. **User Input**:
+   - User enters their communication scenario
+   - Selects relationship type and tone preferences
+   - Can add special circumstances or context
 
-## Getting Started
+2. **Processing**:
+   - Frontend sends request to Cloud Function
+   - Cloud Function authenticates user
+   - Checks rate limiting
+   - Formats prompt for OpenAI
+   - Makes API call to GPT-4
 
-### Prerequisites
+3. **Response**:
+   - AI generates personalized message
+   - Provides 2-3 insights about the message
+   - Returns to user interface
+   - Saves to message history (if enabled)
 
-- Node.js (v14 or higher)
-- npm or yarn
-- Expo CLI (`npm install -g expo-cli`)
-- OpenAI API key
-- Firebase project
+## 🔐 Security Considerations
 
-### Installation
+- OpenAI API keys stored in Firebase Secrets
+- User authentication required for all requests
+- Rate limiting prevents abuse
+- CORS configured for specific domains:
+  - heartglowai.com
+  - localhost:3000 (development)
+  - localhost:5000 (Firebase emulator)
 
-1. Clone the repository:
+## 💻 Development Setup
+
+1. **Prerequisites**:
+   - Node.js v20 or later
+   - Firebase CLI
+   - Firebase project with Blaze plan (for OpenAI API calls)
+
+2. **Installation**:
+   ```bash
+   # Clone the repository
+   git clone [repository-url]
+   
+   # Install dependencies
+   cd functions
+   npm install
+   
+   # Install frontend dependencies
+   cd ..
+   npm install
+   ```
+
+3. **Environment Setup**:
+   ```bash
+   # Set up Firebase configuration
+   firebase login
+   firebase init
+   
+   # Configure OpenAI API key
+   firebase functions:secrets:set OPENAI_KEY
+   ```
+
+## 🛠 Configuration
+
+### Firebase Configuration
+Required services:
+- Authentication
+- Cloud Functions
+- Firestore
+- Hosting
+
+### OpenAI Configuration
+- Model: gpt-4-0125-preview
+- Temperature: 0.8
+- Max tokens: 500
+
+## 📝 API Documentation
+
+### Generate Message Endpoint
+`POST https://us-central1-heartglowai.cloudfunctions.net/generateMessage`
+
+**Headers**:
+- Authorization: Bearer [Firebase ID Token]
+- Content-Type: application/json
+
+**Request Body**:
+```json
+{
+  "scenario": "string",
+  "relationshipType": "string",
+  "tone": "string",
+  "toneIntensity": "string",
+  "relationshipDuration": "string",
+  "specialCircumstances": "string"
+}
 ```
-git clone https://github.com/dpk1212/HeartGlowAI.git
-cd HeartGlowAI
+
+**Response**:
+```json
+{
+  "message": "string",
+  "insights": ["string"]
+}
 ```
 
-2. Install dependencies:
-```
-npm install
-```
+## 🤝 Contributing
 
-3. Create a `.env` file in the root directory with your API keys:
-```
-OPENAI_API_KEY=your_openai_api_key
-FIREBASE_API_KEY=your_firebase_api_key
-FIREBASE_AUTH_DOMAIN=your_firebase_auth_domain
-FIREBASE_PROJECT_ID=your_firebase_project_id
-FIREBASE_STORAGE_BUCKET=your_firebase_storage_bucket
-FIREBASE_MESSAGING_SENDER_ID=your_firebase_messaging_sender_id
-FIREBASE_APP_ID=your_firebase_app_id
-FIREBASE_MEASUREMENT_ID=your_firebase_measurement_id
-```
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
-4. Generate assets (if needed):
-   - Open `assets/convert-assets.html` in a web browser
-   - Download the generated PNG files
-   - Ensure all required assets are in the `assets` directory
+## 📈 Future Enhancements
 
-5. Start the development server:
-```
-npm start
-```
+- Message history and favorites
+- Multiple language support
+- Custom relationship categories
+- Message templates
+- Feedback-based improvements
+- Advanced tone analysis
+- Message scheduling
 
-6. Use the Expo Go app on your mobile device to scan the QR code, or press 'i' to open in iOS simulator or 'a' to open in Android emulator.
+## 🆘 Troubleshooting
 
-## Deployment
+Common issues and solutions:
+1. **CORS Errors**: Check domain configuration in Cloud Function
+2. **Authentication Errors**: Verify Firebase setup
+3. **Rate Limit Errors**: Wait one minute between requests
+4. **API Errors**: Check OpenAI API key configuration
 
-### Deploy to GitHub Pages
+## 📞 Support
 
-1. Set up GitHub repository secrets:
-   - Go to Settings > Secrets and variables > Actions
-   - Add the following secrets:
-     - OPENAI_API_KEY
-     - FIREBASE_API_KEY
-     - FIREBASE_AUTH_DOMAIN
-     - FIREBASE_PROJECT_ID
-     - FIREBASE_STORAGE_BUCKET
-     - FIREBASE_MESSAGING_SENDER_ID
-     - FIREBASE_APP_ID
-     - FIREBASE_MEASUREMENT_ID
+For issues or questions:
+1. Check the troubleshooting guide
+2. Review Firebase logs
+3. Contact support team
 
-2. To manually deploy:
-```
-npm run deploy
-```
+## 📄 License
 
-3. The app will be automatically deployed via GitHub Actions when pushing to the main branch.
+[Your License Information]
 
-### Deploy to Expo
+---
 
-1. Login to Expo:
-```
-expo login
-```
-
-2. Build for web:
-```
-expo build:web
-```
-
-3. Deploy to Expo:
-```
-expo publish
-```
-
-## Usage
-
-1. Register or log in to your account
-2. Enter a communication scenario (e.g., "I need to apologize to my partner for forgetting our anniversary")
-3. Select the relationship type from the dropdown
-4. Tap "Generate Message" to create an AI-generated message
-5. Copy the message to your clipboard to use it in your preferred messaging app
-
-## App Design
-
-HeartGlowAI features a modern, sleek dark UI with a distinctive heart-shaped logo that has circuit board patterns inside it. The color scheme uses gradients from pink to cyan blue, creating a futuristic yet emotional visual identity that perfectly represents the app's purpose of combining AI technology with heartfelt communication.
-
-## Technical Details
-
-- Built with React Native and Expo
-- Firebase Authentication for user management
-- OpenAI GPT-3.5 Turbo for message generation
-- Secure API key storage using Expo SecureStore
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
+Made with ❤️ by HeartGlowAI Team 

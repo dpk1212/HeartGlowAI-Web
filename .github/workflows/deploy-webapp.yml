@@ -56,12 +56,17 @@ jobs:
           cp -f index.html web-build/ || echo "No index.html found in root directory"
 
       - name: Update API key in HTML file
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          if [ -n "${{ secrets.OPENAI_API_KEY }}" ]; then
-            sed -i 's/__OPENAI_API_KEY__/${{ secrets.OPENAI_API_KEY }}/g' web-build/index.html
+          if [ -n "$OPENAI_API_KEY" ]; then
+            # Use a more reliable sed pattern to avoid escaping issues
+            sed -i "s|__OPENAI_API_KEY__|$OPENAI_API_KEY|g" web-build/index.html
             echo "OpenAI API key has been set in the HTML file"
+            grep -q "$OPENAI_API_KEY" web-build/index.html && echo "Key successfully injected" || echo "WARNING: Key may not have been injected properly"
           else
-            echo "No OpenAI API key found in secrets, using placeholder"
+            echo "WARNING: No OpenAI API key found in secrets. The application will use mock responses only."
+            echo "Please add your OpenAI API key to the repository secrets as OPENAI_API_KEY."
           fi
 
       - name: Deploy to GitHub Pages

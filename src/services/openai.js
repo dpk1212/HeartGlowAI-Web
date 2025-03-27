@@ -71,42 +71,36 @@ async function getApiKey() {
 // Generate a message using OpenAI
 export async function generateMessage(scenario, relationshipType) {
   try {
-    const apiKey = await getApiKey();
-    
-    const systemPrompt = `You are HeartGlowAI, a helpful AI assistant that specializes in crafting thoughtful, 
-    authentic messages for personal relationships. Your goal is to help people communicate more effectively and 
-    meaningfully with their loved ones. Based on the scenario and relationship type provided, 
-    create a heartfelt message (about 2-4 sentences).`;
-    
-    const response = await axios.post(
-      OPENAI_API_URL,
-      {
-        model: OPENAI_CONFIG.model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { 
-            role: 'user', 
-            content: `Create a heartfelt message for a ${relationshipType} relationship in this scenario: ${scenario}. 
-            Keep it authentic, personal, and emotionally resonant. The message should be about 2-4 sentences.` 
-          }
-        ],
-        temperature: OPENAI_CONFIG.temperature,
-        max_tokens: OPENAI_CONFIG.maxTokens
+    const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
       },
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
-        }
-      }
-    );
+      body: JSON.stringify({ scenario, relationshipType })
+    });
 
-    return response.data.choices[0].message.content.trim();
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to generate message');
+    }
+
+    const data = await response.json();
+    
+    if (!data.message) {
+      throw new Error('No message received from server');
+    }
+
+    return data.message;
   } catch (error) {
     console.error('Error generating message:', error);
-    if (error.response) {
-      console.error('OpenAI API error:', error.response.data);
+    
+    // Enhance error message based on the type of error
+    if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
+      throw new Error('Network error - please check your internet connection and try again');
+    } else if (error.message.includes('API key')) {
+      throw new Error('OpenAI API key error - please contact support');
     }
+    
     throw error;
   }
 }

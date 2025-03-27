@@ -1073,12 +1073,12 @@
           <div class="input-group">
             <label for="relationship">Relationship Type</label>
             <select id="relationship">
-              <option value="Friend">Friend</option>
+          <option value="Friend">Friend</option>
               <option value="Romantic Partner">Romantic Partner</option>
-              <option value="Family Member">Family Member</option>
+          <option value="Family Member">Family Member</option>
               <option value="Professional">Professional</option>
               <option value="Mentor">Mentor</option>
-            </select>
+        </select>
           </div>
           
           <div class="input-group">
@@ -1140,7 +1140,7 @@
             <button class="btn" onclick="copyMessage()">Copy Message</button>
             <button class="btn" onclick="tweakMessage()">Tweak Message</button>
             <button class="btn" onclick="showPreview()">✨ Preview Impact</button>
-          </div>
+        </div>
           <div id="feedbackSection" class="feedback-section" style="display: none;">
             <h3>How would you like to improve this message?</h3>
             <textarea id="feedback" class="feedback-input" placeholder="Describe how you'd like to adjust the message..."></textarea>
@@ -1575,10 +1575,10 @@
       };
 
       if (templateCards) {
-        templateCards.forEach(card => {
-          card.addEventListener('click', function() {
-            const templateType = this.getAttribute('data-template');
-            if (templates[templateType]) {
+      templateCards.forEach(card => {
+        card.addEventListener('click', function() {
+          const templateType = this.getAttribute('data-template');
+          if (templates[templateType]) {
               const template = templates[templateType];
               document.getElementById('scenario').value = template.scenario;
               document.getElementById('relationship').value = template.relationship;
@@ -1586,9 +1586,9 @@
               document.getElementById('intensity').value = template.intensity;
               document.getElementById('result').style.display = "none";
               showScreen(document.getElementById('generator-screen'));
-            }
-          });
+          }
         });
+      });
       }
       
       backToHomeBtn.addEventListener('click', function() {
@@ -1739,56 +1739,30 @@
         const duration = document.getElementById('duration').value;
         const circumstances = document.getElementById('circumstances').value.trim();
         
-        if (!scenario) {
-          showAlert("Please enter a communication scenario", 'error');
+        if (!scenario || !relationship) {
+          showAlert('Please fill in all required fields', 'error');
           return;
         }
         
-        if (!currentUser) {
-          showAlert("Please sign in to generate messages", 'error');
-          return;
-        }
+        const loadingSpinner = document.getElementById('loading');
+        const resultCard = document.getElementById('result');
         
-        loadingSpinner.style.display = "flex";
+        loadingSpinner.style.display = "block";
         resultCard.style.display = "none";
         
         try {
-          // Get the current user's ID token
-          const idToken = await currentUser.getIdToken();
-          
-          console.log('Sending request to Cloud Function:', {
-            scenario,
+          const generateMessage = firebase.functions().httpsCallable('generateMessage');
+          const result = await generateMessage({
+            scenario: scenario,
             relationshipType: relationship,
-            tone,
+            tone: tone,
             toneIntensity: intensity,
             relationshipDuration: duration,
             specialCircumstances: circumstances
           });
           
-          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify({
-              scenario,
-              relationshipType: relationship,
-              tone,
-              toneIntensity: intensity,
-              relationshipDuration: duration,
-              specialCircumstances: circumstances
-            })
-          });
-          
-          console.log('Response status:', response.status);
-          const data = await response.json();
+          const data = result.data;
           console.log('Response data:', data);
-          
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to generate message');
-          }
           
           if (!data.message) {
             throw new Error('No message received from server');
@@ -1851,9 +1825,9 @@
             console.error('Google Sign In Error:', error);
             showAlert(`Error: ${error.message}`, 'error');
           });
+          });
       });
-    });
-
+      
     // Preview functionality
     window.showPreview = function() {
         console.log('showPreview called');
@@ -1881,15 +1855,41 @@
         try {
             const idToken = await firebase.auth().currentUser.getIdToken();
             
-            const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/analyzeMessageImpact', {
+            const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    message: currentMessage,
-                    recipientContext: recipientContext
+                    messageToAnalyze: currentMessage,
+                    recipientContext: recipientContext,
+                    scenario: `You are an expert in communication psychology and relationship dynamics. Analyze how this message would be received by the recipient and provide a detailed impact analysis. Focus on:
+
+1. Initial Reaction & Emotional Response:
+- What immediate emotions might this message trigger?
+- How might the recipient feel after reading this?
+
+2. Message Reception & Understanding:
+- Will the core message be clearly understood?
+- Are there any parts that could be misinterpreted?
+- How well does the tone match the recipient's personality?
+
+3. Impact on Relationship:
+- How might this affect your connection?
+- Does it strengthen or potentially strain the relationship?
+- Is it appropriate for your relationship level?
+
+4. Effectiveness Analysis:
+- What aspects of the message are particularly strong?
+- Are there any potential concerns or areas that could be improved?
+- How authentic and genuine does it feel?
+
+Remember to be specific and provide actionable insights about this particular message's impact.`,
+                    relationshipType: 'Analysis',
+                    tone: 'analytical',
+                    toneIntensity: '5',
+                    isImpactAnalysis: true
                 })
             });
 
@@ -1899,12 +1899,12 @@
             if (!response.ok) throw new Error('Failed to generate preview');
             
             // Format the response for better readability
-            if (data.analysis) {
-                const formattedAnalysis = data.analysis
+            if (data.message) {
+                const formattedMessage = data.message
                     .replace(/\d\./g, '\n$&')  // Add newline before numbers
                     .replace(/([.!?])\s+/g, '$1\n\n')  // Add double newline after sentences
                     .trim();
-                previewResult.innerHTML = formattedAnalysis;
+                previewResult.innerHTML = formattedMessage;
                 previewResult.style.animation = 'fadeIn 0.3s ease-out';
             } else {
                 throw new Error('Invalid response format');

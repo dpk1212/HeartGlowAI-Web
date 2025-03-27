@@ -20,6 +20,7 @@ import { saveMessage } from '../services/messageHistory';
 import TemplatesSection from '../components/TemplatesSection';
 import { COLORS, RELATIONSHIP_TYPES } from '../config/constants';
 import FeedbackModal from '../components/FeedbackModal';
+import firestore from '../services/firebaseFirestore';
 
 const MessageGeneratorScreen = ({ user }) => {
   const [scenario, setScenario] = useState('');
@@ -53,18 +54,52 @@ const MessageGeneratorScreen = ({ user }) => {
     checkApiKey();
   }, []);
 
-  // Check if user has submitted feedback
+  // Initialize message count and check feedback status
   useEffect(() => {
-    const checkFeedbackStatus = async () => {
+    const initializeMessageCount = async () => {
       if (user) {
-        const hasSubmitted = await hasUserSubmittedFeedback(user.uid);
-        if (hasSubmitted) {
-          setMessageCount(0); // Reset count if user has already submitted feedback
+        try {
+          const userDoc = await firestore.collection('users').doc(user.uid).get();
+          const userData = userDoc.data();
+          
+          // Check if user has already submitted feedback
+          if (userData?.hasFeedbackSubmitted) {
+            setMessageCount(0);
+            return;
+          }
+          
+          // Get stored message count or initialize to 0
+          const storedCount = userData?.messageCount || 0;
+          setMessageCount(storedCount);
+          
+          if (storedCount >= 3) {
+            setShowFeedback(true);
+          }
+        } catch (error) {
+          console.error('Error initializing message count:', error);
         }
       }
     };
-    checkFeedbackStatus();
+    
+    initializeMessageCount();
   }, [user]);
+
+  const updateMessageCount = async (newCount) => {
+    if (user) {
+      try {
+        await firestore.collection('users').doc(user.uid).update({
+          messageCount: newCount
+        });
+        setMessageCount(newCount);
+        
+        if (newCount >= 3) {
+          setShowFeedback(true);
+        }
+      } catch (error) {
+        console.error('Error updating message count:', error);
+      }
+    }
+  };
 
   const handleGenerateMessage = async () => {
     if (!scenario) {
@@ -88,15 +123,11 @@ const MessageGeneratorScreen = ({ user }) => {
       const message = await generateMessage(scenario, relationshipType);
       setGeneratedMessage(message);
       
-      // Only increment count and check for feedback if user hasn't submitted before
+      // Update message count if user hasn't submitted feedback
       const hasSubmitted = await hasUserSubmittedFeedback(user.uid);
       if (!hasSubmitted) {
         const newCount = messageCount + 1;
-        setMessageCount(newCount);
-        
-        if (newCount === 3) {
-          setShowFeedback(true);
-        }
+        await updateMessageCount(newCount);
       }
       
       // Save message to history
@@ -187,6 +218,13 @@ const MessageGeneratorScreen = ({ user }) => {
             </TouchableOpacity>
             
             <TemplatesSection onSelectTemplate={handleTemplateSelect} />
+            
+            <TouchableOpacity
+              style={styles.feedbackButton}
+              onPress={() => setShowFeedback(true)}
+            >
+              <Text style={styles.feedbackButtonText}>Submit Feedback</Text>
+            </TouchableOpacity>
           </>
         ) : (
           <>
@@ -410,6 +448,21 @@ const styles = StyleSheet.create({
     color: COLORS.primary,
     fontSize: 14,
     fontWeight: 'bold',
+  },
+  feedbackButton: {
+    backgroundColor: COLORS.backgroundLight,
+    borderRadius: 8,
+    padding: 16,
+    alignItems: 'center',
+    marginTop: 24,
+    marginHorizontal: 20,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+  },
+  feedbackButtonText: {
+    color: COLORS.text,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

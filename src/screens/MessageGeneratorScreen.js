@@ -15,7 +15,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { generateMessage, isApiKeyAvailable } from '../services/openai';
-import { auth } from '../services/firebase';
+import { auth, hasUserSubmittedFeedback } from '../services/firebase';
 import { saveMessage } from '../services/messageHistory';
 import TemplatesSection from '../components/TemplatesSection';
 import { COLORS, RELATIONSHIP_TYPES } from '../config/constants';
@@ -53,6 +53,19 @@ const MessageGeneratorScreen = ({ user }) => {
     checkApiKey();
   }, []);
 
+  // Check if user has submitted feedback
+  useEffect(() => {
+    const checkFeedbackStatus = async () => {
+      if (user) {
+        const hasSubmitted = await hasUserSubmittedFeedback(user.uid);
+        if (hasSubmitted) {
+          setMessageCount(0); // Reset count if user has already submitted feedback
+        }
+      }
+    };
+    checkFeedbackStatus();
+  }, [user]);
+
   const handleGenerateMessage = async () => {
     if (!scenario) {
       Alert.alert('Error', 'Please enter a communication scenario');
@@ -75,12 +88,15 @@ const MessageGeneratorScreen = ({ user }) => {
       const message = await generateMessage(scenario, relationshipType);
       setGeneratedMessage(message);
       
-      // Increment message count and check if we should show feedback
-      const newCount = messageCount + 1;
-      setMessageCount(newCount);
-      
-      if (newCount === 3) {
-        setShowFeedback(true);
+      // Only increment count and check for feedback if user hasn't submitted before
+      const hasSubmitted = await hasUserSubmittedFeedback(user.uid);
+      if (!hasSubmitted) {
+        const newCount = messageCount + 1;
+        setMessageCount(newCount);
+        
+        if (newCount === 3) {
+          setShowFeedback(true);
+        }
       }
       
       // Save message to history

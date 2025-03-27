@@ -389,6 +389,48 @@
       white-space: pre-wrap;
     }
     
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin: 15px 0;
+    }
+    
+    .copy-button, .tweak-button {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      transition: opacity 0.2s;
+      flex: 1;
+    }
+    
+    .copy-button:hover, .tweak-button:hover {
+      opacity: 0.9;
+    }
+    
+    .feedback-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      display: none;
+    }
+    
+    .feedback-input {
+      width: 100%;
+      min-height: 80px;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: var(--input-bg);
+      color: var(--text-primary);
+      margin: 10px 0;
+      font-family: inherit;
+      resize: vertical;
+    }
+    
     .insights-section {
       margin-top: 20px;
       padding-top: 20px;
@@ -716,9 +758,15 @@
         
         <div id="result" class="result-card" style="display: none;">
           <div class="message-text" id="messageText"></div>
-          <button id="copy-btn" class="copy-button">
-            <span class="copy-icon">📋</span> Copy to Clipboard
-          </button>
+          <div class="button-group">
+            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
+            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
+          </div>
+          <div class="feedback-section" id="feedbackSection">
+            <label for="feedback">How would you like to improve this message?</label>
+            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
+            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
+          </div>
           <div class="insights-section">
             <div class="insights-title">Why this message works:</div>
             <ul class="insights-list" id="insightsList"></ul>

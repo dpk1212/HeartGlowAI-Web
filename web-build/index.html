@@ -1741,10 +1741,32 @@
           await checkFeedbackStatus();
           
           showScreen(homeScreen);
+          
+          // Ensure template clicks work after auth state is determined
+          attachTemplateClickListeners();
         } else {
           showScreen(welcomeScreen);
         }
       });
+      
+      // Function to attach template click listeners
+      function attachTemplateClickListeners() {
+        const templateCards = document.querySelectorAll('.template-card');
+        console.log('Attaching template listeners to', templateCards.length, 'cards');
+        
+        templateCards.forEach(card => {
+          const templateType = card.getAttribute('data-template');
+          
+          // Remove any existing listeners to prevent duplicates
+          const newCard = card.cloneNode(true);
+          card.parentNode.replaceChild(newCard, card);
+          
+          newCard.addEventListener('click', function() {
+            console.log('Template clicked:', templateType);
+            handleTemplateClick(templateType);
+          });
+        });
+      }
       
       // Event Listeners
       loginRegisterBtn.addEventListener('click', function() {
@@ -1955,19 +1977,14 @@
           document.getElementById('duration').value = template.duration;
           document.getElementById('circumstances').value = template.circumstances;
           document.getElementById('result').style.display = "none";
-          showScreen(document.getElementById('generator-screen'));
+          showScreen(generatorScreen);
         }
       }
 
       // Add template click listeners
       document.addEventListener('DOMContentLoaded', function() {
-        const templateCards = document.querySelectorAll('.template-card');
-        templateCards.forEach(card => {
-          card.addEventListener('click', function() {
-            const templateType = this.getAttribute('data-template');
-            handleTemplateClick(templateType);
-          });
-        });
+        // Attach template click listeners on initial load
+        attachTemplateClickListeners();
       });
       
       backToHomeBtn.addEventListener('click', function() {

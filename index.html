@@ -28,6 +28,8 @@
       --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
       --box-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --background-dark: #1a1a1a;
+      --background-light: #2a2a2a;
     }
     
     * {
@@ -982,34 +984,36 @@
 
     /* Feedback Modal Styles */
     .feedback-modal {
-      display: none;
       position: fixed;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background-color: var(--card-bg);
-      padding: 24px;
+      background: var(--background-dark);
+      padding: 32px;
       border-radius: 16px;
       width: 90%;
-      max-width: 500px;
-      z-index: 1000;
-      box-shadow: var(--box-shadow);
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      z-index: 1001;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+      display: none;
     }
 
     .feedback-overlay {
-      display: none;
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      z-index: 999;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
     }
 
     .feedback-title {
       font-size: 24px;
-      font-weight: 700;
+      font-weight: 600;
       color: var(--text-primary);
       margin-bottom: 8px;
       text-align: center;
@@ -1022,96 +1026,50 @@
       text-align: center;
     }
 
+    .feedback-form {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .feedback-section {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
     .feedback-input {
       width: 100%;
-      background-color: var(--input-bg);
+      padding: 12px;
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 12px;
+      background: var(--background-light);
       color: var(--text-primary);
-      margin-bottom: 16px;
+      margin-bottom: 12px;
       font-size: 14px;
     }
 
     .feedback-textarea {
-      min-height: 120px;
+      min-height: 100px;
       resize: vertical;
     }
 
-    .feedback-button-container {
-      display: flex;
-      gap: 12px;
-      margin-top: 8px;
+    .rating-group {
+      margin-bottom: 20px;
     }
 
-    .feedback-submit {
-      flex: 1;
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform var(--transition-smooth);
-    }
-
-    .feedback-cancel {
-      flex: 1;
-      background-color: var(--input-bg);
-      color: var(--text-primary);
-      border: 1px solid var(--border-color);
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: transform var(--transition-smooth);
-    }
-
-    .feedback-button {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 12px 24px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 24px;
-      transition: transform var(--transition-smooth);
-    }
-
-    .feedback-button:hover,
-    .feedback-submit:hover,
-    .feedback-cancel:hover {
-      transform: translateY(-2px);
-    }
-
-    /* Additional Feedback Styles */
-    .feedback-section {
-      margin-bottom: 24px;
-      padding-bottom: 24px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    .feedback-section:last-child {
-      border-bottom: none;
-      margin-bottom: 0;
-      padding-bottom: 0;
-    }
-
-    .feedback-section-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
+    .rating-group label {
+      display: block;
+      margin-bottom: 8px;
       color: var(--text-primary);
     }
 
     .star-rating {
       display: flex;
       flex-direction: row-reverse;
-      justify-content: flex-end;
+      justify-content: flex-start;
       gap: 8px;
-      margin: 8px 0 16px;
     }
 
     .star-rating input {
@@ -1138,8 +1096,7 @@
     .checkbox-options {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      margin-top: 8px;
+      gap: 12px;
     }
 
     .checkbox-options label {
@@ -1156,7 +1113,22 @@
 
     .nps-slider {
       width: 100%;
-      margin: 8px 0;
+      height: 6px;
+      margin: 16px 0;
+      -webkit-appearance: none;
+      background: linear-gradient(to right, var(--accent-pink), var(--accent-blue));
+      border-radius: 3px;
+      outline: none;
+    }
+
+    .nps-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
     }
 
     .nps-labels {
@@ -1164,6 +1136,53 @@
       justify-content: space-between;
       color: var(--text-secondary);
       font-size: 14px;
+    }
+
+    .feedback-button-container {
+      display: flex;
+      gap: 16px;
+      margin-top: 24px;
+      justify-content: flex-end;
+    }
+
+    .feedback-submit,
+    .feedback-cancel {
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+    }
+
+    .feedback-submit {
+      background: linear-gradient(to right, var(--accent-pink), var(--accent-blue));
+      color: white;
+      border: none;
+    }
+
+    .feedback-cancel {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .feedback-submit:hover,
+    .feedback-cancel:hover {
+      transform: translateY(-2px);
+    }
+
+    // Function to show feedback modal
+    function showFeedbackModal() {
+      document.getElementById('feedbackOverlay').style.display = 'block';
+      document.getElementById('feedbackModal').style.display = 'block';
+      document.body.style.overflow = 'hidden'; // Prevent scrolling
+    }
+
+    // Function to hide feedback modal
+    function hideFeedbackModal() {
+      document.getElementById('feedbackOverlay').style.display = 'none';
+      document.getElementById('feedbackModal').style.display = 'none';
+      document.body.style.overflow = ''; // Restore scrolling
     }
 
     /* Template Card Additional Styles */
@@ -1416,7 +1435,7 @@
     <form id="feedbackForm" class="feedback-form">
       <!-- User Information -->
       <div class="feedback-section">
-        <h3 class="feedback-section-title">About You (Optional)</h3>
+        <h3 class="section-title">About You (Optional)</h3>
         <input type="email" id="feedbackEmail" class="feedback-input" placeholder="Your email" />
         <select id="feedbackUserType" class="feedback-input">
           <option value="">How often do you use HeartGlowAI?</option>
@@ -1429,7 +1448,7 @@
 
       <!-- Usage Experience -->
       <div class="feedback-section">
-        <h3 class="feedback-section-title">Your Experience</h3>
+        <h3 class="section-title">Your Experience</h3>
         <div class="rating-group">
           <label>How satisfied are you with the message quality?</label>
           <div class="star-rating">
@@ -1466,7 +1485,7 @@
 
       <!-- Detailed Feedback -->
       <div class="feedback-section">
-        <h3 class="feedback-section-title">Your Thoughts</h3>
+        <h3 class="section-title">Your Thoughts</h3>
         <textarea id="feedbackStrengths" class="feedback-input feedback-textarea" placeholder="What did you like most about HeartGlowAI?"></textarea>
         <textarea id="feedbackImprovements" class="feedback-input feedback-textarea" placeholder="What could we improve?"></textarea>
         <textarea id="feedbackFeatures" class="feedback-input feedback-textarea" placeholder="What additional features would you like to see?"></textarea>
@@ -1474,7 +1493,7 @@
 
       <!-- Net Promoter Score -->
       <div class="feedback-section">
-        <h3 class="feedback-section-title">Final Thoughts</h3>
+        <h3 class="section-title">Final Thoughts</h3>
         <label>How likely are you to recommend HeartGlowAI to others?</label>
         <div class="nps-scale">
           <input type="range" id="npsScore" min="0" max="10" value="8" class="nps-slider">
@@ -1484,12 +1503,12 @@
           </div>
         </div>
       </div>
-    </form>
 
-    <div class="feedback-button-container">
-      <button id="feedbackCancel" class="feedback-cancel">Maybe Later</button>
-      <button id="feedbackSubmit" class="feedback-submit">Submit Feedback</button>
-    </div>
+      <div class="feedback-button-container">
+        <button type="button" id="feedbackCancel" class="feedback-cancel">Maybe Later</button>
+        <button type="button" id="feedbackSubmit" class="feedback-submit">Submit Feedback</button>
+      </div>
+    </form>
   </div>
 
   <script>
@@ -2362,12 +2381,14 @@
       function showFeedbackModal() {
         document.getElementById('feedbackOverlay').style.display = 'block';
         document.getElementById('feedbackModal').style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling
       }
 
       // Function to hide feedback modal
       function hideFeedbackModal() {
         document.getElementById('feedbackOverlay').style.display = 'none';
         document.getElementById('feedbackModal').style.display = 'none';
+        document.body.style.overflow = ''; // Restore scrolling
       }
 
       // Check if user has submitted feedback

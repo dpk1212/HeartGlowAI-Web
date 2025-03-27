@@ -1888,10 +1888,34 @@
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    scenario: `Analyze how this message would be received by the recipient. Message: "${currentMessage}" Recipient context: "${recipientContext}"`,
-                    relationshipType: 'Preview',
+                    scenario: `Analyze this message's potential impact and reception. Provide detailed insights in the following areas:
+
+1. Emotional Impact:
+- How might the recipient emotionally respond?
+- What feelings could this message evoke?
+
+2. Message Effectiveness:
+- Key strengths of the message
+- Areas where it particularly resonates
+- Any potential misunderstandings
+
+3. Relationship Dynamics:
+- How this affects your relationship
+- Long-term impact on connection
+- Trust and authenticity factors
+
+4. Contextual Analysis:
+- How well it fits recipient's personality
+- Cultural or situational considerations
+- Timing and circumstance factors
+
+Message: "${currentMessage}"
+Recipient Context: "${recipientContext}"
+
+Provide a comprehensive analysis focusing on these aspects, highlighting both strengths and areas of consideration.`,
+                    relationshipType: 'Impact Analysis',
                     tone: 'analytical',
-                    toneIntensity: '3',
+                    toneIntensity: '4',
                     specialCircumstances: recipientContext,
                     isPreview: true
                 })

@@ -12,6 +12,7 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-functions-compat.js"></script>
   <style>
     :root {
       --primary-gradient: linear-gradient(135deg, #ff6b9d 0%, #64d2ff 100%);
@@ -1389,6 +1390,10 @@
       
       // Initialize Firebase
       firebase.initializeApp(firebaseConfig);
+      
+      // Initialize Firebase Functions
+      const functions = firebase.functions();
+      functions.useEmulator("localhost", 5001);
       
       // Initialize Firebase Analytics
       const analytics = firebase.analytics();

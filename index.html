@@ -1139,9 +1139,14 @@
           <div class="btn-group">
             <button class="btn" onclick="copyMessage()">Copy Message</button>
             <button class="btn" onclick="tweakMessage()">Tweak Message</button>
-            <button class="preview-button" onclick="window.showPreview()">✨ Preview Impact</button>
+            <button class="preview-button" onclick="showPreview()">✨ Preview Impact</button>
           </div>
-          <div class="preview-section" id="previewSection">
+          <div id="feedbackSection" class="feedback-section" style="display: none;">
+            <h3>How would you like to improve this message?</h3>
+            <textarea id="feedback" class="feedback-input" placeholder="Describe how you'd like to adjust the message..."></textarea>
+            <button class="btn" onclick="submitFeedback()">Generate New Version</button>
+          </div>
+          <div class="preview-section" id="previewSection" style="display: none;">
             <h3 style="margin-bottom: 12px;">Tell us about the recipient</h3>
             <textarea id="recipientContext" class="input-field" style="margin-bottom: 12px;" 
               placeholder="Describe who they are, their personality, and your relationship with them..."></textarea>
@@ -1229,7 +1234,13 @@
       document.getElementById('feedback').focus();
     };
 
-    window.tweakMessage = async function() {
+    window.tweakMessage = function() {
+      const feedbackSection = document.getElementById('feedbackSection');
+      feedbackSection.style.display = 'block';
+      document.getElementById('feedback').focus();
+    };
+
+    window.submitFeedback = async function() {
       const feedback = document.getElementById('feedback').value.trim();
       if (!feedback) {
         showAlert("Please provide feedback for the message", 'error');
@@ -1255,14 +1266,22 @@
       resultCard.style.display = "none";
       
       try {
-        // Get the current user's ID token
         const idToken = await currentUser.getIdToken();
+        console.log('Sending tweak request:', {
+          scenario,
+          relationshipType: relationship,
+          tone,
+          toneIntensity: intensity,
+          relationshipDuration: duration,
+          specialCircumstances: circumstances,
+          previousMessage: currentMessage,
+          userFeedback: feedback
+        });
 
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
             'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
@@ -1277,42 +1296,26 @@
           })
         });
 
+        console.log('Tweak response status:', response.status);
         const data = await response.json();
+        console.log('Tweak response data:', data);
         
-        if (response.ok) {
-          const messageText = document.getElementById('messageText');
-          const insightsList = document.getElementById('insightsList');
-          const feedbackSection = document.getElementById('feedbackSection');
-          
-          messageText.textContent = data.message;
-          currentMessage = data.message;
-          
-          // Clear and populate insights
-          insightsList.innerHTML = '';
-          if (data.insights && data.insights.length > 0) {
-            data.insights.forEach(insight => {
-              const li = document.createElement('li');
-              li.className = 'insight-item';
-              li.textContent = insight;
-              insightsList.appendChild(li);
-            });
-          }
-          
-          // Reset feedback
-          document.getElementById('feedback').value = '';
-          feedbackSection.style.display = 'none';
-          
-          loadingSpinner.style.display = "none";
-          resultCard.style.display = "block";
-          resultCard.style.opacity = "1";
-          resultCard.style.transform = "translateY(0)";
-          
-          // Save message to history if user is authenticated
-          if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
-          }
-        } else {
-          throw new Error(data.error || 'Failed to generate message');
+        if (!response.ok) throw new Error(data.error || 'Failed to generate message');
+        
+        const messageText = document.getElementById('messageText');
+        messageText.textContent = data.message;
+        currentMessage = data.message;
+        
+        // Reset feedback
+        document.getElementById('feedback').value = '';
+        document.getElementById('feedbackSection').style.display = 'none';
+        
+        loadingSpinner.style.display = "none";
+        resultCard.style.display = "block";
+        
+        // Save message to history if user is authenticated
+        if (currentUser) {
+          await saveMessage(scenario, relationship, data.message);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -1855,19 +1858,39 @@
     window.showPreview = function() {
       console.log('showPreview called');
       const previewSection = document.getElementById('previewSection');
+      if (!previewSection) {
+        console.error('Preview section not found');
+        return;
+      }
       previewSection.style.display = 'block';
       previewSection.classList.add('active');
-      document.getElementById('recipientContext').focus();
+      const recipientContext = document.getElementById('recipientContext');
+      if (recipientContext) {
+        recipientContext.focus();
+      }
     };
 
     window.generatePreview = async function() {
       console.log('generatePreview called');
-      const recipientContext = document.getElementById('recipientContext').value;
-      const message = document.getElementById('messageText').textContent;
+      const recipientContext = document.getElementById('recipientContext');
+      const messageText = document.getElementById('messageText');
       const previewResult = document.getElementById('previewResult');
       
-      if (!recipientContext) {
+      if (!recipientContext || !messageText || !previewResult) {
+        console.error('Required elements not found');
+        return;
+      }
+
+      const context = recipientContext.value.trim();
+      const message = messageText.textContent;
+      
+      if (!context) {
         showAlert('Please describe the recipient first', 'error');
+        return;
+      }
+
+      if (!message) {
+        showAlert('No message to preview', 'error');
         return;
       }
 
@@ -1876,12 +1899,8 @@
       try {
         const idToken = await firebase.auth().currentUser.getIdToken();
         console.log('Sending preview request:', {
-          scenario: `Generate a preview of how this message will be received: ${message}`,
-          relationshipType: 'Preview',
-          tone: 'analytical',
-          toneIntensity: '3',
-          specialCircumstances: recipientContext,
-          isPreview: true
+          message,
+          recipientContext: context
         });
         
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
@@ -1895,7 +1914,7 @@
             relationshipType: 'Preview',
             tone: 'analytical',
             toneIntensity: '3',
-            specialCircumstances: recipientContext,
+            specialCircumstances: context,
             isPreview: true
           })
         });

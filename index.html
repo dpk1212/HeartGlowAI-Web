@@ -1727,8 +1727,12 @@
             throw new Error('No message received from server');
           }
           
+          // Store current message for feedback
+          currentMessage = data.message;
+          
           // Display the message
-          resultMessage.textContent = data.message;
+          const messageText = document.getElementById('messageText');
+          messageText.textContent = data.message;
           
           // Clear and populate insights
           const insightsList = document.getElementById('insightsList');
@@ -1750,16 +1754,9 @@
             await saveMessage(scenario, relationship, data.message);
           }
         } catch (error) {
-          console.error('Error generating message:', error);
+          console.error('Error:', error);
+          showAlert(error.message || 'Failed to generate message', 'error');
           loadingSpinner.style.display = "none";
-          
-          // Enhance error message based on the type of error
-          let errorMessage = error.message;
-          if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
-            errorMessage = 'Network error - please check your internet connection and try again';
-          }
-          
-          showAlert(`Error: ${errorMessage}. Please try again.`, 'error');
         }
       });
 

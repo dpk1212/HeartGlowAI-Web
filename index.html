@@ -1881,41 +1881,15 @@
         try {
             const idToken = await firebase.auth().currentUser.getIdToken();
             
-            const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/analyzeMessageImpact', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${idToken}`
                 },
                 body: JSON.stringify({
-                    messageToAnalyze: currentMessage,
-                    recipientContext: recipientContext,
-                    scenario: `You are an expert in communication psychology and relationship dynamics. Analyze how this message would be received by the recipient and provide a detailed impact analysis. Focus on:
-
-1. Initial Reaction & Emotional Response:
-- What immediate emotions might this message trigger?
-- How might the recipient feel after reading this?
-
-2. Message Reception & Understanding:
-- Will the core message be clearly understood?
-- Are there any parts that could be misinterpreted?
-- How well does the tone match the recipient's personality?
-
-3. Impact on Relationship:
-- How might this affect your connection?
-- Does it strengthen or potentially strain the relationship?
-- Is it appropriate for your relationship level?
-
-4. Effectiveness Analysis:
-- What aspects of the message are particularly strong?
-- Are there any potential concerns or areas that could be improved?
-- How authentic and genuine does it feel?
-
-Remember to be specific and provide actionable insights about this particular message's impact.`,
-                    relationshipType: 'Analysis',
-                    tone: 'analytical',
-                    toneIntensity: '5',
-                    isImpactAnalysis: true
+                    message: currentMessage,
+                    recipientContext: recipientContext
                 })
             });
 
@@ -1925,12 +1899,12 @@ Remember to be specific and provide actionable insights about this particular me
             if (!response.ok) throw new Error('Failed to generate preview');
             
             // Format the response for better readability
-            if (data.message) {
-                const formattedMessage = data.message
+            if (data.analysis) {
+                const formattedAnalysis = data.analysis
                     .replace(/\d\./g, '\n$&')  // Add newline before numbers
                     .replace(/([.!?])\s+/g, '$1\n\n')  // Add double newline after sentences
                     .trim();
-                previewResult.innerHTML = formattedMessage;
+                previewResult.innerHTML = formattedAnalysis;
                 previewResult.style.animation = 'fadeIn 0.3s ease-out';
             } else {
                 throw new Error('Invalid response format');

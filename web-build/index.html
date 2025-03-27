@@ -1815,7 +1815,9 @@
               email: user.email,
               createdAt: firebase.firestore.FieldValue.serverTimestamp(),
               messageCount: 0,
-              hasFeedbackSubmitted: false
+              hasFeedbackSubmitted: false,
+              lastFeedbackSubmittedAt: null,
+              feedbackData: null
             });
           }
           
@@ -2005,12 +2007,11 @@
 
           if (response.ok) {
             if (currentUser) {
+              // Update user document with feedback data but don't mark as submitted
               await firebase.firestore().collection('users').doc(currentUser.uid).update({
-                hasFeedbackSubmitted: true,
-                feedbackSubmittedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                lastFeedbackSubmittedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 feedbackData: formData
               });
-              hasSubmittedFeedback = true;
             }
 
             showAlert('Thank you for your detailed feedback!', 'success');
@@ -2374,6 +2375,7 @@
         if (currentUser) {
           try {
             const userDoc = await firebase.firestore().collection('users').doc(currentUser.uid).get();
+            // Only check for first-time feedback submission
             hasSubmittedFeedback = userDoc.exists && userDoc.data().hasFeedbackSubmitted === true;
             
             if (!hasSubmittedFeedback) {

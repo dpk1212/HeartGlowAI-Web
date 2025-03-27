@@ -795,6 +795,32 @@
     let currentMessage = '';
     let currentUser = null;
 
+    // Save message to history function
+    async function saveMessage(scenario, relationshipType, message) {
+      if (!currentUser) return false;
+      
+      try {
+        const timestamp = new Date();
+        
+        await firebase.firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('messages')
+          .add({
+            scenario,
+            relationshipType,
+            message,
+            timestamp
+          });
+        
+        console.log('Message saved to history');
+        return true;
+      } catch (error) {
+        console.error('Error saving message:', error);
+        return false;
+      }
+    }
+
     // Global functions for feedback and copy functionality
     window.showFeedback = function() {
       const feedbackSection = document.getElementById('feedbackSection');
@@ -871,7 +897,7 @@
           
           // Save message to history if user is authenticated
           if (currentUser) {
-            saveMessage(scenario, relationship, data.message);
+            await saveMessage(scenario, relationship, data.message);
           }
         } else {
           throw new Error(data.error || 'Failed to generate message');
@@ -1140,20 +1166,22 @@
         }
       };
 
-      templateCards.forEach(card => {
-        card.addEventListener('click', function() {
-          const templateType = this.getAttribute('data-template');
-          if (templates[templateType]) {
-            const template = templates[templateType];
-            scenarioInput.value = template.scenario;
-            relationshipSelect.value = template.relationship;
-            document.getElementById('tone').value = template.tone;
-            document.getElementById('intensity').value = template.intensity;
-            resultCard.style.display = "none";
-            showScreen(generatorScreen);
-          }
+      if (templateCards) {
+        templateCards.forEach(card => {
+          card.addEventListener('click', function() {
+            const templateType = this.getAttribute('data-template');
+            if (templates[templateType]) {
+              const template = templates[templateType];
+              document.getElementById('scenario').value = template.scenario;
+              document.getElementById('relationship').value = template.relationship;
+              document.getElementById('tone').value = template.tone;
+              document.getElementById('intensity').value = template.intensity;
+              document.getElementById('result').style.display = "none";
+              showScreen(document.getElementById('generator-screen'));
+            }
+          });
         });
-      });
+      }
       
       backToHomeBtn.addEventListener('click', function() {
         if (currentUser) {
@@ -1369,12 +1397,7 @@
           
           // Save to history if logged in
           if (currentUser) {
-            saveMessage(scenario, relationship, data.message)
-              .then(success => {
-                if (success) {
-                  console.log('Message saved to history');
-                }
-              });
+            await saveMessage(scenario, relationship, data.message);
           }
         } catch (error) {
           console.error('Error generating message:', error);
@@ -1404,31 +1427,6 @@
             showAlert('Could not copy to clipboard', 'error');
           });
       });
-      
-      // Save message to history
-      async function saveMessage(scenario, relationshipType, message) {
-        if (!currentUser) return false;
-        
-        try {
-          const timestamp = new Date();
-          
-          await firebase.firestore()
-            .collection('users')
-            .doc(currentUser.uid)
-            .collection('messages')
-            .add({
-              scenario,
-              relationshipType,
-              message,
-              timestamp
-            });
-          
-          return true;
-        } catch (error) {
-          console.error('Error saving message:', error);
-          return false;
-        }
-      }
       
       // Initialize
       initializeApp();

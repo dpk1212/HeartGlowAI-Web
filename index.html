@@ -997,12 +997,43 @@
         showScreen(generatorScreen);
       });
       
+      // Template presets
+      const templates = {
+        apology: {
+          scenario: "I need to apologize to someone for missing an important event",
+          relationship: "Friend",
+          tone: "serious",
+          intensity: "4"
+        },
+        romantic: {
+          scenario: "I want to express my love and appreciation to my partner",
+          relationship: "Romantic Partner",
+          tone: "poetic",
+          intensity: "5"
+        },
+        tough: {
+          scenario: "I need to have a difficult conversation about boundaries",
+          relationship: "Friend",
+          tone: "formal",
+          intensity: "3"
+        },
+        checkin: {
+          scenario: "I want to check in with someone I haven't spoken to in a while",
+          relationship: "Family Member",
+          tone: "casual",
+          intensity: "2"
+        }
+      };
+
       templateCards.forEach(card => {
         card.addEventListener('click', function() {
           const templateType = this.getAttribute('data-template');
           if (templates[templateType]) {
-            scenarioInput.value = templates[templateType].scenario;
-            relationshipSelect.value = templates[templateType].relationship;
+            const template = templates[templateType];
+            scenarioInput.value = template.scenario;
+            relationshipSelect.value = template.relationship;
+            document.getElementById('tone').value = template.tone;
+            document.getElementById('intensity').value = template.intensity;
             resultCard.style.display = "none";
             showScreen(generatorScreen);
           }
@@ -1143,6 +1174,95 @@
         }
       });
       
+      // Current message tracking
+      let currentMessage = '';
+
+      // Feedback handling functions
+      function showFeedback() {
+        const feedbackSection = document.getElementById('feedbackSection');
+        feedbackSection.style.display = 'block';
+        document.getElementById('feedback').focus();
+      }
+
+      async function tweakMessage() {
+        const feedback = document.getElementById('feedback').value.trim();
+        if (!feedback) {
+          showAlert("Please provide feedback for the message", 'error');
+          return;
+        }
+
+        const scenario = document.getElementById('scenario').value.trim();
+        const relationship = document.getElementById('relationship').value;
+        const tone = document.getElementById('tone').value;
+        const intensity = document.getElementById('intensity').value;
+        const duration = document.getElementById('duration').value;
+        const circumstances = document.getElementById('circumstances').value.trim();
+        
+        loadingSpinner.style.display = "flex";
+        resultCard.style.display = "none";
+        
+        try {
+          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+              scenario,
+              relationshipType: relationship,
+              tone,
+              toneIntensity: intensity,
+              relationshipDuration: duration,
+              specialCircumstances: circumstances,
+              previousMessage: currentMessage,
+              userFeedback: feedback
+            })
+          });
+
+          const data = await response.json();
+          
+          if (response.ok) {
+            const messageText = document.getElementById('messageText');
+            const insightsList = document.getElementById('insightsList');
+            const feedbackSection = document.getElementById('feedbackSection');
+            
+            messageText.textContent = data.message;
+            currentMessage = data.message;
+            
+            // Clear and populate insights
+            insightsList.innerHTML = '';
+            if (data.insights && data.insights.length > 0) {
+              data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.className = 'insight-item';
+                li.textContent = insight;
+                insightsList.appendChild(li);
+              });
+            }
+            
+            // Reset feedback
+            document.getElementById('feedback').value = '';
+            feedbackSection.style.display = 'none';
+            
+            loadingSpinner.style.display = "none";
+            resultCard.style.display = "block";
+            
+            // Save message to history if user is authenticated
+            if (currentUser) {
+              saveMessage(scenario, relationship, data.message);
+            }
+          } else {
+            throw new Error(data.error || 'Failed to generate message');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          showAlert(error.message || 'Failed to generate message', 'error');
+          loadingSpinner.style.display = "none";
+        }
+      }
+
+      // Update the generateMessage function to store the current message
       generateBtn.addEventListener('click', async function() {
         // Track message generation attempt
         analytics.logEvent('generate_message', {
@@ -1258,26 +1378,6 @@
           });
       });
       
-      // Template presets
-      const templates = {
-        apology: {
-          scenario: "I need to apologize to someone for missing an important event",
-          relationship: "Friend"
-        },
-        romantic: {
-          scenario: "I want to express my love and appreciation to my partner",
-          relationship: "Romantic Partner"
-        },
-        tough: {
-          scenario: "I need to have a difficult conversation about boundaries",
-          relationship: "Friend"
-        },
-        checkin: {
-          scenario: "I want to check in with someone I haven't spoken to in a while",
-          relationship: "Family Member"
-        }
-      };
-
       // Save message to history
       async function saveMessage(scenario, relationshipType, message) {
         if (!currentUser) return false;

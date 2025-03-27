@@ -791,6 +791,142 @@
   </div>
   
   <script>
+    // Global variables and functions
+    let currentMessage = '';
+    let currentUser = null;
+
+    // Global functions for feedback and copy functionality
+    window.showFeedback = function() {
+      const feedbackSection = document.getElementById('feedbackSection');
+      feedbackSection.style.display = 'block';
+      document.getElementById('feedback').focus();
+    };
+
+    window.tweakMessage = async function() {
+      const feedback = document.getElementById('feedback').value.trim();
+      if (!feedback) {
+        showAlert("Please provide feedback for the message", 'error');
+        return;
+      }
+
+      const scenario = document.getElementById('scenario').value.trim();
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value.trim();
+      
+      const loadingSpinner = document.getElementById('loading');
+      const resultCard = document.getElementById('result');
+      
+      loadingSpinner.style.display = "flex";
+      resultCard.style.display = "none";
+      
+      try {
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({
+            scenario,
+            relationshipType: relationship,
+            tone,
+            toneIntensity: intensity,
+            relationshipDuration: duration,
+            specialCircumstances: circumstances,
+            previousMessage: currentMessage,
+            userFeedback: feedback
+          })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          const messageText = document.getElementById('messageText');
+          const insightsList = document.getElementById('insightsList');
+          const feedbackSection = document.getElementById('feedbackSection');
+          
+          messageText.textContent = data.message;
+          currentMessage = data.message;
+          
+          // Clear and populate insights
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
+          // Reset feedback
+          document.getElementById('feedback').value = '';
+          feedbackSection.style.display = 'none';
+          
+          loadingSpinner.style.display = "none";
+          resultCard.style.display = "block";
+          
+          // Save message to history if user is authenticated
+          if (currentUser) {
+            saveMessage(scenario, relationship, data.message);
+          }
+        } else {
+          throw new Error(data.error || 'Failed to generate message');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showAlert(error.message || 'Failed to generate message', 'error');
+        loadingSpinner.style.display = "none";
+      }
+    };
+
+    window.copyMessage = function() {
+      const messageText = document.getElementById('messageText').textContent;
+      navigator.clipboard.writeText(messageText).then(() => {
+        showAlert('Message copied to clipboard!', 'success');
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        showAlert('Failed to copy message', 'error');
+      });
+    };
+
+    // Global function for showing alerts
+    function showAlert(message, type = 'error') {
+      const alertEl = document.createElement('div');
+      alertEl.style.position = 'fixed';
+      alertEl.style.top = '20px';
+      alertEl.style.left = '50%';
+      alertEl.style.transform = 'translateX(-50%)';
+      alertEl.style.padding = '12px 20px';
+      alertEl.style.borderRadius = '8px';
+      alertEl.style.color = 'white';
+      alertEl.style.zIndex = '1000';
+      alertEl.style.maxWidth = '90%';
+      alertEl.style.textAlign = 'center';
+      
+      if (type === 'error') {
+        alertEl.style.backgroundColor = '#ff5757';
+      } else if (type === 'success') {
+        alertEl.style.backgroundColor = '#58d68d';
+      } else {
+        alertEl.style.backgroundColor = '#3498db';
+      }
+      
+      alertEl.textContent = message;
+      document.body.appendChild(alertEl);
+      
+      setTimeout(() => {
+        alertEl.style.opacity = '0';
+        alertEl.style.transition = 'opacity 0.5s ease';
+        setTimeout(() => {
+          document.body.removeChild(alertEl);
+        }, 500);
+      }, 3000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
       // Firebase configuration
       const firebaseConfig = {
@@ -860,7 +996,6 @@
       
       // Auth state
       let isLogin = true;
-      let currentUser = null;
       let openaiApiKey = null;
       
       // Check auth state
@@ -889,40 +1024,6 @@
           s.classList.remove('active');
         });
         screen.classList.add('active');
-      }
-      
-      // Show alert with better styling
-      function showAlert(message, type = 'error') {
-        const alertEl = document.createElement('div');
-        alertEl.style.position = 'fixed';
-        alertEl.style.top = '20px';
-        alertEl.style.left = '50%';
-        alertEl.style.transform = 'translateX(-50%)';
-        alertEl.style.padding = '12px 20px';
-        alertEl.style.borderRadius = '8px';
-        alertEl.style.color = 'white';
-        alertEl.style.zIndex = '1000';
-        alertEl.style.maxWidth = '90%';
-        alertEl.style.textAlign = 'center';
-        
-        if (type === 'error') {
-          alertEl.style.backgroundColor = '#ff5757';
-        } else if (type === 'success') {
-          alertEl.style.backgroundColor = '#58d68d';
-        } else {
-          alertEl.style.backgroundColor = '#3498db';
-        }
-        
-        alertEl.textContent = message;
-        document.body.appendChild(alertEl);
-        
-        setTimeout(() => {
-          alertEl.style.opacity = '0';
-          alertEl.style.transition = 'opacity 0.5s ease';
-          setTimeout(() => {
-            document.body.removeChild(alertEl);
-          }, 500);
-        }, 3000);
       }
       
       // Event Listeners
@@ -1188,103 +1289,6 @@
         }
       });
       
-      // Global variables and functions
-      let currentMessage = '';
-
-      function showFeedback() {
-        const feedbackSection = document.getElementById('feedbackSection');
-        feedbackSection.style.display = 'block';
-        document.getElementById('feedback').focus();
-      }
-
-      async function tweakMessage() {
-        const feedback = document.getElementById('feedback').value.trim();
-        if (!feedback) {
-          showAlert("Please provide feedback for the message", 'error');
-          return;
-        }
-
-        const scenario = document.getElementById('scenario').value.trim();
-        const relationship = document.getElementById('relationship').value;
-        const tone = document.getElementById('tone').value;
-        const intensity = document.getElementById('intensity').value;
-        const duration = document.getElementById('duration').value;
-        const circumstances = document.getElementById('circumstances').value.trim();
-        
-        loadingSpinner.style.display = "flex";
-        resultCard.style.display = "none";
-        
-        try {
-          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-              scenario,
-              relationshipType: relationship,
-              tone,
-              toneIntensity: intensity,
-              relationshipDuration: duration,
-              specialCircumstances: circumstances,
-              previousMessage: currentMessage,
-              userFeedback: feedback
-            })
-          });
-
-          const data = await response.json();
-          
-          if (response.ok) {
-            const messageText = document.getElementById('messageText');
-            const insightsList = document.getElementById('insightsList');
-            const feedbackSection = document.getElementById('feedbackSection');
-            
-            messageText.textContent = data.message;
-            currentMessage = data.message;
-            
-            // Clear and populate insights
-            insightsList.innerHTML = '';
-            if (data.insights && data.insights.length > 0) {
-              data.insights.forEach(insight => {
-                const li = document.createElement('li');
-                li.className = 'insight-item';
-                li.textContent = insight;
-                insightsList.appendChild(li);
-              });
-            }
-            
-            // Reset feedback
-            document.getElementById('feedback').value = '';
-            feedbackSection.style.display = 'none';
-            
-            loadingSpinner.style.display = "none";
-            resultCard.style.display = "block";
-            
-            // Save message to history if user is authenticated
-            if (currentUser) {
-              saveMessage(scenario, relationship, data.message);
-            }
-          } else {
-            throw new Error(data.error || 'Failed to generate message');
-          }
-        } catch (error) {
-          console.error('Error:', error);
-          showAlert(error.message || 'Failed to generate message', 'error');
-          loadingSpinner.style.display = "none";
-        }
-      }
-
-      function copyMessage() {
-        const messageText = document.getElementById('messageText').textContent;
-        navigator.clipboard.writeText(messageText).then(() => {
-          showAlert('Message copied to clipboard!', 'success');
-        }).catch(err => {
-          console.error('Failed to copy:', err);
-          showAlert('Failed to copy message', 'error');
-        });
-      }
-
       // Update the generateMessage function to store the current message
       generateBtn.addEventListener('click', async function() {
         // Track message generation attempt

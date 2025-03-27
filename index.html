@@ -395,6 +395,7 @@
       display: flex;
       gap: 10px;
       margin: 15px 0;
+      justify-content: space-between;
     }
     
     .copy-button, .tweak-button {
@@ -407,11 +408,11 @@
       font-size: 14px;
       font-weight: 600;
       transition: opacity 0.2s;
-      flex: 1;
+      width: calc(50% - 5px); /* Each button takes up half the space minus half the gap */
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 140px;
+      white-space: nowrap;
     }
     
     .copy-button:hover, .tweak-button:hover {
@@ -448,7 +449,6 @@
     .feedback-section .tweak-button {
       width: 100%;
       margin-top: 10px;
-      min-width: 100%;
     }
     
     .insights-section {

@@ -374,32 +374,69 @@
     }
     
     .result-card {
-      background-color: var(--card-bg);
-      border-radius: 16px;
+      background: var(--card-bg);
+      border-radius: 12px;
       padding: 20px;
       margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
     }
     
-    .result-message {
+    .message-text {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 20px;
       white-space: pre-wrap;
-      line-height: 1.5;
-      margin-bottom: 16px;
     }
     
-    .copy-btn {
-      background-color: rgba(255, 255, 255, 0.1);
+    .insights-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .insights-title {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      font-weight: 600;
+    }
+    
+    .insights-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .insight-item {
+      font-size: 0.9em;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      padding-left: 20px;
+      position: relative;
+    }
+    
+    .insight-item:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--primary-color);
+    }
+    
+    .copy-button {
+      background: var(--primary-gradient);
       color: white;
       border: none;
-      border-radius: 100px;
       padding: 8px 16px;
-      font-size: 14px;
+      border-radius: 6px;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
+      font-size: 0.9em;
+      transition: opacity 0.2s;
+      margin-top: 12px;
     }
     
-    .copy-icon {
-      margin-right: 8px;
+    .copy-button:hover {
+      opacity: 0.9;
     }
     
     .loading-spinner {
@@ -678,10 +715,14 @@
         </div>
         
         <div id="result" class="result-card" style="display: none;">
-          <p id="result-message" class="result-message"></p>
-          <button id="copy-btn" class="copy-btn">
+          <div class="message-text" id="messageText"></div>
+          <button id="copy-btn" class="copy-button">
             <span class="copy-icon">📋</span> Copy to Clipboard
           </button>
+          <div class="insights-section">
+            <div class="insights-title">Why this message works:</div>
+            <ul class="insights-list" id="insightsList"></ul>
+          </div>
         </div>
       </div>
     </div>
@@ -738,7 +779,7 @@
       const generateBtn = document.getElementById('generateBtn');
       const loadingSpinner = document.getElementById('loading');
       const resultCard = document.getElementById('result');
-      const resultMessage = document.getElementById('result-message');
+      const resultMessage = document.getElementById('messageText');
       const copyBtn = document.getElementById('copy-btn');
       
       // Storage keys
@@ -1115,6 +1156,19 @@
           
           // Display the message
           resultMessage.textContent = data.message;
+          
+          // Clear and populate insights
+          const insightsList = document.getElementById('insightsList');
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
           loadingSpinner.style.display = "none";
           resultCard.style.display = "block";
           

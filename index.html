@@ -461,27 +461,14 @@
       display: none;
       opacity: 0;
       transform: translateY(20px);
-      transition: opacity var(--transition-smooth), transform var(--transition-smooth);
+      transition: opacity 0.3s ease, transform 0.3s ease;
       position: relative;
       overflow: hidden;
     }
     
-    .result-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(135deg,
-        rgba(255, 107, 157, 0.05) 0%,
-        rgba(100, 210, 255, 0.05) 100%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-    
-    .result-card[style*="display: block"]::before {
+    .result-card[style*="display: block"] {
       opacity: 1;
+      transform: translateY(0);
     }
     
     .message-text {
@@ -489,6 +476,7 @@
       line-height: 1.6;
       margin-bottom: 20px;
       white-space: pre-wrap;
+      color: var(--text-primary);
     }
     
     .button-group {
@@ -1251,6 +1239,8 @@
           
           loadingSpinner.style.display = "none";
           resultCard.style.display = "block";
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
           
           // Save message to history if user is authenticated
           if (currentUser) {
@@ -1746,8 +1736,11 @@
             });
           }
           
+          // Hide loading spinner and show result card
           loadingSpinner.style.display = "none";
           resultCard.style.display = "block";
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
           
           // Save to history if logged in
           if (currentUser) {

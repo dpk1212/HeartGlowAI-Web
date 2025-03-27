@@ -1180,6 +1180,11 @@
         return;
       }
 
+      if (!currentUser) {
+        showAlert("Please sign in to generate messages", 'error');
+        return;
+      }
+
       const scenario = document.getElementById('scenario').value.trim();
       const relationship = document.getElementById('relationship').value;
       const tone = document.getElementById('tone').value;
@@ -1194,11 +1199,15 @@
       resultCard.style.display = "none";
       
       try {
+        // Get the current user's ID token
+        const idToken = await currentUser.getIdToken();
+
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
             scenario,
@@ -1676,10 +1685,18 @@
           return;
         }
         
+        if (!currentUser) {
+          showAlert("Please sign in to generate messages", 'error');
+          return;
+        }
+        
         loadingSpinner.style.display = "flex";
         resultCard.style.display = "none";
         
         try {
+          // Get the current user's ID token
+          const idToken = await currentUser.getIdToken();
+          
           console.log('Sending request to Cloud Function:', {
             scenario,
             relationshipType: relationship,
@@ -1693,7 +1710,8 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
               scenario,

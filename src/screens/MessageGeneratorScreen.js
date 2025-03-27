@@ -19,6 +19,7 @@ import { auth } from '../services/firebase';
 import { saveMessage } from '../services/messageHistory';
 import TemplatesSection from '../components/TemplatesSection';
 import { COLORS, RELATIONSHIP_TYPES } from '../config/constants';
+import FeedbackModal from '../components/FeedbackModal';
 
 const MessageGeneratorScreen = ({ user }) => {
   const [scenario, setScenario] = useState('');
@@ -29,6 +30,8 @@ const MessageGeneratorScreen = ({ user }) => {
   const [apiKeyAvailable, setApiKeyAvailable] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [messageCount, setMessageCount] = useState(0);
+  const [showFeedback, setShowFeedback] = useState(false);
 
   // Check if OpenAI API key is available
   useEffect(() => {
@@ -72,14 +75,21 @@ const MessageGeneratorScreen = ({ user }) => {
       const message = await generateMessage(scenario, relationshipType);
       setGeneratedMessage(message);
       
-      // Automatically save the message to history
+      // Increment message count and check if we should show feedback
+      const newCount = messageCount + 1;
+      setMessageCount(newCount);
+      
+      if (newCount === 3) {
+        setShowFeedback(true);
+      }
+      
+      // Save message to history
       try {
         setIsSaving(true);
         await saveMessage(scenario, relationshipType, message);
         setSavedSuccess(true);
       } catch (saveError) {
         console.error('Error saving message to history:', saveError);
-        // Don't alert the user about this error as it's not critical
       } finally {
         setIsSaving(false);
       }
@@ -124,6 +134,10 @@ const MessageGeneratorScreen = ({ user }) => {
 
   const handleStartConversation = () => {
     setShowInput(true);
+  };
+
+  const handleCloseFeedback = () => {
+    setShowFeedback(false);
   };
 
   return (
@@ -226,6 +240,11 @@ const MessageGeneratorScreen = ({ user }) => {
           </View>
         ) : null}
       </ScrollView>
+
+      <FeedbackModal
+        visible={showFeedback}
+        onClose={handleCloseFeedback}
+      />
     </SafeAreaView>
   );
 };

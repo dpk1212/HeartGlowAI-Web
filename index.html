@@ -401,12 +401,17 @@
       background: var(--primary-gradient);
       color: white;
       border: none;
-      padding: 8px 16px;
-      border-radius: 6px;
+      padding: 12px 20px;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.9em;
+      font-size: 14px;
+      font-weight: 600;
       transition: opacity 0.2s;
       flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 140px;
     }
     
     .copy-button:hover, .tweak-button:hover {
@@ -443,6 +448,7 @@
     .feedback-section .tweak-button {
       width: 100%;
       margin-top: 10px;
+      min-width: 100%;
     }
     
     .insights-section {

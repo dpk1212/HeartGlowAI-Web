@@ -5,26 +5,9 @@ admin.initializeApp();
 
 // Securely retrieve the OpenAI API key from Firestore
 async function getOpenAIKey() {
-  try {
-    const db = admin.firestore();
-    const secretDoc = await db.collection('secrets').doc('openaiKey').get();
-    
-    if (!secretDoc.exists) {
-      console.error('OpenAI API key document not found in Firestore');
-      throw new Error('API key configuration not found');
-    }
-    
-    const apiKey = secretDoc.data().openaiKey;
-    if (!apiKey) {
-      console.error('OpenAI API key field not found in document');
-      throw new Error('API key field not found');
-    }
-    
-    return apiKey;
-  } catch (error) {
-    console.error('Error retrieving OpenAI API key from Firestore:', error);
-    throw error;
-  }
+  const db = admin.firestore();
+  const secretDoc = await db.collection('secrets').doc('openaiKey').get();
+  return secretDoc.data().openaiKey;
 }
 
 // Securely provide the OpenAI API key
@@ -76,11 +59,11 @@ exports.getOpenAIKey = functions.https.onRequest(async (req, res) => {
   }
 });
 
-// Direct message generation endpoint (even more secure approach)
+// API endpoint to generate messages
 exports.generateMessage = functions.https.onRequest(async (req, res) => {
   res.set('Access-Control-Allow-Origin', '*');
   res.set('Access-Control-Allow-Methods', 'POST');
-  res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
   
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -93,21 +76,23 @@ exports.generateMessage = functions.https.onRequest(async (req, res) => {
   }
   
   try {
+    // Get request data
     const { scenario, relationshipType } = req.body;
     
     if (!scenario || !relationshipType) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
     
-    // Get the API key from Firestore
+    // Get the API key securely from Firestore
     const apiKey = await getOpenAIKey();
     
-    // OpenAI configuration
+    // OpenAI API configuration
     const systemPrompt = `You are HeartGlowAI, a helpful AI assistant that specializes in crafting thoughtful, 
     authentic messages for personal relationships. Your goal is to help people communicate more effectively and 
     meaningfully with their loved ones. Based on the scenario and relationship type provided, 
     create a heartfelt message (about 2-4 sentences).`;
     
+    // Make API call to OpenAI
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -131,17 +116,18 @@ exports.generateMessage = functions.https.onRequest(async (req, res) => {
     
     if (!response.ok) {
       const errorData = await response.json();
-      console.error('OpenAI API error response:', errorData);
+      console.error('OpenAI API error:', errorData);
       return res.status(500).json({ error: errorData.error?.message || 'Failed to generate message' });
     }
     
     const data = await response.json();
     const message = data.choices[0].message.content.trim();
     
+    // Return the generated message
     return res.status(200).json({ message });
     
   } catch (error) {
-    console.error('Error in generateMessage function:', error);
-    return res.status(500).json({ error: 'Server error' });
+    console.error('Error generating message:', error);
+    return res.status(500).json({ error: error.message || 'Internal server error' });
   }
 }); 

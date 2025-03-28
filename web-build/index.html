@@ -2316,12 +2316,69 @@
   </div>
   
   <script>
+    // API Configuration
+    const API_CONFIG = {
+      BASE_URL: 'https://us-central1-heartglowai.cloudfunctions.net',
+      ENDPOINTS: {
+        GENERATE: '/generateMessage',
+        FEEDBACK: '/submitFeedback',
+        HISTORY: '/saveMessage'
+      }
+    };
+
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+    let welcomeScreen, authScreen, homeScreen, generatorScreen;
     let messageCount = 0;
     let hasSubmittedFeedback = false;
+
+    // Helper function for API calls
+    async function makeApiRequest(endpoint, data, options = {}) {
+      const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+      console.log(`Making API request to: ${url}`);
+
+      try {
+        // Get auth token if user is logged in
+        let headers = {
+          'Content-Type': 'application/json',
+          'Origin': window.location.origin
+        };
+
+        if (currentUser) {
+          const idToken = await currentUser.getIdToken();
+          headers['Authorization'] = `Bearer ${idToken}`;
+        }
+
+        const response = await fetch(url, {
+          method: options.method || 'POST',
+          headers: headers,
+          body: JSON.stringify(data),
+          mode: 'cors',
+          credentials: 'include'
+        });
+
+        console.log('Response status:', response.status);
+
+        // Handle non-JSON responses
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Invalid response format from server');
+        }
+
+        const responseData = await response.json();
+        console.log('Response data:', responseData);
+
+        if (!response.ok) {
+          throw new Error(responseData.error || 'Request failed');
+        }
+
+        return responseData;
+      } catch (error) {
+        console.error('API request failed:', error);
+        throw error;
+      }
+    }
 
     // Screen transition function
     function showScreen(screen) {
@@ -2361,28 +2418,19 @@
     }
 
     // Save message to history function
-    async function saveMessage(scenario, relationshipType, message) {
-      if (!currentUser) return false;
-      
+    async function saveMessage(scenario, relationship, message) {
       try {
-        const timestamp = new Date();
-        
-        await firebase.firestore()
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('messages')
-          .add({
-            scenario,
-            relationshipType,
-            message,
-            timestamp
-          });
-        
-        console.log('Message saved to history');
-        return true;
+        const requestData = {
+          scenario,
+          relationshipType: relationship,
+          message
+        };
+
+        await makeApiRequest(API_CONFIG.ENDPOINTS.HISTORY, requestData);
+        console.log('Message saved to history successfully');
       } catch (error) {
-        console.error('Error saving message:', error);
-        return false;
+        console.error('Error saving message to history:', error);
+        // Don't show error to user since this is a background operation
       }
     }
 
@@ -3312,7 +3360,7 @@
       }, 400); // Match the CSS transition duration
     }
     
-    // Update the generateMessage function to handle results display
+    // Update the generateMessage function to use the helper
     window.generateMessage = async function(isRetry = false) {
       const scenario = document.getElementById('scenario').value.trim();
       const relationship = document.getElementById('relationship').value;
@@ -3332,29 +3380,22 @@
       showLoading();
 
       try {
-        const response = await fetch('https://heartglowai-api.up.railway.app/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': currentUser ? `Bearer ${await currentUser.getIdToken()}` : ''
-          },
-          body: JSON.stringify({
-            scenario,
-            relationship,
-            tone,
-            intensity,
-            duration,
-            circumstances,
-            retry: isRetry
-          })
-        });
+        const requestData = {
+          scenario,
+          relationshipType: relationship,
+          tone,
+          toneIntensity: intensity,
+          relationshipDuration: duration,
+          specialCircumstances: circumstances,
+          retry: isRetry
+        };
 
-        const data = await response.json();
+        const data = await makeApiRequest(API_CONFIG.ENDPOINTS.GENERATE, requestData);
 
-        if (response.ok && data.message) {
-          // Hide loading first
-          hideLoading();
-          
+        // Hide loading first
+        hideLoading();
+        
+        if (data.message) {
           // Prepare insights
           const insights = data.insights || [
             "The message uses an appropriate tone for your relationship",
@@ -3365,12 +3406,15 @@
           // Show results in popup
           showResults(data.message, insights);
           
+          // Store current message for feedback
+          currentMessage = data.message;
+          
           // Save to history if user is authenticated
           if (currentUser) {
             await saveMessage(scenario, relationship, data.message);
           }
         } else {
-          throw new Error(data.error || 'Failed to generate message');
+          throw new Error('No message received from server');
         }
       } catch (error) {
         console.error('Error generating message:', error);
@@ -3379,8 +3423,15 @@
         hideLoading();
         
         // Show appropriate error message
-        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-          showAlert('Network error - please try again', 'error');
+        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+          showAlert('Unable to connect to the server. Please check your connection and try again.', 'error');
+        } else if (error.message.includes('CORS')) {
+          showAlert('Server connection error. Our team has been notified.', 'error');
+          // Log the CORS error for debugging
+          console.error('CORS Error Details:', {
+            origin: window.location.origin,
+            error: error.message
+          });
         } else {
           showAlert(error.message || 'Failed to generate message', 'error');
         }
@@ -3438,6 +3489,36 @@
         });
       }
     });
+
+    async function submitFeedback(rating, comment) {
+      if (!currentMessage) {
+        showAlert('No message to provide feedback for', 'error');
+        return;
+      }
+
+      try {
+        const requestData = {
+          message: currentMessage,
+          rating: parseInt(rating),
+          comment: comment || ''
+        };
+
+        await makeApiRequest(API_CONFIG.ENDPOINTS.FEEDBACK, requestData);
+        
+        // Mark feedback as submitted
+        hasSubmittedFeedback = true;
+        
+        // Close the modal
+        const modal = document.getElementById('feedbackModal');
+        modal.style.display = 'none';
+        
+        // Show success message
+        showAlert('Thank you for your feedback!', 'success');
+      } catch (error) {
+        console.error('Error submitting feedback:', error);
+        showAlert('Failed to submit feedback. Please try again.', 'error');
+      }
+    }
   </script>
 </body>
 </html> 

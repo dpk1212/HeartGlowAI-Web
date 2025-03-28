@@ -2101,166 +2101,453 @@
       width: 100%;
       max-width: 1200px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 0 20px;
       color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .tour-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 0;
+      margin-bottom: 40px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .tour-logo-container {
+      display: flex;
+      align-items: center;
+    }
+    
+    .tour-logo-heart {
+      width: 32px;
+      height: 32px;
+      margin-right: 12px;
+    }
+    
+    .tour-logo-text {
+      font-size: 22px;
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
     }
     
     .tour-hero {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      margin: 40px 0;
       text-align: center;
+      margin: 60px 0;
+      position: relative;
+      overflow: hidden;
     }
     
-    @media (min-width: 768px) {
+    .tour-hero::before {
+      content: '';
+      position: absolute;
+      top: -300px;
+      left: -300px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.1) 0%, rgba(100, 140, 255, 0.05) 50%, transparent 70%);
+      z-index: -1;
+      border-radius: 50%;
+    }
+    
+    .tour-hero::after {
+      content: '';
+      position: absolute;
+      bottom: -300px;
+      right: -300px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(100, 140, 255, 0.1) 0%, rgba(255, 107, 157, 0.05) 50%, transparent 70%);
+      z-index: -1;
+      border-radius: 50%;
+    }
+    
+    .tour-hero-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    @media (min-width: 992px) {
       .tour-hero-content {
-        display: flex;
+        flex-direction: row;
         align-items: center;
         text-align: left;
+        gap: 60px;
       }
-      
-      .tour-logo {
-        flex: 1;
+    }
+    
+    .tour-heart-wrapper {
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 40px;
+      position: relative;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-heart-wrapper {
+        margin-bottom: 0;
       }
-      
-      .tour-text {
-        flex: 2;
-        padding-left: 40px;
+    }
+    
+    .tour-heart-pulse {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.3) 0%, rgba(100, 140, 255, 0.1) 50%, transparent 70%);
+      animation: pulse 3s ease-in-out infinite;
+      z-index: -1;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.7;
       }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.9;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
+    }
+    
+    .tour-neon-heart {
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 0 10px rgba(255, 107, 157, 0.8));
+      animation: floatAnimation 6s ease-in-out infinite;
+    }
+    
+    @keyframes floatAnimation {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+    
+    .tour-info {
+      flex: 1;
     }
     
     .tour-title {
-      font-size: 36px;
-      font-weight: 700;
-      background: var(--primary-gradient);
+      font-size: 42px;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 24px;
+      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      margin-bottom: 20px;
-      line-height: 1.2;
+      letter-spacing: -0.5px;
     }
     
     .tour-subtitle {
-      font-size: 18px;
-      color: var(--text-secondary);
-      margin-bottom: 24px;
+      font-size: 20px;
       line-height: 1.6;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 660px;
     }
     
     .tour-features {
       list-style: none;
       padding: 0;
-      margin-bottom: 32px;
+      margin-bottom: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     
     .tour-features li {
-      font-size: 18px;
-      margin-bottom: 12px;
-      color: var(--text-primary);
-    }
-    
-    .cta-btn {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 16px 36px;
-      border-radius: 50px;
-      font-size: 18px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
-    }
-    
-    .cta-btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 6px 25px rgba(255, 107, 157, 0.5);
-    }
-    
-    .tour-message-example {
-      margin: 60px auto;
-      max-width: 600px;
-    }
-    
-    .message-card {
-      background: var(--card-bg);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      border: 1px solid var(--border-color);
-    }
-    
-    .message-content {
-      font-size: 18px;
-      line-height: 1.6;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-    }
-    
-    .message-meta {
-      font-size: 14px;
-      color: var(--text-secondary);
-      border-top: 1px solid var(--border-color);
-      padding-top: 12px;
-    }
-    
-    .tour-steps {
-      margin: 80px 0;
-      text-align: center;
-    }
-    
-    .tour-steps h2 {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 40px;
-      color: var(--text-primary);
-    }
-    
-    .step-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 30px;
-      margin-top: 40px;
-    }
-    
-    .step {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      text-align: center;
+      font-size: 18px;
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 16px;
+      transition: transform 0.3s ease, background 0.3s ease;
     }
     
-    .step-number {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--primary-gradient);
-      color: white;
+    .tour-features li:hover {
+      transform: translateY(-3px);
+      background: rgba(255, 255, 255, 0.08);
+    }
+    
+    .feature-icon {
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 16px;
+      min-width: 32px;
+      height: 32px;
+      background: var(--primary-gradient);
+      margin-right: 16px;
+      border-radius: 8px;
+      color: white;
     }
     
-    .step-content h3 {
-      font-size: 20px;
+    .primary-cta {
+      display: inline-block;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 18px 40px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .primary-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 30px rgba(255, 107, 157, 0.5);
+    }
+    
+    .primary-cta::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 1s ease;
+    }
+    
+    .primary-cta:hover::after {
+      transform: translateX(100%);
+    }
+    
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+      margin: 80px 0;
+    }
+    
+    .tour-demo-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 60px 0;
+      position: relative;
+    }
+    
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 48px;
+      color: var(--text-primary);
+      text-align: center;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 60px;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 3px;
+    }
+    
+    .message-preview {
+      width: 100%;
+      max-width: 560px;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .message-preview::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 5px;
+      background: var(--primary-gradient);
+    }
+    
+    .message-text {
+      font-size: 18px;
+      line-height: 1.7;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      font-weight: 500;
+      text-align: left;
+      position: relative;
+      padding: 0 0 0 24px;
+    }
+    
+    .message-text::before {
+      content: '"';
+      position: absolute;
+      left: 0;
+      top: 0;
+      font-size: 48px;
+      line-height: 1;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      opacity: 0.8;
+    }
+    
+    .message-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid var(--border-color);
+    }
+    
+    .message-settings {
+      display: flex;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    
+    .settings-label {
+      color: var(--accent-pink);
+      margin-right: 8px;
       font-weight: 600;
-      margin-bottom: 12px;
+    }
+    
+    .how-it-works {
+      padding: 60px 0;
+      text-align: center;
+    }
+    
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 60px;
+    }
+    
+    .step-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid var(--border-color);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .step-number {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 36px;
+      height: 36px;
+      background: var(--primary-gradient);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 4px 10px rgba(255, 107, 157, 0.4);
+    }
+    
+    .step-icon {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      font-size: 24px;
+    }
+    
+    .step-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 16px;
       color: var(--text-primary);
     }
     
-    .step-content p {
+    .step-description {
       font-size: 16px;
+      line-height: 1.6;
       color: var(--text-secondary);
+      flex-grow: 1;
     }
     
-    .tour-cta {
+    .final-cta {
+      padding: 80px 0;
       text-align: center;
-      margin: 60px 0;
+      background: linear-gradient(180deg, transparent, rgba(255, 107, 157, 0.05), transparent);
+    }
+    
+    .cta-headline {
+      font-size: 36px;
+      font-weight: 800;
+      margin-bottom: 24px;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .cta-subtext {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 40px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
     }
   </style>
 </head>
@@ -2292,18 +2579,35 @@
     <!-- Tour Screen -->
     <div id="tour-screen" class="screen">
       <div class="tour-container">
-        <button id="back-to-welcome-btn" class="back-button">
-          <span class="back-icon">←</span> Back
-        </button>
+        <div class="tour-header">
+          <div class="tour-logo-container">
+            <div class="tour-logo-heart">
+              <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z" fill="url(#headerGradient)"/>
+                <defs>
+                  <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="var(--accent-pink)"/>
+                    <stop offset="100%" stop-color="var(--accent-blue)"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <span class="tour-logo-text">HeartGlowAI</span>
+          </div>
+          <button id="back-to-welcome-btn" class="back-button">
+            <span class="back-icon">←</span> Back
+          </button>
+        </div>
         
         <div class="tour-hero">
           <div class="tour-hero-content">
-            <div class="tour-logo">
-              <div class="neon-heart">
+            <div class="tour-heart-wrapper">
+              <div class="tour-heart-pulse"></div>
+              <div class="tour-neon-heart">
                 <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z" stroke="url(#heartGradient)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z" stroke="url(#neonHeartGradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
                   <defs>
-                    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+                    <linearGradient id="neonHeartGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
                       <stop offset="0%" stop-color="var(--accent-pink)"/>
                       <stop offset="100%" stop-color="var(--accent-blue)"/>
                     </linearGradient>
@@ -2312,72 +2616,92 @@
               </div>
             </div>
             
-            <div class="tour-text">
+            <div class="tour-info">
               <h1 class="tour-title">Struggling to say what you feel?<br>We help you find the words that connect.</h1>
               <p class="tour-subtitle">Whether you're reaching out, making amends, or expressing love — HeartGlowAI guides you through it, step-by-step.</p>
               
               <ul class="tour-features">
-                <li>✅ Thoughtful messages for any relationship</li>
-                <li>✅ Custom tone + emotion</li>
-                <li>✅ Zero pressure, just support</li>
+                <li>
+                  <div class="feature-icon">✓</div>
+                  <span>Thoughtful messages for any relationship</span>
+                </li>
+                <li>
+                  <div class="feature-icon">✓</div>
+                  <span>Custom tone + emotion controls</span>
+                </li>
+                <li>
+                  <div class="feature-icon">✓</div>
+                  <span>Zero pressure, just support when you need it</span>
+                </li>
               </ul>
               
-              <button id="tour-signup-btn" class="cta-btn">Log in or Register - For Free</button>
+              <button id="tour-signup-btn" class="primary-cta">Log in or Register - For Free</button>
             </div>
           </div>
         </div>
         
-        <div class="tour-message-example">
-          <div class="message-card">
-            <div class="message-content">
-              <p>"I've been thinking about you and wanted to reach out. How have you been holding up?"</p>
+        <div class="section-divider"></div>
+        
+        <div class="tour-demo-section">
+          <h2 class="section-title">See it in action</h2>
+          
+          <div class="message-preview">
+            <div class="message-text">
+              I've been thinking about you and wanted to reach out. How have you been holding up?
             </div>
             <div class="message-meta">
-              <span>Generated with Tone: Encouraging | Intensity: 3/5</span>
+              <div class="message-settings">
+                <span class="settings-label">Tone:</span> Encouraging
+              </div>
+              <div class="message-settings">
+                <span class="settings-label">Intensity:</span> 3/5
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="tour-steps">
-          <h2>Here's how it works</h2>
+        <div class="section-divider"></div>
+        
+        <div class="how-it-works">
+          <h2 class="section-title">Here's how it works</h2>
           
-          <div class="step-container">
-            <div class="step">
+          <div class="steps-container">
+            <div class="step-card">
               <div class="step-number">1</div>
-              <div class="step-content">
-                <h3>Choose a relationship type</h3>
-                <p>Friend, partner, family member, colleague, or other</p>
-              </div>
+              <div class="step-icon">👥</div>
+              <h3 class="step-title">Choose a relationship type</h3>
+              <p class="step-description">Friend, partner, family member, colleague, or other - select who you're connecting with</p>
             </div>
             
-            <div class="step">
+            <div class="step-card">
               <div class="step-number">2</div>
-              <div class="step-content">
-                <h3>Tell us what's going on</h3>
-                <p>Describe your situation or what you want to express</p>
-              </div>
+              <div class="step-icon">💬</div>
+              <h3 class="step-title">Tell us what's going on</h3>
+              <p class="step-description">Describe your situation or what you want to express in your own words</p>
             </div>
             
-            <div class="step">
+            <div class="step-card">
               <div class="step-number">3</div>
-              <div class="step-content">
-                <h3>Adjust tone & intensity</h3>
-                <p>Make it casual, formal, poetic, or something in between</p>
-              </div>
+              <div class="step-icon">🎛️</div>
+              <h3 class="step-title">Adjust tone & intensity</h3>
+              <p class="step-description">Make it casual, formal, poetic, or something in between - the choice is yours</p>
             </div>
             
-            <div class="step">
+            <div class="step-card">
               <div class="step-number">4</div>
-              <div class="step-content">
-                <h3>Get your message</h3>
-                <p>Use as-is or tweak it until it feels just right</p>
-              </div>
+              <div class="step-icon">✨</div>
+              <h3 class="step-title">Get your message</h3>
+              <p class="step-description">Use as-is or tweak until it feels just right - we'll help you find the perfect words</p>
             </div>
           </div>
         </div>
         
-        <div class="tour-cta">
-          <button id="tour-signup-btn-bottom" class="cta-btn">Start your first conversation - Free</button>
+        <div class="section-divider"></div>
+        
+        <div class="final-cta">
+          <h2 class="cta-headline">Ready to start expressing yourself?</h2>
+          <p class="cta-subtext">Join thousands of people who are strengthening their relationships with heartfelt messages crafted for real connection.</p>
+          <button id="tour-signup-btn-bottom" class="primary-cta">Start your first conversation - Free</button>
         </div>
       </div>
     </div>

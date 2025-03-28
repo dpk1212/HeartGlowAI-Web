@@ -2183,6 +2183,46 @@
       transform: translateY(-2px);
       box-shadow: var(--box-shadow-hover);
     }
+
+    /* Add navigation button styles */
+    .nav-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .secondary-btn {
+      background: transparent;
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      padding: 12px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+    }
+
+    .secondary-btn:hover {
+      border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+
+    .secondary-btn svg, .secondary-btn span {
+      margin-right: 8px;
+    }
+
+    .dashboard-icon {
+      width: 16px;
+      height: 16px;
+      margin-right: 6px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M4 6h16M4 12h16m-7 6h7'%3E%3C/path%3E%3C/svg%3E");
+      background-position: center;
+      background-repeat: no-repeat;
+    }
   </style>
 </head>
 <body>
@@ -2246,187 +2286,116 @@
     
     <!-- Home Screen -->
     <div id="home-screen" class="screen">
-      <div class="header">
-        <div class="logo-container">
-          <div class="logo-heart"></div>
-          <span class="logo-text">HeartGlowAI</span>
-        </div>
-      </div>
-      
-      <div class="home-header">
-        <h1 class="home-title">Start a meaningful conversation</h1>
-        <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
-      </div>
-      
-      <div class="home-actions">
-        <button id="history-btn" class="settings-btn">
-          <span class="settings-icon">📋</span> History
-        </button>
-        
-        <button id="logout-btn" class="settings-btn">
-          <span class="settings-icon">👤</span> Logout
-        </button>
-      </div>
-      
-      <button id="new-conversation-btn" class="new-conversation-btn">
-        <span class="new-conversation-icon">💬</span> Start a New Conversation
-      </button>
-      
-      <!-- Templates Section -->
-      <div id="templates-section" class="templates-section">
-        <h2 class="section-title">Message Templates</h2>
-        
-        <!-- Everyday Check-ins Category -->
-        <div class="template-category">
-          <h3 class="category-title">Everyday Check-Ins</h3>
-          <div class="templates-grid">
-            <div class="template-card" data-template="checkin">
-              <div class="template-icon">👋</div>
-              <div class="template-name">Check-In</div>
-              <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
-            </div>
-            <div class="template-card" data-template="encouragement">
-              <div class="template-icon">⭐</div>
-              <div class="template-name">Encouragement</div>
-              <div class="template-description">Offer support during a challenging time</div>
-            </div>
+      <div class="home-container">
+        <div class="header">
+          <div class="logo-container">
+            <div class="logo-heart"></div>
+            <div class="logo-text">HeartGlow</div>
+          </div>
+          <div class="nav-buttons">
+            <button id="view-dashboard-btn" class="secondary-btn">
+              <div class="dashboard-icon"></div>
+              Dashboard
+            </button>
+            <button id="logout-btn" class="secondary-btn">Sign Out</button>
           </div>
         </div>
         
-        <!-- Repair & Reconnect Category -->
-        <div class="template-category">
-          <h3 class="category-title">Repair & Reconnect</h3>
-      <div class="templates-grid">
-        <div class="template-card" data-template="apology">
-              <div class="template-icon">✉️</div>
-          <div class="template-name">Apology</div>
-              <div class="template-description">Make amends with empathy and sincerity</div>
-        </div>
-            <div class="template-card" data-template="tough">
-              <div class="template-icon">💬</div>
-              <div class="template-name">Tough Talk</div>
-              <div class="template-description">Navigate a difficult conversation with respect</div>
-            </div>
+        <h1 class="section-title">Create a message</h1>
+        <p class="section-subtitle">Choose a template to get started or create your own</p>
+        
+        <div class="template-grid">
+          <div class="template-card" data-template="apology">
+            <div class="icon apology-icon">✕</div>
+            <h3>Apology</h3>
+            <p>Craft a sincere apology for a mistake or misunderstanding</p>
+          </div>
+          <div class="template-card" data-template="romantic">
+            <div class="icon romantic-icon">❤</div>
+            <h3>Romantic</h3>
+            <p>Express your love and appreciation to your partner</p>
+          </div>
+          <div class="template-card" data-template="tough">
+            <div class="icon tough-icon">↔</div>
+            <h3>Tough Talk</h3>
+            <p>Navigate a difficult conversation with compassion</p>
+          </div>
+          <div class="template-card" data-template="checkin">
+            <div class="icon checkin-icon">?</div>
+            <h3>Check-In</h3>
+            <p>Reconnect with someone you haven't talked to in a while</p>
           </div>
         </div>
         
-        <!-- Celebrate & Appreciate Category -->
-        <div class="template-category">
-          <h3 class="category-title">Celebrate & Appreciate</h3>
-          <div class="templates-grid">
-        <div class="template-card" data-template="romantic">
-              <div class="template-icon">❤️</div>
-          <div class="template-name">Romantic</div>
-              <div class="template-description">Express your love and affection</div>
-        </div>
-            <div class="template-card" data-template="gratitude">
-              <div class="template-icon">🙏</div>
-              <div class="template-name">Gratitude</div>
-              <div class="template-description">Show appreciation for their support</div>
-        </div>
-            <div class="template-card" data-template="celebration">
-              <div class="template-icon">🎉</div>
-              <div class="template-name">Celebration</div>
-              <div class="template-description">Congratulate someone on their achievement</div>
-        </div>
-            <div class="template-card" data-template="sympathy">
-              <div class="template-icon">💐</div>
-              <div class="template-name">Sympathy</div>
-              <div class="template-description">Offer comfort during a difficult time</div>
-            </div>
-          </div>
-        </div>
-        
-        <button id="feedbackButton" class="feedback-button">
-          <span class="feedback-icon">⭐</span> Submit Feedback
+        <button id="new-conversation-btn" class="create-btn">
+          <span>+</span> Create Custom Message
         </button>
       </div>
     </div>
     
     <!-- Message Generator Screen -->
     <div id="generator-screen" class="screen">
-      <button id="back-to-home-btn" class="back-button">
-        <span class="back-icon">←</span> Back
-      </button>
-      
       <div class="generator-container">
-        <div class="form-container">
-          <div class="input-group">
-            <label for="scenario">What would you like to say?</label>
-            <textarea id="scenario" placeholder="Example: I want to express my gratitude for their support during a difficult time"></textarea>
+        <div class="header">
+          <div class="logo-container">
+            <div class="logo-heart"></div>
+            <div class="logo-text">HeartGlow</div>
+          </div>
+          <div class="nav-buttons">
+            <button id="back-to-dashboard-btn" class="secondary-btn">
+              <div class="dashboard-icon"></div>
+              Dashboard
+            </button>
+            <button id="back-to-home-btn" class="secondary-btn">
+              <span>←</span> Back
+            </button>
+          </div>
+        </div>
+        
+        <!-- Rest of the generator screen content -->
+        <h1 class="section-title">Generate a message</h1>
+        
+        <form id="messageForm" class="message-form">
+          <div class="form-group">
+            <label for="scenario" class="form-label">Describe your scenario</label>
+            <textarea id="scenario" class="textarea-field" placeholder="Example: I need to apologize to my friend for missing their birthday" rows="3"></textarea>
           </div>
           
-          <div class="input-group">
-            <label for="relationship">Relationship Type</label>
-            <select id="relationship">
-              <option value="Friend">Friend</option>
+          <div class="form-group">
+            <label for="relationship" class="form-label">Relationship</label>
+            <select id="relationship" class="select-field">
               <option value="Romantic Partner">Romantic Partner</option>
+              <option value="Friend">Friend</option>
               <option value="Family Member">Family Member</option>
-              <option value="Professional">Professional</option>
-              <option value="Mentor">Mentor</option>
+              <option value="Professional Contact">Professional Contact</option>
             </select>
           </div>
           
-          <div class="input-group">
-            <label for="tone">Message Tone</label>
-            <select id="tone">
-              <option value="casual">Casual</option>
-              <option value="formal">Formal</option>
-              <option value="humorous">Humorous</option>
-              <option value="serious">Serious</option>
-              <option value="poetic">Poetic</option>
-              <option value="professional">Professional</option>
-            </select>
-          </div>
-          
-          <div class="input-group">
-            <label for="intensity">Tone Intensity</label>
-            <div class="slider-container">
-              <input type="range" id="intensity" min="1" max="5" value="3" class="slider">
-              <div class="slider-labels">
-                <span>Subtle</span>
-                <span>Balanced</span>
-                <span>Strong</span>
-              </div>
+          <button type="button" id="generateBtn" class="btn">Generate Message</button>
+        </form>
+        
+        <div id="result" class="result-card">
+          <div class="result-header">
+            <h2>Your Message</h2>
+            <div class="result-actions">
+              <button class="action-button copy-button" onclick="copyMessage()">
+                Copy
+              </button>
+              <button class="action-button tweak-button" onclick="showFeedback()">
+                Tweak
+              </button>
             </div>
           </div>
           
-          <div class="input-group">
-            <label for="duration">Relationship Duration</label>
-            <select id="duration">
-              <option value="unspecified">Not specified</option>
-              <option value="new">New/Recent</option>
-              <option value="few months">Few months</option>
-              <option value="1-5 years">1-5 years</option>
-              <option value="5+ years">5+ years</option>
-              <option value="lifelong">Lifelong</option>
-            </select>
+          <div class="result-content">
+            <p id="messageText" class="message-text"></p>
           </div>
           
-          <div class="input-group">
-            <label for="circumstances">Special Circumstances (Optional)</label>
-            <textarea id="circumstances" placeholder="Example: We recently had an argument, or They're going through a tough time"></textarea>
+          <div id="feedbackSection" class="feedback-section">
+            <textarea id="feedback" class="feedback-textarea" placeholder="How would you like to improve this message?"></textarea>
+            <button onclick="tweakMessage()" class="tweak-submit-button">Generate New Version</button>
           </div>
           
-          <button id="generateBtn" class="primary-button">
-            <span class="button-content">
-              Generate Message
-              <span class="button-icon">✨</span>
-            </span>
-          </button>
-        </div>
-        
-        <div id="result" class="result-card" style="display: none;">
-          <div class="message-text" id="messageText"></div>
-          <div class="button-group">
-            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
-            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
-          </div>
-          <div class="feedback-section" id="feedbackSection">
-            <label for="feedback">How would you like to improve this message?</label>
-            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
-            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
-          </div>
           <div class="insights-section">
             <div class="insights-title">Why this message works:</div>
             <ul class="insights-list" id="insightsList"></ul>
@@ -2609,7 +2578,7 @@
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+    let welcomeScreen, authScreen, homeScreen, generatorScreen, dashboardScreen;
     let messageCount = 0;
     let hasSubmittedFeedback = false;
     
@@ -2630,12 +2599,12 @@
 
     // Screen transition function
     function showScreen(screen) {
-      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen];
+      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, dashboardScreen];
       screens.forEach(s => {
-        if (s === screen) {
+        if (s && s === screen) {
           s.style.display = 'flex';
           setTimeout(() => s.classList.add('active'), 50);
-        } else {
+        } else if (s) {
           s.classList.remove('active');
           setTimeout(() => {
             if (!s.classList.contains('active')) {
@@ -2645,6 +2614,16 @@
         }
       });
     }
+    
+    // Hide screen helper function
+    function hideScreen(screen) {
+      if (screen) {
+        screen.classList.remove('active');
+        setTimeout(() => {
+          screen.style.display = 'none';
+        }, 500);
+      }
+    }
 
     // Initialize app function
     function initializeApp() {
@@ -2653,13 +2632,14 @@
       authScreen = document.getElementById('auth-screen');
       homeScreen = document.getElementById('home-screen');
       generatorScreen = document.getElementById('generator-screen');
+      dashboardScreen = document.getElementById('dashboard-screen');
 
       // Add favicon
       const favicon = document.createElement('link');
       favicon.rel = 'icon';
       favicon.type = 'image/svg+xml';
       favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
-      document.head.appendChild(favicon);
+    document.head.appendChild(favicon);
 
       // Show welcome screen by default
       showScreen(welcomeScreen);

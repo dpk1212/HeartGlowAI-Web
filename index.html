@@ -318,12 +318,16 @@
     }
     
     .section-title {
-      font-size: 20px;
-      font-weight: 600;
-      margin-bottom: 20px;
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 24px;
       display: flex;
       align-items: center;
       color: var(--text-primary);
+      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     
     .section-title:after {
@@ -365,27 +369,33 @@
       color: white;
       border: none;
       border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
+      padding: 18px 16px;
+      font-size: 17px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
       margin-bottom: 30px;
       text-align: center;
-      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), filter var(--transition-smooth);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
     
     .new-conversation-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--box-shadow-hover);
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      filter: brightness(1.05);
+    }
+    
+    .new-conversation-btn:active {
+      transform: translateY(1px) scale(0.98);
     }
     
     .new-conversation-icon {
       margin-right: 10px;
-      font-size: 18px;
+      font-size: 20px;
     }
     
     .templates-title {
@@ -398,24 +408,91 @@
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+    }
+    
+    @media (max-width: 480px) {
+      .templates-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .template-card {
+        padding: 20px 16px;
+      }
+    }
+    
+    .templates-section {
+      margin-top: 10px;
     }
     
     .template-card {
       background-color: var(--card-bg);
       border-radius: 16px;
-      padding: 20px;
+      padding: 24px 20px;
       text-align: center;
       cursor: pointer;
-      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
-      backdrop-filter: blur(8px);
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), background-color var(--transition-smooth);
       position: relative;
       overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     
     .template-card:hover {
       transform: translateY(-4px) scale(1.02);
       box-shadow: var(--box-shadow-hover);
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+    
+    .template-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+      font-size: 24px;
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(100, 210, 255, 0.1) 100%);
+    }
+    
+    .template-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+    
+    .template-description {
+      font-size: 13px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+    
+    .template-category {
+      margin-top: 36px;
+      margin-bottom: 16px;
+    }
+    
+    .category-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .category-title::before {
+      content: '';
+      display: inline-block;
+      width: 4px;
+      height: 14px;
+      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
+      margin-right: 10px;
+      border-radius: 2px;
     }
     
     .template-card::before {
@@ -1697,8 +1774,8 @@
       </div>
       
       <div class="home-header">
-        <h1 class="home-title">Generate heartfelt messages</h1>
-        <p class="home-subtitle">What would you like to say today?</p>
+        <h1 class="home-title">Start a meaningful conversation</h1>
+        <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
       </div>
       
       <div class="home-actions">
@@ -1718,40 +1795,68 @@
       <!-- Templates Section -->
       <div id="templates-section" class="templates-section">
         <h2 class="section-title">Message Templates</h2>
-        <div class="templates-grid">
-          <div class="template-card" data-template="apology">
-            <div class="template-icon apology">✕</div>
-            <div class="template-name">Apology</div>
-          </div>
-          <div class="template-card" data-template="romantic">
-            <div class="template-icon romantic">❤️</div>
-            <div class="template-name">Romantic</div>
-          </div>
-          <div class="template-card" data-template="tough">
-            <div class="template-icon tough">≡</div>
-            <div class="template-name">Tough Talk</div>
-          </div>
-          <div class="template-card" data-template="checkin">
-            <div class="template-icon checkin">✧</div>
-            <div class="template-name">Check-In</div>
-          </div>
-          <div class="template-card" data-template="gratitude">
-            <div class="template-icon gratitude">🙏</div>
-            <div class="template-name">Gratitude</div>
-          </div>
-          <div class="template-card" data-template="celebration">
-            <div class="template-icon celebration">🎉</div>
-            <div class="template-name">Celebration</div>
-          </div>
-          <div class="template-card" data-template="encouragement">
-            <div class="template-icon encouragement">⭐</div>
-            <div class="template-name">Encouragement</div>
-          </div>
-          <div class="template-card" data-template="sympathy">
-            <div class="template-icon sympathy">💐</div>
-            <div class="template-name">Sympathy</div>
+        
+        <!-- Everyday Check-ins Category -->
+        <div class="template-category">
+          <h3 class="category-title">Everyday Check-Ins</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="checkin">
+              <div class="template-icon">👋</div>
+              <div class="template-name">Check-In</div>
+              <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
+            </div>
+            <div class="template-card" data-template="encouragement">
+              <div class="template-icon">⭐</div>
+              <div class="template-name">Encouragement</div>
+              <div class="template-description">Offer support during a challenging time</div>
+            </div>
           </div>
         </div>
+        
+        <!-- Repair & Reconnect Category -->
+        <div class="template-category">
+          <h3 class="category-title">Repair & Reconnect</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="apology">
+              <div class="template-icon">✉️</div>
+              <div class="template-name">Apology</div>
+              <div class="template-description">Make amends with empathy and sincerity</div>
+            </div>
+            <div class="template-card" data-template="tough">
+              <div class="template-icon">💬</div>
+              <div class="template-name">Tough Talk</div>
+              <div class="template-description">Navigate a difficult conversation with respect</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Celebrate & Appreciate Category -->
+        <div class="template-category">
+          <h3 class="category-title">Celebrate & Appreciate</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="romantic">
+              <div class="template-icon">❤️</div>
+              <div class="template-name">Romantic</div>
+              <div class="template-description">Express your love and affection</div>
+            </div>
+            <div class="template-card" data-template="gratitude">
+              <div class="template-icon">🙏</div>
+              <div class="template-name">Gratitude</div>
+              <div class="template-description">Show appreciation for their support</div>
+            </div>
+            <div class="template-card" data-template="celebration">
+              <div class="template-icon">🎉</div>
+              <div class="template-name">Celebration</div>
+              <div class="template-description">Congratulate someone on their achievement</div>
+            </div>
+            <div class="template-card" data-template="sympathy">
+              <div class="template-icon">💐</div>
+              <div class="template-name">Sympathy</div>
+              <div class="template-description">Offer comfort during a difficult time</div>
+            </div>
+          </div>
+        </div>
+        
         <button id="feedbackButton" class="feedback-button">
           <span class="feedback-icon">⭐</span> Submit Feedback
         </button>

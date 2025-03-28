@@ -2342,7 +2342,8 @@
         // Get auth token if user is logged in
         let headers = {
           'Content-Type': 'application/json',
-          'Origin': window.location.origin
+          'Origin': window.location.origin,
+          'Access-Control-Allow-Origin': '*'
         };
 
         if (currentUser) {
@@ -2354,8 +2355,7 @@
           method: options.method || 'POST',
           headers: headers,
           body: JSON.stringify(data),
-          mode: 'cors',
-          credentials: 'include'
+          mode: 'cors'
         });
 
         console.log('Response status:', response.status);
@@ -2370,13 +2370,25 @@
         console.log('Response data:', responseData);
 
         if (!response.ok) {
-          throw new Error(responseData.error || 'Request failed');
+          const error = new Error(responseData.error || 'Request failed');
+          error.status = response.status;
+          throw error;
         }
 
         return responseData;
       } catch (error) {
         console.error('API request failed:', error);
-        throw error;
+        
+        // Enhanced error handling
+        if (error.message.includes('Failed to fetch')) {
+          throw new Error('Unable to connect to the server. Please check your connection and try again.');
+        } else if (error.status === 403) {
+          throw new Error('Access denied. Please check your authentication.');
+        } else if (error.status === 429) {
+          throw new Error('Too many requests. Please try again in a moment.');
+        } else {
+          throw error;
+        }
       }
     }
 
@@ -3391,7 +3403,7 @@
         };
 
         const data = await makeApiRequest(API_CONFIG.ENDPOINTS.GENERATE, requestData);
-
+        
         // Hide loading first
         hideLoading();
         
@@ -3423,17 +3435,21 @@
         hideLoading();
         
         // Show appropriate error message
-        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+        if (error.message.includes('Unable to connect')) {
           showAlert('Unable to connect to the server. Please check your connection and try again.', 'error');
-        } else if (error.message.includes('CORS')) {
-          showAlert('Server connection error. Our team has been notified.', 'error');
-          // Log the CORS error for debugging
-          console.error('CORS Error Details:', {
+        } else if (error.message.includes('Access denied')) {
+          showAlert('Access denied. Please try logging in again.', 'error');
+        } else if (error.message.includes('Too many requests')) {
+          showAlert('We\'re experiencing high demand. Please try again in a moment.', 'error');
+        } else if (error.message.includes('CORS') || error.name === 'TypeError') {
+          showAlert('Connection error. Our team has been notified.', 'error');
+          // Log the error for debugging
+          console.error('Connection Error Details:', {
             origin: window.location.origin,
             error: error.message
           });
         } else {
-          showAlert(error.message || 'Failed to generate message', 'error');
+          showAlert(error.message || 'Failed to generate message. Please try again.', 'error');
         }
       }
     };

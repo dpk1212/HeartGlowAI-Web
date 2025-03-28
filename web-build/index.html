@@ -2053,6 +2053,67 @@
     .message-insights {
       margin-top: 24px;
     }
+
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .loading-container {
+      text-align: center;
+    }
+
+    .heart-loader {
+      display: inline-block;
+      position: relative;
+      width: 80px;
+      height: 80px;
+      transform: rotate(45deg);
+      transform-origin: 40px 40px;
+      animation: heartbeat 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    .heart-loader:before,
+    .heart-loader:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 36px;
+      height: 36px;
+      background: var(--primary-color);
+      border-radius: 18px;
+    }
+
+    .heart-loader:after {
+      top: -26px;
+      left: 26px;
+    }
+
+    @keyframes heartbeat {
+      0% { transform: scale(0.95); }
+      5% { transform: scale(1.1); }
+      39% { transform: scale(0.85); }
+      45% { transform: scale(1); }
+      60% { transform: scale(0.95); }
+      100% { transform: scale(0.9); }
+    }
+
+    .loading-message {
+      margin-top: 2rem;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -2309,18 +2370,8 @@
   <!-- Add loading overlay -->
   <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-container">
-      <div class="heart-animation">
-        <div class="heart-shape"></div>
-        <div class="heart-glow"></div>
-        <div class="heart-particles">
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-          <div class="particle"></div>
-        </div>
-      </div>
-      <div id="loadingContext" class="loading-context">Creating your message...</div>
+      <div class="heart-loader"></div>
+      <p id="loadingMessage" class="loading-message">Crafting your message...</p>
     </div>
   </div>
   
@@ -2387,58 +2438,28 @@
       console.log(`Making API request to: ${url}`);
 
       try {
-        // Get auth token if user is logged in
-        let headers = {
-          'Content-Type': 'application/json'
-        };
-
-        if (currentUser) {
-          const idToken = await currentUser.getIdToken();
-          headers['Authorization'] = `Bearer ${idToken}`;
-        }
-
-        // Add CORS headers
         const response = await fetch(url, {
           method: options.method || 'POST',
-          headers: headers,
-          body: JSON.stringify(data),
-          mode: 'cors'
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(data)
         });
 
         console.log('Response status:', response.status);
 
-        // Handle non-JSON responses
-        const contentType = response.headers.get('content-type');
-        if (!contentType || !contentType.includes('application/json')) {
-          console.error('Invalid content type:', contentType);
-          throw new Error('Invalid response format from server');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         const responseData = await response.json();
         console.log('Response data:', responseData);
 
-        if (!response.ok) {
-          const error = new Error(responseData.error || 'Request failed');
-          error.status = response.status;
-          throw error;
-        }
-
         return responseData;
       } catch (error) {
         console.error('API request failed:', error);
-        
-        // Enhanced error handling
-        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-          throw new Error('Unable to connect to the server. Please check your connection and try again.');
-        } else if (error.status === 403) {
-          throw new Error('Access denied. Please check your authentication.');
-        } else if (error.status === 429) {
-          throw new Error('Too many requests. Please try again in a moment.');
-        } else if (error.status === 405) {
-          throw new Error('Server configuration error. Our team has been notified.');
-        } else {
-          throw error;
-        }
+        throw new Error(error.message || 'Failed to connect to server');
       }
     }
 
@@ -3358,204 +3379,74 @@
     
     // Results overlay functions
     function showResults(message, insights) {
-      console.log('Showing results overlay');
+      const overlay = document.getElementById('resultsOverlay');
+      const messageText = document.getElementById('messageText');
+      const insightsList = document.getElementById('messageInsights');
       
-      // Ensure old result card is hidden
-      const resultCard = document.getElementById('result');
-      if (resultCard) {
-        resultCard.style.display = 'none';
+      if (messageText) {
+        messageText.textContent = message;
       }
       
-      // Get overlay elements
-      const resultsOverlay = document.getElementById('resultsOverlay');
-      const resultsMessage = document.getElementById('resultsMessage');
-      const insightsList = document.getElementById('resultsInsights');
-      
-      if (!resultsOverlay || !resultsMessage || !insightsList) {
-        console.error('Required results elements not found');
-        return;
-      }
-      
-      // Update message
-      resultsMessage.textContent = message;
-      
-      // Clear and update insights
-      insightsList.innerHTML = '';
-      if (insights && Array.isArray(insights)) {
+      if (insightsList) {
+        insightsList.innerHTML = '';
         insights.forEach(insight => {
           const li = document.createElement('li');
-          li.className = 'insight-item';
           li.textContent = insight;
           insightsList.appendChild(li);
         });
       }
       
-      // Show overlay with animation
-      resultsOverlay.style.display = 'flex';
-      // Force reflow
-      resultsOverlay.offsetHeight;
-      resultsOverlay.classList.add('active');
-      
-      // Add escape key listener
-      document.addEventListener('keydown', function escapeHandler(e) {
-        if (e.key === 'Escape') {
-          hideResults();
-          document.removeEventListener('keydown', escapeHandler);
-        }
-      });
-      
-      // Add click outside listener
-      resultsOverlay.addEventListener('click', function overlayClickHandler(e) {
-        if (e.target === resultsOverlay) {
-          hideResults();
-          resultsOverlay.removeEventListener('click', overlayClickHandler);
-        }
-      });
-    }
-    
-    function hideResults() {
-      console.log('Hiding results overlay');
-      const resultsOverlay = document.getElementById('resultsOverlay');
-      if (!resultsOverlay) return;
-      
-      resultsOverlay.classList.remove('active');
-      
-      // Wait for animation to complete before hiding
-      setTimeout(() => {
-        if (!resultsOverlay.classList.contains('active')) {
-          resultsOverlay.style.display = 'none';
-        }
-      }, 400); // Match the CSS transition duration
-    }
-    
-    // Update the generateMessage function to use the helper
-    window.generateMessage = async function(isRetry = false) {
-      const scenario = document.getElementById('scenario').value.trim();
-      const relationship = document.getElementById('relationship').value;
-      const tone = document.getElementById('tone').value;
-      const intensity = document.getElementById('intensity').value;
-      const duration = document.getElementById('duration').value;
-      const circumstances = document.getElementById('circumstances').value.trim();
-
-      // Input validation
-      if (!scenario) {
-        showAlert('Please describe what you would like to say', 'error');
-        return;
+      if (overlay) {
+        overlay.style.display = 'flex';
+        setTimeout(() => overlay.classList.add('active'), 10);
       }
+    }
 
-      // Show loading animation
-      showLoading();
-      updateLoadingContext(relationship, tone);
+    function hideResults() {
+      const overlay = document.getElementById('resultsOverlay');
+      if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => {
+          overlay.style.display = 'none';
+        }, 300);
+      }
+    }
 
-      try {
-        const requestData = {
-          scenario,
-          relationshipType: relationship,
-          tone,
-          toneIntensity: intensity,
-          relationshipDuration: duration,
-          specialCircumstances: circumstances,
-          retry: isRetry
-        };
-
-        const data = await makeApiRequest(API_CONFIG.ENDPOINTS.GENERATE, requestData);
-        
-        // Hide loading first
-        hideLoading();
-        
-        if (data && data.message) {
-          // Prepare insights
-          const insights = data.insights || [
-            "The message uses an appropriate tone for your relationship",
-            "It clearly expresses your intention while respecting boundaries",
-            "The language is authentic and connects emotionally"
-          ];
-          
-          // Show results in popup
-          showResults(data.message, insights);
-          
-          // Store current message for feedback
-          currentMessage = data.message;
-          
-          // Try to save to history in the background
-          if (currentUser) {
-            saveMessage(scenario, relationship, data.message).catch(console.error);
-          }
-        } else {
-          throw new Error('No message received from server');
-        }
-      } catch (error) {
-        console.error('Error generating message:', error);
-        
-        // Hide loading
-        hideLoading();
-        
-        // Show appropriate error message
-        if (error.message.includes('Unable to connect')) {
-          showAlert('Unable to connect to the server. Please check your connection and try again.', 'error');
-        } else if (error.message.includes('Access denied')) {
-          showAlert('Access denied. Please try logging in again.', 'error');
-        } else if (error.message.includes('Too many requests')) {
-          showAlert('We\'re experiencing high demand. Please try again in a moment.', 'error');
-        } else if (error.message.includes('Server configuration')) {
-          showAlert('We\'re experiencing technical difficulties. Please try again in a few minutes.', 'error');
-        } else {
-          showAlert(error.message || 'Failed to generate message. Please try again.', 'error');
-        }
+    // Copy functionality
+    window.copyMessage = function() {
+      const messageText = document.getElementById('messageText');
+      if (messageText) {
+        navigator.clipboard.writeText(messageText.textContent)
+          .then(() => showAlert('Message copied to clipboard!', 'success'))
+          .catch(() => showAlert('Failed to copy message', 'error'));
       }
     };
 
-    // Add event listeners for results overlay
-    document.addEventListener('DOMContentLoaded', function() {
-      // Setup results overlay listeners
-      const closeResults = document.getElementById('closeResults');
-      if (closeResults) {
-        closeResults.addEventListener('click', hideResults);
+    // Feedback functionality
+    window.showFeedback = function() {
+      const feedbackForm = document.getElementById('resultsFeedbackForm');
+      if (feedbackForm) {
+        feedbackForm.style.display = 'block';
       }
+    };
+
+    window.tweakMessage = async function() {
+      const feedbackInput = document.getElementById('resultsFeedbackInput');
+      if (!feedbackInput || !feedbackInput.value.trim()) {
+        showAlert('Please provide feedback on how to improve the message', 'error');
+        return;
+      }
+
+      // Store the feedback in circumstances
+      document.getElementById('circumstances').value = 'FEEDBACK: ' + feedbackInput.value.trim();
       
-      // Copy button functionality
-      const resultsCopyBtn = document.getElementById('resultsCopyBtn');
-      if (resultsCopyBtn) {
-        resultsCopyBtn.addEventListener('click', function() {
-          const messageText = document.getElementById('resultsMessage').textContent;
-          navigator.clipboard.writeText(messageText).then(function() {
-            showAlert('Message copied to clipboard!', 'success');
-          }).catch(function(err) {
-            console.error('Could not copy text: ', err);
-            showAlert('Failed to copy message', 'error');
-          });
-        });
-      }
+      // Generate new message with feedback
+      await generateMessage(true);
       
-      // Tweak button functionality
-      const resultsTweakBtn = document.getElementById('resultsTweakBtn');
-      if (resultsTweakBtn) {
-        resultsTweakBtn.addEventListener('click', function() {
-          document.getElementById('resultsFeedbackForm').style.display = 'block';
-        });
-      }
-      
-      // Submit feedback button
-      const resultsSubmitFeedback = document.getElementById('resultsSubmitFeedback');
-      if (resultsSubmitFeedback) {
-        resultsSubmitFeedback.addEventListener('click', function() {
-          tweakMessage();
-        });
-      }
-      
-      // Ensure the Generate button calls the generateMessage function
-      const generateBtn = document.getElementById('generateBtn');
-      if (generateBtn) {
-        // Remove any existing listeners
-        const newBtn = generateBtn.cloneNode(true);
-        generateBtn.parentNode.replaceChild(newBtn, generateBtn);
-        
-        // Add new listener
-        newBtn.addEventListener('click', function() {
-          generateMessage();
-        });
-      }
-    });
+      // Reset feedback form
+      feedbackInput.value = '';
+      document.getElementById('resultsFeedbackForm').style.display = 'none';
+    };
 
     async function submitFeedback(rating, comment) {
       if (!currentMessage) {

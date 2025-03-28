@@ -2431,18 +2431,33 @@
 
     // Save message to history function
     async function saveMessage(scenario, relationship, message) {
+      // Skip if user is not authenticated
+      if (!currentUser) {
+        console.log('Message not saved to history - user not authenticated');
+        return;
+      }
+
       try {
         const requestData = {
           scenario,
           relationshipType: relationship,
-          message
+          message,
+          userId: currentUser.uid,
+          timestamp: new Date().toISOString()
         };
 
-        await makeApiRequest(API_CONFIG.ENDPOINTS.HISTORY, requestData);
+        // Try to save to history, but don't block on failure
+        await Promise.race([
+          makeApiRequest(API_CONFIG.ENDPOINTS.HISTORY, requestData),
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Save timeout')), 5000)
+          )
+        ]);
+        
         console.log('Message saved to history successfully');
       } catch (error) {
-        console.error('Error saving message to history:', error);
-        // Don't show error to user since this is a background operation
+        // Log error but don't surface to user since this is a background operation
+        console.log('Note: Message history not saved -', error.message);
       }
     }
 
@@ -3085,9 +3100,9 @@
           // Show results in the popup overlay
           showResults(data.message, insights);
           
-          // Save to history if logged in
+          // Try to save to history in the background
           if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
+            saveMessage(scenario, relationship, data.message).catch(console.error);
           }
           
           // After successful message generation, update message count
@@ -3421,9 +3436,9 @@
           // Store current message for feedback
           currentMessage = data.message;
           
-          // Save to history if user is authenticated
+          // Try to save to history in the background
           if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
+            saveMessage(scenario, relationship, data.message).catch(console.error);
           }
         } else {
           throw new Error('No message received from server');

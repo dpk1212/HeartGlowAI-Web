@@ -3220,6 +3220,7 @@
     function showResultsPopup() {
       const resultsPopup = document.getElementById('resultsPopupOverlay');
       if (resultsPopup) {
+        resultsPopup.style.zIndex = '9999'; // Ensure it's above everything
         resultsPopup.style.display = 'flex';
         setTimeout(() => {
           resultsPopup.classList.add('active');

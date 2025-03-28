@@ -10,7 +10,8 @@
     "setup": "node setup.js",
     "deploy": "node deploy.js",
     "backup": "node -e \"const fs=require('fs'); const d=new Date(); const dir='backups/backup-'+d.toISOString().replace(/:/g,'-'); fs.mkdirSync(dir, {recursive:true}); fs.copyFileSync('web-build/index.html', dir+'/index.html'); console.log('Backup created at '+dir)\"",
-    "restore": "node -e \"const fs=require('fs'); const path=require('path'); const backupDir=fs.readdirSync('backups').sort().pop(); if(backupDir) { console.log('Restoring from '+backupDir); fs.copyFileSync(path.join('backups', backupDir, 'index.html'), 'web-build/index.html'); console.log('Restored!'); } else { console.log('No backups found!'); }\""
+    "restore": "node revert.js",
+    "restore-old": "node -e \"const fs=require('fs'); const path=require('path'); const backupDir=fs.readdirSync('backups').sort().pop(); if(backupDir) { console.log('Restoring from '+backupDir); fs.copyFileSync(path.join('backups', backupDir, 'index.html'), 'web-build/index.html'); console.log('Restored!'); } else { console.log('No backups found!'); }\""
   },
   "dependencies": {
     "axios": "^1.6.0",

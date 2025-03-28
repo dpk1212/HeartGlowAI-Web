@@ -2508,6 +2508,536 @@
         margin-top: 10px;
       }
     }
+
+    /* Animation keyframes */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeInRight {
+      from {
+        opacity: 0;
+        transform: translateX(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes fadeInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes glowPulse {
+      0% {
+        filter: drop-shadow(0 0 8px rgba(255, 107, 157, 0.7));
+      }
+      50% {
+        filter: drop-shadow(0 0 15px rgba(255, 107, 157, 0.9));
+      }
+      100% {
+        filter: drop-shadow(0 0 8px rgba(255, 107, 157, 0.7));
+      }
+    }
+    
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% 50%;
+      }
+      50% {
+        background-position: 100% 50%;
+      }
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+    
+    /* Tour button styles */
+    .tour-btn {
+      margin-top: 16px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tour-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    /* Tour screen styles */
+    .tour-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 16px;
+      color: var(--text-primary);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    
+    .tour-header {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      margin-bottom: 20px;
+      animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    .tour-hero {
+      display: flex;
+      flex-direction: column;
+      margin: 20px 0 60px;
+      position: relative;
+      align-items: center;
+      text-align: center;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-container {
+        padding: 0 40px;
+      }
+      
+      .tour-header {
+        padding: 20px 0;
+        margin-bottom: 40px;
+      }
+      
+      .tour-hero {
+        flex-direction: row;
+        align-items: flex-start;
+        text-align: left;
+        margin: 60px 0 100px;
+        gap: 60px;
+      }
+    }
+    
+    .tour-hero-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 100%;
+      margin-bottom: 40px;
+      animation: fadeInRight 0.8s ease-out forwards;
+    }
+    
+    .tour-hero-right {
+      width: 100%;
+      max-width: 360px;
+      margin: 0 auto;
+      animation: fadeInLeft 0.8s ease-out forwards;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-hero-left {
+        flex: 1;
+        align-items: flex-start;
+        text-align: left;
+        margin-bottom: 0;
+      }
+      
+      .tour-hero-right {
+        flex: 1;
+        max-width: 400px;
+        margin: 0;
+      }
+    }
+    
+    .tour-neon-heart {
+      width: 220px;
+      height: 220px;
+      margin-bottom: 32px;
+      filter: drop-shadow(0 0 12px rgba(255, 107, 157, 0.8));
+      animation: floatAnimation 6s ease-in-out infinite, glowPulse 4s ease-in-out infinite;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-neon-heart {
+        width: 280px;
+        height: 280px;
+        margin-bottom: 40px;
+      }
+    }
+    
+    @keyframes floatAnimation {
+      0% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-15px);
+      }
+      100% {
+        transform: translateY(0);
+      }
+    }
+    
+    .tour-title {
+      font-size: 40px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.2s;
+    }
+    
+    .tour-subtitle {
+      font-size: 20px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+      max-width: 500px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.4s;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-title {
+        font-size: 56px;
+        margin-bottom: 24px;
+      }
+      
+      .tour-subtitle {
+        font-size: 24px;
+        margin-bottom: 48px;
+      }
+    }
+    
+    .message-card {
+      background: rgba(30, 30, 45, 0.8);
+      border-radius: 16px;
+      padding: 28px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      text-align: left;
+    }
+    
+    .message-content {
+      font-size: 19px;
+      line-height: 1.5;
+      color: var(--text-primary);
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    
+    .message-meta {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    @media (min-width: 992px) {
+      .message-card {
+        padding: 30px;
+      }
+      
+      .message-content {
+        font-size: 21px;
+      }
+    }
+    
+    .tour-cta-button {
+      display: inline-block;
+      background: rgba(50, 50, 80, 0.9);
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      text-align: center;
+      border-radius: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.2s;
+    }
+    
+    .tour-cta-button:hover {
+      background: rgba(60, 60, 100, 0.95);
+      transform: translateY(-3px);
+    }
+    
+    /* Brand-styled CTA button */
+    .branded-cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue), var(--accent-pink));
+      background-size: 200% 200%;
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      text-align: center;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+      position: relative;
+      overflow: hidden;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.4s, gradientFlow 8s ease infinite;
+    }
+    
+    .branded-cta-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 1s ease;
+    }
+    
+    .branded-cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255, 107, 157, 0.4);
+    }
+    
+    .branded-cta-button:hover::after {
+      transform: translateX(100%);
+    }
+    
+    .tour-note {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+      margin-top: 8px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.6s;
+    }
+    
+    @media (min-width: 992px) {
+      .tour-cta-button, .branded-cta-button {
+        padding: 18px 40px;
+        font-size: 18px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+      
+      .branded-cta-button {
+        font-size: 19px;
+      }
+      
+      .tour-note {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+    }
+    
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+      margin: 32px 0 48px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.2s;
+    }
+    
+    @media (min-width: 992px) {
+      .divider {
+        margin: 40px 0 60px;
+      }
+    }
+    
+    .section-title {
+      font-size: 32px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 40px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 0.3s;
+    }
+    
+    @media (min-width: 992px) {
+      .section-title {
+        font-size: 42px;
+        margin-bottom: 80px;
+      }
+    }
+    
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin: 0 auto 60px;
+    }
+    
+    @media (min-width: 992px) {
+      .steps-container {
+        gap: 20px;
+        max-width: 800px;
+        margin-bottom: 100px;
+      }
+    }
+    
+    .step-card {
+      display: flex;
+      gap: 16px;
+      background: rgba(30, 30, 45, 0.6);
+      border-radius: 16px;
+      padding: 20px;
+      align-items: center;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+    }
+    
+    .step-card:nth-child(1) {
+      animation: fadeInUp 0.6s ease forwards 0.4s;
+    }
+    
+    .step-card:nth-child(2) {
+      animation: fadeInUp 0.6s ease forwards 0.6s;
+    }
+    
+    .step-card:nth-child(3) {
+      animation: fadeInUp 0.6s ease forwards 0.8s;
+    }
+    
+    .step-card:nth-child(4) {
+      animation: fadeInUp 0.6s ease forwards 1s;
+    }
+    
+    .step-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+      background: rgba(40, 40, 60, 0.7);
+    }
+    
+    @media (min-width: 992px) {
+      .step-card {
+        gap: 30px;
+        padding: 30px;
+      }
+    }
+    
+    .step-number {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-right: 8px;
+      min-width: 24px;
+    }
+    
+    .step-icon {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      background: linear-gradient(135deg, rgba(100, 100, 255, 0.2), rgba(50, 50, 120, 0.2));
+      color: var(--text-primary);
+      font-size: 20px;
+      flex-shrink: 0;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+    
+    .step-card:hover .step-icon {
+      transform: scale(1.1) rotate(5deg);
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(100, 140, 255, 0.2));
+    }
+    
+    @media (min-width: 992px) {
+      .step-number {
+        font-size: 32px;
+        margin-right: 16px;
+        min-width: 40px;
+      }
+      
+      .step-icon {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+        font-size: 28px;
+      }
+    }
+    
+    .step-content {
+      flex: 1;
+    }
+    
+    .step-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-primary);
+    }
+    
+    .step-description {
+      font-size: 14px;
+      line-height: 1.4;
+      color: var(--text-secondary);
+    }
+    
+    @media (min-width: 992px) {
+      .step-title {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      
+      .step-description {
+        font-size: 16px;
+        line-height: 1.5;
+      }
+    }
+    
+    .bottom-cta {
+      text-align: center;
+      margin-bottom: 60px;
+      opacity: 0;
+      animation: fadeInUp 0.8s ease forwards 1.2s;
+    }
+    
+    .bottom-cta .branded-cta-button {
+      max-width: 340px;
+      margin: 0 auto;
+      animation: none;
+      opacity: 1;
+    }
+    
+    @media (min-width: 992px) {
+      .bottom-cta {
+        margin-bottom: 80px;
+      }
+      
+      .bottom-cta .branded-cta-button {
+        max-width: 400px;
+      }
+    }
   </style>
 </head>
 <body>

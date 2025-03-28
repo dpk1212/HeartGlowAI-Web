@@ -2478,7 +2478,7 @@
       const analytics = firebase.analytics();
       
       // Track page view
-      analytics.logEvent('page_view', {
+      logAnalyticsEvent('page_view', {
         page_title: document.title,
         page_location: window.location.href
       });
@@ -2932,9 +2932,9 @@
         // Show animation immediately
         showGenerateAnimation();
         
-        // Track message generation attempt
-        analytics.logEvent('generate_message', {
-          relationship_type: relationshipSelect.value
+        // Track message generation attempt - use safe function
+        logAnalyticsEvent('generate_message', {
+          relationship_type: document.getElementById('relationship').value
         });
         
         const scenario = document.getElementById('scenario').value.trim();
@@ -3321,9 +3321,9 @@
         // Show animation immediately
         showGenerateAnimation();
         
-        // Track message generation attempt
-        analytics.logEvent('generate_message', {
-          relationship_type: relationshipSelect.value
+        // Track message generation attempt - use the safe function
+        logAnalyticsEvent('generate_message', {
+          relationship_type: document.getElementById('relationship').value
         });
         
         const scenario = document.getElementById('scenario').value.trim();
@@ -3462,6 +3462,21 @@
       initializePopupElements();
     });
 
+    // Fix analytics reference error
+    function logAnalyticsEvent(eventName, eventParams) {
+      // Try to use gtag if available
+      if (typeof gtag === 'function') {
+        gtag('event', eventName, eventParams);
+      } else if (typeof analytics !== 'undefined' && analytics !== null) {
+        // Fall back to analytics object if available
+        analytics.logEvent(eventName, eventParams);
+      } else {
+        // If no analytics available, just log to console
+        console.log('Analytics event:', eventName, eventParams);
+      }
+    }
+
+    // Update the generateMessage function to properly handle analytics
     function generateMessage() {
       // Check if user is logged in
       const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
@@ -3481,8 +3496,8 @@
         return;
       }
       
-      // Log analytics event
-      gtag('event', 'generate_message', {
+      // Log analytics event using our safe function
+      logAnalyticsEvent('generate_message', {
         'event_category': 'engagement',
         'event_label': scenario
       });
@@ -3501,6 +3516,8 @@
         circumstances: circumstances
       };
       
+      console.log('Sending request to Cloud Function:', data);
+      
       // Send request to Cloud Function
       fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.GENERATE}`, {
         method: 'POST',
@@ -3510,6 +3527,7 @@
         body: JSON.stringify(data)
       })
       .then(response => {
+        console.log('Response status:', response.status);
         if (response.status === 429) {
           throw new Error('Rate limit exceeded. Please try again later.');
         }
@@ -3519,15 +3537,17 @@
         return response.json();
       })
       .then(data => {
+        console.log('Response data:', data);
         if (data.success) {
           // Hide loading animation
           hideLoading();
           
-          // Update popup content with generated message
-          if (!popupMessageText) {
+          // Initialize elements if not already done
+          if (!resultPopupOverlay || !popupMessageText) {
             initializePopupElements();
           }
           
+          // Update popup content with generated message
           if (popupMessageText) {
             popupMessageText.textContent = data.message;
           }
@@ -3547,17 +3567,13 @@
           // Show the popup overlay with results
           showResultsPopup();
           
-          // Make sure original card is hidden
-          if (resultCard) {
-            resultCard.style.display = 'none';
-          }
-          
-          // Still update the original card for compatibility
+          // Additionally, still update the original card for backward compatibility
+          const messageText = document.getElementById('message-text');
           if (messageText) {
             messageText.textContent = data.message;
           }
           
-          // Update insights list for original display
+          const insightsList = document.getElementById('insights-list');
           if (insightsList) {
             insightsList.innerHTML = '';
             if (data.insights && data.insights.length > 0) {
@@ -3567,6 +3583,12 @@
                 insightsList.appendChild(li);
               });
             }
+          }
+          
+          // Make sure original card is hidden
+          const resultCard = document.getElementById('result');
+          if (resultCard) {
+            resultCard.style.display = 'none';
           }
           
           // Save message to history if logged in
@@ -3583,6 +3605,54 @@
         hideLoading();
         alert(error.message || 'An error occurred. Please try again.');
       });
+    }
+
+    // Improved showResultsPopup function with better error handling
+    function showResultsPopup() {
+      // Get the popup overlay element
+      const popup = document.getElementById('resultsPopupOverlay');
+      if (!popup) {
+        console.error('Results popup overlay element not found');
+        return false;
+      }
+      
+      // Set high z-index to ensure it's above everything
+      popup.style.zIndex = '10000';
+      popup.style.display = 'flex';
+      
+      // Force browser to reflow the element for animation to work properly
+      void popup.offsetWidth;
+      
+      // Add active class to trigger animations
+      setTimeout(() => {
+        popup.classList.add('active');
+      }, 10);
+      
+      // Hide the original result card
+      const resultCard = document.getElementById('result');
+      if (resultCard) {
+        resultCard.style.display = 'none';
+      }
+      
+      return true;
+    }
+
+    // Improved hideResultsPopup function
+    function hideResultsPopup() {
+      const popup = document.getElementById('resultsPopupOverlay');
+      if (!popup) {
+        console.error('Results popup overlay element not found');
+        return false;
+      }
+      
+      popup.classList.remove('active');
+      
+      // Hide after transition completes
+      setTimeout(() => {
+        popup.style.display = 'none';
+      }, 300);
+      
+      return true;
     }
   </script>
 </body>

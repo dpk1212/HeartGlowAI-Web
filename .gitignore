@@ -71,3 +71,4 @@ web-build/
 
 # Keep example for reference
 !.env.example
+.env

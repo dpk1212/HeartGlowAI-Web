@@ -1895,6 +1895,186 @@
       left: -20px;
       color: var(--accent-pink);
     }
+
+    /* Dashboard Styles */
+    .dashboard-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .dashboard-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+
+    .dashboard-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .dashboard-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .dashboard-card {
+      background-color: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .dashboard-card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+    }
+
+    .dashboard-card-title .icon {
+      margin-right: 8px;
+      font-size: 20px;
+    }
+
+    .stats-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .stat-item {
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(100, 210, 255, 0.1) 100%);
+      border-radius: 12px;
+      padding: 16px;
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .chart-container {
+      height: 200px;
+      position: relative;
+      margin-top: 16px;
+      border-radius: 8px;
+      overflow: hidden;
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .chart-placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    .message-history-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .message-history-item:last-child {
+      border-bottom: none;
+    }
+
+    .message-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 16px;
+      background-color: rgba(100, 210, 255, 0.2);
+      color: var(--text-primary);
+    }
+
+    .message-details {
+      flex: 1;
+    }
+
+    .message-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .message-meta {
+      font-size: 14px;
+      color: var(--text-secondary);
+      display: flex;
+      gap: 16px;
+    }
+
+    .message-date {
+      opacity: 0.7;
+    }
+
+    .message-relationship {
+      opacity: 0.7;
+    }
+
+    .dashboard-btn {
+      background-color: var(--card-bg);
+      border: none;
+      border-radius: 12px;
+      color: var(--text-primary);
+      padding: 10px 20px;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+    }
+
+    .dashboard-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--box-shadow-hover);
+    }
+
+    .dashboard-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .dashboard-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: auto;
+      padding-top: 24px;
+    }
   </style>
 </head>
 <body>
@@ -1971,6 +2151,10 @@
       </div>
       
       <div class="home-actions">
+        <button id="dashboard-btn" class="settings-btn">
+          <span class="settings-icon">📊</span> Dashboard
+        </button>
+        
         <button id="history-btn" class="settings-btn">
           <span class="settings-icon">📋</span> History
         </button>
@@ -2193,6 +2377,88 @@
       <div class="results-popup-insights">
         <div class="results-popup-insights-title">Why this message works:</div>
         <ul class="results-popup-insights-list" id="popupInsightsList"></ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Dashboard Screen -->
+  <div id="dashboard-screen" class="screen">
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
+      </div>
+      
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle">Track your communication progress and insights</p>
+      
+      <div class="dashboard-card">
+        <div class="dashboard-card-title">
+          <span class="icon">📈</span> Message Statistics
+        </div>
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-value">12</div>
+            <div class="stat-label">Messages Created</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">5</div>
+            <div class="stat-label">Relationships</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">3</div>
+            <div class="stat-label">Templates Used</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-placeholder">Message activity chart will appear here</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="dashboard-card-title">
+          <span class="icon">💬</span> Recent Messages
+        </div>
+        <div class="message-history">
+          <div class="message-history-item">
+            <div class="message-icon">❤️</div>
+            <div class="message-details">
+              <div class="message-title">Express love and appreciation</div>
+              <div class="message-meta">
+                <span class="message-date">Today</span>
+                <span class="message-relationship">Romantic Partner</span>
+              </div>
+            </div>
+          </div>
+          <div class="message-history-item">
+            <div class="message-icon">✉️</div>
+            <div class="message-details">
+              <div class="message-title">Apologize for missing an event</div>
+              <div class="message-meta">
+                <span class="message-date">Yesterday</span>
+                <span class="message-relationship">Friend</span>
+              </div>
+            </div>
+          </div>
+          <div class="message-history-item">
+            <div class="message-icon">👋</div>
+            <div class="message-details">
+              <div class="message-title">Check-in with family member</div>
+              <div class="message-meta">
+                <span class="message-date">3 days ago</span>
+                <span class="message-relationship">Family Member</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="dashboard-actions">
+        <button id="back-to-home-from-dashboard" class="dashboard-btn">
+          <span class="dashboard-icon">←</span> Back to Home
+        </button>
       </div>
     </div>
   </div>
@@ -3767,6 +4033,42 @@
         alert(error.message || 'An error occurred. Please try again.');
       });
     }
+
+    // Add JavaScript for Dashboard navigation
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the app first
+      initializeApp();
+
+      // Get dashboard-related buttons
+      const dashboardBtn = document.getElementById('dashboard-btn');
+      const backToHomeFromDashboard = document.getElementById('back-to-home-from-dashboard');
+      const dashboardScreen = document.getElementById('dashboard-screen');
+      
+      // Add event listeners for dashboard navigation
+      if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', function() {
+          // Hide home screen and show dashboard
+          homeScreen.classList.remove('active');
+          setTimeout(() => {
+            homeScreen.style.display = 'none';
+            dashboardScreen.style.display = 'flex';
+            setTimeout(() => dashboardScreen.classList.add('active'), 50);
+          }, 500);
+        });
+      }
+      
+      if (backToHomeFromDashboard) {
+        backToHomeFromDashboard.addEventListener('click', function() {
+          // Hide dashboard and show home screen
+          dashboardScreen.classList.remove('active');
+          setTimeout(() => {
+            dashboardScreen.style.display = 'none';
+            homeScreen.style.display = 'flex';
+            setTimeout(() => homeScreen.classList.add('active'), 50);
+          }, 500);
+        });
+      }
+    });
   </script>
 </body>
 </html> 

@@ -1715,84 +1715,102 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(5, 10, 20, 0.85);
-      backdrop-filter: blur(8px);
+      background-color: rgba(5, 10, 20, 0.95);
+      backdrop-filter: blur(12px);
       z-index: 1000;
-      display: flex;
+      display: none;
       justify-content: center;
       align-items: center;
       opacity: 0;
       visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      padding: 20px;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      padding: 24px;
     }
     
     .results-overlay.active {
       opacity: 1;
       visibility: visible;
+      display: flex;
     }
     
     .results-container {
-      background: var(--card-bg);
-      border-radius: 16px;
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.05) 0%,
+        rgba(255, 255, 255, 0.02) 100%
+      );
+      border-radius: 24px;
       padding: 0;
       width: 100%;
-      max-width: 700px;
-      max-height: 90vh;
-      overflow-y: auto;
+      max-width: 800px;
+      height: 90vh;
+      max-height: 800px;
       position: relative;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
       border: 1px solid rgba(255, 255, 255, 0.1);
       display: flex;
       flex-direction: column;
-      animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+      overflow: hidden;
     }
     
     .results-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px 24px;
+      padding: 24px 32px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.02);
     }
     
     .results-title {
-      font-size: 18px;
+      font-size: 24px;
       font-weight: 700;
       margin: 0;
       background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
+      letter-spacing: -0.02em;
     }
     
     .results-close {
       background: none;
       border: none;
       color: var(--text-secondary);
-      font-size: 24px;
+      font-size: 28px;
       cursor: pointer;
-      width: 30px;
-      height: 30px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: color 0.2s ease, transform 0.2s ease;
+      transition: all 0.2s ease;
       border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
     }
     
     .results-close:hover {
       color: var(--text-primary);
       transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.1);
     }
     
     .results-body {
-      padding: 24px;
+      padding: 32px;
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
     
     .message-container {
       position: relative;
-      margin-bottom: 24px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     .message-text {
@@ -1801,43 +1819,42 @@
       margin: 0;
       white-space: pre-wrap;
       color: var(--text-primary);
-      padding: 5px 5px 5px 16px;
-      border-left: 3px solid var(--accent-pink);
-      background-color: rgba(255, 255, 255, 0.03);
       position: relative;
+      font-weight: 400;
     }
     
     .results-actions {
       display: flex;
-      gap: 12px;
-      margin: 20px 0 30px;
+      gap: 16px;
+      margin: 0;
     }
     
     .copy-button, .tweak-button {
       flex: 1;
-      background: var(--card-bg);
+      background: rgba(255, 255, 255, 0.03);
       color: var(--text-primary);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 15px;
+      padding: 16px;
+      border-radius: 12px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+      transition: all 0.2s ease;
+      gap: 8px;
     }
     
     .copy-button:hover, .tweak-button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-      background-color: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3);
     }
     
     .action-icon {
-      margin-right: 8px;
-      font-size: 16px;
+      font-size: 20px;
     }
     
     .copy-button .action-icon {
@@ -1849,47 +1866,46 @@
     }
     
     .insights-container {
-      background: linear-gradient(135deg, 
-        rgba(255, 107, 157, 0.07) 0%, 
-        rgba(100, 210, 255, 0.07) 100%);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(
+        135deg,
+        rgba(255, 107, 157, 0.05) 0%,
+        rgba(100, 210, 255, 0.05) 100%
+      );
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
     
     .insights-title {
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 700;
-      margin-bottom: 16px;
+      margin-bottom: 20px;
       display: flex;
       align-items: center;
       color: var(--text-primary);
+      gap: 12px;
     }
     
     .insights-title::before {
       content: '💡';
-      margin-right: 10px;
-      font-size: 20px;
+      font-size: 24px;
     }
     
     .insights-list {
       list-style: none;
       padding: 0;
       margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
     }
     
     .insight-item {
       position: relative;
-      padding-left: 28px;
-      margin-bottom: 16px;
+      padding-left: 32px;
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 16px;
       line-height: 1.6;
-    }
-    
-    .insight-item:last-child {
-      margin-bottom: 0;
     }
     
     .insight-item::before {
@@ -1899,52 +1915,96 @@
       top: 2px;
       color: var(--accent-blue);
       font-weight: bold;
-      font-size: 16px;
+      font-size: 18px;
     }
     
     .feedback-form {
-      margin-top: 25px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 0;
+      padding: 24px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
       display: none;
     }
     
     .feedback-input {
       width: 100%;
-      background-color: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 12px 16px;
+      border-radius: 12px;
+      padding: 16px;
       color: var(--text-primary);
-      font-size: 15px;
+      font-size: 16px;
       font-family: inherit;
       resize: vertical;
-      min-height: 100px;
-      margin-bottom: 15px;
+      min-height: 120px;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
     }
     
     .feedback-input:focus {
       outline: none;
       border-color: var(--accent-blue);
-      box-shadow: 0 0 0 1px rgba(100, 210, 255, 0.2);
+      box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.1);
     }
     
     .submit-feedback-btn {
       background: var(--primary-gradient);
       color: white;
       border: none;
-      border-radius: 10px;
-      padding: 12px;
-      font-size: 15px;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 16px;
       font-weight: 600;
       cursor: pointer;
       width: 100%;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: all 0.2s ease;
     }
     
     .submit-feedback-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3);
+    }
+    
+    @keyframes slideUp {
+      0% {
+        transform: translateY(40px);
+        opacity: 0;
+      }
+      100% {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .results-container {
+        height: 100vh;
+        max-height: none;
+        border-radius: 0;
+      }
+      
+      .results-header {
+        padding: 20px;
+      }
+      
+      .results-body {
+        padding: 20px;
+      }
+      
+      .results-title {
+        font-size: 20px;
+      }
+      
+      .message-text {
+        font-size: 16px;
+      }
+      
+      .copy-button, .tweak-button {
+        padding: 14px;
+        font-size: 15px;
+      }
     }
   </style>
 </head>
@@ -3182,38 +3242,77 @@
     
     // Results overlay functions
     function showResults(message, insights) {
-      // Populate the results
-      document.getElementById('resultsMessage').textContent = message;
+      console.log('Showing results overlay');
       
-      // Clear previous insights
-      const insightsList = document.getElementById('resultsInsights');
-      insightsList.innerHTML = '';
-      
-      // Add each insight
-      insights.forEach(insight => {
-        const li = document.createElement('li');
-        li.className = 'insight-item';
-        li.textContent = insight;
-        insightsList.appendChild(li);
-      });
-      
-      // Show the overlay
-      document.getElementById('resultsOverlay').classList.add('active');
-      
-      // Hide the old result card to ensure we only show the popup
+      // Ensure old result card is hidden
       const resultCard = document.getElementById('result');
       if (resultCard) {
         resultCard.style.display = 'none';
       }
+      
+      // Get overlay elements
+      const resultsOverlay = document.getElementById('resultsOverlay');
+      const resultsMessage = document.getElementById('resultsMessage');
+      const insightsList = document.getElementById('resultsInsights');
+      
+      if (!resultsOverlay || !resultsMessage || !insightsList) {
+        console.error('Required results elements not found');
+        return;
+      }
+      
+      // Update message
+      resultsMessage.textContent = message;
+      
+      // Clear and update insights
+      insightsList.innerHTML = '';
+      if (insights && Array.isArray(insights)) {
+        insights.forEach(insight => {
+          const li = document.createElement('li');
+          li.className = 'insight-item';
+          li.textContent = insight;
+          insightsList.appendChild(li);
+        });
+      }
+      
+      // Show overlay with animation
+      resultsOverlay.style.display = 'flex';
+      // Force reflow
+      resultsOverlay.offsetHeight;
+      resultsOverlay.classList.add('active');
+      
+      // Add escape key listener
+      document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+          hideResults();
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      });
+      
+      // Add click outside listener
+      resultsOverlay.addEventListener('click', function overlayClickHandler(e) {
+        if (e.target === resultsOverlay) {
+          hideResults();
+          resultsOverlay.removeEventListener('click', overlayClickHandler);
+        }
+      });
     }
     
     function hideResults() {
+      console.log('Hiding results overlay');
       const resultsOverlay = document.getElementById('resultsOverlay');
-      if (resultsOverlay) {
-        resultsOverlay.classList.remove('active');
-      }
+      if (!resultsOverlay) return;
+      
+      resultsOverlay.classList.remove('active');
+      
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        if (!resultsOverlay.classList.contains('active')) {
+          resultsOverlay.style.display = 'none';
+        }
+      }, 400); // Match the CSS transition duration
     }
-
+    
+    // Update the generateMessage function to handle results display
     window.generateMessage = async function(isRetry = false) {
       const scenario = document.getElementById('scenario').value.trim();
       const relationship = document.getElementById('relationship').value;
@@ -3228,7 +3327,7 @@
         return;
       }
 
-      // Update loading context and show loading screen
+      // Show loading animation
       updateLoadingContext(relationship, tone);
       showLoading();
 
@@ -3253,27 +3352,20 @@
         const data = await response.json();
 
         if (response.ok && data.message) {
-          // Add spaces between paragraphs if needed
-          let formattedMessage = data.message;
-          
-          // Populate insights
-          const insights = data.insights || [
-            "The message uses an appropriate tone for your relationship.",
-            "It clearly expresses your intention in a way that respects boundaries.",
-            "The language is authentic and connects emotionally."
-          ];
-          
-          // Hide loading
+          // Hide loading first
           hideLoading();
           
-          // Show results in the new popup
-          showResults(formattedMessage, insights);
+          // Prepare insights
+          const insights = data.insights || [
+            "The message uses an appropriate tone for your relationship",
+            "It clearly expresses your intention while respecting boundaries",
+            "The language is authentic and connects emotionally"
+          ];
           
-          // Reset feedback
-          document.getElementById('feedback').value = '';
-          document.getElementById('resultsFeedbackForm').style.display = 'none';
+          // Show results in popup
+          showResults(data.message, insights);
           
-          // Save message to history if user is authenticated
+          // Save to history if user is authenticated
           if (currentUser) {
             await saveMessage(scenario, relationship, data.message);
           }
@@ -3281,33 +3373,14 @@
           throw new Error(data.error || 'Failed to generate message');
         }
       } catch (error) {
-        console.error('Error details:', {
-          error: error,
-          message: error.message,
-          stack: error.stack,
-          name: error.name
-        });
+        console.error('Error generating message:', error);
         
-        if (error.response) {
-          console.error('Response error:', {
-            status: error.response.status,
-            data: error.response.data,
-            headers: error.response.headers
-          });
-        }
-        
-        // Hide loading overlay
+        // Hide loading
         hideLoading();
         
-        // Enhanced error handling
-        if (error.message.includes('authenticated')) {
-          showAlert('Please sign in to generate messages', 'error');
-        } else if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
-          showAlert('Network error - please check your connection', 'error');
-        } else if (error.response?.status === 401) {
-          showAlert('Authentication error - please sign in again', 'error');
-        } else if (error.response?.status === 403) {
-          showAlert('Permission denied - please contact support', 'error');
+        // Show appropriate error message
+        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+          showAlert('Network error - please try again', 'error');
         } else {
           showAlert(error.message || 'Failed to generate message', 'error');
         }

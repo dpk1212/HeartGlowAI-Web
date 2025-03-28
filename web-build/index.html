@@ -2400,15 +2400,15 @@
         </div>
         <div class="stats-container">
           <div class="stat-item">
-            <div class="stat-value">12</div>
+            <div class="stat-value" data-stat="messages">...</div>
             <div class="stat-label">Messages Created</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">5</div>
+            <div class="stat-value" data-stat="relationships">...</div>
             <div class="stat-label">Relationships</div>
           </div>
           <div class="stat-item">
-            <div class="stat-value">3</div>
+            <div class="stat-value" data-stat="templates">...</div>
             <div class="stat-label">Templates Used</div>
           </div>
         </div>
@@ -2422,36 +2422,7 @@
           <span class="icon">💬</span> Recent Messages
         </div>
         <div class="message-history">
-          <div class="message-history-item">
-            <div class="message-icon">❤️</div>
-            <div class="message-details">
-              <div class="message-title">Express love and appreciation</div>
-              <div class="message-meta">
-                <span class="message-date">Today</span>
-                <span class="message-relationship">Romantic Partner</span>
-              </div>
-            </div>
-          </div>
-          <div class="message-history-item">
-            <div class="message-icon">✉️</div>
-            <div class="message-details">
-              <div class="message-title">Apologize for missing an event</div>
-              <div class="message-meta">
-                <span class="message-date">Yesterday</span>
-                <span class="message-relationship">Friend</span>
-              </div>
-            </div>
-          </div>
-          <div class="message-history-item">
-            <div class="message-icon">👋</div>
-            <div class="message-details">
-              <div class="message-title">Check-in with family member</div>
-              <div class="message-meta">
-                <span class="message-date">3 days ago</span>
-                <span class="message-relationship">Family Member</span>
-              </div>
-            </div>
-          </div>
+          <div style="text-align: center; padding: 20px;">Loading messages...</div>
         </div>
       </div>
       
@@ -4053,6 +4024,9 @@
             homeScreen.style.display = 'none';
             dashboardScreen.style.display = 'flex';
             setTimeout(() => dashboardScreen.classList.add('active'), 50);
+            
+            // Load dashboard data when dashboard is shown
+            loadDashboardData();
           }, 500);
         });
       }
@@ -4069,6 +4043,296 @@
         });
       }
     });
+
+    // Add this function to fetch and display user's message statistics and history
+    async function loadDashboardData() {
+      if (!currentUser) {
+        console.error('No user logged in while trying to load dashboard data');
+        return;
+      }
+      
+      try {
+        // Show loading state
+        const statValues = document.querySelectorAll('.stat-value');
+        statValues.forEach(el => {
+          el.textContent = '...';
+        });
+        
+        const messageHistoryContainer = document.querySelector('.message-history');
+        if (messageHistoryContainer) {
+          messageHistoryContainer.innerHTML = '<div style="text-align: center; padding: 20px;">Loading messages...</div>';
+        }
+        
+        // Get user's messages collection
+        const messagesRef = firebase.firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('messages');
+        
+        // Get messages ordered by timestamp (newest first)
+        const messagesSnapshot = await messagesRef
+          .orderBy('timestamp', 'desc')
+          .limit(10)
+          .get();
+        
+        // Process message data for statistics and display
+        const messages = [];
+        const relationshipTypes = new Set();
+        const templateTypes = new Set();
+        
+        messagesSnapshot.forEach(doc => {
+          const messageData = doc.data();
+          messages.push({
+            id: doc.id,
+            ...messageData,
+            timestamp: messageData.timestamp?.toDate?.() || new Date(),
+          });
+          
+          if (messageData.relationshipType) {
+            relationshipTypes.add(messageData.relationshipType);
+          }
+          
+          if (messageData.templateType) {
+            templateTypes.add(messageData.templateType);
+          }
+        });
+        
+        // Update statistics
+        const totalMessages = messages.length;
+        const totalRelationships = relationshipTypes.size;
+        const totalTemplates = templateTypes.size;
+        
+        // Find stat elements and update them
+        const messageCountEl = document.querySelector('.stat-value[data-stat="messages"]');
+        const relationshipsCountEl = document.querySelector('.stat-value[data-stat="relationships"]');
+        const templatesCountEl = document.querySelector('.stat-value[data-stat="templates"]');
+        
+        if (messageCountEl) messageCountEl.textContent = totalMessages;
+        if (relationshipsCountEl) relationshipsCountEl.textContent = totalRelationships;
+        if (templatesCountEl) templatesCountEl.textContent = totalTemplates;
+        
+        // Update message history
+        if (messageHistoryContainer) {
+          if (messages.length > 0) {
+            messageHistoryContainer.innerHTML = '';
+            
+            messages.slice(0, 5).forEach(message => {
+              // Format the date
+              const messageDate = message.timestamp;
+              let dateText = 'Unknown date';
+              
+              if (messageDate) {
+                const now = new Date();
+                const yesterday = new Date(now);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                if (messageDate.toDateString() === now.toDateString()) {
+                  dateText = 'Today';
+                } else if (messageDate.toDateString() === yesterday.toDateString()) {
+                  dateText = 'Yesterday';
+                } else {
+                  // If within last week, show days ago
+                  const diffDays = Math.floor((now - messageDate) / (1000 * 60 * 60 * 24));
+                  if (diffDays < 7) {
+                    dateText = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+                  } else {
+                    // Otherwise show the date
+                    dateText = messageDate.toLocaleDateString(undefined, { 
+                      month: 'short', 
+                      day: 'numeric' 
+                    });
+                  }
+                }
+              }
+              
+              // Determine the emoji based on relationship or template type
+              let emoji = '💬'; // Default
+              
+              if (message.relationshipType) {
+                if (message.relationshipType.includes('Romantic')) {
+                  emoji = '❤️';
+                } else if (message.relationshipType.includes('Friend')) {
+                  emoji = '✉️';
+                } else if (message.relationshipType.includes('Family')) {
+                  emoji = '👋';
+                } else if (message.relationshipType.includes('Professional')) {
+                  emoji = '👔';
+                }
+              }
+              
+              if (message.templateType) {
+                if (message.templateType === 'apology') {
+                  emoji = '✉️';
+                } else if (message.templateType === 'romantic') {
+                  emoji = '❤️';
+                } else if (message.templateType === 'checkin') {
+                  emoji = '👋';
+                } else if (message.templateType === 'tough') {
+                  emoji = '💬';
+                } else if (message.templateType === 'gratitude') {
+                  emoji = '🙏';
+                } else if (message.templateType === 'celebration') {
+                  emoji = '🎉';
+                } else if (message.templateType === 'encouragement') {
+                  emoji = '⭐';
+                }
+              }
+              
+              // Create message history item
+              const item = document.createElement('div');
+              item.className = 'message-history-item';
+              item.innerHTML = `
+                <div class="message-icon">${emoji}</div>
+                <div class="message-details">
+                  <div class="message-title">${message.scenario || 'No scenario provided'}</div>
+                  <div class="message-meta">
+                    <span class="message-date">${dateText}</span>
+                    <span class="message-relationship">${message.relationshipType || 'Unknown'}</span>
+                  </div>
+                </div>
+              `;
+              
+              // Add click event to show full message
+              item.addEventListener('click', () => {
+                // Create a modal to show the full message
+                const modal = document.createElement('div');
+                modal.className = 'full-message-modal';
+                modal.innerHTML = `
+                  <div class="full-message-container">
+                    <div class="full-message-header">
+                      <h3>Message</h3>
+                      <button class="close-modal">×</button>
+                    </div>
+                    <div class="full-message-content">
+                      <div class="full-message-scenario">${message.scenario || 'No scenario provided'}</div>
+                      <div class="full-message-relationship">${message.relationshipType || 'Unknown'} · ${dateText}</div>
+                      <div class="full-message-text">${message.message || 'No message content'}</div>
+                    </div>
+                  </div>
+                `;
+                
+                // Add styles if not already in the document
+                if (!document.querySelector('#message-modal-styles')) {
+                  const styleEl = document.createElement('style');
+                  styleEl.id = 'message-modal-styles';
+                  styleEl.textContent = `
+                    .full-message-modal {
+                      position: fixed;
+                      top: 0;
+                      left: 0;
+                      width: 100%;
+                      height: 100%;
+                      background-color: rgba(0, 0, 0, 0.7);
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      z-index: 1000;
+                    }
+                    .full-message-container {
+                      background-color: var(--card-bg);
+                      border-radius: 16px;
+                      width: 90%;
+                      max-width: 500px;
+                      max-height: 80vh;
+                      overflow-y: auto;
+                      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                    }
+                    .full-message-header {
+                      display: flex;
+                      justify-content: space-between;
+                      align-items: center;
+                      padding: 16px 20px;
+                      border-bottom: 1px solid var(--border-color);
+                    }
+                    .full-message-header h3 {
+                      margin: 0;
+                      font-size: 18px;
+                      color: var(--text-primary);
+                    }
+                    .close-modal {
+                      background: none;
+                      border: none;
+                      color: var(--text-secondary);
+                      font-size: 24px;
+                      cursor: pointer;
+                    }
+                    .full-message-content {
+                      padding: 20px;
+                    }
+                    .full-message-scenario {
+                      font-size: 16px;
+                      font-weight: 600;
+                      margin-bottom: 8px;
+                      color: var(--text-primary);
+                    }
+                    .full-message-relationship {
+                      font-size: 14px;
+                      color: var(--text-secondary);
+                      margin-bottom: 16px;
+                    }
+                    .full-message-text {
+                      font-size: 15px;
+                      line-height: 1.6;
+                      white-space: pre-wrap;
+                      color: var(--text-primary);
+                    }
+                  `;
+                  document.head.appendChild(styleEl);
+                }
+                
+                // Add modal to the document
+                document.body.appendChild(modal);
+                
+                // Add close functionality
+                const closeBtn = modal.querySelector('.close-modal');
+                closeBtn.addEventListener('click', () => {
+                  modal.remove();
+                });
+                
+                // Close when clicking outside
+                modal.addEventListener('click', (e) => {
+                  if (e.target === modal) {
+                    modal.remove();
+                  }
+                });
+              });
+              
+              messageHistoryContainer.appendChild(item);
+            });
+            
+            // If no messages, show a message
+            if (messages.length === 0) {
+              messageHistoryContainer.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+                  No messages yet. Generate your first message to see it here.
+                </div>
+              `;
+            }
+          }
+        }
+        
+      } catch (error) {
+        console.error('Error loading dashboard data:', error);
+        
+        // Update with fallback values
+        const messageCountEl = document.querySelector('.stat-value[data-stat="messages"]');
+        const relationshipsCountEl = document.querySelector('.stat-value[data-stat="relationships"]');
+        const templatesCountEl = document.querySelector('.stat-value[data-stat="templates"]');
+        
+        if (messageCountEl) messageCountEl.textContent = '0';
+        if (relationshipsCountEl) relationshipsCountEl.textContent = '0';
+        if (templatesCountEl) templatesCountEl.textContent = '0';
+        
+        const messageHistoryContainer = document.querySelector('.message-history');
+        if (messageHistoryContainer) {
+          messageHistoryContainer.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: var(--text-secondary);">
+              Could not load message history. Please try again later.
+            </div>
+          `;
+        }
+      }
+    }
   </script>
 </body>
 </html> 

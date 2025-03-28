@@ -2007,240 +2007,72 @@
       }
     }
 
-    .feedback-form {
-      margin: 20px 0;
-      padding: 20px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-    }
-
-    .feedback-input {
-      width: 100%;
-      min-height: 100px;
-      padding: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      background: rgba(0, 0, 0, 0.2);
-      color: white;
-      font-size: 14px;
-      margin-bottom: 12px;
-      resize: vertical;
-    }
-
-    .feedback-input:focus {
-      outline: none;
-      border-color: var(--primary-color);
-      box-shadow: 0 0 0 2px rgba(255, 107, 157, 0.2);
-    }
-
-    .submit-feedback-button {
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: var(--primary-gradient);
-      color: white;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-
-    .submit-feedback-button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
-    }
-
-    .message-insights {
-      margin-top: 24px;
-    }
-
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-    }
-
-    .loading-container {
-      text-align: center;
-    }
-
-    .heart-loader {
-      display: inline-block;
-      position: relative;
-      width: 80px;
-      height: 80px;
-      transform: rotate(45deg);
-      transform-origin: 40px 40px;
-      animation: heartbeat 1.2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    @keyframes heartbeat {
+      0% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
+      25% { transform: rotate(45deg) scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8)); }
+      50% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
+      75% { transform: rotate(45deg) scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8)); }
+      100% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
     }
 
     .heart-loader:before,
     .heart-loader:after {
       content: '';
+      width: 60px;
+      height: 60px;
+      background: inherit;
+      border-radius: 50%;
       position: absolute;
-      top: 0;
+    }
+
+    .heart-loader:before {
+      top: -30px;
       left: 0;
-      width: 36px;
-      height: 36px;
-      background: var(--primary-color);
-      border-radius: 18px;
     }
 
     .heart-loader:after {
-      top: -26px;
-      left: 26px;
-    }
-
-    @keyframes heartbeat {
-      0% { transform: scale(0.95); }
-      5% { transform: scale(1.1); }
-      39% { transform: scale(0.85); }
-      45% { transform: scale(1); }
-      60% { transform: scale(0.95); }
-      100% { transform: scale(0.9); }
-    }
-
-    .loading-message {
-      margin-top: 2rem;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-
-    /* Loading overlay */
-    .loading-overlay {
-      position: fixed;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
+      left: -30px;
     }
 
-    .loading-container {
-      text-align: center;
-    }
-
-    .heart-animation {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      margin: 0 auto;
-    }
-
-    .heart {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 50px;
-      height: 50px;
-      background: var(--primary-color);
-      transform: translate(-50%, -50%) rotate(45deg);
-      animation: heartbeat 1.2s infinite;
-    }
-
-    .heart:before,
-    .heart:after {
-      content: '';
-      position: absolute;
-      width: 50px;
-      height: 50px;
-      background: var(--primary-color);
-      border-radius: 50%;
-    }
-
-    .heart:before {
-      left: -25px;
-    }
-
-    .heart:after {
-      top: -25px;
-    }
-
-    .glow {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 70px;
-      height: 70px;
-      background: rgba(255, 107, 157, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      filter: blur(15px);
-      animation: glow 1.2s infinite;
-    }
-
-    @keyframes heartbeat {
-      0% { transform: translate(-50%, -50%) rotate(45deg) scale(1); }
-      14% { transform: translate(-50%, -50%) rotate(45deg) scale(1.1); }
-      28% { transform: translate(-50%, -50%) rotate(45deg) scale(1); }
-      42% { transform: translate(-50%, -50%) rotate(45deg) scale(1.1); }
-      70% { transform: translate(-50%, -50%) rotate(45deg) scale(1); }
-    }
-
-    @keyframes glow {
-      0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-      50% { opacity: 0.8; transform: translate(-50%, -50%) scale(1.2); }
-      100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-    }
-
-    .loading-message {
-      margin-top: 2rem;
-      color: white;
-      font-size: 1.2rem;
-      font-weight: 500;
-    }
-
+    /* Results Overlay Styling */
     .results-overlay {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: rgba(0, 0, 0, 0.85);
+      background-color: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
+      z-index: 1000;
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 1000;
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s ease-in-out;
     }
 
     .results-overlay.active {
+      display: flex;
       opacity: 1;
     }
 
     .results-container {
       background: #1a1b23;
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       width: 90%;
       max-width: 600px;
       max-height: 90vh;
       overflow-y: auto;
       padding: 24px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       transform: translateY(20px);
-      opacity: 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.3s ease-out;
     }
 
     .results-overlay.active .results-container {
       transform: translateY(0);
-      opacity: 1;
     }
 
     .results-header {
@@ -2248,94 +2080,121 @@
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
 
-    .results-header h2 {
-      margin: 0;
+    .results-title {
       color: white;
-      font-size: 1.5rem;
+      font-size: 24px;
+      margin: 0;
     }
 
-    .close-button {
+    .results-close {
       background: none;
       border: none;
-      color: #666;
-      font-size: 24px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 28px;
       cursor: pointer;
-      padding: 4px;
-      transition: color 0.2s;
-    }
-
-    .close-button:hover {
-      color: white;
-    }
-
-    .message-content {
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 12px;
-      padding: 20px;
-      margin-bottom: 24px;
-      color: white;
-      font-size: 1rem;
-      line-height: 1.6;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .action-button {
-      flex: 1;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      padding: 0;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      transition: color 0.2s;
     }
 
-    .action-button:hover {
-      background: rgba(255, 255, 255, 0.15);
-      transform: translateY(-1px);
-    }
-
-    .message-insights {
+    .results-close:hover {
       color: white;
     }
 
-    .message-insights h3 {
-      font-size: 1.1rem;
+    .message-container {
+      margin-bottom: 24px;
+    }
+
+    .message-text {
+      color: white;
+      font-size: 16px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+    }
+
+    .results-actions {
+      display: flex;
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .copy-button, .tweak-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .copy-button {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .copy-button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .tweak-button {
+      background: linear-gradient(135deg, #6b47ff, #8e6bff);
+      color: white;
+      border: none;
+    }
+
+    .tweak-button:hover {
+      filter: brightness(1.1);
+    }
+
+    .insights-container {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 24px;
+    }
+
+    .insights-title {
+      color: white;
+      font-size: 18px;
+      font-weight: 600;
       margin-bottom: 16px;
-      color: var(--primary-color);
+      display: flex;
+      align-items: center;
+    }
+
+    .insights-title::before {
+      content: '💡';
+      margin-right: 8px;
     }
 
     .insights-list {
-      list-style: none;
-      padding: 0;
       margin: 0;
+      padding: 0 0 0 24px;
     }
 
     .insights-list li {
-      padding: 12px 16px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 0.9rem;
-      line-height: 1.5;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 10px;
+      position: relative;
     }
 
-    .insights-list li:before {
+    .insights-list li::before {
       content: '✓';
-      color: var(--primary-color);
-      margin-right: 8px;
+      position: absolute;
+      left: -20px;
+      color: #6b47ff;
     }
   </style>
 </head>
@@ -2591,117 +2450,52 @@
   </div>
   
   <!-- Add loading overlay -->
-  <div id="loadingOverlay" class="loading-overlay">
-    <div class="loading-container">
-      <div class="heart-animation">
-        <div class="heart"></div>
-        <div class="glow"></div>
-      </div>
-      <p id="loadingMessage" class="loading-message">Crafting your message...</p>
+  <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
+    <div class="heart-loader" style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #ff8e8e); transform: rotate(45deg); animation: heartbeat 1.2s infinite; position: relative; margin-bottom: 30px; filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.7));">
     </div>
+    <div class="loading-message" style="color: white; font-size: 20px; font-weight: 500; margin-top: 30px; text-align: center;">Crafting your message...</div>
   </div>
-  
+
   <!-- Results popup overlay -->
   <div class="results-overlay" id="resultsOverlay">
     <div class="results-container">
       <div class="results-header">
-        <h2>Your Message</h2>
-        <button class="close-button" onclick="hideResults()">×</button>
+        <h2 class="results-title">Your Message</h2>
+        <button class="results-close" id="closeResults" onclick="hideResults()">×</button>
       </div>
-      
-      <div class="message-content">
-        <p id="messageText"></p>
-      </div>
-
-      <div class="action-buttons">
-        <button onclick="copyMessage()" class="action-button">
-          📋 Copy Message
-        </button>
-        <button onclick="showFeedback()" class="action-button">
-          ✏️ Tweak Message
-        </button>
-      </div>
-
-      <div id="resultsFeedbackForm" class="feedback-form" style="display: none;">
-        <textarea id="resultsFeedbackInput" 
-                  placeholder="How can we improve this message? Your feedback helps us get better."
-                  class="feedback-input"></textarea>
-        <button onclick="tweakMessage()" class="submit-feedback-button">
-          Submit Feedback
-        </button>
-      </div>
-
-      <div class="message-insights">
-        <h3>💡 Why this message works:</h3>
-        <ul id="messageInsights" class="insights-list"></ul>
+      <div class="results-body">
+        <div class="message-container">
+          <p class="message-text" id="messageContent"></p>
+        </div>
+        
+        <div class="results-actions">
+          <button class="copy-button" id="resultsCopyBtn" onclick="copyMessageToClipboard()">
+            <span class="action-icon">📋</span>
+            Copy Message
+          </button>
+          <button class="tweak-button" id="resultsTweakBtn">
+            <span class="action-icon">✏️</span>
+            Tweak Message
+          </button>
+        </div>
+        
+        <div class="insights-container">
+          <h3 class="insights-title">Why this message works:</h3>
+          <ul class="insights-list" id="messageInsights">
+            <!-- Insights will be populated dynamically -->
+          </ul>
+        </div>
       </div>
     </div>
   </div>
 
   <script>
-    // API Configuration
-    const API_CONFIG = {
-      BASE_URL: 'https://heartglowai-api.up.railway.app',
-      ENDPOINTS: {
-        GENERATE: '/generate'
-      }
-    };
-
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen;
+    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
     let messageCount = 0;
     let hasSubmittedFeedback = false;
-
-    // Helper function for API calls
-    async function makeApiRequest(endpoint, data, options = {}) {
-      const url = `${API_CONFIG.BASE_URL}${endpoint}`;
-      console.log(`Making API request to: ${url}`);
-
-      try {
-        const response = await fetch(url, {
-          method: options.method || 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': window.location.origin
-          },
-          body: JSON.stringify(data),
-          mode: 'no-cors'
-        });
-
-        // Since we're using no-cors, we need to handle the response differently
-        if (response.type === 'opaque') {
-          // Wait a moment and then check if the message was generated
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
-          // Make a follow-up request to get the message
-          const checkResponse = await fetch(url + '/status', {
-            method: 'GET',
-            headers: {
-              'Accept': 'application/json',
-              'Origin': window.location.origin
-            }
-          });
-
-          if (!checkResponse.ok) {
-            throw new Error(`HTTP error! status: ${checkResponse.status}`);
-          }
-
-          return await checkResponse.json();
-        }
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error('API request failed:', error);
-        throw error;
-      }
-    }
 
     // Screen transition function
     function showScreen(screen) {
@@ -2741,34 +2535,28 @@
     }
 
     // Save message to history function
-    async function saveMessage(scenario, relationship, message) {
-      // Skip if user is not authenticated
-      if (!currentUser) {
-        console.log('Message not saved to history - user not authenticated');
-        return;
-      }
-
+    async function saveMessage(scenario, relationshipType, message) {
+      if (!currentUser) return false;
+      
       try {
-        const requestData = {
-          scenario,
-          relationshipType: relationship,
-          message,
-          userId: currentUser.uid,
-          timestamp: new Date().toISOString()
-        };
-
-        // Try to save to history, but don't block on failure
-        await Promise.race([
-          makeApiRequest(API_CONFIG.ENDPOINTS.HISTORY, requestData),
-          new Promise((_, reject) => 
-            setTimeout(() => reject(new Error('Save timeout')), 5000)
-          )
-        ]);
+        const timestamp = new Date();
         
-        console.log('Message saved to history successfully');
+        await firebase.firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('messages')
+          .add({
+            scenario,
+            relationshipType,
+            message,
+            timestamp
+          });
+        
+        console.log('Message saved to history');
+        return true;
       } catch (error) {
-        // Log error but don't surface to user since this is a background operation
-        console.log('Note: Message history not saved -', error.message);
+        console.error('Error saving message:', error);
+        return false;
       }
     }
 
@@ -3411,9 +3199,9 @@
           // Show results in the popup overlay
           showResults(data.message, insights);
           
-          // Try to save to history in the background
+          // Save to history if logged in
           if (currentUser) {
-            saveMessage(scenario, relationship, data.message).catch(console.error);
+            await saveMessage(scenario, relationship, data.message);
           }
           
           // After successful message generation, update message count
@@ -3603,9 +3391,12 @@
     
     // Show the loading overlay
     function showLoading() {
+      console.log('Showing loading overlay');
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
         loadingOverlay.style.display = 'flex';
+        loadingOverlay.style.opacity = '1';
+        loadingOverlay.style.pointerEvents = 'auto';
       }
     }
     
@@ -3613,110 +3404,212 @@
     function hideLoading() {
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
-        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.opacity = '0';
+        setTimeout(() => {
+          loadingOverlay.style.display = 'none';
+          loadingOverlay.style.pointerEvents = 'none';
+        }, 300);
       }
     }
     
     // Results overlay functions
     function showResults(message, insights) {
-      const overlay = document.getElementById('resultsOverlay');
-      const messageText = document.getElementById('messageText');
-      const insightsList = document.getElementById('messageInsights');
+      console.log('Showing results overlay');
       
-      if (messageText) {
-        messageText.textContent = message;
+      // Ensure old result card is hidden
+      const resultCard = document.getElementById('result');
+      if (resultCard) {
+        resultCard.style.display = 'none';
       }
       
-      if (insightsList) {
-        insightsList.innerHTML = '';
+      // Get overlay elements
+      const resultsOverlay = document.getElementById('resultsOverlay');
+      const resultsMessage = document.getElementById('resultsMessage');
+      const insightsList = document.getElementById('resultsInsights');
+      
+      if (!resultsOverlay || !resultsMessage || !insightsList) {
+        console.error('Required results elements not found');
+        return;
+      }
+      
+      // Update message
+      resultsMessage.textContent = message;
+      
+      // Clear and update insights
+      insightsList.innerHTML = '';
+      if (insights && Array.isArray(insights)) {
         insights.forEach(insight => {
           const li = document.createElement('li');
+          li.className = 'insight-item';
           li.textContent = insight;
           insightsList.appendChild(li);
         });
       }
       
-      if (overlay) {
-        overlay.style.display = 'flex';
-        setTimeout(() => overlay.classList.add('active'), 10);
-      }
+      // Show overlay with animation
+      resultsOverlay.style.display = 'flex';
+      // Force reflow
+      resultsOverlay.offsetHeight;
+      resultsOverlay.classList.add('active');
+      
+      // Add escape key listener
+      document.addEventListener('keydown', function escapeHandler(e) {
+        if (e.key === 'Escape') {
+          hideResults();
+          document.removeEventListener('keydown', escapeHandler);
+        }
+      });
+      
+      // Add click outside listener
+      resultsOverlay.addEventListener('click', function overlayClickHandler(e) {
+        if (e.target === resultsOverlay) {
+          hideResults();
+          resultsOverlay.removeEventListener('click', overlayClickHandler);
+        }
+      });
     }
-
+    
     function hideResults() {
-      const overlay = document.getElementById('resultsOverlay');
-      if (overlay) {
-        overlay.classList.remove('active');
-        setTimeout(() => {
-          overlay.style.display = 'none';
-        }, 300);
-      }
+      console.log('Hiding results overlay');
+      const resultsOverlay = document.getElementById('resultsOverlay');
+      if (!resultsOverlay) return;
+      
+      resultsOverlay.classList.remove('active');
+      
+      // Wait for animation to complete before hiding
+      setTimeout(() => {
+        if (!resultsOverlay.classList.contains('active')) {
+          resultsOverlay.style.display = 'none';
+        }
+      }, 400); // Match the CSS transition duration
     }
+    
+    // Update the generateMessage function to handle results display
+    window.generateMessage = async function(isRetry = false) {
+      const scenario = document.getElementById('scenario').value.trim();
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value.trim();
 
-    // Copy functionality
-    window.copyMessage = function() {
-      const messageText = document.getElementById('messageText');
-      if (messageText) {
-        navigator.clipboard.writeText(messageText.textContent)
-          .then(() => showAlert('Message copied to clipboard!', 'success'))
-          .catch(() => showAlert('Failed to copy message', 'error'));
-      }
-    };
-
-    // Feedback functionality
-    window.showFeedback = function() {
-      const feedbackForm = document.getElementById('resultsFeedbackForm');
-      if (feedbackForm) {
-        feedbackForm.style.display = 'block';
-      }
-    };
-
-    window.tweakMessage = async function() {
-      const feedbackInput = document.getElementById('resultsFeedbackInput');
-      if (!feedbackInput || !feedbackInput.value.trim()) {
-        showAlert('Please provide feedback on how to improve the message', 'error');
+      // Input validation
+      if (!scenario) {
+        showAlert('Please describe what you would like to say', 'error');
         return;
       }
 
-      // Store the feedback in circumstances
-      document.getElementById('circumstances').value = 'FEEDBACK: ' + feedbackInput.value.trim();
-      
-      // Generate new message with feedback
-      await generateMessage(true);
-      
-      // Reset feedback form
-      feedbackInput.value = '';
-      document.getElementById('resultsFeedbackForm').style.display = 'none';
-    };
-
-    async function submitFeedback(rating, comment) {
-      if (!currentMessage) {
-        showAlert('No message to provide feedback for', 'error');
-        return;
-      }
+      // Show loading animation
+      updateLoadingContext(relationship, tone);
+      showLoading();
 
       try {
-        const requestData = {
-          message: currentMessage,
-          rating: parseInt(rating),
-          comment: comment || ''
-        };
+        const response = await fetch('https://heartglowai-api.up.railway.app/generate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': currentUser ? `Bearer ${await currentUser.getIdToken()}` : ''
+          },
+          body: JSON.stringify({
+            scenario,
+            relationship,
+            tone,
+            intensity,
+            duration,
+            circumstances,
+            retry: isRetry
+          })
+        });
 
-        await makeApiRequest(API_CONFIG.ENDPOINTS.FEEDBACK, requestData);
-        
-        // Mark feedback as submitted
-        hasSubmittedFeedback = true;
-        
-        // Close the modal
-        const modal = document.getElementById('feedbackModal');
-        modal.style.display = 'none';
-        
-        // Show success message
-        showAlert('Thank you for your feedback!', 'success');
+        const data = await response.json();
+
+        if (response.ok && data.message) {
+          // Hide loading first
+          hideLoading();
+          
+          // Prepare insights
+          const insights = data.insights || [
+            "The message uses an appropriate tone for your relationship",
+            "It clearly expresses your intention while respecting boundaries",
+            "The language is authentic and connects emotionally"
+          ];
+          
+          // Show results in popup
+          showResults(data.message, insights);
+          
+          // Save to history if user is authenticated
+          if (currentUser) {
+            await saveMessage(scenario, relationship, data.message);
+          }
+        } else {
+          throw new Error(data.error || 'Failed to generate message');
+        }
       } catch (error) {
-        console.error('Error submitting feedback:', error);
-        showAlert('Failed to submit feedback. Please try again.', 'error');
+        console.error('Error generating message:', error);
+        
+        // Hide loading
+        hideLoading();
+        
+        // Show appropriate error message
+        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
+          showAlert('Network error - please try again', 'error');
+        } else {
+          showAlert(error.message || 'Failed to generate message', 'error');
+        }
       }
-    }
+    };
+
+    // Add event listeners for results overlay
+    document.addEventListener('DOMContentLoaded', function() {
+      // Setup results overlay listeners
+      const closeResults = document.getElementById('closeResults');
+      if (closeResults) {
+        closeResults.addEventListener('click', hideResults);
+      }
+      
+      // Copy button functionality
+      const resultsCopyBtn = document.getElementById('resultsCopyBtn');
+      if (resultsCopyBtn) {
+        resultsCopyBtn.addEventListener('click', function() {
+          const messageText = document.getElementById('resultsMessage').textContent;
+          navigator.clipboard.writeText(messageText).then(function() {
+            showAlert('Message copied to clipboard!', 'success');
+          }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+            showAlert('Failed to copy message', 'error');
+          });
+        });
+      }
+      
+      // Tweak button functionality
+      const resultsTweakBtn = document.getElementById('resultsTweakBtn');
+      if (resultsTweakBtn) {
+        resultsTweakBtn.addEventListener('click', function() {
+          document.getElementById('resultsFeedbackForm').style.display = 'block';
+        });
+      }
+      
+      // Submit feedback button
+      const resultsSubmitFeedback = document.getElementById('resultsSubmitFeedback');
+      if (resultsSubmitFeedback) {
+        resultsSubmitFeedback.addEventListener('click', function() {
+          tweakMessage();
+        });
+      }
+      
+      // Ensure the Generate button calls the generateMessage function
+      const generateBtn = document.getElementById('generateBtn');
+      if (generateBtn) {
+        // Remove any existing listeners
+        const newBtn = generateBtn.cloneNode(true);
+        generateBtn.parentNode.replaceChild(newBtn, generateBtn);
+        
+        // Add new listener
+        newBtn.addEventListener('click', function() {
+          generateMessage();
+        });
+      }
+    });
   </script>
 </body>
 </html> 

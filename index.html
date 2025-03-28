@@ -3268,12 +3268,7 @@
       const feedbackSection = document.getElementById('popupFeedbackSection');
       if (feedbackSection) {
         feedbackSection.style.display = 'block';
-        const popupFeedback = document.getElementById('popupFeedback');
-        if (popupFeedback) {
-          popupFeedback.focus();
-        }
-      } else {
-        console.error('Popup feedback section not found');
+        document.getElementById('popupFeedback').focus();
       }
     }
 
@@ -3302,40 +3297,67 @@
         return;
       }
       
-      if (!currentUser) {
-        showAlert("Please sign in to generate messages", 'error');
-        return;
-      }
+      // Set the feedback in the original feedback input (for compatibility)
+      document.getElementById('feedback').value = feedback;
       
-      // Get input values from the form
-      const scenario = document.getElementById('scenario').value.trim();
-      const relationship = document.getElementById('relationship').value;
-      const tone = document.getElementById('tone').value;
-      const intensity = document.getElementById('intensity').value;
-      const duration = document.getElementById('duration').value;
-      const circumstances = document.getElementById('circumstances').value.trim();
-      
-      // Show the loading overlay
-      showLoading();
-      
-      // Hide the popup
+      // Hide popup
       hideResultsPopup();
       
-      // Make the API call directly instead of calling the original tweakMessage
-      (async function() {
+      // Call the original tweakMessage function
+      window.tweakMessage();
+    }
+
+    // Modify the existing code by adding popup display but preserving all functionality
+    // This is a safer approach than completely rewriting the message generation
+
+    // Update the generateMessage handler function to use the popup for display
+    const originalGenerateBtn = document.getElementById('generateBtn');
+    if (originalGenerateBtn) {
+      // Get the original click handler
+      const originalClickHandler = originalGenerateBtn.onclick;
+      
+      // Replace with our new handler that adds popup display
+      originalGenerateBtn.addEventListener('click', async function() {
+        // Show animation immediately
+        showGenerateAnimation();
+        
+        // Track message generation attempt - use the safe function
+        logAnalyticsEvent('generate_message', {
+          relationship_type: document.getElementById('relationship').value
+        });
+        
+        const scenario = document.getElementById('scenario').value.trim();
+        const relationship = document.getElementById('relationship').value;
+        const tone = document.getElementById('tone').value;
+        const intensity = document.getElementById('intensity').value;
+        const duration = document.getElementById('duration').value;
+        const circumstances = document.getElementById('circumstances').value.trim();
+        
+        if (!scenario) {
+          showAlert("Please enter a communication scenario", 'error');
+          return;
+        }
+        
+        if (!currentUser) {
+          showAlert("Please sign in to generate messages", 'error');
+          return;
+        }
+        
+        // Show the loading overlay with context about the message being generated
+        updateLoadingContext(relationship, tone);
+        showLoading();
+        
         try {
           // Get the current user's ID token
           const idToken = await currentUser.getIdToken();
           
-          console.log('Sending tweak request:', {
+          console.log('Sending request to Cloud Function:', {
             scenario,
             relationshipType: relationship,
             tone,
             toneIntensity: intensity,
             relationshipDuration: duration,
-            specialCircumstances: circumstances,
-            previousMessage: currentMessage,
-            userFeedback: feedback
+            specialCircumstances: circumstances
           });
           
           const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
@@ -3351,9 +3373,7 @@
               tone,
               toneIntensity: intensity,
               relationshipDuration: duration,
-              specialCircumstances: circumstances,
-              previousMessage: currentMessage,
-              userFeedback: feedback
+              specialCircumstances: circumstances
             })
           });
           
@@ -3365,35 +3385,22 @@
             throw new Error(data.error || 'Failed to generate message');
           }
           
-          // Update current message
+          if (!data.message) {
+            throw new Error('No message received from server');
+          }
+          
+          // Store current message for feedback
           currentMessage = data.message;
           
-          // Update both displays (popup and original)
-          if (!popupMessageText) {
-            initializePopupElements();
-          }
-          
-          if (popupMessageText) {
-            popupMessageText.textContent = data.message;
-          }
-          
+          // Display the message in both places (original and popup)
+          // This ensures compatibility with original code
           const messageText = document.getElementById('messageText');
-          if (messageText) {
-            messageText.textContent = data.message;
-          }
+          if (messageText) messageText.textContent = data.message;
           
-          // Update insights in both displays
-          if (popupInsightsList) {
-            popupInsightsList.innerHTML = '';
-            if (data.insights && data.insights.length > 0) {
-              data.insights.forEach(insight => {
-                const li = document.createElement('li');
-                li.textContent = insight;
-                popupInsightsList.appendChild(li);
-              });
-            }
-          }
+          const popupMessageText = document.getElementById('popupMessageText');
+          if (popupMessageText) popupMessageText.textContent = data.message;
           
+          // Clear and populate insights in both places
           const insightsList = document.getElementById('insightsList');
           if (insightsList) {
             insightsList.innerHTML = '';
@@ -3407,13 +3414,22 @@
             }
           }
           
-          // Clear feedback input
-          document.getElementById('popupFeedback').value = '';
+          const popupInsightsList = document.getElementById('popupInsightsList');
+          if (popupInsightsList) {
+            popupInsightsList.innerHTML = '';
+            if (data.insights && data.insights.length > 0) {
+              data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                popupInsightsList.appendChild(li);
+              });
+            }
+          }
           
-          // Hide loading screen
+          // Hide loading overlay
           hideLoading();
           
-          // Show the popup with new content
+          // Show popup results instead of the original result card
           showResultsPopup();
           
           // Save to history if logged in
@@ -3421,16 +3437,8 @@
             await saveMessage(scenario, relationship, data.message);
           }
           
-          // Try to update message count but handle error if function not available
-          try {
-            if (typeof updateMessageCount === 'function') {
-              await updateMessageCount();
-            }
-          } catch (err) {
-            console.log('Update message count not available:', err);
-            // This is not a critical function, so we can ignore errors
-          }
-          
+          // After successful message generation, update message count
+          await updateMessageCount();
         } catch (error) {
           // Hide loading
           hideLoading();
@@ -3446,7 +3454,7 @@
             showAlert(error.message || 'Failed to generate message', 'error');
           }
         }
-      })();
+      });
     }
 
     // Call this once DOM is loaded

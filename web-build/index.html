@@ -2448,6 +2448,66 @@
         max-width: 400px;
       }
     }
+    
+    /* Brand-styled CTA button */
+    .branded-cta-button {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-blue));
+      color: white;
+      border: none;
+      padding: 16px;
+      width: 100%;
+      text-align: center;
+      border-radius: 12px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .branded-cta-button::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transform: translateX(-100%);
+      transition: transform 1s ease;
+    }
+    
+    .branded-cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255, 107, 157, 0.4);
+    }
+    
+    .branded-cta-button:hover::after {
+      transform: translateX(100%);
+    }
+    
+    @media (min-width: 992px) {
+      .tour-cta-button, .branded-cta-button {
+        padding: 18px 40px;
+        font-size: 18px;
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+      
+      .branded-cta-button {
+        font-size: 19px;
+      }
+      
+      .tour-note {
+        font-size: 16px;
+        margin-top: 10px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -2512,7 +2572,7 @@
               </div>
             </div>
             
-            <button id="tour-signup-btn" class="tour-cta-button">Take the Tour</button>
+            <button id="tour-signup-btn" class="branded-cta-button">Start a Conversation Today - For Free</button>
             <p class="tour-note">Try it now — no login required</p>
           </div>
         </div>
@@ -2560,7 +2620,7 @@
         </div>
         
         <div class="bottom-cta">
-          <button id="tour-signup-btn-bottom" class="tour-cta-button">Start your first conversation</button>
+          <button id="tour-signup-btn-bottom" class="branded-cta-button">Start a Conversation Today - For Free</button>
         </div>
       </div>
     </div>

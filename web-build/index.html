@@ -2006,6 +2006,53 @@
         font-size: 15px;
       }
     }
+
+    .feedback-form {
+      margin: 20px 0;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+    }
+
+    .feedback-input {
+      width: 100%;
+      min-height: 100px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.2);
+      color: white;
+      font-size: 14px;
+      margin-bottom: 12px;
+      resize: vertical;
+    }
+
+    .feedback-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(255, 107, 157, 0.2);
+    }
+
+    .submit-feedback-button {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: var(--primary-gradient);
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .submit-feedback-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.3);
+    }
+
+    .message-insights {
+      margin-top: 24px;
+    }
   </style>
 </head>
 <body>
@@ -2281,48 +2328,49 @@
   <div class="results-overlay" id="resultsOverlay">
     <div class="results-container">
       <div class="results-header">
-        <h2 class="results-title">Your Message</h2>
-        <button class="results-close" id="closeResults">×</button>
+        <h2>Your Message</h2>
+        <button class="close-button" onclick="hideResults()">×</button>
       </div>
-      <div class="results-body">
-        <div class="message-container">
-          <p class="message-text" id="resultsMessage"></p>
-        </div>
-        
-        <div class="results-actions">
-          <button class="copy-button" id="resultsCopyBtn">
-            <span class="action-icon">📋</span>
-            Copy Message
-          </button>
-          <button class="tweak-button" id="resultsTweakBtn">
-            <span class="action-icon">✏️</span>
-            Tweak Message
-          </button>
-        </div>
-        
-        <div class="insights-container">
-          <h3 class="insights-title">Why this message works:</h3>
-          <ul class="insights-list" id="resultsInsights">
-            <!-- Insights will be populated dynamically -->
-          </ul>
-        </div>
-        
-        <div class="feedback-form" id="resultsFeedbackForm">
-          <textarea class="feedback-input" placeholder="How can we improve this message? Your feedback helps us get better." id="resultsFeedbackInput"></textarea>
-          <button class="submit-feedback-btn" id="resultsSubmitFeedback">Submit Feedback</button>
-        </div>
+      
+      <div class="message-content">
+        <p id="messageText"></p>
+      </div>
+
+      <div class="action-buttons">
+        <button onclick="copyMessage()" class="action-button">
+          📋 Copy Message
+        </button>
+        <button onclick="showFeedback()" class="action-button">
+          ✏️ Tweak Message
+        </button>
+      </div>
+
+      <!-- Feedback form - Now above insights -->
+      <div id="resultsFeedbackForm" class="feedback-form" style="display: none;">
+        <textarea id="resultsFeedbackInput" 
+                  placeholder="How can we improve this message? Your feedback helps us get better."
+                  class="feedback-input"></textarea>
+        <button onclick="tweakMessage()" class="submit-feedback-button">
+          Submit Feedback
+        </button>
+      </div>
+
+      <!-- Insights section -->
+      <div class="message-insights">
+        <h3>💡 Why this message works:</h3>
+        <ul id="messageInsights" class="insights-list"></ul>
       </div>
     </div>
   </div>
-  
+
   <script>
     // API Configuration
     const API_CONFIG = {
-      BASE_URL: 'https://us-central1-heartglowai.cloudfunctions.net',
+      BASE_URL: 'https://heartglowai.com',  // Update to use the main domain
       ENDPOINTS: {
-        GENERATE: '/generateMessage',
-        FEEDBACK: '/submitFeedback',
-        HISTORY: '/saveMessage'
+        GENERATE: '/api/generate',
+        FEEDBACK: '/api/feedback',
+        HISTORY: '/api/history'
       }
     };
 
@@ -2341,9 +2389,7 @@
       try {
         // Get auth token if user is logged in
         let headers = {
-          'Content-Type': 'application/json',
-          'Origin': window.location.origin,
-          'Access-Control-Allow-Origin': '*'
+          'Content-Type': 'application/json'
         };
 
         if (currentUser) {
@@ -3456,13 +3502,6 @@
           showAlert('Access denied. Please try logging in again.', 'error');
         } else if (error.message.includes('Too many requests')) {
           showAlert('We\'re experiencing high demand. Please try again in a moment.', 'error');
-        } else if (error.message.includes('CORS') || error.name === 'TypeError') {
-          showAlert('Connection error. Our team has been notified.', 'error');
-          // Log the error for debugging
-          console.error('Connection Error Details:', {
-            origin: window.location.origin,
-            error: error.message
-          });
         } else {
           showAlert(error.message || 'Failed to generate message. Please try again.', 'error');
         }

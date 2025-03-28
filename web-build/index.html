@@ -2075,6 +2075,193 @@
       margin-top: auto;
       padding-top: 24px;
     }
+
+    /* Tour button styles */
+    .tour-btn {
+      margin-top: 16px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tour-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    /* Tour screen styles */
+    .tour-container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      color: var(--text-primary);
+    }
+    
+    .tour-hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin: 40px 0;
+      text-align: center;
+    }
+    
+    @media (min-width: 768px) {
+      .tour-hero-content {
+        display: flex;
+        align-items: center;
+        text-align: left;
+      }
+      
+      .tour-logo {
+        flex: 1;
+      }
+      
+      .tour-text {
+        flex: 2;
+        padding-left: 40px;
+      }
+    }
+    
+    .tour-title {
+      font-size: 36px;
+      font-weight: 700;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+    
+    .tour-subtitle {
+      font-size: 18px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    
+    .tour-features {
+      list-style: none;
+      padding: 0;
+      margin-bottom: 32px;
+    }
+    
+    .tour-features li {
+      font-size: 18px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    
+    .cta-btn {
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 16px 36px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(255, 107, 157, 0.4);
+    }
+    
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 25px rgba(255, 107, 157, 0.5);
+    }
+    
+    .tour-message-example {
+      margin: 60px auto;
+      max-width: 600px;
+    }
+    
+    .message-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+      border: 1px solid var(--border-color);
+    }
+    
+    .message-content {
+      font-size: 18px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+    }
+    
+    .message-meta {
+      font-size: 14px;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-color);
+      padding-top: 12px;
+    }
+    
+    .tour-steps {
+      margin: 80px 0;
+      text-align: center;
+    }
+    
+    .tour-steps h2 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 40px;
+      color: var(--text-primary);
+    }
+    
+    .step-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .step-number {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    
+    .step-content h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+    }
+    
+    .step-content p {
+      font-size: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .tour-cta {
+      text-align: center;
+      margin: 60px 0;
+    }
   </style>
 </head>
 <body>
@@ -2097,6 +2284,100 @@
         <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
         <p class="welcome-subtitle">AI-powered heartfelt message generator for all your relationships</p>
           <button id="login-register-btn">Log in or Register - For Free</button>
+          <button id="take-tour-btn" class="tour-btn">Take a Tour</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Tour Screen -->
+    <div id="tour-screen" class="screen">
+      <div class="tour-container">
+        <button id="back-to-welcome-btn" class="back-button">
+          <span class="back-icon">←</span> Back
+        </button>
+        
+        <div class="tour-hero">
+          <div class="tour-hero-content">
+            <div class="tour-logo">
+              <div class="neon-heart">
+                <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z" stroke="url(#heartGradient)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+                  <defs>
+                    <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stop-color="var(--accent-pink)"/>
+                      <stop offset="100%" stop-color="var(--accent-blue)"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+            
+            <div class="tour-text">
+              <h1 class="tour-title">Struggling to say what you feel?<br>We help you find the words that connect.</h1>
+              <p class="tour-subtitle">Whether you're reaching out, making amends, or expressing love — HeartGlowAI guides you through it, step-by-step.</p>
+              
+              <ul class="tour-features">
+                <li>✅ Thoughtful messages for any relationship</li>
+                <li>✅ Custom tone + emotion</li>
+                <li>✅ Zero pressure, just support</li>
+              </ul>
+              
+              <button id="tour-signup-btn" class="cta-btn">Log in or Register - For Free</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tour-message-example">
+          <div class="message-card">
+            <div class="message-content">
+              <p>"I've been thinking about you and wanted to reach out. How have you been holding up?"</p>
+            </div>
+            <div class="message-meta">
+              <span>Generated with Tone: Encouraging | Intensity: 3/5</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tour-steps">
+          <h2>Here's how it works</h2>
+          
+          <div class="step-container">
+            <div class="step">
+              <div class="step-number">1</div>
+              <div class="step-content">
+                <h3>Choose a relationship type</h3>
+                <p>Friend, partner, family member, colleague, or other</p>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-number">2</div>
+              <div class="step-content">
+                <h3>Tell us what's going on</h3>
+                <p>Describe your situation or what you want to express</p>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-number">3</div>
+              <div class="step-content">
+                <h3>Adjust tone & intensity</h3>
+                <p>Make it casual, formal, poetic, or something in between</p>
+              </div>
+            </div>
+            
+            <div class="step">
+              <div class="step-number">4</div>
+              <div class="step-content">
+                <h3>Get your message</h3>
+                <p>Use as-is or tweak it until it feels just right</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="tour-cta">
+          <button id="tour-signup-btn-bottom" class="cta-btn">Start your first conversation - Free</button>
         </div>
       </div>
     </div>
@@ -2438,7 +2719,7 @@
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
+    let welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen; // Declare screen variables globally
     let messageCount = 0;
     let hasSubmittedFeedback = false;
     
@@ -2459,7 +2740,7 @@
 
     // Screen transition function
     function showScreen(screen) {
-      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen];
+      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen];
       screens.forEach(s => {
         if (s === screen) {
           s.style.display = 'flex';
@@ -2482,6 +2763,7 @@
       authScreen = document.getElementById('auth-screen');
       homeScreen = document.getElementById('home-screen');
       generatorScreen = document.getElementById('generator-screen');
+      tourScreen = document.getElementById('tour-screen');
 
       // Add favicon
       const favicon = document.createElement('link');
@@ -2884,6 +3166,43 @@
       // Event Listeners
       loginRegisterBtn.addEventListener('click', function() {
         showScreen(authScreen);
+      });
+      
+      // Tour navigation event listeners
+      const takeTourBtn = document.getElementById('take-tour-btn');
+      const backToWelcomeBtn = document.getElementById('back-to-welcome-btn');
+      const tourSignupBtn = document.getElementById('tour-signup-btn');
+      const tourSignupBtnBottom = document.getElementById('tour-signup-btn-bottom');
+      
+      takeTourBtn.addEventListener('click', function() {
+        showScreen(tourScreen);
+        
+        // Log analytics event
+        logAnalyticsEvent('tour_view', {
+          source: 'welcome_screen'
+        });
+      });
+      
+      backToWelcomeBtn.addEventListener('click', function() {
+        showScreen(welcomeScreen);
+      });
+      
+      tourSignupBtn.addEventListener('click', function() {
+        showScreen(authScreen);
+        
+        // Log analytics event
+        logAnalyticsEvent('signup_click', {
+          source: 'tour_page_top'
+        });
+      });
+      
+      tourSignupBtnBottom.addEventListener('click', function() {
+        showScreen(authScreen);
+        
+        // Log analytics event
+        logAnalyticsEvent('signup_click', {
+          source: 'tour_page_bottom'
+        });
       });
       
       authToggleLink.addEventListener('click', function(e) {

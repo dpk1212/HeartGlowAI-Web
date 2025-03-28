@@ -691,23 +691,109 @@
     
     .loading-spinner {
       display: flex;
+      flex-direction: column;
       justify-content: center;
-      margin: 40px 0;
+      align-items: center;
+      margin: 40px auto;
       position: relative;
+      min-height: 180px;
+      text-align: center;
+      width: 100%;
     }
     
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid rgba(255, 255, 255, 0.1);
-      border-top: 3px solid var(--accent-blue);
-      border-right: 3px solid var(--accent-pink);
-      animation: spin 1s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
+    .loading-context {
+      color: var(--text-primary);
+      margin-top: 24px;
+      font-size: 16px;
+      max-width: 80%;
+      text-align: center;
+      animation: fadeIn 0.5s ease forwards;
+      font-weight: 500;
     }
     
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .loading-highlight {
+      color: var(--accent-pink);
+      font-weight: 600;
+    }
+    
+    .heart-spinner {
+      width: 60px;
+      height: 60px;
+      position: relative;
+      animation: heartBeat 1.2s ease-in-out infinite;
+    }
+    
+    .heart-spinner::before,
+    .heart-spinner::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 30px;
+      height: 50px;
+      border-radius: 50px 50px 0 0;
+      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
+    }
+    
+    .heart-spinner::before {
+      left: 0;
+      transform: rotate(-45deg);
+      transform-origin: 100% 100%;
+    }
+    
+    .heart-spinner::after {
+      right: 0;
+      transform: rotate(45deg);
+      transform-origin: 0 100%;
+    }
+    
+    @keyframes heartBeat {
+      0% {
+        transform: scale(0.8);
+        opacity: 0.7;
+      }
+      25% {
+        transform: scale(1.1);
+        opacity: 1;
+      }
+      50% {
+        transform: scale(0.9);
+        opacity: 0.9;
+      }
+      100% {
+        transform: scale(0.8);
+        opacity: 0.7;
+      }
+    }
+    
+    .spinner-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: radial-gradient(
+        circle,
+        rgba(255, 107, 157, 0.3) 0%,
+        rgba(100, 210, 255, 0) 70%
+      );
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.5;
+      }
+      50% {
+        transform: translate(-50%, -50%) scale(1.2);
+        opacity: 0.2;
+      }
+      100% {
+        transform: translate(-50%, -50%) scale(0.8);
+        opacity: 0.5;
+      }
     }
     
     /* Message Generation Form */
@@ -1597,7 +1683,9 @@
         </div>
         
         <div id="loading" class="loading-spinner" style="display: none;">
-          <div class="spinner"></div>
+          <div class="heart-spinner"></div>
+          <div class="spinner-glow"></div>
+          <div class="loading-context">Generating message...</div>
         </div>
         
         <div id="result" class="result-card" style="display: none;">
@@ -2365,6 +2453,9 @@
         loadingSpinner.style.display = "flex";
         resultCard.style.display = "none";
         
+        // Update loading context with user's inputs
+        updateLoadingContext(relationship, tone);
+        
         try {
           // Get the current user's ID token
           const idToken = await currentUser.getIdToken();
@@ -2584,6 +2675,38 @@
           generateBtn.removeChild(animationSpan);
         }
       }, 1500);
+    }
+
+    // Update the loading context with user variables
+    function updateLoadingContext(relationship, tone) {
+      const loadingContext = document.querySelector('.loading-context');
+      if (!loadingContext) return;
+      
+      // Craft a loading message based on the relationship and tone
+      let message = `Creating a <span class="loading-highlight">${tone}</span> message for your <span class="loading-highlight">${relationship.toLowerCase()}</span>`;
+      
+      // Add variety based on tone
+      switch(tone.toLowerCase()) {
+        case 'casual':
+          message += "... keeping it relaxed and friendly";
+          break;
+        case 'formal':
+          message += "... with the right level of respect";
+          break;
+        case 'humorous':
+          message += "... with a touch of humor";
+          break;
+        case 'poetic':
+          message += "... with flowing, heartfelt words";
+          break;
+        case 'serious':
+          message += "... with sincerity and depth";
+          break;
+        default:
+          message += "... with the perfect words";
+      }
+      
+      loadingContext.innerHTML = message;
     }
   </script>
 </body>

@@ -2366,11 +2366,11 @@
   <script>
     // API Configuration
     const API_CONFIG = {
-      BASE_URL: 'https://heartglowai.com',  // Update to use the main domain
+      BASE_URL: 'https://us-central1-heartglowai.cloudfunctions.net',
       ENDPOINTS: {
-        GENERATE: '/api/generate',
-        FEEDBACK: '/api/feedback',
-        HISTORY: '/api/history'
+        GENERATE: '/generateMessage',
+        FEEDBACK: '/submitFeedback',
+        HISTORY: '/saveMessage'
       }
     };
 
@@ -2397,6 +2397,7 @@
           headers['Authorization'] = `Bearer ${idToken}`;
         }
 
+        // Add CORS headers
         const response = await fetch(url, {
           method: options.method || 'POST',
           headers: headers,
@@ -2409,6 +2410,7 @@
         // Handle non-JSON responses
         const contentType = response.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
+          console.error('Invalid content type:', contentType);
           throw new Error('Invalid response format from server');
         }
 
@@ -2426,12 +2428,14 @@
         console.error('API request failed:', error);
         
         // Enhanced error handling
-        if (error.message.includes('Failed to fetch')) {
+        if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
           throw new Error('Unable to connect to the server. Please check your connection and try again.');
         } else if (error.status === 403) {
           throw new Error('Access denied. Please check your authentication.');
         } else if (error.status === 429) {
           throw new Error('Too many requests. Please try again in a moment.');
+        } else if (error.status === 405) {
+          throw new Error('Server configuration error. Our team has been notified.');
         } else {
           throw error;
         }
@@ -3338,26 +3342,17 @@
     
     // Show the loading overlay
     function showLoading() {
-      console.log('Showing loading overlay');
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
         loadingOverlay.style.display = 'flex';
-        setTimeout(() => {
-          loadingOverlay.classList.add('active');
-        }, 10);
-      } else {
-        console.error('Loading overlay element not found');
       }
-      
-      // Make sure results overlay is hidden when showing loading
-      hideResults();
     }
     
     // Hide the loading overlay
     function hideLoading() {
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
-        loadingOverlay.classList.remove('active');
+        loadingOverlay.style.display = 'none';
       }
     }
     
@@ -3449,8 +3444,8 @@
       }
 
       // Show loading animation
-      updateLoadingContext(relationship, tone);
       showLoading();
+      updateLoadingContext(relationship, tone);
 
       try {
         const requestData = {
@@ -3468,7 +3463,7 @@
         // Hide loading first
         hideLoading();
         
-        if (data.message) {
+        if (data && data.message) {
           // Prepare insights
           const insights = data.insights || [
             "The message uses an appropriate tone for your relationship",
@@ -3502,6 +3497,8 @@
           showAlert('Access denied. Please try logging in again.', 'error');
         } else if (error.message.includes('Too many requests')) {
           showAlert('We\'re experiencing high demand. Please try again in a moment.', 'error');
+        } else if (error.message.includes('Server configuration')) {
+          showAlert('We\'re experiencing technical difficulties. Please try again in a few minutes.', 'error');
         } else {
           showAlert(error.message || 'Failed to generate message. Please try again.', 'error');
         }

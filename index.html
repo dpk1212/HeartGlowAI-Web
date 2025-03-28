@@ -2204,6 +2204,21 @@
     let welcomeScreen, authScreen, homeScreen, generatorScreen; // Declare screen variables globally
     let messageCount = 0;
     let hasSubmittedFeedback = false;
+    
+    // Popup functions defined at the top of the script
+    let resultPopupOverlay = null;
+    let popupMessageText = null;
+    let popupInsightsList = null;
+    let copyMessageBtn = null;
+    let closeFeedbackBtn = null;
+    let resultCard = null;
+
+    function initializePopupElements() {
+      resultPopupOverlay = document.getElementById('resultsPopupOverlay');
+      popupMessageText = document.getElementById('popupMessageText');
+      popupInsightsList = document.getElementById('popupInsightsList');
+      resultCard = document.getElementById('result');
+    }
 
     // Screen transition function
     function showScreen(screen) {
@@ -3218,22 +3233,33 @@
 
     // New functions for popup results display
     function showResultsPopup() {
-      const resultsPopup = document.getElementById('resultsPopupOverlay');
-      if (resultsPopup) {
-        resultsPopup.style.zIndex = '9999'; // Ensure it's above everything
-        resultsPopup.style.display = 'flex';
+      if (!resultPopupOverlay) {
+        initializePopupElements();
+      }
+      
+      if (resultPopupOverlay) {
+        resultPopupOverlay.style.display = 'flex';
+        resultPopupOverlay.style.zIndex = '10000'; // Ensure it's above everything
+        resultPopupOverlay.classList.add('active');
         setTimeout(() => {
-          resultsPopup.classList.add('active');
+          resultPopupOverlay.classList.add('active');
         }, 10);
+      } else {
+        console.error('Result popup overlay not found');
       }
     }
 
     function hideResultsPopup() {
-      const resultsPopup = document.getElementById('resultsPopupOverlay');
-      if (resultsPopup) {
-        resultsPopup.classList.remove('active');
+      if (!resultPopupOverlay) {
+        initializePopupElements();
+      }
+      
+      if (resultPopupOverlay) {
+        resultPopupOverlay.classList.remove('active');
+        
+        // Hide after transition
         setTimeout(() => {
-          resultsPopup.style.display = 'none';
+          resultPopupOverlay.style.display = 'none';
         }, 300);
       }
     }
@@ -3247,13 +3273,20 @@
     }
 
     function copyPopupMessage() {
-      const messageText = document.getElementById('popupMessageText').textContent;
-      navigator.clipboard.writeText(messageText).then(() => {
-        showAlert('Message copied to clipboard!', 'success');
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-        showAlert('Failed to copy message', 'error');
-      });
+      if (!popupMessageText) {
+        initializePopupElements();
+      }
+      
+      const textToCopy = popupMessageText.textContent;
+      if (textToCopy) {
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => {
+            alert('Message copied to clipboard!');
+          })
+          .catch(err => {
+            console.error('Error copying text: ', err);
+          });
+      }
     }
 
     function tweakPopupMessage() {
@@ -3421,6 +3454,134 @@
             showAlert(error.message || 'Failed to generate message', 'error');
           }
         }
+      });
+    }
+
+    // Call this once DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      initializePopupElements();
+    });
+
+    function generateMessage() {
+      // Check if user is logged in
+      const currentUser = gapi.auth2.getAuthInstance().currentUser.get();
+      const isLoggedIn = currentUser.isSignedIn();
+      
+      // Get input values
+      const scenario = document.getElementById('scenario').value;
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value;
+      
+      // Validate input
+      if (!scenario || !relationship || !tone || !intensity || !duration) {
+        alert('Please fill out all required fields.');
+        return;
+      }
+      
+      // Log analytics event
+      gtag('event', 'generate_message', {
+        'event_category': 'engagement',
+        'event_label': scenario
+      });
+      
+      // Show loading animation
+      showLoading();
+      
+      // Prepare data for the Cloud Function
+      const data = {
+        userId: isLoggedIn ? currentUser.getId() : 'anonymous',
+        scenario: scenario,
+        relationship: relationship,
+        tone: tone,
+        intensity: intensity,
+        duration: duration,
+        circumstances: circumstances
+      };
+      
+      // Send request to Cloud Function
+      fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.GENERATE}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => {
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again later.');
+        }
+        if (!response.ok) {
+          throw new Error('Failed to generate message.');
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data.success) {
+          // Hide loading animation
+          hideLoading();
+          
+          // Update popup content with generated message
+          if (!popupMessageText) {
+            initializePopupElements();
+          }
+          
+          if (popupMessageText) {
+            popupMessageText.textContent = data.message;
+          }
+          
+          // Update popup insights if available
+          if (popupInsightsList) {
+            popupInsightsList.innerHTML = '';
+            if (data.insights && data.insights.length > 0) {
+              data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                popupInsightsList.appendChild(li);
+              });
+            }
+          }
+          
+          // Show the popup overlay with results
+          showResultsPopup();
+          
+          // Make sure original card is hidden
+          if (resultCard) {
+            resultCard.style.display = 'none';
+          }
+          
+          // Still update the original card for compatibility
+          if (messageText) {
+            messageText.textContent = data.message;
+          }
+          
+          // Update insights list for original display
+          if (insightsList) {
+            insightsList.innerHTML = '';
+            if (data.insights && data.insights.length > 0) {
+              data.insights.forEach(insight => {
+                const li = document.createElement('li');
+                li.textContent = insight;
+                insightsList.appendChild(li);
+              });
+            }
+          }
+          
+          // Save message to history if logged in
+          if (isLoggedIn) {
+            saveMessageToHistory(data.message, scenario, relationship, tone, intensity, duration, circumstances);
+          }
+        } else {
+          hideLoading();
+          alert(data.error || 'Failed to generate message.');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        hideLoading();
+        alert(error.message || 'An error occurred. Please try again.');
       });
     }
   </script>

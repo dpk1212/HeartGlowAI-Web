@@ -1914,8 +1914,8 @@
               <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z"/>
             </svg>
           </div>
-          <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
-          <p class="welcome-subtitle">AI-powered heartfelt message generator for all your relationships</p>
+        <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
+        <p class="welcome-subtitle">AI-powered heartfelt message generator for all your relationships</p>
           <button id="login-register-btn">Log in or Register</button>
         </div>
       </div>
@@ -2008,12 +2008,12 @@
         <!-- Repair & Reconnect Category -->
         <div class="template-category">
           <h3 class="category-title">Repair & Reconnect</h3>
-          <div class="templates-grid">
-            <div class="template-card" data-template="apology">
+      <div class="templates-grid">
+        <div class="template-card" data-template="apology">
               <div class="template-icon">✉️</div>
-              <div class="template-name">Apology</div>
+          <div class="template-name">Apology</div>
               <div class="template-description">Make amends with empathy and sincerity</div>
-            </div>
+        </div>
             <div class="template-card" data-template="tough">
               <div class="template-icon">💬</div>
               <div class="template-name">Tough Talk</div>
@@ -2026,21 +2026,21 @@
         <div class="template-category">
           <h3 class="category-title">Celebrate & Appreciate</h3>
           <div class="templates-grid">
-            <div class="template-card" data-template="romantic">
+        <div class="template-card" data-template="romantic">
               <div class="template-icon">❤️</div>
-              <div class="template-name">Romantic</div>
+          <div class="template-name">Romantic</div>
               <div class="template-description">Express your love and affection</div>
-            </div>
+        </div>
             <div class="template-card" data-template="gratitude">
               <div class="template-icon">🙏</div>
               <div class="template-name">Gratitude</div>
               <div class="template-description">Show appreciation for their support</div>
-            </div>
+        </div>
             <div class="template-card" data-template="celebration">
               <div class="template-icon">🎉</div>
               <div class="template-name">Celebration</div>
               <div class="template-description">Congratulate someone on their achievement</div>
-            </div>
+        </div>
             <div class="template-card" data-template="sympathy">
               <div class="template-icon">💐</div>
               <div class="template-name">Sympathy</div>
@@ -2401,7 +2401,7 @@
         } else if (error.response?.status === 403) {
           showAlert('Permission denied - please contact support', 'error');
         } else {
-          showAlert(error.message || 'Failed to generate message', 'error');
+        showAlert(error.message || 'Failed to generate message', 'error');
         }
         
         loadingSpinner.style.display = "none";
@@ -2774,15 +2774,15 @@
 
       // Template card click handler
       function handleTemplateClick(templateType) {
-        const template = templates[templateType];
+              const template = templates[templateType];
         if (template) {
-          document.getElementById('scenario').value = template.scenario;
-          document.getElementById('relationship').value = template.relationship;
-          document.getElementById('tone').value = template.tone;
-          document.getElementById('intensity').value = template.intensity;
+              document.getElementById('scenario').value = template.scenario;
+              document.getElementById('relationship').value = template.relationship;
+              document.getElementById('tone').value = template.tone;
+              document.getElementById('intensity').value = template.intensity;
           document.getElementById('duration').value = template.duration;
           document.getElementById('circumstances').value = template.circumstances;
-          document.getElementById('result').style.display = "none";
+              document.getElementById('result').style.display = "none";
           showScreen(generatorScreen);
         }
       }
@@ -3031,7 +3031,16 @@
           }
           
           // After successful message generation, update message count
-          await updateMessageCount();
+          try {
+            if (typeof updateMessageCount === 'function') {
+              await updateMessageCount();
+            } else {
+              console.log('updateMessageCount function not available');
+            }
+          } catch (err) {
+            console.log('Error updating message count:', err);
+            // Non-critical error, continue
+          }
         } catch (error) {
           // Hide loading
           hideLoading();
@@ -3061,7 +3070,7 @@
           } else if (error.response?.status === 403) {
             showAlert('Permission denied - please contact support', 'error');
           } else {
-            showAlert(error.message || 'Failed to generate message', 'error');
+          showAlert(error.message || 'Failed to generate message', 'error');
           }
         }
       });
@@ -3154,7 +3163,16 @@
           // ... existing try block code ...
           
           // After successful message generation, update message count
-          await updateMessageCount();
+          try {
+            if (typeof updateMessageCount === 'function') {
+              await updateMessageCount();
+            } else {
+              console.log('updateMessageCount function not available');
+            }
+          } catch (err) {
+            console.log('Error updating message count:', err);
+            // Non-critical error, continue
+          }
           
           // ... rest of the existing code ...
         } catch (error) {
@@ -3297,67 +3315,40 @@
         return;
       }
       
-      // Set the feedback in the original feedback input (for compatibility)
-      document.getElementById('feedback').value = feedback;
+      if (!currentUser) {
+        showAlert("Please sign in to generate messages", 'error');
+        return;
+      }
       
-      // Hide popup
+      // Get input values from the form
+      const scenario = document.getElementById('scenario').value.trim();
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value.trim();
+      
+      // Show the loading overlay
+      showLoading();
+      
+      // Hide the popup
       hideResultsPopup();
       
-      // Call the original tweakMessage function
-      window.tweakMessage();
-    }
-
-    // Modify the existing code by adding popup display but preserving all functionality
-    // This is a safer approach than completely rewriting the message generation
-
-    // Update the generateMessage handler function to use the popup for display
-    const originalGenerateBtn = document.getElementById('generateBtn');
-    if (originalGenerateBtn) {
-      // Get the original click handler
-      const originalClickHandler = originalGenerateBtn.onclick;
-      
-      // Replace with our new handler that adds popup display
-      originalGenerateBtn.addEventListener('click', async function() {
-        // Show animation immediately
-        showGenerateAnimation();
-        
-        // Track message generation attempt - use the safe function
-        logAnalyticsEvent('generate_message', {
-          relationship_type: document.getElementById('relationship').value
-        });
-        
-        const scenario = document.getElementById('scenario').value.trim();
-        const relationship = document.getElementById('relationship').value;
-        const tone = document.getElementById('tone').value;
-        const intensity = document.getElementById('intensity').value;
-        const duration = document.getElementById('duration').value;
-        const circumstances = document.getElementById('circumstances').value.trim();
-        
-        if (!scenario) {
-          showAlert("Please enter a communication scenario", 'error');
-          return;
-        }
-        
-        if (!currentUser) {
-          showAlert("Please sign in to generate messages", 'error');
-          return;
-        }
-        
-        // Show the loading overlay with context about the message being generated
-        updateLoadingContext(relationship, tone);
-        showLoading();
-        
+      // Make the API call directly instead of calling the original tweakMessage
+      (async function() {
         try {
           // Get the current user's ID token
           const idToken = await currentUser.getIdToken();
           
-          console.log('Sending request to Cloud Function:', {
+          console.log('Sending tweak request:', {
             scenario,
             relationshipType: relationship,
             tone,
             toneIntensity: intensity,
             relationshipDuration: duration,
-            specialCircumstances: circumstances
+            specialCircumstances: circumstances,
+            previousMessage: currentMessage,
+            userFeedback: feedback
           });
           
           const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
@@ -3373,7 +3364,9 @@
               tone,
               toneIntensity: intensity,
               relationshipDuration: duration,
-              specialCircumstances: circumstances
+              specialCircumstances: circumstances,
+              previousMessage: currentMessage,
+              userFeedback: feedback
             })
           });
           
@@ -3381,64 +3374,77 @@
           const data = await response.json();
           console.log('Response data:', data);
           
-          if (!response.ok) {
+          if (response.ok) {
+            // Update current message
+            currentMessage = data.message;
+            
+            // Initialize popup elements if needed
+            if (!popupMessageText) {
+              initializePopupElements();
+            }
+            
+            // Update popup content
+            if (popupMessageText) {
+              popupMessageText.textContent = data.message;
+            }
+            
+            // Update popup insights
+            if (popupInsightsList) {
+              popupInsightsList.innerHTML = '';
+              if (data.insights && data.insights.length > 0) {
+                data.insights.forEach(insight => {
+                  const li = document.createElement('li');
+                  li.textContent = insight;
+                  popupInsightsList.appendChild(li);
+                });
+              }
+            }
+            
+            // For compatibility, also update the original card
+            const messageText = document.getElementById('messageText');
+            if (messageText) {
+              messageText.textContent = data.message;
+            }
+            
+            const insightsList = document.getElementById('insightsList');
+            if (insightsList) {
+              insightsList.innerHTML = '';
+              if (data.insights && data.insights.length > 0) {
+                data.insights.forEach(insight => {
+                  const li = document.createElement('li');
+                  li.className = 'insight-item';
+                  li.textContent = insight;
+                  insightsList.appendChild(li);
+                });
+              }
+            }
+            
+            // Clear feedback input
+            document.getElementById('popupFeedback').value = '';
+            
+            // Hide loading overlay
+            hideLoading();
+            
+            // Show the popup with the new content
+            showResultsPopup();
+            
+            // Save message to history if logged in
+            if (currentUser) {
+              await saveMessage(scenario, relationship, data.message);
+            }
+            
+            // Safely call updateMessageCount
+            try {
+              if (typeof updateMessageCount === 'function') {
+                await updateMessageCount();
+              }
+            } catch (err) {
+              console.log('Error updating message count:', err);
+              // Non-critical error, continue
+            }
+          } else {
             throw new Error(data.error || 'Failed to generate message');
           }
-          
-          if (!data.message) {
-            throw new Error('No message received from server');
-          }
-          
-          // Store current message for feedback
-          currentMessage = data.message;
-          
-          // Display the message in both places (original and popup)
-          // This ensures compatibility with original code
-          const messageText = document.getElementById('messageText');
-          if (messageText) messageText.textContent = data.message;
-          
-          const popupMessageText = document.getElementById('popupMessageText');
-          if (popupMessageText) popupMessageText.textContent = data.message;
-          
-          // Clear and populate insights in both places
-          const insightsList = document.getElementById('insightsList');
-          if (insightsList) {
-            insightsList.innerHTML = '';
-            if (data.insights && data.insights.length > 0) {
-              data.insights.forEach(insight => {
-                const li = document.createElement('li');
-                li.className = 'insight-item';
-                li.textContent = insight;
-                insightsList.appendChild(li);
-              });
-            }
-          }
-          
-          const popupInsightsList = document.getElementById('popupInsightsList');
-          if (popupInsightsList) {
-            popupInsightsList.innerHTML = '';
-            if (data.insights && data.insights.length > 0) {
-              data.insights.forEach(insight => {
-                const li = document.createElement('li');
-                li.textContent = insight;
-                popupInsightsList.appendChild(li);
-              });
-            }
-          }
-          
-          // Hide loading overlay
-          hideLoading();
-          
-          // Show popup results instead of the original result card
-          showResultsPopup();
-          
-          // Save to history if logged in
-          if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
-          }
-          
-          // After successful message generation, update message count
-          await updateMessageCount();
         } catch (error) {
           // Hide loading
           hideLoading();
@@ -3454,7 +3460,7 @@
             showAlert(error.message || 'Failed to generate message', 'error');
           }
         }
-      });
+      })();
     }
 
     // Call this once DOM is loaded

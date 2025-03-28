@@ -1023,11 +1023,7 @@
 
     /* Generator screen animations */
     @keyframes slideUp {
-      0% {
-        transform: translateY(50px);
-        opacity: 0;
-      }
-      100% {
+      to {
         transform: translateY(0);
         opacity: 1;
       }
@@ -1707,495 +1703,6 @@
       50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.5; }
       100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.3; }
     }
-
-    /* Results Popup */
-    .results-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(5, 10, 20, 0.95);
-      backdrop-filter: blur(12px);
-      z-index: 1000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.4s ease, visibility 0.4s ease;
-      padding: 24px;
-    }
-    
-    .results-overlay.active {
-      opacity: 1;
-      visibility: visible;
-      display: flex;
-    }
-    
-    .results-container {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 255, 255, 0.05) 0%,
-        rgba(255, 255, 255, 0.02) 100%
-      );
-      border-radius: 24px;
-      padding: 0;
-      width: 100%;
-      max-width: 800px;
-      height: 90vh;
-      max-height: 800px;
-      position: relative;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      display: flex;
-      flex-direction: column;
-      animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-      overflow: hidden;
-    }
-    
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 32px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      background: rgba(255, 255, 255, 0.02);
-    }
-    
-    .results-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin: 0;
-      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      letter-spacing: -0.02em;
-    }
-    
-    .results-close {
-      background: none;
-      border: none;
-      color: var(--text-secondary);
-      font-size: 28px;
-      cursor: pointer;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .results-close:hover {
-      color: var(--text-primary);
-      transform: scale(1.1);
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .results-body {
-      padding: 32px;
-      flex: 1;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-    }
-    
-    .message-container {
-      position: relative;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 16px;
-      padding: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .message-text {
-      font-size: 18px;
-      line-height: 1.7;
-      margin: 0;
-      white-space: pre-wrap;
-      color: var(--text-primary);
-      position: relative;
-      font-weight: 400;
-    }
-    
-    .results-actions {
-      display: flex;
-      gap: 16px;
-      margin: 0;
-    }
-    
-    .copy-button, .tweak-button {
-      flex: 1;
-      background: rgba(255, 255, 255, 0.03);
-      color: var(--text-primary);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 16px;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      gap: 8px;
-    }
-    
-    .copy-button:hover, .tweak-button:hover {
-      transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.05);
-      border-color: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .action-icon {
-      font-size: 20px;
-    }
-    
-    .copy-button .action-icon {
-      color: var(--accent-blue);
-    }
-    
-    .tweak-button .action-icon {
-      color: var(--accent-pink);
-    }
-    
-    .insights-container {
-      background: linear-gradient(
-        135deg,
-        rgba(255, 107, 157, 0.05) 0%,
-        rgba(100, 210, 255, 0.05) 100%
-      );
-      border-radius: 16px;
-      padding: 24px;
-      border: 1px solid rgba(255, 255, 255, 0.05);
-    }
-    
-    .insights-title {
-      font-size: 20px;
-      font-weight: 700;
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      color: var(--text-primary);
-      gap: 12px;
-    }
-    
-    .insights-title::before {
-      content: '💡';
-      font-size: 24px;
-    }
-    
-    .insights-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    
-    .insight-item {
-      position: relative;
-      padding-left: 32px;
-      color: var(--text-primary);
-      font-size: 16px;
-      line-height: 1.6;
-    }
-    
-    .insight-item::before {
-      content: "✓";
-      position: absolute;
-      left: 0;
-      top: 2px;
-      color: var(--accent-blue);
-      font-weight: bold;
-      font-size: 18px;
-    }
-    
-    .feedback-form {
-      margin-top: 0;
-      padding: 24px;
-      border-radius: 16px;
-      background: rgba(255, 255, 255, 0.02);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      display: none;
-    }
-    
-    .feedback-input {
-      width: 100%;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 16px;
-      color: var(--text-primary);
-      font-size: 16px;
-      font-family: inherit;
-      resize: vertical;
-      min-height: 120px;
-      margin-bottom: 16px;
-      transition: all 0.2s ease;
-    }
-    
-    .feedback-input:focus {
-      outline: none;
-      border-color: var(--accent-blue);
-      box-shadow: 0 0 0 2px rgba(100, 210, 255, 0.1);
-    }
-    
-    .submit-feedback-btn {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      border-radius: 12px;
-      padding: 16px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.2s ease;
-    }
-    
-    .submit-feedback-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 20px -10px rgba(0, 0, 0, 0.3);
-    }
-    
-    @keyframes slideUp {
-      0% {
-        transform: translateY(40px);
-        opacity: 0;
-      }
-      100% {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 768px) {
-      .results-container {
-        height: 100vh;
-        max-height: none;
-        border-radius: 0;
-      }
-      
-      .results-header {
-        padding: 20px;
-      }
-      
-      .results-body {
-        padding: 20px;
-      }
-      
-      .results-title {
-        font-size: 20px;
-      }
-      
-      .message-text {
-        font-size: 16px;
-      }
-      
-      .copy-button, .tweak-button {
-        padding: 14px;
-        font-size: 15px;
-      }
-    }
-
-    @keyframes heartbeat {
-      0% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
-      25% { transform: rotate(45deg) scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8)); }
-      50% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
-      75% { transform: rotate(45deg) scale(1.1); filter: drop-shadow(0 0 20px rgba(255, 107, 107, 0.8)); }
-      100% { transform: rotate(45deg) scale(1); filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.4)); }
-    }
-
-    .heart-loader:before,
-    .heart-loader:after {
-      content: '';
-      width: 60px;
-      height: 60px;
-      background: inherit;
-      border-radius: 50%;
-      position: absolute;
-    }
-
-    .heart-loader:before {
-      top: -30px;
-      left: 0;
-    }
-
-    .heart-loader:after {
-      top: 0;
-      left: -30px;
-    }
-
-    /* Results Overlay Styling */
-    .results-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.3s ease-in-out;
-    }
-
-    .results-overlay.active {
-      display: flex;
-      opacity: 1;
-    }
-
-    .results-container {
-      background: #1a1b23;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      width: 90%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      transform: translateY(20px);
-      transition: transform 0.3s ease-out;
-    }
-
-    .results-overlay.active .results-container {
-      transform: translateY(0);
-    }
-
-    .results-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-
-    .results-title {
-      color: white;
-      font-size: 24px;
-      margin: 0;
-    }
-
-    .results-close {
-      background: none;
-      border: none;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 28px;
-      cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: color 0.2s;
-    }
-
-    .results-close:hover {
-      color: white;
-    }
-
-    .message-container {
-      margin-bottom: 24px;
-    }
-
-    .message-text {
-      color: white;
-      font-size: 16px;
-      line-height: 1.6;
-      white-space: pre-wrap;
-    }
-
-    .results-actions {
-      display: flex;
-      gap: 12px;
-      margin: 24px 0;
-    }
-
-    .copy-button, .tweak-button {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .copy-button {
-      background: rgba(255, 255, 255, 0.1);
-      color: white;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .copy-button:hover {
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .tweak-button {
-      background: linear-gradient(135deg, #6b47ff, #8e6bff);
-      color: white;
-      border: none;
-    }
-
-    .tweak-button:hover {
-      filter: brightness(1.1);
-    }
-
-    .insights-container {
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 24px;
-    }
-
-    .insights-title {
-      color: white;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-    }
-
-    .insights-title::before {
-      content: '💡';
-      margin-right: 8px;
-    }
-
-    .insights-list {
-      margin: 0;
-      padding: 0 0 0 24px;
-    }
-
-    .insights-list li {
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 10px;
-      position: relative;
-    }
-
-    .insights-list li::before {
-      content: '✓';
-      position: absolute;
-      left: -20px;
-      color: #6b47ff;
-    }
   </style>
 </head>
 <body>
@@ -2450,45 +1957,23 @@
   </div>
   
   <!-- Add loading overlay -->
-  <div id="loadingOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(8px); z-index: 2000; display: flex; align-items: center; justify-content: center; flex-direction: column; opacity: 0; transition: opacity 0.3s ease; pointer-events: none;">
-    <div class="heart-loader" style="width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b6b, #ff8e8e); transform: rotate(45deg); animation: heartbeat 1.2s infinite; position: relative; margin-bottom: 30px; filter: drop-shadow(0 0 10px rgba(255, 107, 107, 0.7));">
-    </div>
-    <div class="loading-message" style="color: white; font-size: 20px; font-weight: 500; margin-top: 30px; text-align: center;">Crafting your message...</div>
-  </div>
-
-  <!-- Results popup overlay -->
-  <div class="results-overlay" id="resultsOverlay">
-    <div class="results-container">
-      <div class="results-header">
-        <h2 class="results-title">Your Message</h2>
-        <button class="results-close" id="closeResults" onclick="hideResults()">×</button>
-      </div>
-      <div class="results-body">
-        <div class="message-container">
-          <p class="message-text" id="messageContent"></p>
-        </div>
-        
-        <div class="results-actions">
-          <button class="copy-button" id="resultsCopyBtn" onclick="copyMessageToClipboard()">
-            <span class="action-icon">📋</span>
-            Copy Message
-          </button>
-          <button class="tweak-button" id="resultsTweakBtn">
-            <span class="action-icon">✏️</span>
-            Tweak Message
-          </button>
-        </div>
-        
-        <div class="insights-container">
-          <h3 class="insights-title">Why this message works:</h3>
-          <ul class="insights-list" id="messageInsights">
-            <!-- Insights will be populated dynamically -->
-          </ul>
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-container">
+      <div class="heart-animation">
+        <div class="heart-shape"></div>
+        <div class="heart-glow"></div>
+        <div class="heart-particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
         </div>
       </div>
+      <div id="loadingContext" class="loading-context">Creating your message...</div>
     </div>
   </div>
-
+  
   <script>
     // Global variables and functions
     let currentMessage = '';
@@ -2568,28 +2053,122 @@
     };
 
     window.tweakMessage = async function() {
-      const feedback = document.getElementById('resultsFeedbackInput').value.trim();
-      
+      const feedback = document.getElementById('feedback').value.trim();
       if (!feedback) {
-        showAlert('Please provide some feedback on how to improve the message', 'error');
+        showAlert("Please provide feedback for the message", 'error');
         return;
       }
+
+      if (!currentUser) {
+        showAlert("Please sign in to generate messages", 'error');
+        return;
+      }
+
+      const scenario = document.getElementById('scenario').value.trim();
+      const relationship = document.getElementById('relationship').value;
+      const tone = document.getElementById('tone').value;
+      const intensity = document.getElementById('intensity').value;
+      const duration = document.getElementById('duration').value;
+      const circumstances = document.getElementById('circumstances').value.trim();
       
-      // Store the feedback in the circumstances field
-      document.getElementById('circumstances').value = 'FEEDBACK: ' + feedback;
+      const loadingSpinner = document.getElementById('loading');
+      const resultCard = document.getElementById('result');
       
-      // Generate a new message with the feedback
-      await generateMessage(true);
+      loadingSpinner.style.display = "flex";
+      resultCard.style.display = "none";
       
-      // Reset the feedback input
-      document.getElementById('resultsFeedbackInput').value = '';
-      document.getElementById('resultsFeedbackForm').style.display = 'none';
-    }
-    
-    // Show feedback form
-    window.showFeedback = function() {
-      document.getElementById('resultsFeedbackForm').style.display = 'block';
-    }
+      try {
+        // Get the current user's ID token
+        const idToken = await currentUser.getIdToken();
+
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+          },
+          body: JSON.stringify({
+            scenario,
+            relationshipType: relationship,
+            tone,
+            toneIntensity: intensity,
+            relationshipDuration: duration,
+            specialCircumstances: circumstances,
+            previousMessage: currentMessage,
+            userFeedback: feedback
+          })
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          const messageText = document.getElementById('messageText');
+          const insightsList = document.getElementById('insightsList');
+          const feedbackSection = document.getElementById('feedbackSection');
+          
+          messageText.textContent = data.message;
+          currentMessage = data.message;
+          
+          // Clear and populate insights
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
+          // Reset feedback
+          document.getElementById('feedback').value = '';
+          feedbackSection.style.display = 'none';
+          
+          loadingSpinner.style.display = "none";
+          resultCard.style.display = "block";
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
+          
+          // Save message to history if user is authenticated
+          if (currentUser) {
+            await saveMessage(scenario, relationship, data.message);
+          }
+        } else {
+          throw new Error(data.error || 'Failed to generate message');
+        }
+      } catch (error) {
+        console.error('Error details:', {
+          error: error,
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+        
+        if (error.response) {
+          console.error('Response error:', {
+            status: error.response.status,
+            data: error.response.data,
+            headers: error.response.headers
+          });
+        }
+        
+        // Enhanced error handling
+        if (error.message.includes('authenticated')) {
+          showAlert('Please sign in to generate messages', 'error');
+        } else if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
+          showAlert('Network error - please check your connection', 'error');
+        } else if (error.response?.status === 401) {
+          showAlert('Authentication error - please sign in again', 'error');
+        } else if (error.response?.status === 403) {
+          showAlert('Permission denied - please contact support', 'error');
+        } else {
+          showAlert(error.message || 'Failed to generate message', 'error');
+        }
+        
+        loadingSpinner.style.display = "none";
+      }
+    };
 
     window.copyMessage = function() {
       const messageText = document.getElementById('messageText').textContent;
@@ -3186,18 +2765,27 @@
           // Store current message for feedback
           currentMessage = data.message;
           
-          // Prepare insights
-          const insights = data.insights || [
-            "The message uses an appropriate tone for your relationship.",
-            "It clearly expresses your intention in a way that respects boundaries.",
-            "The language is authentic and connects emotionally."
-          ];
+          // Display the message
+          const messageText = document.getElementById('messageText');
+          messageText.textContent = data.message;
           
-          // Hide loading
+          // Clear and populate insights
+          const insightsList = document.getElementById('insightsList');
+          insightsList.innerHTML = '';
+          if (data.insights && data.insights.length > 0) {
+            data.insights.forEach(insight => {
+              const li = document.createElement('li');
+              li.className = 'insight-item';
+              li.textContent = insight;
+              insightsList.appendChild(li);
+            });
+          }
+          
+          // Hide loading overlay and show result card
           hideLoading();
-          
-          // Show results in the popup overlay
-          showResults(data.message, insights);
+          resultCard.style.display = "block";
+          resultCard.style.opacity = "1";
+          resultCard.style.transform = "translateY(0)";
           
           // Save to history if logged in
           if (currentUser) {
@@ -3391,12 +2979,9 @@
     
     // Show the loading overlay
     function showLoading() {
-      console.log('Showing loading overlay');
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.opacity = '1';
-        loadingOverlay.style.pointerEvents = 'auto';
+        loadingOverlay.classList.add('active');
       }
     }
     
@@ -3404,212 +2989,9 @@
     function hideLoading() {
       const loadingOverlay = document.getElementById('loadingOverlay');
       if (loadingOverlay) {
-        loadingOverlay.style.opacity = '0';
-        setTimeout(() => {
-          loadingOverlay.style.display = 'none';
-          loadingOverlay.style.pointerEvents = 'none';
-        }, 300);
+        loadingOverlay.classList.remove('active');
       }
     }
-    
-    // Results overlay functions
-    function showResults(message, insights) {
-      console.log('Showing results overlay');
-      
-      // Ensure old result card is hidden
-      const resultCard = document.getElementById('result');
-      if (resultCard) {
-        resultCard.style.display = 'none';
-      }
-      
-      // Get overlay elements
-      const resultsOverlay = document.getElementById('resultsOverlay');
-      const resultsMessage = document.getElementById('resultsMessage');
-      const insightsList = document.getElementById('resultsInsights');
-      
-      if (!resultsOverlay || !resultsMessage || !insightsList) {
-        console.error('Required results elements not found');
-        return;
-      }
-      
-      // Update message
-      resultsMessage.textContent = message;
-      
-      // Clear and update insights
-      insightsList.innerHTML = '';
-      if (insights && Array.isArray(insights)) {
-        insights.forEach(insight => {
-          const li = document.createElement('li');
-          li.className = 'insight-item';
-          li.textContent = insight;
-          insightsList.appendChild(li);
-        });
-      }
-      
-      // Show overlay with animation
-      resultsOverlay.style.display = 'flex';
-      // Force reflow
-      resultsOverlay.offsetHeight;
-      resultsOverlay.classList.add('active');
-      
-      // Add escape key listener
-      document.addEventListener('keydown', function escapeHandler(e) {
-        if (e.key === 'Escape') {
-          hideResults();
-          document.removeEventListener('keydown', escapeHandler);
-        }
-      });
-      
-      // Add click outside listener
-      resultsOverlay.addEventListener('click', function overlayClickHandler(e) {
-        if (e.target === resultsOverlay) {
-          hideResults();
-          resultsOverlay.removeEventListener('click', overlayClickHandler);
-        }
-      });
-    }
-    
-    function hideResults() {
-      console.log('Hiding results overlay');
-      const resultsOverlay = document.getElementById('resultsOverlay');
-      if (!resultsOverlay) return;
-      
-      resultsOverlay.classList.remove('active');
-      
-      // Wait for animation to complete before hiding
-      setTimeout(() => {
-        if (!resultsOverlay.classList.contains('active')) {
-          resultsOverlay.style.display = 'none';
-        }
-      }, 400); // Match the CSS transition duration
-    }
-    
-    // Update the generateMessage function to handle results display
-    window.generateMessage = async function(isRetry = false) {
-      const scenario = document.getElementById('scenario').value.trim();
-      const relationship = document.getElementById('relationship').value;
-      const tone = document.getElementById('tone').value;
-      const intensity = document.getElementById('intensity').value;
-      const duration = document.getElementById('duration').value;
-      const circumstances = document.getElementById('circumstances').value.trim();
-
-      // Input validation
-      if (!scenario) {
-        showAlert('Please describe what you would like to say', 'error');
-        return;
-      }
-
-      // Show loading animation
-      updateLoadingContext(relationship, tone);
-      showLoading();
-
-      try {
-        const response = await fetch('https://heartglowai-api.up.railway.app/generate', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': currentUser ? `Bearer ${await currentUser.getIdToken()}` : ''
-          },
-          body: JSON.stringify({
-            scenario,
-            relationship,
-            tone,
-            intensity,
-            duration,
-            circumstances,
-            retry: isRetry
-          })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.message) {
-          // Hide loading first
-          hideLoading();
-          
-          // Prepare insights
-          const insights = data.insights || [
-            "The message uses an appropriate tone for your relationship",
-            "It clearly expresses your intention while respecting boundaries",
-            "The language is authentic and connects emotionally"
-          ];
-          
-          // Show results in popup
-          showResults(data.message, insights);
-          
-          // Save to history if user is authenticated
-          if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
-          }
-        } else {
-          throw new Error(data.error || 'Failed to generate message');
-        }
-      } catch (error) {
-        console.error('Error generating message:', error);
-        
-        // Hide loading
-        hideLoading();
-        
-        // Show appropriate error message
-        if (error.message.includes('CORS') || error.message.includes('Failed to fetch')) {
-          showAlert('Network error - please try again', 'error');
-        } else {
-          showAlert(error.message || 'Failed to generate message', 'error');
-        }
-      }
-    };
-
-    // Add event listeners for results overlay
-    document.addEventListener('DOMContentLoaded', function() {
-      // Setup results overlay listeners
-      const closeResults = document.getElementById('closeResults');
-      if (closeResults) {
-        closeResults.addEventListener('click', hideResults);
-      }
-      
-      // Copy button functionality
-      const resultsCopyBtn = document.getElementById('resultsCopyBtn');
-      if (resultsCopyBtn) {
-        resultsCopyBtn.addEventListener('click', function() {
-          const messageText = document.getElementById('resultsMessage').textContent;
-          navigator.clipboard.writeText(messageText).then(function() {
-            showAlert('Message copied to clipboard!', 'success');
-          }).catch(function(err) {
-            console.error('Could not copy text: ', err);
-            showAlert('Failed to copy message', 'error');
-          });
-        });
-      }
-      
-      // Tweak button functionality
-      const resultsTweakBtn = document.getElementById('resultsTweakBtn');
-      if (resultsTweakBtn) {
-        resultsTweakBtn.addEventListener('click', function() {
-          document.getElementById('resultsFeedbackForm').style.display = 'block';
-        });
-      }
-      
-      // Submit feedback button
-      const resultsSubmitFeedback = document.getElementById('resultsSubmitFeedback');
-      if (resultsSubmitFeedback) {
-        resultsSubmitFeedback.addEventListener('click', function() {
-          tweakMessage();
-        });
-      }
-      
-      // Ensure the Generate button calls the generateMessage function
-      const generateBtn = document.getElementById('generateBtn');
-      if (generateBtn) {
-        // Remove any existing listeners
-        const newBtn = generateBtn.cloneNode(true);
-        generateBtn.parentNode.replaceChild(newBtn, generateBtn);
-        
-        // Add new listener
-        newBtn.addEventListener('click', function() {
-          generateMessage();
-        });
-      }
-    });
   </script>
 </body>
 </html> 

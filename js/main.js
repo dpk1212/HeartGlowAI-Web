@@ -2093,8 +2093,8 @@
 
     // Initialize the test button for Perplexity API (development only)
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('Looking for test-perplexity-btn...');
-      const testButton = document.getElementById('test-perplexity-btn');
+      console.log('Looking for test-perplexity-btn-main...');
+      const testButton = document.getElementById('test-perplexity-btn-main');
       console.log('Found test button?', !!testButton);
       if (testButton) {
         console.log('Adding click event listener to Test Perplexity AI button');

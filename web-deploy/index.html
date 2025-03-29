@@ -485,5 +485,99 @@
   
   <!-- JavaScript -->
   <script src="js/main.js"></script>
+  
+  <!-- Direct script to ensure handleLearnWithAI is globally available -->
+  <script>
+    // Global function for Learn with AI button
+    function handleLearnWithAI() {
+      console.log('Learn with AI button clicked!');
+      
+      // Get the button element
+      const learnBtn = document.getElementById('learn-with-ai-btn');
+      
+      // Save original button text
+      const originalText = learnBtn.innerHTML;
+      
+      // Show loading state
+      learnBtn.innerHTML = `<span class="btn-loading-spinner"></span> Connecting...`;
+      learnBtn.disabled = true;
+      
+      try {
+        // Call the testPerplexityAPI function
+        testPerplexityAPI()
+          .then(result => {
+            console.log('API call complete, result:', result);
+            
+            if (result && result.choices && result.choices[0]) {
+              // Create a modal to display the result
+              const modalOverlay = document.createElement('div');
+              modalOverlay.className = 'modal-overlay';
+              modalOverlay.style.position = 'fixed';
+              modalOverlay.style.top = '0';
+              modalOverlay.style.left = '0';
+              modalOverlay.style.width = '100%';
+              modalOverlay.style.height = '100%';
+              modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+              modalOverlay.style.display = 'flex';
+              modalOverlay.style.justifyContent = 'center';
+              modalOverlay.style.alignItems = 'center';
+              modalOverlay.style.zIndex = '9999';
+              
+              const modalContent = document.createElement('div');
+              modalContent.className = 'modal-content';
+              modalContent.style.backgroundColor = '#fff';
+              modalContent.style.borderRadius = '12px';
+              modalContent.style.padding = '20px';
+              modalContent.style.maxWidth = '90%';
+              modalContent.style.maxHeight = '80%';
+              modalContent.style.overflow = 'auto';
+              modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+              
+              // Add the AI response
+              modalContent.innerHTML = `
+                <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
+                <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">
+                  ${result.choices[0].message.content.replace(/\n/g, '<br>')}
+                </div>
+                <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+              `;
+              
+              modalOverlay.appendChild(modalContent);
+              document.body.appendChild(modalOverlay);
+              
+              // Add event listener to close button
+              document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.body.removeChild(modalOverlay);
+              });
+              
+              // Also allow closing by clicking outside
+              modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                  document.body.removeChild(modalOverlay);
+                }
+              });
+            } else {
+              throw new Error('Invalid response from AI service');
+            }
+          })
+          .catch(error => {
+            console.error('Learn with AI error:', error);
+            alert(`AI Learning failed: ${error.message}`);
+          })
+          .finally(() => {
+            // Restore button state
+            learnBtn.innerHTML = originalText;
+            learnBtn.disabled = false;
+          });
+      } catch (error) {
+        console.error('Learn with AI error:', error);
+        alert(`AI Learning failed: ${error.message}`);
+        
+        // Restore button state
+        learnBtn.innerHTML = originalText;
+        learnBtn.disabled = false;
+      }
+    }
+  </script>
 </body>
 </html> 

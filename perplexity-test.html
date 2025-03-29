@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perplexity API Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      line-height: 1.6;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      color: #333;
+    }
+    h1 {
+      color: #4a2b8c;
+      margin-bottom: 30px;
+    }
+    .test-container {
+      background-color: #f5f5f5;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #4a2b8c;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #361f66;
+    }
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 16px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    .result {
+      background-color: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 15px;
+      margin-top: 20px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .citations {
+      margin-top: 15px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+    .spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 3px solid rgba(255,255,255,.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 10px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <h1>Perplexity API Test</h1>
+  
+  <div class="test-container">
+    <h2>Test the API</h2>
+    <p>Enter a prompt below and click "Send to Perplexity" to test the API:</p>
+    <textarea id="prompt-input" placeholder="What are the benefits of meditation?"></textarea>
+    <button id="test-btn">Send to Perplexity</button>
+    <div id="result-container" style="display: none;">
+      <h3>Response:</h3>
+      <div id="result" class="result"></div>
+    </div>
+  </div>
+
+  <script>
+    // Perplexity API Key Retrieval
+    async function getPerplexityApiKey() {
+      try {
+        // First try to get the key from localStorage
+        const cachedKey = localStorage.getItem('perplexity_api_key');
+        if (cachedKey) {
+          console.log('Using cached Perplexity API key');
+          return cachedKey;
+        }
+        
+        // If not in localStorage, get from Firestore
+        console.log('Fetching Perplexity API key from Firestore');
+        
+        // Get the Firebase instance
+        const fb = window.firebase;
+        if (!fb) {
+          throw new Error('Firebase not initialized');
+        }
+        
+        // Get the current user
+        const user = fb.auth().currentUser;
+        if (!user) {
+          throw new Error('User not logged in');
+        }
+        
+        // Access Firestore
+        const db = fb.firestore();
+        const apiKeysDoc = await db.collection('api_keys').doc('perplexity').get();
+        
+        if (!apiKeysDoc.exists) {
+          throw new Error('Perplexity API key not found in Firestore');
+        }
+        
+        const apiKey = apiKeysDoc.data().key;
+        if (!apiKey) {
+          throw new Error('Invalid API key format in Firestore');
+        }
+        
+        // Cache the key in localStorage
+        localStorage.setItem('perplexity_api_key', apiKey);
+        console.log('Perplexity API key retrieved and cached');
+        
+        return apiKey;
+      } catch (error) {
+        console.error('Error getting Perplexity API key:', error);
+        throw error;
+      }
+    }
+
+    // Call Perplexity API
+    async function callPerplexityAPI(prompt) {
+      try {
+        const apiKey = await getPerplexityApiKey();
+        
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'llama-3-sonar-medium-128k',
+            messages: [
+              {
+                role: 'user',
+                content: prompt
+              }
+            ],
+            temperature: 0.7,
+            max_tokens: 1024,
+            top_p: 0.9
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.text();
+          throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorData}`);
+        }
+        
+        const data = await response.json();
+        console.log('Perplexity API response:', data);
+        return data;
+      } catch (error) {
+        console.error('Error calling Perplexity API:', error);
+        throw error;
+      }
+    }
+
+    // Test function
+    async function testPerplexityAPI(prompt) {
+      try {
+        const result = await callPerplexityAPI(prompt);
+        return result;
+      } catch (error) {
+        console.error('Test failed:', error);
+        throw error;
+      }
+    }
+
+    // Initialize the test page
+    document.addEventListener('DOMContentLoaded', () => {
+      const testButton = document.getElementById('test-btn');
+      const promptInput = document.getElementById('prompt-input');
+      const resultContainer = document.getElementById('result-container');
+      const resultElement = document.getElementById('result');
+      
+      testButton.addEventListener('click', async () => {
+        try {
+          // Clear previous results
+          resultContainer.style.display = 'none';
+          resultElement.innerHTML = '';
+          
+          // Get the prompt
+          const prompt = promptInput.value.trim();
+          if (!prompt) {
+            alert('Please enter a prompt');
+            return;
+          }
+          
+          // Disable button and show loading state
+          testButton.disabled = true;
+          const originalButtonText = testButton.textContent;
+          testButton.innerHTML = '<span class="spinner"></span> Testing...';
+          
+          // Call the API
+          const result = await testPerplexityAPI(prompt);
+          
+          // Display the result
+          if (result && result.choices && result.choices[0]) {
+            resultElement.textContent = result.choices[0].message.content;
+            
+            // Add citations if available
+            if (result.citations && result.citations.length > 0) {
+              const citationsDiv = document.createElement('div');
+              citationsDiv.className = 'citations';
+              
+              const citationsTitle = document.createElement('h4');
+              citationsTitle.textContent = 'Citations';
+              citationsDiv.appendChild(citationsTitle);
+              
+              const citationsList = document.createElement('ul');
+              result.citations.forEach(citation => {
+                const item = document.createElement('li');
+                const link = document.createElement('a');
+                link.href = citation.url;
+                link.textContent = citation.title || citation.url;
+                link.target = '_blank';
+                item.appendChild(link);
+                citationsList.appendChild(item);
+              });
+              citationsDiv.appendChild(citationsList);
+              resultElement.appendChild(citationsDiv);
+            }
+          } else {
+            resultElement.textContent = 'No valid response received';
+          }
+          
+          // Show result container
+          resultContainer.style.display = 'block';
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+          console.error('Test error:', error);
+        } finally {
+          // Reset button state
+          testButton.disabled = false;
+          testButton.textContent = originalButtonText;
+        }
+      });
+    });
+  </script>
+</body>
+</html> 

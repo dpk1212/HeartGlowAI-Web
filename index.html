@@ -3278,11 +3278,6 @@
         <span class="new-conversation-icon">💬</span> Start a New Conversation
       </button>
       
-      <!-- Learn button for Perplexity API Test -->
-      <button id="learn-btn" class="new-conversation-btn" style="background-color: #6c4ba3; margin-top: 10px; font-size: 14px; padding: 10px 15px;">
-        <span class="new-conversation-icon">🧠</span> Learn
-      </button>
-      
       <!-- Templates Section -->
       <div id="templates-section" class="templates-section">
         <h2 class="section-title">Message Templates</h2>
@@ -5506,30 +5501,17 @@
         
         console.log('Retrieving Perplexity API key from Firestore');
         
-        // Try to get from config collection (allowed in your Firebase rules)
-        const configDoc = await firebase.firestore().collection('config').doc('perplexity').get();
+        // Access the secrets collection directly - matching the exact structure from Firebase console
+        const secretsDoc = await firebase.firestore().collection('secrets').doc('secrets').get();
         
-        if (configDoc.exists && configDoc.data().apiKey) {
-          perplexityApiKey = configDoc.data().apiKey;
+        if (secretsDoc.exists && secretsDoc.data().perplexitykey) {
+          perplexityApiKey = secretsDoc.data().perplexitykey;
           localStorage.setItem('perplexity_api_key', perplexityApiKey);
-          console.log('Perplexity API key retrieved from config collection');
+          console.log('Perplexity API key retrieved from secrets collection');
           return perplexityApiKey;
         }
         
-        // Fallback to openai key format if perplexity key not available yet
-        // This is just for testing purposes
-        console.log('Trying to get OpenAI API key as fallback');
-        const apiKeysDoc = await firebase.firestore().collection('api-keys').doc('openai').get();
-        
-        if (apiKeysDoc.exists && apiKeysDoc.data().key) {
-          // This is just for testing - in production you should use a real Perplexity key
-          console.warn('Using OpenAI key for testing - not recommended for production');
-          perplexityApiKey = apiKeysDoc.data().key;
-          localStorage.setItem('perplexity_api_key', perplexityApiKey);
-          return perplexityApiKey;
-        }
-        
-        console.error('Perplexity API key not found in accessible collections');
+        console.error('Perplexity API key not found in secrets collection');
         throw new Error('Perplexity API key not found');
       } catch (error) {
         console.error('Error fetching Perplexity API key:', error);
@@ -5673,40 +5655,7 @@
       // Call the init function after the DOM is loaded
       document.addEventListener('DOMContentLoaded', () => {
         initTestButton();
-        
-        // Initialize the Learn button
-        const learnButton = document.getElementById('learn-btn');
-        if (learnButton) {
-          learnButton.addEventListener('click', async () => {
-            try {
-              // Change button appearance
-              learnButton.disabled = true;
-              learnButton.innerHTML = '<span class="new-conversation-icon">⏳</span> Testing...';
-              
-              // Test prompt
-              const testPrompt = "What are three benefits of emotional intelligence in relationships?";
-              
-              // Call Perplexity API
-              const result = await callPerplexityAPI(testPrompt);
-              
-              // Show simple alert with success or failure
-              if (result && result.choices && result.choices[0]) {
-                alert("✅ Perplexity API Test Successful!");
-              } else {
-                alert("❌ API returned empty or invalid response");
-              }
-            } catch (error) {
-              // Show error
-              alert("❌ Perplexity API Test Failed: " + error.message);
-              console.error("Perplexity test error:", error);
-            } finally {
-              // Reset button
-              learnButton.disabled = false;
-              learnButton.innerHTML = '<span class="new-conversation-icon">🧠</span> Learn';
-            }
-          });
-        }
-      });
+    });
   </script>
 </body>
 </html> 

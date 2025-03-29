@@ -11,7 +11,8 @@
     "eject": "expo eject",
     "deploy": "gh-pages -d deploy-build",
     "prepare-deploy": "mkdir -p deploy-build && cp -r web-deploy/* deploy-build/",
-    "deploy-gh-pages": "npm run prepare-deploy && npm run deploy"
+    "deploy-gh-pages": "npm run prepare-deploy && npm run deploy",
+    "force-deploy": "npm run prepare-deploy && gh-pages -d deploy-build --no-history"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

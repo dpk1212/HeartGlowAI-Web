@@ -132,12 +132,44 @@
       z-index: 1;
     }
     
+    /* Enhanced welcome animations */
     .welcome-heart {
       width: 180px;
       height: 180px;
       margin-bottom: 60px;
       position: relative;
-      animation: float 6s ease-in-out infinite;
+      animation: float 6s ease-in-out infinite, fadeInUp 1.2s ease-out;
+    }
+    
+    .welcome-title {
+      animation: fadeInUp 1.4s ease-out;
+    }
+    
+    .welcome-subtitle {
+      animation: fadeInUp 1.6s ease-out;
+    }
+    
+    #login-register-btn {
+      animation: fadeInUp 1.8s ease-out;
+    }
+    
+    #take-tour-btn {
+      animation: fadeInUp 2s ease-out;
+    }
+    
+    .trust-badge {
+      animation: fadeInUp 2.2s ease-out;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     .welcome-heart svg {
@@ -180,6 +212,63 @@
       line-height: 1.5;
     }
     
+    /* Mobile optimizations for welcome screen */
+    @media (max-width: 768px) {
+      .welcome-heart {
+        width: 140px;
+        height: 140px;
+        margin-bottom: 40px;
+      }
+      
+      .welcome-title {
+        font-size: 36px;
+        margin-bottom: 16px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 20px;
+        margin-bottom: 30px;
+        padding: 0 10px;
+      }
+      
+      #login-register-btn, #take-tour-btn {
+        max-width: 280px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .welcome-heart {
+        width: 110px;
+        height: 110px;
+        margin-bottom: 30px;
+      }
+      
+      .welcome-title {
+        font-size: 32px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 18px;
+        line-height: 1.4;
+      }
+      
+      .trust-badge {
+        font-size: 13px;
+        margin-top: 16px;
+      }
+      
+      #login-register-btn {
+        padding: 14px 24px;
+        font-size: 15px;
+      }
+      
+      #take-tour-btn {
+        font-size: 15px;
+        padding: 12px 24px;
+        margin-top: 12px;
+      }
+    }
+    
     .trust-badge {
       font-size: 14px;
       color: var(--text-secondary);
@@ -204,6 +293,9 @@
       width: 100%;
       max-width: 300px;
       transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
     }
     
     #login-register-btn:hover {
@@ -213,6 +305,59 @@
     
     #login-register-btn:active {
       transform: scale(0.98);
+    }
+    
+    /* Enhanced touch feedback */
+    #login-register-btn::after,
+    #take-tour-btn::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      transition: transform 0.4s, opacity 0.4s;
+      pointer-events: none;
+    }
+    
+    #login-register-btn:active::after,
+    #take-tour-btn:active::after {
+      transform: translate(-50%, -50%) scale(2);
+      opacity: 1;
+      transition: 0s;
+    }
+    
+    /* Tour button styles */
+    .tour-btn {
+      margin-top: 16px;
+      background: transparent;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 14px 32px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .tour-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    
+    .tour-btn:active {
+      transform: scale(0.96);
+      background: rgba(255, 255, 255, 0.15);
+      transition: transform 0.1s;
     }
     
     /* Animated background for welcome screen */
@@ -228,6 +373,15 @@
         radial-gradient(circle at 80% 80%, rgba(100, 210, 255, 0.05) 0%, transparent 50%);
       animation: gradientMove 20s ease-in-out infinite alternate;
       z-index: 0;
+    }
+    
+    /* Mobile optimization for animated background */
+    @media (max-width: 768px) {
+      .welcome-container::before {
+        background: 
+          radial-gradient(circle at 30% 30%, rgba(255, 107, 157, 0.08) 0%, transparent 60%),
+          radial-gradient(circle at 70% 70%, rgba(100, 210, 255, 0.08) 0%, transparent 60%);
+      }
     }
     
     @keyframes drawHeart {

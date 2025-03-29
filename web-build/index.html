@@ -3114,6 +3114,9 @@
           <button id="login-register-btn">Start Your First Message - Free</button>
           <button id="take-tour-btn" class="tour-btn">See How It Works</button>
           <p class="trust-badge">Built on OpenAI. Designed for human connection.</p>
+          
+          <!-- Test button for Perplexity (hidden in production) -->
+          <button id="test-perplexity-btn" class="test-btn" style="margin-top: 20px; background: #444; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none;">Test Perplexity API</button>
         </div>
       </div>
     </div>
@@ -5478,6 +5481,175 @@
         }
       }
     }
+
+    // Perplexity API Integration
+    // Function to retrieve Perplexity API key from Firestore
+    async function getPerplexityApiKey() {
+      try {
+        // Check local storage first
+        let perplexityApiKey = localStorage.getItem('perplexity_api_key');
+        
+        if (perplexityApiKey) {
+          console.log('Using Perplexity API key from local storage');
+          return perplexityApiKey;
+        }
+        
+        // Get from Firestore if not in local storage
+        console.log('Retrieving Perplexity API key from Firestore');
+        const doc = await firebase.firestore().collection('secrets').doc('secrets').get();
+        
+        if (doc.exists && doc.data().perplexitykey) {
+          perplexityApiKey = doc.data().perplexitykey;
+          localStorage.setItem('perplexity_api_key', perplexityApiKey);
+          console.log('Perplexity API key retrieved successfully');
+          return perplexityApiKey;
+        } else {
+          console.error('Perplexity API key document not found in Firestore');
+          throw new Error('Perplexity API key not found');
+        }
+      } catch (error) {
+        console.error('Error fetching Perplexity API key:', error);
+        throw error;
+      }
+    }
+
+    // Function to make a Perplexity API call
+    async function callPerplexityAPI(prompt) {
+      try {
+        console.log('Making Perplexity API call with prompt:', prompt);
+        const apiKey = await getPerplexityApiKey();
+        
+        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "sonar",
+            messages: [
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            max_tokens: 500,
+            top_p: 0.9
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(`Perplexity API error: ${errorData.error?.message || response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Perplexity API response:', data);
+        return data;
+      } catch (error) {
+        console.error('Perplexity API call failed:', error);
+        throw error;
+      }
+    }
+
+    // Test function for Perplexity API
+    async function testPerplexityAPI() {
+      try {
+        console.log('Testing Perplexity API...');
+        const result = await callPerplexityAPI('What are the top 3 benefits of meditation?');
+        console.log('Result:', result.choices[0].message.content);
+        if (result.citations && result.citations.length > 0) {
+          console.log('Citations:', result.citations);
+        }
+        return result;
+      } catch (error) {
+        console.error('Test failed:', error);
+        return null;
+      }
+    }
+
+    // You can call testPerplexityAPI() from the browser console to test
+    // ... existing code continues ...
+
+      // You can call testPerplexityAPI() from the browser console to test
+      
+      // Initialize the test button for Perplexity API (development only)
+      const initTestButton = () => {
+        const testButton = document.getElementById('test-perplexity-btn');
+        if (testButton) {
+          // Only show in development or if a URL parameter is present
+          const isDev = window.location.hostname === 'localhost' || 
+                         window.location.hostname === '127.0.0.1' || 
+                         window.location.search.includes('showtest=true');
+          
+          if (isDev) {
+            testButton.style.display = 'block';
+            
+            // Add click event listener
+            testButton.addEventListener('click', async () => {
+              testButton.textContent = 'Testing...';
+              testButton.disabled = true;
+              
+              try {
+                const result = await testPerplexityAPI();
+                
+                if (result && result.choices && result.choices[0]) {
+                  // Create a floating div to show the result
+                  const resultDiv = document.createElement('div');
+                  resultDiv.style.position = 'fixed';
+                  resultDiv.style.top = '50%';
+                  resultDiv.style.left = '50%';
+                  resultDiv.style.transform = 'translate(-50%, -50%)';
+                  resultDiv.style.background = 'rgba(0, 0, 0, 0.9)';
+                  resultDiv.style.color = 'white';
+                  resultDiv.style.padding = '20px';
+                  resultDiv.style.borderRadius = '12px';
+                  resultDiv.style.zIndex = '1000';
+                  resultDiv.style.maxWidth = '80%';
+                  resultDiv.style.maxHeight = '80%';
+                  resultDiv.style.overflow = 'auto';
+                  
+                  // Add close button
+                  const closeBtn = document.createElement('button');
+                  closeBtn.textContent = 'Close';
+                  closeBtn.style.background = '#555';
+                  closeBtn.style.color = 'white';
+                  closeBtn.style.border = 'none';
+                  closeBtn.style.padding = '8px 16px';
+                  closeBtn.style.borderRadius = '4px';
+                  closeBtn.style.marginTop = '15px';
+                  closeBtn.style.cursor = 'pointer';
+                  closeBtn.onclick = () => document.body.removeChild(resultDiv);
+                  
+                  // Add content
+                  resultDiv.innerHTML = `
+                    <h3>Perplexity API Test Result</h3>
+                    <p><strong>Response:</strong> ${result.choices[0].message.content}</p>
+                    ${result.citations && result.citations.length > 0 ? `
+                      <p><strong>Citations:</strong></p>
+                      <ul>
+                        ${result.citations.map(citation => `<li><a href="${citation}" target="_blank">${citation}</a></li>`).join('')}
+                      </ul>
+                    ` : ''}
+                  `;
+                  resultDiv.appendChild(closeBtn);
+                  document.body.appendChild(resultDiv);
+                }
+                
+                showAlert('Perplexity API test successful! Check console for details.', 'success');
+              } catch (error) {
+                showAlert(`Perplexity API test failed: ${error.message}`, 'error');
+              } finally {
+                testButton.textContent = 'Test Perplexity API';
+                testButton.disabled = false;
+              }
+            });
+          }
+        }
+      };
+      
+      // Call the init function after the DOM is loaded
+      document.addEventListener('DOMContentLoaded', () => {
+        initTestButton();
+      });
   </script>
 </body>
 </html> 

@@ -159,18 +159,37 @@
     }
     
     .welcome-title {
-      font-size: 42px;
+      background-image: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-size: 48px;
       font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+      letter-spacing: -0.5px;
       line-height: 1.2;
     }
     
     .welcome-subtitle {
-      font-size: 18px;
       color: var(--text-secondary);
-      margin-bottom: 48px;
+      font-size: 24px;
+      margin-bottom: 40px;
+      text-align: center;
+      max-width: 600px;
       line-height: 1.5;
+    }
+    
+    .trust-badge {
+      font-size: 14px;
+      color: var(--text-secondary);
+      opacity: 0.8;
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      width: 100%;
+      max-width: 400px;
     }
     
     #login-register-btn {
@@ -3058,9 +3077,10 @@
             </svg>
           </div>
         <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
-        <p class="welcome-subtitle">For reconnecting, apologizing, or celebrating — craft the perfect words with AI.</p>
+        <p class="welcome-subtitle">Hard to say. Easy to feel. Let AI help you bridge the gap.</p>
           <button id="login-register-btn">Start Your First Message - Free</button>
           <button id="take-tour-btn" class="tour-btn">See How It Works</button>
+          <p class="trust-badge">Built on OpenAI. Designed for human connection.</p>
         </div>
       </div>
     </div>

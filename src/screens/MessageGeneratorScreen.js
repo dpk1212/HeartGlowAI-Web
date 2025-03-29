@@ -22,6 +22,61 @@ import { COLORS, RELATIONSHIP_TYPES } from '../config/constants';
 import FeedbackModal from '../components/FeedbackModal';
 import firestore from '../services/firebaseFirestore';
 
+// API function to test Perplexity integration
+const testPerplexityAPI = async () => {
+  try {
+    // For web apps, especially on GitHub Pages, direct API calls may face CORS issues
+    // We should use a proxy API or backend function instead
+    let apiKey;
+
+    // Try to get API key from Firestore if we're in a React Native environment
+    try {
+      const doc = await firestore.collection('config').doc('perplexity').get();
+      if (doc.exists) {
+        apiKey = doc.data().apiKey;
+      }
+    } catch (keyError) {
+      console.log('Could not fetch Perplexity API key from Firestore');
+    }
+
+    if (!apiKey) {
+      // In production, you should use environment variables or a secure backend
+      // This is a fallback for demo purposes only
+      apiKey = 'pplx-xxxxxxxx'; // Replace with actual key or proxy solution
+    }
+
+    // You can modify this to call your backend API endpoint that handles the Perplexity API call
+    // For example: const response = await fetch('https://your-backend.com/api/perplexity', ...
+    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: 'mistral-7b-instruct',
+        messages: [
+          { role: 'system', content: 'You are a helpful assistant.' },
+          { role: 'user', content: 'How can AI help with communication?' }
+        ]
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(
+        errorData?.error?.message || 
+        `API request failed with status ${response.status}`
+      );
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('Error testing Perplexity API:', error);
+    throw error;
+  }
+};
+
 const MessageGeneratorScreen = ({ user }) => {
   const [scenario, setScenario] = useState('');
   const [relationshipType, setRelationshipType] = useState(RELATIONSHIP_TYPES[0]);
@@ -183,6 +238,44 @@ const MessageGeneratorScreen = ({ user }) => {
     setShowInput(true);
   };
 
+  const handleLearnWithPerplexity = async () => {
+    try {
+      // Show loading indicator
+      setLoading(true);
+      Alert.alert('Learn Module', 'Connecting to AI learning module...');
+      
+      // Call the test function to verify API integration
+      const result = await testPerplexityAPI();
+      console.log('Perplexity API test result:', result);
+      
+      // Extract and display the response content
+      if (result && result.choices && result.choices.length > 0 && result.choices[0].message) {
+        const aiResponse = result.choices[0].message.content;
+        
+        // Show the AI response in a more user-friendly way
+        setTimeout(() => {
+          Alert.alert(
+            'AI Learning Tips', 
+            aiResponse,
+            [{ text: 'Got it!', style: 'default' }]
+          );
+        }, 500);
+      } else {
+        throw new Error('Invalid response format from AI service');
+      }
+    } catch (error) {
+      console.error('Error with Learn Module:', error);
+      Alert.alert(
+        'AI Learning Unavailable', 
+        `We're having trouble connecting to our AI learning service. Please try again later. ${error.message}`,
+        [{ text: 'OK', style: 'cancel' }]
+      );
+    } finally {
+      // Hide loading indicator
+      setLoading(false);
+    }
+  };
+
   const handleCloseFeedback = () => {
     setShowFeedback(false);
   };
@@ -215,6 +308,13 @@ const MessageGeneratorScreen = ({ user }) => {
               onPress={handleStartConversation}
             >
               <Text style={styles.startButtonText}>Start a New Conversation</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={[styles.startButton, styles.learnButton]}
+              onPress={handleLearnWithPerplexity}
+            >
+              <Text style={styles.startButtonText}>Learn with AI</Text>
             </TouchableOpacity>
             
             <TemplatesSection onSelectTemplate={handleTemplateSelect} />
@@ -348,9 +448,18 @@ const styles = StyleSheet.create({
   startButton: {
     backgroundColor: COLORS.primary,
     padding: 16,
-    borderRadius: 10,
+    borderRadius: 8,
+    marginVertical: 10,
     alignItems: 'center',
-    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  learnButton: {
+    backgroundColor: COLORS.accent2,
+    marginTop: 5,
   },
   startButtonText: {
     color: COLORS.text,

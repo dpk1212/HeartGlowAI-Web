@@ -492,24 +492,20 @@
       const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
       if (learnWithAiBtn) {
         learnWithAiBtn.addEventListener('click', function() {
-          // Import the learning screen functionality
-          const script = document.createElement('script');
-          script.src = 'js/learn-button.js';
-          document.head.appendChild(script);
-          
-          // Call the navigation function with a slight delay to ensure the script is loaded
-          setTimeout(() => {
-            if (typeof goToLearningScreen === 'function') {
-              goToLearningScreen();
-            } else {
-              alert('The learning module is not available at the moment. Please try again later.');
-            }
-          }, 100);
+          showScreen(learningScreen);
           
           // Log analytics event
           logAnalyticsEvent('learn_module_click', {
             source: 'home_screen'
           });
+        });
+      }
+      
+      // Back to home from learning button
+      const backToHomeFromLearning = document.getElementById('back-to-home-from-learning');
+      if (backToHomeFromLearning) {
+        backToHomeFromLearning.addEventListener('click', function() {
+          showScreen(homeScreen);
         });
       }
       

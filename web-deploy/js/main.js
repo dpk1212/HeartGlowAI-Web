@@ -489,10 +489,16 @@
       });
       
       // Learn with AI button event listener
-      const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
-      if (learnWithAiBtn) {
-        learnWithAiBtn.addEventListener('click', function() {
-          showScreen(learningScreen);
+      const learnBtn = document.getElementById('learn-btn');
+      if (learnBtn) {
+        learnBtn.addEventListener('click', function() {
+          // Hide home screen and show learning screen
+          homeScreen.classList.remove('active');
+          setTimeout(() => {
+            homeScreen.style.display = 'none';
+            learningScreen.style.display = 'flex';
+            setTimeout(() => learningScreen.classList.add('active'), 50);
+          }, 500);
           
           // Log analytics event
           logAnalyticsEvent('learn_module_click', {
@@ -505,7 +511,13 @@
       const backToHomeFromLearning = document.getElementById('back-to-home-from-learning');
       if (backToHomeFromLearning) {
         backToHomeFromLearning.addEventListener('click', function() {
-          showScreen(homeScreen);
+          // Hide learning screen and show home screen
+          learningScreen.classList.remove('active');
+          setTimeout(() => {
+            learningScreen.style.display = 'none';
+            homeScreen.style.display = 'flex';
+            setTimeout(() => homeScreen.classList.add('active'), 50);
+          }, 500);
         });
       }
       

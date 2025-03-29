@@ -1,157 +1,533 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeartGlowAI - AI-Powered Heart Health & Emotional Well-being</title>
-    <meta name="description" content="AI-powered heart health insights and emotional well-being tools to help you live a healthier, more balanced life.">
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
-    <link rel="stylesheet" href="css/styles.css">
-    <link rel="stylesheet" href="css/perplexity-citations.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeartGlowAI</title>
+  <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
+  
+  <!-- Resource Hints -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://us-central1-heartglowai.cloudfunctions.net" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preload" href="css/styles.css" as="style">
+  <link rel="preload" href="js/main.js" as="script">
+  
+  <!-- Font Loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/perplexity-citations.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Header -->
-        <header class="site-header">
-            <div class="header-content">
-                <a href="index.html" class="logo">HeartGlowAI</a>
-                <nav class="main-nav">
-                    <ul>
-                        <li><a href="index.html" class="active">Home</a></li>
-                        <li><a href="learn.html">Learn</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </header>
-
-        <!-- Main Hero Section -->
-        <section class="hero-section">
-            <div class="hero-content">
-                <h1>Unlock the Wisdom of Your Heart</h1>
-                <p>AI-powered insights for emotional health, relationships, and personal growth.</p>
-                <div class="hero-buttons">
-                    <a href="#features" class="primary-button">Get Started</a>
-                    <a href="learn.html" class="secondary-button" id="learn-with-ai-btn">Learn with AI</a>
-                </div>
-            </div>
-        </section>
-
-        <!-- Features Section -->
-        <section id="features" class="features-section">
-            <div class="section-header">
-                <h2>How HeartGlowAI Helps You</h2>
-                <p>Discover our tools for emotional well-being and relationship growth</p>
-            </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">❤️</div>
-                    <h3>AI-Powered Insights</h3>
-                    <p>Get personalized guidance on relationships, emotional intelligence, and communication.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">🔍</div>
-                    <h3>Research Backed</h3>
-                    <p>Access information from peer-reviewed journals and evidence-based practice.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">📚</div>
-                    <h3>Learning Library</h3>
-                    <p>Browse our extensive collection of resources on emotional well-being topics.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">💬</div>
-                    <h3>Communication Tools</h3>
-                    <p>Improve your relationships with strategies for effective, empathetic communication.</p>
-                </div>
-            </div>
-        </section>
-
-        <!-- Learn with AI Banner -->
-        <section class="cta-banner">
-            <div class="cta-content">
-                <h2>Learn with HeartGlowAI</h2>
-                <p>Let AI help you explore ideas that improve your relationships, emotions, and communication.</p>
-                <a href="learn.html" class="cta-button">Browse All Topics</a>
-            </div>
-        </section>
-
-        <!-- Testimonials Section -->
-        <section class="testimonials-section">
-            <div class="section-header">
-                <h2>What Our Users Say</h2>
-                <p>Real stories from people who've grown with HeartGlowAI</p>
-            </div>
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>"HeartGlowAI helped me understand my attachment style and how it was affecting my relationships. The resources were life-changing!"</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-info">
-                            <h4>Sarah M.</h4>
-                            <p>Relationship Coach</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>"The research-backed information on setting boundaries transformed how I approach difficult conversations at work and at home."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-info">
-                            <h4>James T.</h4>
-                            <p>Marketing Executive</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <p>"I appreciate how HeartGlowAI combines AI with evidence-based research. I trust the information and have seen real improvements in my relationships."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-info">
-                            <h4>Elena R.</h4>
-                            <p>Therapist</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="site-footer">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h4>HeartGlowAI</h4>
-                    <p>AI-powered relationship insights and communication tools to help you build healthier, more meaningful connections.</p>
-                </div>
-                <div class="footer-column">
-                    <h4>Links</h4>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="learn.html">Learn</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="privacy.html">Privacy Policy</a></li>
-                        <li><a href="terms.html">Terms of Service</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2023 HeartGlowAI. All rights reserved.</p>
-            </div>
-        </footer>
+  <div id="app">
+    <!-- Welcome Screen -->
+    <div id="welcome-screen" class="screen active">
+      <div class="welcome-container">
+        <div class="welcome-content">
+          <div class="welcome-heart">
+            <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--accent-pink)"/>
+                  <stop offset="100%" style="stop-color:var(--accent-blue)"/>
+                </linearGradient>
+              </defs>
+              <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z"/>
+            </svg>
+          </div>
+        <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
+        <p class="welcome-subtitle">Hard to say. Easy to feel. Let AI help you bridge the gap.</p>
+          <button id="login-register-btn">Start Your First Message - Free</button>
+          <button id="take-tour-btn" class="tour-btn">See How It Works</button>
+          <p class="trust-badge">Built on OpenAI. Designed for human connection.</p>
+          
+          <!-- Test button for Perplexity (hidden in production) -->
+          <button id="test-perplexity-btn" class="test-btn" style="margin-top: 20px; background: #444; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none;">Test Perplexity API</button>
+        </div>
+      </div>
     </div>
-
-    <!-- Scripts -->
-    <script src="js/perplexity-handler.js"></script>
-    <script src="js/main.js"></script>
+    
+    <!-- Tour Screen -->
+    <div id="tour-screen" class="screen">
+      <div class="tour-container">
+        <div class="tour-header">
+          <button id="back-to-welcome-btn" class="back-button">
+            <span class="back-icon">←</span> Back
+          </button>
+        </div>
+        
+        <div class="tour-hero">
+          <div class="tour-hero-left">
+            <div class="tour-neon-heart">
+              <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z" stroke="url(#neonHeartGradient)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="neonHeartGradient" x1="0%" y1="0%" x2="100%" y2="100%" gradientUnits="userSpaceOnUse">
+                    <stop offset="0%" stop-color="var(--accent-pink)"/>
+                    <stop offset="100%" stop-color="var(--accent-blue)"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            
+            <h1 class="tour-title">Words matter. Make yours count.</h1>
+            <p class="tour-subtitle">When emotions are complex, finding the right message shouldn't be.</p>
+          </div>
+          
+          <div class="tour-hero-right">
+            <div class="message-card">
+              <div class="message-content">
+                I've been thinking about you and wanted to reach out. How have you been holding up?
+              </div>
+              <div class="message-meta">
+                Generated with Tone: Encouraging | Intensity: 3/5
+              </div>
+            </div>
+            
+            <button id="tour-signup-btn" class="branded-cta-button">Create Your Message - Free</button>
+            <p class="tour-note">Start now — no account needed</p>
+          </div>
+        </div>
+        
+        <div class="divider"></div>
+        
+        <h2 class="section-title">How it works</h2>
+        
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon">👥</div>
+            <div class="step-content">
+              <h3 class="step-title">Choose your relationship</h3>
+              <p class="step-description">Tell us who you're talking to - each connection needs its own language</p>
+            </div>
+          </div>
+          
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon">✏️</div>
+            <div class="step-content">
+              <h3 class="step-title">Share your feelings</h3>
+              <p class="step-description">Describe what you want to express - no judgment, just understanding</p>
+            </div>
+          </div>
+          
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon">⭐</div>
+            <div class="step-content">
+              <h3 class="step-title">Set the perfect tone</h3>
+              <p class="step-description">Gentle, direct, playful, or somewhere in between - you decide</p>
+            </div>
+          </div>
+          
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-icon">💬</div>
+            <div class="step-content">
+              <h3 class="step-title">Get your message</h3>
+              <p class="step-description">Choose from thoughtful options that sound authentically like you</p>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bottom-cta">
+          <button id="tour-signup-btn-bottom" class="branded-cta-button">Create Your Message - Free</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Auth Screen -->
+    <div id="auth-screen" class="screen">
+      <div class="auth-container">
+        <div class="auth-logo"></div>
+        <h1 class="auth-title">Log in or sign up</h1>
+        
+        <!-- Add Google Sign In button -->
+        <button id="google-sign-in" class="google-btn">
+          <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" alt="Google logo">
+          Continue with Google
+        </button>
+        
+        <div class="auth-divider">
+          <span>or continue with email</span>
+        </div>
+        
+        <form id="auth-form" class="auth-form">
+          <label class="input-label" for="email">Email</label>
+          <input type="email" id="email" class="input-field" placeholder="Enter your email">
+          
+          <label class="input-label" for="password">Password</label>
+          <input type="password" id="password" class="input-field" placeholder="Enter your password">
+          
+          <button type="submit" id="auth-submit-btn" class="btn">Continue</button>
+        </form>
+        <div class="auth-links">
+          <span id="auth-toggle-text">Don't have an account?</span>
+          <a href="#" id="auth-toggle-link" class="auth-link">Sign up</a>
+        </div>
+        <div class="auth-links">
+          <a href="#" id="forgot-password-link" class="auth-link">Forgot password?</a>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen">
+      <div class="header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
+      </div>
+      
+      <div class="home-header">
+        <h1 class="home-title">Start a meaningful conversation</h1>
+        <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
+      </div>
+      
+      <div class="home-actions">
+        <button id="dashboard-btn" class="settings-btn">
+          <span class="settings-icon">📊</span> Dashboard
+        </button>
+        
+        <button id="history-btn" class="settings-btn">
+          <span class="settings-icon">📋</span> History
+        </button>
+        
+        <button id="learn-btn" class="settings-btn">
+          <span class="settings-icon">🧠</span> Learn
+        </button>
+        
+        <button id="logout-btn" class="settings-btn">
+          <span class="settings-icon">👤</span> Logout
+        </button>
+      </div>
+      
+      <button id="new-conversation-btn" class="new-conversation-btn">
+        <span class="new-conversation-icon">💬</span> Start a New Conversation
+      </button>
+      
+      <!-- Templates Section -->
+      <div id="templates-section" class="templates-section">
+        <h2 class="section-title">Message Templates</h2>
+        
+        <!-- Everyday Check-ins Category -->
+        <div class="template-category">
+          <h3 class="category-title">Everyday Check-Ins</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="checkin">
+              <div class="template-icon">👋</div>
+              <div class="template-name">Check-In</div>
+              <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
+            </div>
+            <div class="template-card" data-template="encouragement">
+              <div class="template-icon">⭐</div>
+              <div class="template-name">Encouragement</div>
+              <div class="template-description">Offer support during a challenging time</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Repair & Reconnect Category -->
+        <div class="template-category">
+          <h3 class="category-title">Repair & Reconnect</h3>
+      <div class="templates-grid">
+        <div class="template-card" data-template="apology">
+              <div class="template-icon">✉️</div>
+          <div class="template-name">Apology</div>
+              <div class="template-description">Make amends with empathy and sincerity</div>
+        </div>
+            <div class="template-card" data-template="tough">
+              <div class="template-icon">💬</div>
+              <div class="template-name">Tough Talk</div>
+              <div class="template-description">Navigate a difficult conversation with respect</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Celebrate & Appreciate Category -->
+        <div class="template-category">
+          <h3 class="category-title">Celebrate & Appreciate</h3>
+          <div class="templates-grid">
+        <div class="template-card" data-template="romantic">
+              <div class="template-icon">❤️</div>
+          <div class="template-name">Romantic</div>
+              <div class="template-description">Express your love and affection</div>
+        </div>
+            <div class="template-card" data-template="gratitude">
+              <div class="template-icon">🙏</div>
+              <div class="template-name">Gratitude</div>
+              <div class="template-description">Show appreciation for their support</div>
+        </div>
+            <div class="template-card" data-template="celebration">
+              <div class="template-icon">🎉</div>
+              <div class="template-name">Celebration</div>
+              <div class="template-description">Congratulate someone on their achievement</div>
+        </div>
+            <div class="template-card" data-template="sympathy">
+              <div class="template-icon">💐</div>
+              <div class="template-name">Sympathy</div>
+              <div class="template-description">Offer comfort during a difficult time</div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="feedbackButton" class="feedback-button">
+          <span class="feedback-icon">⭐</span> Submit Feedback
+        </button>
+      </div>
+    </div>
+    
+    <!-- Message Generator Screen -->
+    <div id="generator-screen" class="screen">
+      <button id="back-to-home-btn" class="back-button">
+        <span class="back-icon">←</span> Back
+      </button>
+      
+      <div class="generator-container">
+        <div class="form-container">
+          <div class="input-group">
+            <label for="scenario">What would you like to say?</label>
+            <textarea id="scenario" placeholder="Example: I want to express my gratitude for their support during a difficult time"></textarea>
+          </div>
+          
+          <div class="input-group">
+            <label for="relationship">Relationship Type</label>
+            <select id="relationship">
+              <option value="Friend">Friend</option>
+              <option value="Romantic Partner">Romantic Partner</option>
+              <option value="Family Member">Family Member</option>
+              <option value="Professional">Professional</option>
+              <option value="Mentor">Mentor</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="tone">Message Tone</label>
+            <select id="tone">
+              <option value="casual">Casual</option>
+              <option value="formal">Formal</option>
+              <option value="humorous">Humorous</option>
+              <option value="serious">Serious</option>
+              <option value="poetic">Poetic</option>
+              <option value="professional">Professional</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="intensity">Tone Intensity</label>
+            <div class="slider-container">
+              <input type="range" id="intensity" min="1" max="5" value="3" class="slider">
+              <div class="slider-labels">
+                <span>Subtle</span>
+                <span>Balanced</span>
+                <span>Strong</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="input-group">
+            <label for="duration">Relationship Duration</label>
+            <select id="duration">
+              <option value="unspecified">Not specified</option>
+              <option value="new">New/Recent</option>
+              <option value="few months">Few months</option>
+              <option value="1-5 years">1-5 years</option>
+              <option value="5+ years">5+ years</option>
+              <option value="lifelong">Lifelong</option>
+            </select>
+          </div>
+          
+          <div class="input-group">
+            <label for="circumstances">Special Circumstances (Optional)</label>
+            <textarea id="circumstances" placeholder="Example: We recently had an argument, or They're going through a tough time"></textarea>
+          </div>
+          
+          <button id="generateBtn" class="primary-button">
+            <span class="button-content">
+              Generate Message
+              <span class="button-icon">✨</span>
+            </span>
+          </button>
+        </div>
+        
+        <div id="result" class="result-card" style="display: none;">
+          <div class="message-text" id="messageText"></div>
+          <div class="button-group">
+            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
+            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
+          </div>
+          <div class="feedback-section" id="feedbackSection">
+            <label for="feedback">How would you like to improve this message?</label>
+            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
+            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
+          </div>
+          <div class="insights-section">
+            <div class="insights-title">Why this message works:</div>
+            <ul class="insights-list" id="insightsList"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Learning Screen -->
+  <div id="learning-screen" class="screen">
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
+      </div>
+      
+      <h1 class="dashboard-title">Perplexity AI Integration</h1>
+      <p class="dashboard-subtitle">Test our new AI-powered learning experience</p>
+      
+      <div class="learning-content" style="text-align: center; padding: 40px 20px;">
+        <p style="margin-bottom: 30px; font-size: 18px; color: var(--text-secondary);">
+          Click the button below to test our Perplexity AI integration. 
+          This will demonstrate our ability to connect with advanced AI models for enhanced learning.
+        </p>
+        
+        <button id="test-perplexity-btn-main" class="primary-button" style="background: linear-gradient(135deg, #6e8efb, #a777e3); margin: 0 auto; padding: 18px 36px; font-size: 18px;">
+          <span class="button-content">
+            Test Perplexity AI
+            <span class="button-icon">🧠</span>
+          </span>
+        </button>
+        
+        <div id="perplexity-result" class="learning-answer" style="margin-top: 40px; display: none;">
+          <h2>API Test Result</h2>
+          <div id="perplexity-response" style="white-space: pre-wrap; text-align: left; font-size: 16px; line-height: 1.6;"></div>
+        </div>
+      </div>
+      
+      <div class="dashboard-actions">
+        <button id="back-to-home-from-learning" class="dashboard-btn">
+          <span class="dashboard-icon">←</span> Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add loading overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-container">
+      <div class="heart-animation">
+        <div class="heart-shape"></div>
+        <div class="heart-glow"></div>
+        <div class="heart-particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+        </div>
+      </div>
+      <div id="loadingContext" class="loading-context">Creating your message...</div>
+    </div>
+  </div>
+  
+  <!-- Add Results Popup Overlay -->
+  <div id="resultsPopupOverlay" class="results-popup-overlay">
+    <div class="results-popup-container">
+      <div class="results-popup-header">
+        <h2 class="results-popup-title">Your Message</h2>
+        <button class="results-popup-close" onclick="hideResultsPopup()">×</button>
+      </div>
+      
+      <div class="results-popup-message" id="popupMessageText"></div>
+      
+      <div class="results-popup-actions">
+        <button class="results-popup-copy-btn" onclick="copyPopupMessage()">
+          <span>📋</span> Copy Message
+        </button>
+        <button class="results-popup-tweak-btn" onclick="showPopupFeedback()">
+          <span>✏️</span> Tweak Message
+        </button>
+      </div>
+      
+      <div class="results-popup-feedback" id="popupFeedbackSection">
+        <textarea id="popupFeedback" placeholder="How would you like to improve this message? Be specific about what to change."></textarea>
+        <button class="results-popup-tweak-btn" onclick="tweakPopupMessage()">Generate New Version</button>
+      </div>
+      
+      <div class="results-popup-insights">
+        <div class="results-popup-insights-title">Why this message works:</div>
+        <ul class="results-popup-insights-list" id="popupInsightsList"></ul>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Add Dashboard Screen -->
+  <div id="dashboard-screen" class="screen">
+    <div class="dashboard-container">
+      <div class="dashboard-header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
+      </div>
+      
+      <h1 class="dashboard-title">Dashboard</h1>
+      <p class="dashboard-subtitle">Track your communication progress and insights</p>
+      
+      <div class="dashboard-card">
+        <div class="dashboard-card-title">
+          <span class="icon">📈</span> Message Statistics
+        </div>
+        <div class="stats-container">
+          <div class="stat-item">
+            <div class="stat-value" data-stat="messages">...</div>
+            <div class="stat-label">Messages Created</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" data-stat="relationships">...</div>
+            <div class="stat-label">Relationships</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" data-stat="templates">...</div>
+            <div class="stat-label">Templates Used</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-placeholder">Message activity chart will appear here</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-card">
+        <div class="dashboard-card-title">
+          <span class="icon">💬</span> Recent Messages
+        </div>
+        <div class="message-history">
+          <div style="text-align: center; padding: 20px;">Loading messages...</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-actions">
+        <button id="back-to-home-from-dashboard" class="dashboard-btn">
+          <span class="dashboard-icon">←</span> Back to Home
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="js/main.js"></script>
+  <script src="js/learn-button.js"></script>
+  <script src="js/learn-with-ai.js"></script>
+  <script src="js/perplexity-handler.js"></script>
 </body>
 </html> 

@@ -114,7 +114,15 @@ async function callPerplexityAPI(prompt, options = {}) {
 
 // Function to enhance a prompt to encourage citation-rich responses
 function createCitationPrompt(basePrompt) {
-  return `${basePrompt}\n\nPlease include citations to reliable sources in your answer. Format citations as [1], [2], etc. and include the full source details at the end of your response.`;
+  return `${basePrompt}
+
+Please provide a comprehensive, well-structured answer with:
+1. Clear headings for main points
+2. Citations to reliable academic sources, medical journals, or other authoritative references
+3. Numbered citations in the format [1], [2], etc.
+4. A complete list of sources at the end of your response
+
+Format your answer professionally and ensure all factual claims are properly cited.`;
 }
 
 // Function to display formatted Perplexity results with citations
@@ -129,16 +137,16 @@ function displayPerplexityResults(result, containerElement) {
   
   // Extract citation references and sources from the content
   const citations = [];
-  let citationsSection = '';
   
   // Check if the response has a citations section at the end
-  const citationSectionMatch = content.match(/(?:References|Sources|Citations):\s*\n((?:.|\n)+)$/i);
+  const citationSectionMatches = content.match(/(?:References|Sources|Citations):\s*\n((?:.|\n)+)$/i);
   
-  if (citationSectionMatch) {
-    citationsSection = citationSectionMatch[1];
+  if (citationSectionMatches) {
+    const citationsSection = citationSectionMatches[1];
+    // Remove the citations section from the main content
     content = content.replace(/(?:References|Sources|Citations):\s*\n((?:.|\n)+)$/i, '');
     
-    // Extract individual citations
+    // Extract individual citations with improved regex
     const citationRegex = /\[(\d+)\]\s*(.+?)(?=\n\[\d+\]|\n*$)/gs;
     let match;
     
@@ -157,7 +165,7 @@ function displayPerplexityResults(result, containerElement) {
         index,
         text: citationText,
         url,
-        title: citationText.replace(url, '').trim()
+        title: citationText.replace(url, '').trim() || `Source ${index}`
       });
     }
   } else {
@@ -172,18 +180,18 @@ function displayPerplexityResults(result, containerElement) {
       citationNumbers.forEach(num => {
         citations.push({
           index: num,
-          text: `Citation ${num}`,
+          text: `Source ${num}`,
           url: '',
-          title: `Citation ${num}`
+          title: `Source ${num}`
         });
       });
     }
   }
   
-  // Create HTML structure for the response
-  let html = '<div class="perplexity-response">';
+  // Sort citations by index
+  citations.sort((a, b) => a.index - b.index);
   
-  // Format the main content with citation references
+  // Format the main content with enhanced citation references
   if (citations.length > 0) {
     // Replace citation indices with superscript links
     citations.forEach(citation => {
@@ -192,8 +200,18 @@ function displayPerplexityResults(result, containerElement) {
     });
   }
   
-  // Add the main content
-  html += `<div class="response-content">${content}</div>`;
+  // Create HTML structure for the response with improved formatting
+  let html = '<div class="perplexity-response">';
+  
+  // Add the main content with paragraphs preserved
+  const paragraphs = content.trim().split(/\n\n+/);
+  html += '<div class="response-content">';
+  paragraphs.forEach(paragraph => {
+    if (paragraph.trim()) {
+      html += `<p>${paragraph.trim().replace(/\n/g, '<br>')}</p>`;
+    }
+  });
+  html += '</div>';
   
   // Add citations section if available
   if (citations.length > 0) {
@@ -201,20 +219,17 @@ function displayPerplexityResults(result, containerElement) {
     html += '<h3>Sources</h3>';
     html += '<ol class="citations-list">';
     
-    // Sort citations by index
-    citations.sort((a, b) => a.index - b.index);
-    
     citations.forEach(citation => {
       html += `<li id="citation-${citation.index}" class="citation-item">`;
       
-      if (citation.title) {
-        html += `<div class="citation-title">${citation.title}</div>`;
-      }
-      
       if (citation.url) {
-        html += `<a href="${citation.url}" target="_blank" class="citation-link">${citation.url}</a>`;
+        html += `<a href="${citation.url}" target="_blank" class="citation-link">`;
+        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
+        html += `<div class="citation-url">${citation.url}</div>`;
+        html += '</a>';
       } else {
-        html += `<span class="citation-text">${citation.text}</span>`;
+        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
+        html += `<div class="citation-text">${citation.text}</div>`;
       }
       
       html += '</li>';
@@ -228,19 +243,30 @@ function displayPerplexityResults(result, containerElement) {
   // Set the HTML to the container
   containerElement.innerHTML = html;
   
-  // Add event listeners to citation references
+  // Add event listeners to citation references with improved highlighting
   setTimeout(() => {
     const refs = containerElement.querySelectorAll('.citation-ref');
     refs.forEach(ref => {
       ref.addEventListener('click', () => {
         const index = ref.getAttribute('data-index');
         const citationItem = containerElement.querySelector(`#citation-${index}`);
+        
+        // Remove highlight from all citations first
+        document.querySelectorAll('.citation-item').forEach(item => {
+          item.classList.remove('highlight');
+        });
+        
         if (citationItem) {
-          citationItem.scrollIntoView({ behavior: 'smooth' });
+          // Smooth scroll to the citation
+          citationItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          
+          // Add highlight class
           citationItem.classList.add('highlight');
+          
+          // Remove highlight after delay
           setTimeout(() => {
             citationItem.classList.remove('highlight');
-          }, 2000);
+          }, 3000);
         }
       });
     });
@@ -253,30 +279,87 @@ async function performPerplexityResearch(query, containerElement, loadingElement
     // Show loading state if element provided
     if (loadingElement) {
       loadingElement.style.display = 'block';
+    } else {
+      // Create and append a temporary loading indicator
+      const tempLoader = document.createElement('div');
+      tempLoader.className = 'perplexity-temp-loader';
+      tempLoader.innerHTML = `
+        <div style="display: flex; align-items: center; justify-content: center; padding: 20px; color: var(--text-secondary, rgba(255,255,255,0.7));">
+          <div class="perplexity-spinner"></div>
+          <span style="margin-left: 12px;">Researching your query...</span>
+        </div>
+      `;
+      containerElement.innerHTML = '';
+      containerElement.appendChild(tempLoader);
     }
     
     // Add citation instruction to the query
     const enhancedQuery = createCitationPrompt(query);
     
-    // Call the API with longer token limit for research
-    const result = await callPerplexityAPI(enhancedQuery, {
-      model: "sonar", // Higher quality model for research
-      max_tokens: 1000,
-      temperature: 0.3 // Lower temperature for more factual responses
-    });
-    
-    // Display the formatted results
-    displayPerplexityResults(result, containerElement);
-    
-    return result;
+    try {
+      // Call the API with longer token limit for research
+      const result = await callPerplexityAPI(enhancedQuery, {
+        model: "sonar", // Higher quality model for research
+        max_tokens: 1500, // Increased token limit for more comprehensive answers
+        temperature: 0.2 // Lower temperature for more factual responses
+      });
+      
+      // Display the formatted results
+      displayPerplexityResults(result, containerElement);
+      
+      return result;
+    } catch (apiError) {
+      // Handle API-specific errors
+      console.error('Perplexity API error:', apiError);
+      
+      // Create a more user-friendly error message
+      const errorMessage = apiError.message.includes('Perplexity API error') 
+        ? apiError.message 
+        : 'Unable to complete the research query. Please try again later.';
+      
+      containerElement.innerHTML = `
+        <div class="perplexity-response">
+          <div class="error-message">
+            <strong>Research Error:</strong> ${errorMessage}
+          </div>
+          <div style="margin-top: 16px; font-size: 14px; color: var(--text-secondary, rgba(255,255,255,0.7));">
+            <p>Possible solutions:</p>
+            <ul>
+              <li>Check your API key configuration</li>
+              <li>Try a different, more specific query</li>
+              <li>Reduce the complexity of your question</li>
+            </ul>
+          </div>
+        </div>
+      `;
+      
+      throw apiError;
+    }
   } catch (error) {
+    // Handle general errors
     console.error('Perplexity research failed:', error);
-    containerElement.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+    
+    if (containerElement && !containerElement.querySelector('.error-message')) {
+      containerElement.innerHTML = `
+        <div class="perplexity-response">
+          <div class="error-message">
+            <strong>Error:</strong> ${error.message}
+          </div>
+        </div>
+      `;
+    }
+    
     throw error;
   } finally {
     // Hide loading state
     if (loadingElement) {
       loadingElement.style.display = 'none';
+    } else {
+      // Remove temporary loader if it exists
+      const tempLoader = containerElement.querySelector('.perplexity-temp-loader');
+      if (tempLoader) {
+        tempLoader.remove();
+      }
     }
   }
 }
@@ -305,23 +388,39 @@ document.addEventListener('DOMContentLoaded', function() {
       // Show loading state
       testButton.disabled = true;
       const originalText = testButton.innerHTML;
-      testButton.innerHTML = '<span class="button-content">Testing... <div class="perplexity-spinner"></div></span>';
+      testButton.innerHTML = '<span class="button-content">Researching... <div class="perplexity-spinner"></div></span>';
       
       try {
-        // Display the result container
+        // Display the result container and clear previous results
         resultDiv.style.display = 'block';
+        responseDiv.innerHTML = '';
         
-        // Use a research question likely to get citations
-        const researchQuery = "What are the latest research findings on the benefits of meditation for mental health? Include scientific studies.";
+        // Use a research-focused medical question to showcase citation abilities
+        const researchQuery = "What are the latest clinical research findings on the effectiveness of meditation for treating anxiety disorders and depression? Focus on randomized controlled trials and meta-analyses from the past 5 years.";
+        
+        // Show heading for the result
+        const resultHeader = document.createElement('h3');
+        resultHeader.textContent = 'AI Research Results';
+        resultHeader.style.marginBottom = '16px';
+        resultHeader.style.color = 'var(--accent-blue, #64b5f6)';
+        responseDiv.appendChild(resultHeader);
         
         // Perform the research query
         await performPerplexityResearch(researchQuery, responseDiv);
         
         // Scroll to the results
-        resultDiv.scrollIntoView({ behavior: 'smooth' });
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } catch (error) {
         console.error('Perplexity test failed:', error);
-        responseDiv.innerHTML = `<div class="error-message">Error: ${error.message}</div>`;
+        if (!responseDiv.querySelector('.error-message')) {
+          responseDiv.innerHTML = `
+            <div class="perplexity-response">
+              <div class="error-message">
+                <strong>Error:</strong> ${error.message}
+              </div>
+            </div>
+          `;
+        }
       } finally {
         // Restore button state
         testButton.disabled = false;

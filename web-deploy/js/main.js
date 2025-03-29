@@ -1115,6 +1115,103 @@
           // ... existing error handling ...
         }
       });
+
+      // Get elements
+      const loginRegisterBtn = document.getElementById('login-register-btn');
+
+      const authForm = document.getElementById('auth-form');
+      const authSubmitBtn = document.getElementById('auth-submit-btn');
+      const authToggleText = document.getElementById('auth-toggle-text');
+      const authToggleLink = document.getElementById('auth-toggle-link');
+      const forgotPasswordLink = document.getElementById('forgot-password-link');
+
+      const newConversationBtn = document.getElementById('new-conversation-btn');
+      const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
+      const templateCards = document.querySelectorAll('.template-card');
+      const settingsBtn = document.getElementById('history-btn');
+      const logoutBtn = document.getElementById('logout-btn');
+
+      const backToHomeBtn = document.getElementById('back-to-home-btn');
+      const scenarioInput = document.getElementById('scenario');
+      const relationshipSelect = document.getElementById('relationship');
+      const generateBtn = document.getElementById('generateBtn');
+      const loadingSpinner = document.getElementById('loading');
+      const resultCard = document.getElementById('result');
+      const resultMessage = document.getElementById('messageText');
+
+      // Setup Learn with AI button click handler
+      if (learnWithAiBtn) {
+        learnWithAiBtn.addEventListener('click', async function() {
+          // Show loading state
+          const originalText = learnWithAiBtn.innerHTML;
+          learnWithAiBtn.innerHTML = '<span class="btn-loading-spinner"></span> Connecting...';
+          learnWithAiBtn.disabled = true;
+          
+          try {
+            // Call the Perplexity API
+            const result = await testPerplexityAPI();
+            
+            if (result && result.choices && result.choices[0]) {
+              // Create a modal to display the result
+              const modalOverlay = document.createElement('div');
+              modalOverlay.className = 'modal-overlay';
+              modalOverlay.style.position = 'fixed';
+              modalOverlay.style.top = '0';
+              modalOverlay.style.left = '0';
+              modalOverlay.style.width = '100%';
+              modalOverlay.style.height = '100%';
+              modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+              modalOverlay.style.display = 'flex';
+              modalOverlay.style.justifyContent = 'center';
+              modalOverlay.style.alignItems = 'center';
+              modalOverlay.style.zIndex = '9999';
+              
+              const modalContent = document.createElement('div');
+              modalContent.className = 'modal-content';
+              modalContent.style.backgroundColor = '#fff';
+              modalContent.style.borderRadius = '12px';
+              modalContent.style.padding = '20px';
+              modalContent.style.maxWidth = '90%';
+              modalContent.style.maxHeight = '80%';
+              modalContent.style.overflow = 'auto';
+              modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+              
+              // Add the AI response
+              modalContent.innerHTML = `
+                <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
+                <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">
+                  ${result.choices[0].message.content.replace(/\n/g, '<br>')}
+                </div>
+                <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+              `;
+              
+              modalOverlay.appendChild(modalContent);
+              document.body.appendChild(modalOverlay);
+              
+              // Add event listener to close button
+              document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.body.removeChild(modalOverlay);
+              });
+              
+              // Also allow closing by clicking outside
+              modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                  document.body.removeChild(modalOverlay);
+                }
+              });
+            } else {
+              throw new Error('Invalid response from AI service');
+            }
+          } catch (error) {
+            console.error('Learn with AI error:', error);
+            showAlert(`AI Learning failed: ${error.message}`, 'error');
+          } finally {
+            // Restore button state
+            learnWithAiBtn.innerHTML = originalText;
+            learnWithAiBtn.disabled = false;
+          }
+        });
+      }
     });
 
     function showGenerateAnimation() {
@@ -2050,6 +2147,87 @@
       }
     }
 
+    // Function to handle Learn with AI button click
+    async function handleLearnWithAI() {
+      console.log('Learn with AI button clicked!');
+      
+      // Get the button element
+      const learnBtn = document.getElementById('learn-with-ai-btn');
+      
+      // Save original button text
+      const originalText = learnBtn.innerHTML;
+      
+      // Show loading state
+      learnBtn.innerHTML = `<span class="btn-loading-spinner"></span> Connecting...`;
+      learnBtn.disabled = true;
+      
+      try {
+        // Call the existing test function that uses your Firestore setup
+        console.log('Calling testPerplexityAPI...');
+        const result = await testPerplexityAPI();
+        console.log('API call complete, result:', result);
+        
+        if (result && result.choices && result.choices[0]) {
+          // Create a modal to display the result
+          const modalOverlay = document.createElement('div');
+          modalOverlay.className = 'modal-overlay';
+          modalOverlay.style.position = 'fixed';
+          modalOverlay.style.top = '0';
+          modalOverlay.style.left = '0';
+          modalOverlay.style.width = '100%';
+          modalOverlay.style.height = '100%';
+          modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+          modalOverlay.style.display = 'flex';
+          modalOverlay.style.justifyContent = 'center';
+          modalOverlay.style.alignItems = 'center';
+          modalOverlay.style.zIndex = '9999';
+          
+          const modalContent = document.createElement('div');
+          modalContent.className = 'modal-content';
+          modalContent.style.backgroundColor = '#fff';
+          modalContent.style.borderRadius = '12px';
+          modalContent.style.padding = '20px';
+          modalContent.style.maxWidth = '90%';
+          modalContent.style.maxHeight = '80%';
+          modalContent.style.overflow = 'auto';
+          modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+          
+          // Add the AI response
+          modalContent.innerHTML = `
+            <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
+            <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">
+              ${result.choices[0].message.content.replace(/\n/g, '<br>')}
+            </div>
+            <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+          `;
+          
+          modalOverlay.appendChild(modalContent);
+          document.body.appendChild(modalOverlay);
+          
+          // Add event listener to close button
+          document.getElementById('close-modal-btn').addEventListener('click', () => {
+            document.body.removeChild(modalOverlay);
+          });
+          
+          // Also allow closing by clicking outside
+          modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+              document.body.removeChild(modalOverlay);
+            }
+          });
+        } else {
+          throw new Error('Invalid response from AI service');
+        }
+      } catch (error) {
+        console.error('Learn with AI error:', error);
+        showAlert(`AI Learning failed: ${error.message}`, 'error');
+      } finally {
+        // Restore button state
+        learnBtn.innerHTML = originalText;
+        learnBtn.disabled = false;
+      }
+    }
+
     // You can call testPerplexityAPI() from the browser console to test
     // ... existing code continues ...
 
@@ -2136,7 +2314,7 @@
     });
 
     // Call the init function after the DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', function() {
       initTestButton();
       
       // Initialize the Learn with AI button
@@ -2212,5 +2390,198 @@
             learnWithAiBtn.disabled = false;
           }
         });
+      }
+    });
+
+    // Call the init function after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the test button
+      initTestButton();
+      
+      // Initialize the Learn with AI button
+      const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
+      if (learnWithAiBtn) {
+        console.log('Learn with AI button found - attaching event listener');
+        
+        // Remove any existing click listeners (in case of duplicates)
+        const newBtn = learnWithAiBtn.cloneNode(true);
+        learnWithAiBtn.parentNode.replaceChild(newBtn, learnWithAiBtn);
+        
+        // Add the click handler
+        newBtn.addEventListener('click', async function() {
+          console.log('Learn with AI button clicked!');
+          
+          // Show loading state
+          const originalText = newBtn.innerHTML;
+          newBtn.innerHTML = '<span class="btn-loading-spinner"></span> Connecting...';
+          newBtn.disabled = true;
+          
+          try {
+            // Call the existing test function that uses your Firestore setup
+            console.log('Calling testPerplexityAPI...');
+            const result = await testPerplexityAPI();
+            console.log('API call complete, result:', result);
+            
+            if (result && result.choices && result.choices[0]) {
+              // Create a modal to display the result
+              const modalOverlay = document.createElement('div');
+              modalOverlay.className = 'modal-overlay';
+              modalOverlay.style.position = 'fixed';
+              modalOverlay.style.top = '0';
+              modalOverlay.style.left = '0';
+              modalOverlay.style.width = '100%';
+              modalOverlay.style.height = '100%';
+              modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+              modalOverlay.style.display = 'flex';
+              modalOverlay.style.justifyContent = 'center';
+              modalOverlay.style.alignItems = 'center';
+              modalOverlay.style.zIndex = '9999';
+              
+              const modalContent = document.createElement('div');
+              modalContent.className = 'modal-content';
+              modalContent.style.backgroundColor = '#fff';
+              modalContent.style.borderRadius = '12px';
+              modalContent.style.padding = '20px';
+              modalContent.style.maxWidth = '90%';
+              modalContent.style.maxHeight = '80%';
+              modalContent.style.overflow = 'auto';
+              modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+              
+              // Add the AI response
+              modalContent.innerHTML = `
+                <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
+                <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">
+                  ${result.choices[0].message.content.replace(/\n/g, '<br>')}
+                </div>
+                <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+              `;
+              
+              modalOverlay.appendChild(modalContent);
+              document.body.appendChild(modalOverlay);
+              
+              // Add event listener to close button
+              document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.body.removeChild(modalOverlay);
+              });
+              
+              // Also allow closing by clicking outside
+              modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                  document.body.removeChild(modalOverlay);
+                }
+              });
+            } else {
+              throw new Error('Invalid response from AI service');
+            }
+          } catch (error) {
+            console.error('Learn with AI error:', error);
+            showAlert(`AI Learning failed: ${error.message}`, 'error');
+          } finally {
+            // Restore button state
+            newBtn.innerHTML = originalText;
+            newBtn.disabled = false;
+          }
+        });
+      } else {
+        console.error('Learn with AI button not found in the DOM');
+      }
+    });
+
+    // Call the init function after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
+      initTestButton();
+    });
+
+    // Call the init function after the DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize the test button
+      initTestButton();
+      
+      // Initialize the Learn with AI button
+      const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
+      if (learnWithAiBtn) {
+        console.log('Learn with AI button found - attaching event listener');
+        
+        // Remove any existing click listeners (in case of duplicates)
+        const newBtn = learnWithAiBtn.cloneNode(true);
+        learnWithAiBtn.parentNode.replaceChild(newBtn, learnWithAiBtn);
+        
+        // Add the click handler
+        newBtn.addEventListener('click', async function() {
+          console.log('Learn with AI button clicked!');
+          
+          // Show loading state
+          const originalText = newBtn.innerHTML;
+          newBtn.innerHTML = '<span class="btn-loading-spinner"></span> Connecting...';
+          newBtn.disabled = true;
+          
+          try {
+            // Call the existing test function that uses your Firestore setup
+            console.log('Calling testPerplexityAPI...');
+            const result = await testPerplexityAPI();
+            console.log('API call complete, result:', result);
+            
+            if (result && result.choices && result.choices[0]) {
+              // Create a modal to display the result
+              const modalOverlay = document.createElement('div');
+              modalOverlay.className = 'modal-overlay';
+              modalOverlay.style.position = 'fixed';
+              modalOverlay.style.top = '0';
+              modalOverlay.style.left = '0';
+              modalOverlay.style.width = '100%';
+              modalOverlay.style.height = '100%';
+              modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+              modalOverlay.style.display = 'flex';
+              modalOverlay.style.justifyContent = 'center';
+              modalOverlay.style.alignItems = 'center';
+              modalOverlay.style.zIndex = '9999';
+              
+              const modalContent = document.createElement('div');
+              modalContent.className = 'modal-content';
+              modalContent.style.backgroundColor = '#fff';
+              modalContent.style.borderRadius = '12px';
+              modalContent.style.padding = '20px';
+              modalContent.style.maxWidth = '90%';
+              modalContent.style.maxHeight = '80%';
+              modalContent.style.overflow = 'auto';
+              modalContent.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.15)';
+              
+              // Add the AI response
+              modalContent.innerHTML = `
+                <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
+                <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">
+                  ${result.choices[0].message.content.replace(/\n/g, '<br>')}
+                </div>
+                <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
+              `;
+              
+              modalOverlay.appendChild(modalContent);
+              document.body.appendChild(modalOverlay);
+              
+              // Add event listener to close button
+              document.getElementById('close-modal-btn').addEventListener('click', () => {
+                document.body.removeChild(modalOverlay);
+              });
+              
+              // Also allow closing by clicking outside
+              modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                  document.body.removeChild(modalOverlay);
+                }
+              });
+            } else {
+              throw new Error('Invalid response from AI service');
+            }
+          } catch (error) {
+            console.error('Learn with AI error:', error);
+            showAlert(`AI Learning failed: ${error.message}`, 'error');
+          } finally {
+            // Restore button state
+            newBtn.innerHTML = originalText;
+            newBtn.disabled = false;
+          }
+        });
+      } else {
+        console.error('Learn with AI button not found in the DOM');
       }
     });

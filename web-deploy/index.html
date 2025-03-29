@@ -391,49 +391,25 @@
         </div>
       </div>
       
-      <h1 class="dashboard-title">Learn with AI</h1>
-      <p class="dashboard-subtitle">Discover communication strategies for better relationships</p>
+      <h1 class="dashboard-title">Perplexity AI Integration</h1>
+      <p class="dashboard-subtitle">Test our new AI-powered learning experience</p>
       
-      <input type="text" class="learning-search" placeholder="Ask anything about communication...">
-      
-      <div class="learning-content">
-        <div class="learning-categories">
-          <div class="category-item active">
-            <div class="category-icon">🗣️</div>
-            <div class="category-name">Basics</div>
-          </div>
-          <div class="category-item">
-            <div class="category-icon">❤️</div>
-            <div class="category-name">Romantic</div>
-          </div>
-          <div class="category-item">
-            <div class="category-icon">👪</div>
-            <div class="category-name">Family</div>
-          </div>
-          <div class="category-item">
-            <div class="category-icon">🏢</div>
-            <div class="category-name">Work</div>
-          </div>
-          <div class="category-item">
-            <div class="category-icon">🔄</div>
-            <div class="category-name">Repair</div>
-          </div>
-        </div>
+      <div class="learning-content" style="text-align: center; padding: 40px 20px;">
+        <p style="margin-bottom: 30px; font-size: 18px; color: var(--text-secondary);">
+          Click the button below to test our Perplexity AI integration. 
+          This will demonstrate our ability to connect with advanced AI models for enhanced learning.
+        </p>
         
-        <div class="learning-answer">
-          <h2>Welcome to the Learning Module</h2>
-          <p>This feature will help you understand effective communication strategies for different types of relationships and situations. Use the search bar above to ask specific questions or browse the categories to explore topics.</p>
-          <p>Communication tips will be displayed here once you select a topic or ask a question.</p>
-        </div>
+        <button id="test-perplexity-btn" class="primary-button" style="background: linear-gradient(135deg, #6e8efb, #a777e3); margin: 0 auto; padding: 18px 36px; font-size: 18px;">
+          <span class="button-content">
+            Test Perplexity AI
+            <span class="button-icon">🧠</span>
+          </span>
+        </button>
         
-        <div class="related-questions">
-          <h3>Popular Questions</h3>
-          <ul>
-            <li><a href="#" class="question-link" data-question="How do I start a difficult conversation?">How do I start a difficult conversation?</a></li>
-            <li><a href="#" class="question-link" data-question="What's the best way to apologize?">What's the best way to apologize?</a></li>
-            <li><a href="#" class="question-link" data-question="How can I be more assertive without being aggressive?">How can I be more assertive without being aggressive?</a></li>
-            <li><a href="#" class="question-link" data-question="What's active listening and why is it important?">What's active listening and why is it important?</a></li>
-          </ul>
+        <div id="perplexity-result" class="learning-answer" style="margin-top: 40px; display: none;">
+          <h2>API Test Result</h2>
+          <div id="perplexity-response" style="white-space: pre-wrap; text-align: left; font-size: 16px; line-height: 1.6;"></div>
         </div>
       </div>
       

@@ -9,9 +9,9 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "eject": "expo eject",
-    "deploy": "gh-pages -d web-build",
-    "build-web": "mkdir -p web-build/js web-build/css && cp -r web-deploy/* web-build/",
-    "deploy-gh-pages": "npm run build-web && npm run deploy"
+    "deploy": "gh-pages -d deploy-build",
+    "prepare-deploy": "mkdir -p deploy-build && cp -r web-deploy/* deploy-build/",
+    "deploy-gh-pages": "npm run prepare-deploy && npm run deploy"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",

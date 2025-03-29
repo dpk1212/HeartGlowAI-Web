@@ -2035,8 +2035,11 @@
     async function callPerplexityAPI(prompt) {
       try {
         console.log('Making Perplexity API call with prompt:', prompt);
+        console.log('Getting API key...');
         const apiKey = await getPerplexityApiKey();
+        console.log('API key retrieved (first few chars):', apiKey.substring(0, 8) + '...');
         
+        console.log('Preparing to send request to Perplexity API');
         const response = await fetch('https://api.perplexity.ai/chat/completions', {
           method: 'POST',
           headers: {
@@ -2054,8 +2057,10 @@
           })
         });
         
+        console.log('Got response from API, status:', response.status);
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('API error response:', errorData);
           throw new Error(`Perplexity API error: ${errorData.error?.message || response.statusText}`);
         }
         
@@ -2072,7 +2077,9 @@
     async function testPerplexityAPI() {
       try {
         console.log('Testing Perplexity API...');
+        console.log('About to call Perplexity API with test prompt');
         const result = await callPerplexityAPI('What are the top 3 benefits of meditation?');
+        console.log('Call completed, got result:', result);
         console.log('Result:', result.choices[0].message.content);
         if (result.citations && result.citations.length > 0) {
           console.log('Citations:', result.citations);
@@ -2086,9 +2093,13 @@
 
     // Initialize the test button for Perplexity API (development only)
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('Looking for test-perplexity-btn...');
       const testButton = document.getElementById('test-perplexity-btn');
+      console.log('Found test button?', !!testButton);
       if (testButton) {
+        console.log('Adding click event listener to Test Perplexity AI button');
         testButton.addEventListener('click', async function() {
+          console.log('Test Perplexity AI button clicked!');
           try {
             // Disable the button and show loading state
             testButton.disabled = true;

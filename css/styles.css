@@ -3241,3 +3241,221 @@
       background: rgba(255, 255, 255, 0.05);
       color: var(--text-primary);
     }
+
+    /* Add enhanced mobile styling at the end of the file */
+
+    /* Mobile Responsiveness Improvements */
+    @media (max-width: 768px) {
+      .app-container {
+        width: 100%;
+        overflow-x: hidden;
+      }
+      
+      /* Header & Navigation */
+      .site-header {
+        padding: 15px 10px;
+      }
+      
+      .header-content {
+        max-width: 100%;
+      }
+      
+      .logo {
+        font-size: 1.2rem;
+      }
+      
+      .main-nav ul {
+        gap: 15px;
+      }
+      
+      .main-nav ul li a {
+        font-size: 0.9rem;
+        padding: 5px;
+      }
+      
+      /* Welcome Screen */
+      .welcome-container {
+        padding: 20px 15px;
+      }
+      
+      .welcome-title {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+      
+      .welcome-subtitle {
+        font-size: 1rem;
+      }
+      
+      #login-register-btn, 
+      .tour-btn {
+        width: 100%;
+        max-width: 300px;
+        margin: 10px auto;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+      
+      /* Tour Screen */
+      .tour-container {
+        padding: 20px 15px;
+      }
+      
+      .tour-header {
+        flex-direction: column;
+        gap: 15px;
+      }
+      
+      .tour-title {
+        font-size: 1.8rem;
+        line-height: 1.2;
+      }
+      
+      .tour-hero {
+        flex-direction: column;
+      }
+      
+      .tour-hero-right, 
+      .tour-hero-left {
+        width: 100%;
+      }
+      
+      .steps-container {
+        grid-template-columns: 1fr;
+      }
+      
+      /* Home Screen */
+      .home-container {
+        padding: 20px 15px;
+      }
+      
+      .home-title {
+        font-size: 1.8rem;
+      }
+      
+      .home-subtitle {
+        font-size: 1rem;
+      }
+      
+      .templates-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .home-actions {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      .settings-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+      }
+      
+      .new-conversation-btn {
+        width: 100%;
+        padding: 12px 20px;
+        font-size: 0.95rem;
+      }
+      
+      /* Message composer */
+      .message-composer {
+        padding: 15px;
+      }
+      
+      /* Auth Screen */
+      .auth-container {
+        width: 95%;
+        max-width: 350px;
+        padding: 20px 15px;
+      }
+      
+      .auth-title {
+        font-size: 1.6rem;
+      }
+      
+      .google-btn {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+      
+      .input-field {
+        padding: 10px;
+        font-size: 0.9rem;
+      }
+      
+      /* Footer */
+      .site-footer {
+        padding: 20px 15px;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        gap: 20px;
+      }
+      
+      .footer-column {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Welcome Screen */
+      .welcome-title {
+        font-size: 1.6rem;
+      }
+      
+      .welcome-content {
+        padding: 15px;
+      }
+      
+      .welcome-heart {
+        width: 60px;
+        height: 60px;
+      }
+      
+      /* Tour Screen */
+      .tour-title {
+        font-size: 1.5rem;
+      }
+      
+      .step-card {
+        padding: 15px;
+      }
+      
+      /* Home Screen */
+      .home-title {
+        font-size: 1.5rem;
+      }
+      
+      .template-card {
+        padding: 12px;
+      }
+      
+      .template-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+      
+      .template-name {
+        font-size: 1rem;
+      }
+      
+      .template-description {
+        font-size: 0.85rem;
+      }
+      
+      /* Auth Screen */
+      .auth-container {
+        width: 95%;
+        padding: 15px;
+      }
+      
+      .auth-title {
+        font-size: 1.4rem;
+      }
+      
+      .auth-divider {
+        margin: 15px 0;
+      }
+    }

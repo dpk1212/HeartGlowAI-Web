@@ -488,6 +488,21 @@
   
   <!-- Direct script to ensure handleLearnWithAI is globally available -->
   <script>
+    // Minimal testPerplexityAPI function
+    async function testPerplexityAPI() {
+      console.log('testPerplexityAPI called');
+      // Return a mock response for testing
+      return {
+        choices: [
+          {
+            message: {
+              content: "Here are the top 3 benefits of meditation:\n\n1. Reduced stress and anxiety: Meditation activates the parasympathetic nervous system, lowering cortisol levels and promoting relaxation.\n\n2. Improved focus and concentration: Regular meditation strengthens attention control and helps resist distractions.\n\n3. Better emotional regulation: Meditation creates distance between thoughts and reactions, helping you respond more consciously to situations rather than reacting impulsively."
+            }
+          }
+        ]
+      };
+    }
+    
     // Global function for Learn with AI button
     function handleLearnWithAI() {
       console.log('Learn with AI button clicked!');

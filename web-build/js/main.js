@@ -2108,4 +2108,68 @@
       // Call the init function after the DOM is loaded
       document.addEventListener('DOMContentLoaded', () => {
         initTestButton();
+        
+        // Initialize the Learn with AI button
+        const learnAIBtn = document.getElementById('learn-ai-btn');
+        if (learnAIBtn) {
+          learnAIBtn.addEventListener('click', async () => {
+            learnAIBtn.textContent = 'Loading...';
+            learnAIBtn.disabled = true;
+            
+            try {
+              const result = await testPerplexityAPI();
+              
+              if (result && result.choices && result.choices[0]) {
+                // Create a floating div to show the result
+                const resultDiv = document.createElement('div');
+                resultDiv.style.position = 'fixed';
+                resultDiv.style.top = '50%';
+                resultDiv.style.left = '50%';
+                resultDiv.style.transform = 'translate(-50%, -50%)';
+                resultDiv.style.background = 'rgba(0, 0, 0, 0.9)';
+                resultDiv.style.color = 'white';
+                resultDiv.style.padding = '20px';
+                resultDiv.style.borderRadius = '12px';
+                resultDiv.style.zIndex = '1000';
+                resultDiv.style.maxWidth = '80%';
+                resultDiv.style.maxHeight = '80%';
+                resultDiv.style.overflow = 'auto';
+                
+                // Add close button
+                const closeBtn = document.createElement('button');
+                closeBtn.textContent = 'Close';
+                closeBtn.style.background = '#555';
+                closeBtn.style.color = 'white';
+                closeBtn.style.border = 'none';
+                closeBtn.style.padding = '8px 16px';
+                closeBtn.style.borderRadius = '4px';
+                closeBtn.style.marginTop = '15px';
+                closeBtn.style.cursor = 'pointer';
+                closeBtn.onclick = () => document.body.removeChild(resultDiv);
+                
+                // Add content
+                resultDiv.innerHTML = `
+                  <h3>Learn with AI</h3>
+                  <p>${result.choices[0].message.content}</p>
+                  ${result.citations && result.citations.length > 0 ? `
+                    <p><strong>Sources:</strong></p>
+                    <ul>
+                      ${result.citations.map(citation => `<li><a href="${citation}" target="_blank">${citation}</a></li>`).join('')}
+                    </ul>
+                  ` : ''}
+                `;
+                resultDiv.appendChild(closeBtn);
+                document.body.appendChild(resultDiv);
+              }
+              
+              showAlert('AI knowledge retrieved successfully!', 'success');
+            } catch (error) {
+              showAlert(`Learn with AI failed: ${error.message}`, 'error');
+            } finally {
+              // Restore the button text
+              learnAIBtn.innerHTML = '<span class="new-conversation-icon">🧠</span> Learn with AI';
+              learnAIBtn.disabled = false;
+            }
+          });
+        }
     });

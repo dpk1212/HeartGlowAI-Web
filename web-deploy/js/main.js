@@ -1,7 +1,7 @@
     // Global variables and functions
     let currentMessage = '';
     let currentUser = null;
-    let welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen; // Declare screen variables globally
+    let welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen, learningScreen; // Declare screen variables globally
     let messageCount = 0;
     let hasSubmittedFeedback = false;
     
@@ -22,7 +22,7 @@
 
     // Screen transition function
     function showScreen(screen) {
-      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen];
+      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen, learningScreen];
       screens.forEach(s => {
         if (s === screen) {
           s.style.display = 'flex';
@@ -46,6 +46,7 @@
       homeScreen = document.getElementById('home-screen');
       generatorScreen = document.getElementById('generator-screen');
       tourScreen = document.getElementById('tour-screen');
+      learningScreen = document.getElementById('learning-screen');
 
       // Add favicon
       const favicon = document.createElement('link');
@@ -486,6 +487,31 @@
           source: 'tour_page_bottom'
         });
       });
+      
+      // Learn with AI button event listener
+      const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
+      if (learnWithAiBtn) {
+        learnWithAiBtn.addEventListener('click', function() {
+          // Import the learning screen functionality
+          const script = document.createElement('script');
+          script.src = 'js/learn-button.js';
+          document.head.appendChild(script);
+          
+          // Call the navigation function with a slight delay to ensure the script is loaded
+          setTimeout(() => {
+            if (typeof goToLearningScreen === 'function') {
+              goToLearningScreen();
+            } else {
+              alert('The learning module is not available at the moment. Please try again later.');
+            }
+          }, 100);
+          
+          // Log analytics event
+          logAnalyticsEvent('learn_module_click', {
+            source: 'home_screen'
+          });
+        });
+      }
       
       authToggleLink.addEventListener('click', function(e) {
         e.preventDefault();

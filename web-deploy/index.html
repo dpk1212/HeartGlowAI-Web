@@ -213,7 +213,7 @@
         <span class="new-conversation-icon">💬</span> Start a New Conversation
       </button>
       
-      <button id="learn-with-ai-btn" class="new-conversation-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); margin-top: 15px;" onclick="handleLearnWithAI()">
+      <button id="learn-with-ai-btn" class="new-conversation-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); margin-top: 15px;">
         <span class="new-conversation-icon">🧠</span> Learn with AI
       </button>
       
@@ -381,64 +381,66 @@
     </div>
   </div>
   
-  <!-- Add Learning Dashboard Screen -->
+  <!-- Learning Screen -->
   <div id="learning-screen" class="screen">
     <div class="dashboard-container">
-      <button id="back-from-learning-btn" class="back-button">
-        <span class="back-icon">←</span> Back
-      </button>
-      
-      <div class="logo-container" style="margin-bottom: 20px;">
-        <div class="logo-heart"></div>
-        <span class="logo-text">HeartGlowAI Learn</span>
+      <div class="dashboard-header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
       </div>
       
-      <div class="search-container">
-        <input type="text" id="learning-search" class="learning-search" placeholder="What do i do when someone stops' exting me back?" style="width: 100%; padding: 15px; border-radius: 30px; border: none; background: linear-gradient(135deg, rgba(110, 142, 251, 0.1), rgba(167, 119, 227, 0.1)); color: white;">
-      </div>
+      <h1 class="dashboard-title">Learn with AI</h1>
+      <p class="dashboard-subtitle">Discover communication strategies for better relationships</p>
+      
+      <input type="text" class="learning-search" placeholder="Ask anything about communication...">
       
       <div class="learning-content">
         <div class="learning-categories">
           <div class="category-item active">
-            <span class="category-icon">❤️</span>
-            <span class="category-name">Emotions</span>
+            <div class="category-icon">🗣️</div>
+            <div class="category-name">Basics</div>
           </div>
           <div class="category-item">
-            <span class="category-icon">👫</span>
-            <span class="category-name">Relationships</span>
+            <div class="category-icon">❤️</div>
+            <div class="category-name">Romantic</div>
           </div>
           <div class="category-item">
-            <span class="category-icon">💬</span>
-            <span class="category-name">Communication</span>
+            <div class="category-icon">👪</div>
+            <div class="category-name">Family</div>
           </div>
           <div class="category-item">
-            <span class="category-icon">🔬</span>
-            <span class="category-name">Science</span>
+            <div class="category-icon">🏢</div>
+            <div class="category-name">Work</div>
           </div>
           <div class="category-item">
-            <span class="category-icon">🌱</span>
-            <span class="category-name">Growth</span>
+            <div class="category-icon">🔄</div>
+            <div class="category-name">Repair</div>
           </div>
         </div>
         
         <div class="learning-answer">
-          <h2>It's common to feel confused or worried when communication halts unexpectedly.</h2>
-          
-          <p>Start by giving the situation some time—there may be a simple reason for the lack of response. If the silence continues, consider reaching out with a gentle, open-ended message that invites them to share if and when they're ready to talk.</p>
-          
-          <button class="learning-action-btn" id="turn-into-message-btn">
-            <span>→</span> Turn this into a message
-          </button>
+          <h2>Welcome to the Learning Module</h2>
+          <p>This feature will help you understand effective communication strategies for different types of relationships and situations. Use the search bar above to ask specific questions or browse the categories to explore topics.</p>
+          <p>Communication tips will be displayed here once you select a topic or ask a question.</p>
         </div>
         
         <div class="related-questions">
-          <h3>Suggestions</h3>
+          <h3>Popular Questions</h3>
           <ul>
-            <li><a href="#">How do I communicate better in a relationship?</a></li>
-            <li><a href="#">How can I set boundaries over text?</a></li>
-            <li><a href="#">When is it time to move on from someone?</a></li>
+            <li><a href="#" class="question-link" data-question="How do I start a difficult conversation?">How do I start a difficult conversation?</a></li>
+            <li><a href="#" class="question-link" data-question="What's the best way to apologize?">What's the best way to apologize?</a></li>
+            <li><a href="#" class="question-link" data-question="How can I be more assertive without being aggressive?">How can I be more assertive without being aggressive?</a></li>
+            <li><a href="#" class="question-link" data-question="What's active listening and why is it important?">What's active listening and why is it important?</a></li>
           </ul>
         </div>
+      </div>
+      
+      <div class="dashboard-actions">
+        <button id="back-to-home-from-learning" class="dashboard-btn">
+          <span class="dashboard-icon">←</span> Back to Home
+        </button>
       </div>
     </div>
   </div>
@@ -547,80 +549,5 @@
   
   <!-- JavaScript -->
   <script src="js/main.js"></script>
-  
-  <!-- Direct script to ensure handleLearnWithAI is globally available -->
-  <script>
-    // Global function for Learn with AI button
-    function handleLearnWithAI() {
-      console.log('Learn with AI button clicked!');
-      
-      // Get relevant screen elements
-      const homeScreen = document.getElementById('home-screen');
-      const learningScreen = document.getElementById('learning-screen');
-      
-      // Navigate to learning screen
-      homeScreen.classList.remove('active');
-      setTimeout(() => {
-        homeScreen.style.display = 'none';
-        learningScreen.style.display = 'flex';
-        setTimeout(() => learningScreen.classList.add('active'), 50);
-        
-        // Set up the "Turn into message" button click handler
-        const turnIntoMessageBtn = document.getElementById('turn-into-message-btn');
-        if (turnIntoMessageBtn) {
-          // Remove existing listeners to prevent duplicates
-          const newBtn = turnIntoMessageBtn.cloneNode(true);
-          turnIntoMessageBtn.parentNode.replaceChild(newBtn, turnIntoMessageBtn);
-          
-          // Add click handler
-          newBtn.addEventListener('click', function() {
-            // Get the learning content to pre-fill in generator form
-            const learningQuestion = document.getElementById('learning-search').placeholder;
-            const learningAnswer = document.querySelector('.learning-answer p').textContent;
-            
-            // Navigate to generator screen
-            const generatorScreen = document.getElementById('generator-screen');
-            
-            // Pre-fill generator form
-            const scenarioInput = document.getElementById('scenario');
-            if (scenarioInput) {
-              scenarioInput.value = learningQuestion;
-            }
-            
-            const circumstancesInput = document.getElementById('circumstances');
-            if (circumstancesInput) {
-              circumstancesInput.value = "Based on advice: " + learningAnswer;
-            }
-            
-            // Show generator screen
-            learningScreen.classList.remove('active');
-            setTimeout(() => {
-              learningScreen.style.display = 'none';
-              generatorScreen.style.display = 'flex';
-              setTimeout(() => generatorScreen.classList.add('active'), 50);
-            }, 300);
-          });
-        }
-      }, 300);
-      
-      // Add event listener to back button if not already added
-      const backButton = document.getElementById('back-from-learning-btn');
-      if (backButton) {
-        // Remove existing listeners to prevent duplicates
-        const newBackBtn = backButton.cloneNode(true);
-        backButton.parentNode.replaceChild(newBackBtn, backButton);
-        
-        // Add click handler
-        newBackBtn.addEventListener('click', function() {
-          learningScreen.classList.remove('active');
-          setTimeout(() => {
-            learningScreen.style.display = 'none';
-            homeScreen.style.display = 'flex';
-            setTimeout(() => homeScreen.classList.add('active'), 50);
-          }, 300);
-        });
-      }
-    }
-  </script>
 </body>
 </html> 

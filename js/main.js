@@ -2035,28 +2035,65 @@
     async function callPerplexityAPI(prompt) {
       try {
         console.log('Making Perplexity API call with prompt:', prompt);
-        const apiKey = await getPerplexityApiKey();
         
-        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        // More resilient authentication check with retry
+        let authUser = currentUser;
+        
+        // If no user is available, wait a short time to see if auth state catches up
+        if (!authUser) {
+          console.log('No user detected initially, waiting briefly for auth state to update...');
+          // Wait for a short time to see if Firebase auth completes
+          await new Promise(resolve => setTimeout(resolve, 500));
+          authUser = currentUser;
+          
+          // Try to use Firebase auth directly as a fallback
+          if (!authUser) {
+            console.log('Attempting to get user directly from Firebase auth...');
+            authUser = firebase.auth().currentUser;
+          }
+        }
+        
+        // Final authentication check
+        if (!authUser) {
+          console.error('Authentication check failed after retry');
+          throw new Error('Authentication required to use Perplexity API');
+        }
+        
+        console.log('User authenticated, calling perplexityResearch HTTP endpoint');
+        
+        // Get the ID token from the authenticated user
+        const idToken = await authUser.getIdToken();
+        
+        // Call the HTTP endpoint
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/perplexityResearch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            model: "sonar",
-            messages: [
-              { role: 'user', content: prompt }
-            ],
-            temperature: 0.7,
-            max_tokens: 500,
-            top_p: 0.9
+            prompt: prompt
           })
         });
         
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(`Perplexity API error: ${errorData.error?.message || response.statusText}`);
+          let errorMessage = `Server responded with status ${response.status}`;
+          
+          try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (jsonError) {
+            // If JSON parsing fails, use status text
+            errorMessage = `Error: ${response.statusText || errorMessage}`;
+          }
+          
+          console.error('Server function error:', errorMessage);
+          throw new Error(errorMessage);
         }
         
         const data = await response.json();

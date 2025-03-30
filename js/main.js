@@ -353,6 +353,18 @@
         measurementId: "G-KJMPL1DNPY"
       };
       
+      // Initialize Firebase only if it hasn't been initialized yet
+      if (!firebase.apps.length) {
+        try {
+            firebase.initializeApp(firebaseConfig);
+            console.log("main.js: Firebase initialized.");
+        } catch (error) {
+            console.error("main.js: Firebase initialization error:", error);
+        }
+      } else {
+          console.log("main.js: Firebase already initialized (likely by inline script). Skipping init.");
+      }
+      
       // Initialize Firebase Analytics
       const analytics = firebase.analytics();
       

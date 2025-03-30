@@ -6,55 +6,74 @@
 // Function to retrieve Perplexity API key from Firestore or other sources
 async function getPerplexityApiKey() {
   try {
-    // Check local storage first for cached key
-    let perplexityApiKey = localStorage.getItem('perplexity_api_key');
+    console.log('Getting Perplexity API key...');
     
-    if (perplexityApiKey) {
+    // Check local storage first for cached key (most reliable cross-device)
+    const localStorageKey = localStorage.getItem('perplexity_api_key');
+    if (localStorageKey) {
       console.log('Using Perplexity API key from local storage');
-      return perplexityApiKey;
+      return localStorageKey;
     }
     
     // Try to get from Firebase if available
-    if (typeof firebase !== 'undefined' && firebase.firestore) {
-      console.log('Retrieving Perplexity API key from Firestore');
+    if (typeof firebase !== 'undefined' && firebase.firestore && firebase.auth && firebase.auth().currentUser) {
+      console.log('Attempting to retrieve Perplexity API key from Firestore');
       try {
         // Access the secrets collection
         const secretsRef = firebase.firestore().collection('secrets').doc('api_keys');
         const secretsDoc = await secretsRef.get();
         
-        if (secretsDoc.exists && secretsDoc.data().perplexity) {
-          perplexityApiKey = secretsDoc.data().perplexity;
+        if (secretsDoc.exists && secretsDoc.data() && secretsDoc.data().perplexity) {
+          const apiKey = secretsDoc.data().perplexity;
+          
           // Cache the key in localStorage to avoid repeated Firestore calls
-          localStorage.setItem('perplexity_api_key', perplexityApiKey);
+          try {
+            localStorage.setItem('perplexity_api_key', apiKey);
+            console.log('Perplexity API key cached in localStorage');
+          } catch (storageError) {
+            console.warn('Could not cache API key:', storageError.message);
+          }
+          
           console.log('Perplexity API key retrieved from Firestore');
-          return perplexityApiKey;
+          return apiKey;
+        } else {
+          console.warn('API key not found in Firestore document');
         }
       } catch (fbError) {
-        console.warn('Could not retrieve key from Firestore:', fbError);
+        console.warn('Could not retrieve key from Firestore:', fbError.message);
       }
+    } else {
+      console.log('Firebase not available or user not logged in');
     }
     
-    // Check URL parameters for a demo key (development only)
-    const urlParams = new URLSearchParams(window.location.search);
-    const paramKey = urlParams.get('demo_key');
-    if (paramKey && paramKey.startsWith('pplx-')) {
-      console.log('Using demo key from URL parameter');
-      return paramKey;
+    // Try alternative sources that work better on mobile
+    
+    // 1. Check URL parameters for a demo key
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const paramKey = urlParams.get('demo_key');
+      if (paramKey && paramKey.startsWith('pplx-')) {
+        console.log('Using demo key from URL parameter');
+        return paramKey;
+      }
+    } catch (urlError) {
+      console.warn('Error checking URL parameters:', urlError.message);
     }
     
-    // Use the fallback key from environment if available
-    if (typeof PERPLEXITY_API_KEY !== 'undefined') {
-      console.log('Using fallback Perplexity API key');
+    // 2. Check for a hardcoded fallback key in a global variable
+    if (typeof PERPLEXITY_API_KEY !== 'undefined' && PERPLEXITY_API_KEY) {
+      console.log('Using fallback Perplexity API key from global variable');
       return PERPLEXITY_API_KEY;
     }
     
-    // If we still don't have a key, use a default demo key (ONLY FOR DEVELOPMENT)
-    const fallbackKey = 'pplx-DEMO_KEY_REPLACE_IN_PRODUCTION';
-    console.warn('Using fallback demo key - replace in production!');
-    return fallbackKey;
+    // 3. Use a temporary demo key as last resort
+    console.warn('Using fallback demo key - this should be replaced in production');
+    return 'pplx-DEMO_KEY_REPLACE_IN_PRODUCTION';
+    
   } catch (error) {
-    console.error('Error fetching Perplexity API key:', error);
-    return null;
+    console.error('Error in getPerplexityApiKey:', error.message || error);
+    // Return a fallback key even in case of errors to prevent complete failure
+    return 'pplx-DEMO_KEY_REPLACE_IN_PRODUCTION';
   }
 }
 
@@ -80,10 +99,12 @@ async function callPerplexityAPI(prompt, options = {}) {
     // Create a more detailed system message to encourage citations
     const systemMessage = "You are a relationship expert providing research-backed answers about relationships. Always cite reliable sources such as psychology journals, academic research papers, or books by relationship experts. Format citations as [1], [2], etc. and include complete source details at the end of your response. Focus on providing well-structured, evidence-based information with practical advice. Always maintain a professional, empathetic tone.";
     
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
+    // Create request options - restructured for improved mobile compatibility
+    const requestOptions = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
@@ -96,19 +117,49 @@ async function callPerplexityAPI(prompt, options = {}) {
         max_tokens: config.max_tokens,
         top_p: config.top_p
       })
+    };
+
+    console.log('Sending Perplexity API request with options:', {
+      model: config.model,
+      temperature: config.temperature,
+      max_tokens: config.max_tokens
     });
     
+    // Perform the fetch with improved error handling
+    const response = await fetch('https://api.perplexity.ai/chat/completions', requestOptions);
+    
+    // Log response status to help with debugging
+    console.log('Perplexity API response status:', response.status);
+    
+    // Handle non-OK responses
     if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(`Perplexity API error: ${errorData.error?.message || response.statusText}`);
+      let errorMessage = `API request failed with status ${response.status}`;
+      
+      try {
+        // Try to parse error response as JSON
+        const errorData = await response.json();
+        if (errorData && errorData.error) {
+          errorMessage = `Perplexity API error: ${errorData.error.message || errorData.error}`;
+        }
+      } catch (jsonError) {
+        // If JSON parsing fails, use the status text
+        errorMessage = `Perplexity API error: ${response.statusText || errorMessage}`;
+      }
+      
+      console.error(errorMessage);
+      throw new Error(errorMessage);
     }
     
+    // Parse the successful response
     const data = await response.json();
-    console.log('Perplexity API response received');
+    console.log('Perplexity API response received successfully');
     return data;
   } catch (error) {
-    console.error('Perplexity API call failed:', error);
-    throw error;
+    // Improved error logging with more context
+    console.error('Perplexity API call failed:', error.message || error);
+    
+    // Rethrow with clearer message
+    throw new Error(`Research service unavailable: ${error.message || 'Unknown error'}`);
   }
 }
 
@@ -551,43 +602,70 @@ async function performPerplexityResearch(query, containerElement, loadingElement
     
     // Add citation instruction to the query
     const enhancedQuery = createCitationPrompt(query);
+
+    // Create safeguards to ensure the API call works on mobile
+    const apiOptions = {
+      model: "sonar", // Higher quality model for research
+      max_tokens: 1500, // Increased token limit for more comprehensive answers
+      temperature: 0.2, // Lower temperature for more factual responses
+      timeout: 30000 // 30 second timeout to prevent hanging on mobile
+    };
+    
+    console.log(`Making research query with model ${apiOptions.model}, max_tokens ${apiOptions.max_tokens}`);
     
     try {
-      // Call the API with longer token limit for research
-      const result = await callPerplexityAPI(enhancedQuery, {
-        model: "sonar", // Higher quality model for research
-        max_tokens: 1500, // Increased token limit for more comprehensive answers
-        temperature: 0.2 // Lower temperature for more factual responses
-      });
+      // Call the API with enhanced options for mobile compatibility
+      const result = await Promise.race([
+        callPerplexityAPI(enhancedQuery, apiOptions),
+        // Create a timeout promise to prevent hanging
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Research request timed out')), apiOptions.timeout)
+        )
+      ]);
       
       // Display the formatted results
       displayPerplexityResults(result, containerElement);
       
       return result;
     } catch (apiError) {
-      // Handle API-specific errors
-      console.error('Perplexity API error:', apiError);
+      // Log and handle API-specific errors
+      console.error('Perplexity API error during research:', apiError);
       
-      // Create a more user-friendly error message
-      const errorMessage = apiError.message.includes('Perplexity API error') 
-        ? apiError.message 
-        : 'Unable to complete the research query. Please try again later.';
+      // Create a user-friendly error message
+      let errorMessage = 'Unable to complete the research query.';
+      if (apiError.message.includes('timed out')) {
+        errorMessage = 'The research request took too long to complete. Please try again.';
+      } else if (apiError.message.includes('API key')) {
+        errorMessage = 'There was an issue with the API authorization.';
+      } else if (apiError.message.includes('network') || apiError.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error. Please check your internet connection and try again.';
+      }
       
+      // Display error in container
       containerElement.innerHTML = `
         <div class="perplexity-response">
           <div class="error-message">
             <strong>Research Error:</strong> ${errorMessage}
           </div>
           <div style="margin-top: 16px; font-size: 14px; color: var(--text-secondary, rgba(255,255,255,0.7));">
-            <p>Possible solutions:</p>
+            <p>Please try:</p>
             <ul>
-              <li>Check your API key configuration</li>
-              <li>Try a different, more specific query</li>
-              <li>Reduce the complexity of your question</li>
+              <li>Refreshing the page</li>
+              <li>Trying a different, more specific query</li>
+              <li>Checking your internet connection</li>
             </ul>
+            <button class="retry-btn primary-button" style="margin-top: 15px;">Try Again</button>
           </div>
         </div>
       `;
+      
+      // Add event listener to the retry button
+      const retryBtn = containerElement.querySelector('.retry-btn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          performPerplexityResearch(query, containerElement, loadingElement);
+        });
+      }
       
       throw apiError;
     }
@@ -599,10 +677,20 @@ async function performPerplexityResearch(query, containerElement, loadingElement
       containerElement.innerHTML = `
         <div class="perplexity-response">
           <div class="error-message">
-            <strong>Error:</strong> ${error.message}
+            <strong>Error:</strong> We couldn't complete your research request.
+            <p>Please check your internet connection and try again.</p>
+            <button class="retry-btn primary-button" style="margin-top: 15px;">Try Again</button>
           </div>
         </div>
       `;
+      
+      // Add event listener to the retry button
+      const retryBtn = containerElement.querySelector('.retry-btn');
+      if (retryBtn) {
+        retryBtn.addEventListener('click', () => {
+          performPerplexityResearch(query, containerElement, loadingElement);
+        });
+      }
     }
     
     throw error;
@@ -709,32 +797,86 @@ window.perplexityHandler = {
         `;
       }
       
-      // Call Perplexity API with proper error handling
-      const result = await callPerplexityAPI(enhancedPrompt, {
+      console.log('Starting research query with prompt:', prompt.substring(0, 100) + '...');
+      
+      // Create API call options optimized for mobile
+      const apiOptions = {
         model: "sonar",
         temperature: 0.7,
         max_tokens: 1500,  // Increased for more comprehensive responses
-        top_p: 0.9
-      });
+        top_p: 0.9,
+        timeout: 30000 // 30 second timeout to prevent hanging on mobile devices
+      };
       
-      // Display formatted results
-      displayPerplexityResults(result, containerElement);
-      
-      // Add citation click handlers after rendering
-      addCitationInteractivity(containerElement);
-      
-      return result;
+      try {
+        // Use Promise.race to implement a timeout for the API call
+        const result = await Promise.race([
+          // Main API call
+          callPerplexityAPI(enhancedPrompt, apiOptions),
+          // Timeout promise
+          new Promise((_, reject) => 
+            setTimeout(() => reject(new Error('Research request timed out')), apiOptions.timeout)
+          )
+        ]);
+        
+        // Display formatted results
+        displayPerplexityResults(result, containerElement);
+        
+        // Add citation click handlers after rendering
+        addCitationInteractivity(containerElement);
+        
+        return result;
+      } catch (apiError) {
+        console.error('Research API call failed:', apiError);
+        
+        // Create user-friendly error message based on error type
+        let errorMessage = 'We encountered an issue while generating insights.';
+        if (apiError.message.includes('timed out')) {
+          errorMessage = 'The research request took too long to complete. Please try again.';
+        } else if (apiError.message.includes('network') || apiError.message.includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection and try again.';
+        }
+        
+        // Display user-friendly error
+        containerElement.innerHTML = `
+          <div class="research-error">
+            <h3>Research Error</h3>
+            <p>${errorMessage}</p>
+            <button class="retry-btn primary-button">Try Again</button>
+          </div>
+        `;
+        
+        // Add retry button handler
+        const retryButton = containerElement.querySelector('.retry-btn');
+        if (retryButton) {
+          retryButton.addEventListener('click', () => {
+            this.research(prompt, containerElement);
+          });
+        }
+        
+        throw apiError;
+      }
     } catch (error) {
-      console.error('Research failed:', error);
+      console.error('Research wrapper failed:', error);
       
-      // Display user-friendly error
-      containerElement.innerHTML = `
-        <div class="research-error">
-          <h3>Research Error</h3>
-          <p>${error.message || 'We encountered an issue while generating insights. Please try again.'}</p>
-          <button class="retry-btn primary-button">Retry</button>
-        </div>
-      `;
+      // Only show error if not already displayed
+      if (!containerElement.querySelector('.research-error')) {
+        containerElement.innerHTML = `
+          <div class="research-error">
+            <h3>Research Error</h3>
+            <p>We encountered an issue while generating insights. Please try again.</p>
+            <button class="retry-btn primary-button">Try Again</button>
+          </div>
+        `;
+        
+        // Add retry button handler
+        const retryButton = containerElement.querySelector('.retry-btn');
+        if (retryButton) {
+          retryButton.addEventListener('click', () => {
+            this.research(prompt, containerElement);
+          });
+        }
+      }
       
       throw error;
     }

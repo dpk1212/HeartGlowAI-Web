@@ -236,29 +236,35 @@
 
     <!-- Scripts -->
     <script>
-        // Initialize Firebase - must happen before other scripts
+        // Initialize Firebase
         const firebaseConfig = {
-            apiKey: "AIzaSyDheartglowai12345",
-            authDomain: "heartglow-ai.firebaseapp.com",
-            projectId: "heartglow-ai",
-            storageBucket: "heartglow-ai.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890",
-            measurementId: "G-ABCDEF1234"
+            apiKey: "AIzaSyBqe71ji_-QEUKjM4qrYcYbMRUZe2MixIk",
+            authDomain: "heartglowai.firebaseapp.com",
+            projectId: "heartglowai",
+            storageBucket: "heartglowai.appspot.com",
+            messagingSenderId: "156288006557",
+            appId: "1:156288006557:web:e0cbb98cd5d2c57abcabee",
+            measurementId: "G-QLE0NFYKMK"
         };
         
-        // Initialize Firebase before any other scripts run
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            // Set persistence to LOCAL for better cross-page authentication
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                .catch(error => {
-                    console.error("Auth persistence error:", error);
-                });
-        }
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Set persistence
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+        
+        // Log auth state
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                console.log("Firebase user authenticated on page load:", user.uid);
+            } else {
+                console.log("No user authenticated on page load");
+            }
+        });
     </script>
     <script src="js/perplexity-handler.js"></script>
     <script src="js/learn-with-ai.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/learn-auth.js"></script>
 </body>
 </html> 

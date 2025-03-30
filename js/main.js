@@ -2030,37 +2030,38 @@
     async function callPerplexityAPI(prompt) {
       try {
         console.log('Making Perplexity API call with prompt:', prompt);
-        console.log('Getting API key...');
-        const apiKey = await getPerplexityApiKey();
-        console.log('API key retrieved (first few chars):', apiKey.substring(0, 8) + '...');
         
-        console.log('Preparing to send request to Perplexity API');
-        const response = await fetch('https://api.perplexity.ai/chat/completions', {
+        // Ensure Firebase Auth is initialized and user is authenticated
+        if (!firebase.auth().currentUser) {
+          throw new Error('Authentication required to use Perplexity API');
+        }
+        
+        console.log('Calling perplexityResearch HTTP endpoint');
+        
+        // Get the current user's ID token
+        const idToken = await firebase.auth().currentUser.getIdToken();
+        
+        // Call the HTTP endpoint
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/perplexityResearch', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${idToken}`
           },
           body: JSON.stringify({
-            model: "sonar",
-            messages: [
-              { role: 'user', content: prompt }
-            ],
-            temperature: 0.7,
-            max_tokens: 500,
-            top_p: 0.9
+            prompt: prompt
           })
         });
         
-        console.log('Got response from API, status:', response.status);
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error('API error response:', errorData);
-          throw new Error(`Perplexity API error: ${errorData.error?.message || response.statusText}`);
-        }
-        
+        console.log('Response status:', response.status);
         const data = await response.json();
         console.log('Perplexity API response:', data);
+        
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to call Perplexity API');
+        }
+        
         return data;
       } catch (error) {
         console.error('Perplexity API call failed:', error);

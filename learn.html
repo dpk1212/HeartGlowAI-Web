@@ -4,11 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Learn with HeartGlowAI - Relationship Resources</title>
-    <meta name="description" content="Explore research-backed resources on relationships, emotional health, and communication with HeartGlowAI's learning center">
+    <meta name="description" content="Explore relationship topics and research with HeartGlowAI's learning resources. Discover insights on communication, attachment, and more.">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/learn-with-ai.css">
     <link rel="stylesheet" href="css/perplexity-citations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -34,102 +35,107 @@
             <!-- Hero Section -->
             <div class="learn-hero-section">
                 <div class="learn-hero-content">
-                    <h1>Learn with HeartGlowAI</h1>
-                    <p>Get research-backed insights about relationships, emotions, and communication. Choose a topic to explore or ask your own questions.</p>
+                    <h1>Learn with Heart</h1>
+                    <p>Explore relationship topics, gain insights, and discover research-backed advice to strengthen your connections and understanding.</p>
                     <div class="hero-buttons">
-                        <button class="primary-button" id="custom-research-btn">Ask Your Own Question</button>
-                        <button class="secondary-button" id="browse-all-topics-btn">Browse All Topics</button>
+                        <button class="primary-button" id="explore-topics-btn">Explore Topics</button>
+                        <a href="index.html" class="secondary-button">Back to Home</a>
                     </div>
                 </div>
                 <div class="learn-hero-image">
-                    <div class="hero-illustration">
-                        <div class="glow-effect"></div>
-                    </div>
+                    <div class="hero-illustration"></div>
+                    <div class="glow-effect"></div>
                 </div>
             </div>
 
             <!-- Topics Section -->
             <div class="dashboard-container learning-container">
                 <div class="section-header">
-                    <h2>Popular Topics</h2>
-                    <p>Select a topic to get research-backed insights</p>
+                    <h2>Relationship Topics</h2>
+                    <p>Select a topic to receive AI-powered insights and research on common relationship questions</p>
                 </div>
 
                 <div class="topics-grid">
-                    <!-- Topic Card 1 -->
-                    <div class="topic-card" id="boundaries">
-                        <div class="topic-icon icon-relationships">💬</div>
-                        <h3>Healthy Boundaries in Relationships</h3>
-                        <p>Learn what boundaries are, how to set them, and practical language to use.</p>
+                    <div class="topic-card" data-topic="communication-styles">
+                        <div class="topic-icon icon-communication">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Communication Styles</h3>
+                        <p>Discover different communication patterns and how they impact your relationships. Learn strategies for more effective dialogue.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Relationships</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Communication</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
 
-                    <!-- Topic Card 2 -->
-                    <div class="topic-card" id="emotional-intimacy">
-                        <div class="topic-icon icon-psychology">❤️</div>
-                        <h3>Emotional Intimacy</h3>
-                        <p>Discover how to build deeper emotional connections and understand intimacy beyond physical aspects.</p>
+                    <div class="topic-card" data-topic="conflict-resolution">
+                        <div class="topic-icon icon-conflict">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Conflict Resolution</h3>
+                        <p>Explore healthy approaches to disagreements and how to turn conflicts into opportunities for growth and deeper understanding.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Psychology</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Conflict Management</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
 
-                    <!-- Topic Card 3 -->
-                    <div class="topic-card" id="stonewalling">
-                        <div class="topic-icon icon-conflict">🚫</div>
-                        <h3>Stonewalling in Relationships</h3>
-                        <p>Understand what stonewalling is, why it happens, and effective ways to address it.</p>
+                    <div class="topic-card" data-topic="attachment-theory">
+                        <div class="topic-icon icon-psychology">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3>Attachment Theory</h3>
+                        <p>Understand how early attachment patterns influence adult relationships and strategies for developing secure attachment styles.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Conflict</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Psychology</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
 
-                    <!-- Topic Card 4 -->
-                    <div class="topic-card" id="attachment-styles">
-                        <div class="topic-icon icon-psychology">📋</div>
-                        <h3>Attachment Styles</h3>
-                        <p>Learn about the four attachment styles and how they shape your relationship patterns.</p>
+                    <div class="topic-card" data-topic="emotional-intelligence">
+                        <div class="topic-icon icon-psychology">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Emotional Intelligence</h3>
+                        <p>Learn about recognizing emotions in yourself and others, and how emotional awareness can transform your relationships.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Psychology</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Psychology</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
 
-                    <!-- Topic Card 5 -->
-                    <div class="topic-card" id="express-needs">
-                        <div class="topic-icon icon-communication">🔊</div>
-                        <h3>Expressing Needs Clearly</h3>
-                        <p>Master the art of communicating your needs without triggering defensiveness.</p>
+                    <div class="topic-card" data-topic="love-languages">
+                        <div class="topic-icon icon-relationships">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Love Languages</h3>
+                        <p>Explore the five ways people express and experience love, and how understanding them can improve your relationship connections.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Communication</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Relationships</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
 
-                    <!-- Topic Card 6 -->
-                    <div class="topic-card" id="meaningful-apology">
-                        <div class="topic-icon icon-conflict">👋</div>
-                        <h3>Meaningful Apologies</h3>
-                        <p>Discover what makes an apology effective and learn how to avoid common pitfalls.</p>
+                    <div class="topic-card" data-topic="relationship-boundaries">
+                        <div class="topic-icon icon-relationships">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Healthy Boundaries</h3>
+                        <p>Discover how to establish and maintain healthy boundaries in relationships for better mutual respect and understanding.</p>
                         <div class="topic-footer">
-                            <span class="topic-category">Conflict Resolution</span>
-                            <span class="learn-more">Explore</span>
+                            <div class="topic-category">Relationships</div>
+                            <div class="learn-more">Learn More</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Custom Question Section -->
                 <div id="custom-question-section" class="custom-question-section">
-                    <h2>Ask Your Own Relationship Question</h2>
-                    <p>Get AI-powered insights on any relationship topic</p>
+                    <h2>Ask Your Own Question</h2>
+                    <p>Have a specific relationship question? Our AI can provide personalized insights based on research.</p>
                     
                     <div class="custom-question-input-container">
-                        <textarea id="custom-question-input" placeholder="e.g., How do I navigate disagreements with my partner about finances?"></textarea>
+                        <textarea id="custom-question-input" placeholder="Type your relationship question here..."></textarea>
                         <button id="submit-question-btn" class="primary-button">Get Insights</button>
                     </div>
                 </div>
@@ -138,21 +144,42 @@
             <!-- Results Modal - Hidden by default -->
             <div id="research-results-container" class="research-results-container">
                 <div class="research-results-header">
-                    <h2>Research Results</h2>
                     <span class="research-category">Category</span>
+                    <h2>Topic Title</h2>
                     <div class="result-actions">
-                        <button id="copy-result-btn" class="action-button" title="Copy to clipboard">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        <button class="action-button" id="copy-results-btn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
                         </button>
-                        <button class="close-results-btn">&times;</button>
+                        <button class="action-button" id="share-results-btn" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
                     </div>
+                    <button class="close-results-btn">&times;</button>
                 </div>
                 <div class="research-results-content">
-                    <!-- Content will be populated dynamically -->
+                    <div class="research-loading">
+                        <div class="perplexity-spinner"></div>
+                        <p>Researching insights for you...</p>
+                    </div>
+                    
+                    <div class="research-error" style="display: none;">
+                        <h3>Research Error</h3>
+                        <p>We encountered an issue while generating insights. Please try again.</p>
+                        <button class="retry-btn" data-topic="" data-title="" data-category="">Retry</button>
+                    </div>
+                    
+                    <div class="response-content"></div>
+                    
+                    <div class="citations-section" style="display: none;">
+                        <div class="citations-tabs">
+                            <div class="citation-tab active" data-tab="sources">Sources</div>
+                        </div>
+                        <ul class="citations-list"></ul>
+                    </div>
                 </div>
                 <div class="results-footer">
-                    <p>Powered by <span class="footer-highlight">Perplexity AI</span> research</p>
-                    <a href="index.html" class="back-to-home-link">Return to Home</a>
+                    <p>Powered by <span class="footer-highlight">HeartGlowAI</span> using advanced research techniques</p>
+                    <button id="back-to-topics-btn" class="secondary-button">Back to Topics</button>
                 </div>
             </div>
         </main>

@@ -492,11 +492,16 @@
       const learnBtn = document.getElementById('learn-btn');
       if (learnBtn) {
         learnBtn.addEventListener('click', function() {
-          // Navigate to the learn.html page
-          window.location.href = 'learn.html';
+          // Hide home screen and show learning screen
+          homeScreen.classList.remove('active');
+          setTimeout(() => {
+            homeScreen.style.display = 'none';
+            learningScreen.style.display = 'flex';
+            setTimeout(() => learningScreen.classList.add('active'), 50);
+          }, 500);
           
           // Log analytics event
-          logAnalyticsEvent('learn_page_visit', {
+          logAnalyticsEvent('learn_module_click', {
             source: 'home_screen'
           });
         });
@@ -2073,13 +2078,26 @@
         });
         
         console.log('Response status:', response.status);
-        const data = await response.json();
-        console.log('Perplexity API response:', data);
         
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to call Perplexity API');
+          let errorMessage = `Server responded with status ${response.status}`;
+          
+          try {
+            const errorData = await response.json();
+            if (errorData && errorData.error) {
+              errorMessage = errorData.error;
+            }
+          } catch (jsonError) {
+            // If JSON parsing fails, use status text
+            errorMessage = `Error: ${response.statusText || errorMessage}`;
+          }
+          
+          console.error('Server function error:', errorMessage);
+          throw new Error(errorMessage);
         }
         
+        const data = await response.json();
+        console.log('Perplexity API response:', data);
         return data;
       } catch (error) {
         console.error('Perplexity API call failed:', error);
@@ -2091,9 +2109,7 @@
     async function testPerplexityAPI() {
       try {
         console.log('Testing Perplexity API...');
-        console.log('About to call Perplexity API with test prompt');
         const result = await callPerplexityAPI('What are the top 3 benefits of meditation?');
-        console.log('Call completed, got result:', result);
         console.log('Result:', result.choices[0].message.content);
         if (result.citations && result.citations.length > 0) {
           console.log('Citations:', result.citations);
@@ -2105,53 +2121,68 @@
       }
     }
 
-    // Add direct event listener for Perplexity testing
-    window.addEventListener('load', function() {
-      console.log('Adding direct event listener to test-perplexity-btn-main');
-      const directButton = document.getElementById('test-perplexity-btn-main');
-      if (directButton) {
-        console.log('Found button, attaching direct listener');
-        directButton.onclick = async function() {
-          console.log('Button clicked via direct listener!');
+    // Initialize the test button for Perplexity API (development only)
+    document.addEventListener('DOMContentLoaded', function() {
+      const testButton = document.getElementById('test-perplexity-btn');
+      if (testButton) {
+        testButton.addEventListener('click', async function() {
           try {
             // Disable the button and show loading state
-            directButton.disabled = true;
-            const originalText = directButton.innerHTML;
-            directButton.innerHTML = '<span class="button-content">Testing... <div class="spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; margin-left: 10px;"></div></span>';
+            testButton.disabled = true;
+            testButton.innerHTML = '<span class="button-content">Testing... <div class="spinner" style="display: inline-block; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite; margin-left: 10px;"></div></span>';
             
-            // Call our API test function
-            console.log('Calling testPerplexityAPI function directly');
+            // Test the API
             const result = await testPerplexityAPI();
-            console.log('API test result:', result);
             
-            // Display results
+            // Show the result div
             const resultDiv = document.getElementById('perplexity-result');
             const responseDiv = document.getElementById('perplexity-response');
             
             if (resultDiv && responseDiv) {
               resultDiv.style.display = 'block';
+              
+              // Format the response nicely
               if (result && result.choices && result.choices.length > 0) {
-                responseDiv.textContent = result.choices[0].message.content;
-                alert('Perplexity API test successful!');
+                const content = result.choices[0].message.content;
+                responseDiv.textContent = content;
+                
+                // Show success message
+                showAlert('Perplexity API test successful!', 'success');
               } else {
                 responseDiv.textContent = 'No valid response received. Please check the console for details.';
-                alert('Test completed but no valid response received.');
+                showAlert('Test completed but no valid response received.', 'error');
               }
             } else {
-              alert('Perplexity API test complete - check console for details.');
+              // Fallback if result div isn't found
+              const responseHtml = `
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 8px; margin-top: 20px;">
+                  <h3>Perplexity API Test Result</h3>
+                  <pre style="white-space: pre-wrap;">${
+                    result && result.choices && result.choices.length > 0 
+                    ? result.choices[0].message.content 
+                    : 'No valid response received'
+                  }</pre>
+                </div>
+              `;
+              
+              // Create temporary element
+              const tempDiv = document.createElement('div');
+              tempDiv.innerHTML = responseHtml;
+              testButton.parentNode.appendChild(tempDiv);
+              
+              showAlert('Perplexity API test successful! Check console for details.', 'success');
             }
+            
+            console.log('Perplexity API test result:', result);
           } catch (error) {
-            console.error('Direct Perplexity API test error:', error);
-            alert(`Perplexity API test failed: ${error.message}`);
+            console.error('Perplexity API test error:', error);
+            showAlert(`Perplexity API test failed: ${error.message}`, 'error');
           } finally {
-            // Restore button
-            directButton.disabled = false;
-            directButton.innerHTML = '<span class="button-content">Test Perplexity AI <span class="button-icon">🧠</span></span>';
+            // Re-enable the button
+            testButton.disabled = false;
+            testButton.innerHTML = '<span class="button-content">Test Perplexity AI <span class="button-icon">🧠</span></span>';
           }
-          return false; // Prevent any default behavior
-        };
-      } else {
-        console.error('Could not find test-perplexity-btn-main element for direct attachment');
+        });
       }
     });
 

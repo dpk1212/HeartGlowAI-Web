@@ -2031,15 +2031,16 @@
       try {
         console.log('Making Perplexity API call with prompt:', prompt);
         
-        // Ensure Firebase Auth is initialized and user is authenticated
-        if (!firebase.auth().currentUser) {
+        // Ensure user is authenticated using the global currentUser variable that's
+        // properly managed by the onAuthStateChanged listener
+        if (!currentUser) {
           throw new Error('Authentication required to use Perplexity API');
         }
         
         console.log('Calling perplexityResearch HTTP endpoint');
         
-        // Get the current user's ID token
-        const idToken = await firebase.auth().currentUser.getIdToken();
+        // Get the current user's ID token from the global currentUser variable
+        const idToken = await currentUser.getIdToken();
         
         // Call the HTTP endpoint
         const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/perplexityResearch', {

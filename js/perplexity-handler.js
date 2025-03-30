@@ -14,17 +14,19 @@ async function getPerplexityApiKey() {
       return perplexityApiKey;
     }
     
-    // Try to get from Firebase if user is authenticated
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+    // Try to get from Firebase if available
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
       console.log('Retrieving Perplexity API key from Firestore');
       try {
         // Access the secrets collection
-        const secretsDoc = await firebase.firestore().collection('secrets').doc('secrets').get();
+        const secretsRef = firebase.firestore().collection('secrets').doc('api_keys');
+        const secretsDoc = await secretsRef.get();
         
-        if (secretsDoc.exists && secretsDoc.data().perplexitykey) {
-          perplexityApiKey = secretsDoc.data().perplexitykey;
+        if (secretsDoc.exists && secretsDoc.data().perplexity) {
+          perplexityApiKey = secretsDoc.data().perplexity;
+          // Cache the key in localStorage to avoid repeated Firestore calls
           localStorage.setItem('perplexity_api_key', perplexityApiKey);
-          console.log('Perplexity API key retrieved from secrets collection');
+          console.log('Perplexity API key retrieved from Firestore');
           return perplexityApiKey;
         }
       } catch (fbError) {
@@ -40,18 +42,16 @@ async function getPerplexityApiKey() {
       return paramKey;
     }
     
-    // Prompt user for API key if we don't have one
-    if (!perplexityApiKey) {
-      const userKey = prompt('Please enter your Perplexity API key (starts with pplx-):');
-      if (userKey && userKey.startsWith('pplx-')) {
-        localStorage.setItem('perplexity_api_key', userKey);
-        return userKey;
-      }
+    // Use the fallback key from environment if available
+    if (typeof PERPLEXITY_API_KEY !== 'undefined') {
+      console.log('Using fallback Perplexity API key');
+      return PERPLEXITY_API_KEY;
     }
     
-    // If we still don't have a key, return null to handle gracefully
-    console.warn('No Perplexity API key available');
-    return null;
+    // If we still don't have a key, use a default demo key (ONLY FOR DEVELOPMENT)
+    const fallbackKey = 'pplx-DEMO_KEY_REPLACE_IN_PRODUCTION';
+    console.warn('Using fallback demo key - replace in production!');
+    return fallbackKey;
   } catch (error) {
     console.error('Error fetching Perplexity API key:', error);
     return null;
@@ -74,11 +74,11 @@ async function callPerplexityAPI(prompt, options = {}) {
     const apiKey = await getPerplexityApiKey();
     
     if (!apiKey) {
-      throw new Error('No Perplexity API key available');
+      throw new Error('Failed to retrieve API key for research');
     }
     
     // Create a more detailed system message to encourage citations
-    const systemMessage = "You are a helpful assistant that provides informative answers with citations to sources when possible. Format citations as [1], [2], etc. and include the source details at the end of your response.";
+    const systemMessage = "You are a relationship expert providing research-backed answers about relationships. Always cite reliable sources such as psychology journals, academic research papers, or books by relationship experts. Format citations as [1], [2], etc. and include complete source details at the end of your response. Focus on providing well-structured, evidence-based information with practical advice. Always maintain a professional, empathetic tone.";
     
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -104,7 +104,7 @@ async function callPerplexityAPI(prompt, options = {}) {
     }
     
     const data = await response.json();
-    console.log('Perplexity API response:', data);
+    console.log('Perplexity API response received');
     return data;
   } catch (error) {
     console.error('Perplexity API call failed:', error);
@@ -121,6 +121,8 @@ Please provide a comprehensive, well-structured answer with:
 2. Citations to reliable academic sources, medical journals, or other authoritative references
 3. Numbered citations in the format [1], [2], etc.
 4. A complete list of sources at the end of your response
+5. Practical advice and evidence-based insights
+6. A focus on relationship psychology and research
 
 Format your answer professionally and ensure all factual claims are properly cited.`;
 }
@@ -191,86 +193,340 @@ function displayPerplexityResults(result, containerElement) {
   // Sort citations by index
   citations.sort((a, b) => a.index - b.index);
   
-  // Format the main content with enhanced citation references
-  if (citations.length > 0) {
-    // Replace citation indices with superscript links
-    citations.forEach(citation => {
-      const refRegex = new RegExp(`\\[${citation.index}\\]`, 'g');
-      content = content.replace(refRegex, `<sup class="citation-ref" data-index="${citation.index}">[${citation.index}]</sup>`);
-    });
-  }
+  // Parse and format the content for enhanced display
+  const formattedResponse = formatResearchResponse(content, citations);
   
-  // Create HTML structure for the response with improved formatting
-  let html = '<div class="perplexity-response">';
+  // Create HTML for the enhanced research response
+  let html = '<div class="research-response">';
   
-  // Add the main content with paragraphs preserved
-  const paragraphs = content.trim().split(/\n\n+/);
-  html += '<div class="response-content">';
-  paragraphs.forEach(paragraph => {
-    if (paragraph.trim()) {
-      html += `<p>${paragraph.trim().replace(/\n/g, '<br>')}</p>`;
-    }
+  // Key Takeaways Section
+  html += '<div class="key-takeaways">';
+  html += '<h3>Key Insights</h3>';
+  html += '<div class="takeaway-grid">';
+  
+  formattedResponse.keyTakeaways.forEach(point => {
+    html += `
+      <div class="takeaway-card">
+        <i class="fas ${point.icon}"></i>
+        <h4>${point.title}</h4>
+        <p>${point.description}</p>
+      </div>
+    `;
   });
+  
+  html += '</div></div>';
+  
+  // Main Content Sections
+  html += '<div class="content-sections">';
+  
+  formattedResponse.sections.forEach(section => {
+    html += `
+      <div class="content-section">
+        <div class="section-header">
+          <h3>${section.title}</h3>
+        </div>
+        <div class="section-content">
+          ${section.content}
+        </div>
+      </div>
+    `;
+  });
+  
   html += '</div>';
   
-  // Add citations section if available
-  if (citations.length > 0) {
-    html += '<div class="citations-section">';
-    html += '<h3>Sources</h3>';
-    html += '<ol class="citations-list">';
+  // Practical Tips Section (if available)
+  if (formattedResponse.practicalTips.length > 0) {
+    html += '<div class="practical-tips">';
+    html += '<h3>Practical Applications</h3>';
+    html += '<div class="tips-list">';
     
-    citations.forEach(citation => {
-      html += `<li id="citation-${citation.index}" class="citation-item">`;
-      
-      if (citation.url) {
-        html += `<a href="${citation.url}" target="_blank" class="citation-link">`;
-        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
-        html += `<div class="citation-url">${citation.url}</div>`;
-        html += '</a>';
-      } else {
-        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
-        html += `<div class="citation-text">${citation.text}</div>`;
-      }
-      
-      html += '</li>';
+    formattedResponse.practicalTips.forEach(tip => {
+      html += `
+        <div class="tip-item">
+          <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
+          <div class="tip-content">${tip}</div>
+        </div>
+      `;
     });
     
-    html += '</ol></div>';
+    html += '</div></div>';
   }
   
-  html += '</div>';
+  // Citations Panel
+  if (citations.length > 0) {
+    html += '<div class="citations-panel">';
+    html += '<h3>Sources</h3>';
+    html += '<div class="citation-cards">';
+    
+    citations.forEach(citation => {
+      html += `
+        <div class="citation-card" id="citation-${citation.index}">
+          <div class="citation-number">[${citation.index}]</div>
+          <div class="citation-details">
+            <div class="citation-title">${citation.title}</div>
+            ${citation.url ? `<a href="${citation.url}" target="_blank" class="citation-link">${citation.url}</a>` : ''}
+          </div>
+        </div>
+      `;
+    });
+    
+    html += '</div></div>';
+  }
   
-  // Set the HTML to the container
+  html += '</div>'; // End of research-response div
+  
+  // Set the HTML content
   containerElement.innerHTML = html;
   
-  // Add event listeners to citation references with improved highlighting
-  setTimeout(() => {
-    const refs = containerElement.querySelectorAll('.citation-ref');
-    refs.forEach(ref => {
-      ref.addEventListener('click', () => {
-        const index = ref.getAttribute('data-index');
-        const citationItem = containerElement.querySelector(`#citation-${index}`);
-        
-        // Remove highlight from all citations first
-        document.querySelectorAll('.citation-item').forEach(item => {
-          item.classList.remove('highlight');
+  // Add interactive elements
+  initializeInteractiveElements(containerElement);
+}
+
+// Helper function to extract key points from content
+function formatResearchResponse(content, citations) {
+  // Process the content to identify key sections, takeaways, and practical tips
+  
+  // Extract headings and split content into sections
+  const sections = [];
+  let currentSection = { title: 'Overview', content: '' };
+  let keyTakeaways = [];
+  let practicalTips = [];
+  
+  // Split content into paragraphs
+  const paragraphs = content.split(/\n\n+/);
+  
+  // Process each paragraph
+  paragraphs.forEach(paragraph => {
+    paragraph = paragraph.trim();
+    if (!paragraph) return;
+    
+    // Check if paragraph is a heading
+    if (/^#+\s+.+/.test(paragraph) || /^.+\n[=\-]{2,}$/.test(paragraph)) {
+      // If we have content in the current section, save it
+      if (currentSection.content) {
+        sections.push({ ...currentSection });
+      }
+      
+      // Extract heading text
+      let title = paragraph.replace(/^#+\s+/, '').replace(/\n[=\-]{2,}$/, '');
+      currentSection = { title, content: '' };
+    } 
+    // Check if paragraph might be a key takeaway
+    else if (paragraph.includes(':') && paragraph.length < 200 && !paragraph.includes('[') && /^[A-Z]/.test(paragraph)) {
+      const parts = paragraph.split(':');
+      if (parts.length >= 2) {
+        keyTakeaways.push({
+          title: parts[0].trim(),
+          description: parts.slice(1).join(':').trim(),
+          icon: selectIconForContent(parts[0].trim())
         });
-        
-        if (citationItem) {
-          // Smooth scroll to the citation
-          citationItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Add highlight class
-          citationItem.classList.add('highlight');
-          
-          // Remove highlight after delay
-          setTimeout(() => {
-            citationItem.classList.remove('highlight');
-          }, 3000);
-        }
+      } else {
+        currentSection.content += formatParagraph(paragraph);
+      }
+    }
+    // Check if paragraph might be a practical tip
+    else if ((paragraph.toLowerCase().includes('tip') || 
+              paragraph.toLowerCase().includes('advice') || 
+              paragraph.toLowerCase().includes('recommend') ||
+              paragraph.toLowerCase().includes('practice') ||
+              paragraph.toLowerCase().includes('suggest')) && 
+              paragraph.length < 300) {
+      practicalTips.push(formatParagraph(paragraph));
+    }
+    // Regular content paragraph
+    else {
+      currentSection.content += formatParagraph(paragraph);
+    }
+  });
+  
+  // Add the last section if it has content
+  if (currentSection.content) {
+    sections.push({ ...currentSection });
+  }
+  
+  // If we couldn't identify sections, create a default one with all content
+  if (sections.length === 0) {
+    sections.push({ title: 'Information', content: formatParagraph(content) });
+  }
+  
+  // If we couldn't identify key takeaways, extract some from the first section
+  if (keyTakeaways.length === 0) {
+    // Try to extract key sentences from the first section
+    const sentences = sections[0].content.split(/(?<=[.!?])\s+/);
+    
+    for (let i = 0; i < sentences.length && keyTakeaways.length < 3; i++) {
+      const sentence = sentences[i];
+      if (sentence.length > 40 && sentence.length < 200 && !sentence.includes('citation')) {
+        keyTakeaways.push({
+          title: `Key Point ${keyTakeaways.length + 1}`,
+          description: sentence,
+          icon: selectIconForContent(sentence)
+        });
+      }
+    }
+  }
+  
+  // Limit to 3-4 key takeaways
+  keyTakeaways = keyTakeaways.slice(0, 4);
+  
+  // Enhance each section with citations
+  sections.forEach(section => {
+    // Replace citation indices with enhanced superscript
+    citations.forEach(citation => {
+      const refRegex = new RegExp(`\\[${citation.index}\\]`, 'g');
+      section.content = section.content.replace(refRegex, 
+        `<sup class="citation-ref" data-index="${citation.index}">[${citation.index}]</sup>`);
+    });
+    
+    // Highlight key terms
+    section.content = highlightKeyTerms(section.content);
+  });
+  
+  return {
+    keyTakeaways,
+    sections,
+    practicalTips
+  };
+}
+
+// Format a paragraph with proper HTML and enhanced styling
+function formatParagraph(paragraph) {
+  // Replace newlines with breaks
+  let formatted = paragraph.replace(/\n/g, '<br>');
+  
+  // Add spacing between paragraphs
+  return `<p>${formatted}</p>`;
+}
+
+// Highlight important terms in the content
+function highlightKeyTerms(content) {
+  // List of relationship and psychology key terms to highlight
+  const keyTerms = [
+    'attachment style', 'secure attachment', 'anxious attachment', 'avoidant attachment',
+    'love language', 'emotional intelligence', 'stonewalling', 'contempt', 'criticism',
+    'defensiveness', 'gaslighting', 'boundaries', 'validation', 'active listening',
+    'communication pattern', 'conflict resolution', 'intimacy', 'vulnerability'
+  ];
+  
+  // Highlight each term
+  keyTerms.forEach(term => {
+    const regex = new RegExp(`(${term})`, 'gi');
+    content = content.replace(regex, '<span class="key-term">$1</span>');
+  });
+  
+  return content;
+}
+
+// Select appropriate icon based on content
+function selectIconForContent(text) {
+  text = text.toLowerCase();
+  
+  if (text.includes('communication') || text.includes('talk') || text.includes('conversation'))
+    return 'fa-comments';
+  
+  if (text.includes('emotion') || text.includes('feel') || text.includes('empathy'))
+    return 'fa-heart';
+  
+  if (text.includes('understand') || text.includes('knowledge') || text.includes('learn'))
+    return 'fa-lightbulb';
+    
+  if (text.includes('conflict') || text.includes('disagree') || text.includes('argument'))
+    return 'fa-handshake';
+    
+  if (text.includes('boundary') || text.includes('limit') || text.includes('protect'))
+    return 'fa-shield-alt';
+    
+  if (text.includes('attachment') || text.includes('connect') || text.includes('bond'))
+    return 'fa-link';
+    
+  // Default icon
+  return 'fa-check-circle';
+}
+
+// Initialize interactive elements in the response
+function initializeInteractiveElements(container) {
+  // Add citation tooltip functionality
+  const citationRefs = container.querySelectorAll('.citation-ref');
+  citationRefs.forEach(ref => {
+    ref.addEventListener('click', (e) => {
+      const index = e.target.dataset.index;
+      const citation = container.querySelector(`#citation-${index}`);
+      if (citation) {
+        citation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        citation.classList.add('citation-highlight');
+        setTimeout(() => {
+          citation.classList.remove('citation-highlight');
+        }, 2000);
+      }
+    });
+  });
+  
+  // Add section collapsing functionality for mobile
+  const sectionHeaders = container.querySelectorAll('.section-header');
+  if (window.innerWidth < 768) {
+    sectionHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const section = header.closest('.content-section');
+        const content = section.querySelector('.section-content');
+        content.classList.toggle('expanded');
       });
     });
-  }, 100);
+  }
+  
+  // Add copy functionality
+  const copyBtn = container.closest('.research-results-container')?.querySelector('#copy-results-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      // Get just the text content to copy
+      const textContent = container.textContent;
+      navigator.clipboard.writeText(textContent)
+        .then(() => {
+          // Show success message
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Could not copy text: ', err);
+        });
+    });
+  }
+  
+  // Add share functionality
+  const shareBtn = container.closest('.research-results-container')?.querySelector('#share-results-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      // Get page title and URL
+      const title = document.title;
+      const url = window.location.href;
+      
+      // Try to use Web Share API if available
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: 'Check out this relationship insight from HeartGlowAI',
+          url: url,
+        })
+        .catch(error => console.log('Error sharing', error));
+      } else {
+        // Fallback to copying the URL
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            // Show success message
+            const originalHTML = shareBtn.innerHTML;
+            shareBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              shareBtn.innerHTML = originalHTML;
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Could not copy URL: ', err);
+          });
+      }
+    });
+  }
 }
 
 // Function to make a research query with better citation formatting
@@ -428,4 +684,88 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-}); 
+});
+
+// Export the perplexityHandler for other modules to use
+window.perplexityHandler = {
+  /**
+   * Research a topic using Perplexity AI and display results in the container
+   * @param {string} prompt - The research prompt to send to Perplexity
+   * @param {HTMLElement} containerElement - The container to display results in
+   * @returns {Promise<void>}
+   */
+  research: async function(prompt, containerElement) {
+    try {
+      // Enhance prompt with citation requirements
+      const enhancedPrompt = createCitationPrompt(prompt);
+      
+      // Show loading state if not already shown
+      if (!containerElement.querySelector('.research-loading')) {
+        containerElement.innerHTML = `
+          <div class="research-loading">
+            <div class="perplexity-spinner"></div>
+            <p>Researching insights...</p>
+          </div>
+        `;
+      }
+      
+      // Call Perplexity API with proper error handling
+      const result = await callPerplexityAPI(enhancedPrompt, {
+        model: "sonar",
+        temperature: 0.7,
+        max_tokens: 1500,  // Increased for more comprehensive responses
+        top_p: 0.9
+      });
+      
+      // Display formatted results
+      displayPerplexityResults(result, containerElement);
+      
+      // Add citation click handlers after rendering
+      addCitationInteractivity(containerElement);
+      
+      return result;
+    } catch (error) {
+      console.error('Research failed:', error);
+      
+      // Display user-friendly error
+      containerElement.innerHTML = `
+        <div class="research-error">
+          <h3>Research Error</h3>
+          <p>${error.message || 'We encountered an issue while generating insights. Please try again.'}</p>
+          <button class="retry-btn primary-button">Retry</button>
+        </div>
+      `;
+      
+      throw error;
+    }
+  }
+};
+
+/**
+ * Add interactivity to citation references
+ */
+function addCitationInteractivity(containerElement) {
+  // Find all citation references
+  const citationRefs = containerElement.querySelectorAll('.citation-ref');
+  const citationItems = containerElement.querySelectorAll('.citation-item');
+  
+  citationRefs.forEach(ref => {
+    ref.addEventListener('click', function() {
+      const citationNumber = this.textContent.replace('[', '').replace(']', '');
+      
+      // Find corresponding citation
+      const targetCitation = containerElement.querySelector(`.citation-item[data-citation-number="${citationNumber}"]`);
+      
+      if (targetCitation) {
+        // Remove highlight from all citations
+        citationItems.forEach(item => item.classList.remove('citation-highlight'));
+        
+        // Add highlight to this citation
+        targetCitation.classList.add('citation-highlight');
+        
+        // Scroll to the citation
+        targetCitation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
+} 

@@ -1,161 +1,257 @@
 // Learn with AI functionality
 document.addEventListener('DOMContentLoaded', function() {
-  const learnWithAiBtn = document.getElementById('learn-with-ai-btn');
+  // Initialize topic cards
+  initializeTopicCards();
   
-  if (learnWithAiBtn) {
-    console.log('Learn with AI button found - adding click handler');
-    
-    learnWithAiBtn.addEventListener('click', async function() {
-      console.log('Learn with AI button clicked');
-      // Show loading state
-      const originalText = learnWithAiBtn.innerHTML;
-      learnWithAiBtn.innerHTML = '<span class="btn-loading-spinner"></span> Connecting...';
-      learnWithAiBtn.disabled = true;
-      
-      try {
-        // Try to call Perplexity API without relying on shared functions
-        const apiKey = await getApiKey();
-        const result = await callDirectAPI(apiKey);
-        
-        if (result && result.choices && result.choices[0]) {
-          // Create a modal to display the result
-          showResponseModal(result.choices[0].message.content);
-        } else {
-          throw new Error('Invalid response from AI service');
-        }
-      } catch (error) {
-        console.error('Learn with AI error:', error);
-        showErrorAlert(error.message);
-      } finally {
-        // Restore button state
-        learnWithAiBtn.innerHTML = originalText;
-        learnWithAiBtn.disabled = false;
+  // Set up the explore topics button
+  const exploreTopicsBtn = document.getElementById('explore-topics-btn');
+  if (exploreTopicsBtn) {
+    exploreTopicsBtn.addEventListener('click', function() {
+      // Smooth scroll to the topics grid
+      const topicsGrid = document.querySelector('.topics-grid');
+      if (topicsGrid) {
+        topicsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     });
-  } else {
-    console.error('Learn with AI button not found in the DOM');
   }
   
-  // Helper functions
-  async function getApiKey() {
-    // Try localStorage first
-    const storedKey = localStorage.getItem('perplexity_api_key');
-    if (storedKey) return storedKey;
-    
-    // If no key in storage, use a temporary demo key or ask the user
-    return prompt('Enter your Perplexity API key (or use the demo key by leaving this blank)') || 'pplx-xxxxxxxx';
-  }
+  // Set up the custom question submission
+  const submitQuestionBtn = document.getElementById('submit-question-btn');
+  const customQuestionInput = document.getElementById('custom-question-input');
   
-  async function callDirectAPI(apiKey) {
-    console.log('Calling Perplexity API directly');
-    
-    const response = await fetch('https://api.perplexity.ai/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: "mistral-7b-instruct",
-        messages: [
-          { role: 'system', content: 'You are a helpful assistant.' },
-          { role: 'user', content: 'What are three effective communication strategies for difficult conversations?' }
-        ],
-        temperature: 0.7,
-        max_tokens: 500
-      })
+  if (submitQuestionBtn && customQuestionInput) {
+    submitQuestionBtn.addEventListener('click', function() {
+      const question = customQuestionInput.value.trim();
+      if (question) {
+        handleCustomQuestion(question);
+      } else {
+        // Show validation message
+        customQuestionInput.classList.add('error');
+        setTimeout(() => {
+          customQuestionInput.classList.remove('error');
+        }, 2000);
+      }
     });
+
+    // Also enable pressing Enter to submit
+    customQuestionInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const question = this.value.trim();
+        if (question) {
+          handleCustomQuestion(question);
+        }
+      }
+    });
+  }
+  
+  // Handle back to topics button
+  const backToTopicsBtn = document.getElementById('back-to-topics-btn');
+  if (backToTopicsBtn) {
+    backToTopicsBtn.addEventListener('click', function() {
+      const resultsContainer = document.getElementById('research-results-container');
+      if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+  }
+  
+  // Handle close results button (X button)
+  const closeResultsBtn = document.querySelector('.close-results-btn');
+  if (closeResultsBtn) {
+    closeResultsBtn.addEventListener('click', function() {
+      const resultsContainer = document.getElementById('research-results-container');
+      if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+  }
+  
+  // Set up copy results button
+  const copyResultsBtn = document.getElementById('copy-results-btn');
+  if (copyResultsBtn) {
+    copyResultsBtn.addEventListener('click', function() {
+      const responseContent = document.querySelector('.response-content');
+      if (responseContent) {
+        // Create a temporary element to hold the text without HTML tags
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = responseContent.innerHTML;
+        const textContent = tempElement.textContent || tempElement.innerText;
+        
+        navigator.clipboard.writeText(textContent).then(() => {
+          // Show success indication
+          copyResultsBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            copyResultsBtn.innerHTML = '<i class="fas fa-copy"></i>';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+      }
+    });
+  }
+  
+  // Set up share results button
+  const shareResultsBtn = document.getElementById('share-results-btn');
+  if (shareResultsBtn) {
+    shareResultsBtn.addEventListener('click', function() {
+      const title = document.querySelector('.research-results-header h2')?.textContent || 'Relationship Insights';
+      const text = 'Check out this relationship insight from HeartGlowAI';
+      const url = window.location.href;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: text,
+          url: url
+        }).catch(err => {
+          console.error('Share failed:', err);
+        });
+      } else {
+        // Fallback for browsers that don't support the Web Share API
+        prompt('Copy this link to share:', url);
+      }
+    });
+  }
+  
+  // Initialize the topic cards with data attributes and click handlers
+  function initializeTopicCards() {
+    // Define the mapping between data-topic attributes and research prompts
+    const topicPrompts = {
+      'communication-styles': {
+        title: 'Communication Styles in Relationships',
+        category: 'Communication',
+        prompt: 'Provide a comprehensive guide on communication styles in relationships. Include: 1) The main communication styles identified in research, 2) How to identify your own and your partner\'s communication style, 3) How different styles interact and potential challenges, 4) Evidence-based strategies for improving communication between different styles, 5) Practical exercises for developing better communication habits. Include research from psychology and relationship studies with proper citations.'
+      },
+      'conflict-resolution': {
+        title: 'Effective Conflict Resolution',
+        category: 'Conflict Management',
+        prompt: 'Provide a detailed guide on healthy conflict resolution in relationships. Include: 1) Research-backed approaches to handling disagreements, 2) Common patterns that escalate conflicts, 3) Step-by-step process for resolving conflicts productively, 4) How to repair relationships after conflicts, 5) When and how to seek outside help. Draw on research from relationship psychology, particularly Gottman\'s work, and include citations from relevant studies.'
+      },
+      'attachment-theory': {
+        title: 'Understanding Attachment Theory',
+        category: 'Psychology',
+        prompt: 'Explain attachment theory and its impact on adult relationships in detail. Include: 1) The origins and development of attachment theory, 2) The four main attachment styles (secure, anxious, avoidant, and disorganized/fearful), 3) How attachment styles affect relationship dynamics, 4) Ways to develop more secure attachment patterns, 5) How to navigate relationships with different attachment styles. Cite relevant research from Bowlby, Ainsworth, and contemporary attachment researchers.'
+      },
+      'emotional-intelligence': {
+        title: 'Emotional Intelligence in Relationships',
+        category: 'Psychology',
+        prompt: 'Provide a comprehensive overview of emotional intelligence in relationships. Include: 1) Definition and components of emotional intelligence, 2) How emotional awareness affects relationship quality, 3) Techniques for developing greater emotional awareness, 4) Ways to respond to a partner\'s emotions effectively, 5) Evidence-based exercises for improving emotional intelligence as a couple. Cite relevant psychological research and studies on EQ in relationships.'
+      },
+      'love-languages': {
+        title: 'The Five Love Languages',
+        category: 'Relationships',
+        prompt: 'Explain the concept of love languages in detail. Include: 1) The five love languages as described by Gary Chapman, 2) How to identify your own and your partner\'s love languages, 3) Common misunderstandings when partners have different love languages, 4) Practical ways to express love in each language, 5) Research on the effectiveness of the love languages framework. Include both supportive research and critiques of the concept, with proper citations.'
+      },
+      'relationship-boundaries': {
+        title: 'Healthy Relationship Boundaries',
+        category: 'Relationships',
+        prompt: 'Provide a comprehensive guide on establishing and maintaining healthy boundaries in relationships. Include: 1) What boundaries are and why they\'re essential, 2) Different types of boundaries (emotional, physical, digital, etc.), 3) Signs of boundary violations, 4) How to communicate boundaries effectively, 5) Respecting others\' boundaries while maintaining your own. Include evidence-based approaches and cite relevant psychological research.'
+      }
+    };
     
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API request failed with status ${response.status}`);
+    // Set up click handlers for all topic cards
+    const topicCards = document.querySelectorAll('.topic-card');
+    topicCards.forEach(card => {
+      card.addEventListener('click', function() {
+        const topicId = this.getAttribute('data-topic');
+        if (topicId && topicPrompts[topicId]) {
+          handleTopicCardClick(topicPrompts[topicId]);
+        } else {
+          console.error('Topic not found:', topicId);
+        }
+      });
+    });
+  }
+  
+  // Handle a research topic card click
+  async function handleTopicCardClick(topic) {
+    console.log(`Research topic clicked: ${topic.title}`);
+    
+    // Get or create the research results container
+    let resultsContainer = document.getElementById('research-results-container');
+    if (!resultsContainer) {
+      console.error('Research results container not found in the DOM');
+      return;
     }
     
-    return await response.json();
-  }
-  
-  function showResponseModal(content) {
-    // Create overlay
-    const modalOverlay = document.createElement('div');
-    modalOverlay.className = 'modal-overlay';
-    modalOverlay.style.cssText = `
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
+    // Update header information
+    const headerCategory = resultsContainer.querySelector('.research-category');
+    const headerTitle = resultsContainer.querySelector('h2');
+    if (headerCategory) headerCategory.textContent = topic.category;
+    if (headerTitle) headerTitle.textContent = topic.title;
+    
+    // Show the results container with a loading message
+    resultsContainer.style.display = 'block';
+    
+    // Get the content container where we'll put the research results
+    const contentContainer = resultsContainer.querySelector('.research-results-content');
+    if (!contentContainer) {
+      console.error('Content container not found within research results');
+      return;
+    }
+    
+    // Show loading state
+    contentContainer.innerHTML = `
+      <div class="research-loading">
+        <div class="perplexity-spinner"></div>
+        <p>Researching insights about ${topic.title.toLowerCase()}...</p>
+      </div>
     `;
     
-    // Create modal content
-    const modalContent = document.createElement('div');
-    modalContent.className = 'modal-content';
-    modalContent.style.cssText = `
-      background-color: #fff;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 90%;
-      max-height: 80%;
-      overflow: auto;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-    `;
+    // Scroll to the results container
+    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
-    // Add content
-    modalContent.innerHTML = `
-      <h2 style="color: #333; margin-top: 0;">Learn with AI</h2>
-      <div style="margin-bottom: 20px; line-height: 1.6; color: #333;">${content.replace(/\n/g, '<br>')}</div>
-      <button id="close-modal-btn" style="background: linear-gradient(135deg, #6e8efb, #a777e3); border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: bold;">Close</button>
-    `;
-    
-    modalOverlay.appendChild(modalContent);
-    document.body.appendChild(modalOverlay);
-    
-    // Close functionality
-    document.getElementById('close-modal-btn').addEventListener('click', () => {
-      document.body.removeChild(modalOverlay);
-    });
-    
-    modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        document.body.removeChild(modalOverlay);
+    try {
+      // Call the Perplexity API using our handler
+      if (window.perplexityHandler && typeof window.perplexityHandler.research === 'function') {
+        // Use the enhanced perplexity handler
+        await window.perplexityHandler.research(topic.prompt, contentContainer);
+        
+        // Add event listeners to any retry buttons that might be added by the handler
+        addRetryButtonListeners(contentContainer, topic);
+      } else {
+        console.error('Perplexity handler not available');
+        throw new Error('AI research functionality is not available');
       }
+    } catch (error) {
+      console.error(`Research error for topic "${topic.title}":`, error);
+      contentContainer.innerHTML = `
+        <div class="research-error">
+          <h3>Research Error</h3>
+          <p>${error.message || 'Failed to retrieve research on this topic'}</p>
+          <button class="retry-btn primary-button">Try Again</button>
+        </div>
+      `;
+      
+      // Add retry button functionality
+      addRetryButtonListeners(contentContainer, topic);
+    }
+  }
+  
+  // Helper function to add event listeners to retry buttons
+  function addRetryButtonListeners(container, topic) {
+    const retryBtns = container.querySelectorAll('.retry-btn');
+    retryBtns.forEach(btn => {
+      btn.addEventListener('click', () => handleTopicCardClick(topic));
     });
   }
   
-  function showErrorAlert(message) {
-    const alertEl = document.createElement('div');
-    alertEl.style.cssText = `
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #f44336;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      z-index: 10000;
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      text-align: center;
-      max-width: 90%;
-    `;
+  // Handle custom question submission
+  async function handleCustomQuestion(question) {
+    // Clear the input field after submission
+    if (customQuestionInput) {
+      customQuestionInput.value = '';
+    }
     
-    alertEl.textContent = `AI Learning failed: ${message}`;
-    document.body.appendChild(alertEl);
+    // Create a custom topic object for the question
+    const customTopic = {
+      title: question.length > 60 ? question.substring(0, 57) + '...' : question,
+      category: 'Custom Question',
+      prompt: `Provide a research-based answer to this relationship question: "${question}". Include relevant psychological research and relationship studies with proper citations. Structure your answer with clear sections, practical advice, and evidence-based insights.`
+    };
     
-    setTimeout(() => {
-      alertEl.style.opacity = '0';
-      alertEl.style.transform = 'translateX(-50%) translateY(-20px)';
-      alertEl.style.transition = 'all 0.3s ease-out';
-      
-      setTimeout(() => {
-        document.body.removeChild(alertEl);
-      }, 300);
-    }, 5000);
+    // Use the same handler as the topic cards
+    handleTopicCardClick(customTopic);
   }
 }); 

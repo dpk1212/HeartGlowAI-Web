@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learn with HeartGlowAI - Relationship Resources</title>
+    <meta name="description" content="Explore relationship topics and research with HeartGlowAI's learning resources. Discover insights on communication, attachment, and more.">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/learn-with-ai.css">
+    <link rel="stylesheet" href="css/perplexity-citations.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="site-header">
+            <div class="header-content">
+                <a href="index.html" class="logo">HeartGlowAI</a>
+                <nav class="main-nav">
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="learn.html" class="active">Learn</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Learning Section -->
+        <main id="learning-screen">
+            <!-- Hero Section -->
+            <div class="learn-hero-section">
+                <div class="learn-hero-content">
+                    <h1>Learn with Heart</h1>
+                    <p>Explore relationship topics, gain insights, and discover research-backed advice to strengthen your connections and understanding.</p>
+                    <div class="hero-buttons">
+                        <button class="primary-button" id="explore-topics-btn">Explore Topics</button>
+                        <a href="index.html" class="secondary-button">Back to Home</a>
+                    </div>
+                </div>
+                <div class="learn-hero-image">
+                    <div class="hero-illustration"></div>
+                    <div class="glow-effect"></div>
+                </div>
+            </div>
+
+            <!-- Topics Section -->
+            <div class="dashboard-container learning-container">
+                <div class="section-header">
+                    <h2>Relationship Topics</h2>
+                    <p>Select a topic to receive AI-powered insights and research on common relationship questions</p>
+                </div>
+
+                <div class="topics-grid">
+                    <div class="topic-card" data-topic="communication-styles">
+                        <div class="topic-icon icon-communication">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h3>Communication Styles</h3>
+                        <p>Discover different communication patterns and how they impact your relationships. Learn strategies for more effective dialogue.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Communication</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-card" data-topic="conflict-resolution">
+                        <div class="topic-icon icon-conflict">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <h3>Conflict Resolution</h3>
+                        <p>Explore healthy approaches to disagreements and how to turn conflicts into opportunities for growth and deeper understanding.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Conflict Management</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-card" data-topic="attachment-theory">
+                        <div class="topic-icon icon-psychology">
+                            <i class="fas fa-link"></i>
+                        </div>
+                        <h3>Attachment Theory</h3>
+                        <p>Understand how early attachment patterns influence adult relationships and strategies for developing secure attachment styles.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Psychology</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-card" data-topic="emotional-intelligence">
+                        <div class="topic-icon icon-psychology">
+                            <i class="fas fa-brain"></i>
+                        </div>
+                        <h3>Emotional Intelligence</h3>
+                        <p>Learn about recognizing emotions in yourself and others, and how emotional awareness can transform your relationships.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Psychology</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-card" data-topic="love-languages">
+                        <div class="topic-icon icon-relationships">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <h3>Love Languages</h3>
+                        <p>Explore the five ways people express and experience love, and how understanding them can improve your relationship connections.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Relationships</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+
+                    <div class="topic-card" data-topic="relationship-boundaries">
+                        <div class="topic-icon icon-relationships">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h3>Healthy Boundaries</h3>
+                        <p>Discover how to establish and maintain healthy boundaries in relationships for better mutual respect and understanding.</p>
+                        <div class="topic-footer">
+                            <div class="topic-category">Relationships</div>
+                            <div class="learn-more">Learn More</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Question Section -->
+                <div id="custom-question-section" class="custom-question-section">
+                    <h2>Ask Your Own Question</h2>
+                    <p>Have a specific relationship question? Our AI can provide personalized insights based on research.</p>
+                    
+                    <div class="custom-question-input-container">
+                        <textarea id="custom-question-input" placeholder="Type your relationship question here..."></textarea>
+                        <button id="submit-question-btn" class="primary-button">Get Insights</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Modal - Hidden by default -->
+            <div id="research-results-container" class="research-results-container">
+                <div class="research-results-header">
+                    <span class="research-category">Category</span>
+                    <h2>Topic Title</h2>
+                    <div class="result-actions">
+                        <button class="action-button" id="copy-results-btn" title="Copy to clipboard">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="action-button" id="share-results-btn" title="Share">
+                            <i class="fas fa-share-alt"></i>
+                        </button>
+                    </div>
+                    <button class="close-results-btn">&times;</button>
+                </div>
+                <div class="research-results-content">
+                    <div class="research-loading">
+                        <div class="perplexity-spinner"></div>
+                        <p>Researching insights for you...</p>
+                    </div>
+                    
+                    <div class="research-error" style="display: none;">
+                        <h3>Research Error</h3>
+                        <p>We encountered an issue while generating insights. Please try again.</p>
+                        <button class="retry-btn" data-topic="" data-title="" data-category="">Retry</button>
+                    </div>
+                    
+                    <div class="response-content"></div>
+                    
+                    <div class="citations-section" style="display: none;">
+                        <div class="citations-tabs">
+                            <div class="citation-tab active" data-tab="sources">Sources</div>
+                        </div>
+                        <ul class="citations-list"></ul>
+                    </div>
+                </div>
+                <div class="results-footer">
+                    <p>Powered by <span class="footer-highlight">HeartGlowAI</span> using advanced research techniques</p>
+                    <button id="back-to-topics-btn" class="secondary-button">Back to Topics</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h4>HeartGlowAI</h4>
+                    <p>AI-powered relationship insights and communication tools to help you build healthier, more meaningful connections.</p>
+                </div>
+                <div class="footer-column">
+                    <h4>Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="learn.html">Learn</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="privacy.html">Privacy Policy</a></li>
+                        <li><a href="terms.html">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2023 HeartGlowAI. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDheartglowai12345",
+            authDomain: "heartglow-ai.firebaseapp.com",
+            projectId: "heartglow-ai",
+            storageBucket: "heartglow-ai.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890",
+            measurementId: "G-ABCDEF1234"
+        };
+        
+        // Initialize Firebase - replace with your actual config in production
+        // Using placeholder values for the demo
+        firebase.initializeApp(firebaseConfig);
+    </script>
+    <script src="js/perplexity-handler.js"></script>
+    <script src="js/learn-with-ai.js"></script>
+</body>
+</html> 

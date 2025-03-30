@@ -45,48 +45,16 @@
         if (firebase && firebase.auth) {
             firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
                 .then(() => {
-                    console.log("Firebase persistence set to LOCAL - auth will persist across pages");
+                    console.log("Inline script (learn.html): Firebase persistence set to LOCAL.");
                 })
                 .catch((error) => {
-                    console.error("Auth persistence error:", error);
+                    console.error("Inline script (learn.html): Auth persistence error:", error);
                 });
         }
         
-        // Create a function to check cookie/session storage for auth token
-        function checkExistingAuth() {
-            // Look for Firebase auth tokens in localStorage
-            const tokenKeys = Object.keys(localStorage).filter(key => 
-                key.startsWith('firebase:authUser:')
-            );
-            
-            if (tokenKeys.length > 0) {
-                console.log("Found existing auth tokens in storage");
-                return true;
-            }
-            return false;
-        }
-        
-        // Check if we have tokens in storage
-        const hasExistingTokens = checkExistingAuth();
-        console.log("Has existing auth tokens:", hasExistingTokens);
-        
-        // Log the current auth state for debugging
-        if (firebase && firebase.auth) {
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    console.log("Firebase user authenticated on page load:", user.uid);
-                    // Make the auth state available globally
-                    window.currentUser = user;
-                } else {
-                    console.log("No user authenticated on page load");
-                    if (hasExistingTokens) {
-                        console.log("Found tokens but no user - possible auth state init delay");
-                    }
-                }
-            });
-        } else {
-            console.error("Firebase auth not available yet");
-        }
+        // Removed duplicate onAuthStateChanged from inline script.
+        // Auth state handling (including promise) is now solely in js/learn-auth.js
+        console.log("Inline script (learn.html): Firebase initialization complete. Auth listener setup deferred to learn-auth.js");
     </script>
 </head>
 <body>
@@ -309,7 +277,7 @@
     <!-- JavaScript - correct order is important for dependencies -->
     <script src="js/main.js?v=20250330"></script>
     <script src="js/perplexity-handler.js"></script> 
-    <script src="js/learn-with-ai.js"></script>
     <script src="js/learn-auth.js"></script>
+    <script src="js/learn-with-ai.js"></script>
 </body>
 </html> 

@@ -203,16 +203,27 @@ document.addEventListener('DOMContentLoaded', function() {
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
     try {
-      // Call the Perplexity API using our handler
-      if (window.perplexityHandler && typeof window.perplexityHandler.research === 'function') {
-        // Use the enhanced perplexity handler
-        await window.perplexityHandler.research(topic.prompt, contentContainer);
-        
-        // Add event listeners to any retry buttons that might be added by the handler
-        addRetryButtonListeners(contentContainer, topic);
+      // Ensure the globally accessible callPerplexityAPI function exists
+      if (typeof callPerplexityAPI === 'function') {
+        // Call the corrected API function from main.js
+        const result = await callPerplexityAPI(topic.prompt);
+
+        // Process and display the result (assuming result has a .content field)
+        if (result && result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
+          // Format and display the content
+          // Assuming displayPerplexityResults exists or you have a similar function
+          if (typeof displayPerplexityResults === 'function') {
+             displayPerplexityResults(result, contentContainer);
+          } else {
+             // Simple display if formatting function is not available
+             contentContainer.innerHTML = `<div class="response-content">${result.choices[0].message.content.replace(/\n/g, '<br>')}</div>`;
+          }
+        } else {
+          throw new Error('Received an invalid response from the AI');
+        }
       } else {
-        console.error('Perplexity handler not available');
-        throw new Error('AI research functionality is not available');
+        console.error('callPerplexityAPI function is not available');
+        throw new Error('AI research functionality is not properly configured');
       }
     } catch (error) {
       console.error(`Research error for topic "${topic.title}":`, error);

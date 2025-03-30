@@ -16,6 +16,40 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase Initialization - MUST come before any other scripts -->
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBqe71ji_-QEUKjM4qrYcYbMRUZe2MixIk",
+            authDomain: "heartglowai.firebaseapp.com",
+            projectId: "heartglowai",
+            storageBucket: "heartglowai.appspot.com",
+            messagingSenderId: "156288006557",
+            appId: "1:156288006557:web:e0cbb98cd5d2c57abcabee",
+            measurementId: "G-QLE0NFYKMK"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        
+        // Critical: Set persistence to LOCAL to maintain auth state between pages
+        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+            .then(() => {
+                console.log("Firebase persistence set to LOCAL - auth will persist across pages");
+            })
+            .catch((error) => {
+                console.error("Auth persistence error:", error);
+            });
+            
+        // Log the current auth state for debugging
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                console.log("Firebase user authenticated on page load:", user.uid);
+            } else {
+                console.log("No user authenticated on page load");
+            }
+        });
+    </script>
 </head>
 <body>
     <div class="app-container">
@@ -234,37 +268,10 @@
         </footer>
     </div>
 
-    <!-- Scripts -->
-    <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBqe71ji_-QEUKjM4qrYcYbMRUZe2MixIk",
-            authDomain: "heartglowai.firebaseapp.com",
-            projectId: "heartglowai",
-            storageBucket: "heartglowai.appspot.com",
-            messagingSenderId: "156288006557",
-            appId: "1:156288006557:web:e0cbb98cd5d2c57abcabee",
-            measurementId: "G-QLE0NFYKMK"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        
-        // Set persistence
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-        
-        // Log auth state
-        firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                console.log("Firebase user authenticated on page load:", user.uid);
-            } else {
-                console.log("No user authenticated on page load");
-            }
-        });
-    </script>
-    <script src="js/perplexity-handler.js"></script>
+    <!-- JavaScript - correct order is important for dependencies -->
+    <script src="js/main.js?v=20250330"></script>
+    <script src="js/perplexity-handler.js"></script> 
     <script src="js/learn-with-ai.js"></script>
-    <script src="js/main.js"></script>
     <script src="js/learn-auth.js"></script>
 </body>
 </html> 

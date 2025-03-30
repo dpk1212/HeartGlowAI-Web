@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Set up click handlers for all topic cards
     const topicCards = document.querySelectorAll('.topic-card');
     topicCards.forEach(card => {
-      card.addEventListener('click', function() {
+      card.addEventListener('click', function(e) {
         const topicId = this.getAttribute('data-topic');
         if (topicId && topicPrompts[topicId]) {
           handleTopicCardClick(topicPrompts[topicId]);
@@ -161,6 +161,35 @@ document.addEventListener('DOMContentLoaded', function() {
           console.error('Topic not found:', topicId);
         }
       });
+      
+      // Add touch events for mobile devices with passive: false to improve performance
+      card.addEventListener('touchstart', function(e) {
+        // Just track that the touch started (don't prevent default here)
+        this.setAttribute('data-touch-started', 'true');
+      }, { passive: true });
+      
+      card.addEventListener('touchend', function(e) {
+        // Only process if touch started on this element
+        if (this.getAttribute('data-touch-started') === 'true') {
+          // Prevent default click behavior that might follow
+          e.preventDefault();
+          
+          const topicId = this.getAttribute('data-topic');
+          if (topicId && topicPrompts[topicId]) {
+            handleTopicCardClick(topicPrompts[topicId]);
+          } else {
+            console.error('Topic not found:', topicId);
+          }
+          
+          // Clean up
+          this.removeAttribute('data-touch-started');
+        }
+      }, { passive: false });
+      
+      card.addEventListener('touchcancel', function() {
+        // Clean up if the touch is cancelled
+        this.removeAttribute('data-touch-started');
+      }, { passive: true });
     });
   }
   
@@ -254,4 +283,61 @@ document.addEventListener('DOMContentLoaded', function() {
     // Use the same handler as the topic cards
     handleTopicCardClick(customTopic);
   }
+  
+  // Make loadResearch globally available for the mobile compatibility fix
+  window.loadResearch = function(topicId, title, category) {
+    // Find the topic in our predefined list
+    const topicPrompts = {
+      'communication-styles': {
+        title: 'Communication Styles in Relationships',
+        category: 'Communication',
+        prompt: 'Provide a comprehensive guide on communication styles in relationships. Include: 1) The main communication styles identified in research, 2) How to identify your own and your partner\'s communication style, 3) How different styles interact and potential challenges, 4) Evidence-based strategies for improving communication between different styles, 5) Practical exercises for developing better communication habits. Include research from psychology and relationship studies with proper citations.'
+      },
+      'conflict-resolution': {
+        title: 'Effective Conflict Resolution',
+        category: 'Conflict Management',
+        prompt: 'Provide a detailed guide on healthy conflict resolution in relationships. Include: 1) Research-backed approaches to handling disagreements, 2) Common patterns that escalate conflicts, 3) Step-by-step process for resolving conflicts productively, 4) How to repair relationships after conflicts, 5) When and how to seek outside help. Draw on research from relationship psychology, particularly Gottman\'s work, and include citations from relevant studies.'
+      },
+      'attachment-theory': {
+        title: 'Understanding Attachment Theory',
+        category: 'Psychology',
+        prompt: 'Explain attachment theory and its impact on adult relationships in detail. Include: 1) The origins and development of attachment theory, 2) The four main attachment styles (secure, anxious, avoidant, and disorganized/fearful), 3) How attachment styles affect relationship dynamics, 4) Ways to develop more secure attachment patterns, 5) How to navigate relationships with different attachment styles. Cite relevant research from Bowlby, Ainsworth, and contemporary attachment researchers.'
+      },
+      'emotional-intelligence': {
+        title: 'Emotional Intelligence in Relationships',
+        category: 'Psychology',
+        prompt: 'Provide a comprehensive overview of emotional intelligence in relationships. Include: 1) Definition and components of emotional intelligence, 2) How emotional awareness affects relationship quality, 3) Techniques for developing greater emotional awareness, 4) Ways to respond to a partner\'s emotions effectively, 5) Evidence-based exercises for improving emotional intelligence as a couple. Cite relevant psychological research and studies on EQ in relationships.'
+      },
+      'love-languages': {
+        title: 'The Five Love Languages',
+        category: 'Relationships',
+        prompt: 'Explain the concept of love languages in detail. Include: 1) The five love languages as described by Gary Chapman, 2) How to identify your own and your partner\'s love languages, 3) Common misunderstandings when partners have different love languages, 4) Practical ways to express love in each language, 5) Research on the effectiveness of the love languages framework. Include both supportive research and critiques of the concept, with proper citations.'
+      },
+      'relationship-boundaries': {
+        title: 'Healthy Relationship Boundaries',
+        category: 'Relationships',
+        prompt: 'Provide a comprehensive guide on establishing and maintaining healthy boundaries in relationships. Include: 1) What boundaries are and why they\'re essential, 2) Different types of boundaries (emotional, physical, digital, etc.), 3) Signs of boundary violations, 4) How to communicate boundaries effectively, 5) Respecting others\' boundaries while maintaining your own. Include evidence-based approaches and cite relevant psychological research.'
+      }
+    };
+    
+    if (topicId && topicPrompts[topicId]) {
+      handleTopicCardClick(topicPrompts[topicId]);
+    } else if (title && category) {
+      // Create a custom topic if we have title and category but no matching predefined topic
+      const customTopic = {
+        title: title,
+        category: category,
+        prompt: `Provide comprehensive information about ${title} in relationships, including research findings, practical strategies, and evidence-based approaches.`
+      };
+      handleTopicCardClick(customTopic);
+    } else {
+      console.error('Invalid topic information provided');
+    }
+  };
+  
+  // Add a custom event listener for additional flexibility
+  document.addEventListener('topicSelected', function(e) {
+    const {topic, title, category} = e.detail;
+    window.loadResearch(topic, title, category);
+  });
 }); 

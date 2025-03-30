@@ -29,26 +29,64 @@
             measurementId: "G-QLE0NFYKMK"
         };
         
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                console.log("Firebase initialized successfully");
+            } catch (error) {
+                console.error("Firebase initialization error:", error);
+            }
+        } else {
+            console.log("Firebase already initialized");
+        }
         
         // Critical: Set persistence to LOCAL to maintain auth state between pages
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-            .then(() => {
-                console.log("Firebase persistence set to LOCAL - auth will persist across pages");
-            })
-            .catch((error) => {
-                console.error("Auth persistence error:", error);
-            });
+        if (firebase && firebase.auth) {
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .then(() => {
+                    console.log("Firebase persistence set to LOCAL - auth will persist across pages");
+                })
+                .catch((error) => {
+                    console.error("Auth persistence error:", error);
+                });
+        }
+        
+        // Create a function to check cookie/session storage for auth token
+        function checkExistingAuth() {
+            // Look for Firebase auth tokens in localStorage
+            const tokenKeys = Object.keys(localStorage).filter(key => 
+                key.startsWith('firebase:authUser:')
+            );
             
-        // Log the current auth state for debugging
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                console.log("Firebase user authenticated on page load:", user.uid);
-            } else {
-                console.log("No user authenticated on page load");
+            if (tokenKeys.length > 0) {
+                console.log("Found existing auth tokens in storage");
+                return true;
             }
-        });
+            return false;
+        }
+        
+        // Check if we have tokens in storage
+        const hasExistingTokens = checkExistingAuth();
+        console.log("Has existing auth tokens:", hasExistingTokens);
+        
+        // Log the current auth state for debugging
+        if (firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    console.log("Firebase user authenticated on page load:", user.uid);
+                    // Make the auth state available globally
+                    window.currentUser = user;
+                } else {
+                    console.log("No user authenticated on page load");
+                    if (hasExistingTokens) {
+                        console.log("Found tokens but no user - possible auth state init delay");
+                    }
+                }
+            });
+        } else {
+            console.error("Firebase auth not available yet");
+        }
     </script>
 </head>
 <body>

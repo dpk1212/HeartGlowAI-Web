@@ -168,6 +168,18 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleTopicCardClick(topic) {
     console.log(`Research topic clicked: ${topic.title}`);
     
+    // First verify authentication - the most important step
+    // Check if we already have a user before showing any UI
+    let isUserAuthenticated = false;
+    
+    if (window.isAuthenticated || 
+        (firebase && firebase.auth && firebase.auth().currentUser)) {
+      console.log('User is already authenticated');
+      isUserAuthenticated = true;
+    } else {
+      console.log('User not authenticated, will need to authenticate');
+    }
+    
     // Get or create the research results container
     let resultsContainer = document.getElementById('research-results-container');
     if (!resultsContainer) {
@@ -205,14 +217,21 @@ document.addEventListener('DOMContentLoaded', function() {
     try {
       // Make sure user is authenticated before proceeding
       // This is the key change - force authentication check first
-      if (typeof window.forceAuthentication === 'function') {
+      if (!isUserAuthenticated && typeof window.forceAuthentication === 'function') {
         try {
           await window.forceAuthentication();
           console.log('Authentication confirmed');
+          isUserAuthenticated = true;
         } catch (authError) {
           console.error('Authentication failed:', authError);
           throw new Error('Authentication required to use research functionality');
         }
+      }
+      
+      // Double-check authentication status
+      if (!isUserAuthenticated && 
+          !(firebase && firebase.auth && firebase.auth().currentUser)) {
+        throw new Error('User must be authenticated to use research functionality');
       }
       
       // Ensure the globally accessible callPerplexityAPI function exists

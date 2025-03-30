@@ -492,16 +492,11 @@
       const learnBtn = document.getElementById('learn-btn');
       if (learnBtn) {
         learnBtn.addEventListener('click', function() {
-          // Hide home screen and show learning screen
-          homeScreen.classList.remove('active');
-          setTimeout(() => {
-            homeScreen.style.display = 'none';
-            learningScreen.style.display = 'flex';
-            setTimeout(() => learningScreen.classList.add('active'), 50);
-          }, 500);
+          // Navigate to the learn.html page
+          window.location.href = 'learn.html';
           
           // Log analytics event
-          logAnalyticsEvent('learn_module_click', {
+          logAnalyticsEvent('learn_page_visit', {
             source: 'home_screen'
           });
         });

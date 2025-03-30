@@ -150,46 +150,75 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     };
     
-    // Set up click handlers for all topic cards
+    // Set up handlers for all topic cards with improved mobile support
     const topicCards = document.querySelectorAll('.topic-card');
+    
     topicCards.forEach(card => {
-      card.addEventListener('click', function(e) {
-        const topicId = this.getAttribute('data-topic');
+      // Track whether this is a touch device
+      let isTouchDevice = false;
+      let touchStarted = false;
+      let touchMoved = false;
+      
+      // Handle topic card activation with unified approach
+      function activateCard(cardElement) {
+        const topicId = cardElement.getAttribute('data-topic');
         if (topicId && topicPrompts[topicId]) {
           handleTopicCardClick(topicPrompts[topicId]);
         } else {
           console.error('Topic not found:', topicId);
         }
-      });
+      }
       
-      // Add touch events for mobile devices with passive: false to improve performance
+      // When touch starts, mark as touch device and track start
       card.addEventListener('touchstart', function(e) {
-        // Just track that the touch started (don't prevent default here)
-        this.setAttribute('data-touch-started', 'true');
+        isTouchDevice = true;
+        touchStarted = true;
+        touchMoved = false;
+        // Add visual feedback
+        this.classList.add('touch-active');
       }, { passive: true });
       
-      card.addEventListener('touchend', function(e) {
-        // Only process if touch started on this element
-        if (this.getAttribute('data-touch-started') === 'true') {
-          // Prevent default click behavior that might follow
-          e.preventDefault();
-          
-          const topicId = this.getAttribute('data-topic');
-          if (topicId && topicPrompts[topicId]) {
-            handleTopicCardClick(topicPrompts[topicId]);
-          } else {
-            console.error('Topic not found:', topicId);
-          }
-          
-          // Clean up
-          this.removeAttribute('data-touch-started');
+      // If touch moves significantly, consider it a scroll not a tap
+      card.addEventListener('touchmove', function(e) {
+        touchMoved = true;
+        // Remove visual feedback on scroll
+        if (touchMoved) {
+          this.classList.remove('touch-active');
         }
+      }, { passive: true });
+      
+      // On touch end, if it wasn't a scroll, activate the card
+      card.addEventListener('touchend', function(e) {
+        // Remove visual feedback
+        this.classList.remove('touch-active');
+        
+        if (touchStarted && !touchMoved) {
+          e.preventDefault(); // Prevent ghost click
+          // Add a delay to allow the visual feedback to be seen
+          setTimeout(() => {
+            activateCard(this);
+          }, 50);
+        }
+        // Reset state
+        touchStarted = false;
+        touchMoved = false;
       }, { passive: false });
       
+      // Handle touch cancel
       card.addEventListener('touchcancel', function() {
-        // Clean up if the touch is cancelled
-        this.removeAttribute('data-touch-started');
+        this.classList.remove('touch-active');
+        touchStarted = false;
+        touchMoved = false;
       }, { passive: true });
+      
+      // Only handle click for non-touch devices
+      card.addEventListener('click', function(e) {
+        // Only process click if not a touch device
+        // This prevents double activation on touch devices
+        if (!isTouchDevice) {
+          activateCard(this);
+        }
+      });
     });
   }
   
@@ -286,6 +315,8 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Make loadResearch globally available for the mobile compatibility fix
   window.loadResearch = function(topicId, title, category) {
+    console.log(`Loading research for topic: ${topicId}, title: ${title}, category: ${category}`);
+    
     // Find the topic in our predefined list
     const topicPrompts = {
       'communication-styles': {

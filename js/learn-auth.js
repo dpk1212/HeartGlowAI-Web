@@ -3,49 +3,47 @@
  * This script ensures authentication is properly initialized before any API calls
  */
 
-// Initialize Firebase
+// Initialize authentication checking on page load
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Initializing learn-auth.js');
+  console.log('learn-auth.js: Initializing authentication checks');
   
-  // Check if user is signed in
-  if (firebase && firebase.auth) {
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        console.log('User is signed in:', user.uid);
-      } else {
-        console.log('No user is signed in');
-        // Show login prompt
-        showLoginPrompt();
-      }
-    });
-  } else {
-    console.error('Firebase not initialized properly');
-  }
+  // Don't show login prompt immediately - check auth state first
+  // Let the Firebase auth state observer handle this
 });
 
 // Force re-authentication when making API calls
 window.forceAuthentication = async function() {
   return new Promise((resolve, reject) => {
+    // First check if we already have a user - this avoids unnecessary prompts
     if (firebase && firebase.auth && firebase.auth().currentUser) {
+      console.log('Already authenticated as:', firebase.auth().currentUser.uid);
       resolve(firebase.auth().currentUser);
       return;
     }
     
-    // Show login prompt
-    showLoginPrompt();
+    console.log('No current user found, checking auth state...');
     
-    // Set timeout for user to login
-    const timeout = setTimeout(() => {
+    // Show login prompt after a short delay to allow auth to initialize
+    const authCheckTimeout = setTimeout(() => {
+      console.log('Auth check timed out, showing login prompt');
+      showLoginPrompt();
+    }, 1000);
+    
+    // Set a longer timeout for the entire operation
+    const operationTimeout = setTimeout(() => {
       unsubscribe();
       reject(new Error('Authentication timed out'));
-    }, 30000);
+    }, 60000); // 60 seconds total timeout
     
     // Wait for user to sign in
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        clearTimeout(timeout);
+        // User found! Clear timeouts and resolve
+        clearTimeout(authCheckTimeout);
+        clearTimeout(operationTimeout);
         unsubscribe();
         hideLoginPrompt();
+        console.log('User authenticated via state change:', user.uid);
         resolve(user);
       }
     });
@@ -75,7 +73,17 @@ function showLoginPrompt() {
     // Add event listeners
     document.getElementById('learn-login-google').addEventListener('click', function() {
       const provider = new firebase.auth.GoogleAuthProvider();
-      firebase.auth().signInWithPopup(provider);
+      firebase.auth().signInWithPopup(provider).then(result => {
+        console.log('Google sign-in successful:', result.user.uid);
+        hideLoginPrompt();
+      }).catch(error => {
+        console.error('Google sign-in error:', error);
+        // Show error message in the prompt
+        const errorMsg = document.createElement('p');
+        errorMsg.style.color = '#ff5555';
+        errorMsg.textContent = 'Sign-in failed: ' + error.message;
+        loginBox.appendChild(errorMsg);
+      });
     });
     
     document.getElementById('learn-login-retry').addEventListener('click', function() {

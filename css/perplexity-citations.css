@@ -31,114 +31,175 @@
   margin-bottom: 8px;
 }
 
+/* Perplexity Citations Styles */
+
+/* Citation references in text */
 .citation-ref {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  background: linear-gradient(135deg, #6e8efb, #a777e3);
+  color: #6E8EFB;
   cursor: pointer;
-  font-size: 0.7em;
-  font-weight: bold;
-  margin: 0 2px;
-  border-radius: 4px;
-  padding: 2px 4px;
-  text-decoration: none;
+  font-size: 0.8em;
   vertical-align: super;
-  transition: all 0.2s ease-in-out;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  margin-left: 2px;
+  font-weight: 600;
+  transition: color 0.2s ease;
 }
 
 .citation-ref:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-  background: linear-gradient(135deg, #a777e3, #6e8efb);
+  color: #8052ff;
+  text-decoration: underline;
 }
 
+/* Citations section */
 .citations-section {
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 10px;
-  padding: 20px;
-  margin-top: 24px;
+  margin-top: 30px;
+  padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  animation: fadeIn 0.5s ease-in-out;
 }
 
-.citations-section h3 {
-  font-size: 18px;
-  margin-top: 0;
-  margin-bottom: 16px;
-  color: var(--accent-blue, #64b5f6);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Citations tabs */
+.citations-tabs {
   display: flex;
-  align-items: center;
-  font-weight: 600;
+  margin-bottom: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.citations-section h3::before {
-  content: "📚";
-  margin-right: 8px;
-  font-size: 20px;
+.citation-tab {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  transition: all 0.2s ease;
+  position: relative;
+  font-size: 0.95rem;
 }
 
+.citation-tab.active {
+  color: white;
+}
+
+.citation-tab.active:after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(135deg, #8052ff 0%, #4579f5 100%);
+  border-radius: 2px 2px 0 0;
+}
+
+.citation-tab:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Citation list view */
 .citations-list {
-  padding-left: 2px;
+  list-style-type: none;
+  padding: 0;
   margin: 0;
-  list-style-position: inside;
 }
 
 .citation-item {
-  margin-bottom: 16px;
-  padding: 12px;
+  padding: 12px 15px;
   border-radius: 8px;
-  transition: all 0.3s ease;
   background: rgba(255, 255, 255, 0.05);
-  border-left: 3px solid transparent;
-}
-
-.citation-item:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-left-color: var(--accent-blue, #64b5f6);
-}
-
-.citation-item.highlight {
-  background-color: rgba(100, 181, 246, 0.15);
-  border-left-color: var(--accent-blue, #64b5f6);
-  animation: highlight-pulse 3s 1;
-}
-
-.citation-title {
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: var(--accent-blue, #64b5f6);
-}
-
-.citation-url, .citation-text {
-  font-size: 14px;
-  word-break: break-all;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.5;
-}
-
-.citation-link {
-  color: inherit;
-  text-decoration: none;
-  display: block;
-  padding: 2px;
+  margin-bottom: 10px;
   transition: all 0.2s ease;
 }
 
-.citation-link:hover {
+.citation-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.citation-link {
   text-decoration: none;
-  color: var(--accent-pink, #f48fb1);
+  color: inherit;
+  display: block;
 }
 
-.citation-link:hover .citation-title {
-  color: var(--accent-pink, #f48fb1);
+.citation-title {
+  font-weight: 500;
+  color: white;
+  margin-bottom: 5px;
+  font-size: 0.95rem;
 }
 
-@keyframes highlight-pulse {
-  0% { background-color: rgba(100, 181, 246, 0.15); }
-  50% { background-color: rgba(100, 181, 246, 0.3); }
-  100% { background-color: rgba(100, 181, 246, 0.15); }
+.citation-url {
+  color: #6E8EFB;
+  font-size: 0.85rem;
+  word-break: break-all;
+}
+
+.citation-text {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.5;
+}
+
+/* Citation grid view */
+.citations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.citation-card {
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.citation-card:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.citation-card-number {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8052ff 0%, #4579f5 100%);
+  border-radius: 50%;
+  color: white;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.citation-card-title {
+  color: #6E8EFB;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .citations-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 5px;
+  }
+  
+  .citation-tab {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+  }
+  
+  .citations-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 /* Loading spinner for Perplexity requests */

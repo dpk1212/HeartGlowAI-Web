@@ -252,5 +252,38 @@
     </script>
     <script src="js/perplexity-handler.js"></script>
     <script src="js/learn-with-ai.js"></script>
+    
+    <!-- Mobile Touch Compatibility Fix -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fix for topic cards on mobile devices
+            const topicCards = document.querySelectorAll('.topic-card');
+            
+            topicCards.forEach(card => {
+                // Add touchstart event for mobile devices
+                card.addEventListener('touchstart', function(e) {
+                    // Prevent default behavior only if needed
+                    if (window.innerWidth <= 768) {
+                        e.preventDefault();
+                        
+                        const topic = this.dataset.topic;
+                        const title = this.querySelector('h3').textContent;
+                        const category = this.querySelector('.topic-category').textContent;
+                        
+                        // Check if learn-with-ai.js has the loadResearch function
+                        if (typeof loadResearch === 'function') {
+                            loadResearch(topic, title, category);
+                        } else {
+                            // Fallback - try to dispatch a custom event
+                            const event = new CustomEvent('topicSelected', {
+                                detail: { topic, title, category }
+                            });
+                            document.dispatchEvent(event);
+                        }
+                    }
+                }, { passive: false });
+            });
+        });
+    </script>
 </body>
 </html> 

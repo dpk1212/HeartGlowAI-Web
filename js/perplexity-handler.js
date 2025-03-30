@@ -548,11 +548,16 @@ window.perplexityHandler = {
     try {
       // Check if user is logged in
       if (!firebase.auth || !firebase.auth().currentUser) {
+        console.error('Authentication check failed:', {
+          authExists: !!firebase.auth,
+          currentUser: firebase.auth ? !!firebase.auth().currentUser : 'auth not loaded'
+        });
+        
         containerElement.innerHTML = `
           <div class="research-error">
             <h3>Authentication Required</h3>
             <p>You must be signed in to use the research feature.</p>
-            <button class="primary-button" onclick="document.getElementById('login-btn').click()">Sign In</button>
+            <button class="primary-button" onclick="document.getElementById('login-register-btn').click()">Sign In</button>
           </div>
         `;
         throw new Error('Authentication required for research');

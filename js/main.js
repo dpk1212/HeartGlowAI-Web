@@ -40,6 +40,16 @@
 
     // Initialize app function
     function initializeApp() {
+      // Check if we are on index.html by looking for a key element
+      // If not found, assume we are on learn.html or another page and skip screen setup.
+      const welcomeScreenCheck = document.getElementById('welcome-screen');
+      if (!welcomeScreenCheck) {
+          console.log("main.js: Skipping screen initialization (not on index.html).");
+          // If other initializations specific to learn.html are needed from main.js,
+          // they could be added here or in a separate function.
+          return; 
+      }
+
       // Initialize screen elements
       welcomeScreen = document.getElementById('welcome-screen');
       authScreen = document.getElementById('auth-screen');

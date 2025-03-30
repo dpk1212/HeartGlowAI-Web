@@ -24,17 +24,31 @@ document.addEventListener('DOMContentLoaded', function() {
       // Firebase is loaded, set up auth state listener
       firebase.auth().onAuthStateChanged(function(user) {
         console.log('learn-auth.js: onAuthStateChanged triggered. User object:', user);
-        if (!authStateResolved) { // Only resolve the promise the first time the listener fires
+        let initialUser = user;
+        if (!authStateResolved) {
             if (user) {
               console.log('learn-auth.js: User authenticated via listener:', user.uid);
               authStatePromiseResolver(user); // Resolve the promise with the user object
               hideLoginPrompt(); // Hide login prompt if it was somehow shown
+              authStateResolved = true;
             } else {
-              console.log('learn-auth.js: No user authenticated via listener.');
-              authStatePromiseResolver(null); // Resolve the promise with null
+              console.log('learn-auth.js: Initial listener trigger reported NULL user. Waiting briefly for persisted state...');
+              // Wait a short period. Firebase might fire again quickly with the persisted user.
+              setTimeout(() => {
+                  if (!authStateResolved) {
+                      // Check the *very latest* user status after the delay
+                      const currentUserAfterDelay = firebase.auth().currentUser;
+                      console.log('learn-auth.js: State after brief delay:', currentUserAfterDelay ? currentUserAfterDelay.uid : 'null');
+                      if (currentUserAfterDelay) {
+                          authStatePromiseResolver(currentUserAfterDelay);
+                      } else {
+                           authStatePromiseResolver(null); // Resolve with null if still no user
+                      }
+                      authStateResolved = true;
+                  }
+              }, 250); // Wait 250ms
               // Don't automatically show login - wait for an action that requires auth
             }
-            authStateResolved = true;
         } else {
             console.log('learn-auth.js: onAuthStateChanged triggered again, but promise already resolved. Current user:', user ? user.uid : 'null');
             // Handle potential subsequent changes if needed (e.g., user logs out later)

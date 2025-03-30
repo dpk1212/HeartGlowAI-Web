@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/learn-with-ai.css">
     <link rel="stylesheet" href="css/perplexity-citations.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
@@ -29,79 +31,128 @@
 
         <!-- Main Learning Section -->
         <main id="learning-screen">
-            <div class="dashboard-container learning-container">
-                <div class="learning-header">
+            <!-- Hero Section -->
+            <div class="learn-hero-section">
+                <div class="learn-hero-content">
                     <h1>Learn with HeartGlowAI</h1>
-                    <p>Let AI help you explore ideas that improve your relationships, emotions, and communication.</p>
-                    <button class="browse-button" id="browse-all-topics-btn">Browse All Topics</button>
+                    <p>Get research-backed insights about relationships, emotions, and communication. Choose a topic to explore or ask your own questions.</p>
+                    <div class="hero-buttons">
+                        <button class="primary-button" id="custom-research-btn">Ask Your Own Question</button>
+                        <button class="secondary-button" id="browse-all-topics-btn">Browse All Topics</button>
+                    </div>
+                </div>
+                <div class="learn-hero-image">
+                    <div class="hero-illustration">
+                        <div class="glow-effect"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Topics Section -->
+            <div class="dashboard-container learning-container">
+                <div class="section-header">
+                    <h2>Popular Topics</h2>
+                    <p>Select a topic to get research-backed insights</p>
                 </div>
 
                 <div class="topics-grid">
                     <!-- Topic Card 1 -->
                     <div class="topic-card" id="boundaries">
                         <div class="topic-icon icon-relationships">💬</div>
-                        <h3>Tell me about healthy boundaries in relationships</h3>
-                        <p>What boundaries are, how to set them, and examples or language you can use.</p>
+                        <h3>Healthy Boundaries in Relationships</h3>
+                        <p>Learn what boundaries are, how to set them, and practical language to use.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Relationships</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
 
                     <!-- Topic Card 2 -->
                     <div class="topic-card" id="emotional-intimacy">
                         <div class="topic-icon icon-psychology">❤️</div>
-                        <h3>Tell me about emotional intimacy</h3>
-                        <p>Understanding emotional intimacy and how to build it.</p>
+                        <h3>Emotional Intimacy</h3>
+                        <p>Discover how to build deeper emotional connections and understand intimacy beyond physical aspects.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Psychology</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
 
                     <!-- Topic Card 3 -->
                     <div class="topic-card" id="stonewalling">
                         <div class="topic-icon icon-conflict">🚫</div>
-                        <h3>What is stonewalling?</h3>
-                        <p>Explaining stonewalling and how to deal with it.</p>
+                        <h3>Stonewalling in Relationships</h3>
+                        <p>Understand what stonewalling is, why it happens, and effective ways to address it.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Conflict</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
 
                     <!-- Topic Card 4 -->
                     <div class="topic-card" id="attachment-styles">
                         <div class="topic-icon icon-psychology">📋</div>
-                        <h3>Explain attachment styles</h3>
-                        <p>The four attachment styles and how they affect relationships.</p>
+                        <h3>Attachment Styles</h3>
+                        <p>Learn about the four attachment styles and how they shape your relationship patterns.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Psychology</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
 
                     <!-- Topic Card 5 -->
                     <div class="topic-card" id="express-needs">
                         <div class="topic-icon icon-communication">🔊</div>
-                        <h3>How do I express needs clearly?</h3>
-                        <p>Strategies for expressing your needs and wants effectively.</p>
+                        <h3>Expressing Needs Clearly</h3>
+                        <p>Master the art of communicating your needs without triggering defensiveness.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Communication</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
 
                     <!-- Topic Card 6 -->
                     <div class="topic-card" id="meaningful-apology">
                         <div class="topic-icon icon-conflict">👋</div>
-                        <h3>What makes an apology meaningful?</h3>
-                        <p>The key elements of an effective apology and common pitfalls to avoid.</p>
+                        <h3>Meaningful Apologies</h3>
+                        <p>Discover what makes an apology effective and learn how to avoid common pitfalls.</p>
                         <div class="topic-footer">
                             <span class="topic-category">Conflict Resolution</span>
-                            <span class="learn-more">Learn More</span>
+                            <span class="learn-more">Explore</span>
                         </div>
                     </div>
+                </div>
+
+                <!-- Custom Question Section -->
+                <div id="custom-question-section" class="custom-question-section">
+                    <h2>Ask Your Own Relationship Question</h2>
+                    <p>Get AI-powered insights on any relationship topic</p>
+                    
+                    <div class="custom-question-input-container">
+                        <textarea id="custom-question-input" placeholder="e.g., How do I navigate disagreements with my partner about finances?"></textarea>
+                        <button id="submit-question-btn" class="primary-button">Get Insights</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Modal - Hidden by default -->
+            <div id="research-results-container" class="research-results-container">
+                <div class="research-results-header">
+                    <h2>Research Results</h2>
+                    <span class="research-category">Category</span>
+                    <div class="result-actions">
+                        <button id="copy-result-btn" class="action-button" title="Copy to clipboard">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <button class="close-results-btn">&times;</button>
+                    </div>
+                </div>
+                <div class="research-results-content">
+                    <!-- Content will be populated dynamically -->
+                </div>
+                <div class="results-footer">
+                    <p>Powered by <span class="footer-highlight">Perplexity AI</span> research</p>
+                    <a href="index.html" class="back-to-home-link">Return to Home</a>
                 </div>
             </div>
         </main>

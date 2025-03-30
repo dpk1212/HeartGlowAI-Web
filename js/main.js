@@ -353,9 +353,6 @@
         measurementId: "G-KJMPL1DNPY"
       };
       
-      // Initialize Firebase
-      firebase.initializeApp(firebaseConfig);
-      
       // Initialize Firebase Analytics
       const analytics = firebase.analytics();
       

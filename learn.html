@@ -10,6 +10,10 @@
     <link rel="stylesheet" href="css/learn-with-ai.css">
     <link rel="stylesheet" href="css/perplexity-citations.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -27,6 +31,7 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
+                <button id="login-register-btn" class="btn btn-outline">Log in</button>
             </div>
         </header>
 
@@ -231,27 +236,8 @@
     </div>
 
     <!-- Scripts -->
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-    <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyDheartglowai12345",
-            authDomain: "heartglow-ai.firebaseapp.com",
-            projectId: "heartglow-ai",
-            storageBucket: "heartglow-ai.appspot.com",
-            messagingSenderId: "123456789012",
-            appId: "1:123456789012:web:abcdef1234567890",
-            measurementId: "G-ABCDEF1234"
-        };
-        
-        // Initialize Firebase - replace with your actual config in production
-        // Using placeholder values for the demo
-        firebase.initializeApp(firebaseConfig);
-    </script>
     <script src="js/perplexity-handler.js"></script>
     <script src="js/learn-with-ai.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html> 

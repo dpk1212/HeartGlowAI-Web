@@ -491,4 +491,200 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-}); 
+});
+
+/**
+ * PerplexityHandler - Handles interactions with Perplexity AI for research queries
+ * This is a mock implementation for demonstration purposes
+ */
+class PerplexityHandler {
+  constructor() {
+    this.isReady = true;
+    console.log('PerplexityHandler initialized');
+  }
+
+  /**
+   * Submit a query to the Perplexity API
+   * @param {string} query - The research query to submit
+   * @returns {Promise} - Promise that resolves with the response
+   */
+  submitQuery(query) {
+    return new Promise((resolve) => {
+      console.log('Submitting research query:', query);
+      
+      // Simulate API delay
+      setTimeout(() => {
+        resolve(this.generateMockResponse(query));
+      }, 2000);
+    });
+  }
+
+  /**
+   * Generate mock response for demonstration
+   * @param {string} query - The original query
+   * @returns {Object} - Mock response object
+   */
+  generateMockResponse(query) {
+    const topics = {
+      'communication': {
+        title: 'Communication Styles in Relationships',
+        category: 'Communication',
+        content: `
+# Understanding Communication Styles in Relationships
+
+Effective communication is the cornerstone of healthy relationships. Different people have distinct communication styles that can significantly impact how they interact with others.
+
+## Common Communication Styles
+
+**Assertive Communication**: This style involves expressing thoughts, feelings, and needs in a direct, honest, and appropriate way while respecting others' boundaries. Assertive communicators use "I" statements, maintain appropriate eye contact, and speak with a calm, clear voice.
+
+**Passive Communication**: People with this style tend to avoid expressing their thoughts, feelings, or needs directly. They often prioritize others' needs over their own, avoid conflict, and may struggle with setting boundaries.
+
+**Aggressive Communication**: This style involves expressing thoughts, feelings, and needs in a way that violates others' boundaries. Aggressive communicators may use "you" statements that blame or accuse, speak loudly, and display intimidating body language.
+
+**Passive-Aggressive Communication**: This style combines elements of passive and aggressive communication. People may appear passive on the surface but express negative feelings indirectly through subtle actions, sarcasm, or by withholding positive behaviors.
+
+## Identifying Your Communication Style
+
+To identify your communication style, reflect on:
+- How you typically respond in conflicts
+- Your comfort level with expressing needs and emotions
+- Your body language during difficult conversations
+- How others typically respond to your communication
+
+## Practical Strategies for Effective Communication
+
+1. **Practice active listening**: Give your full attention, avoid interrupting, and validate the other person's perspective.
+
+2. **Use "I" statements**: Frame your thoughts around your experience rather than blaming others (e.g., "I feel frustrated when plans change last minute" instead of "You always change plans").
+
+3. **Be mindful of non-verbal cues**: Body language, facial expressions, and tone of voice all contribute to how your message is received.
+
+4. **Adapt to different styles**: Recognize when you're communicating with someone who has a different style and adjust accordingly.
+
+5. **Check for understanding**: Periodically summarize or ask clarifying questions to ensure mutual understanding.
+
+Improving your communication style is a journey that requires practice, patience, and self-awareness. By understanding your own tendencies and learning to adapt when necessary, you can build stronger, more connected relationships.
+`,
+        citations: [
+          {
+            title: 'The Four Communication Styles',
+            url: 'https://www.betterup.com/blog/communication-styles',
+            snippet: 'This article outlines the four primary communication styles and how they impact personal and professional relationships.'
+          },
+          {
+            title: 'Effective Communication in Relationships',
+            url: 'https://www.gottman.com/blog/communication-mistakes/',
+            snippet: 'The Gottman Institute explores common communication mistakes couples make and how to overcome them.'
+          }
+        ]
+      },
+      'conflict': {
+        title: 'Conflict Resolution Techniques',
+        category: 'Conflict Management',
+        content: `
+# Effective Conflict Resolution in Relationships
+
+Conflict is inevitable in any relationship, but how we handle these disagreements determines whether they strengthen or damage our connections. Healthy conflict resolution skills are essential for maintaining strong, resilient relationships.
+
+## Step-by-Step Approach to Resolving Conflicts
+
+### 1. Create the Right Environment
+- Choose an appropriate time when both parties are calm
+- Find a private, neutral space without distractions
+- Set a positive tone by acknowledging the shared goal of resolution
+
+### 2. Define the Issue Clearly
+- Focus on one specific issue at a time
+- Describe the behavior or situation objectively without accusations
+- Explain the impact using "I" statements
+
+### 3. Listen Actively and Empathetically
+- Give your full attention when the other person speaks
+- Avoid interrupting or planning your response while they're talking
+- Validate their feelings even if you disagree with their perspective
+- Reflect back what you've heard to confirm understanding
+
+### 4. Find Common Ground
+- Identify shared goals, values, or interests
+- Acknowledge areas where you agree before addressing disagreements
+- Focus on the present issue rather than past conflicts
+
+### 5. Explore Solutions Together
+- Brainstorm potential solutions without immediately evaluating them
+- Consider multiple options before deciding
+- Be willing to compromise where appropriate
+- Create solutions that address both parties' core needs
+
+### 6. Agree on a Specific Plan
+- Clearly define what each person will do differently
+- Be specific about behaviors, not general promises
+- Set a time to check in and evaluate progress
+
+## Common Pitfalls to Avoid
+
+1. **Criticism**: Attacking character rather than addressing specific behaviors
+2. **Defensiveness**: Refusing to acknowledge any responsibility
+3. **Stonewalling**: Withdrawing from the conversation completely
+4. **Contempt**: Expressing disgust or superiority toward your partner
+5. **Escalation**: Allowing emotions to intensify rather than staying focused on resolution
+6. **Bringing up past conflicts**: Using past issues as ammunition
+
+## Signs of Healthy Conflict Resolution
+
+- Both parties feel heard and respected
+- The relationship feels stronger after resolving the conflict
+- New understanding and growth emerge from the disagreement
+- Solutions address underlying needs, not just surface issues
+- Both people follow through on commitments made
+
+Remember that effective conflict resolution is a skill that improves with practice. With patience and commitment, conflicts can become opportunities for deeper understanding and connection rather than sources of relationship damage.
+`,
+        citations: [
+          {
+            title: 'The Four Horsemen: Criticism, Contempt, Defensiveness, and Stonewalling',
+            url: 'https://www.gottman.com/blog/the-four-horsemen-recognizing-criticism-contempt-defensiveness-and-stonewalling/',
+            snippet: 'Dr. John Gottman explains the four communication styles that predict relationship failure.'
+          },
+          {
+            title: 'Healthy Approaches to Conflict Resolution',
+            url: 'https://www.apa.org/topics/families/resolve-conflicts',
+            snippet: 'The American Psychological Association provides research-backed techniques for resolving conflicts in relationships.'
+          }
+        ]
+      }
+    };
+
+    // Generate a response based on the query keywords
+    let mockResponse = {
+      answer: `# Research Results for: "${query}"\n\nThis is a simulated research response. In a fully integrated system, this would contain real AI-generated insights based on your query.\n\n## Key Points\n\n- This feature provides relationship insights through AI research\n- You can explore topics like communication, conflict resolution, and attachment theory\n- The goal is to help you understand relationship dynamics better\n\n## Next Steps\n\nIf this were connected to the Perplexity API, you would receive detailed, research-backed information about your specific question.`,
+      citations: [
+        {
+          title: "HeartGlowAI Research Documentation",
+          url: "https://heartglowai.com/research",
+          snippet: "HeartGlowAI provides relationship insights through AI research."
+        },
+        {
+          title: "Understanding Relationships",
+          url: "https://example.com/relationship-research",
+          snippet: "This resource covers fundamental concepts in relationship psychology."
+        }
+      ]
+    };
+
+    // Check for specific topics
+    if (query.toLowerCase().includes('communication')) {
+      mockResponse = {
+        answer: topics.communication.content,
+        citations: topics.communication.citations
+      };
+    } else if (query.toLowerCase().includes('conflict')) {
+      mockResponse = {
+        answer: topics.conflict.content,
+        citations: topics.conflict.citations
+      };
+    }
+
+    return mockResponse;
+  }
+} 

@@ -32,6 +32,17 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 2000);
       }
     });
+
+    // Also enable pressing Enter to submit
+    customQuestionInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        const question = this.value.trim();
+        if (question) {
+          handleCustomQuestion(question);
+        }
+      }
+    });
   }
   
   // Handle back to topics button
@@ -41,6 +52,64 @@ document.addEventListener('DOMContentLoaded', function() {
       const resultsContainer = document.getElementById('research-results-container');
       if (resultsContainer) {
         resultsContainer.style.display = 'none';
+      }
+    });
+  }
+  
+  // Handle close results button (X button)
+  const closeResultsBtn = document.querySelector('.close-results-btn');
+  if (closeResultsBtn) {
+    closeResultsBtn.addEventListener('click', function() {
+      const resultsContainer = document.getElementById('research-results-container');
+      if (resultsContainer) {
+        resultsContainer.style.display = 'none';
+      }
+    });
+  }
+  
+  // Set up copy results button
+  const copyResultsBtn = document.getElementById('copy-results-btn');
+  if (copyResultsBtn) {
+    copyResultsBtn.addEventListener('click', function() {
+      const responseContent = document.querySelector('.response-content');
+      if (responseContent) {
+        // Create a temporary element to hold the text without HTML tags
+        const tempElement = document.createElement('div');
+        tempElement.innerHTML = responseContent.innerHTML;
+        const textContent = tempElement.textContent || tempElement.innerText;
+        
+        navigator.clipboard.writeText(textContent).then(() => {
+          // Show success indication
+          copyResultsBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            copyResultsBtn.innerHTML = '<i class="fas fa-copy"></i>';
+          }, 2000);
+        }).catch(err => {
+          console.error('Failed to copy text: ', err);
+        });
+      }
+    });
+  }
+  
+  // Set up share results button
+  const shareResultsBtn = document.getElementById('share-results-btn');
+  if (shareResultsBtn) {
+    shareResultsBtn.addEventListener('click', function() {
+      const title = document.querySelector('.research-results-header h2')?.textContent || 'Relationship Insights';
+      const text = 'Check out this relationship insight from HeartGlowAI';
+      const url = window.location.href;
+      
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: text,
+          url: url
+        }).catch(err => {
+          console.error('Share failed:', err);
+        });
+      } else {
+        // Fallback for browsers that don't support the Web Share API
+        prompt('Copy this link to share:', url);
       }
     });
   }
@@ -138,6 +207,9 @@ document.addEventListener('DOMContentLoaded', function() {
       if (window.perplexityHandler && typeof window.perplexityHandler.research === 'function') {
         // Use the enhanced perplexity handler
         await window.perplexityHandler.research(topic.prompt, contentContainer);
+        
+        // Add event listeners to any retry buttons that might be added by the handler
+        addRetryButtonListeners(contentContainer, topic);
       } else {
         console.error('Perplexity handler not available');
         throw new Error('AI research functionality is not available');
@@ -153,15 +225,25 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
       
       // Add retry button functionality
-      const retryBtn = contentContainer.querySelector('.retry-btn');
-      if (retryBtn) {
-        retryBtn.addEventListener('click', () => handleTopicCardClick(topic));
-      }
+      addRetryButtonListeners(contentContainer, topic);
     }
+  }
+  
+  // Helper function to add event listeners to retry buttons
+  function addRetryButtonListeners(container, topic) {
+    const retryBtns = container.querySelectorAll('.retry-btn');
+    retryBtns.forEach(btn => {
+      btn.addEventListener('click', () => handleTopicCardClick(topic));
+    });
   }
   
   // Handle custom question submission
   async function handleCustomQuestion(question) {
+    // Clear the input field after submission
+    if (customQuestionInput) {
+      customQuestionInput.value = '';
+    }
+    
     // Create a custom topic object for the question
     const customTopic = {
       title: question.length > 60 ? question.substring(0, 57) + '...' : question,

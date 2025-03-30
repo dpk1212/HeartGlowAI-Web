@@ -215,6 +215,25 @@
     </div>
 
     <!-- Scripts -->
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDheartglowai12345",
+            authDomain: "heartglow-ai.firebaseapp.com",
+            projectId: "heartglow-ai",
+            storageBucket: "heartglow-ai.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890",
+            measurementId: "G-ABCDEF1234"
+        };
+        
+        // Initialize Firebase - replace with your actual config in production
+        // Using placeholder values for the demo
+        firebase.initializeApp(firebaseConfig);
+    </script>
     <script src="js/perplexity-handler.js"></script>
     <script src="js/learn-with-ai.js"></script>
 </body>

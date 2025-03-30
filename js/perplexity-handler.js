@@ -14,17 +14,19 @@ async function getPerplexityApiKey() {
       return perplexityApiKey;
     }
     
-    // Try to get from Firebase if user is authenticated
-    if (typeof firebase !== 'undefined' && firebase.auth && firebase.auth().currentUser) {
+    // Try to get from Firebase if available
+    if (typeof firebase !== 'undefined' && firebase.firestore) {
       console.log('Retrieving Perplexity API key from Firestore');
       try {
         // Access the secrets collection
-        const secretsDoc = await firebase.firestore().collection('secrets').doc('secrets').get();
+        const secretsRef = firebase.firestore().collection('secrets').doc('api_keys');
+        const secretsDoc = await secretsRef.get();
         
-        if (secretsDoc.exists && secretsDoc.data().perplexitykey) {
-          perplexityApiKey = secretsDoc.data().perplexitykey;
+        if (secretsDoc.exists && secretsDoc.data().perplexity) {
+          perplexityApiKey = secretsDoc.data().perplexity;
+          // Cache the key in localStorage to avoid repeated Firestore calls
           localStorage.setItem('perplexity_api_key', perplexityApiKey);
-          console.log('Perplexity API key retrieved from secrets collection');
+          console.log('Perplexity API key retrieved from Firestore');
           return perplexityApiKey;
         }
       } catch (fbError) {
@@ -40,18 +42,16 @@ async function getPerplexityApiKey() {
       return paramKey;
     }
     
-    // Prompt user for API key if we don't have one
-    if (!perplexityApiKey) {
-      const userKey = prompt('Please enter your Perplexity API key (starts with pplx-):');
-      if (userKey && userKey.startsWith('pplx-')) {
-        localStorage.setItem('perplexity_api_key', userKey);
-        return userKey;
-      }
+    // Use the fallback key from environment if available
+    if (typeof PERPLEXITY_API_KEY !== 'undefined') {
+      console.log('Using fallback Perplexity API key');
+      return PERPLEXITY_API_KEY;
     }
     
-    // If we still don't have a key, return null to handle gracefully
-    console.warn('No Perplexity API key available');
-    return null;
+    // If we still don't have a key, use a default demo key (ONLY FOR DEVELOPMENT)
+    const fallbackKey = 'pplx-DEMO_KEY_REPLACE_IN_PRODUCTION';
+    console.warn('Using fallback demo key - replace in production!');
+    return fallbackKey;
   } catch (error) {
     console.error('Error fetching Perplexity API key:', error);
     return null;
@@ -74,11 +74,11 @@ async function callPerplexityAPI(prompt, options = {}) {
     const apiKey = await getPerplexityApiKey();
     
     if (!apiKey) {
-      throw new Error('No Perplexity API key available');
+      throw new Error('Failed to retrieve API key for research');
     }
     
     // Create a more detailed system message to encourage citations
-    const systemMessage = "You are a helpful assistant that provides informative answers with citations to sources when possible. Format citations as [1], [2], etc. and include the source details at the end of your response.";
+    const systemMessage = "You are a relationship expert providing research-backed answers about relationships. Always cite reliable sources such as psychology journals, academic research papers, or books by relationship experts. Format citations as [1], [2], etc. and include complete source details at the end of your response. Focus on providing well-structured, evidence-based information with practical advice. Always maintain a professional, empathetic tone.";
     
     const response = await fetch('https://api.perplexity.ai/chat/completions', {
       method: 'POST',
@@ -104,7 +104,7 @@ async function callPerplexityAPI(prompt, options = {}) {
     }
     
     const data = await response.json();
-    console.log('Perplexity API response:', data);
+    console.log('Perplexity API response received');
     return data;
   } catch (error) {
     console.error('Perplexity API call failed:', error);
@@ -121,6 +121,8 @@ Please provide a comprehensive, well-structured answer with:
 2. Citations to reliable academic sources, medical journals, or other authoritative references
 3. Numbered citations in the format [1], [2], etc.
 4. A complete list of sources at the end of your response
+5. Practical advice and evidence-based insights
+6. A focus on relationship psychology and research
 
 Format your answer professionally and ensure all factual claims are properly cited.`;
 }
@@ -682,4 +684,88 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   }
-}); 
+});
+
+// Export the perplexityHandler for other modules to use
+window.perplexityHandler = {
+  /**
+   * Research a topic using Perplexity AI and display results in the container
+   * @param {string} prompt - The research prompt to send to Perplexity
+   * @param {HTMLElement} containerElement - The container to display results in
+   * @returns {Promise<void>}
+   */
+  research: async function(prompt, containerElement) {
+    try {
+      // Enhance prompt with citation requirements
+      const enhancedPrompt = createCitationPrompt(prompt);
+      
+      // Show loading state if not already shown
+      if (!containerElement.querySelector('.research-loading')) {
+        containerElement.innerHTML = `
+          <div class="research-loading">
+            <div class="perplexity-spinner"></div>
+            <p>Researching insights...</p>
+          </div>
+        `;
+      }
+      
+      // Call Perplexity API with proper error handling
+      const result = await callPerplexityAPI(enhancedPrompt, {
+        model: "sonar",
+        temperature: 0.7,
+        max_tokens: 1500,  // Increased for more comprehensive responses
+        top_p: 0.9
+      });
+      
+      // Display formatted results
+      displayPerplexityResults(result, containerElement);
+      
+      // Add citation click handlers after rendering
+      addCitationInteractivity(containerElement);
+      
+      return result;
+    } catch (error) {
+      console.error('Research failed:', error);
+      
+      // Display user-friendly error
+      containerElement.innerHTML = `
+        <div class="research-error">
+          <h3>Research Error</h3>
+          <p>${error.message || 'We encountered an issue while generating insights. Please try again.'}</p>
+          <button class="retry-btn primary-button">Retry</button>
+        </div>
+      `;
+      
+      throw error;
+    }
+  }
+};
+
+/**
+ * Add interactivity to citation references
+ */
+function addCitationInteractivity(containerElement) {
+  // Find all citation references
+  const citationRefs = containerElement.querySelectorAll('.citation-ref');
+  const citationItems = containerElement.querySelectorAll('.citation-item');
+  
+  citationRefs.forEach(ref => {
+    ref.addEventListener('click', function() {
+      const citationNumber = this.textContent.replace('[', '').replace(']', '');
+      
+      // Find corresponding citation
+      const targetCitation = containerElement.querySelector(`.citation-item[data-citation-number="${citationNumber}"]`);
+      
+      if (targetCitation) {
+        // Remove highlight from all citations
+        citationItems.forEach(item => item.classList.remove('citation-highlight'));
+        
+        // Add highlight to this citation
+        targetCitation.classList.add('citation-highlight');
+        
+        // Scroll to the citation
+        targetCitation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    });
+  });
+} 

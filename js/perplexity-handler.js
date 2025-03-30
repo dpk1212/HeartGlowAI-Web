@@ -191,149 +191,340 @@ function displayPerplexityResults(result, containerElement) {
   // Sort citations by index
   citations.sort((a, b) => a.index - b.index);
   
-  // Format the main content with enhanced citation references
-  if (citations.length > 0) {
-    // Replace citation indices with superscript links
-    citations.forEach(citation => {
-      const refRegex = new RegExp(`\\[${citation.index}\\]`, 'g');
-      content = content.replace(refRegex, `<sup class="citation-ref" data-index="${citation.index}">[${citation.index}]</sup>`);
-    });
-  }
+  // Parse and format the content for enhanced display
+  const formattedResponse = formatResearchResponse(content, citations);
   
-  // Create HTML structure for the response with improved formatting
-  let html = '<div class="perplexity-response">';
+  // Create HTML for the enhanced research response
+  let html = '<div class="research-response">';
   
-  // Add the main content with paragraphs preserved
-  const paragraphs = content.trim().split(/\n\n+/);
-  html += '<div class="response-content">';
-  paragraphs.forEach(paragraph => {
-    if (paragraph.trim()) {
-      html += `<p>${paragraph.trim().replace(/\n/g, '<br>')}</p>`;
-    }
+  // Key Takeaways Section
+  html += '<div class="key-takeaways">';
+  html += '<h3>Key Insights</h3>';
+  html += '<div class="takeaway-grid">';
+  
+  formattedResponse.keyTakeaways.forEach(point => {
+    html += `
+      <div class="takeaway-card">
+        <i class="fas ${point.icon}"></i>
+        <h4>${point.title}</h4>
+        <p>${point.description}</p>
+      </div>
+    `;
   });
+  
+  html += '</div></div>';
+  
+  // Main Content Sections
+  html += '<div class="content-sections">';
+  
+  formattedResponse.sections.forEach(section => {
+    html += `
+      <div class="content-section">
+        <div class="section-header">
+          <h3>${section.title}</h3>
+        </div>
+        <div class="section-content">
+          ${section.content}
+        </div>
+      </div>
+    `;
+  });
+  
   html += '</div>';
   
-  // Add citations section if available
-  if (citations.length > 0) {
-    html += '<div class="citations-section">';
+  // Practical Tips Section (if available)
+  if (formattedResponse.practicalTips.length > 0) {
+    html += '<div class="practical-tips">';
+    html += '<h3>Practical Applications</h3>';
+    html += '<div class="tips-list">';
     
-    // Add tabbed navigation for citations
-    html += '<div class="citations-tabs">';
-    html += '<div class="citation-tab active" data-tab="list">Sources</div>';
-    html += '<div class="citation-tab" data-tab="grid">References</div>';
-    html += '</div>';
-    
-    // Sources list view (default)
-    html += '<div class="citation-tab-content" id="tab-list">';
-    html += '<ol class="citations-list">';
-    
-    citations.forEach(citation => {
-      html += `<li id="citation-${citation.index}" class="citation-item">`;
-      
-      if (citation.url) {
-        html += `<a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="citation-link">`;
-        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
-        html += `<div class="citation-url">${citation.url}</div>`;
-        html += '</a>';
-      } else {
-        html += `<div class="citation-title">${citation.title || 'Source'}</div>`;
-        html += `<div class="citation-text">${citation.text}</div>`;
-      }
-      
-      html += '</li>';
-    });
-    
-    html += '</ol></div>';
-    
-    // References grid view (alternative view)
-    html += '<div class="citation-tab-content" id="tab-grid" style="display: none;">';
-    html += '<div class="citations-grid">';
-    
-    citations.forEach(citation => {
-      html += `<div class="citation-card" id="citation-grid-${citation.index}">`;
-      html += `<span class="citation-number">${citation.index}</span>`;
-      
-      html += `<div class="citation-card-content">`;
-      if (citation.url) {
-        html += `<a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="citation-card-title">${citation.title}</a>`;
-      } else {
-        html += `<div class="citation-card-title">${citation.title}</div>`;
-      }
-      
-      html += `<div class="citation-meta">Reference ${citation.index}</div>`;
-      
-      if (citation.url) {
-        html += `<a href="${citation.url}" target="_blank" rel="noopener noreferrer" class="citation-goto">View Source →</a>`;
-      }
-      
-      html += '</div></div>';
+    formattedResponse.practicalTips.forEach(tip => {
+      html += `
+        <div class="tip-item">
+          <div class="tip-icon"><i class="fas fa-lightbulb"></i></div>
+          <div class="tip-content">${tip}</div>
+        </div>
+      `;
     });
     
     html += '</div></div>';
-    
-    html += '</div>'; // Close citations-section
   }
   
-  html += '</div>';
-  
-  // Set the HTML to the container
-  containerElement.innerHTML = html;
-  
-  // Add event listeners to citation references with improved highlighting
-  setTimeout(() => {
-    const refs = containerElement.querySelectorAll('.citation-ref');
-    refs.forEach(ref => {
-      ref.addEventListener('click', () => {
-        const index = ref.getAttribute('data-index');
-        const citationItem = containerElement.querySelector(`#citation-${index}`);
-        
-        // Remove highlight from all citations first
-        document.querySelectorAll('.citation-item, .citation-card').forEach(item => {
-          item.classList.remove('highlight');
-        });
-        
-        if (citationItem) {
-          // Make sure we're on the list tab view
-          const listTab = containerElement.querySelector('.citation-tab[data-tab="list"]');
-          if (listTab) {
-            listTab.click();
-          }
-          
-          // Smooth scroll to the citation
-          citationItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          
-          // Add highlight class
-          citationItem.classList.add('highlight');
-          
-          // Remove highlight after delay
-          setTimeout(() => {
-            citationItem.classList.remove('highlight');
-          }, 3000);
-        }
-      });
+  // Citations Panel
+  if (citations.length > 0) {
+    html += '<div class="citations-panel">';
+    html += '<h3>Sources</h3>';
+    html += '<div class="citation-cards">';
+    
+    citations.forEach(citation => {
+      html += `
+        <div class="citation-card" id="citation-${citation.index}">
+          <div class="citation-number">[${citation.index}]</div>
+          <div class="citation-details">
+            <div class="citation-title">${citation.title}</div>
+            ${citation.url ? `<a href="${citation.url}" target="_blank" class="citation-link">${citation.url}</a>` : ''}
+          </div>
+        </div>
+      `;
     });
     
-    // Add tab switching functionality
-    const tabs = containerElement.querySelectorAll('.citation-tab');
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        // Remove active class from all tabs
-        tabs.forEach(t => t.classList.remove('active'));
-        
-        // Add active class to current tab
-        tab.classList.add('active');
-        
-        // Hide all tab content
-        containerElement.querySelectorAll('.citation-tab-content').forEach(content => {
-          content.style.display = 'none';
+    html += '</div></div>';
+  }
+  
+  html += '</div>'; // End of research-response div
+  
+  // Set the HTML content
+  containerElement.innerHTML = html;
+  
+  // Add interactive elements
+  initializeInteractiveElements(containerElement);
+}
+
+// Helper function to extract key points from content
+function formatResearchResponse(content, citations) {
+  // Process the content to identify key sections, takeaways, and practical tips
+  
+  // Extract headings and split content into sections
+  const sections = [];
+  let currentSection = { title: 'Overview', content: '' };
+  let keyTakeaways = [];
+  let practicalTips = [];
+  
+  // Split content into paragraphs
+  const paragraphs = content.split(/\n\n+/);
+  
+  // Process each paragraph
+  paragraphs.forEach(paragraph => {
+    paragraph = paragraph.trim();
+    if (!paragraph) return;
+    
+    // Check if paragraph is a heading
+    if (/^#+\s+.+/.test(paragraph) || /^.+\n[=\-]{2,}$/.test(paragraph)) {
+      // If we have content in the current section, save it
+      if (currentSection.content) {
+        sections.push({ ...currentSection });
+      }
+      
+      // Extract heading text
+      let title = paragraph.replace(/^#+\s+/, '').replace(/\n[=\-]{2,}$/, '');
+      currentSection = { title, content: '' };
+    } 
+    // Check if paragraph might be a key takeaway
+    else if (paragraph.includes(':') && paragraph.length < 200 && !paragraph.includes('[') && /^[A-Z]/.test(paragraph)) {
+      const parts = paragraph.split(':');
+      if (parts.length >= 2) {
+        keyTakeaways.push({
+          title: parts[0].trim(),
+          description: parts.slice(1).join(':').trim(),
+          icon: selectIconForContent(parts[0].trim())
         });
-        
-        // Show current tab content
-        const tabId = tab.getAttribute('data-tab');
-        containerElement.querySelector(`#tab-${tabId}`).style.display = 'block';
+      } else {
+        currentSection.content += formatParagraph(paragraph);
+      }
+    }
+    // Check if paragraph might be a practical tip
+    else if ((paragraph.toLowerCase().includes('tip') || 
+              paragraph.toLowerCase().includes('advice') || 
+              paragraph.toLowerCase().includes('recommend') ||
+              paragraph.toLowerCase().includes('practice') ||
+              paragraph.toLowerCase().includes('suggest')) && 
+              paragraph.length < 300) {
+      practicalTips.push(formatParagraph(paragraph));
+    }
+    // Regular content paragraph
+    else {
+      currentSection.content += formatParagraph(paragraph);
+    }
+  });
+  
+  // Add the last section if it has content
+  if (currentSection.content) {
+    sections.push({ ...currentSection });
+  }
+  
+  // If we couldn't identify sections, create a default one with all content
+  if (sections.length === 0) {
+    sections.push({ title: 'Information', content: formatParagraph(content) });
+  }
+  
+  // If we couldn't identify key takeaways, extract some from the first section
+  if (keyTakeaways.length === 0) {
+    // Try to extract key sentences from the first section
+    const sentences = sections[0].content.split(/(?<=[.!?])\s+/);
+    
+    for (let i = 0; i < sentences.length && keyTakeaways.length < 3; i++) {
+      const sentence = sentences[i];
+      if (sentence.length > 40 && sentence.length < 200 && !sentence.includes('citation')) {
+        keyTakeaways.push({
+          title: `Key Point ${keyTakeaways.length + 1}`,
+          description: sentence,
+          icon: selectIconForContent(sentence)
+        });
+      }
+    }
+  }
+  
+  // Limit to 3-4 key takeaways
+  keyTakeaways = keyTakeaways.slice(0, 4);
+  
+  // Enhance each section with citations
+  sections.forEach(section => {
+    // Replace citation indices with enhanced superscript
+    citations.forEach(citation => {
+      const refRegex = new RegExp(`\\[${citation.index}\\]`, 'g');
+      section.content = section.content.replace(refRegex, 
+        `<sup class="citation-ref" data-index="${citation.index}">[${citation.index}]</sup>`);
+    });
+    
+    // Highlight key terms
+    section.content = highlightKeyTerms(section.content);
+  });
+  
+  return {
+    keyTakeaways,
+    sections,
+    practicalTips
+  };
+}
+
+// Format a paragraph with proper HTML and enhanced styling
+function formatParagraph(paragraph) {
+  // Replace newlines with breaks
+  let formatted = paragraph.replace(/\n/g, '<br>');
+  
+  // Add spacing between paragraphs
+  return `<p>${formatted}</p>`;
+}
+
+// Highlight important terms in the content
+function highlightKeyTerms(content) {
+  // List of relationship and psychology key terms to highlight
+  const keyTerms = [
+    'attachment style', 'secure attachment', 'anxious attachment', 'avoidant attachment',
+    'love language', 'emotional intelligence', 'stonewalling', 'contempt', 'criticism',
+    'defensiveness', 'gaslighting', 'boundaries', 'validation', 'active listening',
+    'communication pattern', 'conflict resolution', 'intimacy', 'vulnerability'
+  ];
+  
+  // Highlight each term
+  keyTerms.forEach(term => {
+    const regex = new RegExp(`(${term})`, 'gi');
+    content = content.replace(regex, '<span class="key-term">$1</span>');
+  });
+  
+  return content;
+}
+
+// Select appropriate icon based on content
+function selectIconForContent(text) {
+  text = text.toLowerCase();
+  
+  if (text.includes('communication') || text.includes('talk') || text.includes('conversation'))
+    return 'fa-comments';
+  
+  if (text.includes('emotion') || text.includes('feel') || text.includes('empathy'))
+    return 'fa-heart';
+  
+  if (text.includes('understand') || text.includes('knowledge') || text.includes('learn'))
+    return 'fa-lightbulb';
+    
+  if (text.includes('conflict') || text.includes('disagree') || text.includes('argument'))
+    return 'fa-handshake';
+    
+  if (text.includes('boundary') || text.includes('limit') || text.includes('protect'))
+    return 'fa-shield-alt';
+    
+  if (text.includes('attachment') || text.includes('connect') || text.includes('bond'))
+    return 'fa-link';
+    
+  // Default icon
+  return 'fa-check-circle';
+}
+
+// Initialize interactive elements in the response
+function initializeInteractiveElements(container) {
+  // Add citation tooltip functionality
+  const citationRefs = container.querySelectorAll('.citation-ref');
+  citationRefs.forEach(ref => {
+    ref.addEventListener('click', (e) => {
+      const index = e.target.dataset.index;
+      const citation = container.querySelector(`#citation-${index}`);
+      if (citation) {
+        citation.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        citation.classList.add('citation-highlight');
+        setTimeout(() => {
+          citation.classList.remove('citation-highlight');
+        }, 2000);
+      }
+    });
+  });
+  
+  // Add section collapsing functionality for mobile
+  const sectionHeaders = container.querySelectorAll('.section-header');
+  if (window.innerWidth < 768) {
+    sectionHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const section = header.closest('.content-section');
+        const content = section.querySelector('.section-content');
+        content.classList.toggle('expanded');
       });
     });
-  }, 100);
+  }
+  
+  // Add copy functionality
+  const copyBtn = container.closest('.research-results-container')?.querySelector('#copy-results-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      // Get just the text content to copy
+      const textContent = container.textContent;
+      navigator.clipboard.writeText(textContent)
+        .then(() => {
+          // Show success message
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+          }, 2000);
+        })
+        .catch(err => {
+          console.error('Could not copy text: ', err);
+        });
+    });
+  }
+  
+  // Add share functionality
+  const shareBtn = container.closest('.research-results-container')?.querySelector('#share-results-btn');
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      // Get page title and URL
+      const title = document.title;
+      const url = window.location.href;
+      
+      // Try to use Web Share API if available
+      if (navigator.share) {
+        navigator.share({
+          title: title,
+          text: 'Check out this relationship insight from HeartGlowAI',
+          url: url,
+        })
+        .catch(error => console.log('Error sharing', error));
+      } else {
+        // Fallback to copying the URL
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            // Show success message
+            const originalHTML = shareBtn.innerHTML;
+            shareBtn.innerHTML = '<i class="fas fa-check"></i>';
+            setTimeout(() => {
+              shareBtn.innerHTML = originalHTML;
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Could not copy URL: ', err);
+          });
+      }
+    });
+  }
 }
 
 // Function to make a research query with better citation formatting

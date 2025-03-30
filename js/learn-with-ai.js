@@ -203,6 +203,18 @@ document.addEventListener('DOMContentLoaded', function() {
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
     try {
+      // Make sure user is authenticated before proceeding
+      // This is the key change - force authentication check first
+      if (typeof window.forceAuthentication === 'function') {
+        try {
+          await window.forceAuthentication();
+          console.log('Authentication confirmed');
+        } catch (authError) {
+          console.error('Authentication failed:', authError);
+          throw new Error('Authentication required to use research functionality');
+        }
+      }
+      
       // Ensure the globally accessible callPerplexityAPI function exists
       if (typeof callPerplexityAPI === 'function') {
         // Call the corrected API function from main.js

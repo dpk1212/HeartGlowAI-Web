@@ -168,18 +168,6 @@ document.addEventListener('DOMContentLoaded', function() {
   async function handleTopicCardClick(topic) {
     console.log(`Research topic clicked: ${topic.title}`);
     
-    // First verify authentication - the most important step
-    // Check if we already have a user before showing any UI
-    let isUserAuthenticated = false;
-    
-    if (window.isAuthenticated || 
-        (firebase && firebase.auth && firebase.auth().currentUser)) {
-      console.log('User is already authenticated');
-      isUserAuthenticated = true;
-    } else {
-      console.log('User not authenticated, will need to authenticate');
-    }
-    
     // Get or create the research results container
     let resultsContainer = document.getElementById('research-results-container');
     if (!resultsContainer) {
@@ -200,6 +188,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const contentContainer = resultsContainer.querySelector('.research-results-content');
     if (!contentContainer) {
       console.error('Content container not found within research results');
+      // Hide the container if content area is missing
+      resultsContainer.style.display = 'none';
       return;
     }
     
@@ -215,23 +205,28 @@ document.addEventListener('DOMContentLoaded', function() {
     resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     
     try {
-      // Make sure user is authenticated before proceeding
-      // This is the key change - force authentication check first
-      if (!isUserAuthenticated && typeof window.forceAuthentication === 'function') {
+      // Wait for the initial authentication state to be determined
+      console.log('Waiting for authentication state...');
+      let user = await window.authStatePromise;
+
+      if (!user) {
+        console.log('User not authenticated. Prompting for login.');
+        // If not authenticated, show login prompt and wait for result
         try {
-          await window.forceAuthentication();
-          console.log('Authentication confirmed');
-          isUserAuthenticated = true;
-        } catch (authError) {
-          console.error('Authentication failed:', authError);
-          throw new Error('Authentication required to use research functionality');
+          user = await showLoginPrompt(); // showLoginPrompt now returns a promise
+          if (!user) {
+            console.log('Login cancelled by user.');
+            contentContainer.innerHTML = `<p style="color:#ccc;">Sign-in required to use the research feature.</p>`;
+            return;
+          }
+          console.log('Login successful after prompt.');
+        } catch (loginError) {
+          console.error('Login process failed or was cancelled:', loginError);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Sign-in was cancelled or failed. Please try again.</p>`;
+          return;
         }
-      }
-      
-      // Double-check authentication status
-      if (!isUserAuthenticated && 
-          !(firebase && firebase.auth && firebase.auth().currentUser)) {
-        throw new Error('User must be authenticated to use research functionality');
+      } else {
+        console.log('User already authenticated:', user.uid);
       }
       
       // Ensure the globally accessible callPerplexityAPI function exists
@@ -249,25 +244,30 @@ document.addEventListener('DOMContentLoaded', function() {
              // Simple display if formatting function is not available
              contentContainer.innerHTML = `<div class="response-content">${result.choices[0].message.content.replace(/\n/g, '<br>')}</div>`;
           }
+          // Add retry button listeners if available
+          if (typeof addRetryButtonListeners === 'function') {
+            addRetryButtonListeners(contentContainer, topic);
+          }
+        } else if (result && result.error) {
+          console.error('Perplexity API Error:', result.error);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Error fetching results: ${result.error.message || 'Unknown API error'}</p>`;
         } else {
-          throw new Error('Received an invalid response from the AI');
+          console.error('Invalid response format from Perplexity API:', result);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Couldn't process the response from the AI. Please try again.</p>`;
         }
       } else {
-        console.error('callPerplexityAPI function is not available');
-        throw new Error('AI research functionality is not properly configured');
+        console.error('callPerplexityAPI function is not defined globally!');
+        throw new Error('Core API function is missing.');
       }
     } catch (error) {
-      console.error(`Research error for topic "${topic.title}":`, error);
+      console.error('Error during research process:', error);
+      // Display error in the content container
       contentContainer.innerHTML = `
         <div class="research-error">
-          <h3>Research Error</h3>
-          <p>${error.message || 'Failed to retrieve research on this topic'}</p>
-          <button class="retry-btn primary-button">Try Again</button>
+          <p style="color:#ff5555;">An error occurred: ${error.message}</p>
+          <p style="color:#ccc;">Please ensure you are signed in and try again.</p>
         </div>
       `;
-      
-      // Add retry button functionality
-      addRetryButtonListeners(contentContainer, topic);
     }
   }
   
@@ -281,19 +281,104 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Handle custom question submission
   async function handleCustomQuestion(question) {
-    // Clear the input field after submission
-    if (customQuestionInput) {
-      customQuestionInput.value = '';
+    // Get or create the research results container
+    let resultsContainer = document.getElementById('research-results-container');
+    if (!resultsContainer) {
+      console.error('Research results container not found in the DOM');
+      return;
     }
     
-    // Create a custom topic object for the question
-    const customTopic = {
-      title: question.length > 60 ? question.substring(0, 57) + '...' : question,
-      category: 'Custom Question',
-      prompt: `Provide a research-based answer to this relationship question: "${question}". Include relevant psychological research and relationship studies with proper citations. Structure your answer with clear sections, practical advice, and evidence-based insights.`
-    };
+    // Update header information for custom question
+    const headerCategory = resultsContainer.querySelector('.research-category');
+    const headerTitle = resultsContainer.querySelector('h2');
+    if (headerCategory) headerCategory.textContent = 'Custom Question';
+    if (headerTitle) headerTitle.textContent = 'Research Results'; // Generic title
     
-    // Use the same handler as the topic cards
-    handleTopicCardClick(customTopic);
+    // Show the results container with a loading message
+    resultsContainer.style.display = 'block';
+    
+    // Get the content container
+    const contentContainer = resultsContainer.querySelector('.research-results-content');
+    if (!contentContainer) {
+      console.error('Content container not found within research results');
+      resultsContainer.style.display = 'none';
+      return;
+    }
+    
+    // Show loading state
+    contentContainer.innerHTML = `
+      <div class="research-loading">
+        <div class="perplexity-spinner"></div>
+        <p>Researching your question...</p>
+      </div>
+    `;
+    
+    // Scroll to the results container
+    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    
+    try {
+      // Wait for the initial authentication state to be determined
+      console.log('Waiting for authentication state...');
+      let user = await window.authStatePromise;
+
+      if (!user) {
+        console.log('User not authenticated. Prompting for login.');
+        // If not authenticated, show login prompt and wait for result
+        try {
+          user = await showLoginPrompt(); // showLoginPrompt now returns a promise
+          if (!user) {
+            console.log('Login cancelled by user.');
+            contentContainer.innerHTML = `<p style="color:#ccc;">Sign-in required to use the research feature.</p>`;
+            return;
+          }
+          console.log('Login successful after prompt.');
+        } catch (loginError) {
+          console.error('Login process failed or was cancelled:', loginError);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Sign-in was cancelled or failed. Please try again.</p>`;
+          return;
+        }
+      } else {
+        console.log('User already authenticated:', user.uid);
+      }
+      
+      // Construct a suitable prompt for the custom question
+      const customPrompt = `Answer the following question related to relationships, psychology, or personal growth: "${question}". Provide a thoughtful and informative response, citing relevant concepts or research where appropriate.`;
+      
+      // Ensure the globally accessible callPerplexityAPI function exists
+      if (typeof callPerplexityAPI === 'function') {
+        // Call the API function
+        const result = await callPerplexityAPI(customPrompt);
+
+        // Process and display the result
+        if (result && result.choices && result.choices[0] && result.choices[0].message && result.choices[0].message.content) {
+          if (typeof displayPerplexityResults === 'function') {
+            displayPerplexityResults(result, contentContainer);
+          } else {
+            contentContainer.innerHTML = `<div class="response-content">${result.choices[0].message.content.replace(/\n/g, '<br>')}</div>`;
+          }
+          // Add retry button listeners if available
+          if (typeof addRetryButtonListeners === 'function') {
+            addRetryButtonListeners(contentContainer, { /* Provide relevant context if needed */ prompt: customPrompt, title: "Custom Question" });
+          }
+        } else if (result && result.error) {
+          console.error('Perplexity API Error:', result.error);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Error fetching results: ${result.error.message || 'Unknown API error'}</p>`;
+        } else {
+          console.error('Invalid response format from Perplexity API:', result);
+          contentContainer.innerHTML = `<p style="color:#ff5555;">Couldn't process the response from the AI. Please try again.</p>`;
+        }
+      } else {
+        console.error('callPerplexityAPI function is not defined globally!');
+        throw new Error('Core API function is missing.');
+      }
+    } catch (error) {
+      console.error('Error handling custom question:', error);
+      contentContainer.innerHTML = `
+        <div class="research-error">
+          <p style="color:#ff5555;">An error occurred: ${error.message}</p>
+          <p style="color:#ccc;">Please ensure you are signed in and try again.</p>
+        </div>
+      `;
+    }
   }
 }); 

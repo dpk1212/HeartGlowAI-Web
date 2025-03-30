@@ -31,7 +31,6 @@
                         <li><a href="contact.html">Contact</a></li>
                     </ul>
                 </nav>
-                <button id="login-register-btn" class="btn btn-outline">Log in</button>
             </div>
         </header>
 
@@ -236,6 +235,28 @@
     </div>
 
     <!-- Scripts -->
+    <script>
+        // Initialize Firebase - must happen before other scripts
+        const firebaseConfig = {
+            apiKey: "AIzaSyDheartglowai12345",
+            authDomain: "heartglow-ai.firebaseapp.com",
+            projectId: "heartglow-ai",
+            storageBucket: "heartglow-ai.appspot.com",
+            messagingSenderId: "123456789012",
+            appId: "1:123456789012:web:abcdef1234567890",
+            measurementId: "G-ABCDEF1234"
+        };
+        
+        // Initialize Firebase before any other scripts run
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            // Set persistence to LOCAL for better cross-page authentication
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .catch(error => {
+                    console.error("Auth persistence error:", error);
+                });
+        }
+    </script>
     <script src="js/perplexity-handler.js"></script>
     <script src="js/learn-with-ai.js"></script>
     <script src="js/main.js"></script>

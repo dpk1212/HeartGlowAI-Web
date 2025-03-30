@@ -4,6 +4,44 @@
  * Using server-side function to maintain security and mobile compatibility
  */
 
+// Check if Firebase is properly initialized and auth is available
+function ensureFirebaseAuth() {
+  return new Promise((resolve, reject) => {
+    // Check if Firebase is initialized
+    if (!firebase || !firebase.apps || !firebase.apps.length) {
+      console.error("Firebase not initialized");
+      reject(new Error("Firebase not initialized"));
+      return;
+    }
+    
+    // Check if auth is loaded
+    if (!firebase.auth) {
+      console.error("Firebase auth not loaded");
+      reject(new Error("Firebase auth not loaded"));
+      return;
+    }
+    
+    // Set a timeout to avoid waiting forever
+    const timeout = setTimeout(() => {
+      reject(new Error("Authentication check timed out"));
+    }, 5000);
+    
+    // Use onAuthStateChanged to wait for auth to initialize
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      clearTimeout(timeout);
+      unsubscribe();
+      
+      if (user) {
+        console.log("User is authenticated:", user.uid);
+        resolve(user);
+      } else {
+        console.error("No user is signed in");
+        reject(new Error("Authentication required"));
+      }
+    });
+  });
+}
+
 // Function to create a citation-focused prompt
 function createCitationPrompt(basePrompt) {
   return `${basePrompt}
@@ -33,13 +71,11 @@ async function callPerplexityAPI(prompt, options = {}) {
   try {
     console.log('Making Perplexity API call with prompt:', prompt.substring(0, 100) + '...');
     
-    // We need to be logged in to use the server-side function
-    if (!firebase.auth || !firebase.auth().currentUser) {
-      throw new Error('You must be signed in to use research features');
-    }
+    // Ensure user is authenticated
+    const user = await ensureFirebaseAuth();
     
     // Get the current user's ID token for authorization
-    const idToken = await firebase.auth().currentUser.getIdToken();
+    const idToken = await user.getIdToken();
     
     console.log('Sending research request to server function');
     
@@ -546,18 +582,25 @@ window.perplexityHandler = {
    */
   research: async function(prompt, containerElement) {
     try {
-      // Check if user is logged in
-      if (!firebase.auth || !firebase.auth().currentUser) {
-        console.error('Authentication check failed:', {
-          authExists: !!firebase.auth,
-          currentUser: firebase.auth ? !!firebase.auth().currentUser : 'auth not loaded'
-        });
+      // Show initial loading state
+      containerElement.innerHTML = `
+        <div class="research-loading">
+          <div class="perplexity-spinner"></div>
+          <p>Preparing research...</p>
+        </div>
+      `;
+      
+      // Check authentication state properly
+      try {
+        await ensureFirebaseAuth();
+      } catch (authError) {
+        console.error('Authentication failed:', authError);
         
         containerElement.innerHTML = `
           <div class="research-error">
             <h3>Authentication Required</h3>
             <p>You must be signed in to use the research feature.</p>
-            <button class="primary-button" onclick="document.getElementById('login-register-btn').click()">Sign In</button>
+            <button class="primary-button" onclick="window.location.href='index.html'">Go to Login Page</button>
           </div>
         `;
         throw new Error('Authentication required for research');
@@ -566,7 +609,7 @@ window.perplexityHandler = {
       // Enhance prompt with citation requirements
       const enhancedPrompt = createCitationPrompt(prompt);
       
-      // Show loading state
+      // Update loading state
       containerElement.innerHTML = `
         <div class="research-loading">
           <div class="perplexity-spinner"></div>

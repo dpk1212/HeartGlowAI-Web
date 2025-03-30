@@ -81,11 +81,11 @@
   border-radius: 2px;
 }
 
-/* Hero Section - Fixed centering for both mobile and desktop */
+/* Hero Section */
 .learn-hero-section {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   padding: 60px 40px;
   background: linear-gradient(135deg, rgba(20, 20, 40, 0.9) 0%, rgba(8, 10, 20, 0.95) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
@@ -113,8 +113,6 @@
   max-width: 600px;
   z-index: 2;
   animation: slideUp 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  padding: 0 20px;
-  text-align: center;
 }
 
 .learn-hero-content h1 {
@@ -134,9 +132,7 @@
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.8);
   margin-bottom: 30px;
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 90%;
 }
 
 .hero-buttons {
@@ -146,7 +142,6 @@
   animation: fadeIn 1s ease-out 0.3s forwards;
   opacity: 0;
   animation-fill-mode: forwards;
-  justify-content: center;
 }
 
 .primary-button {
@@ -371,7 +366,7 @@
   margin: 20px auto 0;
 }
 
-/* Topic Cards Grid - Fixed for mobile */
+/* Topic Cards Grid */
 .topics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -392,10 +387,6 @@
   position: relative;
   padding: 30px;
   box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-  -webkit-tap-highlight-color: transparent; /* Removes the tap highlight on mobile */
-  touch-action: manipulation; /* Improves touch handling */
-  will-change: transform; /* Optimizes for animation */
-  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 .topic-card::before {
@@ -654,7 +645,7 @@
   margin-top: 10px;
 }
 
-/* Mobile Responsiveness - Improved */
+/* Mobile Responsiveness */
 @media (max-width: 768px) {
   .learn-hero-section {
     flex-direction: column;
@@ -664,22 +655,15 @@
   .learn-hero-content {
     max-width: 100%;
     text-align: center;
-    padding: 0;
   }
   
   .learn-hero-content h1 {
     font-size: 2.5rem;
   }
   
-  .learn-hero-content p {
-    font-size: 1.1rem;
-    padding: 0 10px;
-  }
-  
   .learn-hero-image {
     width: 100%;
     margin-top: 30px;
-    max-width: 300px;
   }
   
   .hero-buttons {
@@ -688,55 +672,10 @@
   
   .topics-grid {
     grid-template-columns: 1fr;
-    padding: 0 10px;
-    margin-top: 20px;
-  }
-  
-  .topic-card {
-    transform: none !important; /* Prevent transform on mobile to avoid rendering issues */
-    transition: background-color 0.3s ease, border-color 0.3s ease; /* Simple transition that works well on mobile */
-    margin-bottom: 15px;
-    padding: 25px 20px;
-    touch-action: manipulation; /* Better touch handling */
-    -webkit-tap-highlight-color: rgba(0,0,0,0); /* Removes the highlight on tap */
-  }
-  
-  .topic-card:hover, 
-  .topic-card:active,
-  .topic-card.touch-active {
-    transform: none !important;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
-    background-color: rgba(30, 35, 60, 0.6);
-    border-color: rgba(255, 255, 255, 0.15);
-  }
-  
-  .topic-card:active,
-  .topic-card.touch-active {
-    background-color: rgba(35, 40, 70, 0.7);
-  }
-  
-  /* Improves touch feedback */
-  .topic-icon {
-    transition: transform 0.2s ease;
-  }
-  
-  .topic-card:active .topic-icon,
-  .topic-card.touch-active .topic-icon {
-    transform: scale(1.1);
-  }
-  
-  .topic-card:active h3,
-  .topic-card.touch-active h3 {
-    color: #64d2ff;
-  }
-  
-  .topic-footer {
-    margin-top: 15px;
   }
   
   .custom-question-section {
     padding: 30px 20px;
-    margin-top: 30px;
   }
   
   .primary-button, .secondary-button {

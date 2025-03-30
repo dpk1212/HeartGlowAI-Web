@@ -287,6 +287,16 @@
           <span class="feedback-icon">⭐</span> Submit Feedback
         </button>
       </div>
+      
+      <div class="dashboard-section">
+          <h3>Your Relationships</h3>
+          <button id="manage-blueprints-btn" class="tertiary-button">Manage Relationship Blueprints</button>
+      </div>
+      
+      <div class="recent-messages">
+          <h3>Recent Messages</h3>
+          <ul id="message-history"></ul>
+      </div>
     </div>
     
     <!-- Message Generator Screen -->
@@ -522,6 +532,20 @@
         </button>
       </div>
     </div>
+  </div>
+  
+  <!-- Blueprint Management Screen -->
+  <div id="blueprint-screen" class="screen blueprint-dashboard" style="display: none;">
+    <div class="dashboard-header">
+      <h2>Relationship Blueprints</h2>
+      <p>Manage your personalized relationship guides.</p>
+      <button id="create-new-blueprint-btn" class="primary-button">Create New Blueprint</button>
+    </div>
+    <div id="blueprint-list-container" class="blueprint-list-container">
+      <!-- Blueprints will be loaded here by JavaScript -->
+      <p>Loading blueprints...</p> 
+    </div>
+    <button id="back-to-home-from-blueprints-btn" class="secondary-button">Back to Home</button>
   </div>
   
   <!-- JavaScript -->

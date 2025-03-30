@@ -731,43 +731,69 @@
     }
     
     .insights-section {
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
+      margin-top: 24px;
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.05), rgba(100, 210, 255, 0.05));
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.5s ease forwards 0.2s;
+      opacity: 0;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     
     .insights-title {
-      font-size: 18px;
       color: var(--text-primary);
-      margin-bottom: 20px;
-      font-weight: 700;
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      position: relative;
+      padding-left: 28px;
       display: flex;
       align-items: center;
-      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+    }
+    
+    .insights-title::before {
+      content: '💡';
+      position: absolute;
+      left: 0;
+      font-size: 20px;
     }
     
     .insights-list {
-      list-style: none;
-      padding: 0;
-      margin: 0;
+      padding-left: 8px;
+      list-style-type: none;
     }
     
     .insight-item {
-      font-size: 0.9em;
-      color: var(--text-secondary);
-      margin-bottom: 8px;
-      padding-left: 20px;
       position: relative;
+      margin-bottom: 12px;
+      padding-left: 24px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.5;
+      transition: transform 0.2s ease, color 0.2s ease;
     }
     
     .insight-item:before {
-      content: "•";
+      content: '';
       position: absolute;
       left: 0;
-      color: var(--primary-color);
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      box-shadow: 0 0 6px rgba(255, 107, 157, 0.4);
+    }
+    
+    .insight-item:hover {
+      transform: translateX(5px);
+      color: var(--text-primary);
     }
     
     .loading-spinner {
@@ -1892,41 +1918,69 @@
     }
 
     .results-popup-insights {
-      background: rgba(255, 255, 255, 0.03);
+      margin-top: 24px;
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.05), rgba(100, 210, 255, 0.05));
       border-radius: 12px;
-      padding: 20px;
+      padding: 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      animation: fadeIn 0.5s ease forwards 0.2s;
+      opacity: 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .results-popup-insights-title {
-      color: white;
+      color: var(--text-primary);
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 16px;
+      position: relative;
+      padding-left: 28px;
       display: flex;
       align-items: center;
     }
 
     .results-popup-insights-title::before {
       content: '💡';
-      margin-right: 10px;
+      position: absolute;
+      left: 0;
+      font-size: 20px;
     }
 
     .results-popup-insights-list {
-      margin: 0;
-      padding: 0 0 0 24px;
+      padding-left: 8px;
+      list-style-type: none;
     }
 
     .results-popup-insights-list li {
-      color: rgba(255, 255, 255, 0.9);
-      margin-bottom: 12px;
       position: relative;
+      margin-bottom: 12px;
+      padding-left: 24px;
+      color: var(--text-secondary);
+      font-size: 15px;
+      line-height: 1.5;
+      transition: transform 0.2s ease, color 0.2s ease;
     }
 
     .results-popup-insights-list li::before {
-      content: '✓';
+      content: '';
       position: absolute;
-      left: -20px;
-      color: var(--accent-pink);
+      left: 0;
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+      box-shadow: 0 0 6px rgba(255, 107, 157, 0.4);
+    }
+
+    .results-popup-insights-list li:hover {
+      transform: translateX(5px);
+      color: var(--text-primary);
     }
 
     /* Dashboard Styles */

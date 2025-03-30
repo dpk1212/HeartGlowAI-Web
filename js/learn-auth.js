@@ -3,19 +3,47 @@
  * This script ensures authentication is properly initialized before any API calls
  */
 
+// Add a global auth state variable for easy checking
+window.isAuthenticated = false;
+
 // Initialize authentication checking on page load
 document.addEventListener('DOMContentLoaded', function() {
   console.log('learn-auth.js: Initializing authentication checks');
   
-  // Don't show login prompt immediately - check auth state first
-  // Let the Firebase auth state observer handle this
+  // Add a global auth state listener that runs once Firebase is ready
+  // This approach fixes the timing issue with Firebase initialization
+  const checkAuthState = function() {
+    if (typeof firebase !== 'undefined' && firebase.auth) {
+      // Firebase is loaded, set up auth state listener
+      firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+          console.log('User authenticated on page load:', user.uid);
+          window.isAuthenticated = true;
+          hideLoginPrompt(); // Hide login prompt if it's showing
+        } else {
+          console.log('No user authenticated on page load');
+          window.isAuthenticated = false;
+          // Don't automatically show login - wait for an action that requires auth
+        }
+      });
+      
+      // Clear the interval once we've set up the listener
+      clearInterval(authCheckInterval);
+    }
+  };
+  
+  // Check repeatedly until Firebase is fully loaded
+  const authCheckInterval = setInterval(checkAuthState, 100);
+  
+  // Also run immediately
+  checkAuthState();
 });
 
 // Force re-authentication when making API calls
 window.forceAuthentication = async function() {
   return new Promise((resolve, reject) => {
     // First check if we already have a user - this avoids unnecessary prompts
-    if (firebase && firebase.auth && firebase.auth().currentUser) {
+    if (window.isAuthenticated && firebase && firebase.auth && firebase.auth().currentUser) {
       console.log('Already authenticated as:', firebase.auth().currentUser.uid);
       resolve(firebase.auth().currentUser);
       return;
@@ -23,25 +51,22 @@ window.forceAuthentication = async function() {
     
     console.log('No current user found, checking auth state...');
     
-    // Show login prompt after a short delay to allow auth to initialize
-    const authCheckTimeout = setTimeout(() => {
-      console.log('Auth check timed out, showing login prompt');
-      showLoginPrompt();
-    }, 1000);
+    // Show login prompt immediately - we already know user isn't authenticated
+    showLoginPrompt();
     
     // Set a longer timeout for the entire operation
     const operationTimeout = setTimeout(() => {
-      unsubscribe();
+      if (unsubscribe) unsubscribe();
       reject(new Error('Authentication timed out'));
     }, 60000); // 60 seconds total timeout
     
     // Wait for user to sign in
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // User found! Clear timeouts and resolve
-        clearTimeout(authCheckTimeout);
+        // User found! Clear timeout and resolve
         clearTimeout(operationTimeout);
         unsubscribe();
+        window.isAuthenticated = true;
         hideLoginPrompt();
         console.log('User authenticated via state change:', user.uid);
         resolve(user);
@@ -75,6 +100,7 @@ function showLoginPrompt() {
       const provider = new firebase.auth.GoogleAuthProvider();
       firebase.auth().signInWithPopup(provider).then(result => {
         console.log('Google sign-in successful:', result.user.uid);
+        window.isAuthenticated = true;
         hideLoginPrompt();
       }).catch(error => {
         console.error('Google sign-in error:', error);

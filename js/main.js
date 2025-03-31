@@ -1180,12 +1180,48 @@
         popupMessageText.textContent = currentMessage;
       }
       
-      // Update popup insights
+      // Update popup insights with better formatting
       if (popupInsightsList && currentInsights && currentInsights.length > 0) {
         popupInsightsList.innerHTML = '';
+        
+        // Process and format insights
         currentInsights.forEach(insight => {
           const li = document.createElement('li');
-          li.textContent = insight;
+          
+          // Extract title if insight has a format like "Title: Description"
+          const titleMatch = insight.match(/^([^:]+):\s*(.*)/);
+          
+          if (titleMatch && titleMatch[1] && titleMatch[2]) {
+            // If the insight has a title:description format
+            const title = titleMatch[1].trim();
+            const description = titleMatch[2].trim();
+            
+            // Create strong element for the title
+            const titleElement = document.createElement('strong');
+            titleElement.textContent = title;
+            li.appendChild(titleElement);
+            
+            // Add the description as text
+            li.appendChild(document.createTextNode(description));
+          } else {
+            // For insights without clear title formatting
+            // Try to extract a meaningful title from the first few words
+            const words = insight.split(' ');
+            if (words.length > 3) {
+              // Create a title from the first 2-3 words
+              const title = words.slice(0, Math.min(3, Math.floor(words.length/3))).join(' ');
+              const description = words.slice(Math.min(3, Math.floor(words.length/3))).join(' ');
+              
+              const titleElement = document.createElement('strong');
+              titleElement.textContent = title;
+              li.appendChild(titleElement);
+              li.appendChild(document.createTextNode(' ' + description));
+            } else {
+              // If it's a short insight, just show it as is
+              li.textContent = insight;
+            }
+          }
+          
           popupInsightsList.appendChild(li);
         });
       }

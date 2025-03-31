@@ -1,5 +1,6 @@
     // Global variables and functions
     let currentMessage = '';
+    let currentInsights = [];
     let currentUser = null;
     let welcomeScreen, authScreen, homeScreen, generatorScreen, tourScreen, learningScreen; // Declare screen variables globally
     let messageCount = 0;
@@ -910,23 +911,11 @@
         showLoading();
         
         try {
-          // Get the current user's ID token
           const idToken = await currentUser.getIdToken();
-          
-          console.log('Sending request to Cloud Function:', {
-            scenario,
-            relationshipType: relationship,
-            tone,
-            toneIntensity: intensity,
-            relationshipDuration: duration,
-            specialCircumstances: circumstances
-          });
-          
           const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json',
               'Authorization': `Bearer ${idToken}`
             },
             body: JSON.stringify({
@@ -940,117 +929,50 @@
           });
           
           console.log('Response status:', response.status);
+          
+          if (!response.ok) {
+            if (response.status === 429) {
+              throw new Error('Rate limit exceeded. Please try again later.');
+            }
+            throw new Error('Failed to generate message.');
+          }
+          
           const data = await response.json();
           console.log('Response data:', data);
           
-          if (!response.ok) {
-            throw new Error(data.error || 'Failed to generate message');
-          }
-          
-          if (!data.message) {
+          if (data.message) {
+            // Store current message for feedback and tweaking
+            currentMessage = data.message;
+            
+            // Store insights if available
+            if (data.insights && Array.isArray(data.insights)) {
+              currentInsights = data.insights;
+            } else {
+              currentInsights = [];
+            }
+            
+            // Show the result with the new layout
+            showResultsPopup();
+            
+            // Save to history if logged in
+            if (currentUser) {
+              await saveMessage(scenario, relationship, data.message);
+            }
+            
+            // Update message count after successful generation
+            try {
+              await updateMessageCount();
+            } catch (err) {
+              console.log('Error updating message count:', err);
+              // Non-critical error, continue
+            }
+          } else {
             throw new Error('No message received from server');
           }
-          
-          // Store current message for feedback
-          currentMessage = data.message;
-          
-          // Display the message
-          const messageText = document.getElementById('messageText');
-          messageText.textContent = data.message;
-          
-          // Clear and populate insights
-          const insightsList = document.getElementById('insightsList');
-          insightsList.innerHTML = '';
-          if (data.insights && data.insights.length > 0) {
-            data.insights.forEach(insight => {
-              const li = document.createElement('li');
-              li.className = 'insight-item';
-              li.textContent = insight;
-              insightsList.appendChild(li);
-            });
-          }
-          
-          // Hide loading overlay and show result card
-          hideLoading();
-          
-          // Initialize popup elements if needed
-          if (!popupMessageText) {
-            initializePopupElements();
-          }
-          
-          // Update popup content
-          if (popupMessageText) {
-            popupMessageText.textContent = data.message;
-          }
-          
-          // Update popup insights
-          if (popupInsightsList) {
-            popupInsightsList.innerHTML = '';
-            if (data.insights && data.insights.length > 0) {
-              data.insights.forEach(insight => {
-                const li = document.createElement('li');
-                li.textContent = insight;
-                popupInsightsList.appendChild(li);
-              });
-            }
-          }
-          
-          // Show popup instead of original card
-          showResultsPopup();
-          
-          // Also update original card for compatibility (but keep it hidden)
-          if (resultCard) {
-            // Set content but keep hidden
-            resultCard.style.display = "none";
-          }
-          
-          // Save to history if logged in
-          if (currentUser) {
-            await saveMessage(scenario, relationship, data.message);
-          }
-          
-          // After successful message generation, update message count
-          try {
-            if (typeof updateMessageCount === 'function') {
-              await updateMessageCount();
-            } else {
-              console.log('updateMessageCount function not available');
-            }
-          } catch (err) {
-            console.log('Error updating message count:', err);
-            // Non-critical error, continue
-          }
         } catch (error) {
-          // Hide loading
+          console.error('Error:', error);
           hideLoading();
-          
-          console.error('Error details:', {
-            error: error,
-            message: error.message,
-            stack: error.stack,
-            name: error.name
-          });
-          
-          if (error.response) {
-            console.error('Response error:', {
-              status: error.response.status,
-              data: error.response.data,
-              headers: error.response.headers
-            });
-          }
-          
-          // Enhanced error handling
-          if (error.message.includes('authenticated')) {
-            showAlert('Please sign in to generate messages', 'error');
-          } else if (error.message.includes('Failed to fetch') || error.message.includes('Network error')) {
-            showAlert('Network error - please check your connection', 'error');
-          } else if (error.response?.status === 401) {
-            showAlert('Authentication error - please sign in again', 'error');
-          } else if (error.response?.status === 403) {
-            showAlert('Permission denied - please contact support', 'error');
-          } else {
-          showAlert(error.message || 'Failed to generate message', 'error');
-          }
+          showAlert(error.message || 'An error occurred. Please try again.', 'error');
         }
       });
 
@@ -1232,36 +1154,49 @@
     function showResultsPopup() {
       console.log("showResultsPopup called");
       
-      // Initialize elements if needed
-      if (!resultPopupOverlay || !popupMessageText) {
-        console.log("Re-initializing popup elements");
-        initializePopupElements();
-      }
-      
-      // Get the popup overlay element
-      const popup = document.getElementById('resultsPopupOverlay');
-      if (!popup) {
-        console.error('Results popup overlay element not found');
+      // Use the new three-column layout instead of the popup
+      const result = document.getElementById('result');
+      if (!result) {
+        console.error('Result container not found');
         return false;
       }
       
-      // Set high z-index to ensure it's above everything
-      popup.style.zIndex = '10000';
-      popup.style.display = 'flex';
-      
-      // Force browser to reflow the element for animation to work properly
-      void popup.offsetWidth;
-      
-      // Add active class to trigger animations
-      setTimeout(() => {
-        popup.classList.add('active');
-      }, 10);
-      
-      // Hide the original result card
-      const resultCard = document.getElementById('result');
-      if (resultCard) {
-        resultCard.style.display = 'none';
+      // Set the message in the center column
+      const messageText = document.getElementById('messageText');
+      if (messageText && currentMessage) {
+        messageText.textContent = currentMessage;
       }
+      
+      // Display insights in the left column
+      const insightsList = document.getElementById('insightsList');
+      if (insightsList && currentInsights && currentInsights.length > 0) {
+        insightsList.innerHTML = '';
+        currentInsights.forEach(insight => {
+          const li = document.createElement('li');
+          li.textContent = insight;
+          insightsList.appendChild(li);
+        });
+      }
+      
+      // Initialize sliders at default positions
+      const toneAdjustment = document.getElementById('toneAdjustment');
+      const lengthAdjustment = document.getElementById('lengthAdjustment');
+      
+      if (toneAdjustment) {
+        toneAdjustment.value = 3;
+        updateSliderLabels(toneAdjustment, 'More Casual', 'Current', 'More Formal');
+      }
+      
+      if (lengthAdjustment) {
+        lengthAdjustment.value = 3;
+        updateSliderLabels(lengthAdjustment, 'Shorter', 'Current', 'Longer');
+      }
+      
+      // Hide the loading spinner
+      hideLoading();
+      
+      // Show the result with the new layout
+      result.style.display = 'block';
       
       return true;
     }

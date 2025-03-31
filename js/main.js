@@ -13,11 +13,19 @@
     let copyMessageBtn = null;
     let closeFeedbackBtn = null;
     let resultCard = null;
+    let popupFeedbackSection = null;
+    let popupFeedback = null;
+    let popupToneAdjustment = null;
+    let popupLengthAdjustment = null;
 
     function initializePopupElements() {
       resultPopupOverlay = document.getElementById('resultsPopupOverlay');
       popupMessageText = document.getElementById('popupMessageText');
       popupInsightsList = document.getElementById('popupInsightsList');
+      popupFeedbackSection = document.getElementById('popupFeedbackSection');
+      popupFeedback = document.getElementById('popupFeedback');
+      popupToneAdjustment = document.getElementById('popupToneAdjustment');
+      popupLengthAdjustment = document.getElementById('popupLengthAdjustment');
       resultCard = document.getElementById('result');
     }
 
@@ -1154,49 +1162,54 @@
     function showResultsPopup() {
       console.log("showResultsPopup called");
       
-      // Use the new three-column layout instead of the popup
-      const result = document.getElementById('result');
-      if (!result) {
-        console.error('Result container not found');
+      // Initialize elements if needed
+      if (!resultPopupOverlay || !popupMessageText) {
+        console.log("Re-initializing popup elements");
+        initializePopupElements();
+      }
+      
+      // Get the popup overlay element
+      const popup = document.getElementById('resultsPopupOverlay');
+      if (!popup) {
+        console.error('Results popup overlay element not found');
         return false;
       }
       
-      // Set the message in the center column
-      const messageText = document.getElementById('messageText');
-      if (messageText && currentMessage) {
-        messageText.textContent = currentMessage;
+      // Update popup content with the current message
+      if (popupMessageText && currentMessage) {
+        popupMessageText.textContent = currentMessage;
       }
       
-      // Display insights in the left column
-      const insightsList = document.getElementById('insightsList');
-      if (insightsList && currentInsights && currentInsights.length > 0) {
-        insightsList.innerHTML = '';
+      // Update popup insights
+      if (popupInsightsList && currentInsights && currentInsights.length > 0) {
+        popupInsightsList.innerHTML = '';
         currentInsights.forEach(insight => {
           const li = document.createElement('li');
           li.textContent = insight;
-          insightsList.appendChild(li);
+          popupInsightsList.appendChild(li);
         });
       }
       
-      // Initialize sliders at default positions
-      const toneAdjustment = document.getElementById('toneAdjustment');
-      const lengthAdjustment = document.getElementById('lengthAdjustment');
+      // Set high z-index to ensure it's above everything
+      popup.style.zIndex = '10000';
+      popup.style.display = 'flex';
       
-      if (toneAdjustment) {
-        toneAdjustment.value = 3;
-        updateSliderLabels(toneAdjustment, 'More Casual', 'Current', 'More Formal');
-      }
+      // Force browser to reflow the element for animation to work properly
+      void popup.offsetWidth;
       
-      if (lengthAdjustment) {
-        lengthAdjustment.value = 3;
-        updateSliderLabels(lengthAdjustment, 'Shorter', 'Current', 'Longer');
+      // Add active class to trigger animations
+      setTimeout(() => {
+        popup.classList.add('active');
+      }, 10);
+      
+      // Hide the original result card
+      const resultCard = document.getElementById('result');
+      if (resultCard) {
+        resultCard.style.display = 'none';
       }
       
       // Hide the loading spinner
       hideLoading();
-      
-      // Show the result with the new layout
-      result.style.display = 'block';
       
       return true;
     }
@@ -1254,20 +1267,42 @@
     }
 
     function copyPopupMessage() {
+      console.log("copyPopupMessage called");
+      
+      // Initialize elements if needed
       if (!popupMessageText) {
         initializePopupElements();
       }
       
-      const textToCopy = popupMessageText.textContent;
-      if (textToCopy) {
-        navigator.clipboard.writeText(textToCopy)
-          .then(() => {
-            alert('Message copied to clipboard!');
-          })
-          .catch(err => {
-            console.error('Error copying text: ', err);
-          });
+      if (!popupMessageText) {
+        console.error('Popup message text element not found');
+        return false;
       }
+      
+      // Get the message text
+      const messageText = popupMessageText.textContent;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(messageText)
+        .then(() => {
+          // Show success indicator
+          const copyButton = document.querySelector('.popup-copy-button');
+          if (copyButton) {
+            const originalText = copyButton.innerHTML;
+            copyButton.innerHTML = '<span>✓</span> Copied!';
+            
+            // Reset after 2 seconds
+            setTimeout(() => {
+              copyButton.innerHTML = originalText;
+            }, 2000);
+          }
+        })
+        .catch(err => {
+          console.error('Failed to copy text: ', err);
+          showAlert('Failed to copy to clipboard', 'error');
+        });
+      
+      return true;
     }
 
     function tweakPopupMessage() {
@@ -2312,6 +2347,51 @@ Maintain the core message and emotional intent while applying these changes.`
         case '4': return 'Make it slightly longer';
         case '5': return 'Make it much longer and more detailed';
         default: return 'Keep current length';
+      }
+    }
+
+    // Function to handle slider regeneration
+    function regenerateWithOptions() {
+      console.log("regenerateWithOptions called");
+      
+      // Get slider values
+      const toneValue = document.getElementById('popupToneAdjustment').value;
+      const lengthValue = document.getElementById('popupLengthAdjustment').value;
+      
+      // Determine tone and length adjustments
+      let toneAdjustment = "neutral";
+      if (toneValue == 1) toneAdjustment = "very casual";
+      else if (toneValue == 2) toneAdjustment = "somewhat casual";
+      else if (toneValue == 4) toneAdjustment = "somewhat formal";
+      else if (toneValue == 5) toneAdjustment = "very formal";
+      
+      let lengthAdjustment = "same length";
+      if (lengthValue == 1) lengthAdjustment = "much shorter";
+      else if (lengthValue == 2) lengthAdjustment = "a bit shorter";
+      else if (lengthValue == 4) lengthAdjustment = "a bit longer";
+      else if (lengthValue == 5) lengthAdjustment = "much longer";
+      
+      // Build feedback based on slider settings
+      const feedback = `Please regenerate this message with the following adjustments: 
+      - Make it ${toneAdjustment} in tone
+      - Make it ${lengthAdjustment}
+      But keep the same overall content and message.`;
+      
+      // Set feedback in the textarea
+      const popupFeedback = document.getElementById('popupFeedback');
+      if (popupFeedback) {
+        popupFeedback.value = feedback;
+        
+        // Show the feedback section
+        const feedbackSection = document.getElementById('popupFeedbackSection');
+        if (feedbackSection) {
+          feedbackSection.style.display = 'block';
+        }
+        
+        // Trigger tweak message
+        tweakPopupMessage();
+      } else {
+        console.error('Cannot find popupFeedback element');
       }
     }
 

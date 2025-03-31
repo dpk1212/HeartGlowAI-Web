@@ -1771,7 +1771,7 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(5, 10, 20, 0.9);
+      background-color: rgba(5, 10, 20, 0.95);
       backdrop-filter: blur(10px);
       z-index: 1000;
       display: none;
@@ -1795,8 +1795,8 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       padding: 32px;
-      width: 90%;
-      max-width: 600px;
+      width: 95%;
+      max-width: 1200px;
       max-height: 90vh;
       overflow-y: auto;
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
@@ -3767,6 +3767,246 @@
       }
       
       .controls-column {
+        order: 3;
+      }
+    }
+
+    /* Popup Result Layout */
+    .popup-result-layout {
+      display: grid;
+      grid-template-columns: 300px 1fr 300px;
+      gap: 24px;
+      margin-top: 20px;
+      width: 100%;
+    }
+
+    .popup-result-column {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 20px;
+      height: fit-content;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    /* Popup Insights Column */
+    .popup-insights-column {
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, rgba(100, 210, 255, 0.1) 100%);
+    }
+
+    .popup-insights-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .popup-insights-icon {
+      font-size: 24px;
+    }
+
+    .popup-insights-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .popup-insights-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px 0;
+    }
+
+    .popup-insights-list li {
+      position: relative;
+      padding-left: 24px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .popup-insights-list li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-pink);
+      font-size: 20px;
+    }
+
+    /* Popup Message Column */
+    .popup-message-column {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .popup-message-text {
+      font-size: 18px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+      white-space: pre-wrap;
+      color: var(--text-primary);
+      padding: 20px;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-left: 3px solid var(--accent-pink);
+    }
+
+    .popup-button-group {
+      display: flex;
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .popup-copy-button, .popup-tweak-button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .popup-copy-button {
+      background: var(--accent-blue);
+      color: white;
+    }
+
+    .popup-tweak-button {
+      background: var(--accent-pink);
+      color: white;
+    }
+
+    .popup-feedback-section {
+      display: none;
+      margin-top: 20px;
+    }
+
+    .popup-feedback-section textarea {
+      width: 100%;
+      min-height: 100px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 16px;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      resize: vertical;
+    }
+
+    /* Popup Controls Column */
+    .popup-controls-column {
+      background: linear-gradient(135deg, rgba(100, 210, 255, 0.1) 0%, rgba(255, 107, 157, 0.1) 100%);
+    }
+
+    .popup-controls-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin: 0 0 16px 0;
+    }
+
+    .popup-slider-container {
+      margin-bottom: 24px;
+    }
+
+    .popup-slider {
+      width: 100%;
+      height: 6px;
+      -webkit-appearance: none;
+      background: linear-gradient(to right, var(--accent-pink), var(--accent-blue));
+      border-radius: 3px;
+      outline: none;
+      margin-bottom: 10px;
+    }
+
+    .popup-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    }
+
+    .popup-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+      border: none;
+    }
+
+    .popup-slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+
+    .popup-slider-current {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .popup-generate-new-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-pink) 100%);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      margin-top: 30px;
+    }
+
+    .popup-generate-new-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(100, 210, 255, 0.3);
+    }
+
+    /* Responsive Design for Popup */
+    @media (max-width: 1200px) {
+      .popup-result-layout {
+        grid-template-columns: 250px 1fr 250px;
+        gap: 16px;
+      }
+    }
+
+    @media (max-width: 900px) {
+      .popup-result-layout {
+        grid-template-columns: 1fr;
+      }
+      
+      .popup-result-column {
+        margin-bottom: 16px;
+      }
+      
+      .popup-message-column {
+        order: 1;
+      }
+      
+      .popup-insights-column {
+        order: 2;
+      }
+      
+      .popup-controls-column {
         order: 3;
       }
     }

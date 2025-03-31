@@ -373,19 +373,75 @@
         </div>
         
         <div id="result" class="result-card" style="display: none;">
-          <div class="message-text" id="messageText"></div>
-          <div class="button-group">
-            <button class="copy-button" onclick="copyMessage()">Copy Message</button>
-            <button class="tweak-button" onclick="showFeedback()">Tweak Message</button>
-          </div>
-          <div class="feedback-section" id="feedbackSection">
-            <label for="feedback">How would you like to improve this message?</label>
-            <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
-            <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
-          </div>
-          <div class="insights-section">
-            <div class="insights-title">Why this message works:</div>
-            <ul class="insights-list" id="insightsList"></ul>
+          <div class="result-layout">
+            <!-- Left Column: Insights -->
+            <div class="result-column insights-column">
+              <div class="insights-section">
+                <div class="insights-header">
+                  <span class="insights-icon">💡</span>
+                  <h3 class="insights-title">Message Insights</h3>
+                </div>
+                <ul class="insights-list" id="insightsList"></ul>
+                <button class="grade-message-btn">
+                  <span class="grade-icon">⭐</span>
+                  Grade This Message
+                </button>
+              </div>
+            </div>
+            
+            <!-- Center Column: Message -->
+            <div class="result-column message-column">
+              <div class="message-text" id="messageText"></div>
+              <div class="button-group">
+                <button class="copy-button" onclick="copyMessage()">
+                  <span class="button-icon">📋</span>
+                  Copy Message
+                </button>
+                <button class="tweak-button" onclick="showFeedback()">
+                  <span class="button-icon">✏️</span>
+                  Tweak Message
+                </button>
+              </div>
+              <div class="feedback-section" id="feedbackSection">
+                <label for="feedback">How would you like to improve this message?</label>
+                <textarea id="feedback" class="feedback-input" placeholder="Example: Make it more formal, add more emotion, be more specific about..."></textarea>
+                <button class="tweak-button" onclick="tweakMessage()">Generate New Version</button>
+              </div>
+            </div>
+            
+            <!-- Right Column: Controls -->
+            <div class="result-column controls-column">
+              <div class="message-controls">
+                <div class="control-group">
+                  <label for="toneAdjustment">Tone Adjustment</label>
+                  <div class="slider-container">
+                    <input type="range" id="toneAdjustment" min="1" max="5" value="3" class="slider">
+                    <div class="slider-labels">
+                      <span>More Casual</span>
+                      <span>Current</span>
+                      <span>More Formal</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div class="control-group">
+                  <label for="lengthAdjustment">Length Adjustment</label>
+                  <div class="slider-container">
+                    <input type="range" id="lengthAdjustment" min="1" max="5" value="3" class="slider">
+                    <div class="slider-labels">
+                      <span>Shorter</span>
+                      <span>Current</span>
+                      <span>Longer</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <button class="generate-new-version-btn">
+                  <span class="button-icon">🔄</span>
+                  Generate New Version
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

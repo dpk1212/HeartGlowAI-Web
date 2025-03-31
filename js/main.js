@@ -2195,4 +2195,189 @@
       }
     });
 
+    // Add event listeners for the new controls
+    document.addEventListener('DOMContentLoaded', function() {
+      const toneAdjustment = document.getElementById('toneAdjustment');
+      const lengthAdjustment = document.getElementById('lengthAdjustment');
+      const gradeMessageBtn = document.querySelector('.grade-message-btn');
+      const generateNewVersionBtn = document.querySelector('.generate-new-version-btn');
+
+      // Store current slider values
+      let currentToneValue = 3;
+      let currentLengthValue = 3;
+
+      // Update tone adjustment
+      toneAdjustment.addEventListener('input', function() {
+        currentToneValue = this.value;
+        updateSliderLabels(this, 'More Casual', 'Current', 'More Formal');
+      });
+
+      // Update length adjustment
+      lengthAdjustment.addEventListener('input', function() {
+        currentLengthValue = this.value;
+        updateSliderLabels(this, 'Shorter', 'Current', 'Longer');
+      });
+
+      // Grade message button click handler
+      gradeMessageBtn.addEventListener('click', async function() {
+        if (!currentMessage) {
+          showAlert('No message to grade', 'error');
+          return;
+        }
+
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'loading-spinner';
+        loadingSpinner.innerHTML = '<div class="spinner"></div>';
+        gradeMessageBtn.appendChild(loadingSpinner);
+        gradeMessageBtn.disabled = true;
+
+        try {
+          const idToken = await firebase.auth().currentUser.getIdToken();
+          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+              messageToAnalyze: currentMessage,
+              scenario: `You are an expert in communication psychology and relationship dynamics. Analyze this message and provide a detailed grade with specific feedback on:
+
+1. Emotional Impact (0-10):
+- How well does it convey the intended emotions?
+- Is the emotional tone appropriate for the context?
+
+2. Clarity & Effectiveness (0-10):
+- Is the message clear and easy to understand?
+- Does it achieve its intended purpose?
+
+3. Relationship Appropriateness (0-10):
+- How well does it match the relationship context?
+- Is the tone and formality level appropriate?
+
+4. Authenticity (0-10):
+- How genuine and personal does it feel?
+- Does it reflect the sender's true feelings?
+
+Provide specific examples and suggestions for improvement.`
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to grade message');
+          }
+
+          const data = await response.json();
+          const insightsList = document.getElementById('insightsList');
+          insightsList.innerHTML = ''; // Clear existing insights
+
+          // Parse and display the grade
+          const gradeMatch = data.message.match(/Emotional Impact \((\d+)\)/);
+          const grade = gradeMatch ? gradeMatch[1] : 'N/A';
+          
+          const gradeElement = document.createElement('li');
+          gradeElement.innerHTML = `<strong>Overall Grade: ${grade}/10</strong>`;
+          insightsList.appendChild(gradeElement);
+
+          // Add detailed feedback
+          const feedbackPoints = data.message.split('\n').filter(line => line.trim());
+          feedbackPoints.forEach(point => {
+            if (point.includes('(') && point.includes(')')) {
+              const insightElement = document.createElement('li');
+              insightElement.textContent = point;
+              insightsList.appendChild(insightElement);
+            }
+          });
+
+          showAlert('Message graded successfully!', 'success');
+        } catch (error) {
+          console.error('Error grading message:', error);
+          showAlert('Failed to grade message', 'error');
+        } finally {
+          loadingSpinner.remove();
+          gradeMessageBtn.disabled = false;
+        }
+      });
+
+      // Generate new version button click handler
+      generateNewVersionBtn.addEventListener('click', async function() {
+        if (!currentMessage) {
+          showAlert('No message to modify', 'error');
+          return;
+        }
+
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'loading-spinner';
+        loadingSpinner.innerHTML = '<div class="spinner"></div>';
+        generateNewVersionBtn.appendChild(loadingSpinner);
+        generateNewVersionBtn.disabled = true;
+
+        try {
+          const idToken = await firebase.auth().currentUser.getIdToken();
+          const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify({
+              messageToAnalyze: currentMessage,
+              scenario: `Revise this message with the following adjustments:
+- Tone: ${getToneAdjustment(currentToneValue)}
+- Length: ${getLengthAdjustment(currentLengthValue)}
+
+Maintain the core message and emotional intent while applying these changes.`
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to generate new version');
+          }
+
+          const data = await response.json();
+          currentMessage = data.message;
+          document.getElementById('messageText').textContent = data.message;
+          showAlert('New version generated!', 'success');
+        } catch (error) {
+          console.error('Error generating new version:', error);
+          showAlert('Failed to generate new version', 'error');
+        } finally {
+          loadingSpinner.remove();
+          generateNewVersionBtn.disabled = false;
+        }
+      });
+    });
+
+    // Helper function to update slider labels
+    function updateSliderLabels(slider, leftLabel, centerLabel, rightLabel) {
+      const labels = slider.parentElement.querySelector('.slider-labels').children;
+      labels[0].textContent = leftLabel;
+      labels[1].textContent = centerLabel;
+      labels[2].textContent = rightLabel;
+    }
+
+    // Helper function to get tone adjustment description
+    function getToneAdjustment(value) {
+      switch (value) {
+        case '1': return 'Much more casual and conversational';
+        case '2': return 'Slightly more casual';
+        case '3': return 'Keep current tone';
+        case '4': return 'Slightly more formal';
+        case '5': return 'Much more formal and professional';
+        default: return 'Keep current tone';
+      }
+    }
+
+    // Helper function to get length adjustment description
+    function getLengthAdjustment(value) {
+      switch (value) {
+        case '1': return 'Make it much shorter and more concise';
+        case '2': return 'Make it slightly shorter';
+        case '3': return 'Keep current length';
+        case '4': return 'Make it slightly longer';
+        case '5': return 'Make it much longer and more detailed';
+        default: return 'Keep current length';
+      }
+    }
+
 // Updated on Sun Mar 30 13:14:46 EDT 2025

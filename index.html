@@ -514,25 +514,65 @@
         <button class="results-popup-close" onclick="hideResultsPopup()">×</button>
       </div>
       
-      <div class="results-popup-message" id="popupMessageText"></div>
-      
-      <div class="results-popup-actions">
-        <button class="results-popup-copy-btn" onclick="copyPopupMessage()">
-          <span>📋</span> Copy Message
-        </button>
-        <button class="results-popup-tweak-btn" onclick="showPopupFeedback()">
-          <span>✏️</span> Tweak Message
-        </button>
-      </div>
-      
-      <div class="results-popup-feedback" id="popupFeedbackSection">
-        <textarea id="popupFeedback" placeholder="How would you like to improve this message? Be specific about what to change."></textarea>
-        <button class="results-popup-tweak-btn" onclick="tweakPopupMessage()">Generate New Version</button>
-      </div>
-      
-      <div class="results-popup-insights">
-        <div class="results-popup-insights-title">Why this message works:</div>
-        <ul class="results-popup-insights-list" id="popupInsightsList"></ul>
+      <div class="popup-result-layout">
+        <!-- Left Column: Insights -->
+        <div class="popup-result-column popup-insights-column">
+          <div class="popup-insights-section">
+            <div class="popup-insights-header">
+              <span class="popup-insights-icon">💡</span>
+              <h3 class="popup-insights-title">Message Insights</h3>
+            </div>
+            <ul class="popup-insights-list" id="popupInsightsList"></ul>
+          </div>
+        </div>
+        
+        <!-- Center Column: Message -->
+        <div class="popup-result-column popup-message-column">
+          <div class="popup-message-text" id="popupMessageText"></div>
+          <div class="popup-button-group">
+            <button class="popup-copy-button" onclick="copyPopupMessage()">
+              <span class="popup-button-icon">📋</span>
+              Copy Message
+            </button>
+            <button class="popup-tweak-button" onclick="showPopupFeedback()">
+              <span class="popup-button-icon">✏️</span>
+              Tweak Message
+            </button>
+          </div>
+          <div class="popup-feedback-section" id="popupFeedbackSection">
+            <textarea id="popupFeedback" placeholder="How would you like to improve this message? Be specific about what to change."></textarea>
+            <button class="popup-tweak-button" onclick="tweakPopupMessage()">Generate New Version</button>
+          </div>
+        </div>
+        
+        <!-- Right Column: Controls -->
+        <div class="popup-result-column popup-controls-column">
+          <div class="popup-controls-section">
+            <h3 class="popup-controls-title">Tone Adjustment</h3>
+            <div class="popup-slider-container">
+              <input type="range" id="popupToneAdjustment" min="1" max="5" value="3" class="popup-slider">
+              <div class="popup-slider-labels">
+                <span>More Casual</span>
+                <span class="popup-slider-current">Current</span>
+                <span>More Formal</span>
+              </div>
+            </div>
+            
+            <h3 class="popup-controls-title">Length Adjustment</h3>
+            <div class="popup-slider-container">
+              <input type="range" id="popupLengthAdjustment" min="1" max="5" value="3" class="popup-slider">
+              <div class="popup-slider-labels">
+                <span>Shorter</span>
+                <span class="popup-slider-current">Current</span>
+                <span>Longer</span>
+              </div>
+            </div>
+            
+            <button class="popup-generate-new-btn" onclick="regenerateWithOptions()">
+              <span>🔄</span> Generate New Version
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

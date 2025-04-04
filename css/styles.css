@@ -102,6 +102,8 @@
       background-color: var(--bg-dark);
       position: relative;
       overflow: hidden;
+      background-image: radial-gradient(circle at 0% 0%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 100% 100%, rgba(100, 210, 255, 0.1) 0%, transparent 50%);
     }
     
     .welcome-content {
@@ -118,9 +120,9 @@
     }
     
     .welcome-heart {
-      width: 180px;
-      height: 180px;
-      margin-bottom: 60px;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 40px;
       position: relative;
       animation: float 6s ease-in-out infinite;
     }
@@ -148,9 +150,9 @@
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
-      font-size: 48px;
+      font-size: 42px;
       font-weight: 700;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       text-align: center;
       letter-spacing: -0.5px;
       line-height: 1.2;
@@ -158,11 +160,230 @@
     
     .welcome-subtitle {
       color: var(--text-secondary);
-      font-size: 24px;
-      margin-bottom: 40px;
+      font-size: 22px;
+      margin-bottom: 35px;
       text-align: center;
       max-width: 600px;
       line-height: 1.5;
+    }
+    
+    /* Sample Message Card Styles */
+    .sample-message-card {
+      background-color: rgba(25, 33, 52, 0.8);
+      border-radius: 24px;
+      padding: 25px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 30px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      animation: cardEntrance 0.8s ease-out 0.3s both;
+    }
+    
+    @keyframes cardEntrance {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .sample-message-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    }
+    
+    .sample-message-content {
+      color: var(--text-primary);
+      font-size: 24px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    
+    .sample-message-meta {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+      opacity: 0.8;
+    }
+    
+    .sample-tone-tag {
+      font-size: 14px;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.1);
+      padding: 4px 12px;
+      border-radius: 100px;
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    /* Message Insights */
+    .message-insights {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    
+    .insights-header {
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    
+    .insights-icon {
+      margin-right: 8px;
+      font-size: 18px;
+    }
+    
+    .insights-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .insights-list li {
+      position: relative;
+      padding-left: 16px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      margin-bottom: 8px;
+      line-height: 1.4;
+    }
+    
+    .insights-list li:before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent-pink);
+    }
+    
+    /* Quick Options */
+    .quick-options {
+      width: 100%;
+      margin-bottom: 16px;
+    }
+    
+    .option-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 16px;
+      width: 100%;
+    }
+    
+    @media (min-width: 500px) {
+      .option-inputs {
+        flex-direction: row;
+      }
+    }
+    
+    .relationship-dropdown,
+    .tone-dropdown {
+      flex: 1;
+    }
+    
+    .quick-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      padding: 14px 16px;
+      border-radius: 16px;
+      font-size: 16px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23B7BAC1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 16px center;
+      transition: border-color 0.3s ease;
+    }
+    
+    .quick-select:focus {
+      outline: none;
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 3px rgba(100, 210, 255, 0.2);
+    }
+    
+    .primary-button {
+      width: 100%;
+      background: var(--primary-gradient);
+      color: white;
+      border: none;
+      padding: 16px 24px;
+      border-radius: 16px;
+      font-size: 17px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+      z-index: 1;
+    }
+    
+    .primary-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
+    }
+    
+    .primary-button:active {
+      transform: scale(0.98);
+    }
+    
+    .no-signup-option {
+      text-align: center;
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+      cursor: pointer;
+      margin-bottom: 16px;
+    }
+    
+    .no-signup-option:hover {
+      color: var(--text-primary);
+      text-decoration: underline;
+    }
+    
+    /* Tone Buttons */
+    .tone-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    
+    .tone-pill {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--text-secondary);
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .tone-pill:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-primary);
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+    
+    .tone-pill.active {
+      background: var(--primary-gradient);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 2px 10px rgba(255, 107, 157, 0.3);
     }
     
     .trust-badge {
@@ -170,34 +391,60 @@
       color: var(--text-secondary);
       opacity: 0.8;
       text-align: center;
-      margin-top: 20px;
-      padding-top: 10px;
+      margin-top: 25px;
+      padding-top: 15px;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       width: 100%;
       max-width: 400px;
     }
     
+    .built-on {
+      font-size: 13px;
+      color: var(--text-secondary);
+      opacity: 0.6;
+      text-align: center;
+      margin-top: 10px;
+    }
+    
+    @media (max-width: 480px) {
+      .welcome-title {
+        font-size: 36px;
+      }
+      
+      .welcome-subtitle {
+        font-size: 18px;
+        margin-bottom: 30px;
+      }
+      
+      .welcome-heart {
+        width: 100px;
+        height: 100px;
+        margin-bottom: 30px;
+      }
+      
+      .sample-message-content {
+        font-size: 20px;
+      }
+      
+      .sample-message-card {
+        padding: 20px;
+      }
+      
+      .primary-button {
+        padding: 14px 20px;
+      }
+    }
+    
     #login-register-btn {
-      background: var(--primary-gradient);
-      color: white;
-      border: none;
-      padding: 16px 32px;
-      font-size: 16px;
-      font-weight: 600;
-      border-radius: 100px;
-      cursor: pointer;
-      width: 100%;
-      max-width: 300px;
-      transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
+      /* Styling now handled by .primary-button class */
     }
     
     #login-register-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--box-shadow-hover);
+      /* Styling now handled by .primary-button:hover */
     }
     
     #login-register-btn:active {
-      transform: scale(0.98);
+      /* Styling now handled by .primary-button:active */
     }
     
     /* Animated background for welcome screen */
@@ -2864,8 +3111,6 @@
       transition: all 0.3s ease;
       margin-top: 24px;
       margin-bottom: 12px;
-      opacity: 0;
-      animation: fadeInUp 0.8s ease forwards 0.2s;
     }
     
     .tour-cta-button:hover {
@@ -3796,12 +4041,12 @@
     .popup-insights-header {
       display: flex;
       align-items: center;
-      margin-bottom: 16px;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
     .popup-insights-icon {
-      font-size: 20px;
-      margin-right: 10px;
+      font-size: 24px;
     }
 
     .popup-insights-title {
@@ -3809,10 +4054,6 @@
       font-weight: 600;
       color: var(--text-primary);
       margin: 0;
-      background: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-blue) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
 
     .popup-insights-list {
@@ -3823,29 +4064,18 @@
 
     .popup-insights-list li {
       position: relative;
-      padding: 10px 0 10px 32px;
-      margin-bottom: 10px;
+      padding-left: 24px;
+      margin-bottom: 12px;
       color: var(--text-primary);
-      line-height: 1.4;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 8px;
-      border-left: 3px solid var(--accent-pink);
-    }
-
-    .popup-insights-list li strong {
-      display: block;
-      margin-bottom: 4px;
-      color: #fff;
-      font-size: 15px;
+      line-height: 1.5;
     }
 
     .popup-insights-list li:before {
-      content: "✓";
+      content: "•";
       position: absolute;
-      left: 10px;
-      top: 10px;
+      left: 0;
       color: var(--accent-pink);
-      font-weight: bold;
+      font-size: 20px;
     }
 
     /* Popup Message Column */

@@ -478,6 +478,103 @@
         showScreen(authScreen);
       });
       
+      // Try without signup option
+      const noSignupOption = document.querySelector('.no-signup-option');
+      if (noSignupOption) {
+        noSignupOption.addEventListener('click', function() {
+          // Pre-fill the quick options data if selected
+          const quickRelationship = document.getElementById('quick-relationship');
+          const quickTone = document.getElementById('quick-tone');
+          const activeTonePill = document.querySelector('.tone-pill.active');
+          
+          // Prepare the generator screen
+          if (scenarioInput) {
+            scenarioInput.value = ""; // Clear any previous input
+            
+            // Set relationship if selected
+            if (quickRelationship && quickRelationship.value && relationshipSelect) {
+              relationshipSelect.value = quickRelationship.value;
+            }
+            
+            // Set tone if selected
+            if (quickTone && quickTone.value && document.getElementById('tone')) {
+              document.getElementById('tone').value = quickTone.value;
+            }
+            
+            // Skip auth and go directly to generator
+            showScreen(generatorScreen);
+          }
+        });
+      }
+      
+      // Tone pill buttons
+      const tonePills = document.querySelectorAll('.tone-pill');
+      tonePills.forEach(pill => {
+        pill.addEventListener('click', function() {
+          // Remove active class from all pills
+          tonePills.forEach(p => p.classList.remove('active'));
+          
+          // Add active class to clicked pill
+          this.classList.add('active');
+          
+          // Optionally set the tone in the dropdown
+          const quickTone = document.getElementById('quick-tone');
+          if (quickTone) {
+            const pillText = this.textContent.toLowerCase();
+            
+            // Map pill text to tone option values
+            const toneMap = {
+              'gentle': 'casual',
+              'honest': 'serious',
+              'warm': 'casual'
+            };
+            
+            if (toneMap[pillText] && quickTone.querySelector(`option[value="${toneMap[pillText]}"]`)) {
+              quickTone.value = toneMap[pillText];
+            }
+          }
+        });
+      });
+      
+      // Quick relationship and tone selection
+      const quickRelationship = document.getElementById('quick-relationship');
+      const quickTone = document.getElementById('quick-tone');
+      
+      if (quickRelationship) {
+        quickRelationship.addEventListener('change', function() {
+          // Highlight this field to show it's been selected
+          this.style.borderColor = 'var(--accent-pink)';
+        });
+      }
+      
+      if (quickTone) {
+        quickTone.addEventListener('change', function() {
+          // Highlight this field to show it's been selected
+          this.style.borderColor = 'var(--accent-pink)';
+          
+          // Update tone pills to match if possible
+          const tonePills = document.querySelectorAll('.tone-pill');
+          const selectedTone = this.value;
+          
+          // Simple mapping from tone values to pill text
+          const toneToLabel = {
+            'casual': 'Gentle',
+            'formal': 'Formal',
+            'humorous': 'Warm',
+            'serious': 'Honest'
+          };
+          
+          if (toneToLabel[selectedTone]) {
+            tonePills.forEach(pill => {
+              pill.classList.remove('active');
+              if (pill.textContent === toneToLabel[selectedTone]) {
+                pill.classList.add('active');
+              }
+            });
+          }
+        });
+      }
+      
       // Learn with AI button event listener
       const learnBtn = document.getElementById('learn-btn');
       if (learnBtn) {

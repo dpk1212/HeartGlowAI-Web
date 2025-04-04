@@ -521,13 +521,28 @@
           // Check feedback status
           await checkFeedbackStatus();
           
-          // Go to home screen by default
-          showScreen(homeScreen);
+          // Check if we have the loggedIn parameter (and we're not already on the home screen)
+          const urlParams = new URLSearchParams(window.location.search);
+          const loggedIn = urlParams.get('loggedIn') === 'true';
+          const isHomeActive = homeScreen.classList.contains('active');
+          
+          // Only switch to home screen if the screen is not already the home screen
+          if (!isHomeActive) {
+            console.log("Auth state change: User logged in, showing home screen");
+            showScreen(homeScreen);
+          }
           
           // Ensure template clicks work after auth state is determined
           attachTemplateClickListeners();
         } else {
-          showScreen(welcomeScreen);
+          // Only switch to welcome screen if we're not specifically trying to show the home screen
+          const urlParams = new URLSearchParams(window.location.search);
+          const loggedIn = urlParams.get('loggedIn') === 'true';
+          
+          if (!loggedIn) {
+            console.log("Auth state change: No user logged in, showing welcome screen");
+            showScreen(welcomeScreen);
+          }
         }
       });
       
@@ -2885,6 +2900,17 @@ Maintain the core message and emotional intent while applying these changes.`
       if (!welcomeScreenCheck) {
         console.log("main.js: Skipping screen initialization (not on index.html).");
         return; 
+      }
+      
+      // Check if there's a loggedIn parameter in the URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const loggedIn = urlParams.get('loggedIn');
+      if (loggedIn === 'true') {
+        console.log("main.js: loggedIn parameter detected. Showing home screen.");
+        // Must delay slightly to ensure Firebase has time to initialize
+        setTimeout(() => {
+          showScreen(homeScreen);
+        }, 100);
       }
       
       // Add favicon

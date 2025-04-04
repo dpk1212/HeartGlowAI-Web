@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - HeartGlowAI</title>
+  <meta name="description" content="Log in or sign up to HeartGlowAI - AI-powered heartfelt message generator.">
+  
+  <!-- Resource Hints -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://us-central1-heartglowai.cloudfunctions.net" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preload" href="css/styles.css" as="style">
+  <link rel="preload" href="js/login.js" as="script">
+  
+  <!-- Font Loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <div class="brand-header">
+      <div class="brand-logo">
+        <div class="logo-heart">❤️</div>
+        <div class="brand-name">HeartGlow<span class="brand-ai">AI</span></div>
+      </div>
+    </div>
+    
+    <!-- Auth Container -->
+    <div class="auth-container">
+      <h1 class="auth-title">Log in or sign up</h1>
+      
+      <!-- Google Sign In button -->
+      <button id="google-sign-in" class="google-btn">
+        <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNNCAxMC43YTUuNCA1LjQgMCAwIDEgMC0zLjRWNUgxYTkgOSAwIDAgMCAwIDhsMy0yLjN6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjZjMS4zIDAgMi41LjQgMy40IDEuM0wxNSAyLjNBOSA5IDAgMCAwIDEgNWwzIDIuNGE1LjQgNS40IDAgMCAxIDUtMy43eiIgZmlsbD0iI0VBNDMzNSIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMGgxOHYxOEgweiIvPjwvZz48L3N2Zz4=" alt="Google logo">
+        Continue with Google
+      </button>
+      
+      <div class="auth-divider">
+        <span>or continue with email</span>
+      </div>
+      
+      <form id="auth-form" class="auth-form">
+        <label class="input-label" for="email">Email</label>
+        <input type="email" id="email" class="input-field" placeholder="Enter your email">
+        
+        <label class="input-label" for="password">Password</label>
+        <input type="password" id="password" class="input-field" placeholder="Enter your password">
+        
+        <button type="submit" id="auth-submit-btn" class="btn">Continue</button>
+      </form>
+      
+      <div class="auth-links">
+        <span id="auth-toggle-text">Don't have an account?</span>
+        <a href="#" id="auth-toggle-link" class="auth-link">Sign up</a>
+      </div>
+      
+      <div class="auth-links">
+        <a href="#" id="forgot-password-link" class="auth-link">Forgot password?</a>
+      </div>
+      
+      <div class="auth-links" style="margin-top: 25px;">
+        <a href="index.html" class="auth-link">← Back to home</a>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-container">
+      <div class="heart-animation">
+        <div class="heart-shape"></div>
+        <div class="heart-glow"></div>
+        <div class="heart-particles">
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+          <div class="particle"></div>
+        </div>
+      </div>
+      <div id="loadingContext" class="loading-context">Authenticating...</div>
+    </div>
+  </div>
+  
+  <!-- Alert Component -->
+  <div id="alertContainer" class="alert-container"></div>
+  
+  <!-- JavaScript -->
+  <script src="js/login.js"></script>
+</body>
+</html> 

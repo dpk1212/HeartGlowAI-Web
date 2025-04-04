@@ -2440,4 +2440,172 @@ Maintain the core message and emotional intent while applying these changes.`
       }
     }
 
+    // Event Listeners for Type Selection Flow
+    // Select message type cards
+    const messageTypeCards = document.querySelectorAll('.message-type-card');
+    const nextStepBtn = document.getElementById('next-step-btn');
+    const messageFlowScreen = document.getElementById('message-flow-screen');
+    const backToTypesBtn = document.getElementById('back-to-types-btn');
+    const selectedTypeIcon = document.getElementById('selected-type-icon');
+    const selectedTypeText = document.getElementById('selected-type-text');
+    
+    // Track the currently selected message type
+    let selectedMessageType = null;
+    
+    // Add click listeners to message type cards
+    messageTypeCards.forEach(card => {
+      card.addEventListener('click', function() {
+        // Remove selected class from all cards
+        messageTypeCards.forEach(c => c.classList.remove('selected'));
+        
+        // Add selected class to clicked card
+        this.classList.add('selected');
+        
+        // Store the selected type
+        const typeId = this.id;
+        selectedMessageType = typeId.replace('-type', '');
+        
+        // Show the next button
+        nextStepBtn.style.display = 'block';
+      });
+    });
+    
+    // Handle next button click - go to type-specific flow
+    nextStepBtn.addEventListener('click', function() {
+      if (!selectedMessageType) {
+        return; // Do nothing if no type selected
+      }
+      
+      // Update the type indicator in the flow screen
+      const iconMap = {
+        'romantic': '❤️',
+        'professional': '👔',
+        'personal': '💬'
+      };
+      
+      selectedTypeIcon.textContent = iconMap[selectedMessageType] || '💌';
+      selectedTypeText.textContent = selectedMessageType.charAt(0).toUpperCase() + selectedMessageType.slice(1);
+      
+      // Update example message based on selected type
+      updateExampleMessage(selectedMessageType);
+      
+      // Show the message flow screen
+      showScreen(messageFlowScreen);
+    });
+    
+    // Handle back button from flow screen
+    backToTypesBtn.addEventListener('click', function() {
+      showScreen(welcomeScreen);
+    });
+    
+    // Handle scenario selection
+    const scenarioCards = document.querySelectorAll('.scenario-card');
+    scenarioCards.forEach(card => {
+      card.addEventListener('click', function() {
+        // Toggle selection
+        scenarioCards.forEach(c => c.classList.remove('selected'));
+        this.classList.add('selected');
+        
+        // Get selected scenario
+        const scenarioType = this.getAttribute('data-scenario');
+        updateExampleMessage(selectedMessageType, scenarioType);
+      });
+    });
+    
+    // Update example message based on selection
+    function updateExampleMessage(messageType, scenario = null) {
+      const exampleTextElement = document.getElementById('example-message-text');
+      
+      // Example messages by type and scenario
+      const messages = {
+        romantic: {
+          reconnect: "It's been on my mind for a while now, and I just wanted to reach out. I miss our conversations and the way we used to laugh together. I hope we can reconnect soon.",
+          appreciation: "I was thinking about the time you surprised me with that perfect gift, and it made me smile. You've always had a way of knowing exactly what I need. I truly appreciate how thoughtful you are.",
+          missing: "I've been thinking about you lately. The little things keep reminding me of our time together, and I realized I never properly expressed how much you mean to me. I miss the way you always knew how to make me laugh."
+        },
+        professional: {
+          reconnect: "I hope this message finds you well. It's been some time since we last connected, and I wanted to reach out to see how things have progressed since our last interaction.",
+          appreciation: "I wanted to take a moment to express my sincere appreciation for your guidance on the recent project. Your insights were invaluable and made a significant difference in the outcome.",
+          missing: "I've been reflecting on our professional relationship, and I realized I never properly acknowledged how much your mentorship has meant to me. Your advice has been instrumental in my growth."
+        },
+        personal: {
+          reconnect: "It's been too long since we caught up! Life gets busy, but I've been thinking about you and wondering how you've been. I'd love to hear what's new in your world.",
+          appreciation: "I was just thinking about that time you helped me through that rough patch. Your support meant more than you know, and I'm grateful to have you in my life.",
+          missing: "It's been a while. I just wanted to reach out and let you know you've been on my mind. Sometimes the simplest connections are the most meaningful."
+        }
+      };
+      
+      // Default to the missing scenario if none selected
+      const defaultScenario = 'missing';
+      const selectedScenario = scenario || defaultScenario;
+      
+      // Set the example message text
+      if (messages[messageType] && messages[messageType][selectedScenario]) {
+        exampleTextElement.textContent = messages[messageType][selectedScenario];
+      }
+    }
+    
+    // Event Listeners
+    loginRegisterBtn.addEventListener('click', function() {
+      showScreen(authScreen);
+    });
+    
+    // No account note (try without signing up)
+    const noAccountNote = document.querySelector('.no-account-note');
+    if (noAccountNote) {
+      noAccountNote.addEventListener('click', function() {
+        prefillAndNavigateToGenerator();
+      });
+    }
+    
+    // Get Started button in the flow screen
+    const createMessageBtn = document.getElementById('create-message-btn');
+    if (createMessageBtn) {
+      createMessageBtn.addEventListener('click', function() {
+        prefillAndNavigateToGenerator();
+      });
+    }
+    
+    // Helper function to prefill generator and navigate to it
+    function prefillAndNavigateToGenerator() {
+      // Pre-fill the generator form based on selections
+      if (scenarioInput && relationshipSelect) {
+        // Determine scenario text based on selected message type and scenario
+        const selectedScenario = document.querySelector('.scenario-card.selected');
+        let scenarioDescription = '';
+        
+        if (selectedMessageType === 'romantic') {
+          relationshipSelect.value = 'Romantic Partner';
+          scenarioDescription = 'Express my feelings to my partner';
+        } else if (selectedMessageType === 'professional') {
+          relationshipSelect.value = 'Professional';
+          scenarioDescription = 'Communicate with a colleague or professional contact';
+        } else if (selectedMessageType === 'personal') {
+          relationshipSelect.value = 'Friend';
+          scenarioDescription = 'Reach out to a friend';
+        } else {
+          // Default if no type was selected
+          relationshipSelect.value = 'Friend';
+          scenarioDescription = 'Write a heartfelt message';
+        }
+        
+        // Add scenario detail if available
+        if (selectedScenario) {
+          const scenarioType = selectedScenario.getAttribute('data-scenario');
+          if (scenarioType === 'reconnect') {
+            scenarioDescription += ' after we haven\'t spoken in a while';
+          } else if (scenarioType === 'appreciation') {
+            scenarioDescription += ' to show my appreciation';
+          } else if (scenarioType === 'missing') {
+            scenarioDescription += ' to let them know I miss them';
+          }
+        }
+        
+        scenarioInput.value = scenarioDescription;
+        
+        // Show generator screen directly (skip auth)
+        showScreen(generatorScreen);
+      }
+    }
+
 // Updated on Sun Mar 30 13:14:46 EDT 2025

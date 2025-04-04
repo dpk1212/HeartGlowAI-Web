@@ -16,6 +16,9 @@
   <!-- Font Loading -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
@@ -165,6 +168,15 @@
   </style>
 </head>
 <body>
+  <!-- Debug Console -->
+  <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+    <div>
+      Debug Console: 
+      <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+    </div>
+    <div id="debug-output"></div>
+  </div>
+
   <!-- Header and Navigation -->
   <header class="header">
     <div class="logo-container">
@@ -172,7 +184,7 @@
       <div class="logo-text">HeartGlowAI</div>
     </div>
     <nav class="nav-bar">
-      <button id="dashboard-btn" class="nav-button active">
+      <button id="dashboard-btn" class="nav-button">
         <i class="fas fa-columns"></i> Dashboard
       </button>
       <button id="history-btn" class="nav-button">
@@ -187,7 +199,7 @@
     </nav>
   </header>
 
-  <main class="entry-card-container">
+  <main class="entry-card-container" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
     <h1 class="page-title">Let's help you say something real.</h1>
     <p class="page-subtitle">Select your emotional starting point, and we'll guide you through creating a meaningful message.</p>
     
@@ -244,6 +256,57 @@
 
   <!-- JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  
+  <script>
+    // Debug logging function
+    function debugLog(message) {
+      console.log('DEBUG:', message);
+      const debugOutput = document.getElementById('debug-output');
+      if (debugOutput) {
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        debugOutput.appendChild(logEntry);
+      }
+    }
+    
+    // Show debug console on certain errors
+    window.addEventListener('error', function(e) {
+      const debugConsole = document.getElementById('debug-console');
+      if (debugConsole) {
+        debugConsole.style.display = 'block';
+        debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+      }
+    });
+    
+    // Add debug button
+    document.addEventListener('DOMContentLoaded', function() {
+      const debugBtn = document.createElement('button');
+      debugBtn.textContent = 'Debug';
+      debugBtn.style.position = 'fixed';
+      debugBtn.style.bottom = '10px';
+      debugBtn.style.right = '10px';
+      debugBtn.style.zIndex = '9999';
+      debugBtn.style.padding = '5px 10px';
+      debugBtn.style.background = '#333';
+      debugBtn.style.color = '#fff';
+      debugBtn.style.border = 'none';
+      debugBtn.style.borderRadius = '4px';
+      debugBtn.style.cursor = 'pointer';
+      
+      debugBtn.addEventListener('click', function() {
+        const debugConsole = document.getElementById('debug-console');
+        if (debugConsole) {
+          debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+        }
+      });
+      
+      document.body.appendChild(debugBtn);
+      
+      // Log initial page load
+      debugLog('Page fully loaded');
+    });
+  </script>
+  
   <script src="js/emotional-entry.js"></script>
 </body>
 </html> 

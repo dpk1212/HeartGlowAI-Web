@@ -136,9 +136,13 @@
         });
       });
       
-      // Next button functionality
+      // Next button functionality - Navigate to auth screen instead of message flow
       nextBtn.addEventListener('click', () => {
-        prefillAndNavigateToGenerator(selectedType);
+        // Store the selected type for future use after authentication
+        localStorage.setItem('selectedMessageType', selectedType);
+        
+        // Navigate to auth screen instead of message flow
+        showScreen(authScreen);
       });
       
       // Make sure Next button is visible by default since we already have a tab selected
@@ -515,7 +519,8 @@
           // Check feedback status
           await checkFeedbackStatus();
           
-          showScreen(homeScreen);
+          // Use the new handleAuthSuccess function to determine navigation
+          handleAuthSuccess(user);
           
           // Ensure template clicks work after auth state is determined
           attachTemplateClickListeners();
@@ -696,7 +701,8 @@
           // Login
           firebase.auth().signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
-              showScreen(homeScreen);
+              // Use handleAuthSuccess instead of directly navigating
+              handleAuthSuccess(userCredential.user);
             })
             .catch((error) => {
               showAlert(`Login error: ${error.message}`, 'error');
@@ -711,7 +717,8 @@
                 createdAt: new Date()
               });
               
-              showScreen(homeScreen);
+              // Use handleAuthSuccess instead of directly navigating
+              handleAuthSuccess(userCredential.user);
               showAlert('Account created successfully!', 'success');
             })
             .catch((error) => {
@@ -2680,6 +2687,25 @@ Maintain the core message and emotional intent while applying these changes.`
       
       // Show generator screen directly (skip auth)
       showScreen(generatorScreen);
+    }
+
+    // Function to handle successful authentication
+    function handleAuthSuccess(user) {
+      currentUser = user;
+      
+      // Check if we have a stored message type selection
+      const selectedType = localStorage.getItem('selectedMessageType');
+      
+      if (selectedType) {
+        // Clear the stored selection to avoid it being used again unnecessarily
+        localStorage.removeItem('selectedMessageType');
+        
+        // Navigate to message flow screen with the selected type
+        prefillAndNavigateToGenerator(selectedType);
+      } else {
+        // Default navigation to home screen if no pending message creation
+        showScreen(homeScreen);
+      }
     }
 
 // Updated on Sun Mar 30 13:14:46 EDT 2025

@@ -50,6 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeHomePage() {
   console.log('Initializing home page functionality');
   
+  // Ensure the emotional onboarding modal is hidden
+  const onboardingModal = document.getElementById('emotional-onboarding');
+  if (onboardingModal) {
+    onboardingModal.style.display = 'none';
+    console.log('Emotional onboarding modal hidden during initialization');
+  }
+  
   // Initialize new conversation button
   const newConversationBtn = document.getElementById('new-conversation-btn');
   if (newConversationBtn) {

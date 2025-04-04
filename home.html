@@ -2278,5 +2278,15 @@
         });
     }
   </script>
+  <script>
+    // Immediately hide the emotional onboarding modal
+    document.addEventListener('DOMContentLoaded', function() {
+      const onboardingModal = document.getElementById('emotional-onboarding');
+      if (onboardingModal) {
+        onboardingModal.style.display = 'none';
+        console.log('Emotional onboarding modal hidden by default');
+      }
+    });
+  </script>
 </body>
 </html> 

@@ -27,32 +27,36 @@
       background-color: var(--bg-dark);
       color: var(--text-primary);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      overscroll-behavior: none;
+      overscroll-behavior-y: none;
+      overflow-x: hidden;
     }
     
     #app {
       display: flex;
       flex-direction: column;
-      height: 100%;
+      width: 100%;
       max-width: 480px;
       margin: 0 auto;
       position: relative;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch; /* Better scrolling on iOS */
+      min-height: 100%;
     }
     
     .screen {
       display: none;
       flex-direction: column;
-      height: 100%;
       padding: 20px;
       opacity: 0;
       transform: scale(0.98) translateY(10px);
-      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 100%;
       pointer-events: none;
+      min-height: 100%;
     }
     
     .screen.active {
@@ -60,6 +64,8 @@
       opacity: 1;
       transform: scale(1) translateY(0);
       pointer-events: all;
+      position: relative;
+      height: auto;
     }
     
     .header {
@@ -95,13 +101,12 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 20px;
+      justify-content: flex-start;
+      padding: 40px 20px;
       text-align: center;
       background-color: var(--bg-dark);
       position: relative;
-      overflow: hidden;
+      overflow: visible;
       background-image: radial-gradient(circle at 0% 0%, rgba(255, 107, 157, 0.1) 0%, transparent 50%),
                         radial-gradient(circle at 100% 100%, rgba(100, 210, 255, 0.1) 0%, transparent 50%);
     }
@@ -428,10 +433,40 @@
       
       .sample-message-card {
         padding: 20px;
+        width: calc(100% - 10px);
+        margin-left: auto;
+        margin-right: auto;
       }
       
       .primary-button {
         padding: 14px 20px;
+      }
+      
+      /* Fix for mobile sticky elements */
+      .welcome-container {
+        padding-bottom: 60px; /* Add extra padding at bottom for scrolling */
+      }
+      
+      /* Fix quick-select dropdowns on mobile */
+      .quick-select {
+        font-size: 15px;
+        padding: 12px 14px;
+      }
+      
+      /* Better layout for tone pills */
+      .tone-buttons {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        justify-content: flex-start;
+        padding-bottom: 8px;
+        margin: 0 -10px;
+        width: calc(100% + 20px);
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .tone-pill {
+        flex: 0 0 auto;
+        white-space: nowrap;
       }
     }
     
@@ -4253,5 +4288,40 @@
       
       .popup-controls-column {
         order: 3;
+      }
+    }
+
+    /* iOS Safari fixes */
+    @supports (-webkit-touch-callout: none) {
+      html, body {
+        height: -webkit-fill-available;
+      }
+      
+      #app {
+        min-height: -webkit-fill-available;
+      }
+      
+      .welcome-container {
+        min-height: auto;
+      }
+    }
+    
+    /* Fix for mobile bounce effect */
+    @media (max-width: 768px) {
+      html, body {
+        overflow-x: hidden;
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+      }
+      
+      body {
+        overscroll-behavior-y: none;
+        position: relative;
+      }
+      
+      #app {
+        position: relative;
+        z-index: 1;
       }
     }

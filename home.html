@@ -273,6 +273,102 @@
       animation: fadeIn 0.6s ease-out;
     }
     
+    .welcome-back {
+      position: absolute;
+      top: 30px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: white;
+      font-size: 17px;
+      font-weight: 600;
+      animation: fadeInDown 0.8s ease-out;
+      z-index: 10;
+    }
+    
+    .recent-recipient {
+      display: flex;
+      width: 90%;
+      max-width: 500px;
+      margin: 0 auto 30px;
+      background: rgba(42, 14, 44, 0.7);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 107, 157, 0.2);
+      padding: 18px 24px;
+      text-align: left;
+      align-items: center;
+      gap: 16px;
+      animation: fadeInUp 0.7s ease-out;
+      transition: var(--transition-standard);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    
+    .recent-recipient:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(255, 107, 157, 0.2);
+      background: rgba(255, 107, 157, 0.1);
+    }
+    
+    .recipient-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ff6b9d, #64d2ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: white;
+      font-weight: 600;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .recipient-info {
+      flex: 1;
+    }
+    
+    .recipient-name {
+      font-size: 18px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+    
+    .recipient-context {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .recipient-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    
+    .recipient-button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 13px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition-standard);
+    }
+    
+    .recipient-button:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+    
+    .recipient-button.primary {
+      background: rgba(255, 107, 157, 0.2);
+      border-color: rgba(255, 107, 157, 0.3);
+    }
+    
+    .recipient-button.primary:hover {
+      background: rgba(255, 107, 157, 0.3);
+    }
+    
     .onboarding-card {
       width: 90%;
       max-width: 550px;
@@ -288,6 +384,30 @@
       animation: slideUp 0.6s cubic-bezier(0.22, 1, 0.36, 1);
     }
     
+    .onboarding-card::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.1) 0%, transparent 70%);
+      z-index: 0;
+      border-radius: 50%;
+    }
+    
+    .onboarding-card::after {
+      content: '';
+      position: absolute;
+      bottom: -100px;
+      right: -100px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(100, 210, 255, 0.1) 0%, transparent 70%);
+      z-index: 0;
+      border-radius: 50%;
+    }
+    
     .onboarding-title {
       font-size: 38px;
       font-weight: 800;
@@ -298,6 +418,8 @@
       color: transparent;
       line-height: 1.2;
       letter-spacing: -0.02em;
+      position: relative;
+      z-index: 2;
     }
     
     .onboarding-subtitle {
@@ -308,6 +430,8 @@
       max-width: 450px;
       margin-left: auto;
       margin-right: auto;
+      position: relative;
+      z-index: 2;
     }
     
     .emotional-options {
@@ -315,6 +439,8 @@
       flex-direction: column;
       gap: 16px;
       margin-bottom: 20px;
+      position: relative;
+      z-index: 2;
     }
     
     .emotional-option {
@@ -334,9 +460,13 @@
     
     .emotional-option:hover {
       background: rgba(51, 17, 53, 0.8);
-      transform: translateY(-2px);
+      transform: translateY(-3px);
       border-color: rgba(255, 255, 255, 0.15);
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .emotional-option:hover .option-icon {
+      transform: scale(1.1);
     }
     
     .emotional-option.selected {
@@ -356,6 +486,25 @@
       z-index: 0;
     }
     
+    .option-glow {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 107, 157, 0.3) 0%, transparent 70%);
+      opacity: 0;
+      transition: opacity 0.6s ease-out;
+      z-index: 0;
+      top: 50%;
+      left: 20%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    
+    .emotional-option:hover .option-glow {
+      opacity: 1;
+    }
+    
     .option-icon {
       font-size: 30px;
       z-index: 1;
@@ -363,6 +512,7 @@
       min-width: 40px;
       display: flex;
       justify-content: center;
+      transition: transform 0.3s ease-in-out;
     }
     
     .option-content {
@@ -383,6 +533,33 @@
       line-height: 1.4;
     }
     
+    .example-message {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      background: rgba(100, 210, 255, 0.15);
+      border: 1px solid rgba(100, 210, 255, 0.3);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 200px;
+      line-height: 1.4;
+      text-align: left;
+      opacity: 0;
+      transform: scale(0.9) translateY(-5px);
+      transition: all 0.3s ease-out;
+      pointer-events: none;
+      z-index: 5;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .emotional-option:hover .example-message,
+    .emotional-option.selected .example-message {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+    
     .explore-option {
       margin-top: 15px;
       background: transparent;
@@ -392,11 +569,14 @@
       cursor: pointer;
       transition: var(--transition-standard);
       text-align: center;
+      position: relative;
+      z-index: 2;
     }
     
     .explore-option:hover {
       background: rgba(255, 255, 255, 0.03);
       border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
     }
     
     .explore-option.selected {
@@ -409,6 +589,22 @@
       font-size: 17px;
       font-weight: 500;
       color: var(--text-secondary);
+    }
+    
+    .privacy-note {
+      margin-top: 36px;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      position: relative;
+      z-index: 2;
+    }
+    
+    .privacy-icon {
+      font-size: 16px;
     }
     
     .continue-button {
@@ -426,6 +622,8 @@
       opacity: 0;
       transform: translateY(20px);
       visibility: hidden;
+      position: relative;
+      z-index: 2;
     }
     
     .continue-button.visible {
@@ -440,6 +638,21 @@
       box-shadow: 0 12px 25px rgba(255, 107, 157, 0.35);
     }
     
+    .continue-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: all 0.7s ease;
+    }
+    
+    .continue-button:hover::before {
+      left: 100%;
+    }
+    
     .skip-onboarding {
       background: transparent;
       border: none;
@@ -449,16 +662,48 @@
       cursor: pointer;
       transition: var(--transition-standard);
       text-decoration: none;
+      position: relative;
+      z-index: 2;
     }
     
     .skip-onboarding:hover {
       color: rgba(255, 255, 255, 0.7);
     }
     
+    .confirmation-message {
+      position: absolute;
+      text-align: center;
+      font-size: 18px;
+      color: white;
+      width: 100%;
+      bottom: -50px;
+      opacity: 0;
+      transition: all 0.4s ease-out;
+      z-index: 5;
+      left: 0;
+      font-weight: 500;
+    }
+    
+    .confirmation-message.visible {
+      bottom: 20px;
+      opacity: 1;
+    }
+    
     /* Animations */
     @keyframes fadeIn {
       from { opacity: 0; }
       to { opacity: 1; }
+    }
+    
+    @keyframes fadeInDown {
+      from { 
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to { 
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
     
     @keyframes fadeInUp {
@@ -533,6 +778,31 @@
         width: 95%;
       }
       
+      .recent-recipient {
+        width: 95%;
+        padding: 16px 20px;
+        margin-bottom: 25px;
+      }
+      
+      .recipient-avatar {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+      }
+      
+      .recipient-name {
+        font-size: 16px;
+      }
+      
+      .recipient-context {
+        font-size: 13px;
+      }
+      
+      .recipient-button {
+        font-size: 12px;
+        padding: 5px 10px;
+      }
+      
       .onboarding-title {
         font-size: 30px;
       }
@@ -546,6 +816,12 @@
         padding: 18px 20px;
       }
       
+      .example-message {
+        max-width: 150px;
+        font-size: 12px;
+        padding: 10px;
+      }
+      
       .option-icon {
         font-size: 26px;
         min-width: 30px;
@@ -557,6 +833,11 @@
       
       .option-description {
         font-size: 14px;
+      }
+      
+      .privacy-note {
+        font-size: 12px;
+        margin-top: 30px;
       }
     }
     
@@ -626,42 +907,78 @@
     
     <!-- Emotional Onboarding Modal -->
     <div id="emotional-onboarding" class="onboarding-overlay">
+      <!-- Welcome back for returning users (conditionally shown) -->
+      <div class="welcome-back" id="welcome-back" style="display: none;">
+        Welcome back, <span id="user-name">Dale</span>!
+      </div>
+      
+      <!-- Recent recipient (conditionally shown) -->
+      <div class="recent-recipient" id="recent-recipient" style="display: none;">
+        <div class="recipient-avatar">J</div>
+        <div class="recipient-info">
+          <div class="recipient-name">Jamie</div>
+          <div class="recipient-context">Last time, you were sending a reconnection message</div>
+          <div class="recipient-actions">
+            <button class="recipient-button primary">Continue Message</button>
+            <button class="recipient-button">View History</button>
+          </div>
+        </div>
+      </div>
+      
       <div class="onboarding-card">
         <h1 class="onboarding-title">Let's help you say something real.</h1>
         <p class="onboarding-subtitle">Choose what's been on your heart — we'll help you turn it into words.</p>
         
         <div class="emotional-options">
-          <div class="emotional-option" data-intent="holding-in">
+          <div class="emotional-option" data-intent="holding-in" data-confirmation="Let's open up together...">
+            <div class="option-glow"></div>
             <div class="option-icon">❤️</div>
             <div class="option-content">
               <div class="option-title">I've been holding something in...</div>
-              <div class="option-description">Express feelings you've wanted to share but haven't found the words for.</div>
+              <div class="option-description">You've thought about saying it — maybe even typed it — but couldn't hit send. Let's help you find the words.</div>
+            </div>
+            <div class="example-message">
+              "You've been on my mind lately… and I don't say this enough — your presence really matters to me."
             </div>
           </div>
           
-          <div class="emotional-option" data-intent="reconnect">
+          <div class="emotional-option" data-intent="reconnect" data-confirmation="Bridging the gap...">
+            <div class="option-glow"></div>
             <div class="option-icon">💬</div>
             <div class="option-content">
               <div class="option-title">I want to reconnect with someone.</div>
-              <div class="option-description">Bridge the gap and renew your connection in a meaningful way.</div>
+              <div class="option-description">Maybe it's been a while. Maybe something happened. You're ready to reach out.</div>
+            </div>
+            <div class="example-message">
+              "It's been too long since we connected. I miss our conversations and wanted to reach out."
             </div>
           </div>
           
-          <div class="emotional-option" data-intent="appreciation">
+          <div class="emotional-option" data-intent="appreciation" data-confirmation="Finding the perfect thank you...">
+            <div class="option-glow"></div>
             <div class="option-icon">👏</div>
             <div class="option-content">
               <div class="option-title">I need to show someone appreciation.</div>
-              <div class="option-description">Let them know how much they matter and the difference they make.</div>
+              <div class="option-description">They helped. They showed up. It's time to tell them it mattered.</div>
+            </div>
+            <div class="example-message">
+              "I wanted to take a moment to properly thank you for how you've impacted my life in ways you might not realize."
             </div>
           </div>
         </div>
         
-        <div class="explore-option" data-intent="explore">
+        <div class="explore-option" data-intent="explore" data-confirmation="Let's explore together...">
           <div class="explore-text">🔍 Not sure — let me explore.</div>
+        </div>
+        
+        <div class="privacy-note">
+          <span class="privacy-icon">🔒</span> Private by default. No one sees your message unless you choose to share it.
         </div>
         
         <button id="continue-button" class="continue-button">Continue</button>
         <button id="skip-onboarding" class="skip-onboarding">Skip for now</button>
+        
+        <div id="confirmation-message" class="confirmation-message"></div>
       </div>
     </div>
     
@@ -710,7 +1027,22 @@
     // Emotional onboarding option selection
     const emotionalOptions = document.querySelectorAll('.emotional-option, .explore-option');
     const continueButton = document.getElementById('continue-button');
+    const confirmationMessage = document.getElementById('confirmation-message');
     let selectedIntent = null;
+    
+    // Simulate a returning user (this would be based on actual user data)
+    const simulateReturningUser = function() {
+      // Check if user has previous data (this would normally be from database/localStorage)
+      const hasRecentActivity = Math.random() > 0.5; // Simulate 50% chance
+      
+      if (hasRecentActivity) {
+        document.getElementById('welcome-back').style.display = 'block';
+        document.getElementById('recent-recipient').style.display = 'block';
+      }
+    };
+    
+    // Run on page load with slight delay for demo
+    setTimeout(simulateReturningUser, 1000);
     
     emotionalOptions.forEach(option => {
       option.addEventListener('click', function() {
@@ -725,6 +1057,13 @@
         
         // Store selected intent
         selectedIntent = this.getAttribute('data-intent');
+        
+        // Show confirmation message
+        const message = this.getAttribute('data-confirmation');
+        if (message) {
+          confirmationMessage.textContent = message;
+          confirmationMessage.classList.add('visible');
+        }
       });
     });
     
@@ -744,20 +1083,43 @@
       document.getElementById('emotional-onboarding').style.display = 'none';
     });
     
+    // Handle "Continue Message" for recent recipient
+    document.querySelector('.recipient-button.primary').addEventListener('click', function() {
+      document.getElementById('emotional-onboarding').style.display = 'none';
+      
+      // This would load the previous message draft
+      loadMessageSetup('reconnect', 'Jamie');
+    });
+    
     // Placeholder function for loading the message setup
-    function loadMessageSetup(intent) {
+    function loadMessageSetup(intent, recipientName) {
       // This will be replaced with actual step loading code
       console.log('Loading message setup for intent: ' + intent);
+      
+      // If recipientName is provided, it means we're continuing with a specific person
+      if (recipientName) {
+        console.log('Continuing message for: ' + recipientName);
+      }
       
       // Later we'll implement the 3-step flow here
       // For now, just show a placeholder message
       const mainContent = document.getElementById('main-content');
-      mainContent.innerHTML = `
-        <div style="text-align: center; padding: 50px 20px;">
-          <h2 style="margin-bottom: 20px; color: white;">Getting your "${intent}" message ready...</h2>
-          <p style="color: rgba(255,255,255,0.7);">We'll implement the full 3-step message flow here.</p>
-        </div>
-      `;
+      
+      if (recipientName) {
+        mainContent.innerHTML = `
+          <div style="text-align: center; padding: 50px 20px;">
+            <h2 style="margin-bottom: 20px; color: white;">Continuing your message to ${recipientName}...</h2>
+            <p style="color: rgba(255,255,255,0.7);">We'll implement the full message creation interface here.</p>
+          </div>
+        `;
+      } else {
+        mainContent.innerHTML = `
+          <div style="text-align: center; padding: 50px 20px;">
+            <h2 style="margin-bottom: 20px; color: white;">Getting your "${intent}" message ready...</h2>
+            <p style="color: rgba(255,255,255,0.7);">We'll implement the full 3-step message flow here.</p>
+          </div>
+        `;
+      }
     }
   </script>
 </body>

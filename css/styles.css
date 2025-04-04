@@ -887,3 +887,36 @@ body::after {
     font-size: 16px;
   }
 }
+
+/* Fix for unwanted visible content */
+body:not(.generator-active) .loading-overlay,
+body:not(.results-active) .results-popup-overlay,
+body:not(.generator-active) #generator-screen {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  z-index: -9999 !important;
+  transform: translateY(-9999px) !important;
+}
+
+/* Hide any direct children of body that aren't inside #app */
+body > *:not(#app):not(script):not(link) {
+  display: none !important;
+}
+
+/* Ensure loading overlay is properly hidden when not in use */
+.loading-overlay {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  position: fixed;
+}
+
+.loading-overlay.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}

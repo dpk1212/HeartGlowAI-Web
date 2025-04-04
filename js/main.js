@@ -29,13 +29,20 @@
       resultCard = document.getElementById('result');
     }
 
-    // Screen transition function
+    // Screen transition function - updated to manage visibility classes
     function showScreen(screen) {
       const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, learningScreen];
       screens.forEach(s => {
         if (s === screen) {
           s.style.display = 'flex';
           setTimeout(() => s.classList.add('active'), 50);
+          
+          // Add appropriate body classes for the active screen
+          if (s === generatorScreen) {
+            document.body.classList.add('generator-active');
+          } else {
+            document.body.classList.remove('generator-active');
+          }
         } else {
           s.classList.remove('active');
           setTimeout(() => {
@@ -75,6 +82,9 @@
       
       // Initialize tab navigation
       initTabNavigation();
+      
+      // Remove any visible classes that shouldn't be on initial load
+      document.body.classList.remove('generator-active', 'results-active');
 
       // Show welcome screen by default
       showScreen(welcomeScreen);

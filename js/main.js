@@ -452,17 +452,17 @@
       // Handle login/register button click
       if (loginRegisterBtn) {
         console.log('Adding click event listener to login button');
-        loginRegisterBtn.addEventListener('click', function() {
+      loginRegisterBtn.addEventListener('click', function() {
           console.log('Login/Register button clicked');
           try {
             window.location.href = 'login.html';
-          } catch (error) {
+        } catch (error) {
             console.error('Navigation error:', error);
             // Fallback method
             window.open('login.html', '_self');
           }
         });
-      } else {
+        } else {
         console.error('Login button not found in the DOM');
       }
     });

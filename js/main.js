@@ -437,6 +437,7 @@
       
       // Get elements
       const loginRegisterBtn = document.getElementById('login-register-btn');
+      console.log('Login button element:', loginRegisterBtn);
       
       // Check if user is already authenticated
       firebase.auth().onAuthStateChanged((user) => {
@@ -450,10 +451,19 @@
       
       // Handle login/register button click
       if (loginRegisterBtn) {
+        console.log('Adding click event listener to login button');
         loginRegisterBtn.addEventListener('click', function() {
           console.log('Login/Register button clicked');
-          window.location.href = 'login.html';
+          try {
+            window.location.href = 'login.html';
+          } catch (error) {
+            console.error('Navigation error:', error);
+            // Fallback method
+            window.open('login.html', '_self');
+          }
         });
+      } else {
+        console.error('Login button not found in the DOM');
       }
     });
 

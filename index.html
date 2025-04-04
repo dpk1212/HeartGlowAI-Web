@@ -45,10 +45,66 @@
               <path d="M256 412.8L219.2 379.2C128 298.7 68.3 245.3 68.3 177.9C68.3 123.2 111.5 80 166.2 80C195.8 80 224.1 93.1 256 118.4C287.9 93.1 316.2 80 345.8 80C400.5 80 443.7 123.2 443.7 177.9C443.7 245.3 384 298.7 292.8 379.2L256 412.8Z"/>
             </svg>
           </div>
-        <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
-        <p class="welcome-subtitle">Hard to say. Easy to feel. Let AI help you bridge the gap.</p>
-          <button id="login-register-btn">Start Your First Message - Free</button>
-          <p class="trust-badge">Built on OpenAI. Designed for human connection.</p>
+          
+          <h1 class="welcome-title">Say what you feel, the way they'll hear it.</h1>
+          <p class="welcome-subtitle">Reconnect. Reflect. Reach out with confidence.</p>
+          
+          <!-- Sample Message Preview Card -->
+          <div class="sample-message-card">
+            <div class="sample-message-content">
+              I just wanted to check in. You've been on my mind.
+            </div>
+            <div class="sample-message-meta">
+              <span class="sample-tone-tag">Tone: Encouraging, 2/5</span>
+            </div>
+            
+            <div class="message-insights">
+              <h3 class="insights-header">
+                <span class="insights-icon">💡</span>
+                Why this message works:
+              </h3>
+              <ul class="insights-list">
+                <li>Builds warmth without pressure</li>
+                <li>Leaves room for them to respond</li>
+                <li>Balances honesty and care</li>
+              </ul>
+            </div>
+            
+            <div class="quick-options">
+              <div class="option-inputs">
+                <div class="relationship-dropdown">
+                  <select id="quick-relationship" class="quick-select">
+                    <option value="" disabled selected>Relationship Type</option>
+                    <option value="Friend">Friend</option>
+                    <option value="Romantic Partner">Romantic Partner</option>
+                    <option value="Family Member">Family Member</option>
+                    <option value="Professional">Professional</option>
+                  </select>
+                </div>
+                <div class="tone-dropdown">
+                  <select id="quick-tone" class="quick-select">
+                    <option value="" disabled selected>Message Tone</option>
+                    <option value="casual">Casual</option>
+                    <option value="formal">Formal</option>
+                    <option value="humorous">Humorous</option>
+                    <option value="serious">Serious</option>
+                  </select>
+                </div>
+              </div>
+              
+              <button id="login-register-btn" class="primary-button">Start Your First Message</button>
+              <p class="no-signup-option">Try without signing up</p>
+            </div>
+            
+            <div class="tone-buttons">
+              <button class="tone-pill">Gentle</button>
+              <button class="tone-pill">Honest</button>
+              <button class="tone-pill">Warm</button>
+            </div>
+          </div>
+          
+          <p class="trust-badge">Trusted by thousands • 100% secure • Private by design</p>
+          <p class="built-on">Built on OpenAI. Designed for human connection.</p>
           
           <!-- Test button for Perplexity (hidden in production) -->
           <button id="test-perplexity-btn" class="test-btn" style="margin-top: 20px; background: #444; color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; display: none;">Test Perplexity API</button>

@@ -56,38 +56,72 @@
 
     // Initialize app function
     function initializeApp() {
-      // Check if we are on index.html by looking for a key element
-      // If not found, assume we are on learn.html or another page and skip screen setup.
-      const welcomeScreenCheck = document.getElementById('welcome-screen');
-      if (!welcomeScreenCheck) {
-          console.log("main.js: Skipping screen initialization (not on index.html).");
-          // If other initializations specific to learn.html are needed from main.js,
-          // they could be added here or in a separate function.
-          return; 
+      // Initialize Firebase first
+      try {
+        if (!firebase.apps.length) {
+          const firebaseConfig = {
+            apiKey: "AIzaSyDx-RCOt6KU4KFV9w-fKmIEcW0mvmQJ2Z8",
+            authDomain: "heartglowai-web.firebaseapp.com",
+            projectId: "heartglowai-web",
+            storageBucket: "heartglowai-web.appspot.com",
+            messagingSenderId: "564142355525",
+            appId: "1:564142355525:web:bd10f60b9d30e518b19c0f",
+            measurementId: "G-25W7SVNL3Z"
+          };
+          firebase.initializeApp(firebaseConfig);
+          console.log('Firebase initialized successfully');
+        }
+      } catch (error) {
+        console.error('Firebase initialization error:', error);
       }
-
-      // Initialize screen elements
-      welcomeScreen = document.getElementById('welcome-screen');
-      authScreen = document.getElementById('auth-screen');
-      homeScreen = document.getElementById('home-screen');
-      generatorScreen = document.getElementById('generator-screen');
-      learningScreen = document.getElementById('learning-screen');
-
-      // Add favicon
-      const favicon = document.createElement('link');
-      favicon.rel = 'icon';
-      favicon.type = 'image/svg+xml';
-      favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
-      document.head.appendChild(favicon);
       
       // Initialize tab navigation
       initTabNavigation();
       
-      // Remove any visible classes that shouldn't be on initial load
-      document.body.classList.remove('generator-active', 'results-active');
-
-      // Show welcome screen by default
-      showScreen(welcomeScreen);
+      // Initialize authentication handlers
+      initializeAuthHandlers();
+      
+      // Check authentication state
+      firebase.auth().onAuthStateChanged(async (user) => {
+        console.log('Auth state changed:', user ? 'Logged in' : 'Logged out');
+        currentUser = user;
+        
+        if (user) {
+          try {
+            // Initialize user document if it doesn't exist
+            const userRef = firebase.firestore().collection('users').doc(user.uid);
+            const userDoc = await userRef.get();
+            
+            if (!userDoc.exists) {
+              await userRef.set({
+                email: user.email,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                messageCount: 0,
+                hasFeedbackSubmitted: false,
+                lastFeedbackSubmittedAt: null,
+                feedbackData: null
+              });
+            }
+            
+            // Check feedback status
+            await checkFeedbackStatus();
+            
+            // Use the new handleAuthSuccess function to determine navigation
+            handleAuthSuccess(user);
+            
+            // Ensure template clicks work after auth state is determined
+            attachTemplateClickListeners();
+          } catch (error) {
+            console.error('Error handling authenticated user:', error);
+          }
+        } else {
+          console.log('User not authenticated, showing welcome screen');
+          showScreen(welcomeScreen);
+        }
+      });
+      
+      // Initialize any additional components
+      console.log('App initialization completed');
     }
     
     // Tab navigation functionality
@@ -1113,7 +1147,7 @@
       });
 
       // Add Google Sign In functionality
-      document.getElementById('google-sign-in').addEventListener('click', function() {
+      safeAddEventListener('google-sign-in', 'click', function() {
         const provider = new firebase.auth.GoogleAuthProvider();
         provider.setCustomParameters({
           prompt: 'select_account'
@@ -2719,4 +2753,190 @@ Maintain the core message and emotional intent while applying these changes.`
       }
     }
 
+    // Helper function to safely add event listeners
+    function safeAddEventListener(elementId, eventType, handler) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.addEventListener(eventType, handler);
+        return true;
+      } else {
+        console.warn(`Element with ID '${elementId}' not found for event listener`);
+        return false;
+      }
+    }
+
+    // Function to initialize all authentication handlers
+    function initializeAuthHandlers() {
+      console.log('Initializing authentication handlers...');
+      
+      // Set up auth form submission handling
+      const authForm = document.getElementById('auth-form');
+      if (authForm) {
+        authForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          const email = document.getElementById('email').value;
+          const password = document.getElementById('password').value;
+          
+          if (!email || !password) {
+            showAlert('Please enter both email and password', 'error');
+            return;
+          }
+          
+          if (isLogin) {
+            // Login
+            firebase.auth().signInWithEmailAndPassword(email, password)
+              .then((userCredential) => {
+                // Use handleAuthSuccess instead of directly navigating
+                handleAuthSuccess(userCredential.user);
+              })
+              .catch((error) => {
+                console.error('Login error:', error);
+                showAlert(`Login error: ${error.message}`, 'error');
+              });
+          } else {
+            // Register
+            firebase.auth().createUserWithEmailAndPassword(email, password)
+              .then((userCredential) => {
+                // Create user document in Firestore
+                return firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+                  email: email,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  messageCount: 0,
+                  hasFeedbackSubmitted: false,
+                  lastFeedbackSubmittedAt: null,
+                  feedbackData: null
+                }).then(() => {
+                  // Use handleAuthSuccess instead of directly navigating
+                  handleAuthSuccess(userCredential.user);
+                  showAlert('Account created successfully!', 'success');
+                });
+              })
+              .catch((error) => {
+                console.error('Registration error:', error);
+                showAlert(`Registration error: ${error.message}`, 'error');
+              });
+          }
+        });
+      } else {
+        console.warn('Auth form not found');
+      }
+      
+      // Handle Google Sign In
+      safeAddEventListener('google-sign-in', 'click', function() {
+        console.log('Google sign-in button clicked');
+        const provider = new firebase.auth.GoogleAuthProvider();
+        provider.setCustomParameters({
+          prompt: 'select_account'
+        });
+        
+        firebase.auth()
+          .signInWithPopup(provider)
+          .then((result) => {
+            console.log('Google sign-in successful');
+            // Check if it's a new user
+            const isNewUser = result.additionalUserInfo.isNewUser;
+            
+            if (isNewUser) {
+              // Create user document in Firestore
+              return firebase.firestore().collection('users').doc(result.user.uid).set({
+                email: result.user.email,
+                displayName: result.user.displayName,
+                photoURL: result.user.photoURL,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                messageCount: 0,
+                hasFeedbackSubmitted: false,
+                lastFeedbackSubmittedAt: null,
+                feedbackData: null,
+                authProvider: 'google'
+              }).then(() => {
+                showAlert('Account created successfully!', 'success');
+                // Use handleAuthSuccess instead of directly navigating to home screen
+                handleAuthSuccess(result.user);
+              });
+            } else {
+              // Use handleAuthSuccess instead of directly navigating to home screen
+              handleAuthSuccess(result.user);
+            }
+          })
+          .catch((error) => {
+            console.error('Google Sign In Error:', error);
+            showAlert(`Error: ${error.message}`, 'error');
+          });
+      });
+      
+      // Toggle between login and registration
+      safeAddEventListener('auth-toggle-link', 'click', function(e) {
+        e.preventDefault();
+        const authToggleText = document.getElementById('auth-toggle-text');
+        const authToggleLink = document.getElementById('auth-toggle-link');
+        const authSubmitBtn = document.getElementById('auth-submit-btn');
+        
+        isLogin = !isLogin;
+        if (isLogin) {
+          if (authToggleText) authToggleText.textContent = "Don't have an account?";
+          if (authToggleLink) authToggleLink.textContent = "Sign up";
+          if (authSubmitBtn) authSubmitBtn.textContent = "Continue";
+        } else {
+          if (authToggleText) authToggleText.textContent = "Already have an account?";
+          if (authToggleLink) authToggleLink.textContent = "Log in";
+          if (authSubmitBtn) authSubmitBtn.textContent = "Create Account";
+        }
+      });
+      
+      // Handle forgot password
+      safeAddEventListener('forgot-password-link', 'click', function(e) {
+        e.preventDefault();
+        const email = prompt("Please enter your email address to reset your password:");
+        if (email) {
+          firebase.auth().sendPasswordResetEmail(email)
+            .then(() => {
+              showAlert('Password reset email sent!', 'success');
+            })
+            .catch((error) => {
+              showAlert(`Error: ${error.message}`, 'error');
+            });
+        }
+      });
+      
+      console.log('Authentication handlers initialized');
+    }
+
 // Updated on Sun Mar 30 13:14:46 EDT 2025
+
+    // Ensure DOM is fully loaded before initializing
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded, initializing app...');
+      
+      // Initialize screen elements
+      welcomeScreen = document.getElementById('welcome-screen');
+      authScreen = document.getElementById('auth-screen');
+      homeScreen = document.getElementById('home-screen');
+      generatorScreen = document.getElementById('generator-screen');
+      learningScreen = document.getElementById('learning-screen');
+      
+      // Check if we are on index.html by looking for a key element
+      const welcomeScreenCheck = document.getElementById('welcome-screen');
+      if (!welcomeScreenCheck) {
+        console.log("main.js: Skipping screen initialization (not on index.html).");
+        return; 
+      }
+      
+      // Add favicon
+      const favicon = document.createElement('link');
+      favicon.rel = 'icon';
+      favicon.type = 'image/svg+xml';
+      favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
+    document.head.appendChild(favicon);
+    
+    // Remove any visible classes that shouldn't be on initial load
+    document.body.classList.remove('generator-active', 'results-active');
+    
+    // Short delay to ensure everything is ready
+    setTimeout(() => {
+      try {
+        initializeApp();
+      } catch (error) {
+        console.error('Error during app initialization:', error);
+      }
+    }, 200);
+  });

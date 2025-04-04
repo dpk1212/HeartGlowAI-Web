@@ -6,6 +6,61 @@
   <title>HeartGlowAI - Let's Help You Say Something Real</title>
   <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
   
+  <!-- CRITICAL CSS to ensure page loads -->
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: block;
+      min-height: 100vh;
+    }
+    
+    main {
+      max-width: 800px;
+      margin: 60px auto;
+      padding: 20px;
+      display: block;
+    }
+    
+    .emotion-button {
+      display: flex;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #ff6b9d;
+    }
+    
+    .page-subtitle {
+      font-size: 16px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 40px;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px 20px;
+      background: rgba(0, 0, 0, 0.2);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  </style>
+  
   <!-- Resource Hints -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
@@ -64,110 +119,8 @@
         });
     }
   </script>
-  
-  <style>
-    /* Additional styles specific to emotional entry point */
-    .entry-card-container {
-      max-width: 800px;
-      margin: 60px auto;
-      padding: 20px;
-    }
-    
-    .emotion-button {
-      display: flex;
-      align-items: center;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 16px;
-      padding: 24px;
-      margin-bottom: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .emotion-button:hover {
-      background: rgba(255, 255, 255, 0.08);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-    
-    .emotion-button:active {
-      transform: translateY(0px);
-    }
-    
-    .emotion-icon {
-      font-size: 28px;
-      margin-right: 20px;
-      background: var(--primary-gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    
-    .emotion-content {
-      flex: 1;
-    }
-    
-    .emotion-title {
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 4px;
-      color: var(--text-light);
-    }
-    
-    .emotion-description {
-      font-size: 14px;
-      color: var(--text-secondary);
-    }
-    
-    .emotion-arrow {
-      font-size: 24px;
-      color: var(--text-secondary);
-      opacity: 0.5;
-      transition: all 0.3s ease;
-    }
-    
-    .emotion-button:hover .emotion-arrow {
-      opacity: 1;
-      transform: translateX(4px);
-    }
-    
-    .page-title {
-      font-size: 32px;
-      font-weight: 700;
-      margin-bottom: 12px;
-      background: var(--heading-gradient);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    
-    .page-subtitle {
-      font-size: 16px;
-      color: var(--text-secondary);
-      margin-bottom: 40px;
-    }
-    
-    .glow-effect {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 107, 157, 0.4) 0%, rgba(255, 107, 157, 0) 70%);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      pointer-events: none;
-      z-index: 0;
-    }
-    
-    .emotion-button:hover .glow-effect {
-      opacity: 1;
-    }
-  </style>
 </head>
-<body>
+<body style="background-color: #121212 !important; color: white !important; visibility: visible !important; display: block !important;">
   <!-- Debug Console -->
   <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
     <div>
@@ -304,6 +257,71 @@
       
       // Log initial page load
       debugLog('Page fully loaded');
+    });
+
+    // Check if stylesheets loaded properly
+    document.addEventListener('DOMContentLoaded', function() {
+      const stylesheets = document.styleSheets;
+      let stylesLoaded = false;
+      
+      for (let i = 0; i < stylesheets.length; i++) {
+        try {
+          if (stylesheets[i].href && stylesheets[i].href.includes('styles.css')) {
+            stylesLoaded = true;
+            console.log('Main stylesheet loaded successfully');
+            debugLog('Main stylesheet loaded successfully');
+            break;
+          }
+        } catch (e) {
+          console.error('Error checking stylesheets:', e);
+        }
+      }
+      
+      if (!stylesLoaded) {
+        console.error('Main stylesheet failed to load!');
+        debugLog('ERROR: Main stylesheet failed to load!');
+        
+        // Apply emergency styles
+        const style = document.createElement('style');
+        style.textContent = `
+          body { background-color: #121212 !important; color: white !important; }
+          .emotion-button { 
+            background-color: rgba(255, 255, 255, 0.1) !important; 
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            margin-bottom: 15px !important;
+            padding: 20px !important;
+            border-radius: 10px !important;
+          }
+          .emotion-title { color: white !important; }
+          .emotion-description { color: rgba(255, 255, 255, 0.7) !important; }
+        `;
+        document.head.appendChild(style);
+        debugLog('Emergency styles applied');
+      }
+      
+      // Force display of buttons
+      const buttons = document.querySelectorAll('.emotion-button');
+      if (buttons.length) {
+        debugLog(`Found ${buttons.length} emotion buttons`);
+        buttons.forEach((btn, i) => {
+          btn.style.display = 'flex !important';
+          btn.style.visibility = 'visible !important';
+          btn.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+          btn.style.border = '1px solid rgba(255, 255, 255, 0.2)';
+          btn.style.borderRadius = '10px';
+          btn.style.padding = '20px';
+          btn.style.marginBottom = '15px';
+          debugLog(`Forced display of button ${i+1}`);
+        });
+      } else {
+        debugLog('ERROR: No emotion buttons found in DOM!');
+      }
+      
+      // Show debug console automatically on page load
+      const debugConsole = document.getElementById('debug-console');
+      if (debugConsole) {
+        debugConsole.style.display = 'block';
+      }
     });
   </script>
   

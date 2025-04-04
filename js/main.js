@@ -705,6 +705,7 @@
               handleAuthSuccess(userCredential.user);
             })
             .catch((error) => {
+              console.error('Login error:', error);
               showAlert(`Login error: ${error.message}`, 'error');
             });
         } else {
@@ -712,16 +713,21 @@
           firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
               // Create user document in Firestore
-              firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+              return firebase.firestore().collection('users').doc(userCredential.user.uid).set({
                 email: email,
-                createdAt: new Date()
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                messageCount: 0,
+                hasFeedbackSubmitted: false,
+                lastFeedbackSubmittedAt: null,
+                feedbackData: null
+              }).then(() => {
+                // Use handleAuthSuccess instead of directly navigating
+                handleAuthSuccess(userCredential.user);
+                showAlert('Account created successfully!', 'success');
               });
-              
-              // Use handleAuthSuccess instead of directly navigating
-              handleAuthSuccess(userCredential.user);
-              showAlert('Account created successfully!', 'success');
             })
             .catch((error) => {
+              console.error('Registration error:', error);
               showAlert(`Registration error: ${error.message}`, 'error');
             });
         }
@@ -2646,24 +2652,27 @@ Maintain the core message and emotional intent while applying these changes.`
     }
     
     // Helper function to prefill generator and navigate to it
-    function prefillAndNavigateToGenerator() {
+    function prefillAndNavigateToGenerator(messageType) {
       // Get the input elements first
       const scenarioInput = document.getElementById('scenario');
       const relationshipSelect = document.getElementById('relationship');
       
       // Pre-fill the generator form based on selections
       if (scenarioInput && relationshipSelect) {
+        // Use the passed messageType parameter if available, otherwise use the global selectedMessageType
+        const selectedType = messageType || selectedMessageType;
+        
         // Determine scenario text based on selected message type and scenario
         const selectedScenario = document.querySelector('.scenario-card.selected');
         let scenarioDescription = '';
         
-        if (selectedMessageType === 'romantic') {
+        if (selectedType === 'romantic') {
           relationshipSelect.value = 'Romantic Partner';
           scenarioDescription = 'Express my feelings to my partner';
-        } else if (selectedMessageType === 'professional') {
+        } else if (selectedType === 'professional') {
           relationshipSelect.value = 'Professional';
           scenarioDescription = 'Communicate with a colleague or professional contact';
-        } else if (selectedMessageType === 'personal') {
+        } else if (selectedType === 'personal') {
           relationshipSelect.value = 'Friend';
           scenarioDescription = 'Reach out to a friend';
         } else {
@@ -2687,7 +2696,7 @@ Maintain the core message and emotional intent while applying these changes.`
         scenarioInput.value = scenarioDescription;
       }
       
-      // Show generator screen directly (skip auth)
+      // Show generator screen directly
       showScreen(generatorScreen);
     }
 

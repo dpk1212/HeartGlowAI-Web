@@ -326,135 +326,159 @@ function createMessageFromTemplate(templateType, templateName) {
         sampleInsights = ["Simple and direct", "Shows thoughtfulness", "Opens conversation naturally"];
     }
     
-    // Show the generated message in a modal or popup
-    showMessageResult(templateType, templateName, sampleMessage, sampleInsights);
+    // Store the message in sessionStorage for transfer between pages
+    sessionStorage.setItem('currentMessage', sampleMessage);
+    sessionStorage.setItem('currentTemplate', templateName);
+    sessionStorage.setItem('currentTemplateType', templateType);
+    sessionStorage.setItem('currentInsights', JSON.stringify(sampleInsights));
+    
+    // Create and show the message display page directly in the current page
+    showMessagePage(templateName, sampleMessage, sampleInsights);
   }, 1500);
 }
 
-// Function to display the generated message
-function showMessageResult(templateType, templateName, message, insights) {
-  // Create modal container
-  const modalOverlay = document.createElement('div');
-  modalOverlay.className = 'modal-overlay';
-  modalOverlay.style.position = 'fixed';
-  modalOverlay.style.top = '0';
-  modalOverlay.style.left = '0';
-  modalOverlay.style.width = '100%';
-  modalOverlay.style.height = '100%';
-  modalOverlay.style.backgroundColor = 'rgba(0, 0, 0, 0.75)';
-  modalOverlay.style.display = 'flex';
-  modalOverlay.style.justifyContent = 'center';
-  modalOverlay.style.alignItems = 'center';
-  modalOverlay.style.zIndex = '1000';
-  modalOverlay.style.backdropFilter = 'blur(5px)';
+// Replace the showMessageResult function with this new approach
+function showMessagePage(templateName, message, insights) {
+  // First, hide the home screen
+  const homeScreen = document.getElementById('home-screen');
+  if (homeScreen) {
+    homeScreen.style.display = 'none';
+  }
   
-  // Create modal content
-  const modalContent = document.createElement('div');
-  modalContent.className = 'modal-content';
-  modalContent.style.backgroundColor = 'var(--card-bg)';
-  modalContent.style.borderRadius = '12px';
-  modalContent.style.padding = '24px';
-  modalContent.style.maxWidth = '600px';
-  modalContent.style.width = '90%';
-  modalContent.style.maxHeight = '90vh';
-  modalContent.style.overflowY = 'auto';
-  modalContent.style.boxShadow = 'var(--card-shadow)';
-  modalContent.style.border = '1px solid rgba(255, 255, 255, 0.1)';
-  modalContent.style.position = 'relative';
+  // Check if the message page already exists and remove it
+  const existingMessagePage = document.getElementById('message-page');
+  if (existingMessagePage) {
+    existingMessagePage.remove();
+  }
   
-  // Create modal header
-  const modalHeader = document.createElement('div');
-  modalHeader.style.marginBottom = '20px';
-  modalHeader.style.display = 'flex';
-  modalHeader.style.justifyContent = 'space-between';
-  modalHeader.style.alignItems = 'center';
+  // Create a new message page
+  const messagePage = document.createElement('div');
+  messagePage.id = 'message-page';
+  messagePage.className = 'screen active';
   
-  const modalTitle = document.createElement('h2');
-  modalTitle.textContent = `${templateName} Message`;
-  modalTitle.style.margin = '0';
-  modalTitle.style.background = 'var(--heading-gradient)';
-  modalTitle.style.webkitBackgroundClip = 'text';
-  modalTitle.style.backgroundClip = 'text';
-  modalTitle.style.color = 'transparent';
+  // Apply basic styles
+  messagePage.style.display = 'flex';
+  messagePage.style.flexDirection = 'column';
+  messagePage.style.width = '100%';
+  messagePage.style.minHeight = '100vh';
   
-  const closeButton = document.createElement('button');
-  closeButton.innerHTML = '&times;';
-  closeButton.style.background = 'none';
-  closeButton.style.border = 'none';
-  closeButton.style.color = 'var(--text-primary)';
-  closeButton.style.fontSize = '24px';
-  closeButton.style.cursor = 'pointer';
-  closeButton.style.padding = '0';
-  closeButton.style.lineHeight = '1';
-  closeButton.style.opacity = '0.7';
-  closeButton.style.transition = 'opacity 0.2s';
-  closeButton.addEventListener('mouseover', () => {
-    closeButton.style.opacity = '1';
+  // Create the content
+  messagePage.innerHTML = `
+    <header class="header">
+      <div class="logo-container">
+        <div class="logo-heart">❤️</div>
+        <span class="logo-text">HeartGlowAI</span>
+      </div>
+      
+      <nav class="nav-bar">
+        <button id="back-button" class="nav-button">
+          <span>←</span> Back to Templates
+        </button>
+        
+        <button id="dashboard-btn-result" class="nav-button">
+          <span>📊</span> Dashboard
+        </button>
+        
+        <button id="history-btn-result" class="nav-button">
+          <span>📋</span> History
+        </button>
+        
+        <button id="logout-btn-result" class="nav-button">
+          <span>👤</span> Logout
+        </button>
+      </nav>
+    </header>
+    
+    <div class="message-container">
+      <div class="message-header">
+        <h1 class="home-title">${templateName} Message</h1>
+        <p class="home-subtitle">Here's your personalized message, ready to share</p>
+      </div>
+      
+      <div class="message-box">
+        <div class="message-text">${message}</div>
+        
+        <div class="message-actions">
+          <button id="copy-btn" class="new-conversation-btn">
+            <span>📋</span> Copy to Clipboard
+          </button>
+          
+          <button id="new-message-btn" class="nav-button" style="margin-left: 10px;">
+            <span>✨</span> Create Another
+          </button>
+        </div>
+      </div>
+      
+      <div class="insights-box">
+        <h3 class="insights-title" style="color: var(--accent-pink); margin-bottom: 16px;">Why This Works:</h3>
+        <ul class="insights-list" style="padding-left: 20px;">
+          ${insights.map(insight => `<li style="margin-bottom: 8px; color: var(--text-secondary);">${insight}</li>`).join('')}
+        </ul>
+      </div>
+    </div>
+  `;
+  
+  // Add custom styles
+  const style = document.createElement('style');
+  style.textContent = `
+    .message-container {
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .message-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .message-box {
+      background: rgba(42, 14, 44, 0.3);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 30px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .message-text {
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 16px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      margin-bottom: 24px;
+    }
+    
+    .message-actions {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .insights-box {
+      background: rgba(42, 14, 44, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+  `;
+  
+  // Add the page to the DOM
+  document.getElementById('app').appendChild(style);
+  document.getElementById('app').appendChild(messagePage);
+  
+  // Add event listeners
+  document.getElementById('back-button').addEventListener('click', function() {
+    // Go back to templates
+    messagePage.remove();
+    if (homeScreen) {
+      homeScreen.style.display = 'flex';
+    }
   });
-  closeButton.addEventListener('mouseout', () => {
-    closeButton.style.opacity = '0.7';
-  });
-  closeButton.addEventListener('click', () => {
-    document.body.removeChild(modalOverlay);
-  });
   
-  modalHeader.appendChild(modalTitle);
-  modalHeader.appendChild(closeButton);
-  
-  // Create message content
-  const messageContent = document.createElement('div');
-  messageContent.className = 'message-content';
-  messageContent.style.backgroundColor = 'rgba(255, 255, 255, 0.05)';
-  messageContent.style.borderRadius = '8px';
-  messageContent.style.padding = '16px';
-  messageContent.style.marginBottom = '20px';
-  messageContent.style.fontSize = '16px';
-  messageContent.style.lineHeight = '1.6';
-  messageContent.style.color = 'var(--text-primary)';
-  messageContent.textContent = message;
-  
-  // Create insights section
-  const insightsSection = document.createElement('div');
-  insightsSection.className = 'insights-section';
-  
-  const insightsTitle = document.createElement('h3');
-  insightsTitle.textContent = 'Why This Works:';
-  insightsTitle.style.fontSize = '18px';
-  insightsTitle.style.marginBottom = '12px';
-  insightsTitle.style.color = 'var(--accent-pink)';
-  
-  const insightsList = document.createElement('ul');
-  insightsList.style.paddingLeft = '20px';
-  insightsList.style.margin = '0';
-  
-  insights.forEach(insight => {
-    const insightItem = document.createElement('li');
-    insightItem.textContent = insight;
-    insightItem.style.marginBottom = '8px';
-    insightItem.style.color = 'var(--text-secondary)';
-    insightsList.appendChild(insightItem);
-  });
-  
-  insightsSection.appendChild(insightsTitle);
-  insightsSection.appendChild(insightsList);
-  
-  // Create action buttons
-  const actionButtons = document.createElement('div');
-  actionButtons.style.display = 'flex';
-  actionButtons.style.gap = '12px';
-  actionButtons.style.marginTop = '24px';
-  
-  const copyButton = document.createElement('button');
-  copyButton.textContent = 'Copy to Clipboard';
-  copyButton.style.background = 'var(--primary-gradient)';
-  copyButton.style.border = 'none';
-  copyButton.style.color = 'white';
-  copyButton.style.padding = '10px 20px';
-  copyButton.style.borderRadius = '8px';
-  copyButton.style.cursor = 'pointer';
-  copyButton.style.fontWeight = '500';
-  copyButton.style.flex = '1';
-  copyButton.addEventListener('click', () => {
+  document.getElementById('copy-btn').addEventListener('click', function() {
+    // Copy to clipboard
     navigator.clipboard.writeText(message).then(() => {
       showAlert('Message copied to clipboard!', 'success');
     }).catch(err => {
@@ -463,42 +487,42 @@ function showMessageResult(templateType, templateName, message, insights) {
     });
   });
   
-  const regenerateButton = document.createElement('button');
-  regenerateButton.textContent = 'Create Another';
-  regenerateButton.style.background = 'rgba(255, 255, 255, 0.1)';
-  regenerateButton.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-  regenerateButton.style.color = 'var(--text-primary)';
-  regenerateButton.style.padding = '10px 20px';
-  regenerateButton.style.borderRadius = '8px';
-  regenerateButton.style.cursor = 'pointer';
-  regenerateButton.style.fontWeight = '500';
-  regenerateButton.style.flex = '1';
-  regenerateButton.addEventListener('click', () => {
-    document.body.removeChild(modalOverlay);
-    // Scroll to templates section
-    const templatesSection = document.getElementById('templates-section');
-    if (templatesSection) {
-      templatesSection.scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('new-message-btn').addEventListener('click', function() {
+    // Go back to templates to create a new message
+    messagePage.remove();
+    if (homeScreen) {
+      homeScreen.style.display = 'flex';
+      const templatesSection = document.getElementById('templates-section');
+      if (templatesSection) {
+        templatesSection.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   });
   
-  actionButtons.appendChild(copyButton);
-  actionButtons.appendChild(regenerateButton);
+  // Handle main navigation buttons
+  document.getElementById('dashboard-btn-result').addEventListener('click', function() {
+    window.location.href = 'dashboard.html';
+  });
   
-  // Assemble the modal
-  modalContent.appendChild(modalHeader);
-  modalContent.appendChild(messageContent);
-  modalContent.appendChild(insightsSection);
-  modalContent.appendChild(actionButtons);
+  document.getElementById('history-btn-result').addEventListener('click', function() {
+    window.location.href = 'history.html';
+  });
   
-  modalOverlay.appendChild(modalContent);
+  document.getElementById('logout-btn-result').addEventListener('click', function() {
+    showLoading('Logging out...');
+    firebase.auth().signOut()
+      .then(() => {
+        window.location.href = 'index.html';
+      })
+      .catch((error) => {
+        console.error('Logout error:', error);
+        showAlert(`Logout error: ${error.message}`, 'error');
+        hideLoading();
+      });
+  });
   
-  // Add to body
-  document.body.appendChild(modalOverlay);
-  
-  // Remove Firestore save functionality since it's causing permission errors
-  // This allows the core message generation feature to work properly
-  console.log('Message generated successfully:', templateType);
+  // Log that message was generated successfully
+  console.log('Message page created successfully');
 }
 
 // Function to show a simple feedback form

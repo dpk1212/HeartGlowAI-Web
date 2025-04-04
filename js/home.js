@@ -327,12 +327,12 @@ function createMessageFromTemplate(templateType, templateName) {
     }
     
     // Show the generated message in a modal or popup
-    showMessageResult(templateName, sampleMessage, sampleInsights);
+    showMessageResult(templateType, templateName, sampleMessage, sampleInsights);
   }, 1500);
 }
 
 // Function to display the generated message
-function showMessageResult(templateName, message, insights) {
+function showMessageResult(templateType, templateName, message, insights) {
   // Create modal container
   const modalOverlay = document.createElement('div');
   modalOverlay.className = 'modal-overlay';

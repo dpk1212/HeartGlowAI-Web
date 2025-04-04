@@ -31,7 +31,7 @@
 
     // Screen transition function - updated to manage visibility classes
     function showScreen(screen) {
-      const screens = [welcomeScreen, authScreen, homeScreen, generatorScreen, learningScreen];
+      const screens = [welcomeScreen, homeScreen, generatorScreen, learningScreen]; // authScreen removed
       screens.forEach(s => {
         if (s === screen) {
           s.style.display = 'flex';
@@ -136,11 +136,14 @@
         });
       });
       
-      // Next button functionality - Navigate to auth screen
+      // Next button functionality - Navigate to login page instead of auth screen
       if (nextBtn) {
         nextBtn.addEventListener('click', () => {
-          // Navigate to auth screen
-          showScreen(authScreen);
+          // Store the selected message type in localStorage
+          localStorage.setItem('selectedMessageType', selectedType);
+          
+          // Redirect to the dedicated login page
+          window.location.href = 'login.html';
         });
         
         // Make sure Next button is visible by default since we already have a tab selected
@@ -2872,7 +2875,7 @@ Maintain the core message and emotional intent while applying these changes.`
       
       // Initialize screen elements
       welcomeScreen = document.getElementById('welcome-screen');
-      authScreen = document.getElementById('auth-screen');
+      // authScreen removed (now using separate login.html)
       homeScreen = document.getElementById('home-screen');
       generatorScreen = document.getElementById('generator-screen');
       learningScreen = document.getElementById('learning-screen');

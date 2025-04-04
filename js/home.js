@@ -21,16 +21,6 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  // Set permissions to allow access during development
-  // This is a temporary fix until proper security rules are deployed
-  if (firebase.firestore) {
-    firebase.firestore().settings({
-      ignoreUndefinedProperties: true,
-      // This allows temporary bypass of security rules
-      experimentalForceLongPolling: true
-    });
-  }
-  
   // Check authentication status on load
   try {
     console.log('Checking authentication status...');
@@ -344,151 +334,112 @@ function loadUserConnections() {
   
   try {
     console.log('Loading user connections...');
-    
-    // First, check if the user document exists, if not create it
+    // Query Firestore for user's connections
     firebase.firestore()
       .collection('users')
       .doc(currentUser.uid)
+      .collection('connections')
+      .orderBy('name', 'asc')
+      .limit(10)
       .get()
-      .then((docSnapshot) => {
-        if (!docSnapshot.exists) {
-          // Create the user document if it doesn't exist
-          return firebase.firestore()
-            .collection('users')
-            .doc(currentUser.uid)
-            .set({
-              displayName: currentUser.displayName || 'User',
-              email: currentUser.email,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp()
-            })
-            .then(() => {
-              console.log('Created user document');
-              // Show empty connections since this is a new user
-              connectionsList.innerHTML = `
-                <li class="empty-state">
-                  <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
-                  <div class="empty-title">No connections yet</div>
-                  <div class="empty-description">Save people to your connections when sending messages</div>
-                  <a href="emotional-entry.html" class="empty-action">
-                    <i class="fas fa-plus-circle"></i> Create a message
-                  </a>
-                </li>
-              `;
-            });
+      .then((querySnapshot) => {
+        // Clear loading indicator
+        connectionsList.innerHTML = '';
+        
+        if (querySnapshot.empty) {
+          // Show empty state
+          connectionsList.innerHTML = `
+            <li class="empty-state">
+              <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
+              <div class="empty-title">No connections yet</div>
+              <div class="empty-description">Save people to your connections when sending messages</div>
+              <a href="emotional-entry.html" class="empty-action">
+                <i class="fas fa-plus-circle"></i> Create a message
+              </a>
+            </li>
+          `;
+          return;
         }
+        
+        // Add connections to the list
+        querySnapshot.forEach((doc) => {
+          const connectionData = doc.data();
+          
+          // Get initials for avatar
+          const initials = getInitials(connectionData.name);
+          
+          // Get last message timestamp if available
+          let lastMessageText = 'No messages yet';
+          if (connectionData.lastMessageDate) {
+            const lastMessageDate = connectionData.lastMessageDate.toDate();
+            const timeAgo = getTimeAgo(lastMessageDate);
+            lastMessageText = `Last message ${timeAgo}`;
+          }
+          
+          // Create connection item
+          const connectionItem = document.createElement('li');
+          connectionItem.className = 'connection-item';
+          connectionItem.innerHTML = `
+            <div class="connection-avatar">${initials}</div>
+            <div class="connection-details">
+              <div class="connection-name">${connectionData.name}</div>
+              <div class="connection-meta">
+                <span class="connection-relation">${capitalizeFirstLetter(connectionData.relationship || 'Contact')}</span>
+                <span class="connection-last-message">${lastMessageText}</span>
+              </div>
+            </div>
+            <div class="connection-actions">
+              <div class="connection-action send-message" title="Send Message">
+                <i class="fas fa-paper-plane"></i>
+              </div>
+              <div class="connection-action view-history" title="View History">
+                <i class="fas fa-history"></i>
+              </div>
+            </div>
+          `;
+          
+          // Add connection ID as data attribute
+          connectionItem.setAttribute('data-id', doc.id);
+          
+          // Add click handlers for the connection item and its actions
+          const sendMessageBtn = connectionItem.querySelector('.send-message');
+          const viewHistoryBtn = connectionItem.querySelector('.view-history');
+          
+          if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent triggering the parent click
+              // Store recipient data for message flow
+              localStorage.setItem('recipientData', JSON.stringify({
+                id: doc.id,
+                name: connectionData.name,
+                relationship: connectionData.relationship,
+                isExisting: true
+              }));
+              // Navigate to message intent page
+              window.location.href = 'message-intent.html';
+            });
+          }
+          
+          if (viewHistoryBtn) {
+            viewHistoryBtn.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent triggering the parent click
+              // Navigate to history page filtered for this connection
+              window.location.href = `history.html?connectionId=${doc.id}`;
+            });
+          }
+          
+          connectionsList.appendChild(connectionItem);
+        });
+        
+        console.log('Connections loaded successfully');
       })
       .catch((error) => {
-        console.error('Error checking user document:', error);
-        // Continue anyway to try fetching connections
-      })
-      .finally(() => {
-        // Now try to fetch connections
-        firebase.firestore()
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('connections')
-          .orderBy('name', 'asc')
-          .limit(10)
-          .get()
-          .then((querySnapshot) => {
-            // Clear loading indicator
-            connectionsList.innerHTML = '';
-            
-            if (querySnapshot.empty) {
-              // Show empty state
-              connectionsList.innerHTML = `
-                <li class="empty-state">
-                  <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
-                  <div class="empty-title">No connections yet</div>
-                  <div class="empty-description">Save people to your connections when sending messages</div>
-                  <a href="emotional-entry.html" class="empty-action">
-                    <i class="fas fa-plus-circle"></i> Create a message
-                  </a>
-                </li>
-              `;
-              return;
-            }
-            
-            // Add connections to the list
-            querySnapshot.forEach((doc) => {
-              const connectionData = doc.data();
-              
-              // Get initials for avatar
-              const initials = getInitials(connectionData.name);
-              
-              // Get last message timestamp if available
-              let lastMessageText = 'No messages yet';
-              if (connectionData.lastMessageDate) {
-                const lastMessageDate = connectionData.lastMessageDate.toDate();
-                const timeAgo = getTimeAgo(lastMessageDate);
-                lastMessageText = `Last message ${timeAgo}`;
-              }
-              
-              // Create connection item
-              const connectionItem = document.createElement('li');
-              connectionItem.className = 'connection-item';
-              connectionItem.innerHTML = `
-                <div class="connection-avatar">${initials}</div>
-                <div class="connection-details">
-                  <div class="connection-name">${connectionData.name}</div>
-                  <div class="connection-meta">
-                    <span class="connection-relation">${capitalizeFirstLetter(connectionData.relationship || 'Contact')}</span>
-                    <span class="connection-last-message">${lastMessageText}</span>
-                  </div>
-                </div>
-                <div class="connection-actions">
-                  <div class="connection-action send-message" title="Send Message">
-                    <i class="fas fa-paper-plane"></i>
-                  </div>
-                  <div class="connection-action view-history" title="View History">
-                    <i class="fas fa-history"></i>
-                  </div>
-                </div>
-              `;
-              
-              // Add connection ID as data attribute
-              connectionItem.setAttribute('data-id', doc.id);
-              
-              // Add click handlers for the connection item and its actions
-              const sendMessageBtn = connectionItem.querySelector('.send-message');
-              const viewHistoryBtn = connectionItem.querySelector('.view-history');
-              
-              if (sendMessageBtn) {
-                sendMessageBtn.addEventListener('click', function(e) {
-                  e.stopPropagation(); // Prevent triggering the parent click
-                  // Store recipient data for message flow
-                  localStorage.setItem('recipientData', JSON.stringify({
-                    id: doc.id,
-                    name: connectionData.name,
-                    relationship: connectionData.relationship,
-                    isExisting: true
-                  }));
-                  // Navigate to message intent page
-                  window.location.href = 'message-intent.html';
-                });
-              }
-              
-              if (viewHistoryBtn) {
-                viewHistoryBtn.addEventListener('click', function(e) {
-                  e.stopPropagation(); // Prevent triggering the parent click
-                  // Navigate to history page filtered for this connection
-                  window.location.href = `history.html?connectionId=${doc.id}`;
-                });
-              }
-              
-              connectionsList.appendChild(connectionItem);
-            });
-            
-            console.log('Connections loaded successfully');
-          })
-          .catch((error) => {
-            console.error('Error loading connections:', error);
-            showConnectionsError(error.message);
-            if (typeof debugLog === 'function') {
-              debugLog('Error loading connections: ' + error.message);
-              document.getElementById('debug-console').style.display = 'block';
-            }
-          });
+        console.error('Error loading connections:', error);
+        showConnectionsError(error.message);
+        if (typeof debugLog === 'function') {
+          debugLog('Error loading connections: ' + error.message);
+          document.getElementById('debug-console').style.display = 'block';
+        }
       });
   } catch (error) {
     console.error('Exception in loadUserConnections:', error);
@@ -600,44 +551,132 @@ function loadUserReminders() {
   const remindersList = document.getElementById('reminders-list');
   if (!remindersList) return;
   
-  try {
-    // Get current date for comparison
-    const now = new Date();
-    
-    // First, ensure the user document and subcollections exist
-    firebase.firestore()
-      .collection('users')
-      .doc(currentUser.uid)
-      .get()
-      .then((docSnapshot) => {
-        if (!docSnapshot.exists) {
-          // If the user document doesn't exist yet, just show empty state
-          remindersList.innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon"><i class="fas fa-bell"></i></div>
-              <div class="empty-title">No upcoming reminders</div>
-              <div class="empty-description">Set reminders when sending messages to stay connected</div>
-            </div>
-          `;
-          return;
+  // Get current date for comparison
+  const now = new Date();
+  
+  // Query Firestore for user's upcoming reminders
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('reminders')
+    .where('isComplete', '==', false)
+    .where('reminderDate', '>=', now)
+    .orderBy('reminderDate', 'asc')
+    .limit(5)
+    .get()
+    .then((querySnapshot) => {
+      // Clear loading indicator
+      remindersList.innerHTML = '';
+      
+      if (querySnapshot.empty) {
+        // Show empty state
+        remindersList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-bell"></i></div>
+            <div class="empty-title">No upcoming reminders</div>
+            <div class="empty-description">Set reminders when sending messages to stay connected</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Add reminders to the list
+      querySnapshot.forEach((doc) => {
+        const reminderData = doc.data();
+        
+        // Format reminder date
+        let dateText = 'Soon';
+        if (reminderData.reminderDate) {
+          const reminderDate = reminderData.reminderDate.toDate();
+          dateText = formatDate(reminderDate);
         }
         
-        // Now try to fetch reminders
-        return firebase.firestore()
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('reminders')
-          .where('isComplete', '==', false)
-          .where('reminderDate', '>=', now)
-          .orderBy('reminderDate', 'asc')
-          .limit(5)
-          .get()
-          .then((querySnapshot) => {
-            // Clear loading indicator
-            remindersList.innerHTML = '';
+        // Create reminder item
+        const reminderItem = document.createElement('div');
+        reminderItem.className = 'reminder-item';
+        reminderItem.innerHTML = `
+          <div class="reminder-icon">
+            <i class="fas fa-bell"></i>
+          </div>
+          <div class="reminder-content">
+            <div class="reminder-title">Message ${reminderData.recipientName || 'Someone'}</div>
+            <div class="reminder-date">${dateText}</div>
+            <div class="reminder-actions">
+              <div class="reminder-action message-now">Message Now</div>
+              <div class="reminder-action dismiss">Dismiss</div>
+            </div>
+          </div>
+        `;
+        
+        // Add reminder ID as data attribute
+        reminderItem.setAttribute('data-id', doc.id);
+        
+        // Add click handlers for action buttons
+        const messageNowBtn = reminderItem.querySelector('.message-now');
+        const dismissBtn = reminderItem.querySelector('.dismiss');
+        
+        if (messageNowBtn) {
+          messageNowBtn.addEventListener('click', function() {
+            // Navigate to message creation with recipient pre-selected
+            if (reminderData.connectionId) {
+              // If we have a connection ID, use it
+              firebase.firestore()
+                .collection('users')
+                .doc(currentUser.uid)
+                .collection('connections')
+                .doc(reminderData.connectionId)
+                .get()
+                .then((doc) => {
+                  if (doc.exists) {
+                    const connectionData = doc.data();
+                    localStorage.setItem('recipientData', JSON.stringify({
+                      id: reminderData.connectionId,
+                      name: connectionData.name,
+                      relationship: connectionData.relationship,
+                      isExisting: true
+                    }));
+                    window.location.href = 'message-intent.html';
+                  } else {
+                    // If connection not found, just use the name
+                    localStorage.setItem('recipientData', JSON.stringify({
+                      name: reminderData.recipientName,
+                      isExisting: false
+                    }));
+                    window.location.href = 'message-intent.html';
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error fetching connection:', error);
+                  // Fallback to just using the name
+                  localStorage.setItem('recipientData', JSON.stringify({
+                    name: reminderData.recipientName,
+                    isExisting: false
+                  }));
+                  window.location.href = 'message-intent.html';
+                });
+            } else {
+              // If no connection ID, just use the name
+              localStorage.setItem('recipientData', JSON.stringify({
+                name: reminderData.recipientName,
+                isExisting: false
+              }));
+              window.location.href = 'message-intent.html';
+            }
             
-            if (querySnapshot.empty) {
-              // Show empty state
+            // Mark reminder as complete
+            markReminderComplete(doc.id);
+          });
+        }
+        
+        if (dismissBtn) {
+          dismissBtn.addEventListener('click', function() {
+            // Mark reminder as complete
+            markReminderComplete(doc.id);
+            // Remove from UI
+            reminderItem.remove();
+            
+            // Check if list is now empty
+            if (remindersList.children.length === 0) {
               remindersList.innerHTML = `
                 <div class="empty-state">
                   <div class="empty-icon"><i class="fas fa-bell"></i></div>
@@ -645,142 +684,20 @@ function loadUserReminders() {
                   <div class="empty-description">Set reminders when sending messages to stay connected</div>
                 </div>
               `;
-              return;
-            }
-            
-            // Add reminders to the list
-            querySnapshot.forEach((doc) => {
-              const reminderData = doc.data();
-              
-              // Format reminder date
-              let dateText = 'Soon';
-              if (reminderData.reminderDate) {
-                const reminderDate = reminderData.reminderDate.toDate();
-                dateText = formatDate(reminderDate);
-              }
-              
-              // Create reminder item
-              const reminderItem = document.createElement('div');
-              reminderItem.className = 'reminder-item';
-              reminderItem.innerHTML = `
-                <div class="reminder-icon">
-                  <i class="fas fa-bell"></i>
-                </div>
-                <div class="reminder-content">
-                  <div class="reminder-title">Message ${reminderData.recipientName || 'Someone'}</div>
-                  <div class="reminder-date">${dateText}</div>
-                  <div class="reminder-actions">
-                    <div class="reminder-action message-now">Message Now</div>
-                    <div class="reminder-action dismiss">Dismiss</div>
-                  </div>
-                </div>
-              `;
-              
-              // Add reminder ID as data attribute
-              reminderItem.setAttribute('data-id', doc.id);
-              
-              // Add click handlers for action buttons
-              const messageNowBtn = reminderItem.querySelector('.message-now');
-              const dismissBtn = reminderItem.querySelector('.dismiss');
-              
-              if (messageNowBtn) {
-                messageNowBtn.addEventListener('click', function() {
-                  // Navigate to message creation with recipient pre-selected
-                  if (reminderData.connectionId) {
-                    // If we have a connection ID, use it
-                    firebase.firestore()
-                      .collection('users')
-                      .doc(currentUser.uid)
-                      .collection('connections')
-                      .doc(reminderData.connectionId)
-                      .get()
-                      .then((doc) => {
-                        if (doc.exists) {
-                          const connectionData = doc.data();
-                          localStorage.setItem('recipientData', JSON.stringify({
-                            id: reminderData.connectionId,
-                            name: connectionData.name,
-                            relationship: connectionData.relationship,
-                            isExisting: true
-                          }));
-                          window.location.href = 'message-intent.html';
-                        } else {
-                          // If connection not found, just use the name
-                          localStorage.setItem('recipientData', JSON.stringify({
-                            name: reminderData.recipientName,
-                            isExisting: false
-                          }));
-                          window.location.href = 'message-intent.html';
-                        }
-                      })
-                      .catch((error) => {
-                        console.error('Error fetching connection:', error);
-                        // Fallback to just using the name
-                        localStorage.setItem('recipientData', JSON.stringify({
-                          name: reminderData.recipientName,
-                          isExisting: false
-                        }));
-                        window.location.href = 'message-intent.html';
-                      });
-                  } else {
-                    // If no connection ID, just use the name
-                    localStorage.setItem('recipientData', JSON.stringify({
-                      name: reminderData.recipientName,
-                      isExisting: false
-                    }));
-                    window.location.href = 'message-intent.html';
-                  }
-                  
-                  // Mark reminder as complete
-                  markReminderComplete(doc.id);
-                });
-              }
-              
-              if (dismissBtn) {
-                dismissBtn.addEventListener('click', function() {
-                  // Mark reminder as complete
-                  markReminderComplete(doc.id);
-                  // Remove from UI
-                  reminderItem.remove();
-                  
-                  // Check if list is now empty
-                  if (remindersList.children.length === 0) {
-                    remindersList.innerHTML = `
-                      <div class="empty-state">
-                        <div class="empty-icon"><i class="fas fa-bell"></i></div>
-                        <div class="empty-title">No upcoming reminders</div>
-                        <div class="empty-description">Set reminders when sending messages to stay connected</div>
-                      </div>
-                    `;
-                  }
-                });
-              }
-              
-              remindersList.appendChild(reminderItem);
-            });
-          })
-          .catch((error) => {
-            console.error('Error loading reminders:', error);
-            showRemindersError(error.message);
-            if (typeof debugLog === 'function') {
-              debugLog('Error loading reminders: ' + error.message);
             }
           });
-      })
-      .catch((error) => {
-        console.error('Error checking user document for reminders:', error);
-        showRemindersError(error.message);
-        if (typeof debugLog === 'function') {
-          debugLog('Error checking user document for reminders: ' + error.message);
         }
+        
+        remindersList.appendChild(reminderItem);
       });
-  } catch (error) {
-    console.error('Exception in loadUserReminders:', error);
-    showRemindersError(error.message);
-    if (typeof debugLog === 'function') {
-      debugLog('Exception in loadUserReminders: ' + error.message);
-    }
-  }
+    })
+    .catch((error) => {
+      console.error('Error loading reminders:', error);
+      showRemindersError(error.message);
+      if (typeof debugLog === 'function') {
+        debugLog('Error loading reminders: ' + error.message);
+      }
+    });
 }
 
 // Mark a reminder as complete

@@ -45,27 +45,6 @@
       try {
         firebase.initializeApp(firebaseConfig);
         console.log("Firebase initialized successfully");
-        
-        // Set Firestore persistence
-        if (firebase.firestore) {
-          firebase.firestore().enablePersistence({ synchronizeTabs: true })
-            .then(() => {
-              console.log("Firestore persistence enabled");
-            })
-            .catch((err) => {
-              if (err.code == 'failed-precondition') {
-                console.warn("Multiple tabs open, persistence only enabled in one tab");
-              } else if (err.code == 'unimplemented') {
-                console.warn("Browser doesn't support persistence");
-              }
-            });
-            
-          // Set permissive settings for development
-          firebase.firestore().settings({
-            ignoreUndefinedProperties: true,
-            experimentalForceLongPolling: true
-          });
-        }
       } catch (error) {
         console.error("Firebase initialization error:", error);
         alert("Error initializing Firebase. Please refresh and try again.");
@@ -88,40 +67,6 @@
       console.error("Firebase auth not available!");
       alert("Firebase auth not available. Please refresh and try again.");
     }
-    
-    // Debug logging function used throughout the app
-    function debugLog(message) {
-      const debugConsole = document.getElementById('debug-console');
-      if (debugConsole) {
-        const logEntry = document.createElement('div');
-        logEntry.className = 'debug-log-entry';
-        
-        const timestamp = new Date().toLocaleTimeString();
-        logEntry.innerHTML = `<span class="debug-timestamp">${timestamp}</span> ${message}`;
-        
-        const logContent = document.getElementById('debug-log-content');
-        if (logContent) {
-          logContent.appendChild(logEntry);
-          logContent.scrollTop = logContent.scrollHeight;
-        }
-      }
-      
-      console.log(message);
-    }
-    
-    // Add event listener for DOMContentLoaded to ensure document is ready
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM fully loaded and parsed');
-      
-      // Attach click handler to retry button (if it exists)
-      const retryButton = document.getElementById('retry-firebase');
-      if (retryButton) {
-        retryButton.addEventListener('click', function() {
-          debugLog('Retrying Firebase operations...');
-          location.reload();
-        });
-      }
-    });
   </script>
   
   <style>

@@ -331,8 +331,7 @@ function loadUserConnections() {
       .collection('users')
       .doc(currentUser.uid)
       .collection('connections')
-      .orderBy('name', 'asc')
-      .limit(10)
+      .limit(20) // Fetch a bit more to sort
       .get()
       .then((querySnapshot) => {
         try {
@@ -344,9 +343,26 @@ function loadUserConnections() {
             return;
           }
           
-          // Add connections to the list
+          // Process and sort connections client-side
+          const connections = [];
           querySnapshot.forEach((doc) => {
-            const connectionData = doc.data();
+            connections.push({ id: doc.id, data: doc.data() });
+          });
+          
+          // Sort by name (case-insensitive)
+          connections.sort((a, b) => {
+            const nameA = a.data.name ? a.data.name.toLowerCase() : '';
+            const nameB = b.data.name ? b.data.name.toLowerCase() : '';
+            if (nameA < nameB) return -1;
+            if (nameA > nameB) return 1;
+            return 0;
+          });
+          
+          // Limit to 10 after sorting
+          const connectionsToDisplay = connections.slice(0, 10);
+
+          // Add connections to the list
+          connectionsToDisplay.forEach(({ id, data: connectionData }) => {
             // Add checks for potentially missing data
             const name = connectionData.name || 'Unknown Connection';
             const relationship = connectionData.relationship || 'Contact';
@@ -358,7 +374,7 @@ function loadUserConnections() {
               const timeAgo = getTimeAgo(lastMessageDate);
               lastMessageText = `Last message ${timeAgo}`;
             } else {
-              console.warn('Missing or invalid lastMessageDate for connection:', doc.id);
+              console.warn('Missing or invalid lastMessageDate for connection:', id);
             }
             
             const connectionItem = document.createElement('li');
@@ -381,7 +397,7 @@ function loadUserConnections() {
                 </div>
               </div>
             `;
-            connectionItem.setAttribute('data-id', doc.id);
+            connectionItem.setAttribute('data-id', id);
             
             const sendMessageBtn = connectionItem.querySelector('.send-message');
             const viewHistoryBtn = connectionItem.querySelector('.view-history');
@@ -390,9 +406,9 @@ function loadUserConnections() {
               sendMessageBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
                 localStorage.setItem('recipientData', JSON.stringify({
-                  id: doc.id,
-                  name: name, // Use checked name
-                  relationship: relationship, // Use checked relationship
+                  id: id, 
+                  name: name, 
+                  relationship: relationship, 
                   isExisting: true
                 }));
                 window.location.href = 'message-intent.html';
@@ -402,32 +418,32 @@ function loadUserConnections() {
             if (viewHistoryBtn) {
               viewHistoryBtn.addEventListener('click', function(e) {
                 e.stopPropagation();
-                window.location.href = `history.html?connectionId=${doc.id}`;
+                window.location.href = `history.html?connectionId=${id}`;
               });
             }
             
             connectionsList.appendChild(connectionItem);
           });
           
-          console.log('Connections loaded successfully');
+          console.log('Connections loaded and sorted successfully');
         } catch(processingError) {
           console.error('Error processing connections data:', processingError);
           showConnectionsError('Failed to display connections: ' + processingError.message);
         }
       })
       .catch((error) => {
-        console.error('Error loading connections:', error);
+        console.error('Error loading connections query:', error); // Changed log message
         showConnectionsError(error.message);
         if (typeof debugLog === 'function') {
-          debugLog('Error loading connections: ' + error.message);
+          debugLog('Error loading connections query: ' + error.message);
           document.getElementById('debug-console').style.display = 'block';
         }
       });
   } catch (error) {
-    console.error('Exception in loadUserConnections:', error);
+    console.error('Exception in loadUserConnections setup:', error); // Changed log message
     showConnectionsError(error.message);
     if (typeof debugLog === 'function') {
-      debugLog('Exception in loadUserConnections: ' + error.message);
+      debugLog('Exception in loadUserConnections setup: ' + error.message);
       document.getElementById('debug-console').style.display = 'block';
     }
   }
@@ -458,8 +474,7 @@ function loadUserMessages() {
     .collection('users')
     .doc(currentUser.uid)
     .collection('messages')
-    .orderBy('createdAt', 'desc')
-    .limit(5)
+    .limit(20) // Fetch a bit more to sort
     .get()
     .then((querySnapshot) => {
       try {
@@ -471,22 +486,40 @@ function loadUserMessages() {
           return;
         }
         
-        // Add messages to the list
+        // Process and sort messages client-side
+        const messages = [];
         querySnapshot.forEach((doc) => {
-          const messageData = doc.data();
-          // Add checks for potentially missing data
+            // Add a check for createdAt before pushing
+            const data = doc.data();
+            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
+                messages.push({ id: doc.id, data: data });
+            } else {
+                console.warn('Skipping message due to missing/invalid createdAt:', doc.id);
+            }
+        });
+
+        // Sort by createdAt date (descending)
+        messages.sort((a, b) => {
+          const dateA = a.data.createdAt.toDate();
+          const dateB = b.data.createdAt.toDate();
+          return dateB - dateA; // Descending order
+        });
+
+        // Limit to 5 after sorting
+        const messagesToDisplay = messages.slice(0, 5);
+        
+        // Add messages to the list
+        messagesToDisplay.forEach(({ id, data: messageData }) => {
+           // Add checks for potentially missing data
           const recipientName = messageData.recipientName || 'Unknown Recipient';
           const content = messageData.content || '';
           const intent = messageData.intent || 'custom';
           const tone = messageData.tone || 'neutral';
           
           let dateText = 'Recently';
-          if (messageData.createdAt && typeof messageData.createdAt.toDate === 'function') {
-            const messageDate = messageData.createdAt.toDate();
-            dateText = formatDate(messageDate);
-          } else {
-              console.warn('Missing or invalid createdAt date for message:', doc.id);
-          }
+          // We already checked createdAt exists and is valid during the initial loop
+          const messageDate = messageData.createdAt.toDate();
+          dateText = formatDate(messageDate);
           
           let messagePreview = content;
           if (messagePreview.length > 120) {
@@ -501,7 +534,7 @@ function loadUserMessages() {
           }
           const messageItem = document.createElement('li');
           messageItem.className = 'message-item';
-          messageItem.setAttribute('data-id', doc.id);
+          messageItem.setAttribute('data-id', id);
           messageItem.innerHTML = `
             <div class="message-header">
               <div class="message-recipient">${recipientName}</div>
@@ -515,20 +548,20 @@ function loadUserMessages() {
             ` : ''}
           `;
           messageItem.addEventListener('click', function() {
-            localStorage.setItem('viewMessageId', doc.id);
-            window.location.href = `view-message.html?id=${doc.id}`;
+            localStorage.setItem('viewMessageId', id);
+            window.location.href = `view-message.html?id=${id}`;
           });
           recentMessages.appendChild(messageItem);
         });
         
-        console.log('Messages loaded successfully');
+        console.log('Messages loaded and sorted successfully');
       } catch(processingError) {
         console.error('Error processing messages data:', processingError);
         showMessagesError('Failed to display messages: ' + processingError.message);
       }
     })
     .catch((error) => {
-      console.error('Error loading messages:', error);
+      console.error('Error loading messages query:', error); // Changed log message
       showMessagesError(error.message);
     });
 }

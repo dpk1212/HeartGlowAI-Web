@@ -6,12 +6,27 @@ let isLogin = true; // Toggle between login and registration views
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Login page loaded, initializing...');
   
-  // Initialize Firebase - Using existing configuration from HTML
-  try {
-    console.log('Firebase initialization check');
-    // Firebase is already initialized in the HTML header
-  } catch (error) {
-    console.error('Firebase initialization error:', error);
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+    authDomain: "heartglowai.firebaseapp.com",
+    projectId: "heartglowai",
+    storageBucket: "heartglowai.firebasestorage.app",
+    messagingSenderId: "196565711798",
+    appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+    measurementId: "G-KJMPL1DNPY"
+  };
+  
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log("login.js: Firebase initialized successfully");
+    } catch (error) {
+      console.error("login.js: Firebase initialization error:", error);
+    }
+  } else {
+    console.log("login.js: Firebase already initialized. Skipping initialization.");
   }
   
   // Set up authentication listeners

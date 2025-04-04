@@ -962,3 +962,197 @@ body > *:not(#app):not(script):not(link) {
   visibility: visible;
   pointer-events: all;
 }
+
+/* Auth Screen Styling */
+.auth-container {
+  max-width: 450px;
+  width: 90%;
+  padding: 40px;
+  margin: 0 auto;
+  background: linear-gradient(145deg, rgba(47, 18, 59, 0.8), rgba(28, 10, 35, 0.9));
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4), 0 5px 15px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeIn 0.5s var(--animation-curve);
+}
+
+/* Subtle ambient glow effect for auth container */
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  left: -100px;
+  width: calc(100% + 200px);
+  height: calc(100% + 200px);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 107, 157, 0.15), transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Add subtle depth layer */
+.auth-container::after {
+  content: '';
+  position: absolute;
+  inset: 1px;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.001) 100%);
+  border-radius: 23px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.auth-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.auth-logo::before {
+  content: '❤️';
+  font-size: 40px;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+  animation: logoFloat 3s ease-in-out infinite;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 30px;
+  color: white;
+  background-image: linear-gradient(135deg, #ff6b9d, #ff94c2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: -0.03em;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  background-color: white;
+  color: #333;
+  font-weight: 600;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 25px;
+  transition: all 0.3s var(--animation-curve);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.google-btn img {
+  margin-right: 12px;
+  width: 20px;
+  height: 20px;
+}
+
+.google-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  margin: 25px 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.auth-divider span {
+  padding: 0 15px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.input-label {
+  font-size: 14px;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.input-field {
+  padding: 16px;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: white;
+  font-size: 16px;
+  transition: all 0.3s var(--animation-curve);
+}
+
+.input-field:focus {
+  outline: none;
+  border-color: var(--accent-pink);
+  background-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.15);
+}
+
+.input-field::placeholder {
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.auth-form button {
+  margin-top: 10px;
+  background: linear-gradient(90deg, #ff6b9d, #64d2ff);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s var(--animation-curve);
+  box-shadow: 0 4px 15px rgba(255, 107, 157, 0.3);
+}
+
+.auth-form button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4);
+}
+
+.auth-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.auth-link {
+  color: var(--accent-pink);
+  margin-left: 6px;
+  text-decoration: none;
+  transition: all 0.2s var(--animation-curve);
+}
+
+.auth-link:hover {
+  color: white;
+  text-decoration: underline;
+}

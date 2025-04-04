@@ -1156,3 +1156,10 @@ body > *:not(#app):not(script):not(link) {
   color: white;
   text-decoration: underline;
 }
+
+.welcome-buttons {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}

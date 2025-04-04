@@ -2568,6 +2568,10 @@ Maintain the core message and emotional intent while applying these changes.`
     
     // Helper function to prefill generator and navigate to it
     function prefillAndNavigateToGenerator() {
+      // Get the input elements first
+      const scenarioInput = document.getElementById('scenario');
+      const relationshipSelect = document.getElementById('relationship');
+      
       // Pre-fill the generator form based on selections
       if (scenarioInput && relationshipSelect) {
         // Determine scenario text based on selected message type and scenario
@@ -2604,6 +2608,10 @@ Maintain the core message and emotional intent while applying these changes.`
         scenarioInput.value = scenarioDescription;
         
         // Show generator screen directly (skip auth)
+        showScreen(generatorScreen);
+      } else {
+        console.error('Could not find scenario or relationship inputs');
+        // Still try to navigate to generator screen
         showScreen(generatorScreen);
       }
     }

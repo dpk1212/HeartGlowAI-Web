@@ -335,74 +335,85 @@ function loadUserConnections() {
       .limit(10)
       .get()
       .then((querySnapshot) => {
-        // Clear loading indicator
-        connectionsList.innerHTML = '';
-        
-        if (querySnapshot.empty) {
-          displayEmptyStates('connections');
-          return;
+        try {
+          // Clear loading indicator
+          connectionsList.innerHTML = '';
+          
+          if (querySnapshot.empty) {
+            displayEmptyStates('connections');
+            return;
+          }
+          
+          // Add connections to the list
+          querySnapshot.forEach((doc) => {
+            const connectionData = doc.data();
+            // Add checks for potentially missing data
+            const name = connectionData.name || 'Unknown Connection';
+            const relationship = connectionData.relationship || 'Contact';
+            
+            const initials = getInitials(name);
+            let lastMessageText = 'No messages yet';
+            if (connectionData.lastMessageDate && typeof connectionData.lastMessageDate.toDate === 'function') {
+              const lastMessageDate = connectionData.lastMessageDate.toDate();
+              const timeAgo = getTimeAgo(lastMessageDate);
+              lastMessageText = `Last message ${timeAgo}`;
+            } else {
+              console.warn('Missing or invalid lastMessageDate for connection:', doc.id);
+            }
+            
+            const connectionItem = document.createElement('li');
+            connectionItem.className = 'connection-item';
+            connectionItem.innerHTML = `
+              <div class="connection-avatar">${initials}</div>
+              <div class="connection-details">
+                <div class="connection-name">${name}</div>
+                <div class="connection-meta">
+                  <span class="connection-relation">${capitalizeFirstLetter(relationship)}</span>
+                  <span class="connection-last-message">${lastMessageText}</span>
+                </div>
+              </div>
+              <div class="connection-actions">
+                <div class="connection-action send-message" title="Send Message">
+                  <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="connection-action view-history" title="View History">
+                  <i class="fas fa-history"></i>
+                </div>
+              </div>
+            `;
+            connectionItem.setAttribute('data-id', doc.id);
+            
+            const sendMessageBtn = connectionItem.querySelector('.send-message');
+            const viewHistoryBtn = connectionItem.querySelector('.view-history');
+            
+            if (sendMessageBtn) {
+              sendMessageBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                localStorage.setItem('recipientData', JSON.stringify({
+                  id: doc.id,
+                  name: name, // Use checked name
+                  relationship: relationship, // Use checked relationship
+                  isExisting: true
+                }));
+                window.location.href = 'message-intent.html';
+              });
+            }
+            
+            if (viewHistoryBtn) {
+              viewHistoryBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                window.location.href = `history.html?connectionId=${doc.id}`;
+              });
+            }
+            
+            connectionsList.appendChild(connectionItem);
+          });
+          
+          console.log('Connections loaded successfully');
+        } catch(processingError) {
+          console.error('Error processing connections data:', processingError);
+          showConnectionsError('Failed to display connections: ' + processingError.message);
         }
-        
-        // Add connections to the list
-        querySnapshot.forEach((doc) => {
-          const connectionData = doc.data();
-          const initials = getInitials(connectionData.name);
-          let lastMessageText = 'No messages yet';
-          if (connectionData.lastMessageDate) {
-            const lastMessageDate = connectionData.lastMessageDate.toDate();
-            const timeAgo = getTimeAgo(lastMessageDate);
-            lastMessageText = `Last message ${timeAgo}`;
-          }
-          
-          const connectionItem = document.createElement('li');
-          connectionItem.className = 'connection-item';
-          connectionItem.innerHTML = `
-            <div class="connection-avatar">${initials}</div>
-            <div class="connection-details">
-              <div class="connection-name">${connectionData.name}</div>
-              <div class="connection-meta">
-                <span class="connection-relation">${capitalizeFirstLetter(connectionData.relationship || 'Contact')}</span>
-                <span class="connection-last-message">${lastMessageText}</span>
-              </div>
-            </div>
-            <div class="connection-actions">
-              <div class="connection-action send-message" title="Send Message">
-                <i class="fas fa-paper-plane"></i>
-              </div>
-              <div class="connection-action view-history" title="View History">
-                <i class="fas fa-history"></i>
-              </div>
-            </div>
-          `;
-          connectionItem.setAttribute('data-id', doc.id);
-          
-          const sendMessageBtn = connectionItem.querySelector('.send-message');
-          const viewHistoryBtn = connectionItem.querySelector('.view-history');
-          
-          if (sendMessageBtn) {
-            sendMessageBtn.addEventListener('click', function(e) {
-              e.stopPropagation();
-              localStorage.setItem('recipientData', JSON.stringify({
-                id: doc.id,
-                name: connectionData.name,
-                relationship: connectionData.relationship,
-                isExisting: true
-              }));
-              window.location.href = 'message-intent.html';
-            });
-          }
-          
-          if (viewHistoryBtn) {
-            viewHistoryBtn.addEventListener('click', function(e) {
-              e.stopPropagation();
-              window.location.href = `history.html?connectionId=${doc.id}`;
-            });
-          }
-          
-          connectionsList.appendChild(connectionItem);
-        });
-        
-        console.log('Connections loaded successfully');
       })
       .catch((error) => {
         console.error('Error loading connections:', error);
@@ -451,54 +462,70 @@ function loadUserMessages() {
     .limit(5)
     .get()
     .then((querySnapshot) => {
-      // Clear loading indicator
-      recentMessages.innerHTML = '';
-      
-      if (querySnapshot.empty) {
-        displayEmptyStates('messages');
-        return;
-      }
-      
-      // Add messages to the list
-      querySnapshot.forEach((doc) => {
-        const messageData = doc.data();
-        let dateText = 'Recently';
-        if (messageData.createdAt) {
-          const messageDate = messageData.createdAt.toDate();
-          dateText = formatDate(messageDate);
+      try {
+        // Clear loading indicator
+        recentMessages.innerHTML = '';
+        
+        if (querySnapshot.empty) {
+          displayEmptyStates('messages');
+          return;
         }
-        let messagePreview = messageData.content || '';
-        if (messagePreview.length > 120) {
-          messagePreview = messagePreview.substring(0, 120) + '...';
-        }
-        const tags = [];
-        if (messageData.intent) {
-          tags.push(formatIntentTag(messageData.intent));
-        }
-        if (messageData.tone) {
-          tags.push(capitalizeFirstLetter(messageData.tone));
-        }
-        const messageItem = document.createElement('li');
-        messageItem.className = 'message-item';
-        messageItem.setAttribute('data-id', doc.id);
-        messageItem.innerHTML = `
-          <div class="message-header">
-            <div class="message-recipient">${messageData.recipientName || 'Unknown Recipient'}</div>
-            <div class="message-date">${dateText}</div>
-          </div>
-          <div class="message-preview">${messagePreview}</div>
-          ${tags.length > 0 ? `
-            <div class="message-tags">
-              ${tags.map(tag => `<div class="message-tag">${tag}</div>`).join('')}
+        
+        // Add messages to the list
+        querySnapshot.forEach((doc) => {
+          const messageData = doc.data();
+          // Add checks for potentially missing data
+          const recipientName = messageData.recipientName || 'Unknown Recipient';
+          const content = messageData.content || '';
+          const intent = messageData.intent || 'custom';
+          const tone = messageData.tone || 'neutral';
+          
+          let dateText = 'Recently';
+          if (messageData.createdAt && typeof messageData.createdAt.toDate === 'function') {
+            const messageDate = messageData.createdAt.toDate();
+            dateText = formatDate(messageDate);
+          } else {
+              console.warn('Missing or invalid createdAt date for message:', doc.id);
+          }
+          
+          let messagePreview = content;
+          if (messagePreview.length > 120) {
+            messagePreview = messagePreview.substring(0, 120) + '...';
+          }
+          const tags = [];
+          if (intent) {
+            tags.push(formatIntentTag(intent));
+          }
+          if (tone) {
+            tags.push(capitalizeFirstLetter(tone));
+          }
+          const messageItem = document.createElement('li');
+          messageItem.className = 'message-item';
+          messageItem.setAttribute('data-id', doc.id);
+          messageItem.innerHTML = `
+            <div class="message-header">
+              <div class="message-recipient">${recipientName}</div>
+              <div class="message-date">${dateText}</div>
             </div>
-          ` : ''}
-        `;
-        messageItem.addEventListener('click', function() {
-          localStorage.setItem('viewMessageId', doc.id);
-          window.location.href = `view-message.html?id=${doc.id}`;
+            <div class="message-preview">${messagePreview}</div>
+            ${tags.length > 0 ? `
+              <div class="message-tags">
+                ${tags.map(tag => `<div class="message-tag">${tag}</div>`).join('')}
+              </div>
+            ` : ''}
+          `;
+          messageItem.addEventListener('click', function() {
+            localStorage.setItem('viewMessageId', doc.id);
+            window.location.href = `view-message.html?id=${doc.id}`;
+          });
+          recentMessages.appendChild(messageItem);
         });
-        recentMessages.appendChild(messageItem);
-      });
+        
+        console.log('Messages loaded successfully');
+      } catch(processingError) {
+        console.error('Error processing messages data:', processingError);
+        showMessagesError('Failed to display messages: ' + processingError.message);
+      }
     })
     .catch((error) => {
       console.error('Error loading messages:', error);
@@ -536,111 +563,127 @@ function loadUserReminders() {
     .limit(10)
     .get()
     .then((querySnapshot) => {
-      // Clear loading indicator
-      remindersList.innerHTML = '';
-      
-      const filteredDocs = [];
-      querySnapshot.forEach(doc => {
-        const data = doc.data();
-        if (data.reminderDate && data.reminderDate.toDate() >= now) {
-          filteredDocs.push({ doc, data });
+      try {
+        // Clear loading indicator
+        remindersList.innerHTML = '';
+        
+        const filteredDocs = [];
+        querySnapshot.forEach(doc => {
+          const data = doc.data();
+          // Check for valid reminderDate before adding
+          if (data.reminderDate && typeof data.reminderDate.toDate === 'function' && data.reminderDate.toDate() >= now) {
+            filteredDocs.push({ doc, data });
+          } else {
+            console.warn('Skipping reminder due to missing/invalid/past date:', doc.id, data.reminderDate);
+          }
+        });
+        
+        if (filteredDocs.length === 0) {
+          displayEmptyStates('reminders');
+          return;
         }
-      });
-      
-      if (filteredDocs.length === 0) {
-        displayEmptyStates('reminders');
-        return;
-      }
-      
-      filteredDocs.sort((a, b) => {
-        const dateA = a.data.reminderDate.toDate();
-        const dateB = b.data.reminderDate.toDate();
-        return dateA - dateB;
-      });
-      
-      filteredDocs.slice(0, 5).forEach(({ doc, data: reminderData }) => {
-        let dateText = 'Soon';
-        if (reminderData.reminderDate) {
+        
+        filteredDocs.sort((a, b) => {
+          const dateA = a.data.reminderDate.toDate();
+          const dateB = b.data.reminderDate.toDate();
+          return dateA - dateB;
+        });
+        
+        filteredDocs.slice(0, 5).forEach(({ doc, data: reminderData }) => {
+          // Add checks for potentially missing data
+          const recipientName = reminderData.recipientName || 'Someone';
+          
+          let dateText = 'Soon';
+          // We already checked reminderDate exists and is valid
           const reminderDate = reminderData.reminderDate.toDate();
           dateText = formatDate(reminderDate);
-        }
-        const reminderItem = document.createElement('div');
-        reminderItem.className = 'reminder-item';
-        reminderItem.innerHTML = `
-          <div class="reminder-icon">
-            <i class="fas fa-bell"></i>
-          </div>
-          <div class="reminder-content">
-            <div class="reminder-title">Message ${reminderData.recipientName || 'Someone'}</div>
-            <div class="reminder-date">${dateText}</div>
-            <div class="reminder-actions">
-              <div class="reminder-action message-now">Message Now</div>
-              <div class="reminder-action dismiss">Dismiss</div>
+          
+          const reminderItem = document.createElement('div');
+          reminderItem.className = 'reminder-item';
+          reminderItem.innerHTML = `
+            <div class="reminder-icon">
+              <i class="fas fa-bell"></i>
             </div>
-          </div>
-        `;
-        reminderItem.setAttribute('data-id', doc.id);
-        
-        const messageNowBtn = reminderItem.querySelector('.message-now');
-        const dismissBtn = reminderItem.querySelector('.dismiss');
-        
-        if (messageNowBtn) {
-          messageNowBtn.addEventListener('click', function() {
-            if (reminderData.connectionId) {
-              firebase.firestore()
-                .collection('users')
-                .doc(currentUser.uid)
-                .collection('connections')
-                .doc(reminderData.connectionId)
-                .get()
-                .then((doc) => {
-                  if (doc.exists) {
-                    const connectionData = doc.data();
+            <div class="reminder-content">
+              <div class="reminder-title">Message ${recipientName}</div>
+              <div class="reminder-date">${dateText}</div>
+              <div class="reminder-actions">
+                <div class="reminder-action message-now">Message Now</div>
+                <div class="reminder-action dismiss">Dismiss</div>
+              </div>
+            </div>
+          `;
+          reminderItem.setAttribute('data-id', doc.id);
+          
+          const messageNowBtn = reminderItem.querySelector('.message-now');
+          const dismissBtn = reminderItem.querySelector('.dismiss');
+          
+          if (messageNowBtn) {
+            messageNowBtn.addEventListener('click', function() {
+              if (reminderData.connectionId) {
+                firebase.firestore()
+                  .collection('users')
+                  .doc(currentUser.uid)
+                  .collection('connections')
+                  .doc(reminderData.connectionId)
+                  .get()
+                  .then((doc) => {
+                    let recipientDataForStorage;
+                    if (doc.exists) {
+                      const connectionData = doc.data();
+                      recipientDataForStorage = {
+                        id: reminderData.connectionId,
+                        name: connectionData.name || recipientName, // Use fetched name or fallback
+                        relationship: connectionData.relationship,
+                        isExisting: true
+                      };
+                    } else {
+                      recipientDataForStorage = {
+                        name: recipientName,
+                        isExisting: false
+                      };
+                    }
+                    localStorage.setItem('recipientData', JSON.stringify(recipientDataForStorage));
+                    window.location.href = 'message-intent.html';
+                  })
+                  .catch((error) => {
+                    console.error('Error fetching connection for reminder:', error);
+                    // Fallback if fetch fails
                     localStorage.setItem('recipientData', JSON.stringify({
-                      id: reminderData.connectionId,
-                      name: connectionData.name,
-                      relationship: connectionData.relationship,
-                      isExisting: true
-                    }));
-                  } else {
-                    localStorage.setItem('recipientData', JSON.stringify({
-                      name: reminderData.recipientName,
+                      name: recipientName,
                       isExisting: false
                     }));
-                  }
-                  window.location.href = 'message-intent.html';
-                })
-                .catch((error) => {
-                  console.error('Error fetching connection:', error);
-                  localStorage.setItem('recipientData', JSON.stringify({
-                    name: reminderData.recipientName,
-                    isExisting: false
-                  }));
-                  window.location.href = 'message-intent.html';
-                });
-            } else {
-              localStorage.setItem('recipientData', JSON.stringify({
-                name: reminderData.recipientName,
-                isExisting: false
-              }));
-              window.location.href = 'message-intent.html';
-            }
-            markReminderComplete(doc.id);
-          });
-        }
+                    window.location.href = 'message-intent.html';
+                  });
+              } else {
+                localStorage.setItem('recipientData', JSON.stringify({
+                  name: recipientName,
+                  isExisting: false
+                }));
+                window.location.href = 'message-intent.html';
+              }
+              markReminderComplete(doc.id);
+            });
+          }
+          
+          if (dismissBtn) {
+            dismissBtn.addEventListener('click', function() {
+              markReminderComplete(doc.id);
+              reminderItem.remove();
+              if (remindersList.children.length === 0) {
+                displayEmptyStates('reminders');
+              }
+            });
+          }
+          
+          remindersList.appendChild(reminderItem);
+        });
         
-        if (dismissBtn) {
-          dismissBtn.addEventListener('click', function() {
-            markReminderComplete(doc.id);
-            reminderItem.remove();
-            if (remindersList.children.length === 0) {
-              displayEmptyStates('reminders');
-            }
-          });
-        }
-        
-        remindersList.appendChild(reminderItem);
-      });
+        console.log('Reminders loaded successfully');
+      } catch(processingError) {
+        console.error('Error processing reminders data:', processingError);
+        showRemindersError('Failed to display reminders: ' + processingError.message);
+      }
     })
     .catch((error) => {
       console.error('Error loading reminders:', error);

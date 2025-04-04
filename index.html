@@ -42,28 +42,55 @@
         
         <h1 class="main-heading">What kind of message is on your heart today?</h1>
         
-        <!-- Message Type Selection -->
-        <div class="message-type-grid">
-          <div class="message-type-card" data-type="romantic">
-            <div class="type-icon">❤️</div>
-            <h2 class="type-title">Romantic</h2>
-            <p class="type-sample">I miss you. I just didn't know how to say it.</p>
+        <!-- Navigation Button Menu -->
+        <div class="nav-button-container">
+          <div class="nav-tabs">
+            <button class="nav-tab active" data-type="romantic">
+              <div class="tab-icon">❤️</div>
+              <span>Romantic</span>
+            </button>
+            <button class="nav-tab" data-type="professional">
+              <div class="tab-icon">💼</div>
+              <span>Professional</span>
+            </button>
+            <button class="nav-tab" data-type="personal">
+              <div class="tab-icon">🤝</div>
+              <span>Personal</span>
+            </button>
           </div>
           
-          <div class="message-type-card" data-type="professional">
-            <div class="type-icon">💼</div>
-            <h2 class="type-title">Professional</h2>
-            <p class="type-sample">You helped more than you know.</p>
-          </div>
-          
-          <div class="message-type-card" data-type="personal">
-            <div class="type-icon">🤝</div>
-            <h2 class="type-title">Personal</h2>
-            <p class="type-sample">It's been a while. I just wanted to reach out.</p>
+          <!-- Message Type Content -->
+          <div class="message-type-content">
+            <!-- Romantic content (visible by default) -->
+            <div class="type-content active" id="romantic-content">
+              <div class="content-card">
+                <h2 class="content-title">Romantic Messages</h2>
+                <p class="content-description">Express your deepest feelings to someone special in your life.</p>
+                <div class="type-sample">I miss you. I just didn't know how to say it.</div>
+              </div>
+            </div>
+            
+            <!-- Professional content -->
+            <div class="type-content" id="professional-content">
+              <div class="content-card">
+                <h2 class="content-title">Professional Messages</h2>
+                <p class="content-description">Communicate effectively with colleagues, mentors, or business partners.</p>
+                <div class="type-sample">You helped more than you know.</div>
+              </div>
+            </div>
+            
+            <!-- Personal content -->
+            <div class="type-content" id="personal-content">
+              <div class="content-card">
+                <h2 class="content-title">Personal Messages</h2>
+                <p class="content-description">Reconnect with friends or family with authentic, heartfelt communication.</p>
+                <div class="type-sample">It's been a while. I just wanted to reach out.</div>
+              </div>
+            </div>
           </div>
         </div>
         
-        <button id="next-btn" class="primary-button hidden">Next</button>
+        <button id="next-btn" class="primary-button">Next</button>
       </div>
     </div>
     

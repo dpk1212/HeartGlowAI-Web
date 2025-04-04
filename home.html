@@ -63,123 +63,440 @@
         });
     }
   </script>
+  
+  <style>
+    /* Home page specific styles */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      margin-bottom: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .logo-heart {
+      font-size: 28px;
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      background: var(--heading-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .nav-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    
+    .nav-button {
+      background: rgba(255,255,255,0.08);
+      color: var(--text-primary);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .nav-button:hover {
+      background: rgba(255,255,255,0.12);
+    }
+    
+    .nav-button.active {
+      background: rgba(255,107,157,0.15);
+      color: var(--accent-pink);
+    }
+    
+    .home-content {
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+    
+    .home-header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .home-title {
+      font-size: 36px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: var(--heading-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    
+    .home-subtitle {
+      font-size: 16px;
+      color: var(--text-secondary);
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    
+    .action-row {
+      display: flex;
+      justify-content: center;
+      margin: 24px 0;
+    }
+    
+    .new-conversation-btn {
+      background: var(--primary-gradient);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      padding: 14px 28px;
+      border-radius: 12px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 16px rgba(255,107,157,0.25);
+      transition: all 0.2s ease;
+    }
+    
+    .new-conversation-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(255,107,157,0.3);
+    }
+    
+    .new-conversation-icon {
+      font-size: 20px;
+    }
+    
+    .templates-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    
+    .section-title {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      position: relative;
+      display: inline-block;
+    }
+    
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 40px;
+      height: 3px;
+      background: var(--primary-gradient);
+      border-radius: 2px;
+    }
+    
+    .template-category {
+      margin-bottom: 24px;
+    }
+    
+    .category-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-secondary);
+    }
+    
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+    
+    .template-card {
+      background: rgba(42, 14, 44, 0.4);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid rgba(255,255,255,0.05);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .template-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0) 100%);
+      z-index: 0;
+    }
+    
+    .template-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      border-color: rgba(255,255,255,0.1);
+    }
+    
+    .template-icon {
+      font-size: 26px;
+      z-index: 1;
+    }
+    
+    .template-name {
+      font-size: 18px;
+      font-weight: 600;
+      z-index: 1;
+    }
+    
+    .template-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      z-index: 1;
+    }
+    
+    .recent-messages {
+      margin-top: 24px;
+    }
+    
+    #message-history {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .message-item {
+      padding: 14px;
+      border-radius: 10px;
+      background: rgba(42, 14, 44, 0.3);
+      margin-bottom: 10px;
+      cursor: pointer;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: all 0.2s ease;
+    }
+    
+    .message-item:hover {
+      background: rgba(42, 14, 44, 0.5);
+    }
+    
+    .message-date {
+      font-size: 12px;
+      color: var(--accent-pink);
+      margin-bottom: 6px;
+    }
+    
+    .message-preview {
+      font-size: 14px;
+      color: var(--text-secondary);
+    }
+    
+    .empty-item, .loading-item, .error-item {
+      padding: 16px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+    
+    .dashboard-section {
+      margin-top: 16px;
+    }
+    
+    .tertiary-button {
+      background: transparent;
+      color: var(--accent-blue);
+      border: 1px solid rgba(100, 210, 255, 0.3);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .tertiary-button:hover {
+      background: rgba(100, 210, 255, 0.1);
+    }
+    
+    .feedback-button {
+      align-self: center;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.06);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 14px;
+      cursor: pointer;
+      margin-top: 16px;
+      transition: all 0.2s ease;
+    }
+    
+    .feedback-button:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text-primary);
+    }
+    
+    @media (max-width: 768px) {
+      .templates-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .home-title {
+        font-size: 28px;
+      }
+      
+      .nav-bar {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
 </head>
 <body>
   <div id="app">
     <!-- Home Screen -->
     <div id="home-screen" class="screen active">
-      <div class="header">
+      <header class="header">
         <div class="logo-container">
-          <div class="logo-heart"></div>
+          <div class="logo-heart">❤️</div>
           <span class="logo-text">HeartGlowAI</span>
         </div>
-      </div>
-      
-      <div class="home-header">
-        <h1 class="home-title">Start a meaningful conversation</h1>
-        <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
-      </div>
-      
-      <div class="home-actions">
-        <button id="dashboard-btn" class="settings-btn">
-          <span class="settings-icon">📊</span> Dashboard
-        </button>
         
-        <button id="history-btn" class="settings-btn">
-          <span class="settings-icon">📋</span> History
-        </button>
-        
-        <button id="learn-btn" class="settings-btn">
-          <span class="settings-icon">🧠</span> Learn
-        </button>
-        
-        <button id="logout-btn" class="settings-btn">
-          <span class="settings-icon">👤</span> Logout
-        </button>
-      </div>
+        <nav class="nav-bar">
+          <button id="dashboard-btn" class="nav-button">
+            <span>📊</span> Dashboard
+          </button>
+          
+          <button id="history-btn" class="nav-button">
+            <span>📋</span> History
+          </button>
+          
+          <button id="learn-btn" class="nav-button">
+            <span>🧠</span> Learn
+          </button>
+          
+          <button id="logout-btn" class="nav-button">
+            <span>👤</span> Logout
+          </button>
+        </nav>
+      </header>
       
-      <button id="new-conversation-btn" class="new-conversation-btn">
-        <span class="new-conversation-icon">💬</span> Start a New Conversation
-      </button>
-      
-      <!-- Templates Section -->
-      <div id="templates-section" class="templates-section">
-        <h2 class="section-title">Message Templates</h2>
-        
-        <!-- Everyday Check-ins Category -->
-        <div class="template-category">
-          <h3 class="category-title">Everyday Check-Ins</h3>
-          <div class="templates-grid">
-            <div class="template-card" data-template="checkin">
-              <div class="template-icon">👋</div>
-              <div class="template-name">Check-In</div>
-              <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
-            </div>
-            <div class="template-card" data-template="encouragement">
-              <div class="template-icon">⭐</div>
-              <div class="template-name">Encouragement</div>
-              <div class="template-description">Offer support during a challenging time</div>
-            </div>
-          </div>
+      <div class="home-content">
+        <div class="home-header">
+          <h1 class="home-title">Start a meaningful conversation</h1>
+          <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
         </div>
         
-        <!-- Repair & Reconnect Category -->
-        <div class="template-category">
-          <h3 class="category-title">Repair & Reconnect</h3>
-          <div class="templates-grid">
-            <div class="template-card" data-template="apology">
-              <div class="template-icon">✉️</div>
-              <div class="template-name">Apology</div>
-              <div class="template-description">Make amends with empathy and sincerity</div>
-            </div>
-            <div class="template-card" data-template="tough">
-              <div class="template-icon">💬</div>
-              <div class="template-name">Tough Talk</div>
-              <div class="template-description">Navigate a difficult conversation with respect</div>
-            </div>
-          </div>
+        <div class="action-row">
+          <button id="new-conversation-btn" class="new-conversation-btn">
+            <span class="new-conversation-icon">💬</span> Start a New Conversation
+          </button>
         </div>
         
-        <!-- Celebrate & Appreciate Category -->
-        <div class="template-category">
-          <h3 class="category-title">Celebrate & Appreciate</h3>
-          <div class="templates-grid">
-            <div class="template-card" data-template="romantic">
-              <div class="template-icon">❤️</div>
-              <div class="template-name">Romantic</div>
-              <div class="template-description">Express your love and affection</div>
-            </div>
-            <div class="template-card" data-template="gratitude">
-              <div class="template-icon">🙏</div>
-              <div class="template-name">Gratitude</div>
-              <div class="template-description">Show appreciation for their support</div>
-            </div>
-            <div class="template-card" data-template="celebration">
-              <div class="template-icon">🎉</div>
-              <div class="template-name">Celebration</div>
-              <div class="template-description">Congratulate someone on their achievement</div>
-            </div>
-            <div class="template-card" data-template="sympathy">
-              <div class="template-icon">💐</div>
-              <div class="template-name">Sympathy</div>
-              <div class="template-description">Offer comfort during a difficult time</div>
+        <!-- Templates Section -->
+        <div id="templates-section" class="templates-section">
+          <h2 class="section-title">Message Templates</h2>
+          
+          <!-- Everyday Check-ins Category -->
+          <div class="template-category">
+            <h3 class="category-title">Everyday Check-Ins</h3>
+            <div class="templates-grid">
+              <div class="template-card" data-template="checkin">
+                <div class="template-icon">👋</div>
+                <div class="template-name">Check-In</div>
+                <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
+              </div>
+              <div class="template-card" data-template="encouragement">
+                <div class="template-icon">⭐</div>
+                <div class="template-name">Encouragement</div>
+                <div class="template-description">Offer support during a challenging time</div>
+              </div>
             </div>
           </div>
+          
+          <!-- Repair & Reconnect Category -->
+          <div class="template-category">
+            <h3 class="category-title">Repair & Reconnect</h3>
+            <div class="templates-grid">
+              <div class="template-card" data-template="apology">
+                <div class="template-icon">✉️</div>
+                <div class="template-name">Apology</div>
+                <div class="template-description">Make amends with empathy and sincerity</div>
+              </div>
+              <div class="template-card" data-template="tough">
+                <div class="template-icon">💬</div>
+                <div class="template-name">Tough Talk</div>
+                <div class="template-description">Navigate a difficult conversation with respect</div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Celebrate & Appreciate Category -->
+          <div class="template-category">
+            <h3 class="category-title">Celebrate & Appreciate</h3>
+            <div class="templates-grid">
+              <div class="template-card" data-template="romantic">
+                <div class="template-icon">❤️</div>
+                <div class="template-name">Romantic</div>
+                <div class="template-description">Express your love and affection</div>
+              </div>
+              <div class="template-card" data-template="gratitude">
+                <div class="template-icon">🙏</div>
+                <div class="template-name">Gratitude</div>
+                <div class="template-description">Show appreciation for their support</div>
+              </div>
+              <div class="template-card" data-template="celebration">
+                <div class="template-icon">🎉</div>
+                <div class="template-name">Celebration</div>
+                <div class="template-description">Congratulate someone on their achievement</div>
+              </div>
+              <div class="template-card" data-template="sympathy">
+                <div class="template-icon">💐</div>
+                <div class="template-name">Sympathy</div>
+                <div class="template-description">Offer comfort during a difficult time</div>
+              </div>
+            </div>
+          </div>
+          
+          <button id="feedbackButton" class="feedback-button">
+            <span class="feedback-icon">⭐</span> Submit Feedback
+          </button>
         </div>
         
-        <button id="feedbackButton" class="feedback-button">
-          <span class="feedback-icon">⭐</span> Submit Feedback
-        </button>
-      </div>
-      
-      <div class="dashboard-section">
-        <h3>Your Relationships</h3>
-        <button id="manage-blueprints-btn" class="tertiary-button">Manage Relationship Blueprints</button>
-      </div>
-      
-      <div class="recent-messages">
-        <h3>Recent Messages</h3>
-        <ul id="message-history"></ul>
+        <div class="dashboard-section">
+          <h3 class="section-title">Your Relationships</h3>
+          <button id="manage-blueprints-btn" class="tertiary-button">Manage Relationship Blueprints</button>
+        </div>
+        
+        <div class="recent-messages">
+          <h3 class="section-title">Recent Messages</h3>
+          <ul id="message-history">
+            <li class="loading-item">Loading your recent messages...</li>
+          </ul>
+        </div>
       </div>
     </div>
     

@@ -1220,31 +1220,6 @@
       document.getElementById('feedbackCancel').addEventListener('click', hideFeedbackModal);
       document.getElementById('feedbackSubmit').addEventListener('click', handleFeedbackSubmit);
       document.getElementById('feedbackOverlay').addEventListener('click', hideFeedbackModal);
-
-      // Update the generateMessage event listener to include feedback tracking
-      generateBtn.addEventListener('click', async function() {
-        // ... existing generate message code ...
-        
-        try {
-          // ... existing try block code ...
-          
-          // After successful message generation, update message count
-          try {
-            if (typeof updateMessageCount === 'function') {
-              await updateMessageCount();
-            } else {
-              console.log('updateMessageCount function not available');
-            }
-          } catch (err) {
-            console.log('Error updating message count:', err);
-            // Non-critical error, continue
-          }
-          
-          // ... rest of the existing code ...
-        } catch (error) {
-          // ... existing error handling ...
-        }
-      });
     });
 
     function showGenerateAnimation() {
@@ -2731,19 +2706,14 @@ Maintain the core message and emotional intent while applying these changes.`
     function handleAuthSuccess(user) {
       currentUser = user;
       
-      // Check if we have a stored message type selection
+      // Check if we have a stored message type selection and clear it
       const selectedType = localStorage.getItem('selectedMessageType');
-      
       if (selectedType) {
-        // Clear the stored selection to avoid it being used again unnecessarily
         localStorage.removeItem('selectedMessageType');
-        
-        // Navigate to message flow screen with the selected type
-        prefillAndNavigateToGenerator(selectedType);
-      } else {
-        // Default navigation to home screen if no pending message creation
-        showScreen(homeScreen);
       }
+      
+      // Always navigate to home screen after successful authentication
+      showScreen(homeScreen); 
     }
 
     // Helper function to safely add event listeners
@@ -2933,41 +2903,3 @@ Maintain the core message and emotional intent while applying these changes.`
       }
     }, 200);
   });
-
-    // Helper function for safe screen navigation
-    function showScreen(screen) {
-      // Basic validation
-      if (!screen) {
-        console.error("Attempted to navigate to undefined screen");
-        return;
-      }
-      
-      // Get all screens that could be active
-      const allScreens = document.querySelectorAll('.screen');
-      console.log(`Transitioning to screen: ${screen.id}, from ${allScreens.length} possible screens`);
-      
-      try {
-        // Hide all screens first
-        allScreens.forEach(s => {
-          if (s) {
-            s.style.display = 'none';
-          }
-        });
-        
-        // Show the target screen
-        screen.style.display = 'block';
-        
-        // Scroll to top
-        window.scrollTo(0, 0);
-        
-        // Add animation class if needed
-        screen.classList.add('screen-fade-in');
-        setTimeout(() => {
-          screen.classList.remove('screen-fade-in');
-        }, 500);
-        
-        console.log(`Screen transition to ${screen.id} complete`);
-      } catch (error) {
-        console.error(`Error during screen transition: ${error.message}`);
-      }
-    }

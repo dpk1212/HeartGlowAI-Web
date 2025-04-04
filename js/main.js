@@ -72,9 +72,69 @@
       favicon.type = 'image/svg+xml';
       favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
       document.head.appendChild(favicon);
+      
+      // Initialize tab navigation
+      initTabNavigation();
 
       // Show welcome screen by default
       showScreen(welcomeScreen);
+    }
+    
+    // Tab navigation functionality
+    function initTabNavigation() {
+      const navTabs = document.querySelectorAll('.nav-tab');
+      const typeContents = document.querySelectorAll('.type-content');
+      const nextBtn = document.getElementById('next-btn');
+      let selectedType = 'romantic'; // Default
+      
+      // Add click event to navigation tabs
+      navTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          // Update active tab
+          navTabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          
+          // Update content visibility
+          const type = tab.getAttribute('data-type');
+          selectedType = type;
+          typeContents.forEach(content => {
+            content.classList.remove('active');
+            if (content.id === `${type}-content`) {
+              content.classList.add('active');
+            }
+          });
+          
+          // Update the Next button properties
+          nextBtn.classList.remove('hidden');
+          nextBtn.style.opacity = 1;
+          
+          // Update selected type indicators for next screen
+          const selectedTypeIcon = document.getElementById('selected-type-icon');
+          const selectedTypeText = document.getElementById('selected-type-text');
+          
+          if (selectedTypeIcon && selectedTypeText) {
+            // Set the icon based on the selected type
+            if (type === 'romantic') {
+              selectedTypeIcon.textContent = '❤️';
+            } else if (type === 'professional') {
+              selectedTypeIcon.textContent = '💼';
+            } else if (type === 'personal') {
+              selectedTypeIcon.textContent = '🤝';
+            }
+            selectedTypeText.textContent = type.charAt(0).toUpperCase() + type.slice(1);
+          }
+        });
+      });
+      
+      // Next button functionality
+      nextBtn.addEventListener('click', () => {
+        prefillAndNavigateToGenerator(selectedType);
+      });
+      
+      // Make sure Next button is visible by default since we already have a tab selected
+      if (nextBtn.classList.contains('hidden')) {
+        nextBtn.classList.remove('hidden');
+      }
     }
 
     // Save message to history function
@@ -2606,14 +2666,10 @@ Maintain the core message and emotional intent while applying these changes.`
         }
         
         scenarioInput.value = scenarioDescription;
-        
-        // Show generator screen directly (skip auth)
-        showScreen(generatorScreen);
-      } else {
-        console.error('Could not find scenario or relationship inputs');
-        // Still try to navigate to generator screen
-        showScreen(generatorScreen);
       }
+      
+      // Show generator screen directly (skip auth)
+      showScreen(generatorScreen);
     }
 
 // Updated on Sun Mar 30 13:14:46 EDT 2025

@@ -4,8 +4,158 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGlowAI - Who's on your mind?</title>
+    
+    <!-- CRITICAL CSS to ensure page loads -->
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: block;
+            min-height: 100vh;
+        }
+        
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ff6b9d;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .form-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+            color: white;
+        }
+        
+        .form-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .relationship-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .relationship-type {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .relationship-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .step-dot {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
+        }
+        
+        .step-dot.active {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            width: 60px;
+        }
+        
+        .nav-bar button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .nav-bar button:hover {
+            opacity: 1;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .next-button, .back-button {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .next-button {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            color: white;
+        }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     
     <!-- Firebase Scripts -->
@@ -36,346 +186,17 @@
           firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         }
     </script>
-    
-    <style>
-        :root {
-            --primary-color: #4a154b;
-            --accent-pink: #ff6b9d;
-            --accent-purple: #7b2cbf;
-            --bg-dark: #1f0a21;
-            --bg-darker: #0f0113;
-            --text-light: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --border-light: rgba(255, 255, 255, 0.1);
-            --primary-gradient: linear-gradient(45deg, #ff6b9d, #7b2cbf);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-hover: rgba(255, 255, 255, 0.05);
-            --heading-gradient: linear-gradient(to right, #ff6b9d, #8c7db0, #64d2ff);
-        }
-        
-        /* Adding more modern styles */
-        .card-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-        
-        .step-dot {
-            width: 40px;
-            height: 4px;
-            border-radius: 2px;
-            background-color: var(--border-light);
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .step-dot.active {
-            background: var(--primary-gradient);
-            width: 60px;
-        }
-        
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            background: var(--heading-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .page-subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-        }
-        
-        .input-container {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        .form-label {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: block;
-        }
-        
-        .form-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 16px;
-            color: white;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
-        }
-        
-        .relationship-types {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-        
-        .relationship-type {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px 12px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .relationship-type:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-3px);
-        }
-        
-        .relationship-type.selected {
-            background: rgba(255, 107, 157, 0.15);
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 15px rgba(255, 107, 157, 0.3);
-        }
-        
-        .relationship-icon {
-            font-size: 24px;
-            margin-bottom: 12px;
-            color: var(--accent-pink);
-        }
-        
-        .relationship-label {
-            font-size: 14px;
-            font-weight: 500;
-        }
-        
-        .save-connection-container {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .save-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .toggle-switch {
-            position: relative;
-            width: 50px;
-            height: 26px;
-            margin-right: 15px;
-        }
-        
-        .toggle-input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(255, 255, 255, 0.1);
-            transition: .4s;
-            border-radius: 26px;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 20px;
-            width: 20px;
-            left: 3px;
-            bottom: 3px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        .toggle-input:checked + .toggle-slider {
-            background-color: var(--accent-pink);
-        }
-        
-        .toggle-input:checked + .toggle-slider:before {
-            transform: translateX(24px);
-        }
-        
-        .option-label {
-            font-weight: 500;
-        }
-        
-        .option-description {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-top: 5px;
-        }
-        
-        .reminder-options {
-            margin-top: 20px;
-            margin-left: 65px;
-            display: none;
-        }
-        
-        .reminder-options.active {
-            display: block;
-            animation: fadeIn 0.5s ease;
-        }
-        
-        .select-container {
-            position: relative;
-            margin-bottom: 15px;
-        }
-        
-        .select-timeframe {
-            appearance: none;
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-        }
-        
-        .select-container::after {
-            content: '▼';
-            font-size: 10px;
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            color: var(--text-secondary);
-            pointer-events: none;
-        }
-        
-        .btn-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-        }
-        
-        .btn {
-            padding: 14px 25px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .btn-next {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
-        }
-        
-        .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(255, 107, 157, 0.4);
-        }
-        
-        .connections-container {
-            max-height: 200px;
-            overflow-y: auto;
-            margin-top: 15px;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.02);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 10px;
-        }
-        
-        .connection-item {
-            padding: 12px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .connection-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-        }
-        
-        .connection-item.selected {
-            background: rgba(255, 107, 157, 0.1);
-            border: 1px solid rgba(255, 107, 157, 0.2);
-        }
-        
-        .connection-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            margin-right: 12px;
-        }
-        
-        .connection-details {
-            flex: 1;
-        }
-        
-        .connection-name {
-            font-weight: 500;
-            margin-bottom: 3px;
-        }
-        
-        .connection-relation {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
 </head>
-<body>
+<body style="background-color: #121212 !important; color: white !important; visibility: visible !important; display: block !important;">
+    <!-- Debug Console -->
+    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+        <div>
+            Debug Console: 
+            <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+        </div>
+        <div id="debug-output"></div>
+    </div>
+    
     <!-- Header and Navigation -->
     <header class="header">
         <div class="logo-container">
@@ -398,7 +219,7 @@
         </nav>
     </header>
 
-    <div class="card-container">
+    <main class="card-container" style="display: block !important; visibility: visible !important; opacity: 1 !important; max-width: 800px; margin: 30px auto; padding: 20px;">
         <!-- Step Indicator -->
         <div class="step-indicator">
             <div class="step-dot active"></div>
@@ -508,7 +329,7 @@
                 Next <i class="fas fa-arrow-right"></i>
             </button>
         </div>
-    </div>
+    </main>
     
     <!-- Ambient background particles -->
     <div class="particles-container">
@@ -520,5 +341,80 @@
     </div>
 
     <script src="js/recipient-selection.js"></script>
+    
+    <script>
+        // Debug logging function
+        function debugLog(message) {
+            console.log('DEBUG:', message);
+            const debugOutput = document.getElementById('debug-output');
+            if (debugOutput) {
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                debugOutput.appendChild(logEntry);
+            }
+        }
+        
+        // Show debug console on certain errors
+        window.addEventListener('error', function(e) {
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+                debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+            }
+        });
+        
+        // Add debug button
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Debug';
+            debugBtn.style.position = 'fixed';
+            debugBtn.style.bottom = '10px';
+            debugBtn.style.right = '10px';
+            debugBtn.style.zIndex = '9999';
+            debugBtn.style.padding = '5px 10px';
+            debugBtn.style.background = '#333';
+            debugBtn.style.color = '#fff';
+            debugBtn.style.border = 'none';
+            debugBtn.style.borderRadius = '4px';
+            debugBtn.style.cursor = 'pointer';
+            
+            debugBtn.addEventListener('click', function() {
+                const debugConsole = document.getElementById('debug-console');
+                if (debugConsole) {
+                    debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+            
+            document.body.appendChild(debugBtn);
+            
+            // Log initial page load
+            debugLog('Page fully loaded');
+            
+            // Also log URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            for (const [key, value] of urlParams) {
+                debugLog(`URL parameter: ${key} = ${value}`);
+            }
+            
+            // Check if main content is visible
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                debugLog('Main container found');
+                
+                // Force main container to be visible
+                mainContainer.style.display = 'block';
+                mainContainer.style.visibility = 'visible';
+                mainContainer.style.opacity = '1';
+            } else {
+                debugLog('ERROR: Main container not found!');
+            }
+            
+            // Show debug console automatically
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html> 

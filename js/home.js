@@ -489,17 +489,26 @@ function loadUserMessages() {
         // Process and sort messages client-side
         const messages = [];
         querySnapshot.forEach((doc) => {
-            // Add a check for createdAt before pushing
+            // Include ALL messages, with a fallback date if createdAt is missing
             const data = doc.data();
-            if (data.createdAt && typeof data.createdAt.toDate === 'function') {
-                messages.push({ id: doc.id, data: data });
-            } else {
-                console.warn('Skipping message due to missing/invalid createdAt:', doc.id);
+            const messageObj = { id: doc.id, data: data };
+            
+            // If createdAt is missing or invalid, add a fallback date
+            if (!data.createdAt || typeof data.createdAt.toDate !== 'function') {
+                console.log('Adding fallback date for message:', doc.id);
+                messageObj.data.createdAt = { toDate: () => new Date(0) }; // Jan 1, 1970
+                messageObj.hasFallbackDate = true;
             }
+            
+            messages.push(messageObj);
         });
 
-        // Sort by createdAt date (descending)
+        // Sort by createdAt date (descending) with special handling for fallback dates
         messages.sort((a, b) => {
+          // Messages with fallback dates go to the end
+          if (a.hasFallbackDate && !b.hasFallbackDate) return 1;
+          if (!a.hasFallbackDate && b.hasFallbackDate) return -1;
+          
           const dateA = a.data.createdAt.toDate();
           const dateB = b.data.createdAt.toDate();
           return dateB - dateA; // Descending order
@@ -509,17 +518,20 @@ function loadUserMessages() {
         const messagesToDisplay = messages.slice(0, 5);
         
         // Add messages to the list
-        messagesToDisplay.forEach(({ id, data: messageData }) => {
+        messagesToDisplay.forEach(({ id, data: messageData, hasFallbackDate }) => {
            // Add checks for potentially missing data
           const recipientName = messageData.recipientName || 'Unknown Recipient';
           const content = messageData.content || '';
           const intent = messageData.intent || 'custom';
           const tone = messageData.tone || 'neutral';
           
-          let dateText = 'Recently';
-          // We already checked createdAt exists and is valid during the initial loop
+          let dateText = hasFallbackDate ? 'Date unknown' : 'Recently';
+          
+          // Use the date (which may be our fallback date)
           const messageDate = messageData.createdAt.toDate();
-          dateText = formatDate(messageDate);
+          if (!hasFallbackDate) {
+            dateText = formatDate(messageDate);
+          }
           
           let messagePreview = content;
           if (messagePreview.length > 120) {

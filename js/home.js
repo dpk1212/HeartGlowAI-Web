@@ -59,13 +59,13 @@ function initializeHomePage() {
   }
   
   try {
-    // Load user data
-    loadUserConnections();
-    loadUserMessages();
-    loadUserReminders();
+    // Make the debug console visible
+    document.getElementById('debug-console').style.display = 'block';
     
-    // Initialize navigation buttons
+    // Initialize UI elements that don't depend on Firestore data
     initNavigationButtons();
+    initializeQuickActions();
+    initializeManageButtons();
     
     // Initialize create message button
     const createMessageBtn = document.getElementById('create-message-btn');
@@ -77,12 +77,6 @@ function initializeHomePage() {
     } else {
       console.warn('Create message button not found');
     }
-    
-    // Initialize quick action items
-    initializeQuickActions();
-    
-    // Initialize manage buttons
-    initializeManageButtons();
     
     // Initialize logout button
     const logoutBtn = document.getElementById('logout-btn');
@@ -101,6 +95,40 @@ function initializeHomePage() {
       });
     } else {
       console.warn('Logout button not found');
+    }
+    
+    // Display empty states for the data sections
+    displayEmptyStates();
+    
+    // Try to load data, but don't let failures stop the page from working
+    try {
+      loadUserConnections();
+    } catch (error) {
+      console.error('Error loading connections:', error);
+      if (typeof debugLog === 'function') {
+        debugLog('Error loading connections: ' + error.message);
+      }
+      showConnectionsError(error.message);
+    }
+    
+    try {
+      loadUserMessages();
+    } catch (error) {
+      console.error('Error loading messages:', error);
+      if (typeof debugLog === 'function') {
+        debugLog('Error loading messages: ' + error.message);
+      }
+      showMessagesError(error.message);
+    }
+    
+    try {
+      loadUserReminders();
+    } catch (error) {
+      console.error('Error loading reminders:', error);
+      if (typeof debugLog === 'function') {
+        debugLog('Error loading reminders: ' + error.message);
+      }
+      showRemindersError(error.message);
     }
   } catch (error) {
     console.error('Error in initializeHomePage:', error);
@@ -195,6 +223,99 @@ function initializeManageButtons() {
       }
       // In a full implementation, this might open a modal or navigate to a separate page
     });
+  }
+}
+
+// Display empty states for data sections when data can't be loaded
+function displayEmptyStates() {
+  const connectionsList = document.getElementById('connections-list');
+  if (connectionsList) {
+    connectionsList.innerHTML = `
+      <li class="empty-state">
+        <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
+        <div class="empty-title">No connections yet</div>
+        <div class="empty-description">Save people to your connections when sending messages</div>
+        <a href="emotional-entry.html" class="empty-action">
+          <i class="fas fa-plus-circle"></i> Create a message
+        </a>
+      </li>
+    `;
+  }
+  
+  const recentMessages = document.getElementById('recent-messages');
+  if (recentMessages) {
+    recentMessages.innerHTML = `
+      <li class="empty-state">
+        <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
+        <div class="empty-title">No messages yet</div>
+        <div class="empty-description">Start crafting heartfelt messages to build your history</div>
+        <a href="emotional-entry.html" class="empty-action">
+          <i class="fas fa-pen-fancy"></i> Create your first message
+        </a>
+      </li>
+    `;
+  }
+  
+  const remindersList = document.getElementById('reminders-list');
+  if (remindersList) {
+    remindersList.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon"><i class="fas fa-bell"></i></div>
+        <div class="empty-title">No upcoming reminders</div>
+        <div class="empty-description">Set reminders when sending messages to stay connected</div>
+      </div>
+    `;
+  }
+}
+
+// Display errors for connections section
+function showConnectionsError(errorMessage) {
+  const connectionsList = document.getElementById('connections-list');
+  if (connectionsList) {
+    connectionsList.innerHTML = `
+      <li class="error-state">
+        <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="error-title">Error loading connections</div>
+        <div class="error-description">${errorMessage}</div>
+        <button class="error-action" onclick="loadUserConnections()">
+          <i class="fas fa-sync"></i> Try Again
+        </button>
+      </li>
+    `;
+  }
+}
+
+// Display errors for messages section
+function showMessagesError(errorMessage) {
+  const recentMessages = document.getElementById('recent-messages');
+  if (recentMessages) {
+    recentMessages.innerHTML = `
+      <li class="error-state">
+        <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="error-title">Error loading messages</div>
+        <div class="error-description">${errorMessage}</div>
+        <button class="error-action" onclick="loadUserMessages()">
+          <i class="fas fa-sync"></i> Try Again
+        </button>
+      </li>
+    `;
+  }
+}
+
+// Display errors for reminders section
+function showRemindersError(errorMessage) {
+  const remindersList = document.getElementById('reminders-list');
+  if (remindersList) {
+    remindersList.innerHTML = `
+      <div class="error-state">
+        <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+        <div class="error-title">Error loading reminders</div>
+        <div class="error-description">${errorMessage}</div>
+        <button class="error-action" onclick="loadUserReminders()">
+          <i class="fas fa-sync"></i> Try Again
+        </button>
+      </div>
+    `;
   }
 }
 
@@ -314,24 +435,18 @@ function loadUserConnections() {
       })
       .catch((error) => {
         console.error('Error loading connections:', error);
-        connectionsList.innerHTML = `
-          <li class="error-state">
-            <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
-            <div class="error-title">Error loading connections</div>
-            <div class="error-description">${error.message}</div>
-            <button class="error-action" onclick="loadUserConnections()">
-              <i class="fas fa-sync"></i> Try Again
-            </button>
-          </li>
-        `;
+        showConnectionsError(error.message);
         if (typeof debugLog === 'function') {
           debugLog('Error loading connections: ' + error.message);
+          document.getElementById('debug-console').style.display = 'block';
         }
       });
   } catch (error) {
     console.error('Exception in loadUserConnections:', error);
+    showConnectionsError(error.message);
     if (typeof debugLog === 'function') {
       debugLog('Exception in loadUserConnections: ' + error.message);
+      document.getElementById('debug-console').style.display = 'block';
     }
   }
 }
@@ -425,13 +540,7 @@ function loadUserMessages() {
     })
     .catch((error) => {
       console.error('Error loading messages:', error);
-      recentMessages.innerHTML = `
-        <li class="empty-state">
-          <div class="empty-icon"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="empty-title">Error loading messages</div>
-          <div class="empty-description">${error.message}</div>
-        </li>
-      `;
+      showMessagesError(error.message);
     });
 }
 
@@ -584,13 +693,7 @@ function loadUserReminders() {
     })
     .catch((error) => {
       console.error('Error loading reminders:', error);
-      remindersList.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="empty-title">Error loading reminders</div>
-          <div class="empty-description">${error.message}</div>
-        </div>
-      `;
+      showRemindersError(error.message);
     });
 }
 

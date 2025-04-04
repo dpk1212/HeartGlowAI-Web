@@ -45,6 +45,27 @@
       try {
         firebase.initializeApp(firebaseConfig);
         console.log("Firebase initialized successfully");
+        
+        // Set Firestore persistence
+        if (firebase.firestore) {
+          firebase.firestore().enablePersistence({ synchronizeTabs: true })
+            .then(() => {
+              console.log("Firestore persistence enabled");
+            })
+            .catch((err) => {
+              if (err.code == 'failed-precondition') {
+                console.warn("Multiple tabs open, persistence only enabled in one tab");
+              } else if (err.code == 'unimplemented') {
+                console.warn("Browser doesn't support persistence");
+              }
+            });
+            
+          // Set permissive settings for development
+          firebase.firestore().settings({
+            ignoreUndefinedProperties: true,
+            experimentalForceLongPolling: true
+          });
+        }
       } catch (error) {
         console.error("Firebase initialization error:", error);
         alert("Error initializing Firebase. Please refresh and try again.");
@@ -68,9 +89,38 @@
       alert("Firebase auth not available. Please refresh and try again.");
     }
     
+    // Debug logging function used throughout the app
+    function debugLog(message) {
+      const debugConsole = document.getElementById('debug-console');
+      if (debugConsole) {
+        const logEntry = document.createElement('div');
+        logEntry.className = 'debug-log-entry';
+        
+        const timestamp = new Date().toLocaleTimeString();
+        logEntry.innerHTML = `<span class="debug-timestamp">${timestamp}</span> ${message}`;
+        
+        const logContent = document.getElementById('debug-log-content');
+        if (logContent) {
+          logContent.appendChild(logEntry);
+          logContent.scrollTop = logContent.scrollHeight;
+        }
+      }
+      
+      console.log(message);
+    }
+    
     // Add event listener for DOMContentLoaded to ensure document is ready
     document.addEventListener('DOMContentLoaded', function() {
       console.log('DOM fully loaded and parsed');
+      
+      // Attach click handler to retry button (if it exists)
+      const retryButton = document.getElementById('retry-firebase');
+      if (retryButton) {
+        retryButton.addEventListener('click', function() {
+          debugLog('Retrying Firebase operations...');
+          location.reload();
+        });
+      }
     });
   </script>
   
@@ -499,45 +549,76 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 40px 20px;
+      padding: 25px 20px;
       text-align: center;
+      border-radius: 10px;
+      background: rgba(255, 63, 85, 0.08);
+      border: 1px dashed rgba(255, 63, 85, 0.3);
+      margin: 10px;
     }
     
     .error-icon {
       font-size: 32px;
-      color: #ff6b9d;
+      color: #ff3f55;
       margin-bottom: 15px;
+      animation: pulse 2s infinite ease-in-out;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
     }
     
     .error-title {
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 8px;
-      color: #ff6b9d;
+      color: #ff3f55;
     }
     
-    .error-description {
+    .error-message {
       font-size: 14px;
+      color: #ff7b8c;
+      margin-bottom: 8px;
+      word-break: break-word;
+      max-width: 100%;
+    }
+    
+    .error-tip {
+      font-size: 13px;
       color: var(--text-secondary);
       margin-bottom: 15px;
+      font-style: italic;
     }
     
     .error-action {
-      background: rgba(255, 107, 157, 0.2);
-      color: #ff6b9d;
+      background: rgba(255, 63, 85, 0.2);
+      color: #ff3f55;
       border: none;
       padding: 8px 15px;
       border-radius: 20px;
       cursor: pointer;
       font-size: 14px;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 5px;
       transition: all 0.3s ease;
+      margin: 0 5px;
     }
     
     .error-action:hover {
-      background: rgba(255, 107, 157, 0.3);
+      background: rgba(255, 63, 85, 0.3);
+    }
+    
+    .error-action.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+    }
+    
+    .error-action.secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: var(--text-primary);
     }
     
     /* Debug console styles */
@@ -743,10 +824,14 @@
     <div class="particle"></div>
   </div>
 
-  <!-- Debug console for troubleshooting -->
+  <!-- Debug console for development -->
   <div id="debug-console" style="position: fixed; bottom: 0; left: 0; right: 0; display: none; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
-    <div>Debug Console: <button onclick="document.getElementById('debug-console').style.display='none'">Close</button></div>
-    <div id="debug-output"></div>
+    <div>
+      Debug Console: 
+      <button id="retry-firebase" style="background: #ff5500; color: white; border: none; padding: 5px 10px; margin-right: 10px;">Retry Firebase</button>
+      <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+    </div>
+    <div id="debug-log-content" style="margin-top: 10px;"></div>
   </div>
 
   <!-- JavaScript -->

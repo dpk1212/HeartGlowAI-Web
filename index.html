@@ -33,107 +33,110 @@
     <!-- Welcome Screen -->
     <div id="welcome-screen" class="screen active">
       <div class="welcome-container">
-        <!-- Logo Header -->
         <div class="brand-header">
-          <div class="logo-heart"></div>
-          <h1 class="brand-name">HeartGlowAI</h1>
+          <div class="brand-logo">
+            <div class="logo-heart">❤️</div>
+            <div class="brand-name">HeartGlow<span class="brand-ai">AI</span></div>
+          </div>
         </div>
         
-        <div class="welcome-content">
-          <h2 class="main-heading">What kind of message is on your heart today?</h2>
-          
-          <!-- Message Type Selection Cards -->
-          <div class="message-type-grid">
-            <!-- Romantic Card -->
-            <div class="message-type-card" id="romantic-type">
-              <div class="card-icon">❤️</div>
-              <h3 class="card-title">Romantic</h3>
-              <p class="card-sample">I miss you. I just didn't know how to say it.</p>
-            </div>
-            
-            <!-- Professional Card -->
-            <div class="message-type-card" id="professional-type">
-              <div class="card-icon">👔</div>
-              <h3 class="card-title">Professional</h3>
-              <p class="card-sample">You helped more than you know.</p>
-            </div>
-            
-            <!-- Personal Card -->
-            <div class="message-type-card" id="personal-type">
-              <div class="card-icon">💬</div>
-              <h3 class="card-title">Personal</h3>
-              <p class="card-sample">It's been a while. I just wanted to reach out.</p>
-            </div>
+        <h1 class="main-heading">What kind of message is on your heart?</h1>
+        
+        <!-- Message Type Selection -->
+        <div class="message-type-grid">
+          <div class="message-type-card" data-type="romantic">
+            <div class="type-icon">❤️</div>
+            <h2 class="type-title">Romantic</h2>
+            <p class="type-sample">Connect with someone special in your life</p>
           </div>
           
-          <!-- Next Button (initially hidden, shown when a card is selected) -->
-          <button id="next-step-btn" class="primary-button" style="display: none;">Next</button>
+          <div class="message-type-card" data-type="professional">
+            <div class="type-icon">💼</div>
+            <h2 class="type-title">Professional</h2>
+            <p class="type-sample">Communicate effectively in work contexts</p>
+          </div>
+          
+          <div class="message-type-card" data-type="personal">
+            <div class="type-icon">🤝</div>
+            <h2 class="type-title">Personal</h2>
+            <p class="type-sample">Reach out to friends or family members</p>
+          </div>
         </div>
+        
+        <button id="next-btn" class="primary-button hidden">Next</button>
       </div>
     </div>
     
     <!-- Message Creation Flow Screen (shown after selection) -->
     <div id="message-flow-screen" class="screen">
       <div class="flow-container">
-        <button id="back-to-types-btn" class="back-button">← Back</button>
-        
-        <div class="selected-type-indicator">
-          <span id="selected-type-icon">💌</span>
-          <span id="selected-type-text">Type</span> Message
+        <div class="flow-header">
+          <button id="back-to-types-btn" class="back-button">
+            <span class="back-icon">←</span> Back
+          </button>
+          <div class="selected-type-indicator">
+            <div id="selected-type-icon" class="mini-icon">❤️</div>
+            <span id="selected-type-text">Romantic</span>
+          </div>
         </div>
         
-        <div class="flow-section scenarios-section">
-          <h3>Common Scenarios</h3>
-          <div class="scenario-cards">
+        <div class="flow-content">
+          <h2 class="flow-heading">Common scenarios</h2>
+          
+          <!-- Scenario Selection -->
+          <div class="scenario-grid">
             <div class="scenario-card" data-scenario="reconnect">
-              <div class="scenario-icon">🔄</div>
-              <div class="scenario-title">Reconnect</div>
-              <div class="scenario-desc">When you haven't spoken in a while</div>
+              <h3>Reconnect after distance</h3>
+              <p>Express care after time apart</p>
             </div>
             <div class="scenario-card" data-scenario="appreciation">
-              <div class="scenario-icon">🙏</div>
-              <div class="scenario-title">Appreciation</div>
-              <div class="scenario-desc">Show gratitude for someone</div>
+              <h3>Show appreciation</h3>
+              <p>Let them know their impact</p>
             </div>
             <div class="scenario-card" data-scenario="missing">
-              <div class="scenario-icon">💭</div>
-              <div class="scenario-title">Missing Someone</div>
-              <div class="scenario-desc">Let them know they're on your mind</div>
+              <h3>Express that you miss them</h3>
+              <p>Share your feelings genuinely</p>
             </div>
           </div>
-        </div>
-        
-        <div class="flow-section mistakes-section">
-          <h3>Common Mistakes to Avoid</h3>
-          <ul class="mistakes-list">
-            <li>Being too generic and not personalizing the message</li>
-            <li>Overwhelming with too much emotion too quickly</li>
-            <li>Using unclear language that could be misinterpreted</li>
-            <li>Forgetting to express genuine interest in the other person</li>
-          </ul>
-        </div>
-        
-        <div class="flow-section example-section">
-          <h3>Example Message</h3>
-          <div class="example-message">
-            <p id="example-message-text">I've been thinking about you lately. The little things keep reminding me of our time together, and I realized I never properly expressed how much you mean to me.</p>
-          </div>
-          <div class="example-insights">
-            <h4>Why This Works:</h4>
-            <ul>
-              <li>Opens with a personal touch that shows genuine thought</li>
-              <li>References shared experiences to establish connection</li>
-              <li>Expresses authentic feelings without overwhelming</li>
-              <li>Leaves room for the other person to respond naturally</li>
+          
+          <!-- Common Mistakes Section -->
+          <div class="mistakes-section">
+            <h3>Common mistakes to avoid</h3>
+            <ul class="mistake-list">
+              <li>Being too vague about your intentions</li>
+              <li>Overwhelming with excessive emotion</li>
+              <li>Not providing context for reaching out</li>
             </ul>
           </div>
-        </div>
-        
-        <div class="flow-section create-section">
-          <h3>Create Your Own Message</h3>
-          <p>Ready to write a heartfelt message that truly connects?</p>
-          <button id="create-message-btn" class="primary-button">Get Started</button>
-          <p class="no-account-note">No account needed - try it now!</p>
+          
+          <!-- Sample Message -->
+          <div class="example-section">
+            <h3>Example message</h3>
+            <div class="example-message">
+              <p id="example-message-text">I've been thinking about you lately. The little things keep reminding me of our time together, and I realized I never properly expressed how much you mean to me. I miss the way you always knew how to make me laugh.</p>
+              <div class="example-meta">
+                <span class="example-tone">Sincere • Balanced</span>
+              </div>
+            </div>
+            
+            <!-- Message Insights -->
+            <div class="example-insights">
+              <h4>Why this works:</h4>
+              <ul>
+                <li>Opens with honest feelings without pressure</li>
+                <li>Provides specific context for why you're reaching out</li>
+                <li>Expresses appreciation in a sincere, specific way</li>
+                <li>Leaves room for their response without expectations</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Create Your Own -->
+          <div class="create-section">
+            <h3>Create your own message</h3>
+            <button id="create-message-btn" class="primary-button">Start Creating</button>
+            <p class="no-account-note">No account required to try</p>
+          </div>
         </div>
       </div>
     </div>
@@ -635,8 +638,9 @@
     <button id="back-to-home-from-blueprints-btn" class="secondary-button">Back to Home</button>
   </div>
   
-  <!-- JavaScript -->
+  <!-- Scripts -->
   <script src="js/main.js?v=20250330"></script>
-  <script src="js/learn-with-ai.js"></script>
+  <script src="js/message-flow.js?v=20250330"></script>
+  <script src="js/learn-with-ai.js?v=20250330"></script>
 </body>
 </html> 

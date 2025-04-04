@@ -56,21 +56,11 @@
 
     // Initialize app function
     function initializeApp() {
-      // Initialize Firebase first
+      // Initialize Firebase - DO NOT hardcode credentials - use the existing configuration
       try {
-        if (!firebase.apps.length) {
-          const firebaseConfig = {
-            apiKey: "AIzaSyDx-RCOt6KU4KFV9w-fKmIEcW0mvmQJ2Z8",
-            authDomain: "heartglowai-web.firebaseapp.com",
-            projectId: "heartglowai-web",
-            storageBucket: "heartglowai-web.appspot.com",
-            messagingSenderId: "564142355525",
-            appId: "1:564142355525:web:bd10f60b9d30e518b19c0f",
-            measurementId: "G-25W7SVNL3Z"
-          };
-          firebase.initializeApp(firebaseConfig);
-          console.log('Firebase initialized successfully');
-        }
+        console.log('Firebase initialization check - using existing configuration');
+        // Firebase is already initialized in the HTML header
+        // DO NOT add API keys or credentials here - they would be exposed in GitHub
       } catch (error) {
         console.error('Firebase initialization error:', error);
       }
@@ -79,48 +69,12 @@
       initTabNavigation();
       
       // Initialize authentication handlers
-      initializeAuthHandlers();
+      if (typeof initializeAuthHandlers === 'function') {
+        initializeAuthHandlers();
+      }
       
-      // Check authentication state
-      firebase.auth().onAuthStateChanged(async (user) => {
-        console.log('Auth state changed:', user ? 'Logged in' : 'Logged out');
-        currentUser = user;
-        
-        if (user) {
-          try {
-            // Initialize user document if it doesn't exist
-            const userRef = firebase.firestore().collection('users').doc(user.uid);
-            const userDoc = await userRef.get();
-            
-            if (!userDoc.exists) {
-              await userRef.set({
-                email: user.email,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                messageCount: 0,
-                hasFeedbackSubmitted: false,
-                lastFeedbackSubmittedAt: null,
-                feedbackData: null
-              });
-            }
-            
-            // Check feedback status
-            await checkFeedbackStatus();
-            
-            // Use the new handleAuthSuccess function to determine navigation
-            handleAuthSuccess(user);
-            
-            // Ensure template clicks work after auth state is determined
-            attachTemplateClickListeners();
-          } catch (error) {
-            console.error('Error handling authenticated user:', error);
-          }
-        } else {
-          console.log('User not authenticated, showing welcome screen');
-          showScreen(welcomeScreen);
-        }
-      });
-      
-      // Initialize any additional components
+      // Check authentication state - use existing handler
+      // The authentication state change listener should already be set up
       console.log('App initialization completed');
     }
     
@@ -182,28 +136,17 @@
         });
       });
       
-      // Next button functionality - only set up if the button exists
+      // Next button functionality - Navigate to auth screen
       if (nextBtn) {
         nextBtn.addEventListener('click', () => {
-          console.log("Next button clicked with type:", selectedType);
-          
-          // Store the selected type for future use after authentication
-          localStorage.setItem('selectedMessageType', selectedType);
-          
-          // Navigate to auth screen instead of message flow
-          if (typeof authScreen !== 'undefined') {
-            showScreen(authScreen);
-          } else {
-            console.error("Auth screen not defined");
-          }
+          // Navigate to auth screen
+          showScreen(authScreen);
         });
         
         // Make sure Next button is visible by default since we already have a tab selected
         if (nextBtn.classList.contains('hidden')) {
           nextBtn.classList.remove('hidden');
         }
-      } else {
-        console.log("Next button not found for tab navigation");
       }
     }
 
@@ -552,7 +495,7 @@
       let isLogin = true;
       let openaiApiKey = null;
       
-      // Check auth state
+      // Restore the original auth state handler functionality
       firebase.auth().onAuthStateChanged(async (user) => {
         currentUser = user;
         
@@ -575,8 +518,8 @@
           // Check feedback status
           await checkFeedbackStatus();
           
-          // Use the new handleAuthSuccess function to determine navigation
-          handleAuthSuccess(user);
+          // Go to home screen by default
+          showScreen(homeScreen);
           
           // Ensure template clicks work after auth state is determined
           attachTemplateClickListeners();
@@ -584,6 +527,38 @@
           showScreen(welcomeScreen);
         }
       });
+      
+      // Simple Google Sign In functionality
+      const googleSignIn = document.getElementById('google-sign-in');
+      if (googleSignIn) {
+        googleSignIn.addEventListener('click', function() {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          
+          firebase.auth().signInWithPopup(provider)
+            .then((result) => {
+              // This gives you a Google Access Token
+              const user = result.user;
+              
+              // Create user document in Firestore if new user
+              if (result.additionalUserInfo.isNewUser) {
+                firebase.firestore().collection('users').doc(user.uid).set({
+                  email: user.email,
+                  displayName: user.displayName,
+                  photoURL: user.photoURL,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  messageCount: 0,
+                  hasFeedbackSubmitted: false,
+                  lastFeedbackSubmittedAt: null,
+                  feedbackData: null
+                });
+              }
+            })
+            .catch((error) => {
+              console.error("Google sign in error:", error);
+              showAlert("Error signing in with Google: " + error.message);
+            });
+        });
+      }
       
       // Function to attach template click listeners
       function attachTemplateClickListeners() {
@@ -757,11 +732,9 @@
           // Login
           firebase.auth().signInWithEmailAndPassword(email, password)
             .then((userCredential) => {
-              // Use handleAuthSuccess instead of directly navigating
-              handleAuthSuccess(userCredential.user);
+              showScreen(homeScreen);
             })
             .catch((error) => {
-              console.error('Login error:', error);
               showAlert(`Login error: ${error.message}`, 'error');
             });
         } else {
@@ -769,21 +742,19 @@
           firebase.auth().createUserWithEmailAndPassword(email, password)
             .then((userCredential) => {
               // Create user document in Firestore
-              return firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+              firebase.firestore().collection('users').doc(userCredential.user.uid).set({
                 email: email,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp(),
                 messageCount: 0,
                 hasFeedbackSubmitted: false,
                 lastFeedbackSubmittedAt: null,
                 feedbackData: null
-              }).then(() => {
-                // Use handleAuthSuccess instead of directly navigating
-                handleAuthSuccess(userCredential.user);
-                showAlert('Account created successfully!', 'success');
               });
+              
+              showScreen(homeScreen);
+              showAlert('Account created successfully!', 'success');
             })
             .catch((error) => {
-              console.error('Registration error:', error);
               showAlert(`Registration error: ${error.message}`, 'error');
             });
         }

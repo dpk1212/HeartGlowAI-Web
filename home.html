@@ -38,15 +38,40 @@
       measurementId: "G-KJMPL1DNPY"
     };
     
+    console.log("Starting Firebase initialization...");
+    
     // Initialize Firebase if not already initialized
     if (!window.firebase || !firebase.apps || !firebase.apps.length) {
-      firebase.initializeApp(firebaseConfig);
+      try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized successfully");
+      } catch (error) {
+        console.error("Firebase initialization error:", error);
+        alert("Error initializing Firebase. Please refresh and try again.");
+      }
+    } else {
+      console.log("Firebase already initialized");
     }
     
     // Critical: Set persistence to LOCAL
     if (firebase && firebase.auth) {
-      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+          console.log("Firebase persistence set to LOCAL");
+        })
+        .catch((error) => {
+          console.error("Error setting persistence:", error);
+          alert("Error with authentication. Please refresh and try again.");
+        });
+    } else {
+      console.error("Firebase auth not available!");
+      alert("Firebase auth not available. Please refresh and try again.");
     }
+    
+    // Add event listener for DOMContentLoaded to ensure document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded and parsed');
+    });
   </script>
   
   <style>
@@ -467,6 +492,97 @@
         grid-template-columns: 1fr;
       }
     }
+    
+    /* Error states */
+    .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      text-align: center;
+    }
+    
+    .error-icon {
+      font-size: 32px;
+      color: #ff6b9d;
+      margin-bottom: 15px;
+    }
+    
+    .error-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #ff6b9d;
+    }
+    
+    .error-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 15px;
+    }
+    
+    .error-action {
+      background: rgba(255, 107, 157, 0.2);
+      color: #ff6b9d;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.3s ease;
+    }
+    
+    .error-action:hover {
+      background: rgba(255, 107, 157, 0.3);
+    }
+    
+    /* Debug console styles */
+    #debug-console {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: none;
+      background: rgba(0, 0, 0, 0.9);
+      color: #0f0;
+      padding: 15px;
+      max-height: 200px;
+      overflow: auto;
+      font-family: monospace;
+      z-index: 9999;
+      font-size: 12px;
+      line-height: 1.4;
+      border-top: 1px solid #333;
+    }
+    
+    #debug-console button {
+      background: #333;
+      color: #fff;
+      border: none;
+      padding: 3px 8px;
+      border-radius: 3px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+    
+    #debug-console button:hover {
+      background: #444;
+    }
+    
+    #debug-output {
+      margin-top: 10px;
+      max-height: 150px;
+      overflow: auto;
+    }
+    
+    #debug-output div {
+      padding: 2px 0;
+      border-bottom: 1px dotted #333;
+    }
   </style>
 </head>
 <body>
@@ -627,8 +743,38 @@
     <div class="particle"></div>
   </div>
 
+  <!-- Debug console for troubleshooting -->
+  <div id="debug-console" style="position: fixed; bottom: 0; left: 0; right: 0; display: none; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+    <div>Debug Console: <button onclick="document.getElementById('debug-console').style.display='none'">Close</button></div>
+    <div id="debug-output"></div>
+  </div>
+
   <!-- JavaScript -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/js/all.min.js"></script>
+  <script>
+    // Debug logging function
+    function debugLog(message) {
+      console.log(message);
+      const debugOutput = document.getElementById('debug-output');
+      if (debugOutput) {
+        const logEntry = document.createElement('div');
+        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        debugOutput.appendChild(logEntry);
+      }
+    }
+    
+    // Show debug console on certain errors
+    window.addEventListener('error', function(e) {
+      const debugConsole = document.getElementById('debug-console');
+      if (debugConsole) {
+        debugConsole.style.display = 'block';
+        debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+      }
+    });
+    
+    // Check if the page is loaded
+    debugLog('Page script section loaded');
+  </script>
   <script src="js/home.js"></script>
 </body>
 </html> 

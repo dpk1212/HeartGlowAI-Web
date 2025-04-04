@@ -129,11 +129,21 @@
       const navTabs = document.querySelectorAll('.nav-tab');
       const typeContents = document.querySelectorAll('.type-content');
       const nextBtn = document.getElementById('next-btn');
+      
+      // If elements don't exist, log and exit early
+      if (navTabs.length === 0 || typeContents.length === 0) {
+        console.log("Tab navigation elements not found, skipping initialization");
+        return;
+      }
+      
       let selectedType = 'romantic'; // Default
+      console.log("Initializing tab navigation with", navTabs.length, "tabs");
       
       // Add click event to navigation tabs
       navTabs.forEach(tab => {
         tab.addEventListener('click', () => {
+          console.log("Tab clicked:", tab.getAttribute('data-type'));
+          
           // Update active tab
           navTabs.forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
@@ -149,8 +159,10 @@
           });
           
           // Update the Next button properties
-          nextBtn.classList.remove('hidden');
-          nextBtn.style.opacity = 1;
+          if (nextBtn) {
+            nextBtn.classList.remove('hidden');
+            nextBtn.style.opacity = 1;
+          }
           
           // Update selected type indicators for next screen
           const selectedTypeIcon = document.getElementById('selected-type-icon');
@@ -170,18 +182,28 @@
         });
       });
       
-      // Next button functionality - Navigate to auth screen instead of message flow
-      nextBtn.addEventListener('click', () => {
-        // Store the selected type for future use after authentication
-        localStorage.setItem('selectedMessageType', selectedType);
+      // Next button functionality - only set up if the button exists
+      if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+          console.log("Next button clicked with type:", selectedType);
+          
+          // Store the selected type for future use after authentication
+          localStorage.setItem('selectedMessageType', selectedType);
+          
+          // Navigate to auth screen instead of message flow
+          if (typeof authScreen !== 'undefined') {
+            showScreen(authScreen);
+          } else {
+            console.error("Auth screen not defined");
+          }
+        });
         
-        // Navigate to auth screen instead of message flow
-        showScreen(authScreen);
-      });
-      
-      // Make sure Next button is visible by default since we already have a tab selected
-      if (nextBtn.classList.contains('hidden')) {
-        nextBtn.classList.remove('hidden');
+        // Make sure Next button is visible by default since we already have a tab selected
+        if (nextBtn.classList.contains('hidden')) {
+          nextBtn.classList.remove('hidden');
+        }
+      } else {
+        console.log("Next button not found for tab navigation");
       }
     }
 
@@ -2940,3 +2962,41 @@ Maintain the core message and emotional intent while applying these changes.`
       }
     }, 200);
   });
+
+    // Helper function for safe screen navigation
+    function showScreen(screen) {
+      // Basic validation
+      if (!screen) {
+        console.error("Attempted to navigate to undefined screen");
+        return;
+      }
+      
+      // Get all screens that could be active
+      const allScreens = document.querySelectorAll('.screen');
+      console.log(`Transitioning to screen: ${screen.id}, from ${allScreens.length} possible screens`);
+      
+      try {
+        // Hide all screens first
+        allScreens.forEach(s => {
+          if (s) {
+            s.style.display = 'none';
+          }
+        });
+        
+        // Show the target screen
+        screen.style.display = 'block';
+        
+        // Scroll to top
+        window.scrollTo(0, 0);
+        
+        // Add animation class if needed
+        screen.classList.add('screen-fade-in');
+        setTimeout(() => {
+          screen.classList.remove('screen-fade-in');
+        }, 500);
+        
+        console.log(`Screen transition to ${screen.id} complete`);
+      } catch (error) {
+        console.error(`Error during screen transition: ${error.message}`);
+      }
+    }

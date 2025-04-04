@@ -1007,88 +1007,120 @@
   <!-- JavaScript -->
   <script src="js/home.js"></script>
   <script>
-    // Mobile navigation toggle
-    document.getElementById('mobile-menu-toggle').addEventListener('click', function() {
-      document.querySelector('.nav-bar').classList.toggle('active');
-    });
-    
-    // Close mobile menu when clicking outside
-    document.addEventListener('click', function(event) {
+    // Wait for DOM to be fully loaded before attaching event handlers
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM fully loaded');
+      
+      // Mobile navigation toggle
+      const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
       const navBar = document.querySelector('.nav-bar');
-      const mobileButton = document.getElementById('mobile-menu-toggle');
       
-      if (navBar.classList.contains('active') && 
-          !navBar.contains(event.target) && 
-          event.target !== mobileButton) {
-        navBar.classList.remove('active');
+      if (mobileMenuToggle) {
+        mobileMenuToggle.addEventListener('click', function() {
+          navBar.classList.toggle('active');
+          console.log('Mobile menu toggled');
+        });
       }
-    });
-    
-    // Emotional onboarding option selection
-    const emotionalOptions = document.querySelectorAll('.emotional-option, .explore-option');
-    const continueButton = document.getElementById('continue-button');
-    const confirmationMessage = document.getElementById('confirmation-message');
-    let selectedIntent = null;
-    
-    // Simulate a returning user (this would be based on actual user data)
-    const simulateReturningUser = function() {
-      // Check if user has previous data (this would normally be from database/localStorage)
-      const hasRecentActivity = Math.random() > 0.5; // Simulate 50% chance
       
-      if (hasRecentActivity) {
-        document.getElementById('welcome-back').style.display = 'block';
-        document.getElementById('recent-recipient').style.display = 'block';
-      }
-    };
-    
-    // Run on page load with slight delay for demo
-    setTimeout(simulateReturningUser, 1000);
-    
-    emotionalOptions.forEach(option => {
-      option.addEventListener('click', function() {
-        // Remove selected class from all options
-        emotionalOptions.forEach(opt => opt.classList.remove('selected'));
-        
-        // Add selected class to clicked option
-        this.classList.add('selected');
-        
-        // Show continue button
-        continueButton.classList.add('visible');
-        
-        // Store selected intent
-        selectedIntent = this.getAttribute('data-intent');
-        
-        // Show confirmation message
-        const message = this.getAttribute('data-confirmation');
-        if (message) {
-          confirmationMessage.textContent = message;
-          confirmationMessage.classList.add('visible');
+      // Close mobile menu when clicking outside
+      document.addEventListener('click', function(event) {
+        if (navBar && navBar.classList.contains('active') && 
+            !navBar.contains(event.target) && 
+            event.target !== mobileMenuToggle) {
+          navBar.classList.remove('active');
         }
       });
-    });
-    
-    // Continue button click event
-    continueButton.addEventListener('click', function() {
-      if (selectedIntent) {
-        // Hide emotional onboarding and proceed to next step
-        document.getElementById('emotional-onboarding').style.display = 'none';
-        
-        // Load next step based on selected intent (placeholder for now)
-        loadMessageSetup(selectedIntent);
-      }
-    });
-    
-    // Skip onboarding
-    document.getElementById('skip-onboarding').addEventListener('click', function() {
-      document.getElementById('emotional-onboarding').style.display = 'none';
-    });
-    
-    // Handle "Continue Message" for recent recipient
-    document.querySelector('.recipient-button.primary').addEventListener('click', function() {
-      document.getElementById('emotional-onboarding').style.display = 'none';
       
-      // This would load the previous message draft
-      loadMessageSetup('reconnect', 'Jamie');
+      // Emotional onboarding option selection
+      const emotionalOptions = document.querySelectorAll('.emotional-option, .explore-option');
+      const continueButton = document.getElementById('continue-button');
+      const confirmationMessage = document.getElementById('confirmation-message');
+      const onboardingModal = document.getElementById('emotional-onboarding');
+      const skipButton = document.getElementById('skip-onboarding');
+      let selectedIntent = null;
+      
+      console.log('Found', emotionalOptions.length, 'emotional options');
+      
+      // Simulate a returning user (this would be based on actual user data)
+      const simulateReturningUser = function() {
+        // Check if user has previous data (this would normally be from database/localStorage)
+        const hasRecentActivity = Math.random() > 0.5; // Simulate 50% chance
+        const welcomeBack = document.getElementById('welcome-back');
+        const recentRecipient = document.getElementById('recent-recipient');
+        
+        if (hasRecentActivity && welcomeBack && recentRecipient) {
+          welcomeBack.style.display = 'block';
+          recentRecipient.style.display = 'block';
+          console.log('Showing returning user UI');
+        }
+      };
+      
+      // Run on page load with slight delay for demo
+      setTimeout(simulateReturningUser, 1000);
+      
+      // Add click handlers to all emotional options
+      emotionalOptions.forEach(option => {
+        option.addEventListener('click', function(e) {
+          const intent = this.getAttribute('data-intent');
+          console.log('Option clicked:', intent);
+          
+          // Remove selected class from all options
+          emotionalOptions.forEach(opt => opt.classList.remove('selected'));
+          
+          // Add selected class to clicked option
+          this.classList.add('selected');
+          
+          // Show continue button
+          if (continueButton) {
+            continueButton.classList.add('visible');
+          }
+          
+          // Store selected intent
+          selectedIntent = intent;
+          
+          // Show confirmation message
+          const message = this.getAttribute('data-confirmation');
+          if (message && confirmationMessage) {
+            confirmationMessage.textContent = message;
+            confirmationMessage.classList.add('visible');
+          }
+        });
+      });
+      
+      // Continue button click event
+      if (continueButton) {
+        continueButton.addEventListener('click', function() {
+          console.log('Continue button clicked, selected intent:', selectedIntent);
+          
+          if (selectedIntent && onboardingModal) {
+            // Hide emotional onboarding and proceed to next step
+            onboardingModal.style.display = 'none';
+            
+            // Load next step based on selected intent (placeholder for now)
+            loadMessageSetup(selectedIntent);
+          }
+        });
+      }
+      
+      // Skip onboarding
+      if (skipButton && onboardingModal) {
+        skipButton.addEventListener('click', function() {
+          console.log('Skip button clicked');
+          onboardingModal.style.display = 'none';
+        });
+      }
+      
+      // Handle "Continue Message" for recent recipient
+      const recipientContinueBtn = document.querySelector('.recipient-button.primary');
+      if (recipientContinueBtn && onboardingModal) {
+        recipientContinueBtn.addEventListener('click', function() {
+          console.log('Continue message for recent recipient clicked');
+          onboardingModal.style.display = 'none';
+          
+          // This would load the previous message draft
+          loadMessageSetup('reconnect', 'Jamie');
+        });
+      }
     });
     
     // Placeholder function for loading the message setup
@@ -1105,20 +1137,22 @@
       // For now, just show a placeholder message
       const mainContent = document.getElementById('main-content');
       
-      if (recipientName) {
-        mainContent.innerHTML = `
-          <div style="text-align: center; padding: 50px 20px;">
-            <h2 style="margin-bottom: 20px; color: white;">Continuing your message to ${recipientName}...</h2>
-            <p style="color: rgba(255,255,255,0.7);">We'll implement the full message creation interface here.</p>
-          </div>
-        `;
-      } else {
-        mainContent.innerHTML = `
-          <div style="text-align: center; padding: 50px 20px;">
-            <h2 style="margin-bottom: 20px; color: white;">Getting your "${intent}" message ready...</h2>
-            <p style="color: rgba(255,255,255,0.7);">We'll implement the full 3-step message flow here.</p>
-          </div>
-        `;
+      if (mainContent) {
+        if (recipientName) {
+          mainContent.innerHTML = `
+            <div style="text-align: center; padding: 50px 20px;">
+              <h2 style="margin-bottom: 20px; color: white;">Continuing your message to ${recipientName}...</h2>
+              <p style="color: rgba(255,255,255,0.7);">We'll implement the full message creation interface here.</p>
+            </div>
+          `;
+        } else {
+          mainContent.innerHTML = `
+            <div style="text-align: center; padding: 50px 20px;">
+              <h2 style="margin-bottom: 20px; color: white;">Getting your "${intent}" message ready...</h2>
+              <p style="color: rgba(255,255,255,0.7);">We'll implement the full 3-step message flow here.</p>
+            </div>
+          `;
+        }
       }
     }
   </script>

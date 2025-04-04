@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartGlowAI - Who's on your mind?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a154b;
+            --accent-pink: #ff6b9d;
+            --accent-purple: #7b2cbf;
+            --bg-dark: #1f0a21;
+            --bg-darker: #0f0113;
+            --text-light: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --primary-gradient: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-hover: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .step-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+
+        .step-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .step-dot {
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--border-light);
+        }
+
+        .step-dot.active {
+            background: var(--accent-pink);
+            width: 1.8rem;
+            border-radius: 0.25rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            display: inline-block;
+        }
+
+        .page-subtitle {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .recipient-form {
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            color: var(--text-light);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .relationship-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .relationship-type {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0.5rem;
+            padding: 0.8rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .relationship-type:hover, .relationship-type.selected {
+            background: var(--card-hover);
+            border-color: var(--accent-pink);
+        }
+
+        .relationship-type.selected {
+            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
+        }
+
+        .relationship-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--accent-pink);
+        }
+
+        .relationship-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .save-connection {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 3rem;
+            height: 1.5rem;
+        }
+
+        .toggle-input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--border-light);
+            transition: .4s;
+            border-radius: 1.5rem;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 1.1rem;
+            width: 1.1rem;
+            left: 0.2rem;
+            bottom: 0.2rem;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        .toggle-input:checked + .toggle-slider {
+            background-color: var(--accent-pink);
+        }
+
+        .toggle-input:checked + .toggle-slider:before {
+            transform: translateX(1.5rem);
+        }
+
+        .toggle-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .reminder-option {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .reminder-option:hover {
+            background: var(--card-hover);
+        }
+
+        .reminder-icon {
+            font-size: 1.2rem;
+            color: var(--accent-pink);
+        }
+
+        .reminder-text {
+            flex: 1;
+        }
+
+        .reminder-title {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .reminder-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .reminder-arrow {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 0.8rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary {
+            background: var(--card-bg);
+            color: var(--text-light);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--card-hover);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: var(--text-light);
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .recents-section {
+            margin-top: 3rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .recents-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .recent-contacts {
+            display: flex;
+            gap: 0.8rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-pink) var(--card-bg);
+        }
+
+        .recent-contacts::-webkit-scrollbar {
+            height: 0.3rem;
+        }
+
+        .recent-contacts::-webkit-scrollbar-track {
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+        }
+
+        .recent-contacts::-webkit-scrollbar-thumb {
+            background: var(--accent-pink);
+            border-radius: 0.5rem;
+        }
+
+        .contact-card {
+            min-width: 100px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .contact-avatar {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            margin: 0 auto 0.5rem;
+            border: 2px solid var(--border-light);
+            transition: all 0.3s ease;
+        }
+
+        .contact-card:hover .contact-avatar {
+            border-color: var(--accent-pink);
+        }
+
+        .contact-name {
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        .contact-relation {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 0 2rem;
+            }
+
+            .page-title {
+                font-size: 2.2rem;
+            }
+
+            .page-subtitle {
+                font-size: 1.1rem;
+            }
+
+            .relationship-types {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+
+            .btn {
+                padding: 1rem 2rem;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 3rem;
+            }
+
+            .form-row {
+                display: flex;
+                gap: 1.5rem;
+            }
+
+            .form-group {
+                flex: 1;
+            }
+
+            .relationship-types {
+                grid-template-columns: repeat(5, 1fr);
+            }
+        }
+
+        /* Loading overlay styles */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 1, 21, 0.9);
+            backdrop-filter: blur(15px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            animation-duration: 0.4s;
+            display: none;
+        }
+
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 320px;
+        }
+
+        .heart-animation {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            margin-bottom: 30px;
+        }
+
+        .heart-shape {
+            width: 100%;
+            height: 100%;
+            background: var(--primary-gradient);
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
+            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .heart-glow {
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            right: -10px;
+            bottom: -10px;
+            background: radial-gradient(circle, rgba(255, 107, 157, 0.6) 0%, rgba(255, 107, 157, 0) 70%);
+            border-radius: 50%;
+            animation: glow 2s infinite alternate;
+            filter: blur(10px);
+        }
+
+        .loading-context {
+            font-size: 20px;
+            color: white;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 10px;
+            animation: fadeInOut 2s infinite alternate;
+            max-width: 280px;
+            line-height: 1.5;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(0.95); }
+        }
+
+        @keyframes glow {
+            0% { opacity: 0.5; transform: scale(0.9); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="step-header">
+            <div class="step-title">Step 1 of 3</div>
+            <div class="step-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot"></div>
+                <div class="step-dot"></div>
+            </div>
+        </div>
+
+        <h1 class="page-title">Who's on your mind?</h1>
+        <p class="page-subtitle">Tell us who you want to send a heartfelt message to.</p>
+
+        <div class="recipient-form">
+            <div class="form-group">
+                <label for="recipient-name" class="form-label">Name</label>
+                <input type="text" id="recipient-name" class="form-input" placeholder="Enter name">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Relationship Type</label>
+                <div class="relationship-types">
+                    <div class="relationship-type" data-type="partner">
+                        <div class="relationship-icon">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="relationship-label">Partner</div>
+                    </div>
+                    <div class="relationship-type" data-type="friend">
+                        <div class="relationship-icon">
+                            <i class="fas fa-user-friends"></i>
+                        </div>
+                        <div class="relationship-label">Friend</div>
+                    </div>
+                    <div class="relationship-type" data-type="family">
+                        <div class="relationship-icon">
+                            <i class="fas fa-home"></i>
+                        </div>
+                        <div class="relationship-label">Family</div>
+                    </div>
+                    <div class="relationship-type" data-type="colleague">
+                        <div class="relationship-icon">
+                            <i class="fas fa-briefcase"></i>
+                        </div>
+                        <div class="relationship-label">Colleague</div>
+                    </div>
+                    <div class="relationship-type" data-type="other">
+                        <div class="relationship-icon">
+                            <i class="fas fa-plus"></i>
+                        </div>
+                        <div class="relationship-label">Other</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="save-connection">
+                <label class="toggle-switch">
+                    <input type="checkbox" class="toggle-input">
+                    <span class="toggle-slider"></span>
+                </label>
+                <div class="toggle-label">Save to My Connections</div>
+            </div>
+
+            <div class="reminder-option">
+                <div class="reminder-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="reminder-text">
+                    <div class="reminder-title">Set a reminder</div>
+                    <div class="reminder-desc">Get notified to follow up with them</div>
+                </div>
+                <div class="reminder-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back</span>
+            </button>
+            <button class="btn btn-primary" id="next-step">
+                <span>Next</span>
+                <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <div class="recents-section">
+            <h2 class="recents-title">Recent Connections</h2>
+            <div class="recent-contacts">
+                <div class="contact-card" data-name="Sarah Johnson" data-relation="Partner">
+                    <div class="contact-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+                    <div class="contact-name">Sarah Johnson</div>
+                    <div class="contact-relation">Partner</div>
+                </div>
+                <div class="contact-card" data-name="Michael Chen" data-relation="Friend">
+                    <div class="contact-avatar" style="background-image: url('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+                    <div class="contact-name">Michael Chen</div>
+                    <div class="contact-relation">Friend</div>
+                </div>
+                <div class="contact-card" data-name="Emily Rodriguez" data-relation="Family">
+                    <div class="contact-avatar" style="background-image: url('https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+                    <div class="contact-name">Emily Rodriguez</div>
+                    <div class="contact-relation">Family</div>
+                </div>
+                <div class="contact-card" data-name="James Wilson" data-relation="Colleague">
+                    <div class="contact-avatar" style="background-image: url('https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+                    <div class="contact-name">James Wilson</div>
+                    <div class="contact-relation">Colleague</div>
+                </div>
+                <div class="contact-card" data-name="Olivia Park" data-relation="Friend">
+                    <div class="contact-avatar" style="background-image: url('https://images.unsplash.com/photo-1544005313-94ddf0286df2?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+                    <div class="contact-name">Olivia Park</div>
+                    <div class="contact-relation">Friend</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-container">
+            <div class="heart-animation">
+                <div class="heart-glow"></div>
+                <div class="heart-shape"></div>
+            </div>
+            <div class="loading-context" id="loadingContext">Setting up your message...</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Relationship type selection
+            const relationshipTypes = document.querySelectorAll('.relationship-type');
+            let selectedRelationType = null;
+
+            relationshipTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    if (selectedRelationType) {
+                        selectedRelationType.classList.remove('selected');
+                    }
+                    this.classList.add('selected');
+                    selectedRelationType = this;
+                });
+            });
+
+            // Recent contact selection
+            const contactCards = document.querySelectorAll('.contact-card');
+            contactCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const name = this.getAttribute('data-name');
+                    const relation = this.getAttribute('data-relation');
+                    
+                    document.getElementById('recipient-name').value = name;
+                    
+                    // Find and select the appropriate relationship type
+                    relationshipTypes.forEach(type => {
+                        if (type.getAttribute('data-type').toLowerCase() === relation.toLowerCase()) {
+                            if (selectedRelationType) {
+                                selectedRelationType.classList.remove('selected');
+                            }
+                            type.classList.add('selected');
+                            selectedRelationType = type;
+                        }
+                    });
+                });
+            });
+
+            // Reminder option toggle
+            const reminderOption = document.querySelector('.reminder-option');
+            reminderOption.addEventListener('click', function() {
+                // In a real app, this would open a date/time picker
+                alert('Reminder setting will be available in the next update.');
+            });
+
+            // Next button functionality
+            const nextButton = document.getElementById('next-step');
+            nextButton.addEventListener('click', function() {
+                const name = document.getElementById('recipient-name').value;
+                if (!name.trim()) {
+                    alert('Please enter a recipient name.');
+                    return;
+                }
+
+                if (!selectedRelationType) {
+                    alert('Please select a relationship type.');
+                    return;
+                }
+
+                // Show loading animation
+                document.getElementById('loadingContext').textContent = 'Setting up your message...';
+                document.getElementById('loadingOverlay').style.display = 'flex';
+
+                // Simulate loading
+                setTimeout(() => {
+                    // In a real app, this would navigate to step 2
+                    window.location.href = 'message-intent.html';
+                }, 1500);
+            });
+        });
+    </script>
+</body>
+</html> 

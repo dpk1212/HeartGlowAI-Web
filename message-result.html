@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartGlowAI - Your Message</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4a154b;
+            --accent-pink: #ff6b9d;
+            --accent-purple: #7b2cbf;
+            --bg-dark: #1f0a21;
+            --bg-darker: #0f0113;
+            --text-light: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --border-light: rgba(255, 255, 255, 0.1);
+            --primary-gradient: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --card-hover: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-light);
+            margin-bottom: 2rem;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-button:hover {
+            color: var(--text-light);
+        }
+
+        .recipient-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .recipient-avatar {
+            width: 3.5rem;
+            height: 3.5rem;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 2px solid var(--accent-pink);
+        }
+
+        .recipient-details {
+            flex: 1;
+        }
+
+        .recipient-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .recipient-relation {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .message-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .message-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 0.25rem;
+            background: var(--primary-gradient);
+        }
+
+        .message-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            animation: typewriter 2s ease forwards;
+        }
+
+        @keyframes typewriter {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .message-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-light);
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .message-meta {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .meta-icon {
+            color: var(--accent-pink);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .action-button {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0.8rem;
+            padding: 1.2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-button:hover {
+            background: var(--card-hover);
+            transform: translateY(-3px);
+        }
+
+        .action-icon {
+            font-size: 1.5rem;
+            color: var(--accent-pink);
+            margin-bottom: 0.3rem;
+        }
+
+        .action-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .action-description {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        .insights-card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+            border: 1px solid var(--border-light);
+        }
+
+        .insights-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .insights-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .insights-title i {
+            color: var(--accent-pink);
+        }
+
+        .toggle-insights {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-insights:hover {
+            color: var(--text-light);
+        }
+
+        .insights-content {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.7;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+
+        .insights-content.open {
+            max-height: 1000px;
+        }
+
+        .insight-point {
+            margin-bottom: 1rem;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .insight-point::before {
+            content: '';
+            position: absolute;
+            top: 0.5rem;
+            left: 0;
+            width: 0.5rem;
+            height: 0.5rem;
+            background: var(--accent-pink);
+            border-radius: 50%;
+        }
+
+        .options-section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1.2rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .option-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-light);
+            border-radius: 0.8rem;
+            padding: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option-card:hover {
+            background: var(--card-hover);
+            border-color: var(--accent-pink);
+            transform: translateY(-2px);
+        }
+
+        .option-icon {
+            font-size: 1.5rem;
+            color: var(--accent-pink);
+            width: 3rem;
+            height: 3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 107, 157, 0.1);
+            border-radius: 50%;
+        }
+
+        .option-details {
+            flex: 1;
+        }
+
+        .option-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.2rem;
+        }
+
+        .option-description {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .particles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: radial-gradient(circle, rgba(255, 107, 157, 0.8) 0%, rgba(255, 107, 157, 0) 70%);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0;
+            animation: float 10s infinite ease-out;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0) scale(1);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: translateY(-100px) translateX(30px) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 107, 157, 0.9);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 0 2rem;
+            }
+
+            .action-buttons {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .options-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .container {
+                padding: 0 3rem;
+            }
+
+            .message-card {
+                padding: 3rem;
+            }
+
+            .message-text {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles-container"></div>
+
+    <div class="container">
+        <div class="message-header">
+            <div class="header-title">Your heartfelt message</div>
+            <button class="close-button">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <div class="recipient-info">
+            <div class="recipient-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
+            <div class="recipient-details">
+                <div class="recipient-name">Sarah Johnson</div>
+                <div class="recipient-relation">Partner</div>
+            </div>
+        </div>
+
+        <div class="message-card">
+            <div class="message-text" id="message-text">
+                I've been thinking about you a lot lately. The way you always know exactly what to say when I'm feeling down, how you can make me laugh even on my worst days, and how you bring so much warmth into my life. 
+
+                Sometimes I don't say it enough, but I want you to know how deeply I care about you. You're not just my partner – you're my best friend, my confidant, and the person who makes every day better just by being in it.
+
+                I treasure our connection and am so grateful for your presence in my life. Thank you for being exactly who you are.
+            </div>
+            <div class="message-footer">
+                <div class="message-meta">
+                    <div class="meta-item">
+                        <i class="fas fa-heart meta-icon"></i>
+                        <span>Warm</span>
+                    </div>
+                    <div class="meta-item">
+                        <i class="fas fa-star meta-icon"></i>
+                        <span>Caring</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-clock meta-icon"></i>
+                    <span>Just now</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <div class="action-button" id="copy-btn">
+                <div class="action-icon">
+                    <i class="fas fa-copy"></i>
+                </div>
+                <div class="action-label">Copy</div>
+                <div class="action-description">Copy to clipboard</div>
+            </div>
+            <div class="action-button" id="edit-btn">
+                <div class="action-icon">
+                    <i class="fas fa-pen"></i>
+                </div>
+                <div class="action-label">Edit</div>
+                <div class="action-description">Make changes</div>
+            </div>
+            <div class="action-button" id="save-btn">
+                <div class="action-icon">
+                    <i class="fas fa-bookmark"></i>
+                </div>
+                <div class="action-label">Save</div>
+                <div class="action-description">Save for later</div>
+            </div>
+            <div class="action-button" id="regen-btn">
+                <div class="action-icon">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+                <div class="action-label">Regenerate</div>
+                <div class="action-description">Try a new version</div>
+            </div>
+        </div>
+
+        <div class="insights-card">
+            <div class="insights-header">
+                <div class="insights-title">
+                    <i class="fas fa-lightbulb"></i>
+                    <span>Why This Message Works</span>
+                </div>
+                <div class="toggle-insights" id="toggle-insights">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            <div class="insights-content" id="insights-content">
+                <div class="insight-point">
+                    <strong>Specificity creates authenticity</strong>: The message mentions specific qualities and actions, making it feel personal rather than generic.
+                </div>
+                <div class="insight-point">
+                    <strong>Emotional vulnerability</strong>: Phrases like "I don't say it enough" create a sense of openness that deepens connection.
+                </div>
+                <div class="insight-point">
+                    <strong>Balance of appreciation and affection</strong>: The message expresses both gratitude for specific actions and affection for who they are as a person.
+                </div>
+                <div class="insight-point">
+                    <strong>Natural language</strong>: The message uses conversational phrasing that sounds like something you would actually say, not overly formal or poetic.
+                </div>
+            </div>
+        </div>
+
+        <div class="options-section">
+            <div class="section-title">What would you like to do next?</div>
+            <div class="options-grid">
+                <div class="option-card" id="set-reminder">
+                    <div class="option-icon">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div class="option-details">
+                        <div class="option-title">Set a follow-up reminder</div>
+                        <div class="option-description">Remember to check in with Sarah next week</div>
+                    </div>
+                </div>
+                <div class="option-card" id="view-history">
+                    <div class="option-icon">
+                        <i class="fas fa-history"></i>
+                    </div>
+                    <div class="option-details">
+                        <div class="option-title">View message history</div>
+                        <div class="option-description">See past messages with Sarah</div>
+                    </div>
+                </div>
+                <div class="option-card" id="new-message">
+                    <div class="option-icon">
+                        <i class="fas fa-paper-plane"></i>
+                    </div>
+                    <div class="option-details">
+                        <div class="option-title">Send another message</div>
+                        <div class="option-description">Create a new message for someone else</div>
+                    </div>
+                </div>
+                <div class="option-card" id="inspiration">
+                    <div class="option-icon">
+                        <i class="fas fa-sparkles"></i>
+                    </div>
+                    <div class="option-details">
+                        <div class="option-title">Browse inspiration</div>
+                        <div class="option-description">Explore message ideas and examples</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Typewriter effect for message text
+            const messageText = document.getElementById('message-text');
+            messageText.innerHTML = messageText.innerHTML.replace(/\n\n/g, '<br><br>');
+            
+            // Toggle insights
+            const toggleInsights = document.getElementById('toggle-insights');
+            const insightsContent = document.getElementById('insights-content');
+            
+            toggleInsights.addEventListener('click', function() {
+                insightsContent.classList.toggle('open');
+                this.querySelector('i').classList.toggle('fa-chevron-down');
+                this.querySelector('i').classList.toggle('fa-chevron-up');
+            });
+            
+            // Copy button functionality
+            const copyBtn = document.getElementById('copy-btn');
+            copyBtn.addEventListener('click', function() {
+                const text = document.getElementById('message-text').innerText;
+                navigator.clipboard.writeText(text).then(function() {
+                    showToast('Message copied to clipboard');
+                }, function() {
+                    showToast('Failed to copy message');
+                });
+            });
+            
+            // Edit button functionality
+            const editBtn = document.getElementById('edit-btn');
+            editBtn.addEventListener('click', function() {
+                // In a real app, this would open an editor
+                showToast('Editor will be available in the next update');
+            });
+            
+            // Save button functionality
+            const saveBtn = document.getElementById('save-btn');
+            saveBtn.addEventListener('click', function() {
+                // In a real app, this would save to user's account
+                showToast('Message saved successfully');
+            });
+            
+            // Regenerate button functionality
+            const regenBtn = document.getElementById('regen-btn');
+            regenBtn.addEventListener('click', function() {
+                // In a real app, this would call the API for a new message
+                messageText.style.opacity = 0;
+                
+                setTimeout(() => {
+                    messageText.innerHTML = "As I was reflecting today, I realized how much joy you bring into my life. Your kindness, warmth, and the way you always listen when I need to talk – these things mean more to me than I often express.<br><br>I just wanted to take a moment to tell you how deeply I care about you. Our connection is something I treasure, and I'm so grateful to have you in my life.<br><br>Thank you for being you and for everything you do. You make my world brighter in so many ways.";
+                    messageText.style.opacity = 1;
+                }, 500);
+                
+                showToast('Generated a new message');
+            });
+            
+            // Option card functionality
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    const option = this.id;
+                    
+                    switch(option) {
+                        case 'set-reminder':
+                            showToast('Reminder feature coming soon');
+                            break;
+                        case 'view-history':
+                            window.location.href = 'home.html';
+                            break;
+                        case 'new-message':
+                            window.location.href = 'recipient-selection.html';
+                            break;
+                        case 'inspiration':
+                            showToast('Inspiration library coming soon');
+                            break;
+                    }
+                });
+            });
+            
+            // Close button functionality
+            document.querySelector('.close-button').addEventListener('click', function() {
+                window.location.href = 'home.html';
+            });
+            
+            // Toast notification
+            function showToast(message) {
+                const toast = document.getElementById('toast');
+                const toastMessage = document.getElementById('toast-message');
+                
+                toastMessage.textContent = message;
+                toast.classList.add('show');
+                
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+            
+            // Create floating particles
+            createParticles();
+            
+            function createParticles() {
+                const container = document.getElementById('particles-container');
+                
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    
+                    // Random size
+                    const size = Math.random() * 15 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    
+                    // Random position
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    particle.style.left = `${posX}%`;
+                    particle.style.top = `${posY}%`;
+                    
+                    // Random animation delay
+                    particle.style.animationDelay = `${Math.random() * 10}s`;
+                    
+                    container.appendChild(particle);
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

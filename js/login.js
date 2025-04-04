@@ -196,7 +196,7 @@ function initAuthListeners() {
 function redirectToHome() {
   console.log('Redirecting to home page...');
   showLoading('Redirecting to your dashboard...');
-  window.location.href = 'index.html?loggedIn=true'; // Add parameter to indicate logged in state
+  window.location.href = 'home.html'; // Now redirects to dedicated home page
 }
 
 // Show loading overlay

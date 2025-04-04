@@ -554,15 +554,13 @@ function loadUserReminders() {
   // Get current date for comparison
   const now = new Date();
   
-  // Query Firestore for user's upcoming reminders
+  // Simplified query that doesn't require a compound index
   firebase.firestore()
     .collection('users')
     .doc(currentUser.uid)
     .collection('reminders')
     .where('isComplete', '==', false)
-    .where('reminderDate', '>=', now)
-    .orderBy('reminderDate', 'asc')
-    .limit(5)
+    .limit(10)
     .get()
     .then((querySnapshot) => {
       // Clear loading indicator
@@ -580,10 +578,36 @@ function loadUserReminders() {
         return;
       }
       
-      // Add reminders to the list
-      querySnapshot.forEach((doc) => {
-        const reminderData = doc.data();
-        
+      // Filter reminders in JavaScript after fetching them
+      const filteredDocs = [];
+      querySnapshot.forEach(doc => {
+        const data = doc.data();
+        if (data.reminderDate && data.reminderDate.toDate() >= now) {
+          filteredDocs.push({ doc, data });
+        }
+      });
+      
+      // Sort the filtered docs by reminderDate
+      filteredDocs.sort((a, b) => {
+        const dateA = a.data.reminderDate.toDate();
+        const dateB = b.data.reminderDate.toDate();
+        return dateA - dateB;
+      });
+      
+      // If no reminders after filtering, show empty state
+      if (filteredDocs.length === 0) {
+        remindersList.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-bell"></i></div>
+            <div class="empty-title">No upcoming reminders</div>
+            <div class="empty-description">Set reminders when sending messages to stay connected</div>
+          </div>
+        `;
+        return;
+      }
+      
+      // Add reminders to the list (use only the first 5)
+      filteredDocs.slice(0, 5).forEach(({ doc, data: reminderData }) => {
         // Format reminder date
         let dateText = 'Soon';
         if (reminderData.reminderDate) {

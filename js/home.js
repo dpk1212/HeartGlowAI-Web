@@ -5,68 +5,110 @@ let currentUser = null;
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Home page loaded, initializing...');
   
+  // Debug logging function (defined in home.html)
+  if (typeof debugLog === 'function') {
+    debugLog('Home.js script loaded and executing');
+  }
+  
   // Check if Firebase is already initialized
-  if (!firebase.apps.length) {
+  if (!firebase || !firebase.apps || !firebase.apps.length) {
     console.error("Firebase not initialized properly. Please refresh the page.");
     showAlert("Error initializing Firebase. Please refresh the page.", "error");
+    if (typeof debugLog === 'function') {
+      debugLog('Firebase initialization error detected');
+      document.getElementById('debug-console').style.display = 'block';
+    }
     return;
   }
   
   // Check authentication status on load
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      console.log('User authenticated:', user.uid);
-      currentUser = user;
-      initializeHomePage();
-    } else {
-      console.log('No user logged in, redirecting to login page');
-      window.location.href = 'login.html';
+  try {
+    console.log('Checking authentication status...');
+    firebase.auth().onAuthStateChanged(function(user) {
+      if (user) {
+        console.log('User authenticated:', user.uid);
+        currentUser = user;
+        
+        // Update the user name display if possible
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+          userNameElement.textContent = user.displayName || 'there';
+        }
+        
+        initializeHomePage();
+      } else {
+        console.log('No user logged in, redirecting to login page');
+        window.location.href = 'login.html';
+      }
+    });
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    showAlert('Error checking authentication. Please refresh the page.', 'error');
+    if (typeof debugLog === 'function') {
+      debugLog('Authentication error: ' + error.message);
+      document.getElementById('debug-console').style.display = 'block';
     }
-  });
+  }
 });
 
 // Initialize the home page functionality
 function initializeHomePage() {
   console.log('Initializing home page functionality');
-  
-  // Load user data
-  loadUserConnections();
-  loadUserMessages();
-  loadUserReminders();
-  
-  // Initialize navigation buttons
-  initNavigationButtons();
-  
-  // Initialize create message button
-  const createMessageBtn = document.getElementById('create-message-btn');
-  if (createMessageBtn) {
-    createMessageBtn.addEventListener('click', function() {
-      // Navigate to emotional entry page
-      window.location.href = 'emotional-entry.html';
-    });
+  if (typeof debugLog === 'function') {
+    debugLog('Initializing home page functionality');
   }
   
-  // Initialize quick action items
-  initializeQuickActions();
-  
-  // Initialize manage buttons
-  initializeManageButtons();
-  
-  // Initialize logout button
-  const logoutBtn = document.getElementById('logout-btn');
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', function() {
-      showLoading('Logging out...');
-      firebase.auth().signOut()
-        .then(() => {
-          window.location.href = 'index.html';
-        })
-        .catch((error) => {
-          console.error('Logout error:', error);
-          hideLoading();
-          showAlert(`Logout error: ${error.message}`, 'error');
-        });
-    });
+  try {
+    // Load user data
+    loadUserConnections();
+    loadUserMessages();
+    loadUserReminders();
+    
+    // Initialize navigation buttons
+    initNavigationButtons();
+    
+    // Initialize create message button
+    const createMessageBtn = document.getElementById('create-message-btn');
+    if (createMessageBtn) {
+      createMessageBtn.addEventListener('click', function() {
+        // Navigate to emotional entry page
+        window.location.href = 'emotional-entry.html';
+      });
+    } else {
+      console.warn('Create message button not found');
+    }
+    
+    // Initialize quick action items
+    initializeQuickActions();
+    
+    // Initialize manage buttons
+    initializeManageButtons();
+    
+    // Initialize logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function() {
+        showLoading('Logging out...');
+        firebase.auth().signOut()
+          .then(() => {
+            window.location.href = 'index.html';
+          })
+          .catch((error) => {
+            console.error('Logout error:', error);
+            hideLoading();
+            showAlert(`Logout error: ${error.message}`, 'error');
+          });
+      });
+    } else {
+      console.warn('Logout button not found');
+    }
+  } catch (error) {
+    console.error('Error in initializeHomePage:', error);
+    showAlert('Error initializing dashboard. Please refresh the page.', 'error');
+    if (typeof debugLog === 'function') {
+      debugLog('Home page initialization error: ' + error.message);
+      document.getElementById('debug-console').style.display = 'block';
+    }
   }
 }
 
@@ -95,7 +137,8 @@ function initNavigationButtons() {
 function initializeQuickActions() {
   const quickActionItems = document.querySelectorAll('.quick-actions-list .message-item');
   
-  if (quickActionItems) {
+  if (quickActionItems && quickActionItems.length > 0) {
+    console.log('Found', quickActionItems.length, 'quick action items');
     quickActionItems.forEach((item, index) => {
       item.addEventListener('click', function() {
         // Handle different quick actions
@@ -119,6 +162,8 @@ function initializeQuickActions() {
         }
       });
     });
+  } else {
+    console.warn('Quick action items not found');
   }
 }
 
@@ -155,131 +200,140 @@ function initializeManageButtons() {
 
 // Load user's connections from Firestore
 function loadUserConnections() {
-  if (!currentUser) return;
+  if (!currentUser) {
+    console.warn('No current user for loading connections');
+    return;
+  }
   
   const connectionsList = document.getElementById('connections-list');
-  if (!connectionsList) return;
+  if (!connectionsList) {
+    console.warn('Connections list element not found');
+    return;
+  }
   
-  // Query Firestore for user's connections
-  firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('connections')
-    .orderBy('name', 'asc')
-    .limit(10)
-    .get()
-    .then((querySnapshot) => {
-      // Clear loading indicator
-      connectionsList.innerHTML = '';
-      
-      if (querySnapshot.empty) {
-        // Show empty state
-        connectionsList.innerHTML = `
-          <li class="empty-state">
-            <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
-            <div class="empty-title">No connections yet</div>
-            <div class="empty-description">Save people to your connections when sending messages</div>
-            <a href="emotional-entry.html" class="empty-action">
-              <i class="fas fa-plus-circle"></i> Create a message
-            </a>
-          </li>
-        `;
-        return;
-      }
-      
-      // Add connections to the list
-      querySnapshot.forEach((doc) => {
-        const connectionData = doc.data();
+  try {
+    console.log('Loading user connections...');
+    // Query Firestore for user's connections
+    firebase.firestore()
+      .collection('users')
+      .doc(currentUser.uid)
+      .collection('connections')
+      .orderBy('name', 'asc')
+      .limit(10)
+      .get()
+      .then((querySnapshot) => {
+        // Clear loading indicator
+        connectionsList.innerHTML = '';
         
-        // Get initials for avatar
-        const initials = getInitials(connectionData.name);
-        
-        // Get last message timestamp if available
-        let lastMessageText = 'No messages yet';
-        if (connectionData.lastMessageDate) {
-          const lastMessageDate = connectionData.lastMessageDate.toDate();
-          const timeAgo = getTimeAgo(lastMessageDate);
-          lastMessageText = `Last message ${timeAgo}`;
+        if (querySnapshot.empty) {
+          // Show empty state
+          connectionsList.innerHTML = `
+            <li class="empty-state">
+              <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
+              <div class="empty-title">No connections yet</div>
+              <div class="empty-description">Save people to your connections when sending messages</div>
+              <a href="emotional-entry.html" class="empty-action">
+                <i class="fas fa-plus-circle"></i> Create a message
+              </a>
+            </li>
+          `;
+          return;
         }
         
-        // Create connection item
-        const connectionItem = document.createElement('li');
-        connectionItem.className = 'connection-item';
-        connectionItem.innerHTML = `
-          <div class="connection-avatar">${initials}</div>
-          <div class="connection-details">
-            <div class="connection-name">${connectionData.name}</div>
-            <div class="connection-meta">
-              <span class="connection-relation">${capitalizeFirstLetter(connectionData.relationship || 'Contact')}</span>
-              <span class="connection-last-message">${lastMessageText}</span>
+        // Add connections to the list
+        querySnapshot.forEach((doc) => {
+          const connectionData = doc.data();
+          
+          // Get initials for avatar
+          const initials = getInitials(connectionData.name);
+          
+          // Get last message timestamp if available
+          let lastMessageText = 'No messages yet';
+          if (connectionData.lastMessageDate) {
+            const lastMessageDate = connectionData.lastMessageDate.toDate();
+            const timeAgo = getTimeAgo(lastMessageDate);
+            lastMessageText = `Last message ${timeAgo}`;
+          }
+          
+          // Create connection item
+          const connectionItem = document.createElement('li');
+          connectionItem.className = 'connection-item';
+          connectionItem.innerHTML = `
+            <div class="connection-avatar">${initials}</div>
+            <div class="connection-details">
+              <div class="connection-name">${connectionData.name}</div>
+              <div class="connection-meta">
+                <span class="connection-relation">${capitalizeFirstLetter(connectionData.relationship || 'Contact')}</span>
+                <span class="connection-last-message">${lastMessageText}</span>
+              </div>
             </div>
-          </div>
-          <div class="connection-actions">
-            <div class="connection-action send-message" title="Send Message">
-              <i class="fas fa-paper-plane"></i>
+            <div class="connection-actions">
+              <div class="connection-action send-message" title="Send Message">
+                <i class="fas fa-paper-plane"></i>
+              </div>
+              <div class="connection-action view-history" title="View History">
+                <i class="fas fa-history"></i>
+              </div>
             </div>
-            <div class="connection-action view-history" title="View History">
-              <i class="fas fa-history"></i>
-            </div>
-          </div>
-        `;
-        
-        // Add connection ID as data attribute
-        connectionItem.setAttribute('data-id', doc.id);
-        
-        // Add click handlers for the connection item and its actions
-        const sendMessageBtn = connectionItem.querySelector('.send-message');
-        const viewHistoryBtn = connectionItem.querySelector('.view-history');
-        
-        if (sendMessageBtn) {
-          sendMessageBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent triggering the parent click
-            // Store recipient data for message flow
-            localStorage.setItem('recipientData', JSON.stringify({
-              id: doc.id,
-              name: connectionData.name,
-              relationship: connectionData.relationship,
-              isExisting: true
-            }));
-            // Navigate to message intent page
-            window.location.href = 'message-intent.html';
-          });
-        }
-        
-        if (viewHistoryBtn) {
-          viewHistoryBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent triggering the parent click
-            // Navigate to history page with connection filter
-            window.location.href = `history.html?connection=${doc.id}`;
-          });
-        }
-        
-        // Add click handler for the whole item
-        connectionItem.addEventListener('click', function() {
-          // Store recipient data for message flow
-          localStorage.setItem('recipientData', JSON.stringify({
-            id: doc.id,
-            name: connectionData.name,
-            relationship: connectionData.relationship,
-            isExisting: true
-          }));
-          // Navigate to message intent page
-          window.location.href = 'message-intent.html';
+          `;
+          
+          // Add connection ID as data attribute
+          connectionItem.setAttribute('data-id', doc.id);
+          
+          // Add click handlers for the connection item and its actions
+          const sendMessageBtn = connectionItem.querySelector('.send-message');
+          const viewHistoryBtn = connectionItem.querySelector('.view-history');
+          
+          if (sendMessageBtn) {
+            sendMessageBtn.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent triggering the parent click
+              // Store recipient data for message flow
+              localStorage.setItem('recipientData', JSON.stringify({
+                id: doc.id,
+                name: connectionData.name,
+                relationship: connectionData.relationship,
+                isExisting: true
+              }));
+              // Navigate to message intent page
+              window.location.href = 'message-intent.html';
+            });
+          }
+          
+          if (viewHistoryBtn) {
+            viewHistoryBtn.addEventListener('click', function(e) {
+              e.stopPropagation(); // Prevent triggering the parent click
+              // Navigate to history page filtered for this connection
+              window.location.href = `history.html?connectionId=${doc.id}`;
+            });
+          }
+          
+          connectionsList.appendChild(connectionItem);
         });
         
-        connectionsList.appendChild(connectionItem);
+        console.log('Connections loaded successfully');
+      })
+      .catch((error) => {
+        console.error('Error loading connections:', error);
+        connectionsList.innerHTML = `
+          <li class="error-state">
+            <div class="error-icon"><i class="fas fa-exclamation-circle"></i></div>
+            <div class="error-title">Error loading connections</div>
+            <div class="error-description">${error.message}</div>
+            <button class="error-action" onclick="loadUserConnections()">
+              <i class="fas fa-sync"></i> Try Again
+            </button>
+          </li>
+        `;
+        if (typeof debugLog === 'function') {
+          debugLog('Error loading connections: ' + error.message);
+        }
       });
-    })
-    .catch((error) => {
-      console.error('Error loading connections:', error);
-      connectionsList.innerHTML = `
-        <li class="empty-state">
-          <div class="empty-icon"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="empty-title">Error loading connections</div>
-          <div class="empty-description">${error.message}</div>
-        </li>
-      `;
-    });
+  } catch (error) {
+    console.error('Exception in loadUserConnections:', error);
+    if (typeof debugLog === 'function') {
+      debugLog('Exception in loadUserConnections: ' + error.message);
+    }
+  }
 }
 
 // Load user's recent messages from Firestore
@@ -682,40 +736,66 @@ function hideLoading() {
 
 // Show alert message
 function showAlert(message, type = 'info') {
-  // Create alert element
-  const alertElement = document.createElement('div');
-  alertElement.className = `alert alert-${type}`;
-  alertElement.innerHTML = `
-    <div class="alert-message">${message}</div>
-    <button class="alert-close">&times;</button>
-  `;
+  console.log('Alert:', message, type);
   
-  // Add to document
-  document.body.appendChild(alertElement);
-  
-  // Animate in
-  setTimeout(() => {
-    alertElement.classList.add('show');
-  }, 10);
-  
-  // Add close button handler
-  const closeBtn = alertElement.querySelector('.alert-close');
-  closeBtn.addEventListener('click', () => {
-    alertElement.classList.remove('show');
+  try {
+    // Create alert element if it doesn't exist
+    let alertElement = document.querySelector('.alert');
+    
+    if (!alertElement) {
+      alertElement = document.createElement('div');
+      alertElement.className = `alert alert-${type}`;
+      document.body.appendChild(alertElement);
+    } else {
+      alertElement.className = `alert alert-${type}`;
+    }
+    
+    // Set message
+    alertElement.innerHTML = `
+      <div class="alert-content">
+        <span class="alert-message">${message}</span>
+        <button class="alert-close">&times;</button>
+      </div>
+    `;
+    
+    // Show alert
     setTimeout(() => {
-      alertElement.remove();
-    }, 300);
-  });
-  
-  // Auto remove after 5 seconds for non-error alerts
-  if (type !== 'error') {
-    setTimeout(() => {
-      if (document.body.contains(alertElement)) {
+      alertElement.classList.add('show');
+    }, 10);
+    
+    // Add close button handler
+    const closeBtn = alertElement.querySelector('.alert-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
         alertElement.classList.remove('show');
+        
         setTimeout(() => {
-          alertElement.remove();
+          if (document.body.contains(alertElement)) {
+            document.body.removeChild(alertElement);
+          }
         }, 300);
-      }
-    }, 5000);
+      });
+    }
+    
+    // Auto remove for non-error alerts
+    if (type !== 'error') {
+      setTimeout(() => {
+        if (document.body.contains(alertElement)) {
+          alertElement.classList.remove('show');
+          
+          setTimeout(() => {
+            if (document.body.contains(alertElement)) {
+              document.body.removeChild(alertElement);
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
+  } catch (error) {
+    console.error('Error showing alert:', error);
+    // Fallback to regular alert if custom alert fails
+    if (type === 'error') {
+      alert(message);
+    }
   }
 } 

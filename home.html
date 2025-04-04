@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HeartGlowAI - Home</title>
+  <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
+  
+  <!-- Resource Hints -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://us-central1-heartglowai.cloudfunctions.net" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preload" href="css/styles.css" as="style">
+  <link rel="preload" href="js/home.js" as="script">
+  
+  <!-- Font Loading -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+  
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/perplexity-citations.css">
+  
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+      authDomain: "heartglowai.firebaseapp.com",
+      projectId: "heartglowai",
+      storageBucket: "heartglowai.firebasestorage.app",
+      messagingSenderId: "196565711798",
+      appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+      measurementId: "G-KJMPL1DNPY"
+    };
+    
+    // Initialize Firebase if not already initialized
+    if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        console.log("Firebase initialized successfully");
+      } catch (error) {
+        console.error("Firebase initialization error:", error);
+      }
+    } else {
+      console.log("Firebase already initialized");
+    }
+    
+    // Critical: Set persistence to LOCAL to maintain auth state between pages
+    if (firebase && firebase.auth) {
+      firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+        .then(() => {
+          console.log("Firebase persistence set to LOCAL.");
+        })
+        .catch((error) => {
+          console.error("Auth persistence error:", error);
+        });
+    }
+  </script>
+</head>
+<body>
+  <div id="app">
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+      <div class="header">
+        <div class="logo-container">
+          <div class="logo-heart"></div>
+          <span class="logo-text">HeartGlowAI</span>
+        </div>
+      </div>
+      
+      <div class="home-header">
+        <h1 class="home-title">Start a meaningful conversation</h1>
+        <p class="home-subtitle">Choose a template or start fresh — we'll guide you.</p>
+      </div>
+      
+      <div class="home-actions">
+        <button id="dashboard-btn" class="settings-btn">
+          <span class="settings-icon">📊</span> Dashboard
+        </button>
+        
+        <button id="history-btn" class="settings-btn">
+          <span class="settings-icon">📋</span> History
+        </button>
+        
+        <button id="learn-btn" class="settings-btn">
+          <span class="settings-icon">🧠</span> Learn
+        </button>
+        
+        <button id="logout-btn" class="settings-btn">
+          <span class="settings-icon">👤</span> Logout
+        </button>
+      </div>
+      
+      <button id="new-conversation-btn" class="new-conversation-btn">
+        <span class="new-conversation-icon">💬</span> Start a New Conversation
+      </button>
+      
+      <!-- Templates Section -->
+      <div id="templates-section" class="templates-section">
+        <h2 class="section-title">Message Templates</h2>
+        
+        <!-- Everyday Check-ins Category -->
+        <div class="template-category">
+          <h3 class="category-title">Everyday Check-Ins</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="checkin">
+              <div class="template-icon">👋</div>
+              <div class="template-name">Check-In</div>
+              <div class="template-description">Reconnect with someone you haven't spoken to in a while</div>
+            </div>
+            <div class="template-card" data-template="encouragement">
+              <div class="template-icon">⭐</div>
+              <div class="template-name">Encouragement</div>
+              <div class="template-description">Offer support during a challenging time</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Repair & Reconnect Category -->
+        <div class="template-category">
+          <h3 class="category-title">Repair & Reconnect</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="apology">
+              <div class="template-icon">✉️</div>
+              <div class="template-name">Apology</div>
+              <div class="template-description">Make amends with empathy and sincerity</div>
+            </div>
+            <div class="template-card" data-template="tough">
+              <div class="template-icon">💬</div>
+              <div class="template-name">Tough Talk</div>
+              <div class="template-description">Navigate a difficult conversation with respect</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Celebrate & Appreciate Category -->
+        <div class="template-category">
+          <h3 class="category-title">Celebrate & Appreciate</h3>
+          <div class="templates-grid">
+            <div class="template-card" data-template="romantic">
+              <div class="template-icon">❤️</div>
+              <div class="template-name">Romantic</div>
+              <div class="template-description">Express your love and affection</div>
+            </div>
+            <div class="template-card" data-template="gratitude">
+              <div class="template-icon">🙏</div>
+              <div class="template-name">Gratitude</div>
+              <div class="template-description">Show appreciation for their support</div>
+            </div>
+            <div class="template-card" data-template="celebration">
+              <div class="template-icon">🎉</div>
+              <div class="template-name">Celebration</div>
+              <div class="template-description">Congratulate someone on their achievement</div>
+            </div>
+            <div class="template-card" data-template="sympathy">
+              <div class="template-icon">💐</div>
+              <div class="template-name">Sympathy</div>
+              <div class="template-description">Offer comfort during a difficult time</div>
+            </div>
+          </div>
+        </div>
+        
+        <button id="feedbackButton" class="feedback-button">
+          <span class="feedback-icon">⭐</span> Submit Feedback
+        </button>
+      </div>
+      
+      <div class="dashboard-section">
+        <h3>Your Relationships</h3>
+        <button id="manage-blueprints-btn" class="tertiary-button">Manage Relationship Blueprints</button>
+      </div>
+      
+      <div class="recent-messages">
+        <h3>Recent Messages</h3>
+        <ul id="message-history"></ul>
+      </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+      <div class="loading-container">
+        <div class="heart-animation">
+          <div class="heart-shape"></div>
+          <div class="heart-glow"></div>
+          <div class="heart-particles">
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+            <div class="particle"></div>
+          </div>
+        </div>
+        <div id="loadingContext" class="loading-context">Loading...</div>
+      </div>
+    </div>
+    
+    <!-- Alert Component -->
+    <div id="alertContainer" class="alert-container"></div>
+  </div>
+  
+  <!-- JavaScript -->
+  <script src="js/home.js"></script>
+</body>
+</html> 

@@ -1129,10 +1129,12 @@
                 authProvider: 'google'
               }).then(() => {
                 showAlert('Account created successfully!', 'success');
-                showScreen(homeScreen);
+                // Use handleAuthSuccess instead of directly navigating to home screen
+                handleAuthSuccess(result.user);
               });
             } else {
-              showScreen(homeScreen);
+              // Use handleAuthSuccess instead of directly navigating to home screen
+              handleAuthSuccess(result.user);
             }
           })
           .catch((error) => {

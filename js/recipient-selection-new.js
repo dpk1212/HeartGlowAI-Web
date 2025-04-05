@@ -250,7 +250,7 @@ function saveDataAndNavigate() {
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
         
         // Navigate to next page
-        const nextPage = `message-intent.html?emotion=${urlEmotion}`;
+        const nextPage = `message-intent-new.html?emotion=${urlEmotion}`;
         logDebug(`Navigating to: ${nextPage}`);
         window.location.href = nextPage;
     } catch (error) {

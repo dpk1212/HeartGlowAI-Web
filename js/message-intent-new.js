@@ -420,7 +420,7 @@ function saveIntentAndNavigate() {
         localStorage.setItem('intentData', JSON.stringify(intentData));
         
         // Navigate to tone selection page
-        const nextPage = `message-tone.html?emotion=${selectedEmotion}`;
+        const nextPage = `message-tone-new.html?emotion=${selectedEmotion}`;
         logDebug(`Navigating to: ${nextPage}`);
         window.location.href = nextPage;
     } catch (error) {

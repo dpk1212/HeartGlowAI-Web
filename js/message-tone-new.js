@@ -9,6 +9,11 @@ let recipientData = null;
 let intentData = null;
 let selectedEmotion = null;
 let authBypass = false;
+let authStateResolved = false;
+let authStatePromiseResolver = null;
+let authStatePromise = new Promise(resolve => {
+  authStatePromiseResolver = resolve;
+});
 
 // Main initialization function - runs when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initPage);
@@ -327,42 +332,64 @@ function checkAuthentication() {
     const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
         logDebug('Found auth token in localStorage. Assuming authenticated initially.');
-        // Optional: We could try to verify this token or use it,
-        // but for now, just knowing it exists helps bridge the gap.
     }
 
     if (window.firebase && firebase.auth) {
+        logDebug('Setting up onAuthStateChanged listener...');
         firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                logDebug(`User authenticated via listener: ${user.uid}`);
-                
-                // Refresh auth token for next page but don't redirect
-                user.getIdToken(true).then(token => {
-                    localStorage.setItem('authToken', token);
-                    logDebug('Refreshed authentication token in localStorage');
-                }).catch(error => {
-                    logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
-                });
-            } else {
-                logDebug('Auth listener reports no user logged in.');
-                // Clear potentially stale token if listener confirms logged out
-                localStorage.removeItem('authToken'); 
-                if (!authBypass) {
-                    logDebug('Authentication required. Showing debug console with bypass option');
-                    document.getElementById('debug-console').style.display = 'block';
-                    // Consider redirecting to login but don't do it automatically
-                    // showAlert('Authentication required. Please sign in.', 'error'); 
-                    // window.location.href = 'login.html'; // Don't redirect automatically
+            logDebug(`>>> onAuthStateChanged Fired! User: ${user ? user.uid : 'null'}. Already resolved: ${authStateResolved}`);
+            if (!authStateResolved) {
+                 if (user) {
+                    logDebug(`   [Listener] User found directly. Resolving promise with user.`);
+                    // Refresh auth token for next page but don't redirect
+                    user.getIdToken(true).then(token => {
+                        localStorage.setItem('authToken', token);
+                        logDebug('Refreshed authentication token in localStorage');
+                    }).catch(error => {
+                        logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
+                    });
+                    authStatePromiseResolver(user);
+                    authStateResolved = true;
                 } else {
-                     logDebug('Auth bypass enabled.');
+                    logDebug('   [Listener] Initial trigger is NULL. Setting 250ms timeout to check persisted state...');
+                    setTimeout(() => {
+                        logDebug('   [Listener Timeout Check] Timeout finished.');
+                        if (!authStateResolved) {
+                            const currentUserAfterDelay = firebase.auth().currentUser;
+                            logDebug(`   [Listener Timeout Check] State after delay: ${currentUserAfterDelay ? currentUserAfterDelay.uid : 'null'}`);
+                            if (currentUserAfterDelay) {
+                                logDebug('   [Listener Timeout Check] User found after delay. Resolving promise with user.');
+                                authStatePromiseResolver(currentUserAfterDelay);
+                            } else {
+                                logDebug('   [Listener Timeout Check] No user after delay. Clearing token. Resolving promise with null.');
+                                localStorage.removeItem('authToken'); 
+                                authStatePromiseResolver(null);
+                                if (!authBypass) {
+                                    logDebug('   [Listener Timeout Check] Authentication required. Showing debug console.');
+                                    document.getElementById('debug-console').style.display = 'block';
+                                }
+                            }
+                            authStateResolved = true;
+                        } else {
+                            logDebug('   [Listener Timeout Check] Auth state was already resolved before timeout check finished.');
+                        }
+                    }, 250); 
                 }
+            } else {
+                 logDebug('   [Listener] Fired again, but promise was already resolved.');
+                 if (!user) {
+                      logDebug('   [Listener] Subsequent fire reports logged out user. Clearing token.');
+                      localStorage.removeItem('authToken'); 
+                 }
             }
         });
     } else {
-        logDebug('WARNING: Firebase auth not available');
-        if (!storedToken && !authBypass) { // Only show debug if no token and no bypass
+        logDebug('WARNING: Firebase auth not available. Resolving promise with null.');
+        if (!storedToken && !authBypass) { 
              document.getElementById('debug-console').style.display = 'block';
         }
+        authStatePromiseResolver(null);
+        authStateResolved = true;
     }
 }
 
@@ -456,69 +483,61 @@ function validateSelection() {
 /**
  * Save tone data and navigate to message result page
  */
-function saveToneAndNavigate() {
+async function saveToneAndNavigate() {
     logDebug('Attempting to save tone and navigate...');
     try {
+        logDebug('   Waiting for authStatePromise to resolve...');
+        await authStatePromise;
+        logDebug('>>> authStatePromise Resolved. Proceeding with navigation logic.');
+
         // Create tone data object
         const toneData = {
             type: selectedTone
         };
         
-        // Add custom tone details if relevant
         if (selectedTone === 'custom') {
             const customToneInput = document.getElementById('custom-tone');
             if (customToneInput) {
                 toneData.customText = customToneInput.value.trim();
             }
         }
-        
-        // Store in localStorage
         localStorage.setItem('toneData', JSON.stringify(toneData));
-        logDebug('Tone data saved to localStorage.');
-        
-        // Authentication check and token saving BEFORE navigation
+        logDebug('   Tone data saved.');
+
         const currentUser = firebase.auth().currentUser;
-        const storedToken = localStorage.getItem('authToken'); // Check localStorage too
+        const storedToken = localStorage.getItem('authToken');
+        logDebug(`   State post-await: currentUser = ${currentUser ? currentUser.uid : 'null'}, storedToken exists = ${!!storedToken}`);
 
         if (currentUser) {
-            logDebug('User found via firebase.auth().currentUser. Getting auth token before navigating...');
+            logDebug('   Condition: currentUser is valid. Getting fresh token...');
             currentUser.getIdToken(true) // Force refresh token
                 .then(token => {
-                    logDebug('Successfully got fresh auth token.');
+                    logDebug('      Successfully got fresh token post-wait.');
                     localStorage.setItem('authToken', token);
-                    logDebug('Auth token saved to localStorage.');
-                    
-                    // NOW navigate
                     const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-                    logDebug(`Navigating to: ${nextPage}`);
+                    logDebug(`      Navigating to: ${nextPage}`);
                     window.location.href = nextPage;
                 })
                 .catch(error => {
-                    logDebug(`ERROR: Failed to get fresh auth token before navigation: ${error.message}`);
-                    showAlert('Could not verify authentication. Please try again.', 'error');
-                    // Do not navigate if token retrieval fails
+                    logDebug(`      ERROR getting fresh token post-wait: ${error.message}`);
+                    showAlert('Could not verify authentication. Please try refreshing the page.', 'error');
                 });
         } else if (storedToken && !authBypass) {
-            // Fallback: If currentUser is null BUT we have a token from the previous page
-            logDebug('firebase.auth().currentUser is null, but found authToken in localStorage. Proceeding with stored token assumption.');
-            // Navigate directly, assuming the token is valid. The next page will verify.
+            logDebug('   Condition: currentUser is null, but storedToken exists. Navigating with assumption...');
             const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-            logDebug(`Navigating (using stored token assumption) to: ${nextPage}`);
+            logDebug(`      Navigating (using stored token assumption) to: ${nextPage}`);
             window.location.href = nextPage; 
         } else if (authBypass) {
-             logDebug('Auth bypass enabled. Navigating without saving token.');
-             // Navigate without token (as bypass is enabled)
+             logDebug('   Condition: Auth bypass enabled. Navigating...');
              const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-             logDebug(`Navigating (bypass) to: ${nextPage}`);
+             logDebug(`      Navigating (bypass) to: ${nextPage}`);
              window.location.href = nextPage;
         } else {
-            // Error: No currentUser, no storedToken, and no bypass
-            logDebug('ERROR: No authenticated user found (currentUser is null and no stored token). Authentication required.');
-            showAlert('Authentication required. Please ensure you are logged in or try again.', 'error');
-            // Do not navigate
+            logDebug('   Condition: No currentUser, no storedToken, no bypass. Showing error.');
+            showAlert('Authentication required. Please ensure you are logged in or try refreshing.', 'error');
         }
     } catch (error) {
-        logDebug(`ERROR: Failed during saveToneAndNavigate: ${error.message}`);
+        logDebug(`   ERROR during saveToneAndNavigate: ${error.message}`);
         showAlert('There was a problem proceeding to the next step.', 'error');
     }
 }

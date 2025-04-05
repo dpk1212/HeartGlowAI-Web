@@ -115,19 +115,19 @@ function navigateToMessageCreation(emotionType) {
   // Navigate to the appropriate next step based on emotion
   switch(emotionType) {
     case 'vulnerability':
-      window.location.href = 'recipient-selection.html?emotion=vulnerability';
+      window.location.href = 'recipient-selection-new.html?emotion=vulnerability';
       break;
     case 'reconnect':
-      window.location.href = 'recipient-selection.html?emotion=reconnect';
+      window.location.href = 'recipient-selection-new.html?emotion=reconnect';
       break;
     case 'appreciation':
-      window.location.href = 'recipient-selection.html?emotion=appreciation';
+      window.location.href = 'recipient-selection-new.html?emotion=appreciation';
       break;
     case 'explore':
       window.location.href = 'home.html';
       break;
     default:
-      window.location.href = 'recipient-selection.html';
+      window.location.href = 'recipient-selection-new.html';
   }
 }
 

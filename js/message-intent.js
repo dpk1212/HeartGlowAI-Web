@@ -57,7 +57,7 @@ function initializeIntentPage() {
   const backBtn = document.getElementById('back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', function() {
-      window.location.href = 'recipient-selection.html?emotion=' + selectedEmotion;
+      window.location.href = 'recipient-selection-new.html?emotion=' + selectedEmotion;
     });
   }
   

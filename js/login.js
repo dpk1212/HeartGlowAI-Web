@@ -36,7 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
   firebase.auth().onAuthStateChanged(function(user) {
     if (user) {
       console.log('User already logged in:', user.uid);
-      redirectToHome();
+      // Don't automatically redirect on page load
+      // The redirect will happen from the login form submission handlers
+      currentUser = user;
     } else {
       console.log('No user logged in');
     }

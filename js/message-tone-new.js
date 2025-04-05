@@ -327,6 +327,14 @@ function checkAuthentication() {
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
                 logDebug(`User authenticated: ${user.uid}`);
+                
+                // Save auth token for next page
+                user.getIdToken(true).then(token => {
+                    localStorage.setItem('authToken', token);
+                    logDebug('Saved authentication token to localStorage');
+                }).catch(error => {
+                    logDebug(`ERROR: Failed to get auth token: ${error.message}`);
+                });
             } else {
                 logDebug('No user logged in');
                 if (!authBypass) {

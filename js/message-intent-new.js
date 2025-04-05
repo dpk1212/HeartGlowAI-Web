@@ -298,7 +298,7 @@ function checkAuthentication() {
             if (user) {
                 logDebug(`User authenticated: ${user.uid}`);
                 
-                // Save auth token for next pages
+                // Save auth token for next pages but don't redirect
                 user.getIdToken(true).then(token => {
                     localStorage.setItem('authToken', token);
                     logDebug('Saved authentication token to localStorage');
@@ -310,6 +310,9 @@ function checkAuthentication() {
                 if (!authBypass) {
                     logDebug('Authentication check failed, showing debug console with bypass option');
                     document.getElementById('debug-console').style.display = 'block';
+                    
+                    // Optionally redirect to login page if needed
+                    // window.location.href = 'login.html';
                 }
             }
         });

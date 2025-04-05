@@ -5,6 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGlowAI - Who's on your mind?</title>
     
+    <!-- Add favicon as SVG to prevent 404 errors -->
+    <script>
+        // Add favicon
+        const favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.type = 'image/svg+xml';
+        favicon.href = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z' fill='%23ff6b9d'/%3E%3C/svg%3E";
+        document.head.appendChild(favicon);
+    </script>
+    
     <!-- CRITICAL CSS to ensure page loads -->
     <style>
         body {
@@ -189,7 +199,7 @@
 </head>
 <body style="background-color: #121212 !important; color: white !important; visibility: visible !important; display: block !important;">
     <!-- Debug Console -->
-    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+    <div id="debug-console" style="display: block; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
         <div>
             Debug Console: 
             <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
@@ -363,8 +373,22 @@
             }
         });
         
-        // Add debug button
-        document.addEventListener('DOMContentLoaded', function() {
+        // Add debug button and ensure page is displayed immediately
+        window.onload = function() {
+            debugLog('Window onload triggered');
+            
+            // Ensure all content is visible regardless of other scripts
+            document.body.style.display = 'block';
+            document.body.style.visibility = 'visible';
+            
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                mainContainer.style.display = 'block';
+                mainContainer.style.visibility = 'visible';
+                mainContainer.style.opacity = '1';
+                debugLog('Force-showing main container');
+            }
+            
             const debugBtn = document.createElement('button');
             debugBtn.textContent = 'Debug';
             debugBtn.style.position = 'fixed';
@@ -388,7 +412,7 @@
             document.body.appendChild(debugBtn);
             
             // Log initial page load
-            debugLog('Page fully loaded');
+            debugLog('Page fully loaded with window.onload');
             
             // Also log URL parameters
             const urlParams = new URLSearchParams(window.location.search);
@@ -396,25 +420,37 @@
                 debugLog(`URL parameter: ${key} = ${value}`);
             }
             
+            // Show debug console automatically
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+            }
+        };
+        
+        // Also use DOMContentLoaded as a backup
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOMContentLoaded event triggered');
+            
+            // Ensure body is visible
+            document.body.style.display = 'block';
+            document.body.style.visibility = 'visible';
+            
             // Check if main content is visible
             const mainContainer = document.querySelector('main');
             if (mainContainer) {
-                debugLog('Main container found');
+                debugLog('Main container found in DOMContentLoaded');
                 
                 // Force main container to be visible
                 mainContainer.style.display = 'block';
                 mainContainer.style.visibility = 'visible';
                 mainContainer.style.opacity = '1';
             } else {
-                debugLog('ERROR: Main container not found!');
-            }
-            
-            // Show debug console automatically
-            const debugConsole = document.getElementById('debug-console');
-            if (debugConsole) {
-                debugConsole.style.display = 'block';
+                debugLog('ERROR: Main container not found in DOMContentLoaded!');
             }
         });
     </script>
+    
+    <!-- JavaScript -->
+    <script src="js/recipient-selection.js"></script>
 </body>
 </html> 

@@ -468,6 +468,14 @@
                 Loading your message...
             </div>
             
+            <!-- New Insights section -->
+            <div id="insights-container" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                <h3 style="font-size: 16px; color: var(--primary-color); margin-bottom: 10px;">Message Insights</h3>
+                <div id="insights-list" style="font-size: 14px; color: #A0AEC0;">
+                    <!-- Insights will be inserted here -->
+                </div>
+            </div>
+            
             <div class="message-options">
                 <button id="copy-btn" class="option-btn">Copy</button>
                 <button id="share-btn" class="option-btn">Share</button>
@@ -511,7 +519,11 @@
     <!-- Debug console -->
     <div id="debug-console">
         <div id="debug-output"></div>
-        <button id="bypass-auth-btn">Bypass Authentication</button>
+        <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button id="bypass-auth-btn">Bypass Authentication</button>
+            <button id="toggle-dev-mode-btn">Toggle Dev Mode</button>
+            <div id="dev-mode-status" style="color: #AAA; font-size: 12px; margin-left: 10px; line-height: 26px;"></div>
+        </div>
     </div>
 
     <!-- Firebase initialization -->

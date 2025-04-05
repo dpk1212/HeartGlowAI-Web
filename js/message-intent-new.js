@@ -410,6 +410,7 @@ function validateSelection() {
  * Save intent data and navigate to message tone page
  */
 function saveIntentAndNavigate() {
+    logDebug('Attempting to save intent and navigate...');
     try {
         // Create intent data object
         const intentData = {
@@ -426,14 +427,44 @@ function saveIntentAndNavigate() {
         
         // Store in localStorage
         localStorage.setItem('intentData', JSON.stringify(intentData));
+        logDebug('Intent data saved to localStorage.');
         
-        // Navigate to tone selection page
-        const nextPage = `message-tone-new.html?emotion=${selectedEmotion}`;
-        logDebug(`Navigating to: ${nextPage}`);
-        window.location.href = nextPage;
+        // Authentication check and token saving BEFORE navigation
+        const currentUser = firebase.auth().currentUser;
+        
+        if (currentUser) {
+            logDebug('User found. Getting auth token before navigating...');
+            currentUser.getIdToken(true) // Force refresh token
+                .then(token => {
+                    logDebug('Successfully got auth token.');
+                    localStorage.setItem('authToken', token);
+                    logDebug('Auth token saved to localStorage.');
+                    
+                    // NOW navigate
+                    const nextPage = `message-tone-new.html?emotion=${selectedEmotion}`;
+                    logDebug(`Navigating to: ${nextPage}`);
+                    window.location.href = nextPage;
+                })
+                .catch(error => {
+                    logDebug(`ERROR: Failed to get auth token before navigation: ${error.message}`);
+                    showAlert('Could not verify authentication. Please try again.', 'error');
+                    // Do not navigate if token retrieval fails
+                });
+        } else if (authBypass) {
+             logDebug('Auth bypass enabled. Navigating without saving token.');
+             // Navigate without token (as bypass is enabled)
+             const nextPage = `message-tone-new.html?emotion=${selectedEmotion}`;
+             logDebug(`Navigating (bypass) to: ${nextPage}`);
+             window.location.href = nextPage;
+        } else {
+            logDebug('ERROR: No authenticated user found before navigation.');
+            showAlert('Authentication required. Please ensure you are logged in.', 'error');
+            // Do not navigate
+        }
+
     } catch (error) {
-        logDebug(`ERROR: Failed to save intent data: ${error.message}`);
-        showAlert('There was a problem saving your intent selection.', 'error');
+        logDebug(`ERROR: Failed during saveIntentAndNavigate: ${error.message}`);
+        showAlert('There was a problem proceeding to the next step.', 'error');
     }
 }
 

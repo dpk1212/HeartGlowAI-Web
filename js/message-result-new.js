@@ -12,6 +12,13 @@ let generatedMessage = null;
 let selectedAdjustments = [];
 let authBypass = false;
 
+// Auth Promise Setup
+let authStateResolved = false;
+let authStatePromiseResolver = null;
+let authStatePromise = new Promise(resolve => {
+  authStatePromiseResolver = resolve;
+});
+
 // Sample messages for different intents and tones
 const sampleMessages = {
     reconnect: {
@@ -85,12 +92,15 @@ document.addEventListener('DOMContentLoaded', initPage);
 /**
  * Initialize the page - main entry point
  */
-function initPage() {
+async function initPage() {
     console.log('Initializing message result page...');
     
     // Get the emotion from URL parameter
     selectedEmotion = getEmotionFromUrl();
     console.log('Emotion from URL:', selectedEmotion);
+    
+    // Start authentication check early
+    checkAuthentication();
     
     // Load data from localStorage
     loadRecipientData();
@@ -107,22 +117,37 @@ function initPage() {
     // Show debug button
     createDebugButton();
     
-    // Use saved token if available
+    // Wait for authentication to be confirmed before generating
+    logDebug('Waiting for auth state promise...');
+    await authStatePromise;
+    logDebug('Auth state promise resolved.');
+    
+    // Use saved token OR current user to generate
+    const currentUser = firebase.auth().currentUser;
     const savedToken = localStorage.getItem('authToken');
-    if (savedToken) {
-        logDebug('Using saved authentication token');
-        generateMessageWithToken(savedToken);
+    logDebug(`State post-auth-wait: currentUser=${currentUser ? currentUser.uid : 'null'}, savedToken exists=${!!savedToken}`);
+    
+    if (currentUser) {
+        logDebug('Generating message using currentUser...');
+        currentUser.getIdToken(true).then(idToken => {
+            callCloudFunction(idToken);
+        }).catch(error => {
+            logDebug(`ERROR: Failed to get ID token from currentUser: ${error.message}`);
+            showError('Authentication error. Please refresh and try again.');
+        });
+    } else if (savedToken && !authBypass) {
+        logDebug('Generating message using savedToken (currentUser was null)...');
+        callCloudFunction(savedToken); // Use the saved token directly
+    } else if (authBypass) {
+        logDebug('Auth bypass enabled. Generating message without token (will likely fail function security).');
+        callCloudFunction(null); // Or handle bypass appropriately if function allows
     } else {
-        // If no token is found from previous steps, authentication is required.
-        logDebug('ERROR: No auth token found in localStorage. Authentication required.');
-        showError('Authentication required. Please sign in again.'); 
-        // Don't attempt generation or checkAuthentication which might try anonymous auth.
-        // checkAuthentication(); // Remove this
-        // generateMessage(); // Remove this
+        logDebug('ERROR: No authenticated user or saved token found, and no bypass. Cannot generate message.');
+        showError('Authentication required. Please sign in again.');
     }
     
     // Log page loaded
-    logDebug('Page initialized successfully');
+    logDebug('Page initialization completed.');
 }
 
 /**
@@ -216,14 +241,15 @@ function updateRecipientDisplay() {
 }
 
 /**
- * Generate a message based on the selected intent and tone
+ * Simplified: Trigger message generation using the provided token (or null for bypass)
+ * Assumes auth state has been resolved before calling this.
  */
-function generateMessage() {
+function triggerGeneration(idToken) {
     if (!intentData || !toneData || !recipientData) {
         showError('Missing required data to generate message');
         return;
     }
-    
+
     try {
         // Show loading state
         document.getElementById('loading-state').style.display = 'flex';
@@ -231,43 +257,15 @@ function generateMessage() {
         document.getElementById('error-state').style.display = 'none';
         document.getElementById('regenerate-options').style.display = 'none';
         
-        // Check if already authenticated
-        if (firebase.auth().currentUser) {
-            logDebug('User already authenticated, proceeding with message generation');
-            firebase.auth().currentUser.getIdToken(true)
-                .then(idToken => {
-                    callCloudFunction(idToken);
-                })
-                .catch(error => {
-                    logDebug(`ERROR: Failed to get auth token: ${error.message}`);
-                    showError('Authentication error: ' + error.message);
-                });
+        if (idToken || authBypass) {
+             callCloudFunction(idToken);
         } else {
-            // Not authenticated yet, wait for auth state to change
-            logDebug('No user authenticated yet, waiting for authentication change...');
-            
-            // Set up a one-time listener
-            const unsubscribe = firebase.auth().onAuthStateChanged(function(user) {
-                unsubscribe(); // Remove the listener after first call
-                if (user) {
-                    logDebug('User authenticated via listener, now proceeding with message generation');
-                    user.getIdToken(true)
-                        .then(idToken => {
-                            callCloudFunction(idToken);
-                        })
-                        .catch(error => {
-                            logDebug(`ERROR: Failed to get auth token: ${error.message}`);
-                            showError('Authentication error: ' + error.message);
-                        });
-                } else {
-                    // If listener also confirms no user, show error. Do not attempt anonymous sign-in.
-                    logDebug('ERROR: Authentication listener confirmed no user. Cannot generate message.');
-                    showError('Authentication required. Please sign in to generate messages.');
-                }
-            });
+             logDebug('ERROR in triggerGeneration: No token provided and bypass not enabled.');
+             showError('Authentication invalid. Cannot generate message.');
         }
+
     } catch (error) {
-        logDebug(`ERROR: Failed to generate message: ${error.message}`);
+        logDebug(`ERROR: Failed during triggerGeneration: ${error.message}`);
         showError('Could not generate message: ' + error.message);
     }
 }
@@ -284,64 +282,75 @@ function isDevMode() {
  * Call the cloud function to generate a real message
  */
 function callCloudFunction(idToken) {
-    logDebug('Calling cloud function for message generation');
+    logDebug('Attempting to call cloud function for message generation...');
     
-    // First, fetch the API key directly from Firestore
-    const db = firebase.firestore();
+    // Show loading state immediately
+    document.getElementById('loading-state').style.display = 'flex';
+    document.getElementById('message-container').style.display = 'none';
+    document.getElementById('error-state').style.display = 'none';
+    document.getElementById('regenerate-options').style.display = 'none';
+
+    // Firestore check requires Firebase to be initialized
+    if (!firebase || !firebase.firestore) {
+         logDebug('ERROR: Firebase or Firestore not available when trying to call cloud function.');
+         showError('Initialization error. Please refresh.');
+         return;
+    }
+    
+    const db = firebase.firestore(); // Now this should work
     db.collection('secrets').doc('secrets').get()
         .then(doc => {
-            if (!doc.exists) {
-                throw new Error('API key document not found');
-            }
-            
-            const apiKeyData = doc.data();
-            if (!apiKeyData || !apiKeyData.openaikey) {
-                throw new Error('API key not found in document');
-            }
-            
-            logDebug('Successfully retrieved API key from Firestore');
-            
-            // Now proceed with cloud function call, including the API key in payload
-            const cloudFunctionPayload = {
-                scenario: getScenarioFromIntent(intentData.type),
-                relationshipType: recipientData.relationship,
-                tone: toneData.type || 'casual',
-                toneIntensity: getToneIntensity(toneData.type),
-                relationshipDuration: 'unspecified',
-                specialCircumstances: intentData.customText || '',
-                recipientName: recipientData.name,
-                // Directly include the API key in the payload
-                apiKey: apiKeyData.openaikey,
-                // For backward compatibility
-                secretsPath: 'secrets/secrets',
-                secretsKey: 'openaikey',
-                useFallback: true
-            };
-            
-            // Add any selected adjustments as special circumstances
-            if (selectedAdjustments.length > 0) {
-                cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
-            }
-            
-            logDebug('Cloud function payload prepared with API key');
-            
-            // Continue with normal request flow
-            makeRequest(cloudFunctionPayload, idToken);
+             // ... (rest of the API key fetching and payload creation is okay)
+              if (!doc.exists) { throw new Error('API key document not found'); }
+              const apiKeyData = doc.data();
+              if (!apiKeyData || !apiKeyData.openaikey) { throw new Error('API key not found in document'); }
+              logDebug('Successfully retrieved API key from Firestore');
+
+              const cloudFunctionPayload = { /* ... payload construction ... */ 
+                   scenario: getScenarioFromIntent(intentData.type),
+                   relationshipType: recipientData.relationship,
+                   tone: toneData.type || 'casual',
+                   toneIntensity: getToneIntensity(toneData.type),
+                   relationshipDuration: 'unspecified',
+                   specialCircumstances: intentData.customText || '',
+                   recipientName: recipientData.name,
+                   apiKey: apiKeyData.openaikey,
+                   secretsPath: 'secrets/secrets',
+                   secretsKey: 'openaikey',
+                   useFallback: true
+              };
+              if (selectedAdjustments.length > 0) {
+                  cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
+              }
+              logDebug('Cloud function payload prepared with API key');
+              makeRequest(cloudFunctionPayload, idToken); // Pass potentially null idToken
         })
         .catch(error => {
             logDebug(`ERROR: Failed to fetch API key: ${error.message}`);
             showError('Failed to access API key: ' + error.message);
+            // Hide loading on critical failure
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block'; 
         });
 }
 
 /**
  * Make the actual request to the cloud function
  */
-function makeRequest(payload, idToken, retryCount = 0) {
-    logDebug(`Calling cloud function (attempt ${retryCount + 1})`);
+function makeRequest(payload, idToken, retryCount = 0) { // idToken can be null
+    logDebug(`Calling cloud function URL (attempt ${retryCount + 1})`);
     
-    const fetchWithTimeout = (url, options, timeout = 30000) => {
-        return Promise.race([
+    const headers = {
+        'Content-Type': 'application/json'
+    };
+    if (idToken) { // Only add Authorization header if token exists
+        headers['Authorization'] = `Bearer ${idToken}`;
+    } else {
+        logDebug('No ID token provided, calling function without Authorization header (expected for bypass).');
+    }
+    
+    const fetchWithTimeout = (url, options, timeout = 30000) => { /* ... timeout logic ... */ 
+       return Promise.race([
             fetch(url, options),
             new Promise((_, reject) => 
                 setTimeout(() => reject(new Error('Request timed out')), timeout)
@@ -351,56 +360,36 @@ function makeRequest(payload, idToken, retryCount = 0) {
     
     fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${idToken}`
-        },
+        headers: headers,
         body: JSON.stringify(payload)
-    }, 60000) // 60 second timeout for AI-based functions
+    }, 60000)
     .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-        }
-        return response.json();
+        // ... (response handling) ...
+         if (!response.ok) { throw new Error(`HTTP error ${response.status}: ${response.statusText}`); }
+         return response.json();
     })
     .then(data => {
-        if (data.error) {
-            throw new Error(data.error);
-        }
-        
-        // Check if we have a message
-        if (!data.message) {
-            throw new Error('No message received from API');
-        }
-        
-        // Store generated message and insights
-        generatedMessage = data.message;
-        const insights = data.insights || [];
-        
-        // Hide loading, show message
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('message-container').style.display = 'block';
-        document.getElementById('regenerate-options').style.display = 'block';
-        
-        // Update message display
-        document.getElementById('message-content').textContent = data.message;
-        document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
-        document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
-        
-        // Display insights
-        displayInsights(insights);
-        
-        logDebug('Cloud function message generated successfully');
+        // ... (data handling - display message/insights) ...
+         if (data.error) { throw new Error(data.error); }
+         if (!data.message) { throw new Error('No message received from API'); }
+         generatedMessage = data.message;
+         const insights = data.insights || [];
+         document.getElementById('loading-state').style.display = 'none';
+         document.getElementById('message-container').style.display = 'block';
+         document.getElementById('regenerate-options').style.display = 'block';
+         document.getElementById('message-content').textContent = data.message;
+         document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
+         document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
+         displayInsights(insights);
+         logDebug('Cloud function message generated successfully');
     })
     .catch(error => {
+        // ... (error handling with retries) ...
         logDebug(`ERROR: Cloud function call failed: ${error.message}`);
-        
-        // Try again if we haven't exceeded max retries
         if (retryCount < 2) {
             logDebug(`Retrying request (${retryCount + 1}/2)...`);
             setTimeout(() => makeRequest(payload, idToken, retryCount + 1), 2000);
         } else {
-            // If still failing after retries, show error
             document.getElementById('loading-state').style.display = 'none';
             document.getElementById('error-state').style.display = 'block';
             document.getElementById('error-state').querySelector('.error-message').textContent = 
@@ -761,83 +750,57 @@ function createDebugButton() {
 }
 
 /**
- * Generate message using a previously saved token
- */
-function generateMessageWithToken(token) {
-    if (!intentData || !toneData || !recipientData) {
-        showError('Missing required data to generate message');
-        return;
-    }
-    
-    try {
-        // Show loading state
-        document.getElementById('loading-state').style.display = 'flex';
-        document.getElementById('message-container').style.display = 'none';
-        document.getElementById('error-state').style.display = 'none';
-        document.getElementById('regenerate-options').style.display = 'none';
-        
-        logDebug('Generating message with saved token');
-        callCloudFunction(token);
-        
-    } catch (error) {
-        logDebug(`ERROR: Failed to generate message with token: ${error.message}`);
-        showError('Could not generate message: ' + error.message);
-    }
-}
-
-/**
- * Check authentication and save token for future use
+ * Authentication check logic (similar to message-tone-new.js)
  */
 function checkAuthentication() {
-    // First, check if we have a token from a previous step
     const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
-        logDebug('Found auth token in localStorage. Assuming authenticated initially.');
-        // Optional: We could try to verify this token or use it,
-        // but for now, just knowing it exists helps bridge the gap.
+        logDebug('[Result Page] Found auth token in localStorage. Assuming authenticated initially.');
     }
 
     if (window.firebase && firebase.auth) {
+        logDebug('[Result Page] Setting up onAuthStateChanged listener...');
         firebase.auth().onAuthStateChanged(function(user) {
-            if (user) {
-                logDebug(`User authenticated via listener: ${user.uid}`);
-                
-                // Refresh auth token if needed (e.g., for subsequent actions on this page)
-                user.getIdToken(true).then(token => {
-                    localStorage.setItem('authToken', token);
-                    logDebug('Refreshed authentication token in localStorage');
-                }).catch(error => {
-                    logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
-                });
-            } else {
-                logDebug('Auth listener reports no user logged in.');
-                // Clear potentially stale token if listener confirms logged out
-                localStorage.removeItem('authToken'); 
-                if (!authBypass) {
-                    logDebug('Authentication required. Showing debug console with bypass option');
-                    if (document.getElementById('debug-console')) {
-                       document.getElementById('debug-console').style.display = 'block';
-                    }
-                    // Error is handled by initPage if no token was present initially
-                    // showError('Authentication required. Please sign in again.'); 
+            logDebug(`[Result Page] >>> onAuthStateChanged Fired! User: ${user ? user.uid : 'null'}. Already resolved: ${authStateResolved}`);
+            if (!authStateResolved) {
+                 if (user) {
+                    logDebug(`   [Result Listener Initial] User found directly. Resolving promise with user.`);
+                    user.getIdToken(true).then(token => localStorage.setItem('authToken', token)).catch(e => logDebug('Error refreshing token initial', e)); 
+                    authStatePromiseResolver(user);
+                    authStateResolved = true;
                 } else {
-                     logDebug('Auth bypass enabled.');
+                    logDebug('   [Result Listener Initial] Initial trigger is NULL. Setting 250ms timeout...');
+                    setTimeout(() => {
+                        logDebug('   [Result Listener Timeout Check] Timeout finished.');
+                        if (!authStateResolved) {
+                            const currentUserAfterDelay = firebase.auth().currentUser;
+                            logDebug(`   [Result Listener Timeout Check] State after delay: ${currentUserAfterDelay ? currentUserAfterDelay.uid : 'null'}`);
+                            if (currentUserAfterDelay) {
+                                logDebug('   [Result Listener Timeout Check] User found after delay. Resolving promise with user.');
+                                authStatePromiseResolver(currentUserAfterDelay);
+                            } else {
+                                logDebug('   [Result Listener Timeout Check] No user after delay. ***NOT deleting token***. Resolving promise with null.');
+                                authStatePromiseResolver(null);
+                                // Don't show debug console here, initPage handles error display if needed
+                            }
+                            authStateResolved = true;
+                        }
+                    }, 250); 
                 }
+            } else {
+                 logDebug('   [Result Listener Subsequent] Fired again after promise was resolved.');
+                 if (!user) {
+                      logDebug('   [Result Listener Subsequent] Subsequent fire reports logged out user. Clearing token NOW.');
+                      localStorage.removeItem('authToken'); 
+                      // Might need to update UI or show error if user logs out while on this page
+                 }
             }
         });
     } else {
-        logDebug('WARNING: Firebase auth not available');
-        if (!storedToken && !authBypass) { // Only show debug if no token and no bypass
-             if (document.getElementById('debug-console')) {
-                 document.getElementById('debug-console').style.display = 'block';
-             }
-             // Error is handled by initPage if no token was present initially
-             // showError('Authentication required. Please sign in again.');
-        }
+        logDebug('[Result Page] WARNING: Firebase auth not available. Resolving promise with null.');
+        authStatePromiseResolver(null); 
+        authStateResolved = true;
     }
-    
-    // REMOVE automatic anonymous authentication attempt
-    // if (window.firebase && firebase.auth && !firebase.auth().currentUser) { ... } 
 }
 
 /**

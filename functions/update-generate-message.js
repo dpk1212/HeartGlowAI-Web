@@ -34,7 +34,8 @@ exports.generateMessage = functions.https.onRequest((req, res) => {
         userFeedback = '',
         messageToAnalyze = '',
         recipientContext = '',
-        blueprintData = {} 
+        blueprintData = {},
+        apiKey = null // Check if API key is provided in request
       } = req.body;
       
       // Check required fields based on mode
@@ -46,14 +47,38 @@ exports.generateMessage = functions.https.onRequest((req, res) => {
         return;
       }
 
-      // Get OpenAI API key from Firestore secrets collection
-      let apiKey;
-      try {
-        const secretsDoc = await admin.firestore().collection('secrets').doc('openai').get();
-        apiKey = secretsDoc.data().apiKey;
-      } catch (error) {
-        console.error('Error fetching API key:', error);
-        res.status(500).json({ error: 'Failed to access API key' });
+      // Get OpenAI API key - first try from request, then from Firestore
+      let openaiApiKey;
+      
+      // Option 1: Use API key from request if provided
+      if (apiKey) {
+        console.log('Using API key provided in the request');
+        openaiApiKey = apiKey;
+      } else {
+        // Option 2: Get API key from Firestore
+        try {
+          console.log('Fetching API key from Firestore...');
+          const secretsDoc = await admin.firestore().collection('secrets').doc('openai').get();
+          
+          if (!secretsDoc.exists) {
+            throw new Error('API key document not found');
+          }
+          
+          openaiApiKey = secretsDoc.data().apiKey;
+          
+          if (!openaiApiKey) {
+            throw new Error('API key not found in document');
+          }
+        } catch (error) {
+          console.error('Error fetching API key from Firestore:', error);
+          res.status(500).json({ error: 'Failed to access API key' });
+          return;
+        }
+      }
+      
+      if (!openaiApiKey) {
+        console.error('No valid API key found via any method');
+        res.status(500).json({ error: 'No valid API key available' });
         return;
       }
 
@@ -134,7 +159,7 @@ Keep insights concise (1-2 sentences each) but specific to this exact message an
         url: 'https://api.openai.com/v1/chat/completions',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${apiKey}`
+          'Authorization': `Bearer ${openaiApiKey}`
         },
         data: {
           model: model,

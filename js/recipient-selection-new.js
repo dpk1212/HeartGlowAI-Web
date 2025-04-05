@@ -233,29 +233,66 @@ function validateForm() {
 /**
  * Save data and navigate to the next page
  */
-function saveDataAndNavigate() {
+async function saveDataAndNavigate() {
+    logDebug('Attempting to save data and navigate...');
     try {
         const nameInput = document.getElementById('recipient-name');
         const name = nameInput.value.trim();
-        const saveConnection = document.getElementById('save-connection').checked;
+        const saveConnectionCheckbox = document.getElementById('save-connection');
+        const shouldSave = saveConnectionCheckbox ? saveConnectionCheckbox.checked : false;
+        const isSaveDisabled = saveConnectionCheckbox ? saveConnectionCheckbox.disabled : false; // Check if disabled (e.g., by bypass)
         
-        // Prepare recipient data
-        const recipientData = {
+        // Prepare recipient data for localStorage (for next page)
+        const recipientDataForStorage = {
             name: name,
             relationship: selectedRelation,
-            shouldSave: saveConnection
+            // We won't pass shouldSave to the next page via localStorage
         };
+        localStorage.setItem('recipientData', JSON.stringify(recipientDataForStorage));
+        logDebug('Recipient data saved to localStorage for next page.');
+
+        // Save to Firestore if requested and not disabled
+        if (shouldSave && !isSaveDisabled) {
+            logDebug('Save connection checkbox is checked. Attempting to save to Firestore...');
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const connectionData = {
+                    name: name,
+                    relationship: selectedRelation,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp() 
+                    // Add any other fields you want to save for a connection
+                };
+                
+                try {
+                    // Use await here to ensure saving completes (or fails) before navigation attempt
+                    const docRef = await firebase.firestore()
+                        .collection('users')
+                        .doc(user.uid)
+                        .collection('connections')
+                        .add(connectionData);
+                    logDebug(`Connection successfully saved to Firestore with ID: ${docRef.id}`);
+                } catch (error) {
+                    logDebug(`ERROR: Failed to save connection to Firestore: ${error.message}`);
+                    // Decide how to handle save failure - maybe alert user but still navigate?
+                    showAlert('Could not save connection: ' + error.message, 'error'); 
+                    // Don't return here, proceed to navigation anyway
+                }
+            } else {
+                logDebug('WARNING: Cannot save connection because user is not logged in.');
+                // Optionally alert the user they need to be logged in to save
+            }
+        } else {
+             logDebug('Not saving connection to Firestore (checkbox unchecked or disabled).');
+        }
         
-        // Store data for next page
-        localStorage.setItem('recipientData', JSON.stringify(recipientData));
-        
-        // Navigate to next page
+        // Navigate to the next page regardless of save success/failure for now
         const nextPage = `message-intent-new.html?emotion=${urlEmotion}`;
         logDebug(`Navigating to: ${nextPage}`);
         window.location.href = nextPage;
+
     } catch (error) {
-        console.error('Error navigating to next page:', error);
-        logDebug(`ERROR: ${error.message}`);
+        logDebug(`ERROR in saveDataAndNavigate: ${error.message}`);
+        showAlert('An unexpected error occurred.', 'error');
     }
 }
 

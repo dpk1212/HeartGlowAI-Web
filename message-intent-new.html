@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HeartGlowAI - What's at the heart of your message?</title>
+    
+    <!-- Essential CSS - directly embedded to avoid external dependencies -->
+    <style>
+        /* Core styles */
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        /* Header styles */
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-heart {
+            margin-right: 10px;
+            font-size: 24px;
+        }
+        
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        
+        .nav-bar {
+            display: flex;
+        }
+        
+        .nav-button {
+            background: none;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+        
+        .nav-button:hover {
+            opacity: 1;
+        }
+        
+        /* Main content styles */
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ff6b9d;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+        
+        /* Step indicator */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .step-dot {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
+        }
+        
+        .step-dot.active {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            width: 60px;
+        }
+        
+        /* Form elements */
+        .input-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        /* Recipient display */
+        .recipient-display {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 15px;
+        }
+        
+        .recipient-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            margin-right: 15px;
+        }
+        
+        .recipient-info {
+            flex: 1;
+        }
+        
+        .recipient-name {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .recipient-relationship {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Intent options */
+        .intent-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .intent-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .intent-option:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        
+        .intent-option.selected {
+            background: rgba(255, 107, 157, 0.15);
+            border: 2px solid #ff6b9d;
+        }
+        
+        .intent-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .intent-title i {
+            margin-right: 10px;
+            color: #ff6b9d;
+        }
+        
+        .intent-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin: 0;
+        }
+        
+        /* Custom intent input */
+        .custom-intent-form {
+            display: none;
+            margin-top: 15px;
+        }
+        
+        .custom-intent-form.active {
+            display: block;
+        }
+        
+        .custom-intent-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 16px;
+            color: white;
+            box-sizing: border-box;
+        }
+        
+        /* Buttons */
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn i {
+            margin: 0 8px;
+        }
+        
+        .btn-back {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .btn-next {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            color: white;
+        }
+        
+        .btn-next:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Utility classes */
+        .hidden {
+            display: none !important;
+        }
+        
+        /* Debug console */
+        #debug-console {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.8);
+            color: #0f0;
+            padding: 10px;
+            max-height: 200px;
+            overflow: auto;
+            font-family: monospace;
+            z-index: 9999;
+            display: none;
+        }
+        
+        /* Alert styles */
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            padding: 15px 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            opacity: 0;
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            max-width: 90%;
+            width: 400px;
+        }
+        
+        .alert.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        .alert-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .alert-message {
+            color: white;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .alert-close {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        
+        .alert-info {
+            border-left: 4px solid #64d2ff;
+        }
+        
+        .alert-error {
+            border-left: 4px solid #ff4d4d;
+        }
+        
+        .alert-success {
+            border-left: 4px solid #4caf50;
+        }
+    </style>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <!-- Debug Console -->
+    <div id="debug-console">
+        <div>
+            Debug Console: 
+            <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+            <button id="bypass-auth-btn">Continue Without Login</button>
+        </div>
+        <div id="debug-output"></div>
+    </div>
+    
+    <!-- Header and Navigation -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-heart">❤️</div>
+            <div class="logo-text">HeartGlowAI</div>
+        </div>
+        <nav class="nav-bar">
+            <button id="dashboard-btn" class="nav-button">
+                <i class="fas fa-columns"></i> Dashboard
+            </button>
+            <button id="history-btn" class="nav-button">
+                <i class="fas fa-history"></i> History
+            </button>
+            <button id="learn-btn" class="nav-button">
+                <i class="fas fa-brain"></i> Learn
+            </button>
+            <button id="logout-btn" class="nav-button">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+        </div>
+        
+        <h1 class="page-title">What's at the heart of your message?</h1>
+        <p class="page-subtitle">Identifying the purpose helps us craft a message that achieves your goal.</p>
+        
+        <!-- Recipient Display -->
+        <div class="recipient-display">
+            <div class="recipient-avatar" id="recipient-avatar">
+                ?
+            </div>
+            <div class="recipient-info">
+                <div class="recipient-name" id="recipient-name-display">Loading recipient...</div>
+                <div class="recipient-relationship" id="recipient-relationship-display">Preparing...</div>
+            </div>
+        </div>
+        
+        <!-- Intent Options -->
+        <div class="intent-options">
+            <div class="intent-option" data-intent="reconnect">
+                <div class="intent-title">
+                    <i class="fas fa-sync-alt"></i> Reconnect
+                </div>
+                <p class="intent-description">Reach out after time apart and reestablish your connection</p>
+            </div>
+            
+            <div class="intent-option" data-intent="appreciate">
+                <div class="intent-title">
+                    <i class="fas fa-heart"></i> Appreciation
+                </div>
+                <p class="intent-description">Express gratitude and acknowledge their positive impact</p>
+            </div>
+            
+            <div class="intent-option" data-intent="apologize">
+                <div class="intent-title">
+                    <i class="fas fa-hands"></i> Apologize
+                </div>
+                <p class="intent-description">Say sorry and make amends for a mistake or misunderstanding</p>
+            </div>
+            
+            <div class="intent-option" data-intent="celebrate">
+                <div class="intent-title">
+                    <i class="fas fa-gift"></i> Celebrate
+                </div>
+                <p class="intent-description">Mark a special occasion, achievement, or milestone</p>
+            </div>
+            
+            <div class="intent-option" data-intent="encourage">
+                <div class="intent-title">
+                    <i class="fas fa-bolt"></i> Encourage
+                </div>
+                <p class="intent-description">Offer support, motivation, or a confidence boost</p>
+            </div>
+            
+            <div class="intent-option" data-intent="invite">
+                <div class="intent-title">
+                    <i class="fas fa-calendar-alt"></i> Invite
+                </div>
+                <p class="intent-description">Ask them to join you for an activity, event, or meeting</p>
+            </div>
+            
+            <div class="intent-option" data-intent="custom">
+                <div class="intent-title">
+                    <i class="fas fa-pencil-alt"></i> Custom
+                </div>
+                <p class="intent-description">Something else not listed here</p>
+            </div>
+        </div>
+        
+        <!-- Custom Intent Form -->
+        <div id="custom-intent-form" class="custom-intent-form">
+            <textarea id="custom-intent" class="custom-intent-input" placeholder="Briefly describe what you want to express..." rows="3"></textarea>
+        </div>
+        
+        <!-- Error message container -->
+        <div id="error-message" class="input-container hidden" style="background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.2);">
+            <p style="margin: 0; color: #ff6666;">Please select an intent before continuing.</p>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="button-container">
+            <button id="back-btn" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button id="next-btn" class="btn btn-next" disabled>
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </main>
+    
+    <!-- Simple Firebase initialization -->
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+          apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+          authDomain: "heartglowai.firebaseapp.com",
+          projectId: "heartglowai",
+          storageBucket: "heartglowai.firebasestorage.app",
+          messagingSenderId: "196565711798",
+          appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+          measurementId: "G-KJMPL1DNPY"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+    
+    <!-- JavaScript -->
+    <script src="js/message-intent-new.js"></script>
+</body>
+</html> 

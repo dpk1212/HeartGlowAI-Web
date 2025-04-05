@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Message - HeartGlow AI</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        :root {
+            --primary-color: #D53F8C;
+            --secondary-color: #805AD5;
+            --background-dark: #1A202C;
+            --text-color: #E2E8F0;
+            --container-bg: #2D3748;
+            --selected-bg: rgba(213, 63, 140, 0.3);
+            --error-color: #F56565;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 80px;
+            height: 4px;
+            background-color: #4A5568;
+            margin: 0 5px;
+            border-radius: 2px;
+        }
+
+        .step.active {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .recipient-display {
+            display: flex;
+            align-items: center;
+            background-color: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .recipient-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .recipient-info {
+            flex-grow: 1;
+        }
+
+        .recipient-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .recipient-relationship {
+            font-size: 14px;
+            color: #A0AEC0;
+        }
+
+        .message-container {
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .message-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #A0AEC0;
+        }
+
+        .message-content {
+            font-size: 18px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            margin-bottom: 20px;
+        }
+
+        .message-options {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .option-btn {
+            padding: 8px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            color: var(--text-color);
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .option-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .option-btn.primary:hover {
+            background-color: #C53080;
+        }
+
+        .regenerate-options {
+            margin-top: 30px;
+            background-color: var(--container-bg);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        .option-heading {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .option-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .adjustment-option {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .adjustment-option:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .adjustment-option.selected {
+            background-color: var(--selected-bg);
+            border: 1px solid var(--primary-color);
+        }
+
+        .regenerate-btn {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.2s;
+        }
+
+        .regenerate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .back-btn, .next-btn {
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .next-btn {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+        }
+
+        .next-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .loading-icon {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-display {
+            background-color: rgba(245, 101, 101, 0.2);
+            border: 1px solid var(--error-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .error-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--error-color);
+            margin-bottom: 10px;
+        }
+
+        .error-message {
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .retry-btn {
+            padding: 8px 16px;
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Debug Console */
+        #debug-console {
+            position: fixed;
+            bottom: 40px;
+            right: 10px;
+            width: 300px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 10px;
+            display: none;
+            z-index: 9999;
+        }
+
+        #debug-output {
+            height: 140px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            color: #DDD;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        #bypass-auth-btn {
+            background-color: #F56565;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Alert styles */
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 9999;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-out;
+            width: 300px;
+        }
+
+        .alert.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .alert-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-message {
+            flex-grow: 1;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .alert-info {
+            background-color: #4299E1;
+            color: white;
+        }
+
+        .alert-error {
+            background-color: #F56565;
+            color: white;
+        }
+
+        .alert-success {
+            background-color: #48BB78;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with navigation -->
+        <div class="header">
+            <div class="nav-buttons">
+                <button id="dashboard-btn" class="nav-btn">Dashboard</button>
+                <button id="history-btn" class="nav-btn">History</button>
+                <button id="learn-btn" class="nav-btn">Learn</button>
+            </div>
+            <button id="logout-btn" class="nav-btn">Logout</button>
+        </div>
+
+        <!-- Steps indicator -->
+        <div class="steps-indicator">
+            <div class="step active"></div>
+            <div class="step active"></div>
+            <div class="step active"></div>
+            <div class="step active"></div>
+        </div>
+
+        <!-- Page title and subtitle -->
+        <h1 class="page-title">Your Message</h1>
+        <p class="subtitle">Customized based on your selected intent and tone.</p>
+
+        <!-- Recipient display -->
+        <div class="recipient-display">
+            <div id="recipient-avatar" class="recipient-avatar">K</div>
+            <div class="recipient-info">
+                <div id="recipient-name-display" class="recipient-name">Recipient Name</div>
+                <div id="recipient-relationship-display" class="recipient-relationship">Relationship</div>
+            </div>
+        </div>
+
+        <!-- Loading state -->
+        <div id="loading-state" class="loading">
+            <div class="loading-icon"></div>
+            <p>Crafting your message...</p>
+            <p>This might take a few seconds</p>
+        </div>
+
+        <!-- Error state -->
+        <div id="error-state" class="error-display" style="display: none;">
+            <div class="error-title">Oops! Something went wrong</div>
+            <p class="error-message">We couldn't generate your message at this time. Please try again.</p>
+            <button id="retry-btn" class="retry-btn">Try Again</button>
+        </div>
+
+        <!-- Message display -->
+        <div id="message-container" class="message-container" style="display: none;">
+            <div class="message-meta">
+                <div id="intent-display">Intent: Reconnect</div>
+                <div id="tone-display">Tone: Warm</div>
+            </div>
+            <div id="message-content" class="message-content">
+                Loading your message...
+            </div>
+            
+            <div class="message-options">
+                <button id="copy-btn" class="option-btn">Copy</button>
+                <button id="share-btn" class="option-btn">Share</button>
+                <button id="save-btn" class="option-btn primary">Save to History</button>
+            </div>
+        </div>
+
+        <!-- Regeneration options -->
+        <div id="regenerate-options" class="regenerate-options" style="display: none;">
+            <div class="option-heading">Make Adjustments</div>
+            <div class="option-grid">
+                <div class="adjustment-option" data-adjust="longer">
+                    <div>Make it longer</div>
+                </div>
+                <div class="adjustment-option" data-adjust="shorter">
+                    <div>Make it shorter</div>
+                </div>
+                <div class="adjustment-option" data-adjust="casual">
+                    <div>More casual</div>
+                </div>
+                <div class="adjustment-option" data-adjust="formal">
+                    <div>More formal</div>
+                </div>
+                <div class="adjustment-option" data-adjust="emotional">
+                    <div>More emotional</div>
+                </div>
+                <div class="adjustment-option" data-adjust="clear">
+                    <div>More straightforward</div>
+                </div>
+            </div>
+            <button id="regenerate-btn" class="regenerate-btn">Regenerate Message</button>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="navigation-buttons">
+            <button id="back-btn" class="back-btn">← Back</button>
+            <button id="next-btn" class="next-btn">Done</button>
+        </div>
+    </div>
+
+    <!-- Debug console -->
+    <div id="debug-console">
+        <div id="debug-output"></div>
+        <button id="bypass-auth-btn">Bypass Authentication</button>
+    </div>
+
+    <!-- Firebase initialization -->
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyC5nsHY3Nv8yYSM_LqMGnkPPi4AXpJvYO0",
+            authDomain: "connectly-a64ee.firebaseapp.com",
+            projectId: "connectly-a64ee",
+            storageBucket: "connectly-a64ee.appspot.com",
+            messagingSenderId: "1007000171311",
+            appId: "1:1007000171311:web:0a1d000c0bc0bfc7baa5a1"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+    <script src="js/message-result-new.js"></script>
+</body>
+</html> 

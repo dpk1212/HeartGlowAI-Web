@@ -70,20 +70,11 @@ function initializeHomePage() {
     const addConnectionBtn = document.getElementById('add-connection-btn');
     if (addConnectionBtn) {
       addConnectionBtn.addEventListener('click', function() {
+        console.log('Add connection button clicked');
         openConnectionModal();
       });
     } else {
       console.warn('Add connection button not found');
-    }
-    
-    // Initialize add person button at bottom of Your People section
-    const addPersonBtn = document.getElementById('add-person-btn');
-    if (addPersonBtn) {
-      addPersonBtn.addEventListener('click', function() {
-        openConnectionModal();
-      });
-    } else {
-      console.warn('Add person button not found');
     }
     
     // Initialize create message button
@@ -257,6 +248,8 @@ function initializeConnectionModal() {
 
 // Open connection modal for adding new connection
 function openConnectionModal(connectionId = null) {
+  console.log('Opening connection modal', connectionId ? `for editing connection: ${connectionId}` : 'for adding new connection');
+  
   const modal = document.getElementById('connection-modal');
   const modalTitle = document.getElementById('modal-title');
   const form = document.getElementById('connection-form');
@@ -265,8 +258,13 @@ function openConnectionModal(connectionId = null) {
   const relationshipField = document.getElementById('connection-relationship');
   const deleteBtn = document.querySelector('.delete-connection-btn');
   
-  if (!modal || !form) {
-    console.error('Connection modal elements not found');
+  if (!modal) {
+    console.error('Connection modal not found');
+    return;
+  }
+  
+  if (!form) {
+    console.error('Connection form not found');
     return;
   }
   
@@ -290,6 +288,9 @@ function openConnectionModal(connectionId = null) {
         deleteButton.textContent = 'Delete';
         deleteButton.addEventListener('click', deleteConnection);
         actionDiv.appendChild(deleteButton);
+        console.log('Added delete button to modal');
+      } else {
+        console.warn('Modal actions div not found');
       }
     } else {
       deleteBtn.style.display = 'inline-block';
@@ -305,6 +306,7 @@ function openConnectionModal(connectionId = null) {
       .then((doc) => {
         if (doc.exists) {
           const data = doc.data();
+          console.log('Loaded connection data:', data);
           nameField.value = data.name || '';
           relationshipField.value = data.relationship || '';
         } else {
@@ -331,6 +333,7 @@ function openConnectionModal(connectionId = null) {
   
   // Show modal
   modal.style.display = 'flex';
+  console.log('Modal should now be visible');
 }
 
 // Close connection modal
@@ -344,7 +347,10 @@ function closeConnectionModal() {
 
 // Save connection to Firestore
 function saveConnection() {
+  console.log('Attempting to save connection');
+  
   if (!currentUser) {
+    console.error('No current user for saving connection');
     showAlert('You must be logged in to save connections', 'error');
     return;
   }
@@ -353,13 +359,20 @@ function saveConnection() {
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
   
-  if (!nameField || !relationshipField) {
-    console.error('Form fields not found');
+  if (!nameField) {
+    console.error('Name field not found');
+    return;
+  }
+  
+  if (!relationshipField) {
+    console.error('Relationship field not found');
     return;
   }
   
   const name = nameField.value.trim();
   const relationship = relationshipField.value;
+  
+  console.log('Form data:', { name, relationship });
   
   if (!name) {
     showAlert('Please enter a name', 'error');
@@ -387,6 +400,8 @@ function saveConnection() {
   const connectionId = editingConnectionId || idField.value;
   const isNewConnection = !connectionId;
   
+  console.log(`Saving ${isNewConnection ? 'new' : 'existing'} connection:`, connectionData);
+  
   // Reference to the connections collection
   const connectionsRef = firebase.firestore()
     .collection('users')
@@ -396,21 +411,27 @@ function saveConnection() {
   // Save to Firestore
   let savePromise;
   if (isNewConnection) {
+    console.log('Adding new connection to Firestore');
     savePromise = connectionsRef.add(connectionData);
   } else {
+    console.log(`Updating existing connection: ${connectionId}`);
     savePromise = connectionsRef.doc(connectionId).update(connectionData);
   }
   
   savePromise
-    .then(() => {
+    .then((result) => {
+      console.log(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, result);
       hideLoading();
       showAlert(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
       closeConnectionModal();
-      loadUserConnections(); // Refresh the list
+      // Wait a moment before refreshing the list
+      setTimeout(() => {
+        loadUserConnections(); // Refresh the list
+      }, 500);
     })
     .catch((error) => {
+      console.error(`Error ${isNewConnection ? 'adding' : 'updating'} connection:`, error);
       hideLoading();
-      console.error('Error saving connection:', error);
       showAlert(`Error saving connection: ${error.message}`, 'error');
     });
 }
@@ -472,7 +493,7 @@ function displayEmptyStates(type) {
           <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
           <div class="empty-title">No people added yet</div>
           <div class="empty-description">Add important people in your life to stay connected</div>
-          <button id="empty-add-connection-btn" class="empty-action">
+          <button id="empty-add-connection-btn" class="create-btn" style="margin: 20px auto; display: block;">
             <i class="fas fa-plus-circle"></i> Add a Person
           </button>
         </li>
@@ -480,7 +501,12 @@ function displayEmptyStates(type) {
       // Add listener for the new button
       const emptyAddBtn = document.getElementById('empty-add-connection-btn');
       if (emptyAddBtn) {
-          emptyAddBtn.addEventListener('click', openConnectionModal);
+          emptyAddBtn.addEventListener('click', function() {
+            console.log('Empty state add person button clicked');
+            openConnectionModal();
+          });
+      } else {
+        console.warn('Empty add connection button not found');
       }
     }
   } else if (type === 'messages') {
@@ -572,7 +598,6 @@ function loadUserConnections() {
   }
   
   const connectionsList = document.getElementById('connections-list');
-  const emptyStateBottom = document.querySelector('.empty-state-bottom');
   
   if (!connectionsList) {
     console.warn('Connections list element not found');
@@ -602,17 +627,7 @@ function loadUserConnections() {
           if (querySnapshot.empty) {
             console.debug('Snapshot was empty, displaying empty state for connections.'); // Use console.debug
             displayEmptyStates('connections');
-            
-            // Show the bottom add person button when list is empty
-            if (emptyStateBottom) {
-              emptyStateBottom.style.display = 'block';
-            }
             return;
-          }
-          
-          // Hide the bottom add person button when connections exist
-          if (emptyStateBottom) {
-            emptyStateBottom.style.display = 'none';
           }
           
           const connections = [];

@@ -308,48 +308,47 @@ function showRemindersError(errorMessage) {
 function loadUserConnections() {
   if (!currentUser) {
     console.warn('No current user for loading connections');
-    showConnectionsError('User not authenticated.'); // Show error if no user
+    showConnectionsError('User not authenticated.');
     return;
   }
   
   const connectionsList = document.getElementById('connections-list');
   if (!connectionsList) {
     console.warn('Connections list element not found');
-    return; // Should not happen, but exit gracefully
+    return;
   }
   
-  // Show loading state
-  connectionsList.innerHTML = `
-    <li class="loading-state">
-      <span class="loading-spinner"></span> Loading your connections...
-    </li>
-  `;
+  connectionsList.innerHTML = `<li class="loading-state"><span class="loading-spinner"></span> Loading your connections...</li>`;
+  
+  const userId = currentUser.uid;
+  logDebug(`Attempting to load connections for user: ${userId}`); // Log User ID
   
   try {
-    console.log('Loading user connections...');
     firebase.firestore()
       .collection('users')
-      .doc(currentUser.uid)
+      .doc(userId)
       .collection('connections')
-      .limit(20) // Fetch a bit more to sort
+      .limit(20)
       .get()
       .then((querySnapshot) => {
+        logDebug(`Firestore connections query successful. Snapshot empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`); // Log Snapshot details
+        querySnapshot.forEach(doc => { // Log each document found
+            logDebug(`  Found connection doc: ${doc.id}, Data: ${JSON.stringify(doc.data())}`);
+        });
+
         try {
-          // Clear loading indicator
           connectionsList.innerHTML = '';
-          
           if (querySnapshot.empty) {
+            logDebug('Snapshot was empty, displaying empty state for connections.');
             displayEmptyStates('connections');
             return;
           }
           
-          // Process and sort connections client-side
           const connections = [];
           querySnapshot.forEach((doc) => {
             connections.push({ id: doc.id, data: doc.data() });
           });
           
-          // Sort by name (case-insensitive)
           connections.sort((a, b) => {
             const nameA = a.data.name ? a.data.name.toLowerCase() : '';
             const nameB = b.data.name ? b.data.name.toLowerCase() : '';
@@ -358,12 +357,9 @@ function loadUserConnections() {
             return 0;
           });
           
-          // Limit to 10 after sorting
           const connectionsToDisplay = connections.slice(0, 10);
 
-          // Add connections to the list
           connectionsToDisplay.forEach(({ id, data: connectionData }) => {
-            // Add checks for potentially missing data
             const name = connectionData.name || 'Unknown Connection';
             const relationship = connectionData.relationship || 'Contact';
             
@@ -389,12 +385,8 @@ function loadUserConnections() {
                 </div>
               </div>
               <div class="connection-actions">
-                <div class="connection-action send-message" title="Send Message">
-                  <i class="fas fa-paper-plane"></i>
-                </div>
-                <div class="connection-action view-history" title="View History">
-                  <i class="fas fa-history"></i>
-                </div>
+                <div class="connection-action send-message" title="Send Message"><i class="fas fa-paper-plane"></i></div>
+                <div class="connection-action view-history" title="View History"><i class="fas fa-history"></i></div>
               </div>
             `;
             connectionItem.setAttribute('data-id', id);
@@ -425,14 +417,16 @@ function loadUserConnections() {
             connectionsList.appendChild(connectionItem);
           });
           
-          console.log('Connections loaded and sorted successfully');
+          logDebug('Connections loaded and rendered successfully');
         } catch(processingError) {
+          logDebug(`Error processing connections snapshot: ${processingError.message}`);
           console.error('Error processing connections data:', processingError);
           showConnectionsError('Failed to display connections: ' + processingError.message);
         }
       })
       .catch((error) => {
-        console.error('Error loading connections query:', error); // Changed log message
+        logDebug(`Firestore query for connections failed: ${error.message}. Code: ${error.code}`); // Log error code
+        console.error('Error loading connections query:', error);
         showConnectionsError(error.message);
         if (typeof debugLog === 'function') {
           debugLog('Error loading connections query: ' + error.message);
@@ -440,7 +434,8 @@ function loadUserConnections() {
         }
       });
   } catch (error) {
-    console.error('Exception in loadUserConnections setup:', error); // Changed log message
+    logDebug(`Exception caught during loadUserConnections setup: ${error.message}`);
+    console.error('Exception in loadUserConnections setup:', error);
     showConnectionsError(error.message);
     if (typeof debugLog === 'function') {
       debugLog('Exception in loadUserConnections setup: ' + error.message);

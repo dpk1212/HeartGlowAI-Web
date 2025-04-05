@@ -203,6 +203,7 @@
         <div>
             Debug Console: 
             <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+            <button id="bypass-auth-btn" style="background: #ff6b9d; color: white; border: none; padding: 5px 10px; border-radius: 4px; margin-left: 10px; cursor: pointer;">Continue Without Login</button>
         </div>
         <div id="debug-output"></div>
     </div>
@@ -350,8 +351,6 @@
         <div class="particle"></div>
     </div>
 
-    <script src="js/recipient-selection.js"></script>
-    
     <script>
         // Debug logging function
         function debugLog(message) {
@@ -370,6 +369,31 @@
             if (debugConsole) {
                 debugConsole.style.display = 'block';
                 debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+            }
+        });
+        
+        // Initialize bypass auth button
+        document.addEventListener('DOMContentLoaded', function() {
+            const bypassAuthBtn = document.getElementById('bypass-auth-btn');
+            if (bypassAuthBtn) {
+                bypassAuthBtn.addEventListener('click', function() {
+                    debugLog('🔓 AUTH BYPASS ACTIVATED - continuing without authentication');
+                    // Force main form to be visible
+                    const newConnectionForm = document.getElementById('new-connection-form');
+                    if (newConnectionForm) {
+                        newConnectionForm.style.display = 'block';
+                    }
+                    
+                    // Disable connection saving features
+                    const saveConnectionOption = document.getElementById('save-connection');
+                    if (saveConnectionOption) {
+                        saveConnectionOption.disabled = true;
+                        saveConnectionOption.parentElement.parentElement.style.opacity = '0.5';
+                    }
+                    
+                    document.getElementById('debug-output').innerHTML += 
+                        '<div style="color:magenta">🚀 BYPASS ACTIVATED: Login skipped. You can continue using the form.</div>';
+                });
             }
         });
         

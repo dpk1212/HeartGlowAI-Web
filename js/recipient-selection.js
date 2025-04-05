@@ -20,99 +20,151 @@ function debugInPage(message) {
   }
 }
 
-// Initialize app on page load - using both event handlers to ensure it runs
-function initApp() {
-  debugInPage('Recipient selection script starting...');
+// Simplified initApp function - runs immediately and focuses on core functionality
+(function() {
+  console.log('DIRECT EXECUTION: Forcing recipient-selection.js to run');
   
   try {
-    // Get the selected emotion from URL params or localStorage
+    // Get the selected emotion from URL params
     const urlParams = new URLSearchParams(window.location.search);
-    selectedEmotion = urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
-    debugInPage('Selected emotion: ' + selectedEmotion);
+    const emotion = urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
+    console.log('Selected emotion:', emotion);
     
-    // Initialize UI components regardless of auth status
-    debugInPage('Initializing UI components...');
-    initializeRelationshipSelection();
-    initializeSaveOptions();
-    initNavigationButtons();
+    // Force UI to display
+    document.body.style.display = 'block';
+    document.body.style.visibility = 'visible';
     
-    // Initialize the selection page for basic functionality
-    initializeSelectionPage();
-    
-    // Force display of the main form container
-    const newConnectionForm = document.getElementById('new-connection-form');
-    if (newConnectionForm) {
-      newConnectionForm.style.display = 'block';
-      debugInPage('Forced new connection form to display');
-    }
-    
-    // Check authentication status - but don't block the page on it
-    if (window.firebase && firebase.auth) {
-      debugInPage('Firebase auth found, checking login status...');
-      
-      // Set a timeout to prevent hanging on auth
-      const authTimeout = setTimeout(() => {
-        debugInPage('AUTH TIMEOUT - proceeding without waiting for Firebase');
-        document.getElementById('debug-output').innerHTML += '<div style="color:orange">⚠️ Auth timed out - continuing anyway</div>';
-      }, 3000);
-      
-      firebase.auth().onAuthStateChanged(function(user) {
-        clearTimeout(authTimeout);
-        
-        if (user) {
-          debugInPage('User authenticated: ' + user.uid);
-          currentUser = user;
-          
-          // Try to load user connections, but don't block if it fails
-          try {
-            loadUserConnections();
-          } catch (error) {
-            debugInPage('Error loading connections: ' + error.message);
-          }
-        } else {
-          debugInPage('No user logged in, continuing in guest mode');
-          document.getElementById('debug-output').innerHTML += '<div style="color:yellow">ℹ️ Not logged in - running in limited mode</div>';
-          
-          // Hide save options that require authentication
-          const saveConnectionOption = document.getElementById('save-connection');
-          if (saveConnectionOption) {
-            saveConnectionOption.disabled = true;
-            saveConnectionOption.parentElement.parentElement.style.opacity = '0.5';
-          }
-        }
-      });
-    } else {
-      debugInPage('Firebase auth not available - continuing in offline mode');
-      document.getElementById('debug-output').innerHTML += '<div style="color:orange">⚠️ Firebase not initialized - continuing without authentication</div>';
-    }
-  } catch (error) {
-    debugInPage('INITIALIZATION ERROR: ' + error.message);
-    console.error('App init error:', error);
-    
-    // Even if there's an error, try to make the form usable
-    const newConnectionForm = document.getElementById('new-connection-form');
-    if (newConnectionForm) {
-      newConnectionForm.style.display = 'block';
-    }
+    // Initialize form elements
+    initBasicFunctionality(emotion);
+  } catch (e) {
+    console.error('Critical initialization error:', e);
   }
+})();
+
+// Core functionality without Firebase dependency
+function initBasicFunctionality(emotion) {
+  console.log('Initializing basic functionality...');
+  
+  // Store emotion for later use
+  window.selectedEmotion = emotion;
+  
+  // Initialize relationship selection
+  initRelationshipSelection();
+  
+  // Set up buttons
+  const backButton = document.getElementById('back-btn');
+  if (backButton) {
+    backButton.addEventListener('click', function() {
+      window.location.href = 'emotional-entry.html';
+    });
+  }
+  
+  const nextButton = document.getElementById('next-btn');
+  if (nextButton) {
+    nextButton.addEventListener('click', function() {
+      if (validateForm()) {
+        proceedToNextPage();
+      }
+    });
+  }
+  
+  // Navigation buttons
+  const dashboardBtn = document.getElementById('dashboard-btn');
+  if (dashboardBtn) {
+    dashboardBtn.addEventListener('click', function() {
+      window.location.href = 'home.html';
+    });
+  }
+  
+  const historyBtn = document.getElementById('history-btn');
+  if (historyBtn) {
+    historyBtn.addEventListener('click', function() {
+      window.location.href = 'history.html';
+    });
+  }
+  
+  const learnBtn = document.getElementById('learn-btn');
+  if (learnBtn) {
+    learnBtn.addEventListener('click', function() {
+      window.location.href = 'learn.html';
+    });
+  }
+  
+  console.log('Basic functionality initialized successfully');
 }
 
-// Run initialization using both event handlers to ensure it runs
-window.addEventListener('load', function() {
-  debugInPage('Window load event received');
-  initApp();
-});
+// Initialize relationship type selection
+function initRelationshipSelection() {
+  const relationshipTypes = document.querySelectorAll('.relationship-type');
+  if (!relationshipTypes.length) {
+    console.error('Relationship type elements not found');
+    return;
+  }
+  
+  relationshipTypes.forEach(type => {
+    type.addEventListener('click', function() {
+      // Remove selected class from all types
+      relationshipTypes.forEach(t => t.classList.remove('selected'));
+      
+      // Add selected class to clicked type
+      this.classList.add('selected');
+      
+      // Save selected relation
+      window.selectedRelation = this.getAttribute('data-relation');
+      console.log('Selected relationship:', window.selectedRelation);
+    });
+  });
+  
+  console.log('Relationship selection initialized with', relationshipTypes.length, 'options');
+}
 
-document.addEventListener('DOMContentLoaded', function() {
-  debugInPage('DOMContentLoaded event received');
-  initApp();
-});
+// Basic form validation
+function validateForm() {
+  const nameInput = document.getElementById('recipient-name');
+  if (!nameInput) {
+    console.error('Recipient name input not found');
+    return false;
+  }
+  
+  const name = nameInput.value.trim();
+  if (!name) {
+    alert('Please enter a name for your recipient.');
+    nameInput.focus();
+    return false;
+  }
+  
+  if (!window.selectedRelation) {
+    alert('Please select your relationship with this person.');
+    return false;
+  }
+  
+  return true;
+}
 
-// Force init after a short delay as a fallback
-setTimeout(function() {
-  debugInPage('Timeout initialization triggered');
-  initApp();
-}, 1000);
+// Navigate to next page with recipient data
+function proceedToNextPage() {
+  try {
+    const nameInput = document.getElementById('recipient-name');
+    const name = nameInput.value.trim();
+    
+    // Prepare recipient data
+    const recipientData = {
+      name: name,
+      relationship: window.selectedRelation,
+      isExisting: false
+    };
+    
+    // Store data for next page
+    localStorage.setItem('recipientData', JSON.stringify(recipientData));
+    
+    // Navigate to next page
+    window.location.href = `message-intent.html?emotion=${window.selectedEmotion}`;
+  } catch (e) {
+    console.error('Error navigating to next page:', e);
+    // As fallback, try to navigate anyway
+    window.location.href = 'message-intent.html';
+  }
+}
 
 // Initialize the recipient selection page
 function initializeSelectionPage() {
@@ -165,24 +217,6 @@ function initializeSelectionPage() {
         });
     });
   }
-}
-
-// Initialize relationship type selection
-function initializeRelationshipSelection() {
-  const relationshipTypes = document.querySelectorAll('.relationship-type');
-  relationshipTypes.forEach(type => {
-    type.addEventListener('click', function() {
-      // Remove selected class from all types
-      relationshipTypes.forEach(t => t.classList.remove('selected'));
-      
-      // Add selected class to clicked type
-      this.classList.add('selected');
-      
-      // Save selected relation
-      selectedRelation = this.getAttribute('data-relation');
-      console.log('Selected relationship:', selectedRelation);
-    });
-  });
 }
 
 // Initialize save options
@@ -316,160 +350,6 @@ function loadUserConnections() {
       console.error('Error loading connections:', error);
       if (connectionsContainer) connectionsContainer.style.display = 'none';
     });
-}
-
-// Validate form inputs before proceeding
-function validateForm() {
-  // If a saved connection is selected, no need to validate other fields
-  if (selectedConnection) {
-    return true;
-  }
-  
-  const nameInput = document.getElementById('recipient-name');
-  const name = nameInput ? nameInput.value.trim() : '';
-  
-  if (!name) {
-    showAlert('Please enter a name for your recipient.', 'error');
-    if (nameInput) nameInput.focus();
-    return false;
-  }
-  
-  if (!selectedRelation) {
-    showAlert('Please select your relationship with this person.', 'error');
-    return false;
-  }
-  
-  return true;
-}
-
-// Save recipient information and navigate to the next page
-function saveRecipientAndNavigate() {
-  let recipientData = {};
-  
-  // If using a saved connection
-  if (selectedConnection) {
-    recipientData = {
-      id: selectedConnection.id,
-      name: selectedConnection.name,
-      relationship: selectedConnection.relationship,
-      isExisting: true
-    };
-  } 
-  // If creating a new connection
-  else {
-    const nameInput = document.getElementById('recipient-name');
-    const name = nameInput ? nameInput.value.trim() : '';
-    
-    recipientData = {
-      name: name,
-      relationship: selectedRelation,
-      isExisting: false
-    };
-    
-    // Only try to save to Firebase if we're authenticated
-    const saveConnectionCheckbox = document.getElementById('save-connection');
-    if (saveConnectionCheckbox && saveConnectionCheckbox.checked && currentUser && window.firebase) {
-      try {
-        // Save to Firestore
-        debugInPage('Saving connection to Firestore...');
-        firebase.firestore()
-          .collection('users')
-          .doc(currentUser.uid)
-          .collection('connections')
-          .add({
-            name: name,
-            relationship: selectedRelation,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-          })
-          .then((docRef) => {
-            debugInPage('Connection saved with ID: ' + docRef.id);
-            recipientData.id = docRef.id;
-            
-            // Set reminder if requested
-            setReminderIfNeeded(docRef.id, name);
-          })
-          .catch((error) => {
-            debugInPage('Error saving connection: ' + error.message);
-            console.error('Error saving connection:', error);
-            // Continue to next page despite the error
-          });
-      } catch (error) {
-        debugInPage('Failed to save connection: ' + error.message);
-        // Continue despite errors
-      }
-    } else if (saveConnectionCheckbox && saveConnectionCheckbox.checked) {
-      debugInPage('Cannot save connection - user not authenticated or Firebase unavailable');
-    }
-  }
-  
-  // Store recipient data for next page
-  try {
-    localStorage.setItem('recipientData', JSON.stringify(recipientData));
-    debugInPage('Recipient data saved to localStorage');
-  } catch (error) {
-    debugInPage('Error saving to localStorage: ' + error.message);
-  }
-  
-  // Navigate to message intent page
-  debugInPage('Navigating to message intent page...');
-  window.location.href = `message-intent.html?emotion=${selectedEmotion}`;
-}
-
-// Set reminder if the checkbox is checked
-function setReminderIfNeeded(connectionId, recipientName) {
-  const setReminderCheckbox = document.getElementById('set-reminder');
-  
-  if (setReminderCheckbox && setReminderCheckbox.checked && currentUser) {
-    const reminderTimeframe = document.getElementById('reminder-timeframe');
-    const customDateInput = document.getElementById('custom-reminder-date');
-    
-    let reminderDate = new Date();
-    
-    // Calculate reminder date based on selection
-    if (reminderTimeframe) {
-      const timeframeValue = reminderTimeframe.value;
-      
-      if (timeframeValue === 'custom' && customDateInput && customDateInput.value) {
-        reminderDate = new Date(customDateInput.value);
-      } else {
-        switch (timeframeValue) {
-          case '1-week':
-            reminderDate.setDate(reminderDate.getDate() + 7);
-            break;
-          case '2-weeks':
-            reminderDate.setDate(reminderDate.getDate() + 14);
-            break;
-          case '1-month':
-            reminderDate.setMonth(reminderDate.getMonth() + 1);
-            break;
-          case '3-months':
-            reminderDate.setMonth(reminderDate.getMonth() + 3);
-            break;
-          default:
-            reminderDate.setMonth(reminderDate.getMonth() + 1);
-        }
-      }
-    }
-    
-    // Save reminder to Firestore
-    firebase.firestore()
-      .collection('users')
-      .doc(currentUser.uid)
-      .collection('reminders')
-      .add({
-        connectionId: connectionId,
-        recipientName: recipientName,
-        reminderDate: reminderDate,
-        created: firebase.firestore.FieldValue.serverTimestamp(),
-        isComplete: false
-      })
-      .then((docRef) => {
-        console.log('Reminder set with ID:', docRef.id);
-      })
-      .catch((error) => {
-        console.error('Error setting reminder:', error);
-      });
-  }
 }
 
 // Utility function to get initials from a name

@@ -5,6 +5,39 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGlowAI - Who's on your mind?</title>
     
+    <!-- CRITICAL DISPLAY FIX: Force content to display no matter what -->
+    <script>
+        // Immediately execute to ensure content is displayed
+        (function() {
+            // Create and apply a style tag that forces visibility
+            const forceDisplayStyle = document.createElement('style');
+            forceDisplayStyle.textContent = `
+                body, main, .card-container, .input-container, #new-connection-form {
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                }
+            `;
+            document.head.appendChild(forceDisplayStyle);
+            
+            // Set a timer to force display again after page load
+            window.setTimeout(function() {
+                document.body.style.display = 'block';
+                document.body.style.visibility = 'visible';
+                const main = document.querySelector('main');
+                if (main) {
+                    main.style.display = 'block';
+                    main.style.visibility = 'visible';
+                    main.style.opacity = '1';
+                }
+                const form = document.getElementById('new-connection-form');
+                if (form) {
+                    form.style.display = 'block';
+                }
+            }, 100);
+        })();
+    </script>
+    
     <!-- Add favicon as SVG to prevent 404 errors -->
     <script>
         // Add favicon

@@ -265,7 +265,9 @@ function callCloudFunction(idToken) {
         toneIntensity: getToneIntensity(toneData.type),
         relationshipDuration: 'unspecified', // Could be added to recipient data in the future
         specialCircumstances: intentData.customText || '',
-        recipientName: recipientData.name
+        recipientName: recipientData.name,
+        // Add API key in the request for fallback (cloud function can still use Firestore if available)
+        apiKey: 'USE-DIRECT-SECRETS-ACCESS' // Placeholder for cloud function to recognize direct mode
     };
     
     // Add any selected adjustments as special circumstances
@@ -333,6 +335,60 @@ function callCloudFunction(idToken) {
         })
         .catch(error => {
             logDebug(`ERROR: Cloud function call failed: ${error.message}`);
+            
+            // If this is API key error, try alternative endpoint
+            if (error.message.includes('API key not valid') && retryCount === 0) {
+                logDebug('API key error detected, trying fallback endpoint');
+                
+                // Try direct API call instead - requires separate handler
+                fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/directGenerate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${idToken}`
+                    },
+                    body: JSON.stringify(cloudFunctionPayload)
+                }, 60000)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Store generated message and insights
+                    generatedMessage = data.message;
+                    const insights = data.insights || [];
+                    
+                    // Hide loading, show message
+                    document.getElementById('loading-state').style.display = 'none';
+                    document.getElementById('message-container').style.display = 'block';
+                    document.getElementById('regenerate-options').style.display = 'block';
+                    
+                    // Update message display
+                    document.getElementById('message-content').textContent = data.message;
+                    document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
+                    document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
+                    
+                    // Display insights
+                    displayInsights(insights);
+                    
+                    logDebug('Direct message generation successful');
+                })
+                .catch(directError => {
+                    logDebug(`ERROR: Direct API call failed: ${directError.message}`);
+                    if (retryCount < 2) {
+                        logDebug(`Retrying original request (${retryCount + 1}/2)...`);
+                        setTimeout(() => makeRequest(retryCount + 1), 2000);
+                    } else {
+                        // If still failing after retries, show error
+                        document.getElementById('loading-state').style.display = 'none';
+                        document.getElementById('error-state').style.display = 'block';
+                        document.getElementById('error-state').querySelector('.error-message').textContent = 
+                            `Failed to generate message: ${directError.message}. Please try again.`;
+                    }
+                });
+                return;
+            }
             
             // Try again if we haven't exceeded max retries
             if (retryCount < 2) {

@@ -328,7 +328,6 @@ function createDebugButton() {
  * Simple authentication check with bypass option
  */
 function checkAuthentication() {
-    // First, check if we have a token from a previous step
     const storedToken = localStorage.getItem('authToken');
     if (storedToken) {
         logDebug('Found auth token in localStorage. Assuming authenticated initially.');
@@ -336,36 +335,33 @@ function checkAuthentication() {
 
     if (window.firebase && firebase.auth) {
         logDebug('Setting up onAuthStateChanged listener...');
+        let initialCheckDone = false; // Flag to track if initial listener has run
+
         firebase.auth().onAuthStateChanged(function(user) {
             logDebug(`>>> onAuthStateChanged Fired! User: ${user ? user.uid : 'null'}. Already resolved: ${authStateResolved}`);
+            
+            // Logic for the FIRST time the listener fires after page load
             if (!authStateResolved) {
                  if (user) {
-                    logDebug(`   [Listener] User found directly. Resolving promise with user.`);
-                    // Refresh auth token for next page but don't redirect
-                    user.getIdToken(true).then(token => {
-                        localStorage.setItem('authToken', token);
-                        logDebug('Refreshed authentication token in localStorage');
-                    }).catch(error => {
-                        logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
-                    });
+                    logDebug(`   [Listener Initial] User found directly. Resolving promise with user.`);
+                    user.getIdToken(true).then(token => localStorage.setItem('authToken', token)).catch(e => logDebug('Error refreshing token initial', e)); 
                     authStatePromiseResolver(user);
                     authStateResolved = true;
                 } else {
-                    logDebug('   [Listener] Initial trigger is NULL. Setting 250ms timeout to check persisted state...');
+                    logDebug('   [Listener Initial] Initial trigger is NULL. Setting 250ms timeout to check persisted state...');
                     setTimeout(() => {
                         logDebug('   [Listener Timeout Check] Timeout finished.');
-                        if (!authStateResolved) {
+                        if (!authStateResolved) { // Check again, maybe resolved by a rapid second fire
                             const currentUserAfterDelay = firebase.auth().currentUser;
                             logDebug(`   [Listener Timeout Check] State after delay: ${currentUserAfterDelay ? currentUserAfterDelay.uid : 'null'}`);
                             if (currentUserAfterDelay) {
                                 logDebug('   [Listener Timeout Check] User found after delay. Resolving promise with user.');
                                 authStatePromiseResolver(currentUserAfterDelay);
                             } else {
-                                logDebug('   [Listener Timeout Check] No user after delay. Clearing token. Resolving promise with null.');
-                                localStorage.removeItem('authToken'); 
+                                logDebug('   [Listener Timeout Check] No user after delay. ***NOT deleting token***. Resolving promise with null.');
                                 authStatePromiseResolver(null);
-                                if (!authBypass) {
-                                    logDebug('   [Listener Timeout Check] Authentication required. Showing debug console.');
+                                if (!authBypass && !storedToken) { // Only show error if no token existed initially either
+                                    logDebug('   [Listener Timeout Check] Authentication potentially required (no initial token either). Showing debug console.');
                                     document.getElementById('debug-console').style.display = 'block';
                                 }
                             }
@@ -375,20 +371,24 @@ function checkAuthentication() {
                         }
                     }, 250); 
                 }
-            } else {
-                 logDebug('   [Listener] Fired again, but promise was already resolved.');
+            } 
+            // Logic for SUBSEQUENT times the listener fires (e.g., user logs out in another tab)
+            else {
+                 logDebug('   [Listener Subsequent] Fired again after promise was resolved.');
                  if (!user) {
-                      logDebug('   [Listener] Subsequent fire reports logged out user. Clearing token.');
-                      localStorage.removeItem('authToken'); 
+                      logDebug('   [Listener Subsequent] Subsequent fire reports logged out user. Clearing token NOW.');
+                      localStorage.removeItem('authToken'); // OK to clear token now if state changes AFTER initial resolution
+                      // Optionally update UI or redirect if needed based on logout
+                 } else {
+                     // User is still logged in or logged in again
+                     logDebug('   [Listener Subsequent] Subsequent fire reports logged in user.');
                  }
             }
+            initialCheckDone = true; // Mark that the listener logic has run at least once
         });
     } else {
         logDebug('WARNING: Firebase auth not available. Resolving promise with null.');
-        if (!storedToken && !authBypass) { 
-             document.getElementById('debug-console').style.display = 'block';
-        }
-        authStatePromiseResolver(null);
+        authStatePromiseResolver(null); 
         authStateResolved = true;
     }
 }

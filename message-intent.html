@@ -4,616 +4,350 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGlowAI - What's at the heart of your message?</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    
+    <!-- CRITICAL CSS to ensure page loads -->
     <style>
-        :root {
-            --primary-color: #4a154b;
-            --accent-pink: #ff6b9d;
-            --accent-purple: #7b2cbf;
-            --bg-dark: #1f0a21;
-            --bg-darker: #0f0113;
-            --text-light: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --border-light: rgba(255, 255, 255, 0.1);
-            --primary-gradient: linear-gradient(45deg, #ff6b9d, #7b2cbf);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-hover: rgba(255, 255, 255, 0.05);
-        }
-
-        * {
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: var(--text-light);
-            line-height: 1.6;
+            display: block;
             min-height: 100vh;
         }
-
-        .container {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        .step-header {
+        
+        header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-light);
-            margin-bottom: 2rem;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-
-        .step-title {
-            font-size: 1.2rem;
+        
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ff6b9d;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .form-label {
+            font-size: 16px;
             font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+            color: white;
         }
-
+        
         .step-indicator {
             display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .step-dot {
-            width: 0.5rem;
-            height: 0.5rem;
-            border-radius: 50%;
-            background-color: var(--border-light);
-        }
-
-        .step-dot.active {
-            background: var(--accent-pink);
-            width: 1.8rem;
-            border-radius: 0.25rem;
-        }
-
-        .page-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            display: inline-block;
-        }
-
-        .page-subtitle {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        .recipient-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            background: var(--card-bg);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .recipient-avatar {
-            width: 3rem;
-            height: 3rem;
-            border-radius: 50%;
-            background-size: cover;
-            background-position: center;
-            border: 2px solid var(--accent-pink);
-        }
-
-        .recipient-details {
-            flex: 1;
-        }
-
-        .recipient-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .recipient-relation {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
-        .intent-options {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .intent-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-light);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .intent-card:hover, .intent-card.selected {
-            background: var(--card-hover);
-            border-color: var(--accent-pink);
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .intent-card.selected {
-            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
-        }
-
-        .intent-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 0.25rem;
-            background: var(--primary-gradient);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.3s ease;
-        }
-
-        .intent-card.selected::before {
-            transform: scaleX(1);
-        }
-
-        .intent-header {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            margin-bottom: 1rem;
-        }
-
-        .intent-icon {
-            font-size: 1.5rem;
-            color: var(--accent-pink);
-            width: 2.5rem;
-            height: 2.5rem;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            background: rgba(255, 107, 157, 0.1);
-            border-radius: 50%;
+            margin-bottom: 40px;
         }
-
-        .intent-title {
-            font-size: 1.1rem;
-            font-weight: 600;
+        
+        .step-dot {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
         }
-
-        .intent-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
+        
+        .step-dot.active {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            width: 60px;
         }
-
-        .intent-example {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            position: relative;
-            margin-top: 1rem;
-            max-height: 0;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            opacity: 0;
-        }
-
-        .intent-card.selected .intent-example {
-            max-height: 10rem;
-            opacity: 1;
-        }
-
-        .intent-example::before {
-            content: 'Example';
-            position: absolute;
-            top: -0.5rem;
-            left: 1rem;
-            background: var(--accent-pink);
-            color: white;
-            font-size: 0.7rem;
-            font-weight: 600;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.25rem;
-        }
-
-        .custom-intent {
-            background: var(--card-bg);
-            border: 1px dashed var(--border-light);
-            border-radius: 0.5rem;
-            padding: 1.5rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 2rem;
-        }
-
-        .custom-intent:hover {
-            background: var(--card-hover);
-            border-color: var(--accent-pink);
-        }
-
-        .custom-intent-icon {
-            font-size: 2rem;
-            color: var(--accent-pink);
-            margin-bottom: 1rem;
-        }
-
-        .custom-intent-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-        }
-
-        .custom-intent-description {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-        }
-
+        
         .button-container {
             display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
+            justify-content: space-between;
+            margin-top: 30px;
         }
-
-        .btn {
-            flex: 1;
-            padding: 0.8rem 1.5rem;
-            border-radius: 0.5rem;
-            font-size: 1rem;
+        
+        .intent-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .intent-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .intent-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .next-button, .back-button {
+            padding: 12px 30px;
+            border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
             border: none;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0.5rem;
+            font-size: 16px;
         }
-
-        .btn-secondary {
-            background: var(--card-bg);
-            color: var(--text-light);
-            border: 1px solid var(--border-light);
-        }
-
-        .btn-secondary:hover {
-            background: var(--card-hover);
-        }
-
-        .btn-primary {
-            background: var(--primary-gradient);
-            color: var(--text-light);
-        }
-
-        .btn-primary:hover {
-            opacity: 0.9;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.3);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        @media (min-width: 768px) {
-            .container {
-                padding: 0 2rem;
-            }
-
-            .page-title {
-                font-size: 2.2rem;
-            }
-
-            .page-subtitle {
-                font-size: 1.1rem;
-            }
-
-            .intent-options {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .btn {
-                padding: 1rem 2rem;
-            }
-        }
-
-        @media (min-width: 1024px) {
-            .container {
-                padding: 0 3rem;
-            }
-
-            .intent-options {
-                grid-template-columns: repeat(3, 1fr);
-            }
-        }
-
-        /* Loading overlay styles */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 1, 21, 0.9);
-            backdrop-filter: blur(15px);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            animation-duration: 0.4s;
-            display: none;
-        }
-
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            max-width: 320px;
-        }
-
-        .heart-animation {
-            position: relative;
-            width: 80px;
-            height: 80px;
-            margin-bottom: 30px;
-        }
-
-        .heart-shape {
-            width: 100%;
-            height: 100%;
-            background: var(--primary-gradient);
-            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
-            -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") center/contain no-repeat;
-            animation: pulse 2s infinite ease-in-out;
-        }
-
-        .heart-glow {
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: radial-gradient(circle, rgba(255, 107, 157, 0.6) 0%, rgba(255, 107, 157, 0) 70%);
-            border-radius: 50%;
-            animation: glow 2s infinite alternate;
-            filter: blur(10px);
-        }
-
-        .loading-context {
-            font-size: 20px;
+        
+        .next-button {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
             color: white;
-            font-weight: 500;
-            text-align: center;
-            margin-top: 10px;
-            animation: fadeInOut 2s infinite alternate;
-            max-width: 280px;
-            line-height: 1.5;
         }
-
-        @keyframes pulse {
-            0% { transform: scale(0.95); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(0.95); }
-        }
-
-        @keyframes glow {
-            0% { opacity: 0.5; transform: scale(0.9); }
-            100% { opacity: 0.8; transform: scale(1.1); }
-        }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0.7; }
-            100% { opacity: 1; }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
         }
     </style>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Firebase Scripts -->
 </head>
-<body>
-    <div class="container">
-        <div class="step-header">
-            <div class="step-title">Step 2 of 3</div>
-            <div class="step-indicator">
-                <div class="step-dot"></div>
-                <div class="step-dot active"></div>
-                <div class="step-dot"></div>
-            </div>
+<body style="background-color: #121212 !important; color: white !important; visibility: visible !important; display: block !important;">
+    <!-- Debug Console -->
+    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+        <div>
+            Debug Console: 
+            <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
         </div>
-
-        <h1 class="page-title">What's at the heart of your message?</h1>
-        <p class="page-subtitle">Choose the emotion or intent that best describes what you want to express.</p>
-
-        <div class="recipient-info">
-            <div class="recipient-avatar" style="background-image: url('https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=334&q=80');"></div>
-            <div class="recipient-details">
-                <div class="recipient-name">Sarah Johnson</div>
-                <div class="recipient-relation">Partner</div>
-            </div>
-        </div>
-
-        <div class="intent-options">
-            <div class="intent-card" data-intent="care">
-                <div class="intent-header">
-                    <div class="intent-icon">
-                        <i class="fas fa-hand-holding-heart"></i>
-                    </div>
-                    <div class="intent-title">I care about them</div>
-                </div>
-                <div class="intent-description">Express your deep care and concern for their wellbeing.</div>
-                <div class="intent-example">
-                    I've been thinking about you lately. I just wanted to let you know that I care deeply about you and I'm here for you, no matter what you're going through right now.
-                </div>
-            </div>
-
-            <div class="intent-card" data-intent="apologize">
-                <div class="intent-header">
-                    <div class="intent-icon">
-                        <i class="fas fa-heart-broken"></i>
-                    </div>
-                    <div class="intent-title">I want to apologize</div>
-                </div>
-                <div class="intent-description">Say sorry and express regret for something that happened.</div>
-                <div class="intent-example">
-                    I've been reflecting on our conversation last week, and I realize I wasn't being fair to you. I'm truly sorry for what I said, and I want to make things right between us.
-                </div>
-            </div>
-
-            <div class="intent-card" data-intent="thankful">
-                <div class="intent-header">
-                    <div class="intent-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div class="intent-title">I'm thankful for something</div>
-                </div>
-                <div class="intent-description">Express gratitude for something they did or who they are.</div>
-                <div class="intent-example">
-                    I was just thinking about how much your support meant to me during that difficult time. You've been such a consistent source of strength, and I'm incredibly grateful for you.
-                </div>
-            </div>
-
-            <div class="intent-card" data-intent="reconnect">
-                <div class="intent-header">
-                    <div class="intent-icon">
-                        <i class="fas fa-reply-all"></i>
-                    </div>
-                    <div class="intent-title">I want to reconnect</div>
-                </div>
-                <div class="intent-description">Reach out after a period of distance or silence.</div>
-                <div class="intent-example">
-                    It's been too long since we last spoke, and I miss our conversations. I've been thinking about you and wondering how you're doing. Would love to catch up soon.
-                </div>
-            </div>
-
-            <div class="intent-card" data-intent="encourage">
-                <div class="intent-header">
-                    <div class="intent-icon">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <div class="intent-title">I want to encourage</div>
-                </div>
-                <div class="intent-description">Offer support and encouragement during a challenge.</div>
-                <div class="intent-example">
-                    I know you're facing a big challenge right now, but I've seen your strength and determination. I believe in you and know that you have what it takes to overcome this.
-                </div>
-            </div>
-        </div>
-
-        <div class="custom-intent">
-            <div class="custom-intent-icon">
-                <i class="fas fa-lightbulb"></i>
-            </div>
-            <div class="custom-intent-title">Surprise me</div>
-            <div class="custom-intent-description">Not sure what to say? Let us suggest something special.</div>
-        </div>
-
-        <div class="button-container">
-            <button class="btn btn-secondary" id="prev-step">
-                <i class="fas fa-arrow-left"></i>
-                <span>Back</span>
-            </button>
-            <button class="btn btn-primary" id="next-step">
-                <span>Next</span>
-                <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
+        <div id="debug-output"></div>
     </div>
+    
+    <!-- Header -->
+    <header class="header">
+        <div class="logo-container">
+            <div class="logo-heart">❤️</div>
+            <div class="logo-text">HeartGlowAI</div>
+        </div>
+        <nav class="nav-bar">
+            <button id="dashboard-btn" class="nav-button">
+                <i class="fas fa-columns"></i> Dashboard
+            </button>
+            <button id="history-btn" class="nav-button">
+                <i class="fas fa-history"></i> History
+            </button>
+            <button id="learn-btn" class="nav-button">
+                <i class="fas fa-brain"></i> Learn
+            </button>
+            <button id="logout-btn" class="nav-button">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </nav>
+    </header>
+
+    <main class="card-container" style="display: block !important; visibility: visible !important; opacity: 1 !important; max-width: 800px; margin: 30px auto; padding: 20px;">
+        <!-- Step Indicator -->
+        <div class="step-indicator">
+            <div class="step-dot active"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot"></div>
+        </div>
+        
+        <h1 class="page-title">What's at the heart of your message?</h1>
+        <p class="page-subtitle">Identifying the purpose helps us craft a message that achieves your goal.</p>
+        
+        <div class="recipient-display">
+            <div class="recipient-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="recipient-info">
+                <div class="recipient-name" id="recipient-name-display">Name</div>
+                <div class="recipient-relationship" id="recipient-relationship-display">Relationship</div>
+            </div>
+        </div>
+        
+        <div class="intent-options">
+            <div class="intent-option" data-intent="reconnect">
+                <div class="intent-title">
+                    <i class="fas fa-sync-alt"></i> Reconnect
+                </div>
+                <p class="intent-description">Reach out after time apart and reestablish your connection</p>
+            </div>
+            
+            <div class="intent-option" data-intent="appreciate">
+                <div class="intent-title">
+                    <i class="fas fa-heart"></i> Appreciation
+                </div>
+                <p class="intent-description">Express gratitude and acknowledge their positive impact</p>
+            </div>
+            
+            <div class="intent-option" data-intent="apologize">
+                <div class="intent-title">
+                    <i class="fas fa-hands"></i> Apologize
+                </div>
+                <p class="intent-description">Say sorry and make amends for a mistake or misunderstanding</p>
+            </div>
+            
+            <div class="intent-option" data-intent="celebrate">
+                <div class="intent-title">
+                    <i class="fas fa-gift"></i> Celebrate
+                </div>
+                <p class="intent-description">Mark a special occasion, achievement, or milestone</p>
+            </div>
+            
+            <div class="intent-option" data-intent="encourage">
+                <div class="intent-title">
+                    <i class="fas fa-bolt"></i> Encourage
+                </div>
+                <p class="intent-description">Offer support, motivation, or a confidence boost</p>
+            </div>
+            
+            <div class="intent-option" data-intent="invite">
+                <div class="intent-title">
+                    <i class="fas fa-calendar-alt"></i> Invite
+                </div>
+                <p class="intent-description">Ask them to join you for an activity, event, or meeting</p>
+            </div>
+            
+            <div class="intent-option" data-intent="inform">
+                <div class="intent-title">
+                    <i class="fas fa-info-circle"></i> Inform
+                </div>
+                <p class="intent-description">Share important news, updates, or information</p>
+            </div>
+            
+            <div class="intent-option" data-intent="askforfavor">
+                <div class="intent-title">
+                    <i class="fas fa-hands-helping"></i> Ask for a favor
+                </div>
+                <p class="intent-description">Request help, advice, or assistance with something</p>
+            </div>
+            
+            <div class="intent-option" data-intent="custom">
+                <div class="intent-title">
+                    <i class="fas fa-pencil-alt"></i> Custom
+                </div>
+                <p class="intent-description">Something else not listed here (you'll describe it later)</p>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="back-btn" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+            <button id="next-btn" class="next-button" disabled>
+                Next <i class="fas fa-arrow-right"></i>
+            </button>
+        </div>
+    </main>
 
     <!-- Loading overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
+    <div id="loading-overlay" class="loading-overlay">
         <div class="loading-container">
             <div class="heart-animation">
                 <div class="heart-glow"></div>
                 <div class="heart-shape"></div>
             </div>
-            <div class="loading-context" id="loadingContext">Preparing your message...</div>
+            <div class="loading-context" id="loading-context">Analyzing your intent...</div>
         </div>
     </div>
 
+    <script src="js/message-intent.js"></script>
+    
     <script>
+        // Debug logging function
+        function debugLog(message) {
+            console.log('DEBUG:', message);
+            const debugOutput = document.getElementById('debug-output');
+            if (debugOutput) {
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                debugOutput.appendChild(logEntry);
+            }
+        }
+        
+        // Show debug console on certain errors
+        window.addEventListener('error', function(e) {
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+                debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+            }
+        });
+        
+        // Add debug button
         document.addEventListener('DOMContentLoaded', function() {
-            // Intent card selection
-            const intentCards = document.querySelectorAll('.intent-card');
-            let selectedIntent = null;
-
-            intentCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    if (selectedIntent) {
-                        selectedIntent.classList.remove('selected');
-                    }
-                    this.classList.add('selected');
-                    selectedIntent = this;
-                    
-                    // Add subtle animation to the example message
-                    const example = this.querySelector('.intent-example');
-                    example.style.animation = 'fadeInOut 1s';
-                    setTimeout(() => {
-                        example.style.animation = '';
-                    }, 1000);
-                });
-            });
-
-            // Custom intent option
-            const customIntent = document.querySelector('.custom-intent');
-            customIntent.addEventListener('click', function() {
-                if (selectedIntent) {
-                    selectedIntent.classList.remove('selected');
-                    selectedIntent = null;
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Debug';
+            debugBtn.style.position = 'fixed';
+            debugBtn.style.bottom = '10px';
+            debugBtn.style.right = '10px';
+            debugBtn.style.zIndex = '9999';
+            debugBtn.style.padding = '5px 10px';
+            debugBtn.style.background = '#333';
+            debugBtn.style.color = '#fff';
+            debugBtn.style.border = 'none';
+            debugBtn.style.borderRadius = '4px';
+            debugBtn.style.cursor = 'pointer';
+            
+            debugBtn.addEventListener('click', function() {
+                const debugConsole = document.getElementById('debug-console');
+                if (debugConsole) {
+                    debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
                 }
+            });
+            
+            document.body.appendChild(debugBtn);
+            
+            // Log initial page load
+            debugLog('Page fully loaded');
+            
+            // Also log URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            for (const [key, value] of urlParams) {
+                debugLog(`URL parameter: ${key} = ${value}`);
+            }
+            
+            // Check if main content is visible
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                debugLog('Main container found');
                 
-                // Show loading animation
-                document.getElementById('loadingContext').textContent = 'Finding the perfect message...';
-                document.getElementById('loadingOverlay').style.display = 'flex';
-                
-                // Simulate loading
-                setTimeout(() => {
-                    document.getElementById('loadingOverlay').style.display = 'none';
-                    
-                    // Randomly select an intent
-                    const randomIndex = Math.floor(Math.random() * intentCards.length);
-                    intentCards[randomIndex].click();
-                    
-                    // Scroll to the selected intent
-                    intentCards[randomIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }, 2000);
-            });
-
-            // Navigation buttons
-            document.getElementById('prev-step').addEventListener('click', function() {
-                window.location.href = 'recipient-selection.html';
-            });
-
-            document.getElementById('next-step').addEventListener('click', function() {
-                if (!selectedIntent) {
-                    alert('Please select a message intent or choose "Surprise me".');
-                    return;
-                }
-
-                // Show loading animation
-                document.getElementById('loadingContext').textContent = 'Setting the right tone...';
-                document.getElementById('loadingOverlay').style.display = 'flex';
-
-                // Simulate loading
-                setTimeout(() => {
-                    // In a real app, this would navigate to step 3 with the selected intent
-                    window.location.href = 'message-tone.html';
-                }, 1500);
-            });
+                // Force main container to be visible
+                mainContainer.style.display = 'block';
+                mainContainer.style.visibility = 'visible';
+                mainContainer.style.opacity = '1';
+            } else {
+                debugLog('ERROR: Main container not found!');
+            }
+            
+            // Show debug console automatically
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+            }
         });
     </script>
 </body>

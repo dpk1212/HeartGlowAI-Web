@@ -3,9 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeartGlowAI - What tone do you want?</title>
+    <title>HeartGlowAI - Set the Tone</title>
+    
+    <!-- CRITICAL CSS to ensure page loads -->
+    <style>
+        body {
+            background-color: #121212;
+            color: white;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: block;
+            min-height: 100vh;
+        }
+        
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        main {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 20px;
+            display: block;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #ff6b9d;
+        }
+        
+        .page-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 40px;
+        }
+        
+        .input-container {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .form-label {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: block;
+            color: white;
+        }
+        
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+        
+        .step-dot {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            margin: 0 5px;
+        }
+        
+        .step-dot.active {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            width: 60px;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        .tone-option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .tone-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .tone-description {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .next-button, .back-button {
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .next-button {
+            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
+            color: white;
+        }
+        
+        .back-button {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+    </style>
+    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
     
     <!-- Firebase Scripts -->
@@ -36,341 +161,18 @@
           firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
         }
     </script>
-    
-    <style>
-        :root {
-            --primary-color: #4a154b;
-            --accent-pink: #ff6b9d;
-            --accent-purple: #7b2cbf;
-            --bg-dark: #1f0a21;
-            --bg-darker: #0f0113;
-            --text-light: #ffffff;
-            --text-secondary: rgba(255, 255, 255, 0.7);
-            --border-light: rgba(255, 255, 255, 0.1);
-            --primary-gradient: linear-gradient(45deg, #ff6b9d, #7b2cbf);
-            --card-bg: rgba(255, 255, 255, 0.03);
-            --card-hover: rgba(255, 255, 255, 0.05);
-            --heading-gradient: linear-gradient(to right, #ff6b9d, #8c7db0, #64d2ff);
-        }
-        
-        /* Layout and containers */
-        .card-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px 20px;
-        }
-        
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-        
-        .step-dot {
-            width: 40px;
-            height: 4px;
-            border-radius: 2px;
-            background-color: var(--border-light);
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .step-dot.active {
-            background: var(--primary-gradient);
-            width: 60px;
-        }
-        
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            background: var(--heading-gradient);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .page-subtitle {
-            font-size: 16px;
-            color: var(--text-secondary);
-            margin-bottom: 40px;
-        }
-        
-        /* Context cards */
-        .context-section {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        }
-        
-        .context-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary-gradient);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 600;
-            color: white;
-        }
-        
-        .context-details {
-            flex: 1;
-        }
-        
-        .context-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-secondary);
-        }
-        
-        .context-value {
-            font-size: 20px;
-            font-weight: 600;
-        }
-        
-        .context-arrow {
-            color: var(--text-secondary);
-            font-size: 20px;
-            margin: 0 10px;
-        }
-        
-        .context-intent {
-            display: flex;
-            align-items: center;
-            background: rgba(255, 107, 157, 0.1);
-            border-radius: 8px;
-            padding: 8px 16px;
-            color: var(--accent-pink);
-            font-weight: 600;
-            max-width: fit-content;
-            margin-top: 8px;
-        }
-        
-        .context-intent-icon {
-            margin-right: 8px;
-            font-size: 14px;
-        }
-        
-        /* Tone section */
-        .tone-section {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-        
-        .tone-pills {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        
-        .tone-pill {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 30px;
-            padding: 10px 20px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .tone-pill:hover {
-            background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
-        }
-        
-        .tone-pill.selected {
-            background: rgba(255, 107, 157, 0.15);
-            border-color: var(--accent-pink);
-            color: var(--accent-pink);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 157, 0.2);
-        }
-        
-        /* Intensity slider */
-        .intensity-container {
-            margin-top: 30px;
-        }
-        
-        .intensity-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .intensity-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-        
-        .intensity-value {
-            font-size: 14px;
-            color: var(--accent-pink);
-            font-weight: 600;
-        }
-        
-        .intensity-slider-container {
-            position: relative;
-            height: 40px;
-        }
-        
-        .intensity-labels {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-        }
-        
-        .intensity-label {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        
-        .intensity-slider {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: linear-gradient(to right, 
-                rgba(255, 255, 255, 0.1) 0%, 
-                rgba(255, 107, 157, 0.5) 100%);
-            outline: none;
-        }
-        
-        .intensity-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-pink);
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
-            border: 3px solid white;
-        }
-        
-        .intensity-slider::-moz-range-thumb {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent-pink);
-            cursor: pointer;
-            box-shadow: 0 0 15px rgba(255, 107, 157, 0.5);
-            border: 3px solid white;
-        }
-        
-        /* Buttons */
-        .btn-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 40px;
-        }
-        
-        .btn {
-            padding: 14px 25px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-        }
-        
-        .btn-back {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-secondary);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .btn-back:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .btn-next {
-            background: var(--primary-gradient);
-            color: white;
-            box-shadow: 0 8px 20px rgba(255, 107, 157, 0.3);
-        }
-        
-        .btn-next:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(255, 107, 157, 0.4);
-        }
-        
-        .btn-next:disabled {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.4);
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-        
-        /* Additional notes */
-        .additional-notes {
-            margin-top: 30px;
-        }
-        
-        .notes-label {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .notes-label i {
-            margin-right: 8px;
-            color: var(--accent-pink);
-        }
-        
-        .notes-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 14px;
-            color: white;
-            min-height: 100px;
-            resize: vertical;
-            transition: all 0.3s ease;
-        }
-        
-        .notes-input:focus {
-            outline: none;
-            border-color: var(--accent-pink);
-            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.2);
-        }
-        
-        .notes-helper {
-            margin-top: 8px;
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-    </style>
 </head>
-<body>
-    <!-- Header and Navigation -->
+<body style="background-color: #121212 !important; color: white !important; visibility: visible !important; display: block !important;">
+    <!-- Debug Console -->
+    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.8); color: #0f0; padding: 10px; max-height: 200px; overflow: auto; font-family: monospace; z-index: 9999;">
+        <div>
+            Debug Console: 
+            <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
+        </div>
+        <div id="debug-output"></div>
+    </div>
+    
+    <!-- Header -->
     <header class="header">
         <div class="logo-container">
             <div class="logo-heart">❤️</div>
@@ -392,90 +194,172 @@
         </nav>
     </header>
 
-    <div class="card-container">
+    <main class="card-container" style="display: block !important; visibility: visible !important; opacity: 1 !important; max-width: 800px; margin: 30px auto; padding: 20px;">
         <!-- Step Indicator -->
         <div class="step-indicator">
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
+            <div class="step-dot active"></div>
+            <div class="step-dot active"></div>
             <div class="step-dot active"></div>
         </div>
         
-        <h1 class="page-title">What tone feels right?</h1>
-        <p class="page-subtitle">Choose a tone and intensity that matches your emotional intention.</p>
+        <h1 class="page-title">Choose the tone for your message</h1>
+        <p class="page-subtitle">Set the emotional tone that will best convey your message.</p>
         
-        <!-- Context Info -->
-        <div class="context-section">
-            <div class="context-avatar" id="recipient-avatar">JS</div>
-            <div class="context-details">
-                <div class="context-title">Recipient</div>
-                <div class="context-value" id="recipient-name">Jamie Smith</div>
-                <div class="context-intent">
-                    <i class="fas fa-heart context-intent-icon"></i>
-                    <span id="intent-name">Expressing care</span>
-                </div>
+        <div class="recipient-display">
+            <div class="recipient-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="recipient-info">
+                <div class="recipient-name" id="recipient-name-display">Name</div>
+                <div class="recipient-relationship" id="recipient-relationship-display">Relationship</div>
             </div>
         </div>
         
-        <!-- Tone Selection -->
-        <div class="tone-section">
-            <h3 class="section-title">Choose your tone</h3>
-            <div class="tone-pills">
-                <div class="tone-pill" data-tone="gentle">Gentle</div>
-                <div class="tone-pill" data-tone="encouraging">Encouraging</div>
-                <div class="tone-pill" data-tone="honest">Honest</div>
-                <div class="tone-pill" data-tone="warm">Warm</div>
-                <div class="tone-pill" data-tone="vulnerable">Vulnerable</div>
-                <div class="tone-pill" data-tone="reflective">Reflective</div>
-                <div class="tone-pill" data-tone="appreciative">Appreciative</div>
-                <div class="tone-pill" data-tone="optimistic">Optimistic</div>
-                <div class="tone-pill" data-tone="sincere">Sincere</div>
+        <div class="intent-display">
+            <div class="intent-label">Intent:</div>
+            <div class="intent-value" id="intent-display">Intent</div>
+        </div>
+        
+        <div class="tone-options">
+            <div class="tone-option" data-tone="warm">
+                <div class="tone-title">
+                    <i class="fas fa-sun"></i> Warm & Affectionate
+                </div>
+                <p class="tone-description">Gentle, loving, and heartfelt with emotional warmth</p>
             </div>
             
-            <!-- Intensity Slider -->
-            <div class="intensity-container">
-                <div class="intensity-header">
-                    <div class="intensity-title">Emotional intensity</div>
-                    <div class="intensity-value" id="intensity-value">Medium</div>
+            <div class="tone-option" data-tone="sincere">
+                <div class="tone-title">
+                    <i class="fas fa-hand-holding-heart"></i> Sincere & Authentic
                 </div>
-                <div class="intensity-labels">
-                    <div class="intensity-label">Soft</div>
-                    <div class="intensity-label">Medium</div>
-                    <div class="intensity-label">Strong</div>
-                </div>
-                <div class="intensity-slider-container">
-                    <input type="range" min="1" max="5" value="3" class="intensity-slider" id="intensity-slider">
-                </div>
+                <p class="tone-description">Honest, straightforward and genuine in expression</p>
             </div>
             
-            <!-- Additional Notes -->
-            <div class="additional-notes">
-                <label class="notes-label" for="additional-notes">
-                    <i class="fas fa-pen-fancy"></i> Any specific points to include? (Optional)
-                </label>
-                <textarea id="additional-notes" class="notes-input" placeholder="E.g., Mention our conversation last week, reference our shared interest in books..."></textarea>
-                <div class="notes-helper">These details will be incorporated into your message to make it more personal</div>
+            <div class="tone-option" data-tone="playful">
+                <div class="tone-title">
+                    <i class="fas fa-laugh"></i> Playful & Lighthearted
+                </div>
+                <p class="tone-description">Fun, witty, and casual with a touch of humor</p>
+            </div>
+            
+            <div class="tone-option" data-tone="respectful">
+                <div class="tone-title">
+                    <i class="fas fa-handshake"></i> Respectful & Formal
+                </div>
+                <p class="tone-description">Polite, professional, and maintaining appropriate boundaries</p>
+            </div>
+            
+            <div class="tone-option" data-tone="passionate">
+                <div class="tone-title">
+                    <i class="fas fa-fire"></i> Passionate & Intense
+                </div>
+                <p class="tone-description">Strong, emotional expression with depth of feeling</p>
+            </div>
+            
+            <div class="tone-option" data-tone="supportive">
+                <div class="tone-title">
+                    <i class="fas fa-hands-helping"></i> Supportive & Encouraging
+                </div>
+                <p class="tone-description">Uplifting, reassuring, and offering moral support</p>
             </div>
         </div>
         
-        <div class="btn-container">
-            <button id="back-btn" class="btn btn-back">
+        <div class="button-container">
+            <button id="back-btn" class="back-button">
                 <i class="fas fa-arrow-left"></i> Back
             </button>
-            <button id="next-btn" class="btn btn-next" disabled>
-                Generate Message <i class="fas fa-magic"></i>
+            <button id="next-btn" class="next-button" disabled>
+                Create Message <i class="fas fa-wand-magic-sparkles"></i>
             </button>
         </div>
-    </div>
-    
-    <!-- Ambient background particles -->
-    <div class="particles-container">
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
-        <div class="particle"></div>
+    </main>
+
+    <!-- Loading overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-container">
+            <div class="heart-animation">
+                <div class="heart-glow"></div>
+                <div class="heart-shape"></div>
+            </div>
+            <div class="loading-context" id="loading-context">Crafting your message...</div>
+        </div>
     </div>
 
     <script src="js/message-tone.js"></script>
+    
+    <script>
+        // Debug logging function
+        function debugLog(message) {
+            console.log('DEBUG:', message);
+            const debugOutput = document.getElementById('debug-output');
+            if (debugOutput) {
+                const logEntry = document.createElement('div');
+                logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+                debugOutput.appendChild(logEntry);
+            }
+        }
+        
+        // Show debug console on certain errors
+        window.addEventListener('error', function(e) {
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+                debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
+            }
+        });
+        
+        // Add debug button
+        document.addEventListener('DOMContentLoaded', function() {
+            const debugBtn = document.createElement('button');
+            debugBtn.textContent = 'Debug';
+            debugBtn.style.position = 'fixed';
+            debugBtn.style.bottom = '10px';
+            debugBtn.style.right = '10px';
+            debugBtn.style.zIndex = '9999';
+            debugBtn.style.padding = '5px 10px';
+            debugBtn.style.background = '#333';
+            debugBtn.style.color = '#fff';
+            debugBtn.style.border = 'none';
+            debugBtn.style.borderRadius = '4px';
+            debugBtn.style.cursor = 'pointer';
+            
+            debugBtn.addEventListener('click', function() {
+                const debugConsole = document.getElementById('debug-console');
+                if (debugConsole) {
+                    debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+                }
+            });
+            
+            document.body.appendChild(debugBtn);
+            
+            // Log initial page load
+            debugLog('Page fully loaded');
+            
+            // Also log URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            for (const [key, value] of urlParams) {
+                debugLog(`URL parameter: ${key} = ${value}`);
+            }
+            
+            // Check if main content is visible
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                debugLog('Main container found');
+                
+                // Force main container to be visible
+                mainContainer.style.display = 'block';
+                mainContainer.style.visibility = 'visible';
+                mainContainer.style.opacity = '1';
+            } else {
+                debugLog('ERROR: Main container not found!');
+            }
+            
+            // Show debug console automatically
+            const debugConsole = document.getElementById('debug-console');
+            if (debugConsole) {
+                debugConsole.style.display = 'block';
+            }
+        });
+    </script>
 </body>
 </html> 

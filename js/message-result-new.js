@@ -113,11 +113,12 @@ function initPage() {
         logDebug('Using saved authentication token');
         generateMessageWithToken(savedToken);
     } else {
-        // Check authentication (with bypass option)
-        checkAuthentication();
-        
-        // Generate message
-        generateMessage();
+        // If no token is found from previous steps, authentication is required.
+        logDebug('ERROR: No auth token found in localStorage. Authentication required.');
+        showError('Authentication required. Please sign in again.'); 
+        // Don't attempt generation or checkAuthentication which might try anonymous auth.
+        // checkAuthentication(); // Remove this
+        // generateMessage(); // Remove this
     }
     
     // Log page loaded
@@ -243,11 +244,13 @@ function generateMessage() {
                 });
         } else {
             // Not authenticated yet, wait for auth state to change
-            logDebug('No user authenticated yet, waiting for authentication...');
+            logDebug('No user authenticated yet, waiting for authentication change...');
             
-            firebase.auth().onAuthStateChanged(function(user) {
+            // Set up a one-time listener
+            const unsubscribe = firebase.auth().onAuthStateChanged(function(user) {
+                unsubscribe(); // Remove the listener after first call
                 if (user) {
-                    logDebug('User authenticated, now proceeding with message generation');
+                    logDebug('User authenticated via listener, now proceeding with message generation');
                     user.getIdToken(true)
                         .then(idToken => {
                             callCloudFunction(idToken);
@@ -257,17 +260,9 @@ function generateMessage() {
                             showError('Authentication error: ' + error.message);
                         });
                 } else {
-                    // Still not authenticated after auth state change, try anonymous sign-in
-                    logDebug('Still not authenticated, attempting anonymous sign-in');
-                    firebase.auth().signInAnonymously()
-                        .then(() => {
-                            logDebug('Anonymous authentication successful, retrying message generation');
-                            // The onAuthStateChanged above will trigger again with the new user
-                        })
-                        .catch((error) => {
-                            logDebug(`ERROR: Anonymous authentication failed: ${error.message}`);
-                            showError('Authentication required. Please sign in to generate messages.');
-                        });
+                    // If listener also confirms no user, show error. Do not attempt anonymous sign-in.
+                    logDebug('ERROR: Authentication listener confirmed no user. Cannot generate message.');
+                    showError('Authentication required. Please sign in to generate messages.');
                 }
             });
         }
@@ -794,48 +789,55 @@ function generateMessageWithToken(token) {
  * Check authentication and save token for future use
  */
 function checkAuthentication() {
+    // First, check if we have a token from a previous step
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+        logDebug('Found auth token in localStorage. Assuming authenticated initially.');
+        // Optional: We could try to verify this token or use it,
+        // but for now, just knowing it exists helps bridge the gap.
+    }
+
     if (window.firebase && firebase.auth) {
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
-                logDebug(`User authenticated: ${user.uid}`);
+                logDebug(`User authenticated via listener: ${user.uid}`);
                 
-                // Save token for future page loads
+                // Refresh auth token if needed (e.g., for subsequent actions on this page)
                 user.getIdToken(true).then(token => {
                     localStorage.setItem('authToken', token);
-                    logDebug('Saved authentication token to localStorage');
+                    logDebug('Refreshed authentication token in localStorage');
+                }).catch(error => {
+                    logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
                 });
             } else {
-                logDebug('No user logged in');
+                logDebug('Auth listener reports no user logged in.');
+                // Clear potentially stale token if listener confirms logged out
+                localStorage.removeItem('authToken'); 
                 if (!authBypass) {
-                    logDebug('Authentication check failed, showing debug console with bypass option');
-                    document.getElementById('debug-console').style.display = 'block';
+                    logDebug('Authentication required. Showing debug console with bypass option');
+                    if (document.getElementById('debug-console')) {
+                       document.getElementById('debug-console').style.display = 'block';
+                    }
+                    // Error is handled by initPage if no token was present initially
+                    // showError('Authentication required. Please sign in again.'); 
+                } else {
+                     logDebug('Auth bypass enabled.');
                 }
             }
         });
     } else {
         logDebug('WARNING: Firebase auth not available');
-        document.getElementById('debug-console').style.display = 'block';
+        if (!storedToken && !authBypass) { // Only show debug if no token and no bypass
+             if (document.getElementById('debug-console')) {
+                 document.getElementById('debug-console').style.display = 'block';
+             }
+             // Error is handled by initPage if no token was present initially
+             // showError('Authentication required. Please sign in again.');
+        }
     }
     
-    // Try anonymous authentication automatically if no user is logged in
-    if (window.firebase && firebase.auth && !firebase.auth().currentUser) {
-        logDebug('Attempting automatic anonymous authentication');
-        firebase.auth().signInAnonymously()
-            .then((userCredential) => {
-                logDebug('Automatic anonymous authentication successful');
-                
-                // Save token immediately after anonymous auth
-                userCredential.user.getIdToken(true).then(token => {
-                    localStorage.setItem('authToken', token);
-                    logDebug('Saved anonymous auth token to localStorage');
-                });
-            })
-            .catch((error) => {
-                logDebug(`ERROR: Automatic anonymous authentication failed: ${error.message}`);
-                // Still show the bypass button
-                document.getElementById('debug-console').style.display = 'block';
-            });
-    }
+    // REMOVE automatic anonymous authentication attempt
+    // if (window.firebase && firebase.auth && !firebase.auth().currentUser) { ... } 
 }
 
 /**

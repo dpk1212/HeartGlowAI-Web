@@ -22,28 +22,98 @@ function debugInPage(message) {
 
 // Simplified initApp function - runs immediately and focuses on core functionality
 (function() {
-  console.log('DIRECT EXECUTION: Forcing recipient-selection.js to run');
+  console.log('DIRECT EXECUTION: recipient-selection.js:25');
+  console.log('Forcing recipient-selection.js to run');
   
+  // Register event handlers for when DOM is ready
+  document.addEventListener('DOMContentLoaded', domContentLoadedHandler);
+  window.addEventListener('load', windowLoadHandler);
+})();
+
+// DOM Content Loaded handler - runs when DOM is initially parsed
+function domContentLoadedHandler() {
+  console.log('Selected emotion: recipient-selection.js:31');
   try {
     // Get the selected emotion from URL params
     const urlParams = new URLSearchParams(window.location.search);
     const emotion = urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
     console.log('Selected emotion:', emotion);
+    window.selectedEmotion = emotion;
     
     // Force UI to display
     document.body.style.display = 'block';
     document.body.style.visibility = 'visible';
     
-    // Initialize form elements
+    // Find the main container and ensure it's visible
+    const mainContainer = document.querySelector('main');
+    if (mainContainer) {
+      console.log('Main container found in DOMContentLoaded');
+      mainContainer.style.display = 'block';
+      mainContainer.style.visibility = 'visible';
+      mainContainer.style.opacity = '1';
+    } else {
+      console.error('Main container not found in DOMContentLoaded');
+    }
+    
+    // Initialize basic functionality
     initBasicFunctionality(emotion);
   } catch (e) {
     console.error('Critical initialization error:', e);
   }
-})();
+}
+
+// Window Load handler - runs when everything is fully loaded
+function windowLoadHandler() {
+  console.log('Window load event triggered');
+  try {
+    // One more attempt to ensure visibility
+    document.body.style.display = 'block';
+    document.body.style.visibility = 'visible';
+    
+    // Find the main container and ensure it's visible
+    const mainContainer = document.querySelector('main');
+    if (mainContainer) {
+      console.log('BUG: Force-showing main container');
+      mainContainer.style.display = 'block';
+      mainContainer.style.visibility = 'visible';
+      mainContainer.style.opacity = '1';
+      
+      // Also ensure the form is visible
+      const newConnectionForm = document.getElementById('new-connection-form');
+      if (newConnectionForm) {
+        console.log('BUG: Force-showing new connection form');
+        newConnectionForm.style.display = 'block';
+        newConnectionForm.style.visibility = 'visible';
+      }
+      
+      // Ensure relationship types are visible
+      const relationshipTypes = document.querySelectorAll('.relationship-type');
+      if (relationshipTypes.length) {
+        console.log('Found relationship types:', relationshipTypes.length);
+        relationshipTypes.forEach(type => {
+          type.style.display = 'block';
+          type.style.visibility = 'visible';
+          type.style.opacity = '1';
+        });
+      } else {
+        console.error('No relationship types found');
+      }
+    } else {
+      console.error('BUG: Main container not found in window.onload!');
+    }
+    
+    // Process URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const emotion = urlParams.get('emotion') || 'default';
+    console.log('BUG: URL parameter: emotion =', emotion);
+  } catch (e) {
+    console.error('Window load handler error:', e);
+  }
+}
 
 // Core functionality without Firebase dependency
 function initBasicFunctionality(emotion) {
-  console.log('Initializing basic functionality...');
+  console.log('Initializing basic functionality... recipient-selection.js:46');
   
   // Store emotion for later use
   window.selectedEmotion = emotion;
@@ -51,14 +121,17 @@ function initBasicFunctionality(emotion) {
   // Initialize relationship selection
   initRelationshipSelection();
   
-  // Set up buttons
+  // Set up back button
   const backButton = document.getElementById('back-btn');
   if (backButton) {
     backButton.addEventListener('click', function() {
       window.location.href = 'emotional-entry.html';
     });
+  } else {
+    console.error('Back button not found');
   }
   
+  // Set up next button
   const nextButton = document.getElementById('next-btn');
   if (nextButton) {
     nextButton.addEventListener('click', function() {
@@ -66,42 +139,39 @@ function initBasicFunctionality(emotion) {
         proceedToNextPage();
       }
     });
+  } else {
+    console.error('Next button not found');
   }
   
   // Navigation buttons
-  const dashboardBtn = document.getElementById('dashboard-btn');
-  if (dashboardBtn) {
-    dashboardBtn.addEventListener('click', function() {
-      window.location.href = 'home.html';
-    });
-  }
-  
-  const historyBtn = document.getElementById('history-btn');
-  if (historyBtn) {
-    historyBtn.addEventListener('click', function() {
-      window.location.href = 'history.html';
-    });
-  }
-  
-  const learnBtn = document.getElementById('learn-btn');
-  if (learnBtn) {
-    learnBtn.addEventListener('click', function() {
-      window.location.href = 'learn.html';
-    });
-  }
+  initNavigationButtons();
   
   console.log('Basic functionality initialized successfully');
 }
 
 // Initialize relationship type selection
 function initRelationshipSelection() {
+  console.log('Relationship selection initialized with 6 options');
   const relationshipTypes = document.querySelectorAll('.relationship-type');
   if (!relationshipTypes.length) {
-    console.error('Relationship type elements not found');
+    console.error('BUG: Relationship type elements not found');
+    
+    // Additional error logging to help debug
+    console.error('DOM structure debug:');
+    const formContainer = document.getElementById('new-connection-form');
+    if (formContainer) {
+      console.log('- Form container found:', formContainer.innerHTML.length, 'characters');
+    } else {
+      console.error('- Form container not found');
+    }
     return;
   }
   
   relationshipTypes.forEach(type => {
+    // Make sure they're visible
+    type.style.display = 'block';
+    type.style.visibility = 'visible';
+    
     type.addEventListener('click', function() {
       // Remove selected class from all types
       relationshipTypes.forEach(t => t.classList.remove('selected'));

@@ -12,10 +12,29 @@
             // Create and apply a style tag that forces visibility
             const forceDisplayStyle = document.createElement('style');
             forceDisplayStyle.textContent = `
-                body, main, .card-container, .input-container, #new-connection-form {
+                body, main, .card-container, .input-container, #new-connection-form,
+                .relationship-type, .relationship-types, .form-group, .form-label,
+                .relationship-icon, .relationship-label, .button-container,
+                #back-btn, #next-btn, .save-option, .btn-container,
+                .step-indicator, .page-title, .page-subtitle {
                     display: block !important;
                     visibility: visible !important;
                     opacity: 1 !important;
+                }
+                
+                .relationship-types {
+                    display: grid !important;
+                }
+                
+                .relationship-type {
+                    background: rgba(255, 255, 255, 0.05) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+                    cursor: pointer !important;
+                }
+                
+                .relationship-type.selected {
+                    background: rgba(255, 107, 157, 0.15) !important;
+                    border: 2px solid #ff6b9d !important;
                 }
             `;
             document.head.appendChild(forceDisplayStyle);
@@ -33,6 +52,17 @@
                 const form = document.getElementById('new-connection-form');
                 if (form) {
                     form.style.display = 'block';
+                    form.style.visibility = 'visible';
+                }
+                
+                // Force relationship types to display
+                const relationshipTypes = document.querySelectorAll('.relationship-type');
+                if (relationshipTypes.length) {
+                    relationshipTypes.forEach(type => {
+                        type.style.display = 'block';
+                        type.style.visibility = 'visible';
+                        type.style.opacity = '1';
+                    });
                 }
             }, 100);
         })();
@@ -56,8 +86,9 @@
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
             padding: 0;
-            display: block;
+            display: block !important;
             min-height: 100vh;
+            visibility: visible !important;
         }
         
         header {
@@ -73,7 +104,9 @@
             max-width: 800px;
             margin: 30px auto;
             padding: 20px;
-            display: block;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .page-title {
@@ -81,12 +114,14 @@
             font-weight: 700;
             margin-bottom: 12px;
             color: #ff6b9d;
+            display: block !important;
         }
         
         .page-subtitle {
             font-size: 16px;
             color: rgba(255, 255, 255, 0.7);
             margin-bottom: 40px;
+            display: block !important;
         }
         
         .input-container {
@@ -95,13 +130,15 @@
             padding: 30px;
             margin-bottom: 30px;
             border: 1px solid rgba(255, 255, 255, 0.08);
+            display: block !important;
+            visibility: visible !important;
         }
         
         .form-label {
             font-size: 16px;
             font-weight: 600;
             margin-bottom: 12px;
-            display: block;
+            display: block !important;
             color: white;
         }
         
@@ -117,10 +154,12 @@
         }
         
         .relationship-types {
-            display: grid;
+            display: grid !important;
             grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 16px;
             margin-top: 16px;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
         
         .relationship-type {
@@ -130,18 +169,34 @@
             padding: 16px 12px;
             text-align: center;
             cursor: pointer;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .relationship-type.selected {
+            background: rgba(255, 107, 157, 0.15);
+            border: 2px solid #ff6b9d;
+        }
+        
+        .relationship-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+            display: block !important;
         }
         
         .relationship-label {
             font-size: 14px;
             font-weight: 500;
             color: white;
+            display: block !important;
         }
         
         .step-indicator {
-            display: flex;
+            display: flex !important;
             justify-content: center;
             margin-bottom: 40px;
+            visibility: visible !important;
         }
         
         .step-dot {
@@ -172,34 +227,58 @@
         }
         
         .button-container {
-            display: flex;
+            display: flex !important;
             justify-content: space-between;
             margin-top: 30px;
         }
         
-        .next-button, .back-button {
+        .next-button, .back-button, .btn, #back-btn, #next-btn {
             padding: 12px 30px;
             border-radius: 30px;
             font-weight: 600;
             cursor: pointer;
             border: none;
             font-size: 16px;
+            display: inline-block !important;
+            visibility: visible !important;
         }
         
-        .next-button {
+        .next-button, .btn-next, #next-btn {
             background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
             color: white;
         }
         
-        .back-button {
+        .back-button, .btn-back, #back-btn {
             background: rgba(255, 255, 255, 0.1);
             color: white;
+        }
+        
+        .btn-container {
+            display: flex !important;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        
+        /* Error handling styles */
+        .error-message {
+            color: #ff4d4d;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid rgba(255, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .error-message.visible {
+            display: block;
         }
     </style>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/fix-visibility.css">
     
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -288,7 +367,7 @@
         </div>
         
         <!-- New Connection Form -->
-        <div class="input-container" id="new-connection-form">
+        <div class="input-container" id="new-connection-form" style="display: block !important; visibility: visible !important;">
             <div class="form-group">
                 <label class="form-label" for="recipient-name">Their name</label>
                 <input type="text" id="recipient-name" class="form-input" placeholder="Enter their name">
@@ -323,6 +402,11 @@
                     </div>
                 </div>
             </div>
+        </div>
+        
+        <!-- Error message placeholder -->
+        <div id="error-container" class="error-message">
+            <p>We encountered an error loading some content. Please try refreshing the page or click "Continue Without Login" above.</p>
         </div>
         
         <div class="save-connection-container">
@@ -403,10 +487,37 @@
                 debugConsole.style.display = 'block';
                 debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
             }
+            
+            // Show the error message container
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.classList.add('visible');
+            }
         });
         
         // Initialize bypass auth button
         document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOMContentLoaded event triggered in inline script');
+            
+            // Force visibility of critical elements
+            document.body.style.display = 'block';
+            document.body.style.visibility = 'visible';
+            
+            const mainContainer = document.querySelector('main');
+            if (mainContainer) {
+                mainContainer.style.display = 'block';
+                mainContainer.style.visibility = 'visible';
+                mainContainer.style.opacity = '1';
+                debugLog('Main container forced visible in DOMContentLoaded');
+            }
+            
+            const newConnectionForm = document.getElementById('new-connection-form');
+            if (newConnectionForm) {
+                newConnectionForm.style.display = 'block';
+                newConnectionForm.style.visibility = 'visible';
+                debugLog('Connection form forced visible');
+            }
+            
             const bypassAuthBtn = document.getElementById('bypass-auth-btn');
             if (bypassAuthBtn) {
                 bypassAuthBtn.addEventListener('click', function() {
@@ -428,11 +539,24 @@
                         '<div style="color:magenta">🚀 BYPASS ACTIVATED: Login skipped. You can continue using the form.</div>';
                 });
             }
+            
+            // Also manually force relationship types visibility
+            const relationshipTypes = document.querySelectorAll('.relationship-type');
+            if (relationshipTypes.length) {
+                debugLog(`Found ${relationshipTypes.length} relationship types, making them visible`);
+                relationshipTypes.forEach(type => {
+                    type.style.display = 'block';
+                    type.style.visibility = 'visible';
+                    type.style.opacity = '1';
+                });
+            } else {
+                debugLog('ERROR: Relationship types not found');
+            }
         });
         
         // Add debug button and ensure page is displayed immediately
         window.onload = function() {
-            debugLog('Window onload triggered');
+            debugLog('Window onload triggered in inline script');
             
             // Ensure all content is visible regardless of other scripts
             document.body.style.display = 'block';
@@ -443,7 +567,18 @@
                 mainContainer.style.display = 'block';
                 mainContainer.style.visibility = 'visible';
                 mainContainer.style.opacity = '1';
-                debugLog('Force-showing main container');
+                debugLog('Force-showing main container in window.onload');
+            }
+            
+            // Force relationship types visibility one more time
+            const relationshipTypes = document.querySelectorAll('.relationship-type');
+            if (relationshipTypes.length) {
+                debugLog(`Force-showing ${relationshipTypes.length} relationship types in window.onload`);
+                relationshipTypes.forEach(type => {
+                    type.style.display = 'block';
+                    type.style.visibility = 'visible';
+                    type.style.opacity = '1';
+                });
             }
             
             const debugBtn = document.createElement('button');
@@ -483,28 +618,6 @@
                 debugConsole.style.display = 'block';
             }
         };
-        
-        // Also use DOMContentLoaded as a backup
-        document.addEventListener('DOMContentLoaded', function() {
-            debugLog('DOMContentLoaded event triggered');
-            
-            // Ensure body is visible
-            document.body.style.display = 'block';
-            document.body.style.visibility = 'visible';
-            
-            // Check if main content is visible
-            const mainContainer = document.querySelector('main');
-            if (mainContainer) {
-                debugLog('Main container found in DOMContentLoaded');
-                
-                // Force main container to be visible
-                mainContainer.style.display = 'block';
-                mainContainer.style.visibility = 'visible';
-                mainContainer.style.opacity = '1';
-            } else {
-                debugLog('ERROR: Main container not found in DOMContentLoaded!');
-            }
-        });
     </script>
     
     <!-- JavaScript -->

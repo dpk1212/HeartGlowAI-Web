@@ -107,11 +107,18 @@ function initPage() {
     // Show debug button
     createDebugButton();
     
-    // Check authentication (with bypass option)
-    checkAuthentication();
-    
-    // Generate message
-    generateMessage();
+    // Use saved token if available
+    const savedToken = localStorage.getItem('authToken');
+    if (savedToken) {
+        logDebug('Using saved authentication token');
+        generateMessageWithToken(savedToken);
+    } else {
+        // Check authentication (with bypass option)
+        checkAuthentication();
+        
+        // Generate message
+        generateMessage();
+    }
     
     // Log page loaded
     logDebug('Page initialized successfully');
@@ -759,13 +766,44 @@ function createDebugButton() {
 }
 
 /**
- * Simple authentication check with bypass option
+ * Generate message using a previously saved token
+ */
+function generateMessageWithToken(token) {
+    if (!intentData || !toneData || !recipientData) {
+        showError('Missing required data to generate message');
+        return;
+    }
+    
+    try {
+        // Show loading state
+        document.getElementById('loading-state').style.display = 'flex';
+        document.getElementById('message-container').style.display = 'none';
+        document.getElementById('error-state').style.display = 'none';
+        document.getElementById('regenerate-options').style.display = 'none';
+        
+        logDebug('Generating message with saved token');
+        callCloudFunction(token);
+        
+    } catch (error) {
+        logDebug(`ERROR: Failed to generate message with token: ${error.message}`);
+        showError('Could not generate message: ' + error.message);
+    }
+}
+
+/**
+ * Check authentication and save token for future use
  */
 function checkAuthentication() {
     if (window.firebase && firebase.auth) {
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
                 logDebug(`User authenticated: ${user.uid}`);
+                
+                // Save token for future page loads
+                user.getIdToken(true).then(token => {
+                    localStorage.setItem('authToken', token);
+                    logDebug('Saved authentication token to localStorage');
+                });
             } else {
                 logDebug('No user logged in');
                 if (!authBypass) {
@@ -783,8 +821,14 @@ function checkAuthentication() {
     if (window.firebase && firebase.auth && !firebase.auth().currentUser) {
         logDebug('Attempting automatic anonymous authentication');
         firebase.auth().signInAnonymously()
-            .then(() => {
+            .then((userCredential) => {
                 logDebug('Automatic anonymous authentication successful');
+                
+                // Save token immediately after anonymous auth
+                userCredential.user.getIdToken(true).then(token => {
+                    localStorage.setItem('authToken', token);
+                    logDebug('Saved anonymous auth token to localStorage');
+                });
             })
             .catch((error) => {
                 logDebug(`ERROR: Automatic anonymous authentication failed: ${error.message}`);

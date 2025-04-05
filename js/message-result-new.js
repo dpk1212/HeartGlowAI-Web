@@ -102,6 +102,7 @@ function initPage() {
     initNavigation();
     initBypassAuth();
     initAdjustmentOptions();
+    initDevModeToggle();
     
     // Show debug button
     createDebugButton();
@@ -109,10 +110,8 @@ function initPage() {
     // Check authentication (with bypass option)
     checkAuthentication();
     
-    // Generate message (simulation)
-    setTimeout(() => {
-        generateMessage();
-    }, 2000); // Simulate API call delay
+    // Generate message
+    generateMessage();
     
     // Log page loaded
     logDebug('Page initialized successfully');
@@ -218,38 +217,222 @@ function generateMessage() {
     }
     
     try {
-        // In a real implementation, this would call an API
-        // For now, we'll use sample messages based on intent and tone
-        const intent = intentData.type || 'custom';
-        const tone = toneData.type || 'warm';
+        // Show loading state
+        document.getElementById('loading-state').style.display = 'flex';
+        document.getElementById('message-container').style.display = 'none';
+        document.getElementById('error-state').style.display = 'none';
+        document.getElementById('regenerate-options').style.display = 'none';
         
-        // Get sample message
-        let message = sampleMessages[intent][tone] || sampleMessages.custom[tone];
+        // Get current user's ID token for cloud function authentication
+        if (!firebase.auth().currentUser) {
+            showError('Authentication required. Please sign in to generate messages.');
+            return;
+        }
         
-        // Replace [NAME] with actual name
-        message = message.replace(/\[NAME\]/g, recipientData.name);
-        
-        // Apply any adjustments
-        message = applyAdjustments(message);
-        
-        // Store generated message
-        generatedMessage = message;
-        
-        // Hide loading, show message
-        document.getElementById('loading-state').style.display = 'none';
-        document.getElementById('message-container').style.display = 'block';
-        document.getElementById('regenerate-options').style.display = 'block';
-        
-        // Update message display
-        document.getElementById('message-content').textContent = message;
-        document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intent)}`;
-        document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(tone)}`;
-        
-        logDebug('Message generated successfully');
+        firebase.auth().currentUser.getIdToken(true)
+            .then(idToken => {
+                callCloudFunction(idToken);
+            })
+            .catch(error => {
+                logDebug(`ERROR: Failed to get auth token: ${error.message}`);
+                showError('Authentication error: ' + error.message);
+            });
     } catch (error) {
         logDebug(`ERROR: Failed to generate message: ${error.message}`);
-        showError('Could not generate message');
+        showError('Could not generate message: ' + error.message);
     }
+}
+
+/**
+ * Check if we're in development mode
+ */
+function isDevMode() {
+    // Never use dev mode / sample messages
+    return false;
+}
+
+/**
+ * Call the cloud function to generate a real message
+ */
+function callCloudFunction(idToken) {
+    logDebug('Calling cloud function for message generation');
+    
+    // Map our simplified data format to what the cloud function expects
+    const cloudFunctionPayload = {
+        scenario: getScenarioFromIntent(intentData.type),
+        relationshipType: recipientData.relationship,
+        tone: toneData.type || 'casual',
+        toneIntensity: getToneIntensity(toneData.type),
+        relationshipDuration: 'unspecified', // Could be added to recipient data in the future
+        specialCircumstances: intentData.customText || '',
+        recipientName: recipientData.name
+    };
+    
+    // Add any selected adjustments as special circumstances
+    if (selectedAdjustments.length > 0) {
+        cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
+    }
+    
+    logDebug('Cloud function payload:', JSON.stringify(cloudFunctionPayload));
+    
+    // Call the cloud function with timeout and retry
+    const fetchWithTimeout = (url, options, timeout = 30000) => {
+        return Promise.race([
+            fetch(url, options),
+            new Promise((_, reject) => 
+                setTimeout(() => reject(new Error('Request timed out')), timeout)
+            )
+        ]);
+    };
+    
+    const makeRequest = (retryCount = 0) => {
+        logDebug(`Calling cloud function (attempt ${retryCount + 1})`);
+        
+        fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(cloudFunctionPayload)
+        }, 60000) // 60 second timeout for AI-based functions
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Check if we have a message
+            if (!data.message) {
+                throw new Error('No message received from API');
+            }
+            
+            // Store generated message and insights
+            generatedMessage = data.message;
+            const insights = data.insights || [];
+            
+            // Hide loading, show message
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('message-container').style.display = 'block';
+            document.getElementById('regenerate-options').style.display = 'block';
+            
+            // Update message display
+            document.getElementById('message-content').textContent = data.message;
+            document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
+            document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
+            
+            // Display insights
+            displayInsights(insights);
+            
+            logDebug('Cloud function message generated successfully');
+        })
+        .catch(error => {
+            logDebug(`ERROR: Cloud function call failed: ${error.message}`);
+            
+            // Try again if we haven't exceeded max retries
+            if (retryCount < 2) {
+                logDebug(`Retrying request (${retryCount + 1}/2)...`);
+                setTimeout(() => makeRequest(retryCount + 1), 2000);
+            } else {
+                // If still failing after retries, show error
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('error-state').style.display = 'block';
+                document.getElementById('error-state').querySelector('.error-message').textContent = 
+                    `Failed to generate message: ${error.message}. Please try again.`;
+            }
+        });
+    };
+    
+    // Start request process
+    makeRequest();
+}
+
+/**
+ * Display insights from the API response
+ */
+function displayInsights(insights) {
+    const insightsContainer = document.getElementById('insights-container');
+    const insightsList = document.getElementById('insights-list');
+    
+    if (!insightsContainer || !insightsList) {
+        logDebug('ERROR: Insights container not found');
+        return;
+    }
+    
+    // Clear previous insights
+    insightsList.innerHTML = '';
+    
+    // If no insights, hide the container
+    if (!insights || !insights.length) {
+        insightsContainer.style.display = 'none';
+        return;
+    }
+    
+    // Show the container
+    insightsContainer.style.display = 'block';
+    
+    // Add each insight
+    insights.forEach(insight => {
+        const insightItem = document.createElement('div');
+        insightItem.style.marginBottom = '10px';
+        
+        // Try to extract title and description from the insight string
+        // Format is usually "Title: Description"
+        const parts = insight.split(/:\s+/);
+        if (parts.length >= 2) {
+            const title = parts[0];
+            const description = parts.slice(1).join(': ');
+            
+            insightItem.innerHTML = `<strong style="color: var(--text-color);">${title}:</strong> ${description}`;
+        } else {
+            // If not in expected format, just display the whole string
+            insightItem.textContent = insight;
+        }
+        
+        insightsList.appendChild(insightItem);
+    });
+    
+    logDebug(`Displayed ${insights.length} insights`);
+}
+
+/**
+ * Map intent type to scenario for the cloud function
+ */
+function getScenarioFromIntent(intentType) {
+    const scenarioMap = {
+        'reconnect': 'Reconnecting with someone after time apart',
+        'appreciate': 'Expressing gratitude and appreciation',
+        'apologize': 'Apologizing for a mistake or misunderstanding',
+        'celebrate': 'Celebrating an achievement or special occasion',
+        'encourage': 'Offering encouragement and support',
+        'invite': 'Inviting someone to an event or activity',
+        'custom': 'Custom message'
+    };
+    
+    return scenarioMap[intentType] || 'Custom message';
+}
+
+/**
+ * Convert tone to intensity level for the cloud function
+ */
+function getToneIntensity(toneType) {
+    const intensityMap = {
+        'warm': '3',
+        'professional': '2',
+        'casual': '3',
+        'enthusiastic': '5',
+        'sincere': '4',
+        'humorous': '4',
+        'formal': '2',
+        'custom': '3'
+    };
+    
+    return intensityMap[toneType] || '3';
 }
 
 /**
@@ -330,17 +513,13 @@ function initAdjustmentOptions() {
     
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', function() {
-            // In a real implementation, this would call the API again
-            // For now, we'll just reapply our adjustments to the original message
             if (generatedMessage) {
                 document.getElementById('loading-state').style.display = 'flex';
                 document.getElementById('message-container').style.display = 'none';
                 document.getElementById('regenerate-options').style.display = 'none';
                 
-                // Simulate API call delay
-                setTimeout(() => {
-                    generateMessage();
-                }, 1000);
+                // Call generateMessage to regenerate with the selected adjustments
+                generateMessage();
             }
         });
     }
@@ -646,4 +825,19 @@ function getInitials(name) {
 function capitalizeFirstLetter(string) {
     if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Initialize dev mode toggle button
+ */
+function initDevModeToggle() {
+    const toggleDevModeBtn = document.getElementById('toggle-dev-mode-btn');
+    const devModeStatus = document.getElementById('dev-mode-status');
+    
+    if (toggleDevModeBtn && devModeStatus) {
+        // Dev mode disabled - hide button
+        toggleDevModeBtn.style.display = 'none';
+        devModeStatus.textContent = 'USING API ONLY';
+        devModeStatus.style.color = '#4CAF50';
+    }
 } 

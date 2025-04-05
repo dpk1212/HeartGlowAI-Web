@@ -336,7 +336,7 @@ function checkAuthentication() {
             if (user) {
                 logDebug(`User authenticated via listener: ${user.uid}`);
                 
-                // Refresh auth token for next page
+                // Refresh auth token for next page but don't redirect
                 user.getIdToken(true).then(token => {
                     localStorage.setItem('authToken', token);
                     logDebug('Refreshed authentication token in localStorage');
@@ -350,8 +350,9 @@ function checkAuthentication() {
                 if (!authBypass) {
                     logDebug('Authentication required. Showing debug console with bypass option');
                     document.getElementById('debug-console').style.display = 'block';
-                    // Consider redirecting to login or showing a more prominent message
+                    // Consider redirecting to login but don't do it automatically
                     // showAlert('Authentication required. Please sign in.', 'error'); 
+                    // window.location.href = 'login.html'; // Don't redirect automatically
                 } else {
                      logDebug('Auth bypass enabled.');
                 }

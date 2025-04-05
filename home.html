@@ -454,6 +454,51 @@
       transform: translateY(-2px);
     }
     
+    /* Connection management */
+    .highlight-section {
+      animation: highlight-pulse 1.5s ease-in-out;
+    }
+    
+    @keyframes highlight-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 107, 157, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0); }
+    }
+    
+    .btn-danger {
+      background: #ff3b5c;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+      background: #ff1a3e;
+    }
+    
+    .manage-btn-inline {
+      background: none;
+      border: none;
+      color: var(--accent-pink);
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 0 10px;
+      margin-left: 10px;
+    }
+    
+    .manage-btn-inline:hover {
+      text-decoration: underline;
+    }
+    
     /* Loading states */
     .loading-state {
       padding: 20px;
@@ -683,10 +728,13 @@
         <div class="dashboard-section">
           <div class="section-header">
             <div class="section-title">
-              <i class="fas fa-users"></i> Your People
+              <i class="fas fa-users section-icon"></i>Your People
+              <button id="add-connection-btn" class="manage-btn-inline" title="Add New Person">
+                <i class="fas fa-plus-circle"></i> Add
+              </button>
             </div>
             <div class="section-actions">
-              <a href="#" id="manage-connections-btn">Manage <i class="fas fa-cog"></i></a>
+              <a href="#" id="manage-connections-btn" class="manage-link">Manage <i class="fas fa-cog"></i></a>
             </div>
           </div>
           <div class="section-content">
@@ -698,6 +746,13 @@
               
               <!-- Connections will be loaded here dynamically -->
             </ul>
+            
+            <!-- Bottom action button -->
+            <div class="empty-state-bottom" style="text-align: center; padding: 15px 0 5px 0;">
+              <button id="add-person-btn" class="empty-action">
+                <i class="fas fa-plus-circle"></i> Add a Person
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -801,5 +856,38 @@
     debugLog('Page script section loaded');
   </script>
   <script src="js/home.js"></script>
+
+  <!-- Add Connection Modal -->
+  <div id="connection-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h2 id="modal-title">Add New Connection</h2>
+      <form id="connection-form">
+        <input type="hidden" id="connection-id"> <!-- Used for editing -->
+        <div class="form-group">
+          <label for="connection-name">Name:</label>
+          <input type="text" id="connection-name" required>
+        </div>
+        <div class="form-group">
+          <label for="connection-relationship">Relationship:</label>
+          <select id="connection-relationship" required>
+            <option value="" disabled selected>Select relationship...</option>
+            <option value="partner">Partner</option>
+            <option value="friend">Friend</option>
+            <option value="family">Family</option>
+            <option value="colleague">Colleague</option>
+            <option value="acquaintance">Acquaintance</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" id="save-connection-btn" class="btn-primary">Save Connection</button>
+          <button type="button" id="cancel-connection-btn" class="btn-secondary">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Font Awesome Kit -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html> 

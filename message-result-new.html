@@ -520,7 +520,7 @@
     <div id="debug-console">
         <div id="debug-output"></div>
         <div style="display: flex; gap: 10px; margin-top: 5px;">
-            <button id="bypass-auth-btn">Bypass Authentication</button>
+            <button id="bypass-auth-btn">Sign In Anonymously</button>
             <button id="toggle-dev-mode-btn">Toggle Dev Mode</button>
             <div id="dev-mode-status" style="color: #AAA; font-size: 12px; margin-left: 10px; line-height: 26px;"></div>
         </div>
@@ -540,6 +540,13 @@
         // Initialize Firebase if not already initialized
         if (!window.firebase || !firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+        }
+        
+        // Pre-load the authentication state
+        if (window.firebase && firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                console.log("Auth state changed:", user ? "User logged in" : "No user");
+            });
         }
     </script>
     <script src="js/message-result-new.js"></script>

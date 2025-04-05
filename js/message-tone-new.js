@@ -323,29 +323,45 @@ function createDebugButton() {
  * Simple authentication check with bypass option
  */
 function checkAuthentication() {
+    // First, check if we have a token from a previous step
+    const storedToken = localStorage.getItem('authToken');
+    if (storedToken) {
+        logDebug('Found auth token in localStorage. Assuming authenticated initially.');
+        // Optional: We could try to verify this token or use it,
+        // but for now, just knowing it exists helps bridge the gap.
+    }
+
     if (window.firebase && firebase.auth) {
         firebase.auth().onAuthStateChanged(function(user) {
             if (user) {
-                logDebug(`User authenticated: ${user.uid}`);
+                logDebug(`User authenticated via listener: ${user.uid}`);
                 
-                // Save auth token for next page
+                // Refresh auth token for next page
                 user.getIdToken(true).then(token => {
                     localStorage.setItem('authToken', token);
-                    logDebug('Saved authentication token to localStorage');
+                    logDebug('Refreshed authentication token in localStorage');
                 }).catch(error => {
-                    logDebug(`ERROR: Failed to get auth token: ${error.message}`);
+                    logDebug(`ERROR: Failed to refresh auth token: ${error.message}`);
                 });
             } else {
-                logDebug('No user logged in');
+                logDebug('Auth listener reports no user logged in.');
+                // Clear potentially stale token if listener confirms logged out
+                localStorage.removeItem('authToken'); 
                 if (!authBypass) {
-                    logDebug('Authentication check failed, showing debug console with bypass option');
+                    logDebug('Authentication required. Showing debug console with bypass option');
                     document.getElementById('debug-console').style.display = 'block';
+                    // Consider redirecting to login or showing a more prominent message
+                    // showAlert('Authentication required. Please sign in.', 'error'); 
+                } else {
+                     logDebug('Auth bypass enabled.');
                 }
             }
         });
     } else {
         logDebug('WARNING: Firebase auth not available');
-        document.getElementById('debug-console').style.display = 'block';
+        if (!storedToken && !authBypass) { // Only show debug if no token and no bypass
+             document.getElementById('debug-console').style.display = 'block';
+        }
     }
 }
 

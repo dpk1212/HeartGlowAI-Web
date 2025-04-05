@@ -478,12 +478,13 @@ function saveToneAndNavigate() {
         
         // Authentication check and token saving BEFORE navigation
         const currentUser = firebase.auth().currentUser;
-        
+        const storedToken = localStorage.getItem('authToken'); // Check localStorage too
+
         if (currentUser) {
-            logDebug('User found. Getting auth token before navigating...');
+            logDebug('User found via firebase.auth().currentUser. Getting auth token before navigating...');
             currentUser.getIdToken(true) // Force refresh token
                 .then(token => {
-                    logDebug('Successfully got auth token.');
+                    logDebug('Successfully got fresh auth token.');
                     localStorage.setItem('authToken', token);
                     logDebug('Auth token saved to localStorage.');
                     
@@ -493,10 +494,17 @@ function saveToneAndNavigate() {
                     window.location.href = nextPage;
                 })
                 .catch(error => {
-                    logDebug(`ERROR: Failed to get auth token before navigation: ${error.message}`);
+                    logDebug(`ERROR: Failed to get fresh auth token before navigation: ${error.message}`);
                     showAlert('Could not verify authentication. Please try again.', 'error');
                     // Do not navigate if token retrieval fails
                 });
+        } else if (storedToken && !authBypass) {
+            // Fallback: If currentUser is null BUT we have a token from the previous page
+            logDebug('firebase.auth().currentUser is null, but found authToken in localStorage. Proceeding with stored token assumption.');
+            // Navigate directly, assuming the token is valid. The next page will verify.
+            const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
+            logDebug(`Navigating (using stored token assumption) to: ${nextPage}`);
+            window.location.href = nextPage; 
         } else if (authBypass) {
              logDebug('Auth bypass enabled. Navigating without saving token.');
              // Navigate without token (as bypass is enabled)
@@ -504,8 +512,9 @@ function saveToneAndNavigate() {
              logDebug(`Navigating (bypass) to: ${nextPage}`);
              window.location.href = nextPage;
         } else {
-            logDebug('ERROR: No authenticated user found before navigation.');
-            showAlert('Authentication required. Please ensure you are logged in.', 'error');
+            // Error: No currentUser, no storedToken, and no bypass
+            logDebug('ERROR: No authenticated user found (currentUser is null and no stored token). Authentication required.');
+            showAlert('Authentication required. Please ensure you are logged in or try again.', 'error');
             // Do not navigate
         }
     } catch (error) {

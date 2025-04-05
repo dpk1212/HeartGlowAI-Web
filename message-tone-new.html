@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Message Tone - HeartGlow AI</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <style>
+        :root {
+            --primary-color: #D53F8C;
+            --secondary-color: #805AD5;
+            --background-dark: #1A202C;
+            --text-color: #E2E8F0;
+            --container-bg: #2D3748;
+            --selected-bg: rgba(213, 63, 140, 0.3);
+            --error-color: #F56565;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-dark);
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 14px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .steps-indicator {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            width: 80px;
+            height: 4px;
+            background-color: #4A5568;
+            margin: 0 5px;
+            border-radius: 2px;
+        }
+
+        .step.active {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .recipient-display {
+            display: flex;
+            align-items: center;
+            background-color: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .recipient-avatar {
+            width: 50px;
+            height: 50px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .recipient-info {
+            flex-grow: 1;
+        }
+
+        .recipient-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .recipient-relationship {
+            font-size: 14px;
+            color: #A0AEC0;
+        }
+
+        .tones-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .tone-option {
+            background-color: var(--container-bg);
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+
+        .tone-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .tone-option.selected {
+            border-color: var(--primary-color);
+            background-color: var(--selected-bg);
+        }
+
+        .tone-emoji {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .tone-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .tone-description {
+            font-size: 14px;
+            color: #A0AEC0;
+        }
+
+        .custom-tone-form {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .custom-tone-form.active {
+            display: block;
+        }
+
+        .custom-tone-label {
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .custom-tone-input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #4A5568;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        .back-btn, .next-btn {
+            padding: 12px 20px;
+            border-radius: 30px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn {
+            background-color: transparent;
+            border: 1px solid var(--text-color);
+            color: var(--text-color);
+        }
+
+        .back-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .next-btn {
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            border: none;
+            color: white;
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .next-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            background-color: var(--error-color);
+            color: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: opacity 0.3s ease;
+        }
+
+        .hidden {
+            opacity: 0;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        /* Debug Console */
+        #debug-console {
+            position: fixed;
+            bottom: 40px;
+            right: 10px;
+            width: 300px;
+            height: 200px;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: 1px solid #444;
+            border-radius: 4px;
+            padding: 10px;
+            display: none;
+            z-index: 9999;
+        }
+
+        #debug-output {
+            height: 140px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            color: #DDD;
+            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        #bypass-auth-btn {
+            background-color: #F56565;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Alert styles */
+        .alert {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            z-index: 9999;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-out;
+            width: 300px;
+        }
+
+        .alert.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .alert-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-message {
+            flex-grow: 1;
+        }
+
+        .alert-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .alert-info {
+            background-color: #4299E1;
+            color: white;
+        }
+
+        .alert-error {
+            background-color: #F56565;
+            color: white;
+        }
+
+        .alert-success {
+            background-color: #48BB78;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with navigation -->
+        <div class="header">
+            <div class="nav-buttons">
+                <button id="dashboard-btn" class="nav-btn">Dashboard</button>
+                <button id="history-btn" class="nav-btn">History</button>
+                <button id="learn-btn" class="nav-btn">Learn</button>
+            </div>
+            <button id="logout-btn" class="nav-btn">Logout</button>
+        </div>
+
+        <!-- Steps indicator -->
+        <div class="steps-indicator">
+            <div class="step active"></div>
+            <div class="step active"></div>
+            <div class="step active"></div>
+            <div class="step"></div>
+        </div>
+
+        <!-- Error message -->
+        <div id="error-message" class="error-message hidden">
+            Please select a tone before continuing.
+        </div>
+
+        <!-- Page title and subtitle -->
+        <h1 class="page-title">How should your message feel?</h1>
+        <p class="subtitle">Choose a tone that best conveys your emotional message.</p>
+
+        <!-- Recipient display -->
+        <div class="recipient-display">
+            <div id="recipient-avatar" class="recipient-avatar">K</div>
+            <div class="recipient-info">
+                <div id="recipient-name-display" class="recipient-name">Recipient Name</div>
+                <div id="recipient-relationship-display" class="recipient-relationship">Relationship</div>
+            </div>
+        </div>
+
+        <!-- Tone selection -->
+        <div class="tones-container">
+            <div class="tone-option" data-tone="warm">
+                <div class="tone-emoji">☀️</div>
+                <div class="tone-title">Warm</div>
+                <div class="tone-description">Friendly, caring, and inviting</div>
+            </div>
+            <div class="tone-option" data-tone="professional">
+                <div class="tone-emoji">👔</div>
+                <div class="tone-title">Professional</div>
+                <div class="tone-description">Polite, respectful, and straightforward</div>
+            </div>
+            <div class="tone-option" data-tone="casual">
+                <div class="tone-emoji">😎</div>
+                <div class="tone-title">Casual</div>
+                <div class="tone-description">Relaxed, informal, and conversational</div>
+            </div>
+            <div class="tone-option" data-tone="enthusiastic">
+                <div class="tone-emoji">🎉</div>
+                <div class="tone-title">Enthusiastic</div>
+                <div class="tone-description">Energetic, excited, and positive</div>
+            </div>
+            <div class="tone-option" data-tone="sincere">
+                <div class="tone-emoji">💗</div>
+                <div class="tone-title">Sincere</div>
+                <div class="tone-description">Heartfelt, honest, and authentic</div>
+            </div>
+            <div class="tone-option" data-tone="humorous">
+                <div class="tone-emoji">😄</div>
+                <div class="tone-title">Humorous</div>
+                <div class="tone-description">Playful, light-hearted, and amusing</div>
+            </div>
+            <div class="tone-option" data-tone="formal">
+                <div class="tone-emoji">📜</div>
+                <div class="tone-title">Formal</div>
+                <div class="tone-description">Traditional, proper, and ceremonious</div>
+            </div>
+            <div class="tone-option" data-tone="custom">
+                <div class="tone-emoji">✏️</div>
+                <div class="tone-title">Custom</div>
+                <div class="tone-description">Define your own tone</div>
+            </div>
+        </div>
+
+        <!-- Custom tone form -->
+        <div id="custom-tone-form" class="custom-tone-form">
+            <label for="custom-tone" class="custom-tone-label">Describe your custom tone:</label>
+            <input type="text" id="custom-tone" class="custom-tone-input" placeholder="e.g., Slightly formal but with warmth">
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="navigation-buttons">
+            <button id="back-btn" class="back-btn">← Back</button>
+            <button id="next-btn" class="next-btn" disabled>Next →</button>
+        </div>
+    </div>
+
+    <!-- Debug console -->
+    <div id="debug-console">
+        <div id="debug-output"></div>
+        <button id="bypass-auth-btn">Bypass Authentication</button>
+    </div>
+
+    <!-- Firebase initialization -->
+    <script>
+        var firebaseConfig = {
+            apiKey: "AIzaSyC5nsHY3Nv8yYSM_LqMGnkPPi4AXpJvYO0",
+            authDomain: "connectly-a64ee.firebaseapp.com",
+            projectId: "connectly-a64ee",
+            storageBucket: "connectly-a64ee.appspot.com",
+            messagingSenderId: "1007000171311",
+            appId: "1:1007000171311:web:0a1d000c0bc0bfc7baa5a1"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+    </script>
+    <script src="js/message-tone-new.js"></script>
+</body>
+</html> 

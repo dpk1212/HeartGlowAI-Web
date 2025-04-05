@@ -266,8 +266,11 @@ function callCloudFunction(idToken) {
         relationshipDuration: 'unspecified', // Could be added to recipient data in the future
         specialCircumstances: intentData.customText || '',
         recipientName: recipientData.name,
-        // Add API key in the request for fallback (cloud function can still use Firestore if available)
-        apiKey: 'USE-DIRECT-SECRETS-ACCESS' // Placeholder for cloud function to recognize direct mode
+        // Add API key path info based on Firestore structure
+        secretsPath: 'secrets/secrets', // Match the path in Firestore rules
+        secretsKey: 'openaikey',       // Match the field name visible in Firestore
+        // Fallback mode flag
+        useFallback: true              // Tell the server to try alternative API key paths
     };
     
     // Add any selected adjustments as special circumstances
@@ -337,17 +340,29 @@ function callCloudFunction(idToken) {
             logDebug(`ERROR: Cloud function call failed: ${error.message}`);
             
             // If this is API key error, try alternative endpoint
-            if (error.message.includes('API key not valid') && retryCount === 0) {
-                logDebug('API key error detected, trying fallback endpoint');
+            if (error.message.includes('API key') || error.message.includes('Failed to access API key') || retryCount === 0) {
+                logDebug('API key error detected or first attempt failed, trying fallback endpoint');
+                
+                // Create a modified payload with alternate paths to try
+                const fallbackPayload = {
+                    ...cloudFunctionPayload,
+                    // Try additional paths where the API key might be located
+                    apiKeyPaths: [
+                        {path: 'secrets/secrets', field: 'openaikey'},
+                        {path: 'api-keys/openai', field: 'apiKey'}, 
+                        {path: 'secrets/openai', field: 'apiKey'},
+                        {path: 'config/openai', field: 'apiKey'}
+                    ]
+                };
                 
                 // Try direct API call instead - requires separate handler
-                fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/directGenerate', {
+                fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${idToken}`
                     },
-                    body: JSON.stringify(cloudFunctionPayload)
+                    body: JSON.stringify(fallbackPayload)
                 }, 60000)
                 .then(response => response.json())
                 .then(data => {
@@ -372,19 +387,19 @@ function callCloudFunction(idToken) {
                     // Display insights
                     displayInsights(insights);
                     
-                    logDebug('Direct message generation successful');
+                    logDebug('Fallback message generation successful');
                 })
-                .catch(directError => {
-                    logDebug(`ERROR: Direct API call failed: ${directError.message}`);
+                .catch(fallbackError => {
+                    logDebug(`ERROR: Fallback API call failed: ${fallbackError.message}`);
                     if (retryCount < 2) {
-                        logDebug(`Retrying original request (${retryCount + 1}/2)...`);
+                        logDebug(`Retrying with increased retry count (${retryCount + 1}/2)...`);
                         setTimeout(() => makeRequest(retryCount + 1), 2000);
                     } else {
                         // If still failing after retries, show error
                         document.getElementById('loading-state').style.display = 'none';
                         document.getElementById('error-state').style.display = 'block';
                         document.getElementById('error-state').querySelector('.error-message').textContent = 
-                            `Failed to generate message: ${directError.message}. Please try again.`;
+                            `Failed to generate message: ${fallbackError.message}. Please try again.`;
                     }
                 });
                 return;

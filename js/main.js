@@ -443,7 +443,12 @@
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           console.log("User already authenticated, redirecting to home page");
-          window.location.href = 'home.html';
+          // Only redirect to home page if we're on the landing page (index.html)
+          // This prevents the login page from redirecting immediately after being loaded
+          const isLoginPage = window.location.pathname.includes('login.html');
+          if (!isLoginPage) {
+            window.location.href = 'home.html';
+          }
         } else {
           console.log("No authenticated user, showing welcome screen");
         }

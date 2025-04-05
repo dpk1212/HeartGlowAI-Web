@@ -653,8 +653,22 @@ function initBypassAuth() {
     const bypassAuthBtn = document.getElementById('bypass-auth-btn');
     if (bypassAuthBtn) {
         bypassAuthBtn.addEventListener('click', function() {
-            logDebug('AUTH BYPASS ACTIVATED - continuing without authentication');
+            logDebug('AUTH BYPASS ACTIVATED - signing in anonymously');
             authBypass = true;
+            
+            // Sign in anonymously instead of just bypassing
+            if (window.firebase && firebase.auth) {
+                firebase.auth().signInAnonymously()
+                    .then(() => {
+                        logDebug('Anonymous authentication successful');
+                        // Regenerate message
+                        generateMessage();
+                    })
+                    .catch((error) => {
+                        logDebug(`ERROR: Anonymous authentication failed: ${error.message}`);
+                        showError(`Authentication error: ${error.message}`);
+                    });
+            }
             
             // Show debug console
             document.getElementById('debug-console').style.display = 'block';
@@ -708,6 +722,20 @@ function checkAuthentication() {
     } else {
         logDebug('WARNING: Firebase auth not available');
         document.getElementById('debug-console').style.display = 'block';
+    }
+    
+    // Try anonymous authentication automatically if no user is logged in
+    if (window.firebase && firebase.auth && !firebase.auth().currentUser) {
+        logDebug('Attempting automatic anonymous authentication');
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                logDebug('Automatic anonymous authentication successful');
+            })
+            .catch((error) => {
+                logDebug(`ERROR: Automatic anonymous authentication failed: ${error.message}`);
+                // Still show the bypass button
+                document.getElementById('debug-console').style.display = 'block';
+            });
     }
 }
 

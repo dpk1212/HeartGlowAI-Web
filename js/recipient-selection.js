@@ -9,41 +9,114 @@ let selectedRelation = null;
 let selectedConnection = null;
 let selectedEmotion = null;
 
-// Initialize app on page load
-document.addEventListener('DOMContentLoaded', function() {
-  console.log('Recipient selection page loaded, initializing...');
+// Debug logging
+function debugInPage(message) {
+  console.log('DEBUG JS:', message);
+  const debugOutput = document.getElementById('debug-output');
+  if (debugOutput) {
+    const logEntry = document.createElement('div');
+    logEntry.textContent = `[JS ${new Date().toLocaleTimeString()}] ${message}`;
+    debugOutput.appendChild(logEntry);
+  }
+}
+
+// Initialize app on page load - using both event handlers to ensure it runs
+function initApp() {
+  debugInPage('Recipient selection script starting...');
   
-  // Get the selected emotion from URL params or localStorage
-  const urlParams = new URLSearchParams(window.location.search);
-  selectedEmotion = urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
-  console.log('Selected emotion:', selectedEmotion);
-  
-  // Check authentication status
-  firebase.auth().onAuthStateChanged(function(user) {
-    if (user) {
-      console.log('User authenticated:', user.uid);
-      currentUser = user;
-      initializeSelectionPage();
-      loadUserConnections();
-    } else {
-      console.log('No user logged in, redirecting to login page');
-      window.location.href = 'login.html';
+  try {
+    // Get the selected emotion from URL params or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    selectedEmotion = urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
+    debugInPage('Selected emotion: ' + selectedEmotion);
+    
+    // Initialize UI components regardless of auth status
+    debugInPage('Initializing UI components...');
+    initializeRelationshipSelection();
+    initializeSaveOptions();
+    initNavigationButtons();
+    
+    // Initialize the selection page for basic functionality
+    initializeSelectionPage();
+    
+    // Force display of the main form container
+    const newConnectionForm = document.getElementById('new-connection-form');
+    if (newConnectionForm) {
+      newConnectionForm.style.display = 'block';
+      debugInPage('Forced new connection form to display');
     }
-  });
-  
-  // Initialize relationship type selection
-  initializeRelationshipSelection();
-  
-  // Initialize save options
-  initializeSaveOptions();
-  
-  // Initialize navigation buttons
-  initNavigationButtons();
+    
+    // Check authentication status - but don't block the page on it
+    if (window.firebase && firebase.auth) {
+      debugInPage('Firebase auth found, checking login status...');
+      
+      // Set a timeout to prevent hanging on auth
+      const authTimeout = setTimeout(() => {
+        debugInPage('AUTH TIMEOUT - proceeding without waiting for Firebase');
+        document.getElementById('debug-output').innerHTML += '<div style="color:orange">⚠️ Auth timed out - continuing anyway</div>';
+      }, 3000);
+      
+      firebase.auth().onAuthStateChanged(function(user) {
+        clearTimeout(authTimeout);
+        
+        if (user) {
+          debugInPage('User authenticated: ' + user.uid);
+          currentUser = user;
+          
+          // Try to load user connections, but don't block if it fails
+          try {
+            loadUserConnections();
+          } catch (error) {
+            debugInPage('Error loading connections: ' + error.message);
+          }
+        } else {
+          debugInPage('No user logged in, continuing in guest mode');
+          document.getElementById('debug-output').innerHTML += '<div style="color:yellow">ℹ️ Not logged in - running in limited mode</div>';
+          
+          // Hide save options that require authentication
+          const saveConnectionOption = document.getElementById('save-connection');
+          if (saveConnectionOption) {
+            saveConnectionOption.disabled = true;
+            saveConnectionOption.parentElement.parentElement.style.opacity = '0.5';
+          }
+        }
+      });
+    } else {
+      debugInPage('Firebase auth not available - continuing in offline mode');
+      document.getElementById('debug-output').innerHTML += '<div style="color:orange">⚠️ Firebase not initialized - continuing without authentication</div>';
+    }
+  } catch (error) {
+    debugInPage('INITIALIZATION ERROR: ' + error.message);
+    console.error('App init error:', error);
+    
+    // Even if there's an error, try to make the form usable
+    const newConnectionForm = document.getElementById('new-connection-form');
+    if (newConnectionForm) {
+      newConnectionForm.style.display = 'block';
+    }
+  }
+}
+
+// Run initialization using both event handlers to ensure it runs
+window.addEventListener('load', function() {
+  debugInPage('Window load event received');
+  initApp();
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+  debugInPage('DOMContentLoaded event received');
+  initApp();
+});
+
+// Force init after a short delay as a fallback
+setTimeout(function() {
+  debugInPage('Timeout initialization triggered');
+  initApp();
+}, 1000);
 
 // Initialize the recipient selection page
 function initializeSelectionPage() {
-  console.log('Initializing recipient selection page');
+  debugInPage('Initializing recipient selection page');
   
   // Back button
   const backBtn = document.getElementById('back-btn');
@@ -51,6 +124,8 @@ function initializeSelectionPage() {
     backBtn.addEventListener('click', function() {
       window.location.href = 'emotional-entry.html';
     });
+  } else {
+    debugInPage('Back button not found');
   }
   
   // Next button
@@ -61,6 +136,8 @@ function initializeSelectionPage() {
         saveRecipientAndNavigate();
       }
     });
+  } else {
+    debugInPage('Next button not found');
   }
   
   // Toggle between saved and new connection
@@ -84,7 +161,7 @@ function initializeSelectionPage() {
         })
         .catch((error) => {
           console.error('Logout error:', error);
-          showAlert(`Logout error: ${error.message}`, 'error');
+          debugInPage('Logout error: ' + error.message);
         });
     });
   }
@@ -241,7 +318,7 @@ function loadUserConnections() {
     });
 }
 
-// Validate form before proceeding
+// Validate form inputs before proceeding
 function validateForm() {
   // If a saved connection is selected, no need to validate other fields
   if (selectedConnection) {
@@ -289,39 +366,52 @@ function saveRecipientAndNavigate() {
       isExisting: false
     };
     
-    // Save new connection if checkbox is checked
+    // Only try to save to Firebase if we're authenticated
     const saveConnectionCheckbox = document.getElementById('save-connection');
-    if (saveConnectionCheckbox && saveConnectionCheckbox.checked && currentUser) {
-      // Save to Firestore
-      firebase.firestore()
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('connections')
-        .add({
-          name: name,
-          relationship: selectedRelation,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        })
-        .then((docRef) => {
-          console.log('Connection saved with ID:', docRef.id);
-          recipientData.id = docRef.id;
-          
-          // Set reminder if requested
-          setReminderIfNeeded(docRef.id, name);
-        })
-        .catch((error) => {
-          console.error('Error saving connection:', error);
-        });
-    } else {
-      // Set reminder if requested (even if not saving the connection)
-      setReminderIfNeeded(null, name);
+    if (saveConnectionCheckbox && saveConnectionCheckbox.checked && currentUser && window.firebase) {
+      try {
+        // Save to Firestore
+        debugInPage('Saving connection to Firestore...');
+        firebase.firestore()
+          .collection('users')
+          .doc(currentUser.uid)
+          .collection('connections')
+          .add({
+            name: name,
+            relationship: selectedRelation,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+          })
+          .then((docRef) => {
+            debugInPage('Connection saved with ID: ' + docRef.id);
+            recipientData.id = docRef.id;
+            
+            // Set reminder if requested
+            setReminderIfNeeded(docRef.id, name);
+          })
+          .catch((error) => {
+            debugInPage('Error saving connection: ' + error.message);
+            console.error('Error saving connection:', error);
+            // Continue to next page despite the error
+          });
+      } catch (error) {
+        debugInPage('Failed to save connection: ' + error.message);
+        // Continue despite errors
+      }
+    } else if (saveConnectionCheckbox && saveConnectionCheckbox.checked) {
+      debugInPage('Cannot save connection - user not authenticated or Firebase unavailable');
     }
   }
   
   // Store recipient data for next page
-  localStorage.setItem('recipientData', JSON.stringify(recipientData));
+  try {
+    localStorage.setItem('recipientData', JSON.stringify(recipientData));
+    debugInPage('Recipient data saved to localStorage');
+  } catch (error) {
+    debugInPage('Error saving to localStorage: ' + error.message);
+  }
   
   // Navigate to message intent page
+  debugInPage('Navigating to message intent page...');
   window.location.href = `message-intent.html?emotion=${selectedEmotion}`;
 }
 

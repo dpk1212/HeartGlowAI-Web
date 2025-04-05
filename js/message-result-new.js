@@ -223,20 +223,47 @@ function generateMessage() {
         document.getElementById('error-state').style.display = 'none';
         document.getElementById('regenerate-options').style.display = 'none';
         
-        // Get current user's ID token for cloud function authentication
-        if (!firebase.auth().currentUser) {
-            showError('Authentication required. Please sign in to generate messages.');
-            return;
-        }
-        
-        firebase.auth().currentUser.getIdToken(true)
-            .then(idToken => {
-                callCloudFunction(idToken);
-            })
-            .catch(error => {
-                logDebug(`ERROR: Failed to get auth token: ${error.message}`);
-                showError('Authentication error: ' + error.message);
+        // Check if already authenticated
+        if (firebase.auth().currentUser) {
+            logDebug('User already authenticated, proceeding with message generation');
+            firebase.auth().currentUser.getIdToken(true)
+                .then(idToken => {
+                    callCloudFunction(idToken);
+                })
+                .catch(error => {
+                    logDebug(`ERROR: Failed to get auth token: ${error.message}`);
+                    showError('Authentication error: ' + error.message);
+                });
+        } else {
+            // Not authenticated yet, wait for auth state to change
+            logDebug('No user authenticated yet, waiting for authentication...');
+            
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    logDebug('User authenticated, now proceeding with message generation');
+                    user.getIdToken(true)
+                        .then(idToken => {
+                            callCloudFunction(idToken);
+                        })
+                        .catch(error => {
+                            logDebug(`ERROR: Failed to get auth token: ${error.message}`);
+                            showError('Authentication error: ' + error.message);
+                        });
+                } else {
+                    // Still not authenticated after auth state change, try anonymous sign-in
+                    logDebug('Still not authenticated, attempting anonymous sign-in');
+                    firebase.auth().signInAnonymously()
+                        .then(() => {
+                            logDebug('Anonymous authentication successful, retrying message generation');
+                            // The onAuthStateChanged above will trigger again with the new user
+                        })
+                        .catch((error) => {
+                            logDebug(`ERROR: Anonymous authentication failed: ${error.message}`);
+                            showError('Authentication required. Please sign in to generate messages.');
+                        });
+                }
             });
+        }
     } catch (error) {
         logDebug(`ERROR: Failed to generate message: ${error.message}`);
         showError('Could not generate message: ' + error.message);

@@ -284,30 +284,60 @@ function isDevMode() {
 function callCloudFunction(idToken) {
     logDebug('Calling cloud function for message generation');
     
-    // Map our simplified data format to what the cloud function expects
-    const cloudFunctionPayload = {
-        scenario: getScenarioFromIntent(intentData.type),
-        relationshipType: recipientData.relationship,
-        tone: toneData.type || 'casual',
-        toneIntensity: getToneIntensity(toneData.type),
-        relationshipDuration: 'unspecified', // Could be added to recipient data in the future
-        specialCircumstances: intentData.customText || '',
-        recipientName: recipientData.name,
-        // Add API key path info based on Firestore structure
-        secretsPath: 'secrets/secrets', // Match the path in Firestore rules
-        secretsKey: 'openaikey',       // Match the field name visible in Firestore
-        // Fallback mode flag
-        useFallback: true              // Tell the server to try alternative API key paths
-    };
+    // First, fetch the API key directly from Firestore
+    const db = firebase.firestore();
+    db.collection('secrets').doc('secrets').get()
+        .then(doc => {
+            if (!doc.exists) {
+                throw new Error('API key document not found');
+            }
+            
+            const apiKeyData = doc.data();
+            if (!apiKeyData || !apiKeyData.openaikey) {
+                throw new Error('API key not found in document');
+            }
+            
+            logDebug('Successfully retrieved API key from Firestore');
+            
+            // Now proceed with cloud function call, including the API key in payload
+            const cloudFunctionPayload = {
+                scenario: getScenarioFromIntent(intentData.type),
+                relationshipType: recipientData.relationship,
+                tone: toneData.type || 'casual',
+                toneIntensity: getToneIntensity(toneData.type),
+                relationshipDuration: 'unspecified',
+                specialCircumstances: intentData.customText || '',
+                recipientName: recipientData.name,
+                // Directly include the API key in the payload
+                apiKey: apiKeyData.openaikey,
+                // For backward compatibility
+                secretsPath: 'secrets/secrets',
+                secretsKey: 'openaikey',
+                useFallback: true
+            };
+            
+            // Add any selected adjustments as special circumstances
+            if (selectedAdjustments.length > 0) {
+                cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
+            }
+            
+            logDebug('Cloud function payload prepared with API key');
+            
+            // Continue with normal request flow
+            makeRequest(cloudFunctionPayload, idToken);
+        })
+        .catch(error => {
+            logDebug(`ERROR: Failed to fetch API key: ${error.message}`);
+            showError('Failed to access API key: ' + error.message);
+        });
+}
+
+/**
+ * Make the actual request to the cloud function
+ */
+function makeRequest(payload, idToken, retryCount = 0) {
+    logDebug(`Calling cloud function (attempt ${retryCount + 1})`);
     
-    // Add any selected adjustments as special circumstances
-    if (selectedAdjustments.length > 0) {
-        cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
-    }
-    
-    logDebug('Cloud function payload:', JSON.stringify(cloudFunctionPayload));
-    
-    // Call the cloud function with timeout and retry
     const fetchWithTimeout = (url, options, timeout = 30000) => {
         return Promise.race([
             fetch(url, options),
@@ -317,137 +347,64 @@ function callCloudFunction(idToken) {
         ]);
     };
     
-    const makeRequest = (retryCount = 0) => {
-        logDebug(`Calling cloud function (attempt ${retryCount + 1})`);
+    fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify(payload)
+    }, 60000) // 60 second timeout for AI-based functions
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.error) {
+            throw new Error(data.error);
+        }
         
-        fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${idToken}`
-            },
-            body: JSON.stringify(cloudFunctionPayload)
-        }, 60000) // 60 second timeout for AI-based functions
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.error) {
-                throw new Error(data.error);
-            }
-            
-            // Check if we have a message
-            if (!data.message) {
-                throw new Error('No message received from API');
-            }
-            
-            // Store generated message and insights
-            generatedMessage = data.message;
-            const insights = data.insights || [];
-            
-            // Hide loading, show message
+        // Check if we have a message
+        if (!data.message) {
+            throw new Error('No message received from API');
+        }
+        
+        // Store generated message and insights
+        generatedMessage = data.message;
+        const insights = data.insights || [];
+        
+        // Hide loading, show message
+        document.getElementById('loading-state').style.display = 'none';
+        document.getElementById('message-container').style.display = 'block';
+        document.getElementById('regenerate-options').style.display = 'block';
+        
+        // Update message display
+        document.getElementById('message-content').textContent = data.message;
+        document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
+        document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
+        
+        // Display insights
+        displayInsights(insights);
+        
+        logDebug('Cloud function message generated successfully');
+    })
+    .catch(error => {
+        logDebug(`ERROR: Cloud function call failed: ${error.message}`);
+        
+        // Try again if we haven't exceeded max retries
+        if (retryCount < 2) {
+            logDebug(`Retrying request (${retryCount + 1}/2)...`);
+            setTimeout(() => makeRequest(payload, idToken, retryCount + 1), 2000);
+        } else {
+            // If still failing after retries, show error
             document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('message-container').style.display = 'block';
-            document.getElementById('regenerate-options').style.display = 'block';
-            
-            // Update message display
-            document.getElementById('message-content').textContent = data.message;
-            document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
-            document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
-            
-            // Display insights
-            displayInsights(insights);
-            
-            logDebug('Cloud function message generated successfully');
-        })
-        .catch(error => {
-            logDebug(`ERROR: Cloud function call failed: ${error.message}`);
-            
-            // If this is API key error, try alternative endpoint
-            if (error.message.includes('API key') || error.message.includes('Failed to access API key') || retryCount === 0) {
-                logDebug('API key error detected or first attempt failed, trying fallback endpoint');
-                
-                // Create a modified payload with alternate paths to try
-                const fallbackPayload = {
-                    ...cloudFunctionPayload,
-                    // Try additional paths where the API key might be located
-                    apiKeyPaths: [
-                        {path: 'secrets/secrets', field: 'openaikey'},
-                        {path: 'api-keys/openai', field: 'apiKey'}, 
-                        {path: 'secrets/openai', field: 'apiKey'},
-                        {path: 'config/openai', field: 'apiKey'}
-                    ]
-                };
-                
-                // Try direct API call instead - requires separate handler
-                fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${idToken}`
-                    },
-                    body: JSON.stringify(fallbackPayload)
-                }, 60000)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        throw new Error(data.error);
-                    }
-                    
-                    // Store generated message and insights
-                    generatedMessage = data.message;
-                    const insights = data.insights || [];
-                    
-                    // Hide loading, show message
-                    document.getElementById('loading-state').style.display = 'none';
-                    document.getElementById('message-container').style.display = 'block';
-                    document.getElementById('regenerate-options').style.display = 'block';
-                    
-                    // Update message display
-                    document.getElementById('message-content').textContent = data.message;
-                    document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
-                    document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
-                    
-                    // Display insights
-                    displayInsights(insights);
-                    
-                    logDebug('Fallback message generation successful');
-                })
-                .catch(fallbackError => {
-                    logDebug(`ERROR: Fallback API call failed: ${fallbackError.message}`);
-                    if (retryCount < 2) {
-                        logDebug(`Retrying with increased retry count (${retryCount + 1}/2)...`);
-                        setTimeout(() => makeRequest(retryCount + 1), 2000);
-                    } else {
-                        // If still failing after retries, show error
-                        document.getElementById('loading-state').style.display = 'none';
-                        document.getElementById('error-state').style.display = 'block';
-                        document.getElementById('error-state').querySelector('.error-message').textContent = 
-                            `Failed to generate message: ${fallbackError.message}. Please try again.`;
-                    }
-                });
-                return;
-            }
-            
-            // Try again if we haven't exceeded max retries
-            if (retryCount < 2) {
-                logDebug(`Retrying request (${retryCount + 1}/2)...`);
-                setTimeout(() => makeRequest(retryCount + 1), 2000);
-            } else {
-                // If still failing after retries, show error
-                document.getElementById('loading-state').style.display = 'none';
-                document.getElementById('error-state').style.display = 'block';
-                document.getElementById('error-state').querySelector('.error-message').textContent = 
-                    `Failed to generate message: ${error.message}. Please try again.`;
-            }
-        });
-    };
-    
-    // Start request process
-    makeRequest();
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-state').querySelector('.error-message').textContent = 
+                `Failed to generate message: ${error.message}. Please try again.`;
+        }
+    });
 }
 
 /**

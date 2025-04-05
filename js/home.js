@@ -264,7 +264,7 @@ function showConnectionsError(errorMessage) {
         <div class="error-message">${errorMessage}</div>
         <div class="error-tip">This is likely a temporary Firebase permissions issue.</div>
         <button class="error-action" onclick="loadUserConnections()">Try Again</button>
-        <button class="error-action secondary" onclick="document.getElementById('debug-console').style.display='block'">Show Details</button>
+        <button class="error-action secondary">Show Details</button>
       </li>
     `;
   }
@@ -281,7 +281,7 @@ function showMessagesError(errorMessage) {
         <div class="error-message">${errorMessage}</div>
         <div class="error-tip">This is likely a temporary Firebase permissions issue.</div>
         <button class="error-action" onclick="loadUserMessages()">Try Again</button>
-        <button class="error-action secondary" onclick="document.getElementById('debug-console').style.display='block'">Show Details</button>
+        <button class="error-action secondary">Show Details</button>
       </li>
     `;
   }
@@ -298,7 +298,7 @@ function showRemindersError(errorMessage) {
         <div class="error-message">${errorMessage}</div>
         <div class="error-tip">This is likely a temporary Firebase permissions issue.</div>
         <button class="error-action" onclick="loadUserReminders()">Try Again</button>
-        <button class="error-action secondary" onclick="document.getElementById('debug-console').style.display='block'">Show Details</button>
+        <button class="error-action secondary">Show Details</button>
       </div>
     `;
   }
@@ -321,7 +321,7 @@ function loadUserConnections() {
   connectionsList.innerHTML = `<li class="loading-state"><span class="loading-spinner"></span> Loading your connections...</li>`;
   
   const userId = currentUser.uid;
-  logDebug(`Attempting to load connections for user: ${userId}`); // Log User ID
+  console.debug(`Attempting to load connections for user: ${userId}`); // Use console.debug
   
   try {
     firebase.firestore()
@@ -331,15 +331,15 @@ function loadUserConnections() {
       .limit(20)
       .get()
       .then((querySnapshot) => {
-        logDebug(`Firestore connections query successful. Snapshot empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`); // Log Snapshot details
-        querySnapshot.forEach(doc => { // Log each document found
-            logDebug(`  Found connection doc: ${doc.id}, Data: ${JSON.stringify(doc.data())}`);
+        console.debug(`Firestore connections query successful. Snapshot empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`); // Use console.debug
+        querySnapshot.forEach(doc => {
+            console.debug(`  Found connection doc: ${doc.id}, Data: ${JSON.stringify(doc.data())}`); // Use console.debug
         });
 
         try {
           connectionsList.innerHTML = '';
           if (querySnapshot.empty) {
-            logDebug('Snapshot was empty, displaying empty state for connections.');
+            console.debug('Snapshot was empty, displaying empty state for connections.'); // Use console.debug
             displayEmptyStates('connections');
             return;
           }
@@ -417,30 +417,22 @@ function loadUserConnections() {
             connectionsList.appendChild(connectionItem);
           });
           
-          logDebug('Connections loaded and rendered successfully');
+          console.debug('Connections loaded and rendered successfully'); // Use console.debug
         } catch(processingError) {
-          logDebug(`Error processing connections snapshot: ${processingError.message}`);
+          console.debug(`Error processing connections snapshot: ${processingError.message}`); // Use console.debug
           console.error('Error processing connections data:', processingError);
           showConnectionsError('Failed to display connections: ' + processingError.message);
         }
       })
       .catch((error) => {
-        logDebug(`Firestore query for connections failed: ${error.message}. Code: ${error.code}`); // Log error code
+        console.debug(`Firestore query for connections failed: ${error.message}. Code: ${error.code}`); // Use console.debug
         console.error('Error loading connections query:', error);
         showConnectionsError(error.message);
-        if (typeof debugLog === 'function') {
-          debugLog('Error loading connections query: ' + error.message);
-          document.getElementById('debug-console').style.display = 'block';
-        }
       });
   } catch (error) {
-    logDebug(`Exception caught during loadUserConnections setup: ${error.message}`);
+    console.debug(`Exception caught during loadUserConnections setup: ${error.message}`); // Use console.debug
     console.error('Exception in loadUserConnections setup:', error);
     showConnectionsError(error.message);
-    if (typeof debugLog === 'function') {
-      debugLog('Exception in loadUserConnections setup: ' + error.message);
-      document.getElementById('debug-console').style.display = 'block';
-    }
   }
 }
 

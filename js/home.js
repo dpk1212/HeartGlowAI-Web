@@ -622,277 +622,339 @@ function showRemindersError(errorMessage) {
   }
 }
 
-// Load user's connections from Firestore
-function loadUserConnections() {
-  console.debug('*** loadUserConnections FUNCTION CALLED ***'); // Add entry log
+// Load user connections from Firestore
+async function loadUserConnections() {
   if (!currentUser) {
-    console.warn('No current user for loading connections');
-    showConnectionsError('User not authenticated.');
+    console.error('No user available for loading connections');
+    showConnectionsError('Authentication error. Please refresh the page.');
     return;
   }
   
-  const connectionsList = document.getElementById('connections-list');
+  const userUid = currentUser.uid;
+  const connectionsContainer = document.querySelector('.connections-list');
   
-  if (!connectionsList) {
-    console.warn('Connections list element not found');
+  if (!connectionsContainer) {
+    console.error('Connections container not found');
     return;
   }
-  
-  connectionsList.innerHTML = `<li class="loading-state"><span class="loading-spinner"></span> Loading your connections...</li>`;
-  
-  const userId = currentUser.uid;
-  console.debug(`Attempting to load connections for user: ${userId}`); // Use console.debug
   
   try {
-    firebase.firestore()
+    console.log('Loading connections for user', userUid);
+    const connectionsRef = firebase.firestore()
       .collection('users')
-      .doc(userId)
+      .doc(userUid)
       .collection('connections')
-      .limit(20)
-      .get()
-      .then((querySnapshot) => {
-        console.debug(`Firestore connections query successful. Snapshot empty: ${querySnapshot.empty}. Size: ${querySnapshot.size}`); // Use console.debug
-        querySnapshot.forEach(doc => {
-            console.debug(`  Found connection doc: ${doc.id}, Data: ${JSON.stringify(doc.data())}`); // Use console.debug
-        });
-
-        try {
-          connectionsList.innerHTML = '';
-          if (querySnapshot.empty) {
-            console.debug('Snapshot was empty, displaying empty state for connections.'); // Use console.debug
-            displayEmptyStates('connections');
-            return;
-          }
+      .orderBy('created', 'desc')
+      .limit(20);
+    
+    const snapshot = await connectionsRef.get();
+    
+    // Start with an empty container
+    connectionsContainer.innerHTML = '';
+    
+    if (snapshot.empty) {
+      console.log('No connections found for user');
+      displayEmptyStates('connections');
+      return;
+    }
+    
+    // We have connections, so hide the no connections message even if we don't show them all
+    const noConnectionsEl = document.querySelector('.no-connections-message');
+    if (noConnectionsEl) {
+      noConnectionsEl.style.display = 'none';
+    }
+    
+    let connectionCount = 0;
+    snapshot.forEach(doc => {
+      connectionCount++;
+      const connection = doc.data();
+      connection.id = doc.id;
+      
+      // Format the connection data
+      const relationshipText = connection.relationship === 'other' && connection.otherRelationship
+        ? connection.otherRelationship
+        : capitalizeFirstLetter(connection.relationship || 'friend');
+      
+      const lastMessageText = connection.lastMessage 
+        ? connection.lastMessage.substring(0, 30) + (connection.lastMessage.length > 30 ? '...' : '')
+        : 'No messages yet';
+      
+      const initials = getInitials(connection.name);
+      
+      // Create the connection item
+      const connectionItem = document.createElement('li');
+      connectionItem.className = 'connection-item';
+      connectionItem.setAttribute('data-id', connection.id);
+      
+      // Choose icon based on relationship
+      let relationshipIcon = 'fa-user-friends';
+      if (connection.relationship === 'family') relationshipIcon = 'fa-home';
+      else if (connection.relationship === 'partner') relationshipIcon = 'fa-heart';
+      else if (connection.relationship === 'colleague') relationshipIcon = 'fa-briefcase';
+      else if (connection.relationship === 'acquaintance') relationshipIcon = 'fa-handshake';
+      
+      connectionItem.innerHTML = `
+        <div class="connection-avatar">
+          <i class="fas ${relationshipIcon}"></i>
+        </div>
+        <div class="connection-details">
+          <div class="connection-name">${connection.name}</div>
+          <div class="connection-meta">
+            <span class="connection-relation">${relationshipText}</span>
+            <span class="connection-last-message">${lastMessageText}</span>
+          </div>
+        </div>
+        <div class="connection-actions">
+          <span class="connection-action message-action" title="Create a message">
+            <i class="fas fa-paper-plane"></i>
+          </span>
+          <span class="connection-action edit-action" title="Edit connection">
+            <i class="fas fa-pencil-alt"></i>
+          </span>
+        </div>
+      `;
+      
+      // Add the connection item to the container
+      connectionsContainer.appendChild(connectionItem);
+      
+      // Event listener for clicking on the entire connection
+      connectionItem.addEventListener('click', function(e) {
+        // Only proceed if not clicking on an action button
+        if (!e.target.closest('.connection-action')) {
+          // Navigate to message creation with this connection pre-selected
+          localStorage.setItem('preselectedConnection', JSON.stringify({
+            id: connection.id,
+            name: connection.name,
+            relationship: connection.relationship,
+            otherRelationship: connection.otherRelationship || ''
+          }));
           
-          const connections = [];
-          querySnapshot.forEach((doc) => {
-            connections.push({ id: doc.id, data: doc.data() });
-          });
-          
-          connections.sort((a, b) => {
-            const nameA = a.data.name ? a.data.name.toLowerCase() : '';
-            const nameB = b.data.name ? b.data.name.toLowerCase() : '';
-            if (nameA < nameB) return -1;
-            if (nameA > nameB) return 1;
-            return 0;
-          });
-          
-          const connectionsToDisplay = connections.slice(0, 10);
-
-          connectionsToDisplay.forEach(({ id, data: connectionData }) => {
-            const name = connectionData.name || 'Unknown Connection';
-            const relationship = connectionData.relationship || 'Contact';
-            
-            const initials = getInitials(name);
-            let lastMessageText = 'No messages yet';
-            if (connectionData.lastMessageDate && typeof connectionData.lastMessageDate.toDate === 'function') {
-              const lastMessageDate = connectionData.lastMessageDate.toDate();
-              const timeAgo = getTimeAgo(lastMessageDate);
-              lastMessageText = `Last message ${timeAgo}`;
-            } else {
-              console.warn('Missing or invalid lastMessageDate for connection:', id);
-            }
-            
-            const connectionItem = document.createElement('li');
-            connectionItem.className = 'connection-item';
-            connectionItem.innerHTML = `
-              <div class="connection-avatar">${initials}</div>
-              <div class="connection-details">
-                <div class="connection-name">${name}</div>
-                <div class="connection-meta">
-                  <span class="connection-relation">${capitalizeFirstLetter(relationship)}</span>
-                  <span class="connection-last-message">${lastMessageText}</span>
-                </div>
-              </div>
-              <div class="connection-actions">
-                <div class="connection-action send-message" title="Send Message"><i class="fas fa-paper-plane"></i></div>
-                <div class="connection-action view-history" title="View History"><i class="fas fa-history"></i></div>
-                <div class="connection-action edit-connection" title="Edit Connection"><i class="fas fa-pencil-alt"></i></div>
-              </div>
-            `;
-            connectionItem.setAttribute('data-id', id);
-            
-            const sendMessageBtn = connectionItem.querySelector('.send-message');
-            const viewHistoryBtn = connectionItem.querySelector('.view-history');
-            const editConnectionBtn = connectionItem.querySelector('.edit-connection');
-            
-            if (sendMessageBtn) {
-              sendMessageBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                localStorage.setItem('recipientData', JSON.stringify({
-                  id: id, 
-                  name: name, 
-                  relationship: relationship, 
-                  isExisting: true
-                }));
-                window.location.href = 'message-intent.html';
-              });
-            }
-            
-            if (viewHistoryBtn) {
-              viewHistoryBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                window.location.href = `history.html?connectionId=${id}`;
-              });
-            }
-            
-            // Add edit connection event listener
-            if (editConnectionBtn) {
-              editConnectionBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                openConnectionModal(id);
-              });
-            }
-            
-            connectionsList.appendChild(connectionItem);
-          });
-          
-          console.debug('Connections loaded and rendered successfully'); // Use console.debug
-        } catch(processingError) {
-          console.debug(`Error processing connections snapshot: ${processingError.message}`); // Use console.debug
-          console.error('Error processing connections data:', processingError);
-          showConnectionsError('Failed to display connections: ' + processingError.message);
+          window.location.href = 'message-intent-new.html';
         }
-      })
-      .catch((error) => {
-        console.debug(`Firestore query for connections failed: ${error.message}. Code: ${error.code}`); // Use console.debug
-        console.error('Error loading connections query:', error);
-        showConnectionsError(error.message);
       });
+      
+      // Event listener for the message action (airplane icon)
+      const messageAction = connectionItem.querySelector('.message-action');
+      if (messageAction) {
+        messageAction.addEventListener('click', function(e) {
+          e.stopPropagation();
+          
+          // Store connection info for the message creation flow
+          localStorage.setItem('recipientData', JSON.stringify({
+            name: connection.name,
+            relationship: connection.relationship,
+            otherRelationship: connection.otherRelationship || ''
+          }));
+          
+          // Navigate to the message creation flow
+          window.location.href = 'message-intent-new.html';
+        });
+      }
+      
+      // Event listener for the edit action (pencil icon)
+      const editAction = connectionItem.querySelector('.edit-action');
+      if (editAction) {
+        editAction.addEventListener('click', function(e) {
+          e.stopPropagation();
+          openConnectionModal(connection.id);
+        });
+      }
+    });
+    
+    console.log(`Loaded ${connectionCount} connections`);
+    
+    // If we have connections but none in the list (shouldn't happen), still show empty state
+    if (connectionCount === 0) {
+      displayEmptyStates('connections');
+    }
+    
   } catch (error) {
-    console.debug(`Exception caught during loadUserConnections setup: ${error.message}`); // Use console.debug
-    console.error('Exception in loadUserConnections setup:', error);
-    showConnectionsError(error.message);
+    console.error('Error loading connections:', error);
+    showConnectionsError(`Failed to load connections: ${error.message}`);
   }
 }
 
-// Load user's recent messages from Firestore
-function loadUserMessages() {
+// Load user messages from Firestore
+async function loadUserMessages() {
   if (!currentUser) {
-    console.warn('No current user for loading messages');
-    showMessagesError('User not authenticated.');
+    console.error('No user available for loading messages');
+    showMessagesError('Authentication error. Please refresh the page.');
     return;
   }
   
-  const recentMessages = document.getElementById('recent-messages');
-  if (!recentMessages) {
-    console.warn('Recent messages element not found');
+  const userUid = currentUser.uid;
+  const messagesContainer = document.querySelector('.messages-list');
+  
+  if (!messagesContainer) {
+    console.error('Messages container not found');
     return;
   }
   
-  // Show loading state
-  recentMessages.innerHTML = `
-    <li class="loading-state">
-      <span class="loading-spinner"></span> Loading recent messages...
-    </li>
-  `;
-  
-  firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('messages')
-    .limit(20) // Fetch a bit more to sort
-    .get()
-    .then((querySnapshot) => {
-      try {
-        // Clear loading indicator
-        recentMessages.innerHTML = '';
-        
-        if (querySnapshot.empty) {
-          displayEmptyStates('messages');
-          return;
-        }
-        
-        // Process and sort messages client-side
-        const messages = [];
-        querySnapshot.forEach((doc) => {
-            // Include ALL messages, with a fallback date if createdAt is missing
-            const data = doc.data();
-            const messageObj = { id: doc.id, data: data };
-            
-            // If createdAt is missing or invalid, add a fallback date
-            if (!data.createdAt || typeof data.createdAt.toDate !== 'function') {
-                console.log('Adding fallback date for message:', doc.id);
-                messageObj.data.createdAt = { toDate: () => new Date(0) }; // Jan 1, 1970
-                messageObj.hasFallbackDate = true;
-            }
-            
-            messages.push(messageObj);
-        });
-
-        // Sort by createdAt date (descending) with special handling for fallback dates
-        messages.sort((a, b) => {
-          // Messages with fallback dates go to the end
-          if (a.hasFallbackDate && !b.hasFallbackDate) return 1;
-          if (!a.hasFallbackDate && b.hasFallbackDate) return -1;
-          
-          const dateA = a.data.createdAt.toDate();
-          const dateB = b.data.createdAt.toDate();
-          return dateB - dateA; // Descending order
-        });
-
-        // Limit to 5 after sorting
-        const messagesToDisplay = messages.slice(0, 5);
-        
-        // Add messages to the list
-        messagesToDisplay.forEach(({ id, data: messageData, hasFallbackDate }) => {
-           // Add checks for potentially missing data
-          const recipientName = messageData.recipientName || 'Unknown Recipient';
-          const content = messageData.content || '';
-          const intent = messageData.intent || 'custom';
-          const tone = messageData.tone || 'neutral';
-          
-          let dateText = hasFallbackDate ? 'Date unknown' : 'Recently';
-          
-          // Use the date (which may be our fallback date)
-          const messageDate = messageData.createdAt.toDate();
-          if (!hasFallbackDate) {
-            dateText = formatDate(messageDate);
-          }
-          
-          let messagePreview = content;
-          if (messagePreview.length > 120) {
-            messagePreview = messagePreview.substring(0, 120) + '...';
-          }
-          const tags = [];
-          if (intent) {
-            tags.push(formatIntentTag(intent));
-          }
-          if (tone) {
-            tags.push(capitalizeFirstLetter(tone));
-          }
-          const messageItem = document.createElement('li');
-          messageItem.className = 'message-item';
-          messageItem.setAttribute('data-id', id);
-          messageItem.innerHTML = `
-            <div class="message-header">
-              <div class="message-recipient">${recipientName}</div>
-              <div class="message-date">${dateText}</div>
-            </div>
-            <div class="message-preview">${messagePreview}</div>
-            ${tags.length > 0 ? `
-              <div class="message-tags">
-                ${tags.map(tag => `<div class="message-tag">${tag}</div>`).join('')}
-              </div>
-            ` : ''}
-          `;
-          messageItem.addEventListener('click', function() {
-            localStorage.setItem('viewMessageId', id);
-            window.location.href = `view-message.html?id=${id}`;
-          });
-          recentMessages.appendChild(messageItem);
-        });
-        
-        console.log('Messages loaded and sorted successfully');
-      } catch(processingError) {
-        console.error('Error processing messages data:', processingError);
-        showMessagesError('Failed to display messages: ' + processingError.message);
+  try {
+    console.log('Loading messages for user', userUid);
+    const messagesRef = firebase.firestore()
+      .collection('users')
+      .doc(userUid)
+      .collection('messages')
+      .orderBy('timestamp', 'desc')
+      .limit(20);
+    
+    const snapshot = await messagesRef.get();
+    
+    // Start with an empty container
+    messagesContainer.innerHTML = '';
+    
+    if (snapshot.empty) {
+      console.log('No messages found for user');
+      displayEmptyStates('messages');
+      return;
+    }
+    
+    // We have messages, so hide the no messages elements
+    const noMessagesEl = document.querySelector('.no-messages-message');
+    if (noMessagesEl) {
+      noMessagesEl.style.display = 'none';
+    }
+    
+    let messageCount = 0;
+    
+    // Get connection information for message recipients
+    const connectionIds = new Set();
+    snapshot.forEach(doc => {
+      const message = doc.data();
+      if (message.connectionId) {
+        connectionIds.add(message.connectionId);
       }
-    })
-    .catch((error) => {
-      console.error('Error loading messages query:', error); // Changed log message
-      showMessagesError(error.message);
     });
+    
+    // Batch get the connections if needed
+    let connectionMap = {};
+    if (connectionIds.size > 0) {
+      try {
+        const connectionsSnapshot = await Promise.all(
+          Array.from(connectionIds).map(id => 
+            firebase.firestore()
+              .collection('users')
+              .doc(userUid)
+              .collection('connections')
+              .doc(id)
+              .get()
+          )
+        );
+        
+        connectionsSnapshot.forEach(doc => {
+          if (doc.exists) {
+            connectionMap[doc.id] = doc.data();
+          }
+        });
+        
+        console.log('Loaded connection details for messages:', Object.keys(connectionMap).length);
+      } catch (error) {
+        console.error('Error loading connection details for messages:', error);
+        // Continue anyway with what we have
+      }
+    }
+    
+    snapshot.forEach(doc => {
+      messageCount++;
+      const message = doc.data();
+      message.id = doc.id;
+      
+      // Try to get connection info
+      let recipientName = message.recipientName || 'Unknown';
+      let relationship = message.relationship || 'friend';
+      
+      // If we have connection info, use it
+      if (message.connectionId && connectionMap[message.connectionId]) {
+        const connection = connectionMap[message.connectionId];
+        recipientName = connection.name || recipientName;
+        relationship = connection.relationship || relationship;
+      }
+      
+      // Format the message data
+      const messageDateText = message.timestamp ? formatDate(message.timestamp.toDate()) : 'Recently';
+      const messageType = message.type || 'general';
+      const intentTag = formatIntentTag(messageType);
+      
+      // Create the message item
+      const messageItem = document.createElement('li');
+      messageItem.className = 'message-item';
+      messageItem.setAttribute('data-id', message.id);
+      
+      // Truncate the message content for display
+      const truncatedContent = message.content
+        ? message.content.substring(0, 50) + (message.content.length > 50 ? '...' : '')
+        : 'No message content';
+      
+      messageItem.innerHTML = `
+        <div class="message-header">
+          <div class="message-recipient">${recipientName}</div>
+          <div class="message-date">${messageDateText}</div>
+        </div>
+        <div class="message-preview">${truncatedContent}</div>
+        <div class="message-footer">
+          <div class="message-intent">${intentTag}</div>
+          <div class="message-actions">
+            <span class="message-action view-action" title="View message">
+              <i class="fas fa-eye"></i>
+            </span>
+            <span class="message-action edit-action" title="Edit message">
+              <i class="fas fa-pencil-alt"></i>
+            </span>
+          </div>
+        </div>
+      `;
+      
+      // Add the message item to the container
+      messagesContainer.appendChild(messageItem);
+      
+      // Event listener for clicking on the message
+      messageItem.addEventListener('click', function(e) {
+        // Only proceed if not clicking on an action button
+        if (!e.target.closest('.message-action')) {
+          // Navigate to view the message
+          localStorage.setItem('viewingMessageId', message.id);
+          window.location.href = 'message-result-new.html?id=' + message.id;
+        }
+      });
+      
+      // Event listener for the view action
+      const viewAction = messageItem.querySelector('.view-action');
+      if (viewAction) {
+        viewAction.addEventListener('click', function(e) {
+          e.stopPropagation();
+          localStorage.setItem('viewingMessageId', message.id);
+          window.location.href = 'message-result-new.html?id=' + message.id;
+        });
+      }
+      
+      // Event listener for the edit action
+      const editAction = messageItem.querySelector('.edit-action');
+      if (editAction) {
+        editAction.addEventListener('click', function(e) {
+          e.stopPropagation();
+          // Store message info for editing
+          localStorage.setItem('editingMessageId', message.id);
+          localStorage.setItem('recipientData', JSON.stringify({
+            name: recipientName,
+            relationship: relationship
+          }));
+          window.location.href = 'message-tone-new.html?edit=true';
+        });
+      }
+    });
+    
+    console.log(`Loaded ${messageCount} messages`);
+    
+    // If we have messages in Firestore but none in the list (shouldn't happen), still show empty state
+    if (messageCount === 0) {
+      displayEmptyStates('messages');
+    }
+    
+  } catch (error) {
+    console.error('Error loading messages:', error);
+    showMessagesError(`Failed to load messages: ${error.message}`);
+  }
 }
 
 // Load user's reminders from Firestore

@@ -34,17 +34,22 @@
     <!-- Welcome Screen -->
     <div id="welcome-screen" class="landing-page">
       <div class="landing-page__container">
-        <div class="landing-page__brand">
-          <div class="landing-page__logo">
-            <div class="landing-page__logo-icon">❤️</div>
-            <div class="landing-page__logo-text">HeartGlow<span class="landing-page__logo-highlight">AI</span></div>
-          </div>
+        <!-- Header with brand logo -->
+        <header class="landing-page__header">
+          <a href="index.html" class="landing-page__brand">
+            <div class="landing-page__logo">❤️</div>
+            <div class="landing-page__brand-name">HeartGlow<span class="landing-page__brand-highlight">AI</span></div>
+          </a>
+        </header>
+        
+        <!-- Hero section -->
+        <div class="landing-page__hero">
+          <h1 class="landing-page__title">What kind of message is on your heart today?</h1>
         </div>
         
-        <h1 class="landing-page__heading">What kind of message is on your heart today?</h1>
-        
-        <!-- Navigation Button Menu -->
-        <div class="landing-page__nav">
+        <!-- Message types -->
+        <div class="landing-page__message-types">
+          <!-- Category tabs -->
           <div class="landing-page__tabs">
             <button class="landing-page__tab landing-page__tab--active" data-type="romantic">
               <div class="landing-page__tab-icon">❤️</div>
@@ -60,106 +65,103 @@
             </button>
           </div>
           
-          <!-- Message Type Content -->
-          <div class="landing-page__content">
-            <!-- Romantic content (visible by default) -->
-            <div class="landing-page__type-content landing-page__type-content--active" id="romantic-content">
-              <div class="landing-page__card">
-                <h2 class="landing-page__card-title">Romantic Messages</h2>
-                <p class="landing-page__card-description">Express your deepest feelings to someone special in your life with authenticity and emotional intelligence. Create heartfelt messages that truly connect.</p>
-                <div class="landing-page__features">
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">✨</span>
-                    <span class="landing-page__feature-text">Authentic emotions</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">💕</span>
-                    <span class="landing-page__feature-text">Personalized expressions</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🔮</span>
-                    <span class="landing-page__feature-text">Thoughtful sentiment</span>
-                  </div>
+          <!-- Type content sections -->
+          <div class="landing-page__type landing-page__type--active" id="romantic-content">
+            <div class="landing-page__type-card">
+              <h2 class="landing-page__type-title">Romantic Messages</h2>
+              <p class="landing-page__type-description">Express your deepest feelings to someone special in your life with authenticity and emotional intelligence. Create heartfelt messages that truly connect.</p>
+              <div class="landing-page__features">
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">✨</span>
+                  <span class="landing-page__feature-text">Authentic emotions</span>
                 </div>
-                <div class="landing-page__sample">
-                  <p>"I've been thinking about you lately, and I realized I never properly told you how much your presence means to me. Your laugh, your kindness, the way you see the world - it all brings so much joy into my life."</p>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">💕</span>
+                  <span class="landing-page__feature-text">Personalized expressions</span>
+                </div>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🔮</span>
+                  <span class="landing-page__feature-text">Thoughtful sentiment</span>
                 </div>
               </div>
-            </div>
-            
-            <!-- Professional content -->
-            <div class="landing-page__type-content" id="professional-content">
-              <div class="landing-page__card">
-                <h2 class="landing-page__card-title">Professional Messages</h2>
-                <p class="landing-page__card-description">Communicate with clarity and impact in your workplace relationships, whether with colleagues, clients, or leadership. Craft messages that resonate professionally.</p>
-                <div class="landing-page__features">
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">📊</span>
-                    <span class="landing-page__feature-text">Clear communication</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🤝</span>
-                    <span class="landing-page__feature-text">Professional tone</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🎯</span>
-                    <span class="landing-page__feature-text">Impactful messaging</span>
-                  </div>
-                </div>
-                <div class="landing-page__sample">
-                  <p>"Your guidance on the recent project helped us navigate complex challenges with remarkable clarity and purpose. Your leadership created a vision that inspired the entire team to deliver beyond expectations."</p>
-                </div>
+              <div class="landing-page__sample">
+                <p>"I've been thinking about you lately, and I realized I never properly told you how much your presence means to me. Your laugh, your kindness, the way you see the world - it all brings so much joy into my life."</p>
               </div>
             </div>
-            
-            <!-- Personal content -->
-            <div class="landing-page__type-content" id="personal-content">
-              <div class="landing-page__card">
-                <h2 class="landing-page__card-title">Personal Messages</h2>
-                <p class="landing-page__card-description">Reconnect with friends or family through meaningful, heartfelt communication that strengthens your relationship. Create messages that bridge any distance.</p>
-                <div class="landing-page__features">
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🌟</span>
-                    <span class="landing-page__feature-text">Genuine connection</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🤗</span>
-                    <span class="landing-page__feature-text">Heartfelt sentiment</span>
-                  </div>
-                  <div class="landing-page__feature">
-                    <span class="landing-page__feature-icon">🔄</span>
-                    <span class="landing-page__feature-text">Relationship building</span>
-                  </div>
+          </div>
+          
+          <div class="landing-page__type" id="professional-content">
+            <div class="landing-page__type-card">
+              <h2 class="landing-page__type-title">Professional Messages</h2>
+              <p class="landing-page__type-description">Communicate with clarity and impact in your workplace relationships, whether with colleagues, clients, or leadership. Craft messages that resonate professionally.</p>
+              <div class="landing-page__features">
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">📊</span>
+                  <span class="landing-page__feature-text">Clear communication</span>
                 </div>
-                <div class="landing-page__sample">
-                  <p>"Our friendship has been a constant source of strength for me, especially during these changing times. I wanted to reach out and let you know how much I appreciate having you in my life through all these years."</p>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🤝</span>
+                  <span class="landing-page__feature-text">Professional tone</span>
                 </div>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🎯</span>
+                  <span class="landing-page__feature-text">Impactful messaging</span>
+                </div>
+              </div>
+              <div class="landing-page__sample">
+                <p>"Your guidance on the recent project helped us navigate complex challenges with remarkable clarity and purpose. Your leadership created a vision that inspired the entire team to deliver beyond expectations."</p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="landing-page__type" id="personal-content">
+            <div class="landing-page__type-card">
+              <h2 class="landing-page__type-title">Personal Messages</h2>
+              <p class="landing-page__type-description">Reconnect with friends or family through meaningful, heartfelt communication that strengthens your relationship. Create messages that bridge any distance.</p>
+              <div class="landing-page__features">
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🌟</span>
+                  <span class="landing-page__feature-text">Genuine connection</span>
+                </div>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🤗</span>
+                  <span class="landing-page__feature-text">Heartfelt sentiment</span>
+                </div>
+                <div class="landing-page__feature">
+                  <span class="landing-page__feature-icon">🔄</span>
+                  <span class="landing-page__feature-text">Relationship building</span>
+                </div>
+              </div>
+              <div class="landing-page__sample">
+                <p>"Our friendship has been a constant source of strength for me, especially during these changing times. I wanted to reach out and let you know how much I appreciate having you in my life through all these years."</p>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="landing-page__actions">
+        <!-- CTA section -->
+        <div class="landing-page__cta">
           <button id="login-register-btn" class="landing-page__button" onclick="window.location.href='login.html'">
             Start Creating <span class="landing-page__button-icon">→</span>
           </button>
         </div>
         
-        <div class="landing-page__highlights">
-          <div class="landing-page__highlight">
-            <div class="landing-page__highlight-icon">✨</div>
-            <h3 class="landing-page__highlight-title">AI-Powered Creativity</h3>
-            <p class="landing-page__highlight-text">Our advanced AI understands emotions and relationships to craft the perfect message</p>
+        <!-- Benefits section -->
+        <div class="landing-page__benefits">
+          <div class="landing-page__benefit">
+            <div class="landing-page__benefit-icon">✨</div>
+            <h3 class="landing-page__benefit-title">AI-Powered Creativity</h3>
+            <p class="landing-page__benefit-text">Our advanced AI understands emotions and relationships to craft the perfect message</p>
           </div>
-          <div class="landing-page__highlight">
-            <div class="landing-page__highlight-icon">🔒</div>
-            <h3 class="landing-page__highlight-title">Private & Secure</h3>
-            <p class="landing-page__highlight-text">Your personal messages and information are always secure and private</p>
+          <div class="landing-page__benefit">
+            <div class="landing-page__benefit-icon">🔒</div>
+            <h3 class="landing-page__benefit-title">Private & Secure</h3>
+            <p class="landing-page__benefit-text">Your personal messages and information are always secure and private</p>
           </div>
-          <div class="landing-page__highlight">
-            <div class="landing-page__highlight-icon">⚡</div>
-            <h3 class="landing-page__highlight-title">Instant Results</h3>
-            <p class="landing-page__highlight-text">Create meaningful messages in seconds, not hours</p>
+          <div class="landing-page__benefit">
+            <div class="landing-page__benefit-icon">⚡</div>
+            <h3 class="landing-page__benefit-title">Instant Results</h3>
+            <p class="landing-page__benefit-text">Create meaningful messages in seconds, not hours</p>
           </div>
         </div>
       </div>
@@ -239,7 +241,7 @@
     </div>
   </div>
   
-  <!-- Add loading overlay -->
+  <!-- Loading Overlay -->
   <div id="loadingOverlay" class="loading-overlay">
     <div class="loading-container">
       <div class="heart-animation">

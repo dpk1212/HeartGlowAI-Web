@@ -432,9 +432,34 @@ function initMessageActions() {
  * Show loading state
  */
 function showLoadingState() {
+    // Hide message content
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        messageContent.style.display = 'none';
+    }
+    
+    // Hide insights
+    const messageInsights = document.getElementById('messageInsights');
+    if (messageInsights) {
+        messageInsights.style.display = 'none';
+    }
+    
+    // Hide error state
+    const errorState = document.getElementById('errorState');
+    if (errorState) {
+        errorState.style.display = 'none';
+    }
+    
+    // Show loading state
     const loadingState = document.getElementById('loadingState');
     if (loadingState) {
         loadingState.style.display = 'flex';
+    }
+    
+    // Hide regenerate options
+    const regenerateOptions = document.getElementById('regenerateOptions');
+    if (regenerateOptions) {
+        regenerateOptions.style.display = 'none';
     }
 }
 
@@ -902,7 +927,9 @@ function generateMessage(variation = null) {
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
         // Log the input data
-        logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
+        console.log("Intent data:", intentData);
+        console.log("Recipient data:", recipientData);
+        console.log("Tone data:", toneData);
         
         // Hide any error state that might be showing
         const errorState = document.getElementById('errorState');
@@ -910,11 +937,10 @@ function generateMessage(variation = null) {
             errorState.style.display = 'none';
         }
         
-        // Build the message prompt that would be sent to OpenAI
+        // Build the prompt and call the API
         buildOpenAIPrompt(intentData, recipientData, toneData, variation)
             .then(messagePrompt => {
-                // Log the prompt for debugging
-                logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
+                console.log("Prompt built successfully");
                 
                 // Get auth token if available
                 const authToken = localStorage.getItem('authToken');
@@ -923,6 +949,8 @@ function generateMessage(variation = null) {
                 return callGenerationAPI(messagePrompt, authToken);
             })
             .then(response => {
+                console.log("API response received");
+                
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
                 
@@ -935,13 +963,10 @@ function generateMessage(variation = null) {
                 
                 // Save the message to Firebase for the current user
                 saveMessageToFirebase(parsedResponse.message, parsedResponse.insights);
-                
-                // Log success
-                logDebug('Message generated successfully');
             })
             .catch(error => {
                 console.error('Error in message generation flow:', error);
-                showError('Failed to generate message: ' + (error.message || 'Unknown error'));
+                showError('Error generating message. Please try again.');
             });
     } catch (error) {
         console.error('Exception in generateMessage:', error);
@@ -1429,9 +1454,11 @@ function displayMessageInsights(insights) {
     const insightsContent = document.getElementById('insightsContent');
     
     if (!insightsContainer || !insightsContent) {
-        console.error('Insights containers not found');
         return;
     }
+    
+    // Make insights container visible
+    insightsContainer.style.display = 'block';
     
     // Clear previous content
     insightsContent.innerHTML = '';
@@ -1447,17 +1474,22 @@ function displayMessageInsights(insights) {
             insightsList.appendChild(listItem);
         });
     } else {
-        // Add a default insight if none provided
-        const listItem = document.createElement('li');
-        listItem.textContent = "This message was crafted with AI assistance.";
-        insightsList.appendChild(listItem);
+        // Add default insights if none provided
+        const defaultInsights = [
+            "This message was created with AI to sound natural and engaging.",
+            "The tone and style are personalized based on your selections.",
+            "It's designed to create a meaningful connection with the recipient."
+        ];
+        
+        defaultInsights.forEach(insight => {
+            const listItem = document.createElement('li');
+            listItem.textContent = insight;
+            insightsList.appendChild(listItem);
+        });
     }
     
     // Add list to container
     insightsContent.appendChild(insightsList);
-    
-    // Show insights container
-    insightsContainer.style.display = 'block';
 }
 
 /**
@@ -1487,28 +1519,27 @@ function displayGeneratedMessage(message) {
     // Store the message for copy functionality
     generatedMessage = message;
     
-    // Set the message content
+    // Display the message content with proper inline styles for better visibility
     const contentElement = document.getElementById('content');
     if (contentElement) {
         contentElement.textContent = message;
+        contentElement.style.display = 'block';
+        contentElement.style.visibility = 'visible';
+        contentElement.style.whiteSpace = 'pre-wrap';
+    }
+    
+    // Make the message container visible
+    const messageContainer = document.getElementById('messageState');
+    if (messageContainer) {
+        messageContainer.style.display = 'block';
     }
     
     // Make the message content visible
     const messageContent = document.getElementById('messageContent');
     if (messageContent) {
         messageContent.style.display = 'block';
-    }
-    
-    // Make sure message container is visible
-    const messageContainer = document.getElementById('messageState');
-    if (messageContainer) {
-        messageContainer.style.display = 'block';
-    }
-    
-    // Display message insights
-    const insightsContainer = document.getElementById('messageInsights');
-    if (insightsContainer) {
-        insightsContainer.style.display = 'block';
+        messageContent.style.opacity = '1';
+        messageContent.style.visibility = 'visible';
     }
 }
 

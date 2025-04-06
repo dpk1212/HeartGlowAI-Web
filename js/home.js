@@ -1253,6 +1253,9 @@ async function loadUserConnections() {
           <div class="connection-action edit-action" title="Edit connection">
             <i class="fas fa-pencil-alt"></i>
           </div>
+          <div class="connection-action delete-action" title="Delete connection">
+            <i class="fas fa-trash"></i>
+          </div>
         </div>
       `;
       
@@ -1280,6 +1283,16 @@ async function loadUserConnections() {
         editAction.addEventListener('click', (e) => {
           e.stopPropagation();
           openConnectionModal(connection.id);
+        });
+      }
+      
+      // Add click event to delete action button (trash)
+      const deleteAction = connectionItem.querySelector('.delete-action');
+      if (deleteAction) {
+        deleteAction.addEventListener('click', (e) => {
+          e.stopPropagation();
+          editingConnectionId = connection.id;
+          showDeleteConfirmation();
         });
       }
       
@@ -1387,6 +1400,9 @@ function showAllConnectionsModal(connections) {
           <button class="connection-action edit-btn" title="Edit connection">
             <i class="fas fa-pencil-alt"></i>
           </button>
+          <button class="connection-action delete-btn" title="Delete connection">
+            <i class="fas fa-trash"></i>
+          </button>
         </div>
       </div>
     `;
@@ -1465,6 +1481,20 @@ function showAllConnectionsModal(connections) {
       
       modalElement.style.display = 'none';
       openConnectionModal(connectionId);
+    });
+  });
+  
+  // Delete buttons
+  const deleteButtons = modalElement.querySelectorAll('.delete-btn');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-connection-item');
+      const connectionId = item.getAttribute('data-id');
+      
+      // Set the editing connection ID and show delete confirmation
+      editingConnectionId = connectionId;
+      showDeleteConfirmation();
     });
   });
   

@@ -1085,7 +1085,7 @@ function callGenerationAPI(prompt, authToken = null) {
         // Log the API call attempt
         logDebug('Calling message generation API...');
         
-        // Ensure we have a valid auth token
+        // First get auth token, then get API keys from Firestore, then make API call
         const getAuthToken = new Promise((resolveToken, rejectToken) => {
             if (authToken) {
                 logDebug('Using existing auth token from localStorage');
@@ -1107,20 +1107,48 @@ function callGenerationAPI(prompt, authToken = null) {
             }
         });
         
-        getAuthToken.then(token => {
-            // Set up the API endpoint URL for the new V2 function
-            const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
-            
-            logDebug(`Making API call with auth token: ${token ? 'Available' : 'Not available'}`);
-            
-            // Make the API call
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': token ? `Bearer ${token}` : ''
-                },
-                body: JSON.stringify(prompt)
+        // Get the auth token, then use it to fetch the OpenAI API key from Firestore
+        getAuthToken
+            .then(token => {
+                // Get the API key from Firestore's 'secrets' collection
+                logDebug('Getting API keys from Firestore...');
+                return firebase.firestore().collection('secrets').doc('secrets').get()
+                    .then(doc => {
+                        if (doc.exists && doc.data().openaikey) {
+                            logDebug('API keys retrieved successfully');
+                            return { 
+                                token: token, 
+                                apiKey: doc.data().openaikey 
+                            };
+                        } else {
+                            throw new Error('API keys not found in Firestore');
+                        }
+                    });
+            })
+            .then(({ token, apiKey }) => {
+                // Now that we have the API key, we can make a direct call to OpenAI
+                // or use our cloud function with the key included in the request
+                
+                // Option 1: Use cloud function but include the API key in the request
+                const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
+                
+                logDebug('Making API call with auth token and API key');
+                
+                // Prepare request with API key included
+                const requestBody = {
+                    ...prompt,
+                    apiKey: apiKey // Include API key in the request body
+                };
+                
+                // Make the API call to your cloud function
+                return fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': token ? `Bearer ${token}` : ''
+                    },
+                    body: JSON.stringify(requestBody)
+                });
             })
             .then(response => {
                 // Check if the request was successful
@@ -1154,12 +1182,59 @@ function callGenerationAPI(prompt, authToken = null) {
                 if (errorState) errorState.style.display = 'block';
                 if (errorText) errorText.textContent = `Failed to generate message: ${error.message || 'Server error'}`;
                 
-                reject(error);
+                // If the error is related to Firestore access, fall back to demo message
+                if (error.message.includes('Firestore') || error.message.includes('API key')) {
+                    logDebug('Falling back to demo message generation...');
+                    generateDemoMessage(prompt)
+                        .then(demoResponse => {
+                            resolve(demoResponse);
+                        })
+                        .catch(demoError => {
+                            reject(demoError);
+                        });
+                } else {
+                    reject(error);
+                }
             });
-        }).catch(error => {
-            console.error('Error getting authentication token:', error);
-            reject(new Error('Authentication failed. Please try signing in again.'));
-        });
+    });
+}
+
+/**
+ * Generate a demo message as fallback when API calls fail
+ */
+function generateDemoMessage(prompt) {
+    return new Promise((resolve) => {
+        // Create a demo message based on the prompt data
+        const recipientName = prompt.recipient.name || 'Friend';
+        const intent = prompt.intent.type || 'custom';
+        const tone = prompt.tone.type || 'warm';
+        
+        // Get sample message from our predefined samples
+        let messageText = '';
+        if (sampleMessages[intent.toLowerCase()] && 
+            sampleMessages[intent.toLowerCase()][tone.toLowerCase()]) {
+            messageText = sampleMessages[intent.toLowerCase()][tone.toLowerCase()];
+        } else {
+            messageText = sampleMessages.custom.warm;
+        }
+        
+        // Replace recipient name placeholder
+        messageText = messageText.replace(/\[NAME\]/g, recipientName);
+        
+        // Create insights based on intent and tone
+        const insights = [
+            `This message uses a ${tone} tone to create a connection with ${recipientName}.`,
+            `${capitalizeFirstLetter(intent)} messages work best when they're specific and authentic.`,
+            `The message is personalized for your relationship as ${prompt.recipient.relationship || 'a friend'}.`
+        ];
+        
+        // Return the demo message after a slight delay to simulate API call
+        setTimeout(() => {
+            resolve({
+                message: messageText,
+                insights: insights
+            });
+        }, 1500);
     });
 }
 

@@ -344,11 +344,7 @@
                 }
             });
             
-            // Also hide the regenerate options section as we're not using it
-            const regenerateOptions = document.getElementById('regenerateOptions');
-            if (regenerateOptions) {
-                regenerateOptions.style.display = 'none';
-            }
+            // We don't want to hide regenerate options here since it's managed by the message-result-new.js
         });
     </script>
 </body>

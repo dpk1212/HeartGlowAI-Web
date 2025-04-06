@@ -1432,32 +1432,57 @@ function callGenerationAPI(prompt, authToken = null) {
  * Display message insights
  */
 function displayMessageInsights(insights) {
-    const insightsContainer = document.getElementById('messageInsights');
-    const insightsContent = document.getElementById('insightsContent');
-    
-    if (!insightsContainer || !insightsContent) {
-        console.error('Insights containers not found');
-        return;
+    try {
+        console.log("Displaying message insights:", insights);
+        
+        const insightsContainer = document.getElementById('messageInsights');
+        const insightsContent = document.getElementById('insightsContent');
+        
+        if (!insightsContainer || !insightsContent) {
+            console.error('Insights containers not found');
+            return;
+        }
+        
+        // Clear previous content
+        insightsContent.innerHTML = '';
+        
+        // Create insights list
+        const insightsList = document.createElement('ul');
+        insightsList.style.display = 'block'; // Ensure the list is visible
+        
+        // Add each insight as a list item
+        if (Array.isArray(insights) && insights.length > 0) {
+            insights.forEach((insight, index) => {
+                const listItem = document.createElement('li');
+                listItem.textContent = insight;
+                listItem.style.display = 'list-item'; // Ensure list items are visible
+                insightsList.appendChild(listItem);
+                console.log(`Added insight ${index + 1}:`, insight.substring(0, 30) + "...");
+            });
+        } else {
+            // Add a default insight if none provided
+            const listItem = document.createElement('li');
+            listItem.textContent = "This message was carefully crafted with AI assistance.";
+            listItem.style.display = 'list-item';
+            insightsList.appendChild(listItem);
+            console.log("Added default insight (no insights provided)");
+        }
+        
+        // Add list to container
+        insightsContent.appendChild(insightsList);
+        
+        // Show insights container
+        insightsContainer.style.display = 'block';
+        console.log("Insights container displayed");
+        
+        // Force visibility after a slight delay to ensure rendering
+        setTimeout(() => {
+            insightsContainer.style.display = 'block';
+            console.log("Reinforced insights visibility after delay");
+        }, 200);
+    } catch (error) {
+        console.error("Error displaying insights:", error);
     }
-    
-    // Clear previous content
-    insightsContent.innerHTML = '';
-    
-    // Create insights list
-    const insightsList = document.createElement('ul');
-    
-    // Add each insight as a list item
-    insights.forEach(insight => {
-        const listItem = document.createElement('li');
-        listItem.textContent = insight;
-        insightsList.appendChild(listItem);
-    });
-    
-    // Add list to container
-    insightsContent.appendChild(insightsList);
-    
-    // Show insights container
-    insightsContainer.style.display = 'block';
 }
 
 /**
@@ -1493,11 +1518,21 @@ function displayGeneratedMessage(message) {
         // Set the message content
         const contentElement = document.getElementById('content');
         if (contentElement) {
+            // Ensure the content is set and visible
             contentElement.textContent = message;
-            console.log("Message content set successfully");
+            contentElement.style.display = 'block';
+            console.log("Message content set successfully:", message.substring(0, 30) + "...");
         } else {
             console.error("Content element not found!");
         }
+        
+        // Explicitly force-show all containers
+        document.querySelectorAll('.message-container, .message-content, .message-body, .message-text').forEach(el => {
+            if (el) {
+                el.style.display = 'block';
+                console.log(`Forced display:block on ${el.className}`);
+            }
+        });
         
         // Make the message container and content visible
         const messageContent = document.getElementById('messageContent');
@@ -1505,6 +1540,13 @@ function displayGeneratedMessage(message) {
             messageContent.style.display = 'block';
             messageContent.style.opacity = '1';
             console.log("Message content display set to block");
+            
+            // Force visibility after a small delay to ensure rendering
+            setTimeout(() => {
+                messageContent.style.display = 'block';
+                messageContent.style.opacity = '1';
+                console.log("Reinforced message content visibility after delay");
+            }, 100);
         } else {
             console.error("Message content element not found!");
         }
@@ -1516,8 +1558,18 @@ function displayGeneratedMessage(message) {
             console.log("Message state display set to block");
         }
         
-        // Initialize regenerate options
-        initializeRegenerateOptions();
+        // Hide any global loading overlay
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+        
+        // Initialize regenerate options but don't display them yet
+        // (they'll be shown when the user clicks the regenerate button)
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        if (regenerateOptions) {
+            regenerateOptions.style.display = 'none';
+        }
         
         // Log success
         logDebug("Message displayed successfully");
@@ -1528,22 +1580,54 @@ function displayGeneratedMessage(message) {
 }
 
 /**
- * Initialize the regenerate options section
+ * Initialize the regenerate options section and button
  */
 function initializeRegenerateOptions() {
+    // Initialize the regenerate button first
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+        console.log('Setting up regenerate button');
+        regenerateBtn.addEventListener('click', function() {
+            console.log('Regenerate button clicked');
+            
+            // Hide message content and insights
+            const messageContent = document.getElementById('messageContent');
+            if (messageContent) {
+                messageContent.style.display = 'none';
+            }
+            
+            const messageInsights = document.getElementById('messageInsights');
+            if (messageInsights) {
+                messageInsights.style.display = 'none';
+            }
+            
+            // Show regenerate options
+            const regenerateOptions = document.getElementById('regenerateOptions');
+            if (regenerateOptions) {
+                regenerateOptions.style.display = 'block';
+                console.log('Showing regenerate options');
+                
+                // Setup option cards if not already done
+                setupRegenerateOptionCards();
+            }
+        });
+    }
+    
+    // Call the function to set up the option cards
+    setupRegenerateOptionCards();
+}
+
+/**
+ * Setup the regenerate option cards with event listeners
+ */
+function setupRegenerateOptionCards() {
     // Get the regenerate options container
     const regenerateOptions = document.getElementById('regenerateOptions');
     
     if (!regenerateOptions) {
         console.error('Regenerate options container not found');
-        logDebug('Regenerate options container not found in the DOM');
         return;
     }
-    
-    console.log('Initializing regenerate options');
-    
-    // Make sure it's visible
-    regenerateOptions.style.display = 'block';
     
     // Get all the option cards
     const optionCards = regenerateOptions.querySelectorAll('.option-card');
@@ -1551,7 +1635,11 @@ function initializeRegenerateOptions() {
     
     // Add click event to each option
     optionCards.forEach(card => {
-        card.addEventListener('click', function() {
+        // Remove any existing event listeners by cloning and replacing the element
+        const newCard = card.cloneNode(true);
+        card.parentNode.replaceChild(newCard, card);
+        
+        newCard.addEventListener('click', function() {
             // Get variation type
             const variation = this.getAttribute('data-variation');
             console.log(`Selected variation: ${variation}`);
@@ -1573,50 +1661,40 @@ function initializeRegenerateOptions() {
         });
     });
     
-    // Add buttons to show/hide regenerate options
-    const regenerateBtn = document.getElementById('regenerateBtn');
-    if (regenerateBtn) {
-        regenerateBtn.addEventListener('click', function() {
-            console.log('Regenerate button clicked');
+    // Add a cancel button if it doesn't exist
+    if (!document.getElementById('cancelRegenerateBtn')) {
+        const cancelRegenerateBtn = document.createElement('button');
+        cancelRegenerateBtn.id = 'cancelRegenerateBtn';
+        cancelRegenerateBtn.className = 'secondary-button';
+        cancelRegenerateBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+        cancelRegenerateBtn.style.marginTop = '20px';
+        cancelRegenerateBtn.style.display = 'block';
+        cancelRegenerateBtn.style.margin = '20px auto 0';
+        
+        // Add event listener to cancel button
+        cancelRegenerateBtn.addEventListener('click', function() {
+            console.log('Cancel regenerate button clicked');
+            regenerateOptions.style.display = 'none';
+            
+            // Show message content and insights again
             const messageContent = document.getElementById('messageContent');
             if (messageContent) {
-                messageContent.style.display = 'none';
+                messageContent.style.display = 'block';
             }
             
             const messageInsights = document.getElementById('messageInsights');
             if (messageInsights) {
-                messageInsights.style.display = 'none';
+                messageInsights.style.display = 'block';
             }
-            
-            regenerateOptions.style.display = 'block';
         });
-    }
-    
-    // Add a button to cancel regeneration
-    const cancelRegenerateBtn = document.createElement('button');
-    cancelRegenerateBtn.id = 'cancelRegenerateBtn';
-    cancelRegenerateBtn.className = 'secondary-button';
-    cancelRegenerateBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-    cancelRegenerateBtn.style.marginTop = '20px';
-    
-    // Add event listener to cancel button
-    cancelRegenerateBtn.addEventListener('click', function() {
-        console.log('Cancel regenerate button clicked');
-        regenerateOptions.style.display = 'none';
         
-        const messageContent = document.getElementById('messageContent');
-        if (messageContent) {
-            messageContent.style.display = 'block';
-        }
-        
-        const messageInsights = document.getElementById('messageInsights');
-        if (messageInsights) {
-            messageInsights.style.display = 'block';
-        }
-    });
-    
-    // Add the cancel button to the regenerate options container
-    if (!document.getElementById('cancelRegenerateBtn')) {
+        // Add the cancel button to the regenerate options container
         regenerateOptions.appendChild(cancelRegenerateBtn);
     }
-} 
+}
+
+// Make sure to initialize the regenerate options when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // This will be called after initPage() runs
+    setTimeout(initializeRegenerateOptions, 1000);
+}); 

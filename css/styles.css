@@ -3392,3 +3392,209 @@ textarea.input-field:focus, #connection-notes:focus {
   border-radius: 3px;
 }
 
+/* Message view modal styling */
+.message-view-modal {
+  max-width: 650px;
+  width: 100%;
+}
+
+.message-info {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.message-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 15px;
+  border-radius: 12px;
+}
+
+.message-meta span {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.message-meta strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.message-full-content {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message-full-content h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.message-text {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+}
+
+/* Message actions styling */
+.message-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.message-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.message-action:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: scale(1.05);
+}
+
+.message-action.view-action:hover {
+  color: var(--accent-blue);
+}
+
+.message-action.edit-action:hover {
+  color: var(--accent-purple);
+}
+
+.message-action.delete-action:hover {
+  color: #ff5252;
+}
+
+/* Delete confirmation dialog */
+#delete-message-dialog .modal-content {
+  max-width: 450px;
+  background: rgba(30, 30, 60, 0.95);
+  border: 1px solid rgba(255, 0, 0, 0.2);
+}
+
+#delete-message-dialog .modal-header {
+  border-bottom-color: rgba(255, 0, 0, 0.1);
+}
+
+#delete-message-dialog .modal-title {
+  color: #ff5252;
+}
+
+#delete-message-dialog .warning {
+  color: #ff5252;
+  font-weight: 500;
+  margin-top: 10px;
+}
+
+#delete-message-dialog .modal-footer {
+  justify-content: space-between;
+}
+
+#delete-message-dialog .cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+#delete-message-dialog .cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#delete-message-dialog .confirm-delete-btn {
+  background: rgba(255, 82, 82, 0.7);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+#delete-message-dialog .confirm-delete-btn:hover {
+  background: rgba(255, 82, 82, 0.9);
+}
+
+/* Copy button, Edit button, Delete button in the message popup */
+.copy-message-btn,
+.edit-message-btn,
+.delete-message-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+}
+
+.copy-message-btn:hover {
+  background: rgba(80, 145, 252, 0.1);
+  color: var(--accent-blue);
+}
+
+.edit-message-btn:hover {
+  background: rgba(144, 63, 236, 0.1);
+  color: var(--accent-purple);
+}
+
+.delete-message-btn:hover {
+  background: rgba(255, 82, 82, 0.1);
+  color: #ff5252;
+}
+
+/* Message popup modal footer */
+.message-view-modal .modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+@media (max-width: 768px) {
+  .message-meta {
+    padding: 12px;
+  }
+  
+  .message-text {
+    padding: 15px;
+  }
+  
+  .message-view-modal .modal-footer {
+    flex-wrap: wrap;
+  }
+  
+  .copy-message-btn,
+  .edit-message-btn,
+  .delete-message-btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+

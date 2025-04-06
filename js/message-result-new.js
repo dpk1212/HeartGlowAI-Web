@@ -978,10 +978,28 @@ function saveMessageToFirebase(messageText, insights) {
     }
     
     try {
+        // Show a subtle saving indicator
+        const savingIndicator = document.createElement('div');
+        savingIndicator.className = 'saving-indicator';
+        savingIndicator.innerHTML = '<i class="fas fa-cloud-upload-alt"></i> Saving message...';
+        savingIndicator.style.position = 'fixed';
+        savingIndicator.style.bottom = '20px';
+        savingIndicator.style.right = '20px';
+        savingIndicator.style.background = 'rgba(0,0,0,0.7)';
+        savingIndicator.style.color = '#fff';
+        savingIndicator.style.padding = '10px 15px';
+        savingIndicator.style.borderRadius = '4px';
+        savingIndicator.style.zIndex = '9999';
+        savingIndicator.style.fontSize = '14px';
+        document.body.appendChild(savingIndicator);
+        
         // Get data from localStorage
         const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
+        
+        // Get current user ID
+        const userId = firebase.auth().currentUser.uid;
         
         // Create message object
         const messageData = {
@@ -993,25 +1011,141 @@ function saveMessageToFirebase(messageText, insights) {
             connectionId: recipientData.id || null,
             type: intentData.type || 'general',
             tone: toneData.type || 'warm',
-            toneIntensity: toneData.intensity || 'medium'
+            toneIntensity: toneData.intensity || 'medium',
+            createdBy: userId
         };
         
-        // Save to Firestore
-        firebase.firestore()
-            .collection('users')
-            .doc(firebase.auth().currentUser.uid)
-            .collection('messages')
-            .add(messageData)
-            .then(docRef => {
-                logDebug(`Message saved to Firebase with ID: ${docRef.id}`);
+        // Reference to Firestore
+        const db = firebase.firestore();
+        
+        // If we have a connection ID, update the connection's message count
+        if (recipientData.id) {
+            // Use a transaction to ensure data consistency
+            db.runTransaction(async (transaction) => {
+                // Reference to the connection
+                const connectionRef = db.collection('users').doc(userId)
+                    .collection('connections').doc(recipientData.id);
+                
+                // Get current connection data
+                const connectionDoc = await transaction.get(connectionRef);
+                
+                // Check if connection exists
+                if (!connectionDoc.exists) {
+                    throw new Error('Connection does not exist');
+                }
+                
+                // Create message document
+                const messageRef = db.collection('users').doc(userId)
+                    .collection('messages').doc();
+                
+                // Get the connection data
+                const connectionData = connectionDoc.data();
+                
+                // Calculate new message count
+                const currentCount = connectionData.messageCount || 0;
+                const newCount = currentCount + 1;
+                
+                // Update connection with message count
+                transaction.update(connectionRef, { 
+                    messageCount: newCount,
+                    lastMessageDate: firebase.firestore.FieldValue.serverTimestamp(),
+                    // Add the connection ID to the message data
+                    lastMessageType: intentData.type || 'general'
+                });
+                
+                // Save the message with connection data
+                transaction.set(messageRef, {
+                    ...messageData,
+                    // Include connection info in message
+                    connectionId: recipientData.id,
+                    connectionName: connectionData.name || recipientData.name,
+                    messageNumber: newCount  // Which message number this is for the connection
+                });
+                
+                logDebug(`Message saved with ID: ${messageRef.id} for connection: ${recipientData.id}`);
+                return { messageId: messageRef.id, connectionId: recipientData.id };
+            })
+            .then(result => {
+                logDebug(`Transaction successfully completed. Message ID: ${result.messageId}`);
+                // Remove saving indicator with success message
+                savingIndicator.innerHTML = '<i class="fas fa-check"></i> Message saved!';
+                savingIndicator.style.background = 'rgba(0,128,0,0.7)';
+                setTimeout(() => {
+                    try {
+                        document.body.removeChild(savingIndicator);
+                    } catch (e) {
+                        // Ignore if already removed
+                    }
+                }, 3000);
             })
             .catch(error => {
-                console.error('Error saving message to Firebase:', error);
-                // Don't show error to user as this is a background operation
+                console.error('Transaction failed:', error);
+                // Save message without updating connection as fallback
+                saveMessageWithoutConnection(userId, messageData, savingIndicator);
             });
+        } else {
+            // No connection ID, save message normally
+            saveMessageWithoutConnection(userId, messageData, savingIndicator);
+        }
     } catch (error) {
         console.error('Error preparing message for Firebase:', error);
+        // Still try to show a temporary error notification
+        const errorIndicator = document.createElement('div');
+        errorIndicator.style.position = 'fixed';
+        errorIndicator.style.bottom = '20px';
+        errorIndicator.style.right = '20px';
+        errorIndicator.style.background = 'rgba(200,0,0,0.7)';
+        errorIndicator.style.color = '#fff';
+        errorIndicator.style.padding = '10px 15px';
+        errorIndicator.style.borderRadius = '4px';
+        errorIndicator.style.zIndex = '9999';
+        errorIndicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error saving message';
+        document.body.appendChild(errorIndicator);
+        setTimeout(() => {
+            try {
+                document.body.removeChild(errorIndicator);
+            } catch (e) {
+                // Ignore if already removed
+            }
+        }, 3000);
     }
+}
+
+/**
+ * Helper function to save message without connection
+ */
+function saveMessageWithoutConnection(userId, messageData, savingIndicator) {
+    firebase.firestore()
+        .collection('users')
+        .doc(userId)
+        .collection('messages')
+        .add(messageData)
+        .then(docRef => {
+            logDebug(`Message saved to Firebase with ID: ${docRef.id}`);
+            // Update indicator to show success
+            savingIndicator.innerHTML = '<i class="fas fa-check"></i> Message saved!';
+            savingIndicator.style.background = 'rgba(0,128,0,0.7)';
+            setTimeout(() => {
+                try {
+                    document.body.removeChild(savingIndicator);
+                } catch (e) {
+                    // Ignore if already removed
+                }
+            }, 3000);
+        })
+        .catch(error => {
+            console.error('Error saving message to Firebase:', error);
+            // Update indicator to show error
+            savingIndicator.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Error saving message';
+            savingIndicator.style.background = 'rgba(200,0,0,0.7)';
+            setTimeout(() => {
+                try {
+                    document.body.removeChild(savingIndicator);
+                } catch (e) {
+                    // Ignore if already removed
+                }
+            }, 3000);
+        });
 }
 
 /**

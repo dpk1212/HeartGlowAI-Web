@@ -24,26 +24,16 @@ exports.generateMessage = functions.https.onRequest((req, res) => {
 
       // Get request data with new fields
       const { 
-        scenario, 
-        relationshipType,
-        tone = 'casual',
-        toneIntensity = '3',
-        relationshipDuration = 'unspecified',
-        specialCircumstances = '',
-        previousMessage = '',
-        userFeedback = '',
-        messageToAnalyze = '',
-        recipientContext = '',
-        blueprintData = {},
+        intent = {},
+        recipient = {},
+        tone = {},
+        variation = null,
         apiKey = null // Check if API key is provided in request
       } = req.body;
       
-      // Check required fields based on mode
-      if (messageToAnalyze && recipientContext) {
-        // This is a preview/analysis request
-        console.log("Message analysis request received");
-      } else if (!scenario || !relationshipType) {
-        res.status(400).json({ error: 'Scenario and relationshipType are required' });
+      // Check for required data
+      if (!intent.type || !recipient.name) {
+        res.status(400).json({ error: 'Intent and recipient information are required' });
         return;
       }
 
@@ -82,77 +72,47 @@ exports.generateMessage = functions.https.onRequest((req, res) => {
         return;
       }
 
-      // Blueprint data handling
-      let blueprintContextString = '';
-      if (blueprintData && Object.keys(blueprintData).length > 0) {
-        blueprintContextString = `
-RELATIONSHIP BLUEPRINT CONTEXT:
-Person: ${blueprintData.personName || 'Unspecified'} (${blueprintData.relationshipType || relationshipType})
-Goal: ${blueprintData.goal || 'Unspecified'}
-Key Dynamics: ${blueprintData.relationshipDescription || 'Unspecified'}
-${blueprintData.qanda ? `Specific Details: ${JSON.stringify(blueprintData.qanda)}` : ''}`;
-      }
+      // Construct an enhanced system prompt based on user's requirements
+      const systemPrompt = `You are an expert in heartfelt communication and relationship dynamics. 
+Your task is to create an emotionally resonant, sincere message that reflects the specific relationship context provided. 
 
-      let model = "gpt-4-turbo-preview";
-      let maxTokens = 1000;
-      let systemPrompt = '';
-      let prompt = '';
+Follow these key principles:
+1. Be authentic and use natural language - write as one human to another
+2. Avoid sounding like AI, cliches, or corporate language
+3. Match the appropriate emotional tone for the relationship and intent
+4. Include specific, personalized details from the context provided
+5. Keep the message concise but emotionally impactful
 
-      // Prepare prompts based on request type
-      if (messageToAnalyze && recipientContext) {
-        // Analysis request
-        systemPrompt = `You are an expert in communication psychology, emotional intelligence, and relationship dynamics. Your task is to analyze a message and provide feedback on its effectiveness.`;
-        prompt = `Analyze this message in the context provided. Evaluate its effectiveness, appropriateness, and suggest improvements.
-        
-MESSAGE TO ANALYZE:
-${messageToAnalyze}
+You MUST structure your response exactly as follows:
+1. First, provide ONLY the message text with no introduction, labels or additional text
+2. Then, on a new line after your message, write "INSIGHTS:" (all caps)
+3. Provide 2-3 brief insights about why the message works, each on a new line prefixed with "-"
 
-RECIPIENT CONTEXT:
-${recipientContext}
+Do not add any additional commentary, explanations, or suggestions - strictly follow the format above.`;
+      
+      // Build detailed user prompt
+      let userPrompt = `Create a heartfelt message with the following parameters:
 
-Provide a detailed analysis including strengths, potential weaknesses, and suggestions for improvement.`;
-      } else if (previousMessage && userFeedback) {
-        // Tweak request
-        systemPrompt = `You are an expert in interpersonal communication and relationship dynamics. Your task is to improve a message based on specific feedback.`;
-        prompt = `Revise the following message based on the user's feedback. Create a completely new version that addresses their concerns.
+INTENT: ${intent.type || 'Support'} 
+${intent.details ? `Intent Details: ${intent.details}` : ''}
 
-ORIGINAL MESSAGE:
-${previousMessage}
+RECIPIENT: 
+- Name: ${recipient.name}
+- Relationship: ${recipient.relationship || 'Friend'}
+${recipient.relationshipCategory ? `- Relationship Category: ${recipient.relationshipCategory}` : ''}
+${recipient.relationshipFocus ? `- Focus of Relationship: ${recipient.relationshipFocus}` : ''}
+${recipient.yearsKnown ? `- Known for: ${recipient.yearsKnown} years` : ''}
+${recipient.communicationStyle ? `- Communication Style: ${recipient.communicationStyle}` : ''}
+${recipient.personalNotes ? `- Personal Context: ${recipient.personalNotes}` : ''}
 
-USER FEEDBACK:
-${userFeedback}
+TONE: ${tone.type || 'Warm'} (Intensity: ${tone.intensity || 'Medium'})
 
-SCENARIO:
-${scenario}
+${variation ? `VARIATION: Please make this message ${variation} than a standard message.` : ''}`;
 
-RELATIONSHIP:
-Type: ${relationshipType}
-Duration: ${relationshipDuration}
-Tone: ${tone} (intensity: ${toneIntensity}/5)
-${specialCircumstances ? `Special circumstances: ${specialCircumstances}` : ''}
-${blueprintContextString}
-
-RESPONSE FORMAT:
-First provide ONLY the revised message text with no introduction.
-Then, on a new line add "INSIGHTS:" followed by 3-4 structured insights about the improvements made. Format each insight as "Title: Description" where the title is a short 2-3 word summary and the description explains the specific improvement made and why it's effective.`;
-      } else {
-        // Standard message generation
-        systemPrompt = `You are an expert in interpersonal communication and relationship dynamics. Your role is to create authentic, effective messages tailored to specific relationship contexts. Focus on emotional intelligence, clear communication, and relationship-building techniques.`;
-
-        prompt = `Create a message for a ${relationshipType} relationship in this scenario: ${scenario}. Tone: ${tone} (intensity: ${toneIntensity}/5). Relationship duration: ${relationshipDuration}.${specialCircumstances ? ` Special circumstances: ${specialCircumstances}.` : ''}${blueprintContextString}
-        
-RESPONSE FORMAT:
-First provide ONLY the message text with no introduction or context.
-Then, on a new line add "INSIGHTS:" followed by 3-4 structured insights. Format each insight as "Title: Description" where Title is 2-3 words capturing the key communication technique or emotional element, and Description explains how this specific element works in the message and why it's effective for this relationship context.
-
-Examples of good insight formats:
-- "Emotional Validation: The message acknowledges their feelings about [specific aspect] which creates psychological safety."
-- "Future Focus: Mentioning specific plans for [activity] provides something positive to look forward to."
-- "Shared History: Referencing the [specific memory] strengthens your connection by activating positive associations."
-
-Keep insights concise (1-2 sentences each) but specific to this exact message and relationship.`;
-      }
-
+      // Use GPT-4 for best quality
+      const model = "gpt-4-turbo-preview";
+      const maxTokens = 1000;
+      
       // Call OpenAI API
       const response = await axios({
         method: 'post',
@@ -164,52 +124,42 @@ Keep insights concise (1-2 sentences each) but specific to this exact message an
         data: {
           model: model,
           messages: [
-            { 
-              role: 'system', 
-              content: systemPrompt
-            },
-            { role: 'user', content: prompt }
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }
           ],
           temperature: 0.7,
           max_tokens: maxTokens
         }
       });
 
-      // Process response based on the type of request
-      if (messageToAnalyze && recipientContext) {
-        // Return analysis
-        res.status(200).json({ 
-          analysis: response.data.choices[0].message.content
-        });
+      // Process the response to extract message and insights
+      const responseContent = response.data.choices[0].message.content;
+      const parts = responseContent.split(/INSIGHTS:/i);
+      
+      let message = '';
+      let insights = [];
+      
+      if (parts.length >= 2) {
+        message = parts[0].trim();
+        
+        // Extract insights as an array
+        const insightsText = parts[1].trim();
+        insights = insightsText
+          .split(/\n+/)
+          .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
+          .filter(line => line.length > 0);
       } else {
-        // Process the response to separate message and insights
-        const responseContent = response.data.choices[0].message.content;
-        const parts = responseContent.split(/INSIGHTS:/i);
-        
-        let message = '';
-        let insights = [];
-        
-        if (parts.length >= 2) {
-          message = parts[0].trim();
-          
-          // Process insights from the second part
-          const insightsText = parts[1].trim();
-          insights = insightsText
-            .split(/\n+/)
-            .map(line => line.replace(/^[•\-\*]\s*/, '').trim())
-            .filter(line => line.length > 0);
-        } else {
-          // Fallback if format wasn't followed
-          message = responseContent.trim();
-        }
-
-        // Return the result for standard message generation
-        res.status(200).json({ 
-          message: message,
-          insights: insights,
-          usage: response.data.usage
-        });
+        // Fallback if format wasn't followed
+        message = responseContent.trim();
       }
+
+      // Return the result
+      res.status(200).json({ 
+        message: message,
+        insights: insights,
+        usage: response.data.usage
+      });
+      
     } catch (error) {
       console.error('Error:', error);
       res.status(500).json({ 

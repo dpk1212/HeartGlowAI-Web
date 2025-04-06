@@ -1003,7 +1003,7 @@ function generateMessage(variation = null) {
         const messagePrompt = buildOpenAIPrompt(intentData, recipientData, toneData, variation);
         
         // Log the prompt for debugging
-        logDebug(`Prompt for OpenAI: ${messagePrompt}`);
+        logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
         
         // Get auth token if available
         const authToken = localStorage.getItem('authToken');
@@ -1032,168 +1032,106 @@ function generateMessage(variation = null) {
 }
 
 /**
- * Build OpenAI prompt based on user inputs
+ * Build the OpenAI prompt based on user inputs
  */
 function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null) {
-    // Default to medium length if not specified
-    const messageLength = variation === 'longer' ? 'longer' : (variation === 'shorter' ? 'shorter' : 'medium-length');
+    // Create a structured request object that matches our cloud function expectations
+    const requestData = {
+        intent: {
+            type: intentData.type || 'Support',
+            details: intentData.details || ''
+        },
+        recipient: {
+            name: recipientData.name || 'Friend',
+            relationship: recipientData.relationship || 'Friend',
+            relationshipCategory: recipientData.relationshipCategory || '',
+            relationshipFocus: recipientData.relationshipFocus || '',
+            yearsKnown: recipientData.yearsKnown || '',
+            communicationStyle: recipientData.communicationStyle || '',
+            personalNotes: recipientData.personalNotes || ''
+        },
+        tone: {
+            type: toneData.type || 'Warm',
+            intensity: toneData.intensity || 'Medium'
+        },
+        variation: variation
+    };
     
-    // Get tone from data
-    const tone = toneData.type || 'warm';
-    
-    // Get recipient info
-    const recipientName = recipientData.name || 'them';
-    const relationshipType = recipientData.relationship || 'friend';
-    
-    // Handle specific relationship if available
-    const specificRelationship = recipientData.specificRelationship || '';
-    const customRelationshipClause = specificRelationship ? 
-        ` (specifically ${specificRelationship})` : '';
-    
-    // Get intent info
-    const intentType = intentData.type || 'connect';
-    
-    // Map intent type to appropriate clause
-    let messageIntentClause = '';
-    switch (intentType) {
-        case 'reconnect':
-            messageIntentClause = 'reconnect after some time apart';
-            break;
-        case 'appreciate':
-            messageIntentClause = 'express my appreciation for them';
-            break;
-        case 'apologize':
-            messageIntentClause = 'apologize for something that happened';
-            break;
-        case 'celebrate':
-            messageIntentClause = 'celebrate their achievement or special occasion';
-            break;
-        case 'encourage':
-            messageIntentClause = 'encourage them during a challenging time';
-            break;
-        case 'invite':
-            messageIntentClause = 'invite them to get together';
-            break;
-        case 'custom':
-            messageIntentClause = intentData.customText || 'connect with them';
-            break;
-        default:
-            messageIntentClause = 'connect with them in a meaningful way';
-    }
-    
-    // Add relationship goal if available
-    const relationshipGoal = recipientData.relationshipGoal || '';
-    const closenessClause = relationshipGoal ? 
-        ` I'm hoping to ${relationshipGoal} through this message.` : '';
-    
-    // Add any additional context
-    const contextNotes = recipientData.notes || '';
-    const contextClause = contextNotes ? 
-        ` Additional context: ${contextNotes}.` : '';
-    
-    // Add variation as an outcome clause if applicable
-    let outcomeClause = '';
-    if (variation === 'deeper') {
-        outcomeClause = ' I want the message to be more emotionally expressive.';
-    } else if (variation === 'different') {
-        outcomeClause = ' Please try a completely different approach than you might normally use.';
-    }
-    
-    // Format clause - in this case, we just want clean formatting
-    const formatClause = '';
-    
-    // Construct the full prompt
-    const prompt = `Please write a ${messageLength}, ${tone} message from me to ${recipientName}, who is my ${relationshipType}${customRelationshipClause}.
-
-This message is meant to ${messageIntentClause}.${closenessClause}${contextClause}${outcomeClause}
-
-Use a warm, human voice — as if I'm speaking directly to them. The message should feel emotionally appropriate and natural, not scripted or overly formal.
-
-Then provide 2–3 brief insights that explain why this message works emotionally or relationally. Use plain, supportive language.${formatClause}`;
-
-    return prompt;
+    return requestData;
 }
 
 /**
- * Parse and display the OpenAI response - in a real implementation, this would parse the API response
+ * Parse the OpenAI response to extract message and insights
  */
-function parseOpenAIResponse(apiResponse) {
-    // In a real implementation, this would extract message and insights from the API response
-    // For now, we'll assume the response format and parse it
-    
-    try {
-        // For demo purposes - this would be replaced with actual parsing logic
-        const messagePart = apiResponse.message || '';
-        const insights = apiResponse.insights || [];
-        
-        return {
-            message: messagePart,
-            insights: insights
-        };
-    } catch (error) {
-        console.error('Error parsing OpenAI response:', error);
-        return {
-            message: 'Could not parse the response properly.',
-            insights: ['The message could not be generated correctly.']
-        };
-    }
+function parseOpenAIResponse(response) {
+    // The response from our cloud function should already be in the correct format
+    return {
+        message: response.message || '',
+        insights: response.insights || []
+    };
 }
 
 /**
  * Call the API to generate a message
- * In a real implementation, this would make an HTTP request to the OpenAI API
  */
 function callGenerationAPI(prompt, authToken = null) {
     return new Promise((resolve, reject) => {
-        // This would be replaced with the actual API call in production
-        // For now, we'll simulate a response after a short delay
+        // Show extended loading time for API call
+        const loadingMessage = document.querySelector('.loading-message p');
+        if (loadingMessage) {
+            loadingMessage.textContent = 'Creating your heartfelt message...';
+        }
         
-        // Check if there's already content in the UI (for demo purposes)
-        const existingContent = document.getElementById('content')?.textContent || '';
+        // Log the API call attempt
+        logDebug('Calling message generation API...');
         
-        // In production, you would make an API call to OpenAI here
-        // Example of what the API call might look like:
-        /*
-        fetch('https://api.yourbackend.com/generate-message', {
+        // Set up the API endpoint URL
+        // In production, this would point to your deployed cloud function
+        const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
+        
+        // Make the API call
+        fetch(apiUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': authToken ? `Bearer ${authToken}` : ''
             },
-            body: JSON.stringify({ prompt })
+            body: JSON.stringify(prompt)
         })
-        .then(response => response.json())
-        .then(data => resolve(data))
-        .catch(error => reject(error));
-        */
-        
-        // For now, simulate an API response
-        setTimeout(() => {
-            try {
-                // If there's existing content, use it; otherwise, use a default message
-                // In a real implementation, this would use the response from the API
-                const message = existingContent || "Hey Test, \n\nI know you're facing challenges right now, but I wanted you to know that I believe in you completely. You have shown such strength and resilience in the past, and those same qualities will help you overcome what you're facing now. Remember how far you've already come. One of the things I value most about you is your ability to bring joy to those around you. It's rare to find someone who balances strength and compassion so effortlessly, and I'm grateful that you're in my life. Sometimes I think back to how you helped me see a situation from a completely different angle, and it always brings a smile to my face.\n\nThinking of you warmly and sending my best wishes your way.\n\nWith love,";
-                
-                // Generate insights based on the message
-                // In a real implementation, these would come from the API
-                const insights = [
-                    "Used emotional language to create connection",
-                    "Included personal details specific to your relationship",
-                    "Balanced warmth with respect appropriate for this relationship",
-                    "Incorporated themes relevant to your intent"
-                ];
-                
-                // Simulate a response object
-                const response = {
-                    message: message,
-                    insights: insights
-                };
-                
-                resolve(response);
-            } catch (error) {
-                reject(error);
+        .then(response => {
+            // Check if the request was successful
+            if (!response.ok) {
+                throw new Error(`API responded with status ${response.status}`);
             }
-        }, 2000);
+            return response.json();
+        })
+        .then(data => {
+            // Log success
+            logDebug('API call successful');
+            
+            // If there's an error in the response
+            if (data.error) {
+                throw new Error(data.error);
+            }
+            
+            // Resolve with the data
+            resolve(data);
+        })
+        .catch(error => {
+            // Log error
+            console.error('API call failed:', error);
+            
+            // Show error in UI
+            const loadingState = document.getElementById('loadingState');
+            const errorState = document.getElementById('errorState');
+            const errorText = document.getElementById('errorText');
+            
+            if (loadingState) loadingState.style.display = 'none';
+            if (errorState) errorState.style.display = 'block';
+            if (errorText) errorText.textContent = `Failed to generate message: ${error.message || 'Server error'}`;
+            
+            reject(error);
+        });
     });
 }
 

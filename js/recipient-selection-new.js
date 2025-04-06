@@ -646,20 +646,21 @@ function initNavigation() {
 }
 
 /**
- * Save recipient data and navigate to next page
+ * Save selected data and navigate to the next page
  */
 async function saveDataAndNavigate() {
     showLoading('Saving your selection...');
     
     try {
         // Get the name and relationship data
-        let name, relationship, otherRelationship;
+        let name, relationship, otherRelationship, connectionId;
         
         if (selectedSavedRecipient) {
             // If a saved recipient is selected, use that data
             name = selectedSavedRecipient.name;
             relationship = selectedSavedRecipient.relationship;
             otherRelationship = selectedSavedRecipient.otherRelationship || '';
+            connectionId = selectedSavedRecipient.id; // Include the connection ID
         } else {
             // Otherwise use the form data
             name = document.getElementById('recipientName').value.trim();
@@ -678,6 +679,11 @@ async function saveDataAndNavigate() {
             otherRelationship: otherRelationship || ''
         };
         
+        // Add connection ID if available
+        if (connectionId) {
+            recipientData.id = connectionId;
+        }
+        
         // Save to localStorage for next pages
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
         
@@ -692,7 +698,13 @@ async function saveDataAndNavigate() {
             const user = firebase.auth().currentUser;
             if (user) {
                 console.log('Attempting to save recipient to Firestore');
-                await saveRecipientToFirestore(user.uid, name, relationship, otherRelationship);
+                const newConnectionId = await saveRecipientToFirestore(user.uid, name, relationship, otherRelationship);
+                
+                // If successfully saved, update the recipientData with the new connection ID
+                if (newConnectionId) {
+                    recipientData.id = newConnectionId;
+                    localStorage.setItem('recipientData', JSON.stringify(recipientData));
+                }
             } else {
                 console.error('User not authenticated, cannot save connection');
                 showAlert('You must be signed in to save connections', 'error');

@@ -109,7 +109,13 @@ async function initPage() {
     
     // Initialize UI elements
     initButtons();
+    initNavigation();
+    initBypassAuth();
     initAdjustmentOptions();
+    initDevModeToggle();
+    
+    // Show debug button
+    createDebugButton();
     
     // Wait for authentication to be confirmed before generating
     logDebug('Waiting for auth state promise...');
@@ -216,31 +222,21 @@ function loadToneData() {
 function updateRecipientDisplay() {
     if (!recipientData) return;
     
-    // Update recipient display with new element IDs
-    const nameElement = document.getElementById('recipientName');
-    const relationshipElement = document.getElementById('recipientRelation');
-    const avatarElement = document.getElementById('recipientAvatar');
-    const intentElement = document.getElementById('messageIntent');
-    const toneElement = document.getElementById('messageTone');
+    // Update recipient display
+    const nameDisplay = document.getElementById('recipient-name-display');
+    const relationshipDisplay = document.getElementById('recipient-relationship-display');
+    const avatarDisplay = document.getElementById('recipient-avatar');
     
-    if (nameElement) {
-        nameElement.textContent = recipientData.name || 'Unknown recipient';
+    if (nameDisplay) {
+        nameDisplay.textContent = recipientData.name || 'Unknown recipient';
     }
     
-    if (relationshipElement) {
-        relationshipElement.textContent = capitalizeFirstLetter(recipientData.relationship) || 'Contact';
+    if (relationshipDisplay) {
+        relationshipDisplay.textContent = capitalizeFirstLetter(recipientData.relationship) || 'Contact';
     }
     
-    if (avatarElement) {
-        avatarElement.textContent = getInitials(recipientData.name);
-    }
-
-    if (intentElement && intentData) {
-        intentElement.textContent = capitalizeFirstLetter(intentData.type);
-    }
-
-    if (toneElement && toneData) {
-        toneElement.textContent = capitalizeFirstLetter(toneData.type);
+    if (avatarDisplay) {
+        avatarDisplay.textContent = getInitials(recipientData.name);
     }
 }
 
@@ -256,7 +252,10 @@ function triggerGeneration(idToken) {
 
     try {
         // Show loading state
-        document.getElementById('loadingOverlay').classList.add('show');
+        document.getElementById('loading-state').style.display = 'flex';
+        document.getElementById('message-container').style.display = 'none';
+        document.getElementById('error-state').style.display = 'none';
+        document.getElementById('regenerate-options').style.display = 'none';
         
         if (idToken || authBypass) {
              callCloudFunction(idToken);
@@ -286,8 +285,10 @@ function callCloudFunction(idToken) {
     logDebug('Attempting to call cloud function for message generation...');
     
     // Show loading state immediately
-    document.getElementById('loadingOverlay').classList.add('show');
-    document.getElementById('loadingContext').textContent = 'Generating your message...';
+    document.getElementById('loading-state').style.display = 'flex';
+    document.getElementById('message-container').style.display = 'none';
+    document.getElementById('error-state').style.display = 'none';
+    document.getElementById('regenerate-options').style.display = 'none';
 
     // Firestore check requires Firebase to be initialized
     if (!firebase || !firebase.firestore) {
@@ -328,7 +329,8 @@ function callCloudFunction(idToken) {
             logDebug(`ERROR: Failed to fetch API key: ${error.message}`);
             showError('Failed to access API key: ' + error.message);
             // Hide loading on critical failure
-            document.getElementById('loadingOverlay').classList.remove('show');
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block'; 
         });
 }
 
@@ -372,8 +374,12 @@ function makeRequest(payload, idToken, retryCount = 0) { // idToken can be null
          if (!data.message) { throw new Error('No message received from API'); }
          generatedMessage = data.message;
          const insights = data.insights || [];
-         document.getElementById('loadingOverlay').classList.remove('show');
-         document.getElementById('messageContent').innerHTML = `<p>${data.message}</p>`;
+         document.getElementById('loading-state').style.display = 'none';
+         document.getElementById('message-container').style.display = 'block';
+         document.getElementById('regenerate-options').style.display = 'block';
+         document.getElementById('message-content').textContent = data.message;
+         document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
+         document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
          displayInsights(insights);
          logDebug('Cloud function message generated successfully');
     })
@@ -384,8 +390,10 @@ function makeRequest(payload, idToken, retryCount = 0) { // idToken can be null
             logDebug(`Retrying request (${retryCount + 1}/2)...`);
             setTimeout(() => makeRequest(payload, idToken, retryCount + 1), 2000);
         } else {
-            document.getElementById('loadingOverlay').classList.remove('show');
-            showAlert(`Failed to generate message: ${error.message}. Please try again.`, 'error');
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-state').style.display = 'block';
+            document.getElementById('error-state').querySelector('.error-message').textContent = 
+                `Failed to generate message: ${error.message}. Please try again.`;
         }
     });
 }
@@ -525,7 +533,7 @@ function applyAdjustments(message) {
  */
 function initAdjustmentOptions() {
     const adjustmentOptions = document.querySelectorAll('.adjustment-option');
-    const regenerateBtn = document.getElementById('regenerateBtn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
     
     if (!adjustmentOptions.length) {
         logDebug('No adjustment options found');
@@ -534,7 +542,7 @@ function initAdjustmentOptions() {
     
     adjustmentOptions.forEach(option => {
         option.addEventListener('click', function() {
-            const adjustment = this.getAttribute('data-adjustment');
+            const adjustment = this.getAttribute('data-adjust');
             
             // Toggle selection
             if (this.classList.contains('selected')) {
@@ -545,57 +553,19 @@ function initAdjustmentOptions() {
                 selectedAdjustments.push(adjustment);
             }
             
-            // Enable the regenerate button if at least one adjustment is selected
-            if (regenerateBtn) {
-                regenerateBtn.disabled = selectedAdjustments.length === 0;
-            }
-            
-            // For custom adjustment, show/hide the input field
-            if (adjustment === 'custom') {
-                const customForm = document.getElementById('customAdjustmentForm');
-                if (customForm) {
-                    customForm.style.display = this.classList.contains('selected') ? 'block' : 'none';
-                }
-            }
-            
             logDebug(`Adjustments selected: ${selectedAdjustments.join(', ')}`);
         });
     });
     
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', function() {
-            if (selectedAdjustments.length > 0) {
-                document.getElementById('loadingOverlay').classList.add('show');
-                document.getElementById('loadingContext').textContent = 'Regenerating your message...';
+            if (generatedMessage) {
+                document.getElementById('loading-state').style.display = 'flex';
+                document.getElementById('message-container').style.display = 'none';
+                document.getElementById('regenerate-options').style.display = 'none';
                 
-                // Add any custom adjustment text
-                const customAdjustment = document.getElementById('customAdjustment');
-                if (customAdjustment && customAdjustment.value && selectedAdjustments.includes('custom')) {
-                    // Save the custom adjustment text
-                    const customText = customAdjustment.value.trim();
-                    if (customText) {
-                        // Replace 'custom' with the actual text
-                        selectedAdjustments = selectedAdjustments.filter(a => a !== 'custom');
-                        selectedAdjustments.push(customText);
-                    }
-                }
-                
-                // Call the function to regenerate with adjustments
-                const currentUser = firebase.auth().currentUser;
-                if (currentUser) {
-                    currentUser.getIdToken(true).then(idToken => {
-                        callCloudFunction(idToken);
-                    }).catch(error => {
-                        showAlert('Authentication error. Please try again.', 'error');
-                    });
-                } else {
-                    const savedToken = localStorage.getItem('authToken');
-                    if (savedToken) {
-                        callCloudFunction(savedToken);
-                    } else {
-                        showAlert('Authentication required. Please sign in again.', 'error');
-                    }
-                }
+                // Call generateMessage to regenerate with the selected adjustments
+                generateMessage();
             }
         });
     }
@@ -710,15 +680,13 @@ function initNavigation() {
             if (window.firebase && firebase.auth) {
                 firebase.auth().signOut()
                     .then(() => {
-                        localStorage.removeItem('authToken');
-                        window.location.href = 'login.html';
+                        window.location.href = 'index.html';
                     })
                     .catch((error) => {
                         console.error('Logout error:', error);
-                        showAlert('Error signing out', 'error');
                     });
             } else {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         });
     }
@@ -839,16 +807,37 @@ function checkAuthentication() {
  * Show error message
  */
 function showError(message = 'An error occurred') {
-    document.getElementById('loadingOverlay').classList.remove('show');
-    showAlert(message, 'error');
+    document.getElementById('loading-state').style.display = 'none';
+    document.getElementById('error-state').style.display = 'block';
+    document.getElementById('message-container').style.display = 'none';
+    document.getElementById('regenerate-options').style.display = 'none';
+    
+    const errorMessage = document.querySelector('.error-message');
+    if (errorMessage) {
+        errorMessage.textContent = message;
+    }
+    
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) {
+        retryBtn.addEventListener('click', function() {
+            document.getElementById('error-state').style.display = 'none';
+            document.getElementById('loading-state').style.display = 'flex';
+            setTimeout(() => {
+                generateMessage();
+            }, 1000);
+        });
+    }
 }
 
 /**
  * Show alert message
  */
 function showAlert(message, type = 'info') {
-    const alertContainer = document.getElementById('alertContainer');
-    if (!alertContainer) return;
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => {
+        document.body.removeChild(alert);
+    });
     
     // Create alert element
     const alertElement = document.createElement('div');
@@ -856,14 +845,12 @@ function showAlert(message, type = 'info') {
     alertElement.innerHTML = `
         <div class="alert-content">
             <span class="alert-message">${message}</span>
-            <button class="alert-close">
-                <i class="fas fa-times"></i>
-            </button>
+            <button class="alert-close">&times;</button>
         </div>
     `;
     
-    // Add to container
-    alertContainer.appendChild(alertElement);
+    // Add to document
+    document.body.appendChild(alertElement);
     
     // Show after a small delay (for animation)
     setTimeout(() => {
@@ -876,8 +863,8 @@ function showAlert(message, type = 'info') {
         closeBtn.addEventListener('click', () => {
             alertElement.classList.remove('show');
             setTimeout(() => {
-                if (alertContainer.contains(alertElement)) {
-                    alertContainer.removeChild(alertElement);
+                if (document.body.contains(alertElement)) {
+                    document.body.removeChild(alertElement);
                 }
             }, 300);
         });
@@ -888,8 +875,8 @@ function showAlert(message, type = 'info') {
         setTimeout(() => {
             alertElement.classList.remove('show');
             setTimeout(() => {
-                if (alertContainer.contains(alertElement)) {
-                    alertContainer.removeChild(alertElement);
+                if (document.body.contains(alertElement)) {
+                    document.body.removeChild(alertElement);
                 }
             }, 300);
         }, 5000);

@@ -374,12 +374,12 @@ function openConnectionModal(connectionId = null) {
   const idField = document.getElementById('connection-id');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
   
-  // New enhanced fields
+  // Enhanced fields
   const yearsKnownField = document.getElementById('connection-years');
-  const birthdayField = document.getElementById('connection-birthday');
-  const interestsField = document.getElementById('connection-interests');
   const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
   let deleteBtn = document.querySelector('.delete-connection-btn');
@@ -392,6 +392,12 @@ function openConnectionModal(connectionId = null) {
   
   // Reset form
   form.reset();
+  
+  // Hide specific relationship field initially
+  const specificContainer = document.getElementById('specific-relationship-container');
+  if (specificContainer) {
+    specificContainer.style.display = 'none';
+  }
   
   // Check if we're editing or adding
   if (connectionId) {
@@ -442,10 +448,19 @@ function openConnectionModal(connectionId = null) {
           
           // Fill enhanced fields if they exist
           if (yearsKnownField) yearsKnownField.value = data.yearsKnown || '';
-          if (birthdayField) birthdayField.value = data.birthday || '';
-          if (interestsField) interestsField.value = data.interests || '';
           if (communicationStyleField) communicationStyleField.value = data.communicationStyle || '';
+          if (goalField) goalField.value = data.relationshipGoal || '';
           if (notesField) notesField.value = data.notes || '';
+          
+          // Update specific relationship options based on primary relationship
+          updateSpecificRelationshipOptions();
+          
+          // Set specific relationship value after options are updated
+          setTimeout(() => {
+            if (specificRelationshipField) {
+              specificRelationshipField.value = data.specificRelationship || '';
+            }
+          }, 100);
           
           // Show modal after data is loaded to ensure it's visible
           showModalWithFallback(modal);
@@ -502,37 +517,35 @@ function createConnectionModal() {
                 <label for="connection-name">Name*</label>
                 <input type="text" id="connection-name" class="input-field" placeholder="Enter name" required>
               </div>
+              
+              <!-- Primary Relationship Type -->
               <div class="form-group">
-                <label for="connection-relationship">Relationship*</label>
+                <label for="connection-relationship">Relationship Type*</label>
                 <select id="connection-relationship" class="input-field" required>
-                  <option value="">Select relationship</option>
-                  <option value="friend">Friend</option>
+                  <option value="">Select relationship type</option>
                   <option value="family">Family</option>
-                  <option value="partner">Partner</option>
-                  <option value="colleague">Colleague</option>
+                  <option value="friend">Friend</option>
+                  <option value="partner">Partner/Romantic</option>
+                  <option value="colleague">Professional</option>
                   <option value="acquaintance">Acquaintance</option>
                   <option value="other">Other</option>
                 </select>
               </div>
+              
+              <!-- Specific Relationship - dynamically shown based on primary type -->
+              <div class="form-group" id="specific-relationship-container" style="display: none;">
+                <label for="connection-specific-relationship">Specific Relationship</label>
+                <select id="connection-specific-relationship" class="input-field">
+                  <option value="">Select specific relationship</option>
+                  <!-- Options will be dynamically populated based on primary relationship -->
+                </select>
+                <div class="field-help">Helps us create more personalized messages</div>
+              </div>
+              
               <div class="form-group">
                 <label for="connection-years">Years Known</label>
                 <input type="number" id="connection-years" class="input-field" min="0" max="100" placeholder="How many years have you known them?">
                 <div class="field-help">Helps tailor messages to the depth of your relationship</div>
-              </div>
-            </div>
-            
-            <!-- Personal Details Section -->
-            <div class="field-group">
-              <h4>Personal Details</h4>
-              <div class="form-group">
-                <label for="connection-birthday">Birthday (Optional)</label>
-                <input type="date" id="connection-birthday" class="input-field" placeholder="Their birthday (if known)">
-                <div class="field-help">We'll use this to create personalized birthday messages</div>
-              </div>
-              <div class="form-group">
-                <label for="connection-interests">Interests/Hobbies</label>
-                <input type="text" id="connection-interests" class="input-field" placeholder="e.g., hiking, reading, cooking">
-                <div class="field-help">Separate multiple interests with commas</div>
               </div>
             </div>
             
@@ -550,6 +563,22 @@ function createConnectionModal() {
                   <option value="humorous">Humorous and playful</option>
                 </select>
                 <div class="field-help">Helps us match the tone of messages to their preferences</div>
+              </div>
+              
+              <!-- Relationship Goal Field -->
+              <div class="form-group">
+                <label for="connection-goal">Relationship Focus</label>
+                <select id="connection-goal" class="input-field">
+                  <option value="">Select focus (optional)</option>
+                  <option value="maintain">Maintain current connection</option>
+                  <option value="strengthen">Strengthen the relationship</option>
+                  <option value="reconnect">Reconnect after distance</option>
+                  <option value="deepen">Deepen emotional connection</option>
+                  <option value="support">Support through tough times</option>
+                  <option value="celebrate">Celebrate achievements</option>
+                  <option value="professional">Develop professional relationship</option>
+                </select>
+                <div class="field-help">Helps us craft messages that serve your relationship goals</div>
               </div>
             </div>
             
@@ -601,6 +630,12 @@ function createConnectionModal() {
     });
   }
   
+  // Set up relationship type change handler
+  const relationshipTypeSelect = document.getElementById('connection-relationship');
+  if (relationshipTypeSelect) {
+    relationshipTypeSelect.addEventListener('change', updateSpecificRelationshipOptions);
+  }
+  
   // Handle form submission
   if (form) {
     form.addEventListener('submit', function(e) {
@@ -610,6 +645,221 @@ function createConnectionModal() {
   }
   
   console.log('Connection modal created and initialized');
+}
+
+// Update specific relationship options based on primary relationship type
+function updateSpecificRelationshipOptions() {
+  const primaryType = document.getElementById('connection-relationship').value;
+  const specificContainer = document.getElementById('specific-relationship-container');
+  const specificSelect = document.getElementById('connection-specific-relationship');
+  
+  if (!specificContainer || !specificSelect) {
+    console.error('Specific relationship elements not found');
+    return;
+  }
+  
+  // Clear existing options except the first one
+  while (specificSelect.options.length > 1) {
+    specificSelect.remove(1);
+  }
+  
+  // Show/hide and populate based on primary type
+  if (primaryType && primaryType !== 'other') {
+    specificContainer.style.display = 'block';
+    
+    const relationshipOptions = {
+      family: [
+        { value: 'parent', text: 'Parent' },
+        { value: 'child', text: 'Child' },
+        { value: 'sibling', text: 'Sibling' },
+        { value: 'grandparent', text: 'Grandparent' },
+        { value: 'grandchild', text: 'Grandchild' },
+        { value: 'aunt-uncle', text: 'Aunt/Uncle' },
+        { value: 'niece-nephew', text: 'Niece/Nephew' },
+        { value: 'cousin', text: 'Cousin' },
+        { value: 'in-law', text: 'In-law' },
+        { value: 'step-family', text: 'Step-family' }
+      ],
+      friend: [
+        { value: 'best-friend', text: 'Best friend' },
+        { value: 'close-friend', text: 'Close friend' },
+        { value: 'childhood-friend', text: 'Childhood friend' },
+        { value: 'school-friend', text: 'School friend' },
+        { value: 'college-friend', text: 'College friend' },
+        { value: 'activity-friend', text: 'Activity/hobby friend' },
+        { value: 'online-friend', text: 'Online friend' },
+        { value: 'neighbor', text: 'Neighbor' },
+        { value: 'new-friend', text: 'New friend' }
+      ],
+      partner: [
+        { value: 'spouse', text: 'Spouse' },
+        { value: 'fiance', text: 'Fiancé/Fiancée' },
+        { value: 'significant-other', text: 'Significant other' },
+        { value: 'boyfriend-girlfriend', text: 'Boyfriend/Girlfriend' },
+        { value: 'dating', text: 'Dating' },
+        { value: 'ex-partner', text: 'Ex-partner (on good terms)' }
+      ],
+      colleague: [
+        { value: 'manager', text: 'Manager/Supervisor' },
+        { value: 'direct-report', text: 'Direct report' },
+        { value: 'team-member', text: 'Team member' },
+        { value: 'department-colleague', text: 'Department colleague' },
+        { value: 'cross-functional', text: 'Cross-functional colleague' },
+        { value: 'client', text: 'Client' },
+        { value: 'vendor', text: 'Vendor/Supplier' },
+        { value: 'mentor', text: 'Mentor' },
+        { value: 'mentee', text: 'Mentee' },
+        { value: 'business-partner', text: 'Business partner' }
+      ],
+      acquaintance: [
+        { value: 'social-acquaintance', text: 'Social acquaintance' },
+        { value: 'friend-of-friend', text: 'Friend of a friend' },
+        { value: 'occasional-contact', text: 'Occasional contact' },
+        { value: 'service-provider', text: 'Service provider' },
+        { value: 'community-member', text: 'Community member' },
+        { value: 'alumni-connection', text: 'Alumni connection' },
+        { value: 'social-media', text: 'Social media connection' }
+      ]
+    };
+    
+    // Add options for the selected relationship type
+    if (relationshipOptions[primaryType]) {
+      relationshipOptions[primaryType].forEach(option => {
+        const newOption = document.createElement('option');
+        newOption.value = option.value;
+        newOption.textContent = option.text;
+        specificSelect.appendChild(newOption);
+      });
+    }
+  } else {
+    specificContainer.style.display = 'none';
+  }
+}
+
+// Save connection to Firestore
+function saveConnection() {
+  console.log('Attempting to save connection');
+  
+  if (!currentUser) {
+    console.error('No current user for saving connection');
+    showAlert('You must be logged in to save connections', 'error');
+    return;
+  }
+  
+  // Ensure Firestore is initialized
+  if (!firebase.firestore) {
+    console.error('Firestore is not initialized');
+    showAlert('Firebase Firestore is not available', 'error');
+    return;
+  }
+  
+  const idField = document.getElementById('connection-id');
+  const nameField = document.getElementById('connection-name');
+  const relationshipField = document.getElementById('connection-relationship');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  
+  // Enhanced fields
+  const yearsKnownField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
+  const notesField = document.getElementById('connection-notes');
+  
+  if (!nameField) {
+    console.error('Name field not found');
+    return;
+  }
+  
+  if (!relationshipField) {
+    console.error('Relationship field not found');
+    return;
+  }
+  
+  const name = nameField.value.trim();
+  const relationship = relationshipField.value;
+  
+  // Get values from fields (with defaults for optional fields)
+  const specificRelationship = specificRelationshipField && specificRelationshipField.style.display !== 'none' ? 
+                               specificRelationshipField.value : '';
+  const yearsKnown = yearsKnownField ? yearsKnownField.value : '';
+  const communicationStyle = communicationStyleField ? communicationStyleField.value : '';
+  const goal = goalField ? goalField.value : '';
+  const notes = notesField ? notesField.value.trim() : '';
+  
+  console.log('Form data:', { 
+    name, 
+    relationship, 
+    specificRelationship,
+    yearsKnown, 
+    communicationStyle,
+    goal,
+    notes 
+  });
+  
+  if (!name) {
+    showAlert('Please enter a name', 'error');
+    return;
+  }
+  
+  if (!relationship) {
+    showAlert('Please select a relationship type', 'error');
+    return;
+  }
+  
+  showLoading('Saving connection...');
+  
+  const connectionData = {
+    name: name,
+    relationship: relationship,
+    specificRelationship: specificRelationship || '',
+    yearsKnown: yearsKnown || 0,
+    communicationStyle: communicationStyle || '',
+    relationshipGoal: goal || '',
+    notes: notes || '',
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  // If new connection, add createdAt field
+  if (!editingConnectionId) {
+    connectionData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  }
+  
+  const connectionId = editingConnectionId || idField.value;
+  const isNewConnection = !connectionId;
+  
+  console.log(`Saving ${isNewConnection ? 'new' : 'existing'} connection:`, connectionData);
+  
+  // Reference to the connections collection
+  const connectionsRef = firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('connections');
+  
+  // Save to Firestore
+  let savePromise;
+  if (isNewConnection) {
+    console.log('Adding new connection to Firestore');
+    savePromise = connectionsRef.add(connectionData);
+  } else {
+    console.log(`Updating existing connection: ${connectionId}`);
+    savePromise = connectionsRef.doc(connectionId).update(connectionData);
+  }
+  
+  savePromise
+    .then((result) => {
+      console.log(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, result);
+      hideLoading();
+      showAlert(`Person ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
+      closeConnectionModal();
+      // Wait a moment before refreshing the list
+      setTimeout(() => {
+        loadUserConnections(); // Refresh the list
+      }, 500);
+    })
+    .catch((error) => {
+      console.error(`Error ${isNewConnection ? 'adding' : 'updating'} connection:`, error);
+      hideLoading();
+      showAlert(`Error saving connection: ${error.message}`, 'error');
+    });
 }
 
 // Show delete confirmation before deleting a connection
@@ -777,146 +1027,6 @@ function closeConnectionModal() {
     console.error('Modal element not found when trying to close');
   }
   editingConnectionId = null;
-}
-
-// Save connection to Firestore
-function saveConnection() {
-  console.log('Attempting to save connection');
-  
-  if (!currentUser) {
-    console.error('No current user for saving connection');
-    showAlert('You must be logged in to save connections', 'error');
-    return;
-  }
-  
-  // Ensure Firestore is initialized
-  if (!firebase.firestore) {
-    console.error('Firestore is not initialized');
-    showAlert('Firebase Firestore is not available', 'error');
-    return;
-  }
-  
-  const idField = document.getElementById('connection-id');
-  const nameField = document.getElementById('connection-name');
-  const relationshipField = document.getElementById('connection-relationship');
-  
-  // New enhanced fields
-  const yearsKnownField = document.getElementById('connection-years');
-  const birthdayField = document.getElementById('connection-birthday');
-  const interestsField = document.getElementById('connection-interests');
-  const communicationStyleField = document.getElementById('connection-communication-style');
-  const notesField = document.getElementById('connection-notes');
-  
-  if (!nameField) {
-    console.error('Name field not found');
-    return;
-  }
-  
-  if (!relationshipField) {
-    console.error('Relationship field not found');
-    return;
-  }
-  
-  const name = nameField.value.trim();
-  const relationship = relationshipField.value;
-  
-  // Get values from new fields (with defaults for optional fields)
-  const yearsKnown = yearsKnownField ? yearsKnownField.value : '';
-  const birthday = birthdayField ? birthdayField.value : '';
-  const interests = interestsField ? interestsField.value.trim() : '';
-  const communicationStyle = communicationStyleField ? communicationStyleField.value : '';
-  const notes = notesField ? notesField.value.trim() : '';
-  
-  console.log('Form data:', { 
-    name, 
-    relationship, 
-    yearsKnown, 
-    birthday, 
-    interests, 
-    communicationStyle, 
-    notes 
-  });
-  
-  if (!name) {
-    showAlert('Please enter a name', 'error');
-    return;
-  }
-  
-  if (!relationship) {
-    showAlert('Please select a relationship', 'error');
-    return;
-  }
-  
-  showLoading('Saving connection...');
-  
-  const connectionData = {
-    name: name,
-    relationship: relationship,
-    yearsKnown: yearsKnown || 0,
-    birthday: birthday || '',
-    interests: interests || '',
-    communicationStyle: communicationStyle || '',
-    notes: notes || '',
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  };
-  
-  // If new connection, add createdAt field
-  if (!editingConnectionId) {
-    connectionData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-  }
-  
-  const connectionId = editingConnectionId || idField.value;
-  const isNewConnection = !connectionId;
-  
-  console.log(`Saving ${isNewConnection ? 'new' : 'existing'} connection:`, connectionData);
-  
-  // Reference to the connections collection
-  const connectionsRef = firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('connections');
-  
-  // Save to Firestore
-  let savePromise;
-  if (isNewConnection) {
-    console.log('Adding new connection to Firestore');
-    savePromise = connectionsRef.add(connectionData);
-  } else {
-    console.log(`Updating existing connection: ${connectionId}`);
-    savePromise = connectionsRef.doc(connectionId).update(connectionData);
-  }
-  
-  savePromise
-    .then((result) => {
-      console.log(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, result);
-      hideLoading();
-      showAlert(`Person ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
-      closeConnectionModal();
-      // Wait a moment before refreshing the list
-      setTimeout(() => {
-        loadUserConnections(); // Refresh the list
-      }, 500);
-    })
-    .catch((error) => {
-      console.error(`Error ${isNewConnection ? 'adding' : 'updating'} connection:`, error);
-      hideLoading();
-      showAlert(`Error saving connection: ${error.message}`, 'error');
-    });
-}
-
-// Open connections management view
-function openConnectionsManagement() {
-  // For now, simply open the connections section
-  const connectionsSection = document.querySelector('.dashboard-section:nth-child(3)');
-  if (connectionsSection) {
-    connectionsSection.scrollIntoView({ behavior: 'smooth' });
-    
-    // Highlight the section temporarily
-    connectionsSection.classList.add('highlight-section');
-    setTimeout(() => {
-      connectionsSection.classList.remove('highlight-section');
-    }, 2000);
-  }
 }
 
 // Display empty states for data sections (called when query is empty)
@@ -2273,5 +2383,20 @@ function hideEmptyState(type) {
         el.style.display = 'none';
       }
     });
+  }
+}
+
+// Open connections management view
+function openConnectionsManagement() {
+  // For now, simply open the connections section
+  const connectionsSection = document.querySelector('.dashboard-section:nth-child(3)');
+  if (connectionsSection) {
+    connectionsSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Highlight the section temporarily
+    connectionsSection.classList.add('highlight-section');
+    setTimeout(() => {
+      connectionsSection.classList.remove('highlight-section');
+    }, 2000);
   }
 } 

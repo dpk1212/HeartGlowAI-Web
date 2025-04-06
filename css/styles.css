@@ -3165,3 +3165,69 @@ textarea.input-field:focus, #connection-notes:focus {
   font-style: italic;
 }
 
+#specific-relationship-container {
+  transition: all 0.3s ease;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+}
+
+#specific-relationship-container[style*="block"] {
+  max-height: 200px;
+  opacity: 1;
+  margin-top: 15px;
+}
+
+.relationship-category {
+  font-weight: 700;
+  color: var(--accent-pink);
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 4px;
+}
+
+/* Styles for relationship focus field */
+#connection-goal {
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#connection-goal option {
+  background-color: #1a1530;
+  color: white;
+}
+
+/* Highlight active form elements */
+.form-group.active label {
+  color: var(--accent-pink);
+  transform: translateY(-5px);
+  transition: all 0.3s ease;
+}
+
+.form-group select:focus + .field-help,
+.form-group input:focus + .field-help,
+.form-group textarea:focus + .field-help {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Updated field groups for better organization */
+.field-group {
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
+  position: relative;
+}
+
+.field-group::before {
+  content: '';
+  position: absolute;
+  left: -20px;
+  top: 0;
+  bottom: 20px;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--accent-pink), transparent);
+  opacity: 0.5;
+  border-radius: 3px;
+}
+

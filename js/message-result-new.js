@@ -807,26 +807,52 @@ function checkAuthentication() {
  * Show error message
  */
 function showError(message = 'An error occurred') {
-    document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-state').style.display = 'block';
-    document.getElementById('message-container').style.display = 'none';
-    document.getElementById('regenerate-options').style.display = 'none';
+    const loadingState = document.getElementById('loading-state');
+    const errorState = document.getElementById('error-state');
+    const messageContainer = document.getElementById('message-container');
+    const regenerateOptions = document.getElementById('regenerate-options');
     
-    const errorMessage = document.querySelector('.error-message');
-    if (errorMessage) {
-        errorMessage.textContent = message;
+    if (loadingState) {
+        loadingState.style.display = 'none';
     }
     
-    const retryBtn = document.getElementById('retry-btn');
-    if (retryBtn) {
-        retryBtn.addEventListener('click', function() {
-            document.getElementById('error-state').style.display = 'none';
-            document.getElementById('loading-state').style.display = 'flex';
-            setTimeout(() => {
-                generateMessage();
-            }, 1000);
-        });
+    if (errorState) {
+        errorState.style.display = 'block';
+        
+        const errorMessage = errorState.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.textContent = message;
+        }
+        
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn) {
+            // Remove any existing event listeners to prevent duplicates
+            const newRetryBtn = retryBtn.cloneNode(true);
+            retryBtn.parentNode.replaceChild(newRetryBtn, retryBtn);
+            
+            newRetryBtn.addEventListener('click', function() {
+                if (errorState) errorState.style.display = 'none';
+                if (loadingState) loadingState.style.display = 'flex';
+                setTimeout(() => {
+                    generateMessage();
+                }, 1000);
+            });
+        }
+    } else {
+        // Fallback to alert if error-state element doesn't exist
+        showAlert(message, 'error');
     }
+    
+    if (messageContainer) {
+        messageContainer.style.display = 'none';
+    }
+    
+    if (regenerateOptions) {
+        regenerateOptions.style.display = 'none';
+    }
+    
+    // Log the error
+    console.error('Error:', message);
 }
 
 /**

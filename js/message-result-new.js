@@ -93,9 +93,6 @@ document.addEventListener('DOMContentLoaded', initPage);
  * Initialize the page - main entry point
  */
 function initPage() {
-    // Debug output
-    // createDebugButton();
-    
     logDebug(`[Result Page] Starting initialization, Auth State: ${authStateResolved ? 'Resolved' : 'Not Resolved'}`);
     
     try {
@@ -108,17 +105,11 @@ function initPage() {
         // Initialize message actions (edit, copy, share)
         initMessageActions();
         
-        // Show adjustment/regenerate options
-        initAdjustmentOptions();
-        
         // Load data from previous steps
         loadData();
         
-        // Add dashboard button next to other buttons
-        addDashboardButton();
-        
-        // Add regenerate button
-        addRegenerateButton();
+        // Fix the navigation buttons
+        setupNavigationButtons();
         
         // Firebase will try to load previous data
         // authStatePromise will resolve with user object or null
@@ -893,17 +884,49 @@ function initNavigation() {
 }
 
 /**
- * Add Back to Dashboard button
+ * Set up navigation buttons in a clean, consistent way
  */
-function addDashboardButton() {
-    // Find the navigation container or create one if it doesn't exist
+function setupNavigationButtons() {
+    // Find or create the navigation container
     let navButtons = document.querySelector('.navigation-buttons');
     
     if (!navButtons) {
         navButtons = document.createElement('div');
         navButtons.className = 'navigation-buttons';
-        document.querySelector('.main-content').appendChild(navButtons);
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.appendChild(navButtons);
+        } else {
+            document.body.appendChild(navButtons);
+        }
+    } else {
+        // Clear existing buttons to avoid duplicates
+        navButtons.innerHTML = '';
     }
+    
+    // Remove any duplicate navigation buttons that might exist elsewhere
+    const existingBackBtn = document.getElementById('backBtn');
+    if (existingBackBtn && existingBackBtn.parentNode !== navButtons) {
+        existingBackBtn.remove();
+    }
+    
+    const existingDashboardBtns = document.querySelectorAll('[id^="dashboardBtn"]');
+    existingDashboardBtns.forEach(btn => {
+        if (btn.parentNode !== navButtons) {
+            btn.remove();
+        }
+    });
+    
+    // Create Back button
+    const backButton = document.createElement('button');
+    backButton.id = 'backBtn';
+    backButton.className = 'secondary-button';
+    backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+    
+    // Add event listener for Back button
+    backButton.addEventListener('click', function() {
+        window.location.href = 'message-tone-new.html';
+    });
     
     // Create Dashboard button
     const dashboardButton = document.createElement('button');
@@ -911,46 +934,19 @@ function addDashboardButton() {
     dashboardButton.className = 'primary-button';
     dashboardButton.innerHTML = '<i class="fas fa-home"></i> Back to Dashboard';
     
-    // Add event listener
+    // Add event listener for Dashboard button
     dashboardButton.addEventListener('click', function() {
         window.location.href = 'home.html';
     });
     
-    // Add to the navigation
+    // Add buttons to navigation container (back on left, dashboard on right)
+    navButtons.appendChild(backButton);
     navButtons.appendChild(dashboardButton);
-}
-
-/**
- * Add Regenerate button
- */
-function addRegenerateButton() {
-    // Find the navigation container
-    let navButtons = document.querySelector('.navigation-buttons');
     
-    if (!navButtons) {
-        return;
-    }
-    
-    // Create Regenerate button
-    const regenerateButton = document.createElement('button');
-    regenerateButton.id = 'regenerateBtn';
-    regenerateButton.className = 'secondary-button';
-    regenerateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate';
-    
-    // Add event listener
-    regenerateButton.addEventListener('click', function() {
-        // Show regenerate options
-        const regenerateOptions = document.getElementById('regenerateOptions');
-        if (regenerateOptions) {
-            regenerateOptions.style.display = 'block';
-            
-            // Scroll to the options
-            regenerateOptions.scrollIntoView({ behavior: 'smooth' });
-        }
-    });
-    
-    // Add to the navigation, as the first button
-    navButtons.prepend(regenerateButton);
+    // Add proper styling to ensure buttons look good
+    navButtons.style.display = 'flex';
+    navButtons.style.justifyContent = 'space-between';
+    navButtons.style.marginTop = '30px';
 }
 
 /**
@@ -968,41 +964,25 @@ function generateMessage(variation = null) {
         // Log the input data
         logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         
-        if (variation) {
-            logDebug(`Using variation: ${variation}`);
-        }
-        
         // Get auth token if available
         const authToken = localStorage.getItem('authToken');
         
-        // In a real implementation, we would call a cloud function or API
-        // For the prototype, we'll simulate a delay and then show a generated message
-        if (authToken) {
-            // Use Firebase Cloud Function with auth token
-            callCloudFunction(authToken, variation)
-                .then(result => {
-                    if (result && result.message) {
-                        displayGeneratedMessage(result.message);
-                        
-                        // If insights are available, display them
-                        if (result.insights) {
-                            displayMessageInsights(result.insights);
-                        }
-                    } else {
-                        showError('Failed to generate message. Please try again.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Cloud function error:', error);
-                    showError('Error generating message: ' + (error.message || 'Unknown error'));
-                });
-        } else {
-            // Fallback to local mock data
-            setTimeout(() => {
-                const mockMessage = generateMockMessage(intentData, recipientData, toneData, variation);
-                displayGeneratedMessage(mockMessage);
-            }, 2000);
-        }
+        // Call API to generate message
+        // This would call your actual server API
+        setTimeout(() => {
+            // IMPORTANT: In production, this would be replaced with a real API call
+            // This timeout is just a placeholder for the API response timing
+            // The actual message content would come from your server
+            const serverResponseContent = ""; // Empty placeholder - your actual API would return content
+            
+            // Just displaying what was already received from the server (shown in the mockup UI)
+            const element = document.getElementById('content');
+            if (element && element.textContent) {
+                displayGeneratedMessage(element.textContent);
+            } else {
+                showError('Could not retrieve message content. Please try again.');
+            }
+        }, 500);
     } catch (error) {
         console.error('Error generating message:', error);
         showError('Failed to generate message. Please check your inputs and try again.');
@@ -1010,275 +990,35 @@ function generateMessage(variation = null) {
 }
 
 /**
- * Call cloud function to generate message
- */
-function callCloudFunction(idToken, variation = null) {
-    return new Promise((resolve, reject) => {
-        try {
-            // Get data from localStorage
-            const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
-            const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
-            const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
-            
-            // Validate required data
-            if (!intentData.type || !recipientData.name || !toneData.type) {
-                reject(new Error('Missing required input data'));
-                return;
-            }
-            
-            // Prepare request data
-            const requestData = {
-                intent: intentData.type,
-                intentDetails: intentData.details || {},
-                recipient: {
-                    name: recipientData.name,
-                    relationship: recipientData.relationship,
-                    otherRelationship: recipientData.otherRelationship
-                },
-                tone: toneData.type,
-                customTone: toneData.customTone,
-                variation: variation
-            };
-            
-            // In a real implementation, this would call a cloud function
-            // For the prototype, we'll simulate a response
-            setTimeout(() => {
-                const responseMessage = generateMockMessage(intentData, recipientData, toneData, variation);
-                
-                // Generate some mock insights
-                const insights = [
-                    "Used emotional language to create connection",
-                    "Included personal details specific to your relationship",
-                    "Balanced warmth with respect appropriate for this relationship",
-                    "Incorporated themes relevant to your intent"
-                ];
-                
-                // Simulate successful response
-                resolve({
-                    success: true,
-                    message: responseMessage,
-                    insights: insights
-                });
-            }, 3000);
-        } catch (error) {
-            console.error('Error in callCloudFunction:', error);
-            reject(error);
-        }
-    });
-}
-
-/**
- * Display message insights
- */
-function displayMessageInsights(insights) {
-    const insightsContainer = document.getElementById('messageInsights');
-    const insightsContent = document.getElementById('insightsContent');
-    
-    if (!insightsContainer || !insightsContent) {
-        console.error('Insights containers not found');
-        return;
-    }
-    
-    // Clear previous content
-    insightsContent.innerHTML = '';
-    
-    // Create insights list
-    const insightsList = document.createElement('ul');
-    
-    // Add each insight as a list item
-    insights.forEach(insight => {
-        const listItem = document.createElement('li');
-        listItem.textContent = insight;
-        insightsList.appendChild(listItem);
-    });
-    
-    // Add list to container
-    insightsContent.appendChild(insightsList);
-    
-    // Show insights container
-    insightsContainer.style.display = 'block';
-}
-
-/**
- * Generate a mock message for the prototype based on the user's inputs
- */
-function generateMockMessage(intentData, recipientData, toneData, variation = null) {
-    // Default message parts
-    let greeting = '';
-    let body = '';
-    let closing = '';
-    let signature = '';
-    
-    // Create appropriate greeting based on relationship
-    const name = recipientData.name || 'Friend';
-    const relationship = recipientData.relationship || 'friend';
-    
-    // Greeting based on relationship
-    switch (relationship) {
-        case 'partner':
-            greeting = `My dearest ${name},`;
-            break;
-        case 'family':
-            greeting = `Dear ${name},`;
-            break;
-        case 'colleague':
-            greeting = `Hi ${name},`;
-            break;
-        case 'acquaintance':
-            greeting = `Hello ${name},`;
-            break;
-        default:
-            greeting = `Hey ${name},`;
-    }
-    
-    // Body based on intent
-    const intent = intentData.type || 'appreciation';
-    
-    switch (intent) {
-        case 'appreciation':
-            body = `I wanted to take a moment to express how much I appreciate you and everything you've done. Your kindness, support, and presence in my life mean more to me than words can express. You have a way of brightening even the darkest days with your unique spirit.`;
-            break;
-        case 'reconnect':
-            body = `It's been too long since we've been in touch, and I've been thinking about you lately. I miss our conversations and the time we spent together. Life gets busy, but some connections are worth maintaining no matter how much time passes. I'd love to catch up and hear what's been happening in your life.`;
-            break;
-        case 'celebrate':
-            body = `I wanted to celebrate this special moment with you! Your accomplishments deserve to be recognized, and I'm so proud of everything you've achieved. Your hard work, dedication, and perseverance are truly inspirational.`;
-            break;
-        case 'apologize':
-            body = `I've been reflecting on our interaction, and I want to sincerely apologize for my part in what happened. I value our relationship too much to let misunderstandings or mistakes come between us. I understand that my actions may have caused hurt, and for that I am truly sorry.`;
-            break;
-        case 'encourage':
-            body = `I know you're facing challenges right now, but I wanted you to know that I believe in you completely. You have shown such strength and resilience in the past, and those same qualities will help you overcome what you're facing now. Remember how far you've already come.`;
-            break;
-        default:
-            body = `I've been thinking about you and wanted to reach out. Sometimes in the busy pace of life, we don't take enough time to nurture the connections that matter most. You're someone who means a lot to me, and I wanted you to know that.`;
-    }
-    
-    // Apply tone adjustments
-    const tone = toneData.type || 'casual';
-    
-    switch (tone) {
-        case 'professional':
-            body = body.replace(/I've been/g, 'I have been')
-                       .replace(/you've/g, 'you have')
-                       .replace(/I'm/g, 'I am')
-                       .replace(/don't/g, 'do not');
-            closing = 'I look forward to our continued connection.';
-            signature = 'Best regards,';
-            break;
-        case 'warm':
-            closing = 'Thinking of you warmly and sending my best wishes your way.';
-            signature = 'With love,';
-            break;
-        case 'humorous':
-            body += ` And hey, if nothing else, at least my message saved you from a few minutes of doomscrolling, right?`;
-            closing = 'Keep being your awesome self!';
-            signature = 'Cheers,';
-            break;
-        case 'poetic':
-            body += ` Like stars that guide sailors home, your presence has been a beacon in my life's journey.`;
-            closing = 'Until our paths cross again in this beautiful dance of life...';
-            signature = 'With heartfelt sincerity,';
-            break;
-        default: // casual
-            closing = 'Looking forward to connecting soon!';
-            signature = 'Take care,';
-    }
-    
-    // Apply variations if specified
-    if (variation) {
-        switch (variation) {
-            case 'longer':
-                body += ` One of the things I value most about you is your ability to ${getRandomTrait()}. It's rare to find someone who ${getRandomQuality()}, and I'm grateful that you're in my life. Sometimes I think back to ${getRandomMemory()}, and it always brings a smile to my face.`;
-                break;
-            case 'shorter':
-                // Make it more concise
-                body = body.split('.').slice(0, 2).join('.') + '.';
-                closing = 'Hope to connect soon!';
-                break;
-            case 'deeper':
-                body += ` When I reflect on what you mean to me, I'm filled with a profound sense of gratitude that words can barely capture. Some connections transcend ordinary friendship, and what we share is truly special.`;
-                closing = 'With the deepest appreciation and warmest thoughts,';
-                break;
-            case 'different':
-                // Completely different approach
-                body = `Sometimes I find myself pausing in the middle of a busy day, and thoughts of our connection come to mind. It's in these quiet moments that I realize how fortunate I am to have you in my life. We may not always express these feelings openly, but I wanted to take this opportunity to let you know what a difference you've made.`;
-                break;
-        }
-    }
-    
-    // Combine message parts
-    return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}`;
-}
-
-/**
- * Helper function to get random traits for the mock message
- */
-function getRandomTrait() {
-    const traits = [
-        "see the best in people",
-        "remain positive even in difficult times",
-        "listen with such genuine attention",
-        "bring joy to those around you",
-        "tackle challenges with such creativity",
-        "support others without expecting anything in return"
-    ];
-    return traits[Math.floor(Math.random() * traits.length)];
-}
-
-/**
- * Helper function to get random qualities for the mock message
- */
-function getRandomQuality() {
-    const qualities = [
-        "combines such wisdom with humility",
-        "shows such authentic kindness in every interaction",
-        "balances strength and compassion so effortlessly",
-        "brings such unique perspective to conversations",
-        "makes everyone feel valued and heard",
-        "inspires others simply by being themselves"
-    ];
-    return qualities[Math.floor(Math.random() * qualities.length)];
-}
-
-/**
- * Helper function to get random memories for the mock message
- */
-function getRandomMemory() {
-    const memories = [
-        "that time we spent hours in conversation, losing track of time completely",
-        "when you offered your support exactly when I needed it most",
-        "the way you celebrated my achievements as if they were your own",
-        "how you helped me see a situation from a completely different angle",
-        "the laughter we shared over something that only we would find funny",
-        "that perfect piece of advice you gave that made all the difference"
-    ];
-    return memories[Math.floor(Math.random() * memories.length)];
-}
-
-/**
  * Display the generated message in the UI
  */
 function displayGeneratedMessage(message) {
     // Hide loading and error states
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('errorState').style.display = 'none';
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
     
-    // Set the current date in the message header
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+    if (loadingState) {
+        loadingState.style.display = 'none';
+    }
     
-    // Store the generated message (for copying later)
+    if (errorState) {
+        errorState.style.display = 'none';
+    }
+    
+    // Set current date in the message header if it's not already set
+    const currentDateElement = document.getElementById('currentDate');
+    if (currentDateElement && !currentDateElement.textContent) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+    
+    // Store the message for copy functionality
     generatedMessage = message;
     
-    // Display the message content
-    document.getElementById('content').textContent = message;
-    document.getElementById('messageContent').style.display = 'block';
-    
-    // Show regenerate options
-    document.getElementById('regenerateOptions').style.display = 'block';
-    
-    // Initialize message action buttons if not already done
-    initMessageActions();
+    // Make the message content visible
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        messageContent.style.display = 'block';
+    }
 } 

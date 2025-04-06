@@ -19,73 +19,6 @@ let authStatePromise = new Promise(resolve => {
   authStatePromiseResolver = resolve;
 });
 
-// Sample messages for different intents and tones
-const sampleMessages = {
-    reconnect: {
-        warm: "Hi [NAME], it's been too long since we last connected! I've been thinking about you and wondering how you've been. I'd love to catch up sometime soon and hear what's been happening in your life. Hope you're doing well!",
-        professional: "Hello [NAME], I hope this message finds you well. It's been some time since we last connected, and I wanted to reach out to reestablish our connection. I would appreciate the opportunity to catch up when you have the time.",
-        casual: "Hey [NAME]! Long time no talk! Just wanted to drop a quick message to see how you're doing these days. We should definitely catch up sometime!",
-        enthusiastic: "Hey [NAME]!! I was just thinking about you today and realized how much I miss our conversations! Would LOVE to reconnect and hear all about what's been happening in your world! Hope you're doing amazing!",
-        sincere: "Dear [NAME], I've been reflecting lately on the important people in my life, and you came to mind. I've missed our connection and would genuinely love to reconnect if you're open to it. I hope you've been well.",
-        humorous: "Hey [NAME], I'm pretty sure the law requires me to check in with awesome people at least once a year, and I'm way overdue! How have you been? I promise I'll be more punctual with the next legally-mandated awesome-person check-in!",
-        formal: "Dear [NAME], I hope this message finds you in good health and spirits. I am writing to reestablish our connection after our period of absence. I would be most pleased to hear from you at your earliest convenience."
-    },
-    appreciate: {
-        warm: "Hi [NAME], I just wanted to take a moment to tell you how much I appreciate you and everything you do. Your kindness and support mean the world to me. Thank you for being such an important part of my life!",
-        professional: "Hello [NAME], I wanted to express my sincere appreciation for your contributions and support. Your dedication and effort have made a significant positive impact, and I am truly grateful for everything you've done.",
-        casual: "Hey [NAME]! Just wanted to say thanks for being awesome! You really helped me out and I super appreciate it.",
-        enthusiastic: "Hey [NAME]!! I just HAD to message you to say THANK YOU SO MUCH for everything you've done! You're absolutely amazing and I can't express enough how much I appreciate you and your incredible support!!",
-        sincere: "Dear [NAME], I'm taking a moment to express my heartfelt gratitude for you. Your impact on my life has been profound, and I truly value your presence, support, and all that you bring to my world. Thank you, from the bottom of my heart.",
-        humorous: "Hey [NAME], if appreciation were a currency, I'd be sending you a trillion-dollar thank you right now! You're so awesome that scientists are studying you to unlock the secrets of awesomeness. Thanks for everything!",
-        formal: "Dear [NAME], I wish to convey my most sincere gratitude for your exemplary contributions and unwavering support. Your actions have been most commendable and have not gone unnoticed. Please accept my deepest appreciation."
-    },
-    apologize: {
-        warm: "Hi [NAME], I wanted to reach out and say I'm truly sorry for what happened. I value our relationship, and I understand that my actions affected you. I hope we can talk about this and move forward together.",
-        professional: "Hello [NAME], I would like to extend my sincere apologies regarding the recent situation. I recognize the impact of the misunderstanding and take full responsibility. I am committed to resolving this matter and preventing similar occurrences in the future.",
-        casual: "Hey [NAME], I messed up and I'm really sorry about that. Totally my bad. Hope we can put this behind us?",
-        enthusiastic: "Hey [NAME]! I feel TERRIBLE about what happened and want you to know I'm SO SORRY! I really value you and our relationship, and I promise to do better going forward! Can you forgive me?",
-        sincere: "Dear [NAME], I've been reflecting deeply on what happened, and I need to express my genuine remorse for my actions. I understand that I hurt you, and that was never my intention. I take full responsibility and am truly sorry. If you're willing, I'd like to make things right between us.",
-        humorous: "Hey [NAME], I've officially won the 'Biggest Mess-Up of the Month' award, and I'd like to apologize and return the trophy to its rightful place. I'm sincerely sorry and promise to aim for 'Most Improved' next time.",
-        formal: "Dear [NAME], I wish to extend my most profound apologies for the regrettable incident that has transpired between us. I acknowledge my indiscretion and the consequent distress it may have caused you. I humbly request your forgiveness and the opportunity to make amends."
-    },
-    celebrate: {
-        warm: "Hi [NAME]! I just heard about your achievement and wanted to say congratulations! I'm so happy for you and proud of all the hard work you've put in to reach this milestone. You truly deserve this success!",
-        professional: "Hello [NAME], congratulations on your recent accomplishment. Your dedication and perseverance have clearly paid off, and this achievement is well-deserved. I wish you continued success in your future endeavors.",
-        casual: "Hey [NAME]! Congrats on the big news! That's awesome and definitely calls for a celebration!",
-        enthusiastic: "OMG [NAME]!! HUGE CONGRATULATIONS on your amazing achievement!! I'm absolutely THRILLED for you and so excited to see all your hard work paying off!! This is just the beginning of all the incredible things coming your way!! SO PROUD OF YOU!!",
-        sincere: "Dear [NAME], I wanted to express my heartfelt congratulations on your achievement. Knowing the journey you've been on and the challenges you've overcome makes this accomplishment even more meaningful. I'm truly happy for you and honored to celebrate this milestone with you.",
-        humorous: "Hey [NAME]! I heard you're officially too awesome for regular people standards now! Congratulations on your achievement! I'll be telling everyone I knew you before you were famous!",
-        formal: "Dear [NAME], please accept my most sincere congratulations on your distinguished achievement. It is with great pleasure that I acknowledge this momentous occasion in recognition of your exemplary accomplishment. May this success herald the commencement of further triumphs in your future endeavors."
-    },
-    encourage: {
-        warm: "Hi [NAME], I just wanted to reach out and let you know that I believe in you completely. Everyone faces challenges, but I know you have the strength and resilience to overcome whatever you're facing. I'm here for you if you need anything at all.",
-        professional: "Hello [NAME], I wanted to express my confidence in your abilities to handle the current situation. Your track record demonstrates your competence and resilience, and I have no doubt that you will navigate through this challenge successfully.",
-        casual: "Hey [NAME]! Just wanted to say you've got this! Sending good vibes your way!",
-        enthusiastic: "Hey [NAME]!! I just HAD to tell you how ABSOLUTELY AMAZING you are!! You've got EVERYTHING it takes to succeed at this, and I'm your biggest cheerleader!! You're going to CRUSH this and I can't wait to celebrate your success!!",
-        sincere: "Dear [NAME], I've been thinking about what you're going through, and I wanted you to know that I truly believe in your capacity to overcome this challenge. Your strength, resilience, and character are remarkable, and they will carry you through this difficult time. I'm here for you, believing in you even in moments when belief might be hard to find within yourself.",
-        humorous: "Hey [NAME], I just checked the Official Book of Awesome People Who Can Handle Anything, and guess whose name was at the top? YOURS! Scientific fact: you've got this! And if science isn't enough, I've also consulted fortune cookies, magic 8 balls, and my cat - they all agree!",
-        formal: "Dear [NAME], I wish to convey my utmost confidence in your capabilities as you confront the present circumstances. Your demonstrated fortitude and perseverance are most commendable attributes that shall undoubtedly facilitate your triumph over the challenges at hand."
-    },
-    invite: {
-        warm: "Hi [NAME]! I'm planning a get-together next Saturday afternoon, and it would mean so much to me if you could join us. We'll have good food, good company, and plenty of time to catch up. I really hope you can make it!",
-        professional: "Hello [NAME], I would like to cordially invite you to attend our upcoming event on [DATE] at [TIME]. Your presence would be greatly valued, and I believe you would find the occasion both beneficial and enjoyable. Please let me know if you are able to attend.",
-        casual: "Hey [NAME]! We're getting some people together this weekend. Wanna join? Should be fun!",
-        enthusiastic: "Hey [NAME]!! We're planning an AMAZING get-together next weekend and it would be ABSOLUTELY FANTASTIC if you could come!! There will be great food, awesome people, and it just wouldn't be the same without YOU!! Hope you can join us!!",
-        sincere: "Dear [NAME], I'm reaching out with a heartfelt invitation to join us for an upcoming gathering. Your presence would truly make the event special for me, as I've always valued your company and the unique perspective you bring. I sincerely hope you'll be able to attend.",
-        humorous: "Hey [NAME]! I'm throwing a party where the guest list exclusively features awesome people, and your attendance is crucial for maintaining our awesome-people quota. No pressure, but the success of the entire event depends on you showing up!",
-        formal: "Dear [NAME], I am pleased to extend a formal invitation for your esteemed presence at our forthcoming gathering on the evening of [DATE]. Your attendance would be most graciously received and would contribute significantly to the distinction of the occasion."
-    },
-    custom: {
-        warm: "Hi [NAME], I hope this message finds you well. I wanted to reach out because you've been on my mind lately. Looking forward to connecting with you soon!",
-        professional: "Hello [NAME], I hope this message finds you well. I wanted to reach out regarding the matter we discussed previously. Please let me know when would be a convenient time to discuss this further.",
-        casual: "Hey [NAME]! Just dropping a quick note to say hi! What's new with you these days?",
-        enthusiastic: "Hey [NAME]!! Just wanted to send you a SUPER quick message to brighten your day!! Hope everything is AMAZING in your world!!",
-        sincere: "Dear [NAME], I've been reflecting on our connection recently and felt compelled to reach out. I value our relationship deeply and wanted you to know you're in my thoughts.",
-        humorous: "Hey [NAME]! Scientific studies show that receiving random messages from me improves your day by at least 27.5%. You're welcome for this evidence-based happiness boost!",
-        formal: "Dear [NAME], I hope this correspondence finds you in good health and high spirits. I am writing to convey my thoughts regarding our previous discourse and to express my sincere regards."
-    }
-};
-
 // Main initialization function - runs when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initPage);
 
@@ -1118,14 +1051,15 @@ function callGenerationAPI(prompt, authToken = null) {
                             logDebug('API keys retrieved successfully');
                             return { 
                                 token: token, 
-                                apiKey: doc.data().openaikey 
+                                apiKey: doc.data().openaikey,
+                                perplexitykey: doc.data().perplexitykey 
                             };
                         } else {
                             throw new Error('API keys not found in Firestore');
                         }
                     });
             })
-            .then(({ token, apiKey }) => {
+            .then(({ token, apiKey, perplexitykey }) => {
                 // Now that we have the API key, we can make a direct call to OpenAI
                 // or use our cloud function with the key included in the request
                 
@@ -1137,7 +1071,8 @@ function callGenerationAPI(prompt, authToken = null) {
                 // Prepare request with API key included
                 const requestBody = {
                     ...prompt,
-                    apiKey: apiKey // Include API key in the request body
+                    apiKey: apiKey, // Include API key in the request body
+                    perplexitykey: perplexitykey // Include perplexity key if available
                 };
                 
                 // Make the API call to your cloud function
@@ -1182,59 +1117,9 @@ function callGenerationAPI(prompt, authToken = null) {
                 if (errorState) errorState.style.display = 'block';
                 if (errorText) errorText.textContent = `Failed to generate message: ${error.message || 'Server error'}`;
                 
-                // If the error is related to Firestore access, fall back to demo message
-                if (error.message.includes('Firestore') || error.message.includes('API key')) {
-                    logDebug('Falling back to demo message generation...');
-                    generateDemoMessage(prompt)
-                        .then(demoResponse => {
-                            resolve(demoResponse);
-                        })
-                        .catch(demoError => {
-                            reject(demoError);
-                        });
-                } else {
-                    reject(error);
-                }
+                // Never fall back to demo messages
+                reject(error);
             });
-    });
-}
-
-/**
- * Generate a demo message as fallback when API calls fail
- */
-function generateDemoMessage(prompt) {
-    return new Promise((resolve) => {
-        // Create a demo message based on the prompt data
-        const recipientName = prompt.recipient.name || 'Friend';
-        const intent = prompt.intent.type || 'custom';
-        const tone = prompt.tone.type || 'warm';
-        
-        // Get sample message from our predefined samples
-        let messageText = '';
-        if (sampleMessages[intent.toLowerCase()] && 
-            sampleMessages[intent.toLowerCase()][tone.toLowerCase()]) {
-            messageText = sampleMessages[intent.toLowerCase()][tone.toLowerCase()];
-        } else {
-            messageText = sampleMessages.custom.warm;
-        }
-        
-        // Replace recipient name placeholder
-        messageText = messageText.replace(/\[NAME\]/g, recipientName);
-        
-        // Create insights based on intent and tone
-        const insights = [
-            `This message uses a ${tone} tone to create a connection with ${recipientName}.`,
-            `${capitalizeFirstLetter(intent)} messages work best when they're specific and authentic.`,
-            `The message is personalized for your relationship as ${prompt.recipient.relationship || 'a friend'}.`
-        ];
-        
-        // Return the demo message after a slight delay to simulate API call
-        setTimeout(() => {
-            resolve({
-                message: messageText,
-                insights: insights
-            });
-        }, 1500);
     });
 }
 

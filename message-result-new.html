@@ -71,26 +71,31 @@
             <!-- Progress Steps -->
             <div class="progress-container">
                 <div class="progress-steps">
-                    <div class="progress-step">
-                        <div class="step-number">1</div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Intention</div>
                     </div>
-                    <div class="progress-step">
-                        <div class="step-number">2</div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Recipient</div>
                     </div>
-                    <div class="progress-step">
-                        <div class="step-number">3</div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Tone</div>
                     </div>
                     <div class="progress-step active">
                         <div class="step-number">4</div>
                         <div class="step-label">Message</div>
-        </div>
-        </div>
+                    </div>
+                </div>
                 <div class="progress-bar">
                     <div class="progress-indicator" style="width: 100%"></div>
-        </div>
+                </div>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">Your Message</h1>
+                <p class="page-description">Here's your personalized message. You can edit it, regenerate or share it.</p>
             </div>
             
             <!-- Message Information -->
@@ -115,18 +120,13 @@
                 </div>
             </div>
             
-            <div class="page-header">
-                <h1 class="page-title">Your Message</h1>
-                <p class="page-description">Here's your personalized message. You can edit it, regenerate or share it.</p>
-            </div>
-            
             <!-- Message Display -->
             <div id="messageState" class="message-container">
                 <div id="loadingState" class="loading-message">
                     <div class="heart-animation">
                         <div class="heart-shape"></div>
                         <div class="heart-glow"></div>
-        </div>
+                    </div>
                     <p>Creating your message with heart...</p>
                 </div>
                 
@@ -147,6 +147,9 @@
                     <div class="message-header">
                         <div class="message-badge">
                             <i class="fas fa-heart"></i> Created with HeartGlowAI
+                        </div>
+                        <div class="message-date" id="messageDate">
+                            <i class="fas fa-calendar-alt"></i> <span id="currentDate"></span>
                         </div>
                     </div>
                     
@@ -177,7 +180,10 @@
             </div>
             
             <!-- Add message insights container after the message content -->
-            <div id="messageInsights" class="message-insights" style="display: none;"></div>
+            <div id="messageInsights" class="message-insights" style="display: none;">
+                <h3><i class="fas fa-lightbulb"></i> Message Insights</h3>
+                <div id="insightsContent"></div>
+            </div>
             
             <div id="regenerateOptions" class="regenerate-options" style="display: none;">
                 <h3 class="options-title">Not quite right?</h3>

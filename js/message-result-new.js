@@ -531,90 +531,67 @@ function callCloudFunction(idToken) {
 /**
  * Display the generated message in the UI
  */
-function displayGeneratedMessage(data) {
-    logDebug('Displaying generated message: ' + JSON.stringify(data));
+function displayGeneratedMessage(message) {
+    logDebug('Generated message:', message);
     
-    // Hide loading state
+    // Hide loading and error states
     document.getElementById('loadingState').style.display = 'none';
     document.getElementById('errorState').style.display = 'none';
     
-    // Show message content
-    const messageContent = document.getElementById('messageContent');
-    if (messageContent) {
-        messageContent.style.display = 'block';
-    }
+    let messageText = '';
+    let insights = [];
     
-    // Parse the message based on the response format
-    // The cloud function returns the message as a single string
-    let fullMessageText = '';
-    
-    // Check if we have the expected format
-    if (typeof data.message === 'string') {
-        // Direct string from the API
-        fullMessageText = data.message;
-    } else if (data.message && typeof data.message === 'object') {
-        // Object format with parts - previous format
-        if (data.message.greeting) {
-            fullMessageText += data.message.greeting + '\n\n';
-        }
+    // Check if the message is a string or an object
+    if (typeof message === 'string') {
+        messageText = message;
+    } else if (message && typeof message === 'object') {
+        // For object responses, construct the full message from its parts
+        if (message.greeting) messageText += message.greeting + '\n\n';
+        if (message.content) messageText += message.content;
+        if (message.closing) messageText += '\n\n' + message.closing;
+        if (message.signature) messageText += '\n' + message.signature;
         
-        if (data.message.content) {
-            fullMessageText += data.message.content;
-        }
-        
-        if (data.message.closing) {
-            fullMessageText += '\n\n' + data.message.closing;
-        }
-        
-        if (data.message.signature) {
-            fullMessageText += '\n' + data.message.signature;
+        // Store insights if available
+        if (message.insights && Array.isArray(message.insights)) {
+            insights = message.insights;
         }
     } else {
-        // Fallback for unexpected format
-        fullMessageText = "Message generation completed, but the response format was unexpected. Please try again.";
-        logDebug("Unexpected message format: " + JSON.stringify(data));
+        // Handle unexpected format
+        console.error('Unexpected message format:', message);
+        messageText = "Your message was generated but couldn't be displayed properly. Please try again.";
     }
     
-    // Set message in content area
-    const messageElement = document.getElementById('content');
-    if (messageElement) {
-        messageElement.textContent = fullMessageText;
-    }
+    // Store the generated message
+    generatedMessage = messageText;
     
-    // Store the generated message for later use
-    generatedMessage = data.message;
+    // Set the current date in the message header
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+    
+    // Display the message content
+    document.getElementById('content').textContent = messageText;
+    document.getElementById('messageContent').style.display = 'block';
     
     // Display insights if available
-    if (data.insights && data.insights.length > 0) {
-        const insightsElement = document.getElementById('messageInsights');
-        if (insightsElement) {
-            // Clear previous insights
-            insightsElement.innerHTML = '';
-            
-            // Add heading
-            const heading = document.createElement('h3');
-            heading.textContent = 'Message Insights';
-            insightsElement.appendChild(heading);
-            
-            // Add insights list
-            const list = document.createElement('ul');
-            data.insights.forEach(insight => {
-                const item = document.createElement('li');
-                item.textContent = insight;
-                list.appendChild(item);
-            });
-            insightsElement.appendChild(list);
-            
-            // Show insights section
-            insightsElement.style.display = 'block';
-        }
+    if (insights.length > 0) {
+        const insightsContainer = document.getElementById('messageInsights');
+        const insightsContent = document.getElementById('insightsContent');
+        insightsContent.innerHTML = ''; // Clear previous insights
+        
+        const ul = document.createElement('ul');
+        insights.forEach(insight => {
+            const li = document.createElement('li');
+            li.textContent = insight;
+            ul.appendChild(li);
+        });
+        
+        insightsContent.appendChild(ul);
+        insightsContainer.style.display = 'block';
     }
     
-    // Show regenerate options
-    const regenerateOptions = document.getElementById('regenerateOptions');
-    if (regenerateOptions) {
-        regenerateOptions.style.display = 'block';
-    }
+    // Show regeneration options
+    document.getElementById('regenerateOptions').style.display = 'block';
     
     // Initialize message action buttons
     initMessageActions();

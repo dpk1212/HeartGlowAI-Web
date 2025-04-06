@@ -1138,220 +1138,116 @@ body::after {
 
 /* Message Result Page */
 .message-container {
+    margin: 25px 0 40px;
     position: relative;
-    width: 100%;
-    margin-bottom: 30px;
 }
 
 .message-content {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: rgba(255, 255, 255, 0.95);
     border-radius: 16px;
-    padding: 25px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    padding: 30px;
     transition: all 0.3s ease;
+    border: 1px solid rgba(126, 87, 194, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.message-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(180deg, #9c64ff 0%, #7e57c2 100%);
+    border-radius: 6px 0 0 6px;
 }
 
 .message-header {
-  display: flex;
+    display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
     padding-bottom: 15px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(126, 87, 194, 0.1);
 }
 
 .message-badge {
     font-size: 14px;
-    color: var(--accent-color);
-  display: flex;
-  align-items: center;
+    color: #7e57c2;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
     gap: 6px;
+    background-color: rgba(126, 87, 194, 0.06);
+    padding: 6px 12px;
+    border-radius: 20px;
 }
 
 .message-badge i {
-    color: var(--primary-color);
+    color: #7e57c2;
 }
 
 .message-body {
-    margin-bottom: 20px;
+    margin: 0 0 25px;
     position: relative;
 }
 
 .message-text {
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.6;
-    color: var(--text-color);
-    white-space: pre-line;
-    margin: 0;
+    color: #444;
+    font-weight: 400;
+    white-space: pre-wrap;
 }
 
 .message-actions {
     display: flex;
-    gap: 20px;
     padding-top: 15px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    border-top: 1px solid rgba(126, 87, 194, 0.1);
+    gap: 15px;
 }
 
 .text-button {
     background: none;
     border: none;
-    color: var(--accent-color);
-    font-size: 14px;
-    padding: 5px 10px;
+    color: #7e57c2;
+    font-size: 15px;
+    font-weight: 500;
     cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
     display: flex;
     align-items: center;
     gap: 6px;
-    transition: all 0.2s ease;
 }
 
 .text-button:hover {
-    color: var(--primary-color);
+    background-color: rgba(126, 87, 194, 0.08);
 }
 
 .text-button i {
-    font-size: 16px;
-}
-
-.edit-container {
-    width: 100%;
-}
-
-.edit-textarea {
-  width: 100%;
-    min-height: 200px;
-    padding: 15px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    color: var(--text-color);
-    font-size: 16px;
-    line-height: 1.6;
-    resize: vertical;
-    margin-bottom: 20px;
-}
-
-.edit-textarea:focus {
-    outline: none;
-    border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(var(--primary-color-rgb), 0.2);
-}
-
-.edit-actions {
-  display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-}
-
-.loading-message {
-    display: flex;
-    flex-direction: column;
-  align-items: center;
-  justify-content: center;
-    min-height: 200px;
-    text-align: center;
-    padding: 30px;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-radius: 16px;
-}
-
-.loading-message p {
-    margin-top: 20px;
-    color: var(--text-light);
-    font-size: 16px;
-}
-
-.error-message {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    background-color: rgba(220, 53, 69, 0.1);
-  border-radius: 16px;
-    padding: 25px;
-    margin-bottom: 30px;
-}
-
-.error-icon {
-    font-size: 30px;
-    color: #dc3545;
-    flex-shrink: 0;
-}
-
-.error-content {
-    flex: 1;
-}
-
-.error-content h3 {
-    margin: 0 0 10px 0;
-    color: var(--text-color);
-    font-size: 18px;
-}
-
-.error-content p {
-    margin: 0 0 15px 0;
-    color: var(--text-light);
-  font-size: 14px;
-}
-
-/* Regenerate Options */
-.regenerate-options {
-    margin-top: 40px;
-    padding: 25px;
-    background-color: rgba(255, 255, 255, 0.02);
-    border-radius: 16px;
-}
-
-.regenerate-options h3 {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-size: 18px;
-    color: var(--text-color);
-}
-
-.regenerate-options p {
-    margin-bottom: 20px;
-    color: var(--text-light);
-}
-
-.small-grid {
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
-}
-
-.small-card {
-    padding: 15px;
-    min-height: 120px;
-}
-
-.small-card .option-icon {
-    width: 40px;
-    height: 40px;
-    font-size: 16px;
-}
-
-.small-card .option-title {
-    font-size: 16px;
-    margin: 10px 0 5px;
-}
-
-.small-card .option-description {
-    font-size: 13px;
+    font-size: 14px;
 }
 
 /* Message insights styles */
 .message-insights {
-    margin-top: 20px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
-    border-left: 4px solid #7e57c2;
+    margin-top: 25px;
+    padding: 25px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    border-left: 6px solid #7e57c2;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
 }
 
 .message-insights h3 {
-    font-size: 16px;
+    font-size: 18px;
     margin-top: 0;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     color: #7e57c2;
+    font-weight: 600;
 }
 
 .message-insights ul {
@@ -1360,8 +1256,242 @@ body::after {
 }
 
 .message-insights li {
-    margin-bottom: 8px;
-    font-size: 14px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #555;
+    position: relative;
+}
+
+.message-insights li::before {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 8px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #7e57c2;
+}
+
+/* Regenerate Options */
+.regenerate-options {
+    margin-top: 30px;
+    padding: 25px;
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+.regenerate-options h3 {
+    font-size: 20px;
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #333;
+    font-weight: 600;
+}
+
+.regenerate-options p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.small-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 15px;
+}
+
+.small-card {
+    padding: 20px 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+}
+
+.small-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border-color: rgba(126, 87, 194, 0.3);
+}
+
+.small-card .option-icon {
+    margin-bottom: 10px;
+    font-size: 20px;
+    color: #7e57c2;
+    width: 45px;
+    height: 45px;
+    background-color: rgba(126, 87, 194, 0.1);
+}
+
+.small-card .option-title {
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+.small-card .option-description {
+    font-size: 13px;
     line-height: 1.4;
+}
+
+/* Improved edit container styles */
+.edit-container {
+    width: 100%;
+}
+
+.edit-textarea {
+    width: 100%;
+    min-height: 200px;
+    padding: 15px;
+    border: 1px solid rgba(126, 87, 194, 0.2);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #444;
+    resize: vertical;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+}
+
+.edit-textarea:focus {
+    border-color: #7e57c2;
+    box-shadow: 0 4px 15px rgba(126, 87, 194, 0.15);
+    outline: none;
+}
+
+.edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+/* Improve message display context information */
+.message-details {
+    display: flex;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    gap: 30px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-label {
+    font-weight: 600;
+    color: #555;
+    font-size: 14px;
+}
+
+.detail-value {
+    color: #7e57c2;
+    font-weight: 500;
+    font-size: 14px;
+    background-color: rgba(126, 87, 194, 0.08);
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+/* Make the recipient card more premium */
+.recipient-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(126, 87, 194, 0.1);
+}
+
+.recipient-avatar {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #9c64ff 0%, #7e57c2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 20px;
+    box-shadow: 0 4px 10px rgba(126, 87, 194, 0.3);
+}
+
+.recipient-info {
+    flex: 1;
+}
+
+.recipient-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    color: #333;
+}
+
+.recipient-relation {
+    font-size: 14px;
+    color: #666;
+}
+
+/* Page title and description improvements */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    background: linear-gradient(135deg, #9c64ff 0%, #7e57c2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-fill-color: transparent;
+}
+
+.page-description {
+    font-size: 16px;
+    color: #666;
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Message date styling */
+.message-date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #666;
+}
+
+.message-date i {
+    color: #7e57c2;
+    opacity: 0.7;
+}
+
+/* Completed step styling */
+.progress-step.completed .step-number {
+    background: linear-gradient(135deg, #9c64ff 0%, #7e57c2 100%);
+    color: white;
+    border: none;
+}
+
+.progress-step.completed .step-number i {
+    font-size: 12px;
+}
+
+.progress-step.completed .step-label {
+    color: #7e57c2;
+    font-weight: 500;
 }
 

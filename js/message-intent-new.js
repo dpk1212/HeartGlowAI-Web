@@ -28,6 +28,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize auth state
     initializeAuthState();
     
+    // Check URL parameters - this needs to happen before other setup
+    checkUrlParameters();
+    
     // Setup event listeners
     setupEventListeners();
     
@@ -401,4 +404,82 @@ function initPage() {
     
     // Check for previous intent data
     checkPreviousData();
+}
+
+// Check URL parameters for connectionId
+function checkUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const connectionId = urlParams.get('connectionId');
+    
+    if (connectionId) {
+        console.log('Connection ID found in URL:', connectionId);
+        
+        // Wait for auth state to be resolved
+        firebase.auth().onAuthStateChanged(user => {
+            if (user) {
+                loadConnectionData(connectionId);
+            }
+        });
+    }
+}
+
+// Load connection data from Firestore
+function loadConnectionData(connectionId) {
+    showLoading('Loading connection...');
+    
+    firebase.firestore()
+        .collection('users')
+        .doc(firebase.auth().currentUser.uid)
+        .collection('connections')
+        .doc(connectionId)
+        .get()
+        .then(doc => {
+            if (doc.exists) {
+                const connection = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                
+                console.log('Loaded connection data:', connection);
+                
+                // Store recipient data
+                localStorage.setItem('recipientData', JSON.stringify({
+                    id: connection.id,
+                    name: connection.name,
+                    relationship: connection.relationship || 'friend',
+                    otherRelationship: connection.otherRelationship || '',
+                    bypassRecipientPage: true
+                }));
+                
+                // Also store in the selectedRecipient format
+                localStorage.setItem('selectedRecipient', JSON.stringify({
+                    name: connection.name,
+                    relationship: connection.relationship || 'friend',
+                    initial: connection.name ? connection.name.charAt(0).toUpperCase() : '?'
+                }));
+                
+                // Update the UI
+                displayRecipientInfo();
+                hideLoading();
+            } else {
+                console.error('Connection not found');
+                showAlert('Connection not found. Please select a recipient.', 'error');
+                hideLoading();
+                
+                // Redirect to recipient selection
+                setTimeout(() => {
+                    window.location.href = 'recipient-selection-new.html';
+                }, 2000);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading connection:', error);
+            showAlert('Error loading connection. Please try again.', 'error');
+            hideLoading();
+            
+            // Redirect to recipient selection
+            setTimeout(() => {
+                window.location.href = 'recipient-selection-new.html';
+            }, 2000);
+        });
 } 

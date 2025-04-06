@@ -244,27 +244,61 @@ function initializeHomePage() {
       if (e.target && (e.target.classList.contains('fa-paper-plane') || e.target.closest('.home-page__connection-button i.fa-paper-plane'))) {
         const connectionEl = e.target.closest('.home-page__connection');
         if (connectionEl && connectionEl.dataset.connectionId) {
-          console.log('Create message for connection ID:', connectionEl.dataset.connectionId);
+          const connectionId = connectionEl.dataset.connectionId;
+          console.log('Create message for connection ID:', connectionId);
           
-          // Get the connection details from the DOM elements or fetch from Firestore
-          const connectionName = connectionEl.querySelector('.home-page__connection-name')?.textContent;
-          const connectionType = connectionEl.querySelector('.home-page__connection-type')?.textContent;
+          // Show loading overlay
+          showLoading('Preparing message...');
           
-          if (connectionName) {
-            // Store recipient data in localStorage before redirecting
-            localStorage.setItem('recipientData', JSON.stringify({
-              id: connectionEl.dataset.connectionId,
-              name: connectionName,
-              relationship: connectionType || 'friend',
-              bypassRecipientPage: true // Flag to indicate we're bypassing recipient page
-            }));
-            
-            // Redirect directly to message intent page
-            window.location.href = 'message-intent-new.html';
-          } else {
-            // Fallback if we can't get the data from the DOM
-            window.location.href = `message-intent-new.html?connectionId=${connectionEl.dataset.connectionId}`;
-          }
+          // Get the full connection data from Firestore instead of relying on DOM elements
+          firebase.firestore()
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('connections')
+            .doc(connectionId)
+            .get()
+            .then(doc => {
+              if (doc.exists) {
+                const connection = {
+                  id: doc.id,
+                  ...doc.data()
+                };
+                
+                console.log('Loaded connection data:', connection);
+                
+                // Store complete recipient data in localStorage before redirecting
+                localStorage.setItem('recipientData', JSON.stringify({
+                  id: connection.id,
+                  name: connection.name,
+                  relationship: connection.relationship || 'friend',
+                  otherRelationship: connection.otherRelationship || '',
+                  bypassRecipientPage: true // Flag to indicate we're bypassing recipient page
+                }));
+                
+                // Also store in the format expected by tone page
+                localStorage.setItem('selectedRecipient', JSON.stringify({
+                  name: connection.name,
+                  relationship: connection.relationship || 'friend',
+                  initial: connection.name ? connection.name.charAt(0).toUpperCase() : '?'
+                }));
+                
+                // Redirect directly to message intent page
+                hideLoading();
+                window.location.href = 'message-intent-new.html';
+              } else {
+                console.error('Connection not found in Firestore');
+                hideLoading();
+                showAlert('Connection not found. Please try again.', 'error');
+              }
+            })
+            .catch(error => {
+              console.error('Error loading connection:', error);
+              hideLoading();
+              showAlert('Error loading connection. Please try again.', 'error');
+              
+              // Fallback to using URL parameter
+              window.location.href = `message-intent-new.html?connectionId=${connectionId}`;
+            });
         }
       }
       
@@ -1817,9 +1851,18 @@ function showAllConnectionsModal(connections) {
 function createMessageForConnection(connection) {
   // Store recipient data in localStorage
   localStorage.setItem('recipientData', JSON.stringify({
+    id: connection.id,
     name: connection.name,
     relationship: connection.relationship,
-    otherRelationship: connection.otherRelationship || ''
+    otherRelationship: connection.otherRelationship || '',
+    bypassRecipientPage: true // Flag to indicate we're bypassing recipient page
+  }));
+  
+  // Also store in the selectedRecipient format for consistency
+  localStorage.setItem('selectedRecipient', JSON.stringify({
+    name: connection.name,
+    relationship: connection.relationship || 'friend',
+    initial: connection.name ? connection.name.charAt(0).toUpperCase() : '?'
   }));
   
   // Navigate to message intent page

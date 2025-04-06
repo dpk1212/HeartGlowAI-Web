@@ -25,11 +25,20 @@ const alertContainer = document.getElementById('alertContainer');
 
 // Initialize the page
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize auth state
+    console.log('Message Intent page DOM loaded');
+    
+    // Initialize auth state first
     initializeAuthState();
     
-    // Check URL parameters - this needs to happen before other setup
+    // First - display recipient info immediately if it exists in localStorage
+    // This will prevent showing the "loading recipient" state for too long
+    displayRecipientInfo();
+    
+    // Check URL parameters next
     checkUrlParameters();
+    
+    // Check for recipient data to ensure we have it
+    checkRecipientData();
     
     // Setup event listeners
     setupEventListeners();
@@ -37,7 +46,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check for previous data
     checkPreviousData();
     
-    // Debug log
+    // Final loading check - if we still see a loading indicator, hide it
+    // This is a safety measure in case something got stuck
+    setTimeout(() => {
+        hideLoading();
+    }, 1500);
+    
     console.log('Message Intent page initialized');
 });
 
@@ -287,15 +301,21 @@ function showAlert(message, type = 'info') {
 
 /**
  * Check for recipient data from previous page
+ * Returns true if valid recipient data was found
  */
 function checkRecipientData() {
+    console.log('Checking for recipient data');
+    
     const recipientDataStr = localStorage.getItem('recipientData');
     const selectedRecipientStr = localStorage.getItem('selectedRecipient');
+    
+    let hasValidData = false;
     
     // Parse recipientData to check for bypass flag
     try {
         if (recipientDataStr) {
             const recipientData = JSON.parse(recipientDataStr);
+            console.log('Found recipientData:', recipientData);
             
             // If we have recipientData with the bypass flag, create the selectedRecipient format too
             if (recipientData.bypassRecipientPage && recipientData.name) {
@@ -309,22 +329,38 @@ function checkRecipientData() {
                         initial: recipientData.name.charAt(0).toUpperCase()
                     };
                     localStorage.setItem('selectedRecipient', JSON.stringify(selectedRecipient));
+                    console.log('Created selectedRecipient from bypass data:', selectedRecipient);
                 }
                 
-                return true;
+                hasValidData = true;
+            }
+        }
+        
+        if (selectedRecipientStr) {
+            const selectedRecipient = JSON.parse(selectedRecipientStr);
+            console.log('Found selectedRecipient:', selectedRecipient);
+            
+            if (selectedRecipient.name) {
+                hasValidData = true;
             }
         }
     } catch (error) {
         console.error('Error parsing recipient data:', error);
     }
     
-    // Standard check if no bypass flag was found
-    if (!recipientDataStr || !selectedRecipientStr) {
-        // Redirect to recipient selection if no data found
-        showAlert('Please select a recipient first', 'error');
-        setTimeout(() => {
-            window.location.href = 'recipient-selection-new.html';
-        }, 1500);
+    // Handle case where no valid data was found
+    if (!hasValidData) {
+        console.warn('No valid recipient data found');
+        
+        // Only redirect if we're not currently handling a URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        if (!urlParams.get('connectionId')) {
+            // Redirect to recipient selection if no data found
+            showAlert('Please select a recipient first', 'error');
+            setTimeout(() => {
+                window.location.href = 'recipient-selection-new.html';
+            }, 1500);
+        }
         return false;
     }
     
@@ -335,6 +371,8 @@ function checkRecipientData() {
  * Display recipient information in the summary card
  */
 function displayRecipientInfo() {
+    console.log('Attempting to display recipient info');
+    
     try {
         // Try both storage formats
         let recipientInfo = null;
@@ -342,6 +380,7 @@ function displayRecipientInfo() {
         // First try selectedRecipient format
         const selectedRecipientStr = localStorage.getItem('selectedRecipient');
         if (selectedRecipientStr) {
+            console.log('Found selectedRecipient in localStorage');
             recipientInfo = JSON.parse(selectedRecipientStr);
         }
         
@@ -349,6 +388,7 @@ function displayRecipientInfo() {
         if (!recipientInfo) {
             const recipientDataStr = localStorage.getItem('recipientData');
             if (recipientDataStr) {
+                console.log('Found recipientData in localStorage');
                 const recipientData = JSON.parse(recipientDataStr);
                 recipientInfo = {
                     name: recipientData.name,
@@ -359,7 +399,12 @@ function displayRecipientInfo() {
         }
         
         // Exit if no recipient info found
-        if (!recipientInfo) return;
+        if (!recipientInfo) {
+            console.warn('No recipient info found in localStorage');
+            return;
+        }
+        
+        console.log('Displaying recipient info:', recipientInfo);
         
         // Update the UI elements
         const recipientName = document.getElementById('recipientName');
@@ -368,16 +413,27 @@ function displayRecipientInfo() {
         
         if (recipientName) {
             recipientName.textContent = recipientInfo.name || 'Unknown';
+        } else {
+            console.warn('Element #recipientName not found in DOM');
         }
         
         if (recipientRelationship) {
             const relationship = recipientInfo.relationship || 'Unknown relationship';
             recipientRelationship.textContent = relationship.charAt(0).toUpperCase() + relationship.slice(1);
+        } else {
+            console.warn('Element #recipientRelationship not found in DOM');
         }
         
         if (recipientInitial) {
             recipientInitial.textContent = recipientInfo.initial || 
                 (recipientInfo.name ? recipientInfo.name.charAt(0).toUpperCase() : '?');
+        } else {
+            console.warn('Element #recipientInitial not found in DOM');
+        }
+        
+        // Also update document title with recipient name for better UX
+        if (recipientInfo.name) {
+            document.title = `Message for ${recipientInfo.name} - HeartGlowAI`;
         }
     } catch (error) {
         console.error('Error displaying recipient info:', error);
@@ -425,7 +481,15 @@ function checkUrlParameters() {
 
 // Load connection data from Firestore
 function loadConnectionData(connectionId) {
+    console.log('Loading connection data for ID:', connectionId);
     showLoading('Loading connection...');
+    
+    // Set a timeout to ensure we don't get stuck loading
+    const loadingTimeout = setTimeout(() => {
+        console.warn('Connection loading timed out');
+        hideLoading();
+        showAlert('Connection loading took too long. Please try again.', 'error');
+    }, 10000); // 10 second timeout
     
     firebase.firestore()
         .collection('users')
@@ -434,13 +498,15 @@ function loadConnectionData(connectionId) {
         .doc(connectionId)
         .get()
         .then(doc => {
+            clearTimeout(loadingTimeout); // Clear the timeout
+            
             if (doc.exists) {
                 const connection = {
                     id: doc.id,
                     ...doc.data()
                 };
                 
-                console.log('Loaded connection data:', connection);
+                console.log('Successfully loaded connection data:', connection);
                 
                 // Store recipient data
                 localStorage.setItem('recipientData', JSON.stringify({
@@ -473,6 +539,7 @@ function loadConnectionData(connectionId) {
             }
         })
         .catch(error => {
+            clearTimeout(loadingTimeout); // Clear the timeout
             console.error('Error loading connection:', error);
             showAlert('Error loading connection. Please try again.', 'error');
             hideLoading();

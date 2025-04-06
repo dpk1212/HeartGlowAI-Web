@@ -93,17 +93,32 @@
       let selectedType = 'romantic'; // Default
       console.log("Initializing tab navigation with", navTabs.length, "tabs");
       
+      // Make sure the default tab is active
+      document.querySelectorAll('.landing-page__type').forEach(content => {
+        if (content.id === 'romantic-content') {
+          content.classList.add('landing-page__type--active');
+        } else {
+          content.classList.remove('landing-page__type--active');
+        }
+      });
+      
       // Add click event to navigation tabs
       navTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          console.log("Tab clicked:", tab.getAttribute('data-type'));
+        tab.addEventListener('click', function(e) {
+          e.preventDefault();
+          const type = this.getAttribute('data-type');
+          console.log("Tab clicked:", type);
+          
+          if (!type) {
+            console.error("No data-type attribute found on tab:", this);
+            return;
+          }
           
           // Update active tab
           navTabs.forEach(t => t.classList.remove('landing-page__tab--active'));
-          tab.classList.add('landing-page__tab--active');
+          this.classList.add('landing-page__tab--active');
           
           // Update content visibility
-          const type = tab.getAttribute('data-type');
           selectedType = type;
           typeContents.forEach(content => {
             content.classList.remove('landing-page__type--active');
@@ -129,6 +144,16 @@
           }
         });
       });
+      
+      // Initialize login button event again to ensure it works
+      const loginRegisterBtn = document.getElementById('login-register-btn');
+      if (loginRegisterBtn) {
+        loginRegisterBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          console.log('Login/Register button clicked');
+          window.location.href = 'login.html';
+        });
+      }
     }
 
     // Save message to history function

@@ -1149,11 +1149,22 @@ function saveConnection() {
 }
 
 // Show delete confirmation before deleting a connection
-function showDeleteConfirmation() {
-  if (!editingConnectionId) {
+function showDeleteConfirmation(connectionId) {
+  console.log('Showing delete confirmation for connection ID:', connectionId);
+  
+  if (!connectionId && !editingConnectionId) {
     console.error('No connection ID to delete');
     return;
   }
+  
+  // Make sure we have a connection ID
+  if (connectionId) {
+    editingConnectionId = connectionId;
+  } else if (editingConnectionId) {
+    connectionId = editingConnectionId;
+  }
+  
+  console.log('Using connection ID for deletion:', connectionId);
   
   // Create confirmation dialog
   let confirmDialog = document.getElementById('delete-confirmation-dialog');
@@ -1167,9 +1178,7 @@ function showDeleteConfirmation() {
       <div class="modal-content" style="max-width: 400px;">
         <div class="modal-header">
           <h3>Delete Connection</h3>
-          <button class="modal-close" id="close-delete-dialog">
-            <i class="fas fa-times"></i>
-          </button>
+          <button class="modal-close" id="close-delete-dialog">×</button>
         </div>
         <div class="modal-body">
           <p>Are you sure you want to delete this connection? This action cannot be undone.</p>
@@ -1182,27 +1191,67 @@ function showDeleteConfirmation() {
     `;
     
     document.body.appendChild(confirmDialog);
-    
-    // Add event listeners
-    const closeBtn = document.getElementById('close-delete-dialog');
-    const cancelBtn = document.getElementById('cancel-delete');
-    const confirmBtn = document.getElementById('confirm-delete');
-    
-    if (closeBtn) closeBtn.addEventListener('click', closeDeleteDialog);
-    if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteDialog);
-    if (confirmBtn) confirmBtn.addEventListener('click', performDeleteConnection);
-    
-    confirmDialog.addEventListener('click', function(e) {
-      if (e.target === confirmDialog) closeDeleteDialog();
+  }
+  
+  // Refresh the event listeners each time to ensure they work
+  // Remove existing listeners by cloning and replacing buttons
+  const closeBtn = document.getElementById('close-delete-dialog');
+  if (closeBtn) {
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    newCloseBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Close delete dialog clicked');
+      closeDeleteDialog();
+      return false;
     });
   }
   
-  // Show dialog with CSS transitions
+  const cancelBtn = document.getElementById('cancel-delete');
+  if (cancelBtn) {
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    newCancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Cancel delete clicked');
+      closeDeleteDialog();
+      return false;
+    });
+  }
+  
+  const confirmBtn = document.getElementById('confirm-delete');
+  if (confirmBtn) {
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    newConfirmBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Confirm delete clicked');
+      performDeleteConnection();
+      return false;
+    });
+  }
+  
+  // Disable click-outside-to-close temporarily to prevent accidental cancellations
+  const dialogClickHandler = function(e) {
+    if (e.target === confirmDialog) {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDeleteDialog();
+    }
+  };
+  
+  confirmDialog.removeEventListener('click', dialogClickHandler);
+  confirmDialog.addEventListener('click', dialogClickHandler);
+  
+  // Show dialog - try multiple methods for maximum reliability
   confirmDialog.style.display = 'flex';
-  setTimeout(() => {
-    confirmDialog.style.opacity = '1';
-    document.querySelector('#delete-confirmation-dialog .modal-content').style.transform = 'translateY(0)';
-  }, 10);
+  confirmDialog.classList.add('modal-visible');
+  
+  // Ensure the dialog is on top
+  confirmDialog.style.zIndex = '10000';
 }
 
 // Close delete confirmation dialog
@@ -3702,3 +3751,70 @@ function openConnectionModal(connectionId = null) {
   modal.style.display = 'flex';
   modal.classList.add('modal-visible');
 }
+
+// Ensure all connection action buttons work reliably with aggressive event handling
+document.addEventListener('click', function(e) {
+  // MESSAGE button (paper plane)
+  if (e.target && (e.target.classList.contains('fa-paper-plane') || e.target.closest('.home-page__connection-button i.fa-paper-plane'))) {
+    const connectionEl = e.target.closest('.home-page__connection');
+    if (connectionEl && connectionEl.dataset.connectionId) {
+      console.log('Create message for connection ID:', connectionEl.dataset.connectionId);
+      e.preventDefault();
+      e.stopPropagation();
+      window.location.href = `message-intent-new.html?connectionId=${connectionEl.dataset.connectionId}`;
+    }
+  }
+  
+  // EDIT button (pencil)
+  if (e.target && (e.target.classList.contains('fa-edit') || e.target.closest('.home-page__connection-button i.fa-edit') || 
+                  e.target.classList.contains('fa-pencil-alt') || e.target.closest('.edit-btn'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Edit button clicked:', e.target);
+    
+    // Find connection ID from different possible parent elements
+    let connectionId;
+    const connectionEl = e.target.closest('.home-page__connection');
+    const modalItem = e.target.closest('.modal-connection-item');
+    
+    if (connectionEl && connectionEl.dataset.connectionId) {
+      connectionId = connectionEl.dataset.connectionId;
+    } else if (modalItem && modalItem.getAttribute('data-id')) {
+      connectionId = modalItem.getAttribute('data-id');
+    }
+    
+    if (connectionId) {
+      console.log('Edit connection ID:', connectionId);
+      openConnectionModal(connectionId);
+      return false;
+    }
+  }
+  
+  // DELETE button (trash)
+  if (e.target && (e.target.classList.contains('fa-trash') || e.target.closest('.home-page__connection-button i.fa-trash') || 
+                  e.target.closest('.delete-btn'))) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log('Delete button clicked:', e.target);
+    
+    // Find connection ID from different possible parent elements
+    let connectionId;
+    const connectionEl = e.target.closest('.home-page__connection');
+    const modalItem = e.target.closest('.modal-connection-item');
+    
+    if (connectionEl && connectionEl.dataset.connectionId) {
+      connectionId = connectionEl.dataset.connectionId;
+    } else if (modalItem && modalItem.getAttribute('data-id')) {
+      connectionId = modalItem.getAttribute('data-id');
+    }
+    
+    if (connectionId) {
+      console.log('Delete connection ID:', connectionId);
+      editingConnectionId = connectionId;
+      showDeleteConfirmation(connectionId);
+      return false;
+    }
+  }
+});

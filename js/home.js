@@ -1708,36 +1708,53 @@ async function loadUserMessages() {
         ? formatDate(message.timestamp) 
         : formatDate(message.timestamp.toDate());
       
-      // Get message type
+      // Get message type & icon
       const messageType = message.type || 'general';
       const intentLabel = formatIntentTag(messageType);
+      const intentIcon = getIntentIcon(messageType);
+      
+      // Get message tone
+      const messageTone = message.tone || 'warm';
       
       // Truncate content
       const truncatedContent = message.content
-        ? message.content.substring(0, 60) + (message.content.length > 60 ? '...' : '')
+        ? message.content.substring(0, 80) + (message.content.length > 80 ? '...' : '')
         : 'No message content';
       
       const messageItem = document.createElement('li');
-      messageItem.className = 'message-item animate__animated animate__fadeIn';
+      messageItem.className = 'message-item animate__animated animate__fadeIn enhanced-message-item';
       messageItem.setAttribute('data-id', message.id);
+      messageItem.setAttribute('data-type', messageType);
+      messageItem.setAttribute('data-tone', messageTone);
+      
+      // Create a colored accent based on message type
+      const accentColor = getAccentColorForType(messageType);
       
       messageItem.innerHTML = `
-        <div class="message-content">
-          <div class="message-header">
-            <span class="message-recipient">${recipientName}</span>
-            <span class="message-date">${messageDateText}</span>
+        <div class="message-card" style="border-left: 4px solid ${accentColor}">
+          <div class="message-content">
+            <div class="message-header">
+              <div class="message-recipient-info">
+                <span class="message-recipient">${recipientName}</span>
+                <div class="message-type">
+                  <i class="fas ${intentIcon}"></i>
+                  <span>${intentLabel}</span>
+                </div>
+              </div>
+              <span class="message-date">
+                <i class="far fa-calendar-alt"></i>
+                ${messageDateText}
+              </span>
+            </div>
+            <div class="message-body">${truncatedContent}</div>
           </div>
-          <div class="message-body">${truncatedContent}</div>
-          <div class="message-footer">
-            <span class="message-intent">${intentLabel}</span>
-          </div>
-        </div>
-        <div class="message-actions">
-          <div class="message-action view-action" title="View message">
-            <i class="fas fa-eye"></i>
-          </div>
-          <div class="message-action delete-action" title="Delete message">
-            <i class="fas fa-trash-alt"></i>
+          <div class="message-actions">
+            <div class="message-action view-action" title="View message">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div class="message-action delete-action" title="Delete message">
+              <i class="fas fa-trash-alt"></i>
+            </div>
           </div>
         </div>
       `;
@@ -1745,9 +1762,11 @@ async function loadUserMessages() {
       // Store the full message object for use in event handlers
       messageItem._messageData = message;
       
-      // Add click event to view message
+      // Add click event to view message - only trigger if not clicking on an action button
       messageItem.addEventListener('click', function(e) {
         if (!e.target.closest('.message-action')) {
+          e.preventDefault();
+          e.stopPropagation();
           // Show message in popup
           showMessagePopup(message, connectionMap);
         }
@@ -1757,6 +1776,7 @@ async function loadUserMessages() {
       const viewButton = messageItem.querySelector('.view-action');
       if (viewButton) {
         viewButton.addEventListener('click', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           // Show message in popup
           showMessagePopup(message, connectionMap);
@@ -1767,6 +1787,7 @@ async function loadUserMessages() {
       const deleteButton = messageItem.querySelector('.delete-action');
       if (deleteButton) {
         deleteButton.addEventListener('click', (e) => {
+          e.preventDefault();
           e.stopPropagation();
           // Show delete confirmation
           showDeleteMessageConfirmation(message, messageItem, connectionMap);
@@ -1829,6 +1850,38 @@ async function loadUserMessages() {
   }
 }
 
+// Get the intent icon based on type
+function getIntentIcon(intentType) {
+  const icons = {
+    'appreciate': 'fa-heart',
+    'apologize': 'fa-dove',
+    'celebrate': 'fa-trophy',
+    'reconnect': 'fa-handshake',
+    'encourage': 'fa-star',
+    'custom': 'fa-edit',
+    'support': 'fa-hands-helping',
+    'general': 'fa-comment'
+  };
+  
+  return icons[intentType.toLowerCase()] || 'fa-comment';
+}
+
+// Get accent color based on message type
+function getAccentColorForType(messageType) {
+  const colors = {
+    'appreciate': '#FF7EB9', // Pink
+    'apologize': '#7F7CAF', // Purple-Blue
+    'celebrate': '#FFD700', // Gold
+    'reconnect': '#5091F5', // Blue
+    'encourage': '#5EE6EB', // Teal
+    'support': '#98D2EB', // Light Blue
+    'custom': '#903FEC', // Purple
+    'general': '#4ECDC4' // Seafoam
+  };
+  
+  return colors[messageType.toLowerCase()] || '#4ECDC4';
+}
+
 // Show all messages in a modal
 function showAllMessagesModal(messages, connectionMap) {
   // Create modal element
@@ -1857,9 +1910,13 @@ function showAllMessagesModal(messages, connectionMap) {
       ? formatDate(message.timestamp) 
       : formatDate(message.timestamp.toDate());
     
-    // Get message type
+    // Get message type and icon
     const messageType = message.type || 'general';
     const intentLabel = formatIntentTag(messageType);
+    const intentIcon = getIntentIcon(messageType);
+    
+    // Get accent color based on message type
+    const accentColor = getAccentColorForType(messageType);
     
     // Truncate content
     const truncatedContent = message.content
@@ -1867,16 +1924,20 @@ function showAllMessagesModal(messages, connectionMap) {
       : 'No message content';
     
     return `
-      <div class="modal-message-item" data-id="${message.id}">
+      <div class="modal-message-item" data-id="${message.id}" style="border-left-color: ${accentColor}">
         <div class="message-content">
-            <div class="message-header">
-            <span class="message-recipient">${recipientName}</span>
-            <span class="message-date">${messageDateText}</span>
-            </div>
-          <div class="message-body">${truncatedContent}</div>
-          <div class="message-footer">
-            <span class="message-intent">${intentLabel}</span>
+          <div class="message-header">
+            <div class="message-recipient-info">
+              <span class="message-recipient">${recipientName}</span>
+              <div class="message-intent">
+                <i class="fas ${intentIcon}"></i> ${intentLabel}
               </div>
+            </div>
+            <span class="message-date">
+              <i class="far fa-calendar-alt"></i> ${messageDateText}
+            </span>
+          </div>
+          <div class="message-body">${truncatedContent}</div>
         </div>
         <div class="message-actions">
           <button class="message-action view-btn" title="View message">
@@ -1913,30 +1974,56 @@ function showAllMessagesModal(messages, connectionMap) {
     </div>
   `;
   
-  // Show modal
-  modalElement.style.display = 'flex';
+  // Show modal with a slight delay to ensure DOM is ready
+  setTimeout(() => {
+    modalElement.style.display = 'flex';
+    // Add a class to indicate it's fully visible
+    modalElement.classList.add('modal-visible');
+  }, 50);
+  
+  // Prevent event bubbling for the modal content
+  const modalContent = modalElement.querySelector('.modal-content');
+  if (modalContent) {
+    modalContent.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
   
   // Add event listeners
   const closeBtn = modalElement.querySelector('.modal-close');
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      modalElement.style.display = 'none';
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      modalElement.classList.remove('modal-visible');
+      setTimeout(() => {
+        modalElement.style.display = 'none';
+      }, 300);
     });
   }
   
   // Close modal when clicking outside
   modalElement.addEventListener('click', (e) => {
     if (e.target === modalElement) {
-      modalElement.style.display = 'none';
+      e.preventDefault();
+      modalElement.classList.remove('modal-visible');
+      setTimeout(() => {
+        modalElement.style.display = 'none';
+      }, 300);
     }
   });
   
   // Create new message button
   const createButton = modalElement.querySelector('.modal-create-button');
   if (createButton) {
-    createButton.addEventListener('click', () => {
-      modalElement.style.display = 'none';
-      window.location.href = 'message-intent-new.html';
+    createButton.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      modalElement.classList.remove('modal-visible');
+      setTimeout(() => {
+        modalElement.style.display = 'none';
+        window.location.href = 'message-intent-new.html';
+      }, 300);
     });
   }
   
@@ -1944,14 +2031,19 @@ function showAllMessagesModal(messages, connectionMap) {
   const viewButtons = modalElement.querySelectorAll('.view-btn');
   viewButtons.forEach(button => {
     button.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const item = button.closest('.modal-message-item');
       const messageId = item.getAttribute('data-id');
       const message = messages.find(m => m.id === messageId);
       
       if (message) {
-        // Show message in popup instead of redirecting
-        showMessagePopup(message, connectionMap);
+        modalElement.classList.remove('modal-visible');
+        setTimeout(() => {
+          modalElement.style.display = 'none';
+          // Show message in popup
+          showMessagePopup(message, connectionMap);
+        }, 300);
       }
     });
   });
@@ -1960,14 +2052,18 @@ function showAllMessagesModal(messages, connectionMap) {
   const editButtons = modalElement.querySelectorAll('.edit-btn');
   editButtons.forEach(button => {
     button.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const item = button.closest('.modal-message-item');
       const messageId = item.getAttribute('data-id');
       const message = messages.find(m => m.id === messageId);
       
       if (message) {
-        modalElement.style.display = 'none';
-        editMessage(message, connectionMap);
+        modalElement.classList.remove('modal-visible');
+        setTimeout(() => {
+          modalElement.style.display = 'none';
+          editMessage(message, connectionMap);
+        }, 300);
       }
     });
   });
@@ -1976,14 +2072,19 @@ function showAllMessagesModal(messages, connectionMap) {
   const deleteButtons = modalElement.querySelectorAll('.delete-btn');
   deleteButtons.forEach(button => {
     button.addEventListener('click', (e) => {
+      e.preventDefault();
       e.stopPropagation();
       const item = button.closest('.modal-message-item');
       const messageId = item.getAttribute('data-id');
       const message = messages.find(m => m.id === messageId);
       
       if (message) {
-        // Show delete confirmation
-        showDeleteMessageConfirmation(message, item, connectionMap);
+        modalElement.classList.remove('modal-visible');
+        setTimeout(() => {
+          modalElement.style.display = 'none';
+          // Show delete confirmation
+          showDeleteMessageConfirmation(message, item, connectionMap);
+        }, 300);
       }
     });
   });
@@ -1993,72 +2094,22 @@ function showAllMessagesModal(messages, connectionMap) {
   messageItems.forEach(item => {
     item.addEventListener('click', (e) => {
       if (!e.target.closest('.message-action')) {
+        e.preventDefault();
+        e.stopPropagation();
         const messageId = item.getAttribute('data-id');
         const message = messages.find(m => m.id === messageId);
         
         if (message) {
-          // Show message in popup instead of redirecting
-          showMessagePopup(message, connectionMap);
+          modalElement.classList.remove('modal-visible');
+          setTimeout(() => {
+            modalElement.style.display = 'none';
+            // Show message in popup
+            showMessagePopup(message, connectionMap);
+          }, 300);
         }
       }
     });
   });
-}
-
-// View a message - now displays in a popup instead of redirecting
-function viewMessage(messageId) {
-  if (!currentUser) return;
-  
-  // Show loading state
-  showLoading('Loading message...');
-  
-  // Get the message from Firestore
-  firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('messages')
-    .doc(messageId)
-    .get()
-    .then(doc => {
-      hideLoading();
-      
-      if (doc.exists) {
-        const message = {
-          id: doc.id,
-          ...doc.data()
-        };
-        
-        // Get connection details if needed
-        if (message.connectionId) {
-          return firebase.firestore()
-            .collection('users')
-            .doc(currentUser.uid)
-            .collection('connections')
-            .doc(message.connectionId)
-            .get()
-            .then(connectionDoc => {
-              const connectionMap = {};
-              if (connectionDoc.exists) {
-                connectionMap[connectionDoc.id] = connectionDoc.data();
-              }
-              return { message, connectionMap };
-            });
-        } else {
-          return { message, connectionMap: {} };
-        }
-      } else {
-        throw new Error('Message not found');
-      }
-    })
-    .then(({ message, connectionMap }) => {
-      // Show message in popup
-      showMessagePopup(message, connectionMap);
-    })
-    .catch(error => {
-      console.error('Error loading message:', error);
-      hideLoading();
-      showAlert('Could not load the message. Please try again.', 'error');
-    });
 }
 
 // Show a message in a popup
@@ -2141,28 +2192,51 @@ function showMessagePopup(message, connectionMap) {
     </div>
   `;
   
-  // Show modal
-  popupModal.style.display = 'flex';
+  // Show modal with a slight delay to ensure DOM is ready
+  setTimeout(() => {
+    popupModal.style.display = 'flex';
+    // Add a class to indicate it's fully visible
+    popupModal.classList.add('modal-visible');
+  }, 50);
   
   // Add event listeners
   const closeBtn = popupModal.querySelector('.modal-close');
   if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      popupModal.style.display = 'none';
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      popupModal.classList.remove('modal-visible');
+      setTimeout(() => {
+        popupModal.style.display = 'none';
+      }, 300);
+    });
+  }
+  
+  // Prevent event bubbling for the modal content
+  const modalContent = popupModal.querySelector('.modal-content');
+  if (modalContent) {
+    modalContent.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   }
   
   // Close modal when clicking outside
   popupModal.addEventListener('click', (e) => {
     if (e.target === popupModal) {
-      popupModal.style.display = 'none';
+      e.preventDefault();
+      popupModal.classList.remove('modal-visible');
+      setTimeout(() => {
+        popupModal.style.display = 'none';
+      }, 300);
     }
   });
   
   // Copy button
   const copyBtn = popupModal.querySelector('.copy-message-btn');
   if (copyBtn) {
-    copyBtn.addEventListener('click', () => {
+    copyBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       const messageText = message.content || '';
       navigator.clipboard.writeText(messageText)
         .then(() => {
@@ -2178,18 +2252,28 @@ function showMessagePopup(message, connectionMap) {
   // Edit button
   const editBtn = popupModal.querySelector('.edit-message-btn');
   if (editBtn) {
-    editBtn.addEventListener('click', () => {
-      popupModal.style.display = 'none';
-      editMessage(message, connectionMap);
+    editBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      popupModal.classList.remove('modal-visible');
+      setTimeout(() => {
+        popupModal.style.display = 'none';
+        editMessage(message, connectionMap);
+      }, 300);
     });
   }
   
   // Delete button
   const deleteBtn = popupModal.querySelector('.delete-message-btn');
   if (deleteBtn) {
-    deleteBtn.addEventListener('click', () => {
-      popupModal.style.display = 'none';
-      showDeleteMessageConfirmation(message, null, connectionMap);
+    deleteBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      popupModal.classList.remove('modal-visible');
+      setTimeout(() => {
+        popupModal.style.display = 'none';
+        showDeleteMessageConfirmation(message, null, connectionMap);
+      }, 300);
     });
   }
 }
@@ -2229,33 +2313,68 @@ function showDeleteMessageConfirmation(message, messageElement, connectionMap) {
     </div>
   `;
   
-  // Show dialog
-  dialog.style.display = 'flex';
+  // Show dialog with a slight delay to ensure DOM is ready
+  setTimeout(() => {
+    dialog.style.display = 'flex';
+    // Add a class to indicate it's fully visible
+    dialog.classList.add('modal-visible');
+  }, 50);
   
   // Add event listeners
+  const modalContent = dialog.querySelector('.modal-content');
+  if (modalContent) {
+    // Prevent event bubbling for the modal content
+    modalContent.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+  
   const closeBtn = dialog.querySelector('.modal-close');
   const cancelBtn = dialog.querySelector('.cancel-btn');
   const confirmBtn = dialog.querySelector('.confirm-delete-btn');
   
   const closeDialog = () => {
-    dialog.style.display = 'none';
+    dialog.classList.remove('modal-visible');
+    setTimeout(() => {
+      dialog.style.display = 'none';
+    }, 300);
   };
   
   // Close buttons
-  if (closeBtn) closeBtn.addEventListener('click', closeDialog);
-  if (cancelBtn) cancelBtn.addEventListener('click', closeDialog);
+  if (closeBtn) {
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDialog();
+    });
+  }
+  
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      closeDialog();
+    });
+  }
   
   // Confirm delete
   if (confirmBtn) {
-    confirmBtn.addEventListener('click', () => {
-      deleteMessage(message.id, messageElement);
+    confirmBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      // First close the dialog with animation
       closeDialog();
+      // Then delete after animation completes
+      setTimeout(() => {
+        deleteMessage(message.id, messageElement);
+      }, 300);
     });
   }
   
   // Close when clicking outside
   dialog.addEventListener('click', (e) => {
     if (e.target === dialog) {
+      e.preventDefault();
       closeDialog();
     }
   });

@@ -36,6 +36,21 @@ document.addEventListener('DOMContentLoaded', function() {
           userNameElement.textContent = user.displayName || 'there';
         }
         
+        // Set user initials in avatar
+        const userInitialsElement = document.getElementById('userInitials');
+        if (userInitialsElement) {
+          const displayName = user.displayName || user.email || 'User';
+          userInitialsElement.textContent = getInitials(displayName);
+          
+          // Add click handler for user menu
+          userInitialsElement.addEventListener('click', function() {
+            // You could show a dropdown menu here
+            console.log('User avatar clicked');
+            // Temporary alert
+            showAlert(`Logged in as ${displayName}`, 'info');
+          });
+        }
+        
         initializeHomePage();
       } else {
         console.log('No user logged in, redirecting to login page');
@@ -75,7 +90,8 @@ function initializeHomePage() {
     // Initialize add connection button
     const addConnectionBtn = document.getElementById('add-connection-btn');
     if (addConnectionBtn) {
-      addConnectionBtn.addEventListener('click', function() {
+      addConnectionBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         console.log('Add connection button clicked');
         openConnectionModal();
       });
@@ -83,15 +99,13 @@ function initializeHomePage() {
       console.warn('Add connection button not found');
     }
     
-    // Ensure all "Add New Connection" buttons work
+    // Make sure all "Add New Connection" buttons work using event delegation
     document.addEventListener('click', function(e) {
-      // Use event delegation for all possible add connection buttons
       if (e.target && 
-          (e.target.classList.contains('add-connection-button') || 
-           e.target.classList.contains('add-new-connection-btn') ||
-           e.target.matches('.add-connection-button *') ||
-           e.target.matches('.add-new-connection-btn *') ||
-           (e.target.textContent && e.target.textContent.includes('Add New Connection')))) {
+          (e.target.classList.contains('home-page__add-connection') || 
+           e.target.closest('.home-page__add-connection') ||
+           e.target.id === 'add-connection-btn' ||
+           e.target.closest('#add-connection-btn'))) {
         console.log('Add connection button clicked via delegation');
         e.preventDefault();
         openConnectionModal();
@@ -101,15 +115,26 @@ function initializeHomePage() {
     // Create message button
     const createMessageBtn = document.getElementById('create-message-btn');
     if (createMessageBtn) {
-      createMessageBtn.addEventListener('click', function() {
-        // Navigate to emotional entry page
+      createMessageBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Create message button clicked');
         window.location.href = 'emotional-entry.html';
       });
     } else {
       console.warn('Create message button not found');
     }
     
-    // Initialize logout button
+    // Initialize home page logo link
+    const logoLink = document.querySelector('.home-page__logo');
+    if (logoLink) {
+      logoLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Logo clicked, reloading home page');
+        window.location.href = 'home.html';
+      });
+    }
+    
+    // Initialize logout button if it exists
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
       logoutBtn.addEventListener('click', function() {
@@ -124,9 +149,155 @@ function initializeHomePage() {
             showAlert(`Logout error: ${error.message}`, 'error');
           });
       });
-    } else {
-      console.warn('Logout button not found');
     }
+    
+    // Set up the view all messages button
+    const viewAllMessagesBtn = document.getElementById('view-all-messages');
+    if (viewAllMessagesBtn) {
+      viewAllMessagesBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('View all messages clicked');
+        // Get a reference to the modal
+        const allMessagesModal = document.getElementById('all-messages-modal');
+        if (allMessagesModal) {
+          // Show the modal
+          allMessagesModal.style.display = 'block';
+          
+          // Check if we already loaded messages or need to load them
+          if (allMessagesModal.querySelector('.all-messages-list').children.length === 0) {
+            loadUserMessages(true); // Pass true to indicate we want to load for the modal
+          }
+        } else {
+          console.warn('All messages modal not found');
+          showAlert('Messages view is not available', 'error');
+        }
+      });
+    }
+    
+    // Set up the manage connections button
+    const manageConnectionsBtn = document.getElementById('manage-connections');
+    if (manageConnectionsBtn) {
+      manageConnectionsBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Manage connections clicked');
+        openConnectionsManagement();
+      });
+    }
+    
+    // Set up the manage reminders button
+    const manageRemindersBtn = document.getElementById('manage-reminders');
+    if (manageRemindersBtn) {
+      manageRemindersBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Manage reminders clicked');
+        // Display a not implemented message for now
+        showAlert('Reminder management will be available soon', 'info');
+      });
+    }
+    
+    // Ensure all message buttons functionality works with event delegation
+    document.addEventListener('click', function(e) {
+      // Copy button
+      if (e.target && (e.target.classList.contains('fa-copy') || e.target.closest('.home-page__message-button i.fa-copy'))) {
+        const messageCard = e.target.closest('.home-page__message-card');
+        if (messageCard) {
+          const messageText = messageCard.querySelector('.home-page__message-text').textContent;
+          navigator.clipboard.writeText(messageText.trim())
+            .then(() => showAlert('Message copied to clipboard!', 'success'))
+            .catch(() => showAlert('Could not copy message', 'error'));
+        }
+      }
+      
+      // Edit button
+      if (e.target && (e.target.classList.contains('fa-edit') || e.target.closest('.home-page__message-button i.fa-edit'))) {
+        const messageCard = e.target.closest('.home-page__message-card');
+        if (messageCard && messageCard.dataset.messageId) {
+          console.log('Edit message clicked for ID:', messageCard.dataset.messageId);
+          // Navigate to message editor with this message ID
+          window.location.href = `message-editor.html?messageId=${messageCard.dataset.messageId}`;
+        }
+      }
+      
+      // Share button
+      if (e.target && (e.target.classList.contains('fa-share') || e.target.closest('.home-page__message-button i.fa-share'))) {
+        const messageCard = e.target.closest('.home-page__message-card');
+        if (messageCard) {
+          const messageText = messageCard.querySelector('.home-page__message-text').textContent;
+          // Try to use the Web Share API if available
+          if (navigator.share) {
+            navigator.share({
+              title: 'A heartfelt message from HeartGlowAI',
+              text: messageText.trim()
+            })
+            .then(() => console.log('Message shared successfully'))
+            .catch((error) => console.log('Error sharing:', error));
+          } else {
+            // Fallback: copy to clipboard
+            navigator.clipboard.writeText(messageText.trim())
+              .then(() => showAlert('Message copied to clipboard for sharing!', 'success'))
+              .catch(() => showAlert('Could not copy message', 'error'));
+          }
+        }
+      }
+      
+      // Connection action buttons
+      if (e.target && (e.target.classList.contains('fa-paper-plane') || e.target.closest('.home-page__connection-button i.fa-paper-plane'))) {
+        const connectionEl = e.target.closest('.home-page__connection');
+        if (connectionEl && connectionEl.dataset.connectionId) {
+          console.log('Create message for connection ID:', connectionEl.dataset.connectionId);
+          window.location.href = `emotional-entry.html?connectionId=${connectionEl.dataset.connectionId}`;
+        }
+      }
+      
+      if (e.target && (e.target.classList.contains('fa-edit') || e.target.closest('.home-page__connection-button i.fa-edit'))) {
+        const connectionEl = e.target.closest('.home-page__connection');
+        if (connectionEl && connectionEl.dataset.connectionId) {
+          console.log('Edit connection ID:', connectionEl.dataset.connectionId);
+          openConnectionModal(connectionEl.dataset.connectionId);
+        }
+      }
+      
+      if (e.target && (e.target.classList.contains('fa-trash') || e.target.closest('.home-page__connection-button i.fa-trash'))) {
+        const connectionEl = e.target.closest('.home-page__connection');
+        if (connectionEl && connectionEl.dataset.connectionId) {
+          console.log('Delete connection ID:', connectionEl.dataset.connectionId);
+          showDeleteConfirmation(connectionEl.dataset.connectionId);
+        }
+      }
+    });
+    
+    // Close button functionality for all modals
+    const closeModalButtons = document.querySelectorAll('.close-modal');
+    closeModalButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const modal = button.closest('.modal');
+        if (modal) {
+          modal.style.display = 'none';
+          // If this was the connection modal, reset it
+          if (modal.id === 'connection-modal') {
+            editingConnectionId = null;
+            // Reset form if needed
+            const form = modal.querySelector('form');
+            if (form) form.reset();
+          }
+        }
+      });
+    });
+    
+    // Close modals when clicking outside the modal content
+    window.addEventListener('click', function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.style.display = 'none';
+        
+        // If this was the connection modal, reset it
+        if (event.target.id === 'connection-modal') {
+          editingConnectionId = null;
+          // Reset form if needed
+          const form = event.target.querySelector('form');
+          if (form) form.reset();
+        }
+      }
+    });
     
     // Try to load data from Firebase
     try {
@@ -403,13 +574,13 @@ function openConnectionModal(connectionId = null) {
   }
   
   // Ensure the expanded modal exists
-  createConnectionModal();
-  
+    createConnectionModal();
+    
   // Get modal elements
   let modal = document.getElementById('connection-modal');
-  if (!modal) {
+    if (!modal) {
     console.error('Could not find or create connection modal');
-    return;
+      return;
   }
   
   // Get form elements
@@ -1229,201 +1400,82 @@ function showRemindersError(errorMessage) {
 // Load user connections from Firestore
 async function loadUserConnections() {
   if (!currentUser) {
-    console.error('No user available for loading connections');
-    showConnectionsError('Authentication error. Please refresh the page.');
+    console.error('Cannot load connections: User not authenticated');
     return;
   }
-  
-  const userUid = currentUser.uid;
-  const connectionsContainer = document.querySelector('.connections-list');
-  
-  if (!connectionsContainer) {
-    console.error('Connections container not found');
-    return;
-  }
-  
-  // Hide any existing no connections messages before showing the loading spinner
-  hideEmptyState('connections');
-  
-  connectionsContainer.innerHTML = `
-    <li class="loading-item">
-      <div class="loading-spinner"></div>
-      <span>Loading your connections...</span>
-    </li>
-  `;
   
   try {
-    console.log('Loading connections for user', userUid);
-    const connectionsRef = firebase.firestore()
+    const userUid = currentUser.uid;
+    console.log('Loading connections for user:', userUid);
+    
+    showLoading('Loading connections...');
+    
+    const connectionsCollection = firebase.firestore()
       .collection('users')
       .doc(userUid)
       .collection('connections');
     
-    const snapshot = await connectionsRef.get();
+    const connectionsSnapshot = await connectionsCollection.get();
     
-    // Start with an empty container
-    connectionsContainer.innerHTML = '';
+    if (connectionsSnapshot.empty) {
+      console.log('No connections found');
+      displayEmptyStates('connections');
+      hideLoading();
+      return;
+    }
     
-    if (snapshot.empty) {
-      console.log('No connections found for user');
-            displayEmptyStates('connections');
-            return;
-          }
-          
-    // Process all connections
-          const connections = [];
-    snapshot.forEach(doc => {
-      connections.push({
-        id: doc.id,
-        ...doc.data(),
-        created: doc.data().created || doc.data().createdAt || new Date(0)
-      });
-    });
-    
-    // Hide any static empty state messages in the DOM
+    // We have connections, hide any empty state
     hideEmptyState('connections');
     
-    // Sort by most recently created first
-          connections.sort((a, b) => {
-      const dateA = a.created instanceof Date ? a.created : a.created.toDate();
-      const dateB = b.created instanceof Date ? b.created : b.created.toDate();
-      return dateB - dateA;
+    const connections = [];
+    connectionsSnapshot.forEach(doc => {
+      connections.push({
+        id: doc.id,
+        ...doc.data()
+      });
     });
     
-    // Only show the first 3 connections
-    const displayConnections = connections.slice(0, 3);
+    console.log(`Loaded ${connections.length} connections`);
     
-    // Add connections to container
-    displayConnections.forEach(connection => {
-      // Format relationship text
-      const relationshipText = connection.relationship === 'other' && connection.otherRelationship
-        ? connection.otherRelationship
-        : capitalizeFirstLetter(connection.relationship || 'friend');
-      
-      // Choose icon based on relationship
-      let relationshipIcon = 'fa-user-friends';
-      if (connection.relationship === 'family') relationshipIcon = 'fa-home';
-      else if (connection.relationship === 'partner') relationshipIcon = 'fa-heart';
-      else if (connection.relationship === 'colleague') relationshipIcon = 'fa-briefcase';
-      else if (connection.relationship === 'acquaintance') relationshipIcon = 'fa-handshake';
-            
-            const connectionItem = document.createElement('li');
-      connectionItem.className = 'connection-item animate__animated animate__fadeIn';
-      connectionItem.setAttribute('data-id', connection.id);
-      
-            connectionItem.innerHTML = `
-        <div class="connection-avatar">
-          <i class="fas ${relationshipIcon}"></i>
-        </div>
-              <div class="connection-details">
-          <div class="connection-name">${connection.name}</div>
-                <div class="connection-meta">
-            <span class="connection-relation">${relationshipText}</span>
-                </div>
-              </div>
-        <div class="connection-actions">
-          <div class="connection-action message-action" title="Create message">
-            <i class="fas fa-paper-plane"></i>
-          </div>
-          <div class="connection-action edit-action" title="Edit connection">
-            <i class="fas fa-pencil-alt"></i>
-          </div>
-          <div class="connection-action delete-action" title="Delete connection">
-            <i class="fas fa-trash"></i>
-          </div>
-        </div>
-      `;
-      
-      // Add click event to the main item to view connection
-      connectionItem.addEventListener('click', function(e) {
-        // Only proceed if not clicking on an action button
-        if (!e.target.closest('.connection-action')) {
-          // Show connection details or open message creation
-          createMessageForConnection(connection);
-        }
-      });
-      
-      // Add click event to message action button (paper airplane)
-      const messageAction = connectionItem.querySelector('.message-action');
-      if (messageAction) {
-        messageAction.addEventListener('click', (e) => {
-          e.stopPropagation();
-          createMessageForConnection(connection);
-        });
-      }
-      
-      // Add click event to edit action button (pencil)
-      const editAction = connectionItem.querySelector('.edit-action');
-      if (editAction) {
-        editAction.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openConnectionModal(connection.id);
-        });
-      }
-      
-      // Add click event to delete action button (trash)
-      const deleteAction = connectionItem.querySelector('.delete-action');
-      if (deleteAction) {
-        deleteAction.addEventListener('click', (e) => {
-          e.stopPropagation();
-          editingConnectionId = connection.id;
-          showDeleteConfirmation();
-        });
-      }
-      
+    // Display in the connections section
+    const connectionsContainer = document.getElementById('connections-list');
+    if (!connectionsContainer) {
+      console.error('Connections container not found');
+      hideLoading();
+      return;
+    }
+    
+    // Clear the container but keep the "Add New Connection" button if it exists
+    const addConnectionBtn = connectionsContainer.querySelector('.home-page__add-connection');
+    connectionsContainer.innerHTML = '';
+    
+    // Add each connection to the container
+    connections.forEach(connection => {
+      const connectionItem = createConnectionItem(connection);
       connectionsContainer.appendChild(connectionItem);
     });
     
-    // Add "View all" button if there are more connections
-    if (connections.length > 3) {
-      const viewAllItem = document.createElement('li');
-      viewAllItem.className = 'view-all-item';
-      viewAllItem.innerHTML = `
-        <button class="view-all-button">
-          <i class="fas fa-users"></i> View All Connections (${connections.length})
-        </button>
+    // Re-add the "Add New Connection" button
+    if (addConnectionBtn) {
+      connectionsContainer.appendChild(addConnectionBtn);
+    } else {
+      // Create a new "Add Connection" button if it didn't exist
+      const newAddBtn = document.createElement('button');
+      newAddBtn.className = 'home-page__add-connection';
+      newAddBtn.id = 'add-connection-btn';
+      newAddBtn.innerHTML = `
+        <span class="home-page__add-connection-icon"><i class="fas fa-plus"></i></span>
+        Add New Connection
       `;
       
-      viewAllItem.addEventListener('click', () => {
-        // Show all connections modal
-        showAllConnectionsModal(connections);
-      });
-      
-      connectionsContainer.appendChild(viewAllItem);
+      connectionsContainer.appendChild(newAddBtn);
     }
     
-    // Add "Add connection" button at the end - now with proper styling
-    const addConnectionItem = document.createElement('li');
-    addConnectionItem.className = 'add-new-connection';
-    addConnectionItem.innerHTML = `
-      <button class="add-new-connection-btn">
-        <i class="fas fa-plus"></i> Add New Connection
-      </button>
-    `;
-    
-    addConnectionItem.addEventListener('click', () => {
-      openConnectionModal();
-    });
-    
-    connectionsContainer.appendChild(addConnectionItem);
-    
-    console.log(`Displayed ${displayConnections.length} of ${connections.length} connections`);
+    hideLoading();
   } catch (error) {
     console.error('Error loading connections:', error);
-    connectionsContainer.innerHTML = `
-      <li class="error-state">
-        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
-        <div class="error-message">
-          <p>Couldn't load your connections</p>
-          <button class="retry-button" id="retry-connections-btn">Retry</button>
-        </div>
-      </li>
-    `;
-    
-    const retryBtn = document.getElementById('retry-connections-btn');
-    if (retryBtn) {
-      retryBtn.addEventListener('click', () => loadUserConnections());
-    }
+    showConnectionsError('Error loading connections. Please try again.');
+    hideLoading();
   }
 }
 
@@ -1601,851 +1653,154 @@ function createMessageForConnection(connection) {
 }
 
 // Load user messages from Firestore
-async function loadUserMessages() {
+async function loadUserMessages(forModal = false) {
   if (!currentUser) {
-    console.error('No user available for loading messages');
-    showMessagesError('Authentication error. Please refresh the page.');
+    console.error('Cannot load messages: User not authenticated');
     return;
   }
-  
-  const userUid = currentUser.uid;
-  const messagesContainer = document.querySelector('.messages-list');
-  
-  if (!messagesContainer) {
-    console.error('Messages container not found');
-    return;
-  }
-  
-  // Hide any existing no messages messages before showing the loading spinner
-  hideEmptyState('messages');
-  
-  messagesContainer.innerHTML = `
-    <li class="loading-item">
-      <div class="loading-spinner"></div>
-      <span>Loading your messages...</span>
-    </li>
-  `;
   
   try {
-    console.log('Loading messages for user', userUid);
-    const messagesRef = firebase.firestore()
-    .collection('users')
+    const userUid = currentUser.uid;
+    console.log('Loading messages for user:', userUid);
+    
+    if (!forModal) showLoading('Loading messages...');
+    
+    // Get a map of connections for looking up names
+    const connectionMap = await getConnectionMap();
+    
+    const messagesCollection = firebase.firestore()
+      .collection('users')
       .doc(userUid)
-    .collection('messages')
+      .collection('messages');
+    
+    // Query for recent messages, limited to 5 for the dashboard
+    const limit = forModal ? 20 : 5;
+    const messagesQuery = messagesCollection
       .orderBy('timestamp', 'desc')
-      .limit(10);
+      .limit(limit);
     
-    const snapshot = await messagesRef.get();
+    const messagesSnapshot = await messagesQuery.get();
     
-    // Start with an empty container
-    messagesContainer.innerHTML = '';
+    if (messagesSnapshot.empty) {
+      console.log('No messages found');
+      displayEmptyStates('messages');
+      hideLoading();
+      return;
+    }
     
-    if (snapshot.empty) {
-      console.log('No messages found for user');
-          displayEmptyStates('messages');
-          return;
-        }
-        
-    // Process all messages
-        const messages = [];
-    snapshot.forEach(doc => {
-            const data = doc.data();
-      messages.push({
-        id: doc.id,
-        ...data,
-        timestamp: data.timestamp || new Date(0)
-      });
-    });
-    
-    // Hide any static empty state messages in the DOM
+    // We have messages, hide any empty state
     hideEmptyState('messages');
     
-    // Get all connection information for message recipients
-    const connectionIds = new Set(messages.filter(m => m.connectionId).map(m => m.connectionId));
-    let connectionMap = {};
-    
-    if (connectionIds.size > 0) {
-      try {
-        const connectionsSnapshot = await Promise.all(
-          Array.from(connectionIds).map(id => 
-            firebase.firestore()
-              .collection('users')
-              .doc(userUid)
-              .collection('connections')
-              .doc(id)
-              .get()
-          )
-        );
-        
-        connectionsSnapshot.forEach(doc => {
-          if (doc.exists) {
-            connectionMap[doc.id] = doc.data();
-          }
-        });
-      } catch (error) {
-        console.error('Error loading connection details for messages:', error);
-      }
-    }
-    
-    // Only show the first 3 messages
-    const displayMessages = messages.slice(0, 3);
-    
-    // Add messages to container
-    displayMessages.forEach(message => {
-      // Get recipient info
-      let recipientName = message.recipientName || 'Unknown';
-      let relationship = message.relationship || 'friend';
-      
-      // Use connection data if available
-      if (message.connectionId && connectionMap[message.connectionId]) {
-        const connection = connectionMap[message.connectionId];
-        recipientName = connection.name || recipientName;
-        relationship = connection.relationship || relationship;
-      }
-      
-      // Format date
-      const messageDateText = message.timestamp instanceof Date 
-        ? formatDate(message.timestamp) 
-        : formatDate(message.timestamp.toDate());
-      
-      // Get message type & icon
-      const messageType = message.type || 'general';
-      const intentLabel = formatIntentTag(messageType);
-      const intentIcon = getIntentIcon(messageType);
-      
-      // Get message tone
-      const messageTone = message.tone || 'warm';
-      
-      // Truncate content
-      const truncatedContent = message.content
-        ? message.content.substring(0, 80) + (message.content.length > 80 ? '...' : '')
-        : 'No message content';
-      
-      const messageItem = document.createElement('li');
-      messageItem.className = 'message-item animate__animated animate__fadeIn enhanced-message-item';
-      messageItem.setAttribute('data-id', message.id);
-      messageItem.setAttribute('data-type', messageType);
-      messageItem.setAttribute('data-tone', messageTone);
-      
-      // Create a colored accent based on message type
-      const accentColor = getAccentColorForType(messageType);
-      
-      messageItem.innerHTML = `
-        <div class="message-card" style="border-left: 4px solid ${accentColor}">
-          <div class="message-content">
-            <div class="message-header">
-              <div class="message-recipient-info">
-                <span class="message-recipient">${recipientName}</span>
-                <div class="message-type">
-                  <i class="fas ${intentIcon}"></i>
-                  <span>${intentLabel}</span>
-                </div>
-              </div>
-              <span class="message-date">
-                <i class="far fa-calendar-alt"></i>
-                ${messageDateText}
-              </span>
-            </div>
-            <div class="message-body">${truncatedContent}</div>
-          </div>
-          <div class="message-actions">
-            <div class="message-action view-action" title="View message">
-              <i class="fas fa-eye"></i>
-            </div>
-            <div class="message-action delete-action" title="Delete message">
-              <i class="fas fa-trash-alt"></i>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      // Store the full message object for use in event handlers
-      messageItem._messageData = message;
-      
-      // Add click event to view message - only trigger if not clicking on an action button
-      messageItem.addEventListener('click', function(e) {
-        if (!e.target.closest('.message-action')) {
-          e.preventDefault();
-          e.stopPropagation();
-          // Show message in popup
-          showMessagePopup(message, connectionMap);
-        }
+    const messages = [];
+    messagesSnapshot.forEach(doc => {
+      messages.push({
+        id: doc.id,
+        ...doc.data()
       });
-      
-      // Add click event to view button
-      const viewButton = messageItem.querySelector('.view-action');
-      if (viewButton) {
-        viewButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // Show message in popup
-          showMessagePopup(message, connectionMap);
-        });
-      }
-      
-      // Add click event to delete button
-      const deleteButton = messageItem.querySelector('.delete-action');
-      if (deleteButton) {
-        deleteButton.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          // Show delete confirmation
-          showDeleteMessageConfirmation(message, messageItem, connectionMap);
-        });
-      }
-      
-      messagesContainer.appendChild(messageItem);
     });
     
-    // Add "View all" button if there are more messages
-    if (messages.length > 3) {
-      const viewAllItem = document.createElement('li');
-      viewAllItem.className = 'view-all-item';
-      viewAllItem.innerHTML = `
-        <button class="view-all-button">
-          <i class="fas fa-list"></i> View All Messages (${messages.length})
-        </button>
-      `;
+    console.log(`Loaded ${messages.length} messages`);
+    
+    if (forModal) {
+      // Display in the all messages modal
+      showAllMessagesModal(messages, connectionMap);
+    } else {
+      // Display in the recent messages section on the dashboard
+      const messagesContainer = document.getElementById('recent-messages-list');
+      if (!messagesContainer) {
+        console.error('Messages container not found');
+        hideLoading();
+        return;
+      }
       
-      viewAllItem.addEventListener('click', () => {
-        // Show all messages modal
-        showAllMessagesModal(messages, connectionMap);
+      // Clear the container of any placeholder content
+      messagesContainer.innerHTML = '';
+      
+      // Add each message to the container
+      messages.forEach(message => {
+        const messageCard = createMessageCard(message, connectionMap);
+        messagesContainer.appendChild(messageCard);
       });
-      
-      messagesContainer.appendChild(viewAllItem);
     }
     
-    // Add "Create message" button at the end
-    const createMessageItem = document.createElement('li');
-    createMessageItem.className = 'create-message-item';
-    createMessageItem.innerHTML = `
-      <button class="create-message-button">
-        <i class="fas fa-magic"></i> Create New Message
-      </button>
-    `;
-    
-    createMessageItem.addEventListener('click', () => {
-      window.location.href = 'message-intent-new.html';
-    });
-    
-    messagesContainer.appendChild(createMessageItem);
-    
-    console.log(`Displayed ${displayMessages.length} of ${messages.length} messages`);
+    hideLoading();
   } catch (error) {
     console.error('Error loading messages:', error);
-    messagesContainer.innerHTML = `
-      <li class="error-state">
-        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
-        <div class="error-message">
-          <p>Couldn't load your messages</p>
-          <button class="retry-button" id="retry-messages-btn">Retry</button>
-        </div>
-      </li>
-    `;
-    
-    const retryBtn = document.getElementById('retry-messages-btn');
-    if (retryBtn) {
-      retryBtn.addEventListener('click', () => loadUserMessages());
-    }
+    showMessagesError('Error loading messages. Please try again.');
+    hideLoading();
   }
 }
 
-// Get the intent icon based on type
-function getIntentIcon(intentType) {
-  const icons = {
-    'appreciate': 'fa-heart',
-    'apologize': 'fa-dove',
-    'celebrate': 'fa-trophy',
-    'reconnect': 'fa-handshake',
-    'encourage': 'fa-star',
-    'custom': 'fa-edit',
-    'support': 'fa-hands-helping',
-    'general': 'fa-comment'
-  };
+// Helper function to create a message card element
+function createMessageCard(message, connectionMap) {
+  const messageCard = document.createElement('div');
+  messageCard.className = 'home-page__message-card';
+  messageCard.dataset.messageId = message.id;
   
-  return icons[intentType.toLowerCase()] || 'fa-comment';
-}
-
-// Get accent color based on message type
-function getAccentColorForType(messageType) {
-  const colors = {
-    'appreciate': '#FF7EB9', // Pink
-    'apologize': '#7F7CAF', // Purple-Blue
-    'celebrate': '#FFD700', // Gold
-    'reconnect': '#5091F5', // Blue
-    'encourage': '#5EE6EB', // Teal
-    'support': '#98D2EB', // Light Blue
-    'custom': '#903FEC', // Purple
-    'general': '#4ECDC4' // Seafoam
-  };
-  
-  return colors[messageType.toLowerCase()] || '#4ECDC4';
-}
-
-// Show all messages in a modal
-function showAllMessagesModal(messages, connectionMap) {
-  // Create modal element
-  let modalElement = document.getElementById('all-messages-modal');
-  
-  if (!modalElement) {
-    modalElement = document.createElement('div');
-    modalElement.id = 'all-messages-modal';
-    modalElement.className = 'modal';
-    document.body.appendChild(modalElement);
+  // Message type influences the accent color
+  const accentColor = getAccentColorForType(message.type);
+  if (accentColor) {
+    messageCard.style.setProperty('--message-accent-color', accentColor);
   }
   
-  // Generate HTML for modal header and controls
-  let modalHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">All Messages (${messages.length})</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-messages-list">
-  `;
+  const timeAgo = getTimeAgo(message.timestamp?.toDate() || new Date());
   
-  // Generate message items HTML
-  messages.forEach(message => {
-    // Get recipient info
-    let recipientName = message.recipientName || 'Unknown';
-    
-    // Use connection data if available
-    if (message.connectionId && connectionMap[message.connectionId]) {
-      const connection = connectionMap[message.connectionId];
-      recipientName = connection.name || recipientName;
-    }
-    
-    // Format date
-    const messageDateText = message.timestamp instanceof Date 
-      ? formatDate(message.timestamp) 
-      : formatDate(message.timestamp.toDate());
-    
-    // Get message type and icon
-    const messageType = message.type || 'general';
-    const intentLabel = formatIntentTag(messageType);
-    const intentIcon = getIntentIcon(messageType);
-    
-    // Get accent color based on message type
-    const accentColor = getAccentColorForType(messageType);
-    
-    // Truncate content
-    const truncatedContent = message.content
-      ? message.content.substring(0, 120) + (message.content.length > 120 ? '...' : '')
-      : 'No message content';
-    
-    modalHTML += `
-      <div class="modal-message-item enhanced-message-item" data-id="${message.id}" style="border-left-color: ${accentColor}">
-        <div class="message-content">
-          <div class="message-header">
-            <div class="message-recipient-info">
-              <span class="message-recipient">${recipientName}</span>
-              <div class="message-intent">
-                <i class="fas ${intentIcon}"></i> ${intentLabel}
-              </div>
-            </div>
-            <span class="message-date">
-              <i class="far fa-calendar-alt"></i> ${messageDateText}
-            </span>
-          </div>
-          <div class="message-body">${truncatedContent}</div>
-        </div>
-        <div class="message-actions">
-          <button class="message-action view-btn" title="View message">
-            <i class="fas fa-eye"></i>
-          </button>
-          <button class="message-action edit-btn" title="Edit message">
-            <i class="fas fa-pencil-alt"></i>
-          </button>
-          <button class="message-action delete-btn" title="Delete message">
-            <i class="fas fa-trash-alt"></i>
-          </button>
-        </div>
+  // Create message template
+  messageCard.innerHTML = `
+    <div class="home-page__message-header">
+      <div class="home-page__message-meta">
+        <div class="home-page__message-type">${formatIntentTag(message.type)}</div>
+        <div class="home-page__message-time">${timeAgo}</div>
       </div>
-    `;
-  });
-  
-  // Close the HTML for the modal
-  modalHTML += `
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-create-button">
-          <i class="fas fa-magic"></i> Create New Message
-        </button>
-      </div>
+    </div>
+    <div class="home-page__message-text">
+      "${message.content}"
+    </div>
+    <div class="home-page__message-actions">
+      <button class="home-page__message-button">
+        <i class="far fa-copy"></i> Copy
+      </button>
+      <button class="home-page__message-button">
+        <i class="far fa-edit"></i> Edit
+      </button>
+      <button class="home-page__message-button home-page__message-button--primary">
+        <i class="fas fa-share"></i> Share
+      </button>
     </div>
   `;
   
-  // Set the HTML content
-  modalElement.innerHTML = modalHTML;
-  
-  // Show modal with a slight delay to ensure DOM is ready
-  setTimeout(() => {
-    modalElement.style.display = 'flex';
-    // Add a class to indicate it's fully visible
-    modalElement.classList.add('modal-visible');
-  }, 50);
-  
-  // Prevent event bubbling for the modal content
-  const modalContent = modalElement.querySelector('.modal-content');
-  if (modalContent) {
-    modalContent.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-  
-  // Add event listeners
-  const closeBtn = modalElement.querySelector('.modal-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      modalElement.classList.remove('modal-visible');
-      setTimeout(() => {
-        modalElement.style.display = 'none';
-      }, 300);
-    });
-  }
-  
-  // Close modal when clicking outside
-  modalElement.addEventListener('click', (e) => {
-    if (e.target === modalElement) {
-      e.preventDefault();
-      modalElement.classList.remove('modal-visible');
-      setTimeout(() => {
-        modalElement.style.display = 'none';
-      }, 300);
-    }
-  });
-  
-  // Create new message button
-  const createButton = modalElement.querySelector('.modal-create-button');
-  if (createButton) {
-    createButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      modalElement.classList.remove('modal-visible');
-      setTimeout(() => {
-        modalElement.style.display = 'none';
-        window.location.href = 'message-intent-new.html';
-      }, 300);
-    });
-  }
-  
-  // View buttons
-  const viewButtons = modalElement.querySelectorAll('.view-btn');
-  viewButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const item = button.closest('.modal-message-item');
-      const messageId = item.getAttribute('data-id');
-      const message = messages.find(m => m.id === messageId);
-      
-      if (message) {
-        modalElement.classList.remove('modal-visible');
-        setTimeout(() => {
-          modalElement.style.display = 'none';
-          // Show message in popup
-          showMessagePopup(message, connectionMap);
-        }, 300);
-      }
-    });
-  });
-  
-  // Edit buttons
-  const editButtons = modalElement.querySelectorAll('.edit-btn');
-  editButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const item = button.closest('.modal-message-item');
-      const messageId = item.getAttribute('data-id');
-      const message = messages.find(m => m.id === messageId);
-      
-      if (message) {
-        modalElement.classList.remove('modal-visible');
-        setTimeout(() => {
-          modalElement.style.display = 'none';
-          editMessage(message, connectionMap);
-        }, 300);
-      }
-    });
-  });
-  
-  // Delete buttons
-  const deleteButtons = modalElement.querySelectorAll('.delete-btn');
-  deleteButtons.forEach(button => {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const item = button.closest('.modal-message-item');
-      const messageId = item.getAttribute('data-id');
-      const message = messages.find(m => m.id === messageId);
-      
-      if (message) {
-        modalElement.classList.remove('modal-visible');
-        setTimeout(() => {
-          modalElement.style.display = 'none';
-          // Show delete confirmation
-          showDeleteMessageConfirmation(message, item, connectionMap);
-        }, 300);
-      }
-    });
-  });
-  
-  // Make message items clickable to view
-  const messageItems = modalElement.querySelectorAll('.modal-message-item');
-  messageItems.forEach(item => {
-    item.addEventListener('click', (e) => {
-      if (!e.target.closest('.message-action')) {
-        e.preventDefault();
-        e.stopPropagation();
-        const messageId = item.getAttribute('data-id');
-        const message = messages.find(m => m.id === messageId);
-        
-        if (message) {
-          modalElement.classList.remove('modal-visible');
-          setTimeout(() => {
-            modalElement.style.display = 'none';
-            // Show message in popup
-            showMessagePopup(message, connectionMap);
-          }, 300);
-        }
-      }
-    });
-  });
+  return messageCard;
 }
 
-// Show a message in a popup
-function showMessagePopup(message, connectionMap) {
-  // Get recipient info
-  let recipientName = message.recipientName || 'Unknown';
-  let relationship = message.relationship || 'friend';
+// Helper function to create a connection item
+function createConnectionItem(connection) {
+  const connectionEl = document.createElement('div');
+  connectionEl.className = 'home-page__connection';
+  connectionEl.dataset.connectionId = connection.id;
   
-  // Use connection data if available
-  if (message.connectionId && connectionMap[message.connectionId]) {
-    const connection = connectionMap[message.connectionId];
-    recipientName = connection.name || recipientName;
-    relationship = connection.relationship || relationship;
-  }
-  
-  // Format date
-  const messageDateText = message.timestamp instanceof Date 
-    ? formatDate(message.timestamp) 
-    : formatDate(message.timestamp.toDate());
-  
-  // Get message type and tone
-  const messageType = message.type || 'general';
-  const messageTone = message.tone || 'warm';
-  const intentLabel = formatIntentTag(messageType);
-  
-  // Create modal for message display
-  let popupModal = document.getElementById('message-popup-modal');
-  if (!popupModal) {
-    popupModal = document.createElement('div');
-    popupModal.id = 'message-popup-modal';
-    popupModal.className = 'modal';
-    document.body.appendChild(popupModal);
-  }
-  
-  // Generate insights HTML if available
-  let insightsHTML = '';
-  if (message.insights && message.insights.length > 0) {
-    const insightItems = message.insights.map(insight => `<li>${insight}</li>`).join('');
-    insightsHTML = `
-      <div class="message-insights">
-        <h3>Message Insights</h3>
-        <ul>${insightItems}</ul>
+  // Create connection template
+  connectionEl.innerHTML = `
+    <div class="home-page__connection-info">
+      <div class="home-page__connection-avatar">${getInitials(connection.name)}</div>
+      <div class="home-page__connection-details">
+        <div class="home-page__connection-name">${connection.name}</div>
+        <div class="home-page__connection-type">${connection.relationship}</div>
       </div>
-    `;
-  }
-  
-  // Populate modal content
-  popupModal.innerHTML = `
-    <div class="modal-content message-view-modal">
-      <div class="modal-header">
-        <h2 class="modal-title">Message to ${recipientName}</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="message-info">
-          <div class="message-meta">
-            <span class="recipient"><strong>To:</strong> ${recipientName} (${relationship})</span>
-            <span class="date"><strong>Date:</strong> ${messageDateText}</span>
-            <span class="intent"><strong>Intent:</strong> ${intentLabel}</span>
-            <span class="tone"><strong>Tone:</strong> ${messageTone}</span>
-          </div>
-          <div class="message-full-content">
-            <h3>Message</h3>
-            <div class="message-text">${message.content || 'No content'}</div>
-          </div>
-          ${insightsHTML}
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="copy-message-btn">
-          <i class="fas fa-copy"></i> Copy
-        </button>
-        <button class="edit-message-btn">
-          <i class="fas fa-pencil-alt"></i> Edit
-        </button>
-        <button class="delete-message-btn">
-          <i class="fas fa-trash-alt"></i> Delete
-        </button>
-      </div>
+    </div>
+    <div class="home-page__connection-actions">
+      <button class="home-page__connection-button">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+      <button class="home-page__connection-button">
+        <i class="fas fa-edit"></i>
+      </button>
+      <button class="home-page__connection-button">
+        <i class="fas fa-trash"></i>
+      </button>
     </div>
   `;
   
-  // Show modal with a slight delay to ensure DOM is ready
-  setTimeout(() => {
-    popupModal.style.display = 'flex';
-    // Add a class to indicate it's fully visible
-    popupModal.classList.add('modal-visible');
-  }, 50);
-  
-  // Add event listeners
-  const closeBtn = popupModal.querySelector('.modal-close');
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      popupModal.classList.remove('modal-visible');
-      setTimeout(() => {
-        popupModal.style.display = 'none';
-      }, 300);
-    });
-  }
-  
-  // Prevent event bubbling for the modal content
-  const modalContent = popupModal.querySelector('.modal-content');
-  if (modalContent) {
-    modalContent.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-  
-  // Close modal when clicking outside
-  popupModal.addEventListener('click', (e) => {
-    if (e.target === popupModal) {
-      e.preventDefault();
-      popupModal.classList.remove('modal-visible');
-      setTimeout(() => {
-        popupModal.style.display = 'none';
-      }, 300);
-    }
-  });
-  
-  // Copy button
-  const copyBtn = popupModal.querySelector('.copy-message-btn');
-  if (copyBtn) {
-    copyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const messageText = message.content || '';
-      navigator.clipboard.writeText(messageText)
-        .then(() => {
-          showAlert('Message copied to clipboard!', 'success');
-        })
-        .catch(err => {
-          console.error('Error copying text:', err);
-          showAlert('Failed to copy message', 'error');
-        });
-    });
-  }
-  
-  // Edit button
-  const editBtn = popupModal.querySelector('.edit-message-btn');
-  if (editBtn) {
-    editBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      popupModal.classList.remove('modal-visible');
-      setTimeout(() => {
-        popupModal.style.display = 'none';
-        editMessage(message, connectionMap);
-      }, 300);
-    });
-  }
-  
-  // Delete button
-  const deleteBtn = popupModal.querySelector('.delete-message-btn');
-  if (deleteBtn) {
-    deleteBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      popupModal.classList.remove('modal-visible');
-      setTimeout(() => {
-        popupModal.style.display = 'none';
-        showDeleteMessageConfirmation(message, null, connectionMap);
-      }, 300);
-    });
-  }
-}
-
-// Show confirmation dialog for deleting a message
-function showDeleteMessageConfirmation(message, messageElement, connectionMap) {
-  // Create confirmation dialog
-  let dialog = document.getElementById('delete-message-dialog');
-  if (!dialog) {
-    dialog = document.createElement('div');
-    dialog.id = 'delete-message-dialog';
-    dialog.className = 'modal';
-    document.body.appendChild(dialog);
-  }
-  
-  // Get recipient name
-  let recipientName = message.recipientName || 'Unknown';
-  if (message.connectionId && connectionMap[message.connectionId]) {
-    recipientName = connectionMap[message.connectionId].name || recipientName;
-  }
-  
-  // Set dialog content
-  dialog.innerHTML = `
-    <div class="modal-content delete-confirmation">
-      <div class="modal-header">
-        <h2 class="modal-title">Delete Message</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <p>Are you sure you want to delete this message to ${recipientName}?</p>
-        <p class="warning">This action cannot be undone.</p>
-      </div>
-      <div class="modal-footer">
-        <button class="cancel-btn">Cancel</button>
-        <button class="confirm-delete-btn">Delete</button>
-      </div>
-    </div>
-  `;
-  
-  // Show dialog with a slight delay to ensure DOM is ready
-  setTimeout(() => {
-    dialog.style.display = 'flex';
-    // Add a class to indicate it's fully visible
-    dialog.classList.add('modal-visible');
-  }, 50);
-  
-  // Add event listeners
-  const modalContent = dialog.querySelector('.modal-content');
-  if (modalContent) {
-    // Prevent event bubbling for the modal content
-    modalContent.addEventListener('click', (e) => {
-      e.stopPropagation();
-    });
-  }
-  
-  const closeBtn = dialog.querySelector('.modal-close');
-  const cancelBtn = dialog.querySelector('.cancel-btn');
-  const confirmBtn = dialog.querySelector('.confirm-delete-btn');
-  
-  const closeDialog = () => {
-    dialog.classList.remove('modal-visible');
-    setTimeout(() => {
-      dialog.style.display = 'none';
-    }, 300);
-  };
-  
-  // Close buttons
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeDialog();
-    });
-  }
-  
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      closeDialog();
-    });
-  }
-  
-  // Confirm delete
-  if (confirmBtn) {
-    confirmBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      // First close the dialog with animation
-      closeDialog();
-      // Then delete after animation completes
-      setTimeout(() => {
-        deleteMessage(message.id, messageElement);
-      }, 300);
-    });
-  }
-  
-  // Close when clicking outside
-  dialog.addEventListener('click', (e) => {
-    if (e.target === dialog) {
-      e.preventDefault();
-      closeDialog();
-    }
-  });
-}
-
-// Delete a message
-function deleteMessage(messageId, messageElement) {
-  if (!currentUser || !messageId) {
-    showAlert('Cannot delete message. Please try again.', 'error');
-    return;
-  }
-  
-  showLoading('Deleting message...');
-  
-  firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('messages')
-    .doc(messageId)
-    .delete()
-    .then(() => {
-      hideLoading();
-      showAlert('Message deleted successfully', 'success');
-      
-      // Remove message element from DOM if provided
-      if (messageElement) {
-        messageElement.remove();
-      }
-      
-      // Refresh messages list
-      loadUserMessages();
-      
-      // Close any open message popup
-      const popup = document.getElementById('message-popup-modal');
-      if (popup) {
-        popup.style.display = 'none';
-      }
-    })
-    .catch(error => {
-      console.error('Error deleting message:', error);
-      hideLoading();
-      showAlert('Failed to delete message. Please try again.', 'error');
-    });
-}
-
-// Edit a message
-function editMessage(message, connectionMap) {
-  // Get recipient info
-  let recipientName = message.recipientName || 'Unknown';
-  let relationship = message.relationship || 'friend';
-  
-  // Use connection data if available
-  if (message.connectionId && connectionMap[message.connectionId]) {
-    const connection = connectionMap[message.connectionId];
-    recipientName = connection.name || recipientName;
-    relationship = connection.relationship || relationship;
-  }
-  
-  localStorage.setItem('editingMessageId', message.id);
-  localStorage.setItem('recipientData', JSON.stringify({
-    name: recipientName,
-    relationship: relationship
-  }));
-  
-  window.location.href = 'message-tone-new.html?edit=true';
+  return connectionEl;
 }
 
 // Load user's reminders from Firestore
@@ -3020,4 +2375,862 @@ function viewMessage(messageId) {
       hideLoading();
       showAlert('Could not load the message. Please try again.', 'error');
     });
-} 
+}
+
+/**
+ * Get accent color based on message type
+ */
+function getAccentColorForType(messageType) {
+  if (!messageType) return '#8a57de'; // Default purple
+  
+  const colors = {
+    'romantic': '#FF7EB9', // Pink
+    'family': '#7F7CAF', // Purple-Blue
+    'professional': '#5091F5', // Blue
+    'friendly': '#4ECDC4', // Teal
+    'gratitude': '#FFD700', // Gold
+    'congratulations': '#FFA500', // Orange
+    'apology': '#FF6B6B', // Red
+    'sympathy': '#98D2EB', // Light Blue
+    'encouragement': '#5EE6EB', // Bright Teal
+    'general': '#8a57de' // Default purple
+  };
+  
+  // Return the matching color or default
+  return colors[messageType.toLowerCase()] || '#8a57de';
+}
+
+/**
+ * Format a readable tag for the message intent/type
+ */
+function formatIntentTag(intentType) {
+  if (!intentType) return 'General';
+  
+  // Capitalize first letter
+  return intentType.charAt(0).toUpperCase() + intentType.slice(1);
+}
+
+/**
+ * Format a date relative to now (e.g. "2 days ago")
+ */
+function getTimeAgo(date) {
+  if (!date) return 'Unknown time';
+  
+  const now = new Date();
+  const seconds = Math.floor((now - date) / 1000);
+  
+  // Less than a minute
+  if (seconds < 60) {
+    return 'Just now';
+  }
+  
+  // Less than an hour
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) {
+    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+  }
+  
+  // Less than a day
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) {
+    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  }
+  
+  // Less than a month
+  const days = Math.floor(hours / 24);
+  if (days < 30) {
+    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+  }
+  
+  // Format as date
+  return formatDate(date);
+}
+
+/**
+ * Format a date as a readable string
+ */
+function formatDate(date) {
+  if (!date) return 'Unknown date';
+  
+  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  return date.toLocaleDateString(undefined, options);
+}
+
+/**
+ * Get a person's initials from their name
+ */
+function getInitials(name) {
+  if (!name) return '?';
+  
+  const parts = name.trim().split(' ');
+  if (parts.length === 1) {
+    return parts[0].charAt(0).toUpperCase();
+  }
+  
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+/**
+ * Get a map of all connections for this user
+ */
+async function getConnectionMap() {
+  if (!currentUser) return {};
+  
+  try {
+    const userUid = currentUser.uid;
+    const connectionMap = {};
+    
+    const snapshot = await firebase.firestore()
+      .collection('users')
+      .doc(userUid)
+      .collection('connections')
+      .get();
+    
+    snapshot.forEach(doc => {
+      connectionMap[doc.id] = {
+        id: doc.id,
+        ...doc.data()
+      };
+    });
+    
+    return connectionMap;
+  } catch (error) {
+    console.error('Error creating connection map:', error);
+    return {};
+  }
+}
+
+/**
+ * Display empty states for different sections
+ */
+function displayEmptyStates(type) {
+  console.log(`Displaying empty state for ${type}`);
+  
+  if (type === 'connections' || type === 'all') {
+    const connectionsContainer = document.getElementById('connections-list');
+    if (connectionsContainer) {
+      // Keep only the add connection button if it exists
+      const addConnectionBtn = connectionsContainer.querySelector('.home-page__add-connection');
+      connectionsContainer.innerHTML = `
+        <div class="home-page__empty-state">
+          <div class="home-page__empty-state-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="home-page__empty-state-text">No connections yet</div>
+          <div class="home-page__empty-state-subtext">Add connections to create personalized messages</div>
+        </div>
+      `;
+      
+      // Re-add the add connection button
+      if (addConnectionBtn) {
+        connectionsContainer.appendChild(addConnectionBtn);
+      } else {
+        // Create a new add connection button
+        const newAddBtn = document.createElement('button');
+        newAddBtn.className = 'home-page__add-connection';
+        newAddBtn.id = 'add-connection-btn';
+        newAddBtn.innerHTML = `
+          <span class="home-page__add-connection-icon"><i class="fas fa-plus"></i></span>
+          Add New Connection
+        `;
+        connectionsContainer.appendChild(newAddBtn);
+      }
+    }
+  }
+  
+  if (type === 'messages' || type === 'all') {
+    const messagesContainer = document.getElementById('recent-messages-list');
+    if (messagesContainer) {
+      messagesContainer.innerHTML = `
+        <div class="home-page__empty-state">
+          <div class="home-page__empty-state-icon">
+            <i class="fas fa-comment-alt"></i>
+          </div>
+          <div class="home-page__empty-state-text">No messages yet</div>
+          <div class="home-page__empty-state-subtext">Create your first message using the button above</div>
+        </div>
+      `;
+    }
+  }
+  
+  if (type === 'reminders' || type === 'all') {
+    const remindersContainer = document.getElementById('reminders-list');
+    if (remindersContainer) {
+      remindersContainer.innerHTML = `
+        <div class="home-page__empty-state">
+          <div class="home-page__empty-state-icon">
+            <i class="fas fa-bell-slash"></i>
+          </div>
+          <div class="home-page__empty-state-text">No upcoming reminders</div>
+          <div class="home-page__empty-state-subtext">Set reminders when sending messages to stay connected</div>
+        </div>
+      `;
+    }
+  }
+}
+
+/**
+ * Hide empty state for a specific section
+ */
+function hideEmptyState(type) {
+  if (type === 'connections' || type === 'all') {
+    const connectionsContainer = document.getElementById('connections-list');
+    if (connectionsContainer) {
+      const emptyState = connectionsContainer.querySelector('.home-page__empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+    }
+  }
+  
+  if (type === 'messages' || type === 'all') {
+    const messagesContainer = document.getElementById('recent-messages-list');
+    if (messagesContainer) {
+      const emptyState = messagesContainer.querySelector('.home-page__empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+    }
+  }
+  
+  if (type === 'reminders' || type === 'all') {
+    const remindersContainer = document.getElementById('reminders-list');
+    if (remindersContainer) {
+      const emptyState = remindersContainer.querySelector('.home-page__empty-state');
+      if (emptyState) {
+        emptyState.remove();
+      }
+    }
+  }
+}
+
+/**
+ * Show an error message for connections
+ */
+function showConnectionsError(errorMessage) {
+  const connectionsContainer = document.getElementById('connections-list');
+  if (connectionsContainer) {
+    connectionsContainer.innerHTML = `
+      <div class="home-page__error-state">
+        <div class="home-page__error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="home-page__error-text">${errorMessage}</div>
+        <button class="home-page__retry-button" onclick="loadUserConnections()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Show an error message for messages
+ */
+function showMessagesError(errorMessage) {
+  const messagesContainer = document.getElementById('recent-messages-list');
+  if (messagesContainer) {
+    messagesContainer.innerHTML = `
+      <div class="home-page__error-state">
+        <div class="home-page__error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="home-page__error-text">${errorMessage}</div>
+        <button class="home-page__retry-button" onclick="loadUserMessages()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Show an error message for reminders
+ */
+function showRemindersError(errorMessage) {
+  const remindersContainer = document.getElementById('reminders-list');
+  if (remindersContainer) {
+    remindersContainer.innerHTML = `
+      <div class="home-page__error-state">
+        <div class="home-page__error-icon">
+          <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="home-page__error-text">${errorMessage}</div>
+        <button class="home-page__retry-button" onclick="loadUserReminders()">
+          <i class="fas fa-sync-alt"></i> Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+/**
+ * Show a modal with all connections
+ */
+function openConnectionsManagement() {
+  // Get a reference to the modal
+  const allConnectionsModal = document.getElementById('all-connections-modal');
+  if (!allConnectionsModal) {
+    console.error('All connections modal not found');
+    showAlert('Connections view is not available', 'error');
+    return;
+  }
+  
+  // Show the modal
+  allConnectionsModal.style.display = 'block';
+  
+  // Load the full list of connections
+  loadAllConnections();
+}
+
+/**
+ * Load all connections for the modal
+ */
+async function loadAllConnections() {
+  if (!currentUser) return;
+  
+  try {
+    const userUid = currentUser.uid;
+    
+    const connectionsContainer = document.getElementById('all-connections-list');
+    if (!connectionsContainer) {
+      console.error('All connections container not found');
+      return;
+    }
+    
+    showLoading('Loading all connections...');
+    
+    const connectionsSnapshot = await firebase.firestore()
+      .collection('users')
+      .doc(userUid)
+      .collection('connections')
+      .get();
+    
+    // Clear the container
+    connectionsContainer.innerHTML = '';
+    
+    if (connectionsSnapshot.empty) {
+      connectionsContainer.innerHTML = `
+        <div class="home-page__empty-state">
+          <div class="home-page__empty-state-icon">
+            <i class="fas fa-users"></i>
+          </div>
+          <div class="home-page__empty-state-text">No connections yet</div>
+          <div class="home-page__empty-state-subtext">Add connections to create personalized messages</div>
+        </div>
+        <button class="home-page__add-connection" id="modal-add-connection-btn">
+          <span class="home-page__add-connection-icon"><i class="fas fa-plus"></i></span>
+          Add New Connection
+        </button>
+      `;
+      
+      // Add click event for the add button
+      const addBtn = connectionsContainer.querySelector('#modal-add-connection-btn');
+      if (addBtn) {
+        addBtn.addEventListener('click', function() {
+          openConnectionModal();
+        });
+      }
+      
+      hideLoading();
+      return;
+    }
+    
+    // Process connections
+    const connections = [];
+    connectionsSnapshot.forEach(doc => {
+      connections.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    // Display all connections
+    connections.forEach(connection => {
+      const connectionItem = createConnectionItem(connection);
+      connectionsContainer.appendChild(connectionItem);
+    });
+    
+    // Add the "Add Connection" button at the end
+    const addBtn = document.createElement('button');
+    addBtn.className = 'home-page__add-connection';
+    addBtn.id = 'modal-add-connection-btn';
+    addBtn.innerHTML = `
+      <span class="home-page__add-connection-icon"><i class="fas fa-plus"></i></span>
+      Add New Connection
+    `;
+    
+    addBtn.addEventListener('click', function() {
+      openConnectionModal();
+    });
+    
+    connectionsContainer.appendChild(addBtn);
+    
+    hideLoading();
+  } catch (error) {
+    console.error('Error loading all connections:', error);
+    hideLoading();
+    showAlert('Error loading connections', 'error');
+  }
+}
+
+/**
+ * Show a general-purpose alert message
+ */
+function showAlert(message, type = 'info') {
+  // Remove any existing alerts
+  const existingAlerts = document.querySelectorAll('.alert');
+  existingAlerts.forEach(alert => {
+    document.body.removeChild(alert);
+  });
+  
+  // Create the alert element
+  const alertElement = document.createElement('div');
+  alertElement.className = `alert alert--${type}`;
+  alertElement.textContent = message;
+  
+  // Add to the document
+  document.body.appendChild(alertElement);
+  
+  // Remove after animation completes
+  setTimeout(() => {
+    if (alertElement.parentNode) {
+      alertElement.parentNode.removeChild(alertElement);
+    }
+  }, 3500);
+}
+
+/**
+ * Show loading overlay
+ */
+function showLoading(message = 'Loading...') {
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  const loadingContext = document.getElementById('loadingContext');
+  
+  if (loadingContext) {
+    loadingContext.textContent = message;
+  }
+  
+  if (loadingOverlay) {
+    loadingOverlay.style.display = 'flex';
+  }
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoading() {
+  const loadingOverlay = document.getElementById('loadingOverlay');
+  
+  if (loadingOverlay) {
+    loadingOverlay.style.display = 'none';
+  }
+}
+
+/**
+ * Initialize the connection modal form
+ */
+function initializeConnectionModal() {
+  const form = document.getElementById('connection-form');
+  if (!form) {
+    console.error('Connection form not found');
+    return;
+  }
+  
+  // Handle relationship type change
+  const relationshipSelect = document.getElementById('connection-relationship');
+  const otherRelationshipGroup = document.getElementById('other-relationship-group');
+  
+  if (relationshipSelect && otherRelationshipGroup) {
+    relationshipSelect.addEventListener('change', function() {
+      if (this.value === 'other') {
+        otherRelationshipGroup.style.display = 'block';
+      } else {
+        otherRelationshipGroup.style.display = 'none';
+      }
+    });
+  }
+  
+  // Handle form submission
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveConnection();
+  });
+  
+  // Handle cancel button
+  const cancelBtn = form.querySelector('.form-cancel-btn');
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', function() {
+      closeConnectionModal();
+    });
+  }
+}
+
+/**
+ * Open the connection modal
+ */
+function openConnectionModal(connectionId = null) {
+  const modal = document.getElementById('connection-modal');
+  if (!modal) {
+    console.error('Connection modal not found');
+    return;
+  }
+  
+  // Set modal title based on whether we're editing or creating
+  const modalTitle = document.getElementById('connection-modal-title');
+  if (modalTitle) {
+    modalTitle.textContent = connectionId ? 'Edit Connection' : 'Add New Connection';
+  }
+  
+  // Reset form
+  const form = document.getElementById('connection-form');
+  if (form) {
+    form.reset();
+  }
+  
+  // Hide the "other relationship" field by default
+  const otherRelationshipGroup = document.getElementById('other-relationship-group');
+  if (otherRelationshipGroup) {
+    otherRelationshipGroup.style.display = 'none';
+  }
+  
+  // If editing an existing connection, pre-fill form fields
+  if (connectionId) {
+    editingConnectionId = connectionId;
+    
+    // Load connection data from Firestore
+    if (currentUser) {
+      showLoading('Loading connection details...');
+      
+      firebase.firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('connections')
+        .doc(connectionId)
+        .get()
+        .then(doc => {
+          if (doc.exists) {
+            const data = doc.data();
+            
+            // Fill form fields
+            const nameField = document.getElementById('connection-name');
+            const relationshipField = document.getElementById('connection-relationship');
+            const otherRelationshipField = document.getElementById('other-relationship');
+            
+            if (nameField) nameField.value = data.name || '';
+            
+            if (relationshipField) {
+              relationshipField.value = data.relationship || '';
+              
+              // Show "other" field if needed
+              if (data.relationship === 'other' && otherRelationshipGroup) {
+                otherRelationshipGroup.style.display = 'block';
+                
+                if (otherRelationshipField && data.otherRelationship) {
+                  otherRelationshipField.value = data.otherRelationship;
+                }
+              }
+            }
+          } else {
+            console.error('Connection document not found');
+            showAlert('Could not find connection details', 'error');
+          }
+          
+          hideLoading();
+        })
+        .catch(error => {
+          console.error('Error loading connection:', error);
+          showAlert('Error loading connection details', 'error');
+          hideLoading();
+        });
+    }
+  } else {
+    // New connection
+    editingConnectionId = null;
+  }
+  
+  // Show the modal
+  modal.style.display = 'block';
+}
+
+/**
+ * Close the connection modal
+ */
+function closeConnectionModal() {
+  const modal = document.getElementById('connection-modal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+  
+  // Reset editing state
+  editingConnectionId = null;
+}
+
+/**
+ * Save a connection (new or edited)
+ */
+function saveConnection() {
+  if (!currentUser) {
+    showAlert('You must be logged in to save connections', 'error');
+    return;
+  }
+  
+  // Get form values
+  const nameField = document.getElementById('connection-name');
+  const relationshipField = document.getElementById('connection-relationship');
+  const otherRelationshipField = document.getElementById('other-relationship');
+  
+  if (!nameField || !relationshipField) {
+    console.error('Form fields not found');
+    return;
+  }
+  
+  const name = nameField.value.trim();
+  const relationship = relationshipField.value;
+  
+  // Validate form
+  if (!name) {
+    showAlert('Please enter a name', 'error');
+    nameField.focus();
+    return;
+  }
+  
+  if (!relationship) {
+    showAlert('Please select a relationship type', 'error');
+    relationshipField.focus();
+    return;
+  }
+  
+  // Get other relationship if applicable
+  let otherRelationship = '';
+  if (relationship === 'other' && otherRelationshipField) {
+    otherRelationship = otherRelationshipField.value.trim();
+    
+    if (!otherRelationship) {
+      showAlert('Please specify the relationship type', 'error');
+      otherRelationshipField.focus();
+      return;
+    }
+  }
+  
+  // Prepare data to save
+  const connectionData = {
+    name,
+    relationship,
+    updatedAt: new Date()
+  };
+  
+  // Add other relationship if applicable
+  if (relationship === 'other') {
+    connectionData.otherRelationship = otherRelationship;
+  }
+  
+  // If creating a new connection, add creation date
+  if (!editingConnectionId) {
+    connectionData.createdAt = new Date();
+  }
+  
+  // Show loading
+  showLoading(editingConnectionId ? 'Updating connection...' : 'Creating connection...');
+  
+  // Save to Firestore
+  const connectionsRef = firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('connections');
+  
+  const savePromise = editingConnectionId
+    ? connectionsRef.doc(editingConnectionId).update(connectionData)
+    : connectionsRef.add(connectionData);
+  
+  savePromise
+    .then(() => {
+      // Success
+      showAlert(
+        editingConnectionId ? 'Connection updated successfully' : 'Connection created successfully',
+        'success'
+      );
+      
+      // Close modal
+      closeConnectionModal();
+      
+      // Reload connections
+      loadUserConnections();
+      
+      // Also refresh all connections modal if it's open
+      const allConnectionsModal = document.getElementById('all-connections-modal');
+      if (allConnectionsModal && allConnectionsModal.style.display === 'block') {
+        loadAllConnections();
+      }
+      
+      hideLoading();
+    })
+    .catch(error => {
+      console.error('Error saving connection:', error);
+      showAlert('Error saving connection', 'error');
+      hideLoading();
+    });
+}
+
+/**
+ * Show the delete confirmation dialog
+ */
+function showDeleteConfirmation(connectionId) {
+  if (!connectionId) {
+    console.error('No connection ID provided for deletion');
+    return;
+  }
+  
+  editingConnectionId = connectionId;
+  
+  const dialog = document.getElementById('delete-confirmation-dialog');
+  if (!dialog) {
+    console.error('Delete confirmation dialog not found');
+    return;
+  }
+  
+  // Get connection name if possible
+  let connectionName = 'this connection';
+  if (currentUser) {
+    firebase.firestore()
+      .collection('users')
+      .doc(currentUser.uid)
+      .collection('connections')
+      .doc(connectionId)
+      .get()
+      .then(doc => {
+        if (doc.exists) {
+          connectionName = doc.data().name || 'this connection';
+          const dialogText = dialog.querySelector('.modal-body p');
+          if (dialogText) {
+            dialogText.textContent = `Are you sure you want to delete ${connectionName}?`;
+          }
+        }
+      })
+      .catch(error => {
+        console.error('Error loading connection for deletion:', error);
+      });
+  }
+  
+  // Set up cancel button
+  const cancelBtn = dialog.querySelector('.modal-cancel-btn');
+  if (cancelBtn) {
+    cancelBtn.onclick = function() {
+      dialog.style.display = 'none';
+      editingConnectionId = null;
+    };
+  }
+  
+  // Set up confirm button
+  const confirmBtn = dialog.querySelector('.modal-confirm-btn');
+  if (confirmBtn) {
+    confirmBtn.onclick = function() {
+      dialog.style.display = 'none';
+      deleteConnection(connectionId);
+    };
+  }
+  
+  // Set up close button
+  const closeBtn = dialog.querySelector('.close-modal');
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      dialog.style.display = 'none';
+      editingConnectionId = null;
+    };
+  }
+  
+  // Show the dialog
+  dialog.style.display = 'block';
+}
+
+/**
+ * Delete a connection
+ */
+function deleteConnection(connectionId) {
+  if (!currentUser || !connectionId) {
+    showAlert('Could not delete connection', 'error');
+    return;
+  }
+  
+  showLoading('Deleting connection...');
+  
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('connections')
+    .doc(connectionId)
+    .delete()
+    .then(() => {
+      showAlert('Connection deleted successfully', 'success');
+      
+      // Reload connections
+      loadUserConnections();
+      
+      // Also refresh all connections modal if it's open
+      const allConnectionsModal = document.getElementById('all-connections-modal');
+      if (allConnectionsModal && allConnectionsModal.style.display === 'block') {
+        loadAllConnections();
+      }
+      
+      hideLoading();
+    })
+    .catch(error => {
+      console.error('Error deleting connection:', error);
+      showAlert('Error deleting connection', 'error');
+      hideLoading();
+    });
+}
+
+// ... existing code ...
+
+/**
+ * Display empty state for a specific container
+ */
+function displayEmptyState(container, type) {
+  let icon, title, description, actionText, actionOnClick;
+  
+  switch (type) {
+    case 'connections':
+      icon = 'person_add';
+      title = 'No connections yet';
+      description = 'Start by adding your first connection to HeartGlowAI';
+      actionText = 'Add Connection';
+      actionOnClick = "openModal('add-connection-modal')";
+      break;
+    case 'messages':
+      icon = 'chat';
+      title = 'No messages yet';
+      description = 'Your recent messages will appear here once you connect and interact with people';
+      actionText = 'Learn More';
+      actionOnClick = "openHelpModal()";
+      break;
+    case 'reminders':
+      icon = 'schedule';
+      title = 'No reminders set';
+      description = 'Create reminders to keep track of important follow-ups';
+      actionText = 'Create Reminder';
+      actionOnClick = "openModal('add-reminder-modal')";
+      break;
+    default:
+      icon = 'info';
+      title = 'Nothing to display';
+      description = 'Check back later for updates';
+      actionText = 'Refresh';
+      actionOnClick = "location.reload()";
+  }
+
+  const emptyStateHtml = `
+    <div class="home-page__empty-state">
+      <span class="material-icons home-page__empty-icon">${icon}</span>
+      <h3 class="home-page__empty-title">${title}</h3>
+      <p class="home-page__empty-description">${description}</p>
+      <button class="home-page__action-button" onclick="${actionOnClick}">
+        ${actionText}
+      </button>
+    </div>
+  `;
+  
+  container.innerHTML = emptyStateHtml;
+}
+
+// ... existing code ... 

@@ -3894,3 +3894,349 @@ textarea.input-field:focus, #connection-notes:focus {
   }
 }
 
+/* Messages-list specific styling for home page */
+.messages-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.messages-list .message-item {
+  padding: 0;
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.messages-list .enhanced-message-item .message-card {
+  background: rgba(30, 30, 60, 0.4);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 120px;
+}
+
+.messages-list .enhanced-message-item .message-card:hover {
+  background: rgba(40, 40, 80, 0.5);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.messages-list .enhanced-message-item .message-content {
+  padding: 16px;
+  flex: 1;
+}
+
+.messages-list .enhanced-message-item .message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.messages-list .enhanced-message-item .message-recipient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.messages-list .enhanced-message-item .message-recipient {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.messages-list .enhanced-message-item .message-type {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  width: fit-content;
+}
+
+.messages-list .enhanced-message-item .message-type i {
+  font-size: 10px;
+}
+
+.messages-list .enhanced-message-item .message-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.messages-list .enhanced-message-item .message-date i {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.messages-list .enhanced-message-item .message-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  max-height: 60px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.messages-list .enhanced-message-item .message-card:hover .message-body {
+  color: var(--text-primary);
+}
+
+.messages-list .enhanced-message-item .message-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  justify-content: center;
+  gap: 8px;
+}
+
+.messages-list .enhanced-message-item .message-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.messages-list .enhanced-message-item .message-action:hover {
+  transform: scale(1.1);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.messages-list .enhanced-message-item .view-action:hover {
+  color: var(--accent-blue);
+  background: rgba(80, 145, 252, 0.15);
+}
+
+.messages-list .enhanced-message-item .delete-action:hover {
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.15);
+}
+
+/* Empty state improvements */
+.messages-list .empty-state {
+  border-radius: 12px;
+  background: rgba(30, 30, 60, 0.4);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* View all and create buttons styling */
+.messages-list .view-all-item, 
+.messages-list .create-message-item {
+  padding: 10px 0;
+}
+
+.messages-list .view-all-button,
+.messages-list .create-message-button {
+  width: 100%;
+  padding: 12px;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.messages-list .view-all-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
+.messages-list .view-all-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text-primary);
+}
+
+.messages-list .create-message-button {
+  background: var(--primary-gradient);
+  color: white;
+  font-weight: 600;
+}
+
+.messages-list .create-message-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(144, 63, 236, 0.3);
+}
+
+/* Enhanced modal styles for displaying messages */
+.modal-content {
+  background: rgba(25, 25, 50, 0.95);
+  border-radius: 16px;
+  padding: 20px;
+  width: 90%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-visible .modal-content {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.modal-messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin: 0;
+  padding: 5px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-messages-list .modal-message-item {
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0;
+  margin-bottom: 0;
+  border-left: 4px solid transparent;
+  display: flex;
+  background: rgba(30, 30, 60, 0.4);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-height: 100px;
+}
+
+.modal-messages-list .modal-message-item:hover {
+  background: rgba(40, 40, 80, 0.5);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.modal-messages-list .modal-message-item .message-content {
+  padding: 16px;
+  flex: 1;
+}
+
+.modal-messages-list .modal-message-item .message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.modal-messages-list .modal-message-item .message-recipient-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal-messages-list .modal-message-item .message-recipient {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-primary);
+}
+
+.modal-messages-list .modal-message-item .message-intent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: fit-content;
+}
+
+.modal-messages-list .modal-message-item .message-intent i {
+  font-size: 10px;
+}
+
+.modal-messages-list .modal-message-item .message-date {
+  font-size: 12px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.modal-messages-list .modal-message-item .message-date i {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.modal-messages-list .modal-message-item .message-body {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+  max-height: 60px;
+  overflow: hidden;
+}
+
+.modal-messages-list .modal-message-item:hover .message-body {
+  color: var(--text-primary);
+}
+
+.modal-messages-list .modal-message-item .message-actions {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.15);
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-messages-list .modal-message-item .message-action {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.modal-messages-list .modal-message-item .message-action:hover {
+  transform: scale(1.1);
+}
+
+.modal-messages-list .modal-message-item .view-btn:hover {
+  color: var(--accent-blue);
+  background: rgba(80, 145, 252, 0.15);
+}
+
+.modal-messages-list .modal-message-item .edit-btn:hover {
+  color: var(--accent-purple);
+  background: rgba(144, 63, 236, 0.15);
+}
+
+.modal-messages-list .modal-message-item .delete-btn:hover {
+  color: #ff5252;
+  background: rgba(255, 82, 82, 0.15);
+}
+

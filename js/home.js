@@ -339,11 +339,6 @@ function openConnectionModal(connectionId = null) {
     return;
   }
   
-  // Add debugging elements
-  console.log('Modal DOM element:', modal);
-  console.log('Current modal display style:', modal.style.display);
-  console.log('Computed style:', window.getComputedStyle(modal).display);
-  
   // Reset form
   form.reset();
   
@@ -392,6 +387,9 @@ function openConnectionModal(connectionId = null) {
           console.log('Loaded connection data:', data);
           nameField.value = data.name || '';
           relationshipField.value = data.relationship || '';
+          
+          // Show modal after data is loaded to ensure it's visible
+          showModalWithFallback(modal);
         } else {
           console.error('Connection not found:', connectionId);
           showAlert('Connection not found', 'error');
@@ -412,19 +410,50 @@ function openConnectionModal(connectionId = null) {
     if (deleteBtn) {
       deleteBtn.style.display = 'none';
     }
+    
+    // Show modal immediately for adding new connection
+    showModalWithFallback(modal);
   }
+}
+
+// Helper function to ensure modal is visible
+function showModalWithFallback(modal) {
+  // Try multiple approaches to ensure modal visibility
   
-  // Force visible modal with !important
-  modal.style.cssText = 'display: flex !important; z-index: 9999 !important;';
-  console.log('Modal should now be visible with display:', modal.style.display);
+  // Method 1: Set inline styles with !important
+  modal.style.cssText = 'display: flex !important; opacity: 1 !important; visibility: visible !important; z-index: 9999 !important;';
   
-  // Add a small delay to ensure DOM updates
+  // Method 2: Add a custom class that we know works
+  modal.classList.add('modal-visible');
+  
+  // Method 3: Set individual styles as a fallback
+  modal.style.display = 'flex';
+  modal.style.opacity = '1';
+  modal.style.visibility = 'visible';
+  
+  // Debugging info
+  console.log('Modal visibility status:', {
+    displayStyle: modal.style.display,
+    opacityStyle: modal.style.opacity,
+    visibilityStyle: modal.style.visibility,
+    className: modal.className
+  });
+  
+  // Final check
   setTimeout(() => {
-    console.log('Modal visibility check (after timeout):', 
-      modal.style.display, 
-      window.getComputedStyle(modal).display, 
-      window.getComputedStyle(modal).visibility
-    );
+    const computedStyle = window.getComputedStyle(modal);
+    console.log('Modal visibility check (computed):', {
+      display: computedStyle.display,
+      opacity: computedStyle.opacity,
+      visibility: computedStyle.visibility
+    });
+    
+    // Emergency fallback if still not visible
+    if (computedStyle.visibility === 'hidden' || computedStyle.display === 'none') {
+      console.warn('Modal still not visible, trying emergency override');
+      document.body.appendChild(modal.cloneNode(true));
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex !important; align-items: center; justify-content: center; z-index: 99999 !important; visibility: visible !important;';
+    }
   }, 100);
 }
 
@@ -433,8 +462,23 @@ function closeConnectionModal() {
   console.log('Closing connection modal');
   const modal = document.getElementById('connection-modal');
   if (modal) {
+    // Reset all visibility settings
+    modal.style.cssText = '';
     modal.style.display = 'none';
+    modal.style.opacity = '0';
+    modal.style.visibility = 'hidden';
+    
+    // Remove custom classes
+    modal.classList.remove('modal-visible');
+    
     console.log('Modal display style set to none');
+    
+    // Clear any emergency cloned modals
+    const clonedModals = document.querySelectorAll('#connection-modal:not(:first-of-type)');
+    clonedModals.forEach(clone => {
+      clone.parentNode.removeChild(clone);
+      console.log('Removed cloned modal');
+    });
   } else {
     console.error('Modal element not found when trying to close');
   }

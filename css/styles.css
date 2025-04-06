@@ -1163,3 +1163,158 @@ body > *:not(#app):not(script):not(link) {
   justify-content: center;
   gap: 1rem;
 }
+
+/* Connection List Actions */
+.connection-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  opacity: 0; /* Hidden by default */
+  transition: opacity 0.3s ease;
+}
+
+.connection-item:hover .connection-actions {
+  opacity: 1; /* Show on hover */
+}
+
+.connection-action {
+  color: var(--text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.connection-action:hover {
+  color: var(--accent-pink);
+  transform: scale(1.2);
+}
+
+/* Add Connection Button Inline */
+.manage-btn-inline {
+    background: none;
+    border: none;
+    color: var(--accent-pink);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0 5px;
+    margin-left: 10px; /* Space from title */
+    vertical-align: middle; /* Align with title */
+}
+
+.manage-btn-inline i {
+    margin-right: 4px;
+}
+
+.manage-btn-inline:hover {
+    filter: brightness(1.2);
+}
+
+
+/* Connection Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.modal-overlay.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-content {
+  background: var(--background-card);
+  padding: 30px;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.visible .modal-content {
+    transform: scale(1);
+}
+
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 25px;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+#connection-form .form-group {
+  margin-bottom: 20px;
+}
+
+#connection-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+#connection-form input[type="text"],
+#connection-form select {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: var(--background-input);
+  color: var(--text-primary);
+  font-size: 15px;
+  box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+#connection-form input[type="text"]:focus,
+#connection-form select:focus {
+  outline: none;
+  border-color: var(--accent-pink);
+  box-shadow: 0 0 0 2px rgba(213, 63, 140, 0.3);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 30px;
+}
+
+/* Define button styles if not already globally defined */
+.btn-primary {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.2s ease;
+}
+.btn-primary:hover { filter: brightness(1.1); }
+
+.btn-secondary {
+    background: var(--background-button);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-color);
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.btn-secondary:hover { background-color: var(--background-hover); }

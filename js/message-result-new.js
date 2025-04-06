@@ -390,16 +390,33 @@ function callCloudFunction(idToken) {
     const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
     
     // Prepare payload - ensure correct format for API
+    // Transform our data to match the cloud function's expected format
     const payload = {
-        intent: intentData.type || "",
-        recipient: {
-            name: recipientData.name || "",
-            relationship: recipientData.relationship || ""
-        },
-        tone: toneData.type || "",
-        customizations: {
-            custom_intent: intentData.customText || '',
-            custom_tone: toneData.customText || ''
+        // Required core fields
+        scenario: intentData.type || "",  // Mapped from intent
+        relationshipType: recipientData.relationship || "", // Relationship type
+        
+        // Tone settings with defaults
+        tone: toneData.type || "casual",
+        toneIntensity: toneData.intensity || "3",
+        
+        // Additional context
+        relationshipDuration: recipientData.duration || "unspecified",
+        
+        // Custom fields go into special circumstances
+        specialCircumstances: [
+            intentData.customText ? `Custom intent: ${intentData.customText}` : '',
+            toneData.customText ? `Custom tone: ${toneData.customText}` : ''
+        ].filter(item => item).join('. '),
+        
+        // Detailed relationship blueprint
+        blueprintData: {
+            personName: recipientData.name || "",
+            relationshipType: recipientData.relationship || "",
+            relationshipDescription: recipientData.notes || recipientData.details || '',
+            goal: intentData.description || '',
+            // If we have any saved Q&A or additional details about the recipient
+            qanda: recipientData.additionalDetails || null
         }
     };
     
@@ -500,6 +517,10 @@ function callCloudFunction(idToken) {
                    error.message.includes('Authentication token invalid')) {
             // Handle auth errors - don't retry, just show error
             showError(error.message);
+        } else if (error.message.includes('Scenario and relationshipType are required')) {
+            // Special handling for missing required fields
+            logDebug("Missing required fields error, showing more helpful message");
+            showError('Missing required information. Please complete all steps of the message creation process.');
         } else {
             // For other errors, show a specific error message
             showError('Could not generate message: ' + error.message + '. Please try again.');
@@ -511,7 +532,7 @@ function callCloudFunction(idToken) {
  * Display the generated message in the UI
  */
 function displayGeneratedMessage(data) {
-    console.log('Displaying generated message:', data);
+    logDebug('Displaying generated message: ' + JSON.stringify(data));
     
     // Hide loading state
     document.getElementById('loadingState').style.display = 'none';
@@ -523,23 +544,35 @@ function displayGeneratedMessage(data) {
         messageContent.style.display = 'block';
     }
     
-    // Create full message text
+    // Parse the message based on the response format
+    // The cloud function returns the message as a single string
     let fullMessageText = '';
     
-    if (data.message.greeting) {
-        fullMessageText += data.message.greeting + '\n\n';
-    }
-    
-    if (data.message.content) {
-        fullMessageText += data.message.content;
-    }
-    
-    if (data.message.closing) {
-        fullMessageText += '\n\n' + data.message.closing;
-    }
-    
-    if (data.message.signature) {
-        fullMessageText += '\n' + data.message.signature;
+    // Check if we have the expected format
+    if (typeof data.message === 'string') {
+        // Direct string from the API
+        fullMessageText = data.message;
+    } else if (data.message && typeof data.message === 'object') {
+        // Object format with parts - previous format
+        if (data.message.greeting) {
+            fullMessageText += data.message.greeting + '\n\n';
+        }
+        
+        if (data.message.content) {
+            fullMessageText += data.message.content;
+        }
+        
+        if (data.message.closing) {
+            fullMessageText += '\n\n' + data.message.closing;
+        }
+        
+        if (data.message.signature) {
+            fullMessageText += '\n' + data.message.signature;
+        }
+    } else {
+        // Fallback for unexpected format
+        fullMessageText = "Message generation completed, but the response format was unexpected. Please try again.";
+        logDebug("Unexpected message format: " + JSON.stringify(data));
     }
     
     // Set message in content area
@@ -550,6 +583,32 @@ function displayGeneratedMessage(data) {
     
     // Store the generated message for later use
     generatedMessage = data.message;
+    
+    // Display insights if available
+    if (data.insights && data.insights.length > 0) {
+        const insightsElement = document.getElementById('messageInsights');
+        if (insightsElement) {
+            // Clear previous insights
+            insightsElement.innerHTML = '';
+            
+            // Add heading
+            const heading = document.createElement('h3');
+            heading.textContent = 'Message Insights';
+            insightsElement.appendChild(heading);
+            
+            // Add insights list
+            const list = document.createElement('ul');
+            data.insights.forEach(insight => {
+                const item = document.createElement('li');
+                item.textContent = insight;
+                list.appendChild(item);
+            });
+            insightsElement.appendChild(list);
+            
+            // Show insights section
+            insightsElement.style.display = 'block';
+        }
+    }
     
     // Show regenerate options
     const regenerateOptions = document.getElementById('regenerateOptions');

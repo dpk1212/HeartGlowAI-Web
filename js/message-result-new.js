@@ -1087,7 +1087,7 @@ function callGenerationAPI(prompt, authToken = null) {
         
         // Set up the API endpoint URL
         // In production, this would point to your deployed cloud function
-        const apiUrl = 'https://us-central1-heartglow-b5a9b.cloudfunctions.net/generateMessage';
+        const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
         
         // Make the API call
         fetch(apiUrl, {

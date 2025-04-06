@@ -4,375 +4,223 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HeartGlowAI - Who's on your mind?</title>
+    <meta name="description" content="Choose who your heartfelt message is for with HeartGlowAI">
     
-    <!-- Essential CSS - directly embedded to avoid external dependencies -->
-    <style>
-        /* Core styles */
-        body {
-            background-color: #121212;
-            color: white;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-        }
-        
-        /* Header styles */
-        .header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px 20px;
-            background: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-        }
-        
-        .logo-heart {
-            margin-right: 10px;
-            font-size: 24px;
-        }
-        
-        .logo-text {
-            font-size: 20px;
-            font-weight: 700;
-        }
-        
-        .nav-bar {
-            display: flex;
-        }
-        
-        .nav-button {
-            background: none;
-            border: none;
-            color: white;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            opacity: 0.7;
-        }
-        
-        .nav-button:hover {
-            opacity: 1;
-        }
-        
-        /* Main content styles */
-        main {
-            max-width: 800px;
-            margin: 30px auto;
-            padding: 20px;
-        }
-        
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: #ff6b9d;
-        }
-        
-        .page-subtitle {
-            font-size: 16px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 40px;
-        }
-        
-        /* Step indicator */
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 40px;
-        }
-        
-        .step-dot {
-            width: 40px;
-            height: 4px;
-            border-radius: 2px;
-            background-color: rgba(255, 255, 255, 0.1);
-            margin: 0 5px;
-        }
-        
-        .step-dot.active {
-            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
-            width: 60px;
-        }
-        
-        /* Form elements */
-        .input-container {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        
-        .form-group {
-            margin-bottom: 25px;
-        }
-        
-        .form-label {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 12px;
-            display: block;
-            color: white;
-        }
-        
-        .form-input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 14px 16px;
-            font-size: 16px;
-            color: white;
-            margin-bottom: 20px;
-            box-sizing: border-box;
-        }
-        
-        /* Relationship types */
-        .relationship-types {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-top: 16px;
-        }
-        
-        .relationship-type {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 12px;
-            padding: 16px 12px;
-            text-align: center;
-            cursor: pointer;
-            min-width: 120px;
-            flex: 1;
-        }
-        
-        .relationship-type.selected {
-            background: rgba(255, 107, 157, 0.15);
-            border: 2px solid #ff6b9d;
-        }
-        
-        .relationship-icon {
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
-        
-        .relationship-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: white;
-        }
-        
-        /* Save options */
-        .save-option {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        
-        .save-option input[type="checkbox"] {
-            margin-right: 10px;
-            width: 20px;
-            height: 20px;
-        }
-        
-        .option-label {
-            font-weight: 600;
-            font-size: 16px;
-        }
-        
-        .option-description {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 4px;
-        }
-        
-        /* Buttons */
-        .btn-container {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 30px;
-        }
-        
-        .btn {
-            padding: 12px 30px;
-            border-radius: 30px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            font-size: 16px;
-        }
-        
-        .btn-back {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-        }
-        
-        .btn-next {
-            background: linear-gradient(45deg, #ff6b9d, #7b2cbf);
-            color: white;
-        }
-        
-        /* Utility classes */
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Debug console */
-        #debug-console {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0,0,0,0.8);
-            color: #0f0;
-            padding: 10px;
-            max-height: 200px;
-            overflow: auto;
-            font-family: monospace;
-            z-index: 9999;
-            display: none;
-        }
-    </style>
+    <!-- Preconnect to Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Preload key assets -->
+    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="js/recipient-selection-new.js" as="script">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-    <!-- Debug Console -->
-    <div id="debug-console">
-        <div>
-            Debug Console: 
-            <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
-            <button id="bypass-auth-btn">Continue Without Login</button>
-        </div>
-        <div id="debug-output"></div>
-    </div>
-    
-    <!-- Header and Navigation -->
-    <header class="header">
-        <div class="logo-container">
-            <div class="logo-heart">❤️</div>
-            <div class="logo-text">HeartGlowAI</div>
-        </div>
-        <nav class="nav-bar">
-            <button id="dashboard-btn" class="nav-button">
-                <i class="fas fa-columns"></i> Dashboard
-            </button>
-            <button id="history-btn" class="nav-button">
-                <i class="fas fa-history"></i> History
-            </button>
-            <button id="learn-btn" class="nav-button">
-                <i class="fas fa-brain"></i> Learn
-            </button>
-            <button id="logout-btn" class="nav-button">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </button>
-        </nav>
-    </header>
-
-    <main>
-        <!-- Step Indicator -->
-        <div class="step-indicator">
-            <div class="step-dot active"></div>
-            <div class="step-dot"></div>
-            <div class="step-dot"></div>
-        </div>
-        
-        <h1 class="page-title">Who's on your mind?</h1>
-        <p class="page-subtitle">Let's start with who you're writing to. This helps us personalize your message.</p>
-        
-        <!-- New Connection Form -->
-        <div class="input-container" id="new-connection-form">
-            <div class="form-group">
-                <label class="form-label" for="recipient-name">Their name</label>
-                <input type="text" id="recipient-name" class="form-input" placeholder="Enter their name">
+    <div id="app">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="brand-logo">
+                <div class="logo-heart"></div>
+                <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
             </div>
             
-            <div class="form-group">
-                <label class="form-label">Your relationship</label>
-                <div class="relationship-types">
-                    <div class="relationship-type" data-relation="partner">
-                        <div class="relationship-icon">💑</div>
-                        <div class="relationship-label">Partner</div>
-                    </div>
-                    <div class="relationship-type" data-relation="friend">
-                        <div class="relationship-icon">🤝</div>
-                        <div class="relationship-label">Friend</div>
-                    </div>
-                    <div class="relationship-type" data-relation="family">
-                        <div class="relationship-icon">👪</div>
-                        <div class="relationship-label">Family</div>
-                    </div>
-                    <div class="relationship-type" data-relation="colleague">
-                        <div class="relationship-icon">💼</div>
-                        <div class="relationship-label">Colleague</div>
-                    </div>
-                    <div class="relationship-type" data-relation="acquaintance">
-                        <div class="relationship-icon">👋</div>
-                        <div class="relationship-label">Acquaintance</div>
-                    </div>
-                    <div class="relationship-type" data-relation="other">
-                        <div class="relationship-icon">✨</div>
-                        <div class="relationship-label">Other</div>
+            <div class="user-menu">
+                <div class="user-profile">
+                    <button id="userMenuBtn" class="user-avatar">
+                        <img id="userAvatar" src="images/default-avatar.png" alt="Profile">
+                    </button>
+                    <div id="userDropdown" class="dropdown-menu">
+                        <div class="dropdown-header">
+                            <div id="userDisplayName" class="dropdown-name">User</div>
+                            <div id="userEmail" class="dropdown-email">user@example.com</div>
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <a href="home.html" class="dropdown-item">
+                            <i class="fas fa-home"></i>
+                            Dashboard
+                        </a>
+                        <a href="settings.html" class="dropdown-item">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </a>
+                        <button id="logoutBtn" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Sign Out
+                        </button>
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
         
-        <!-- Save options -->
-        <div class="input-container">
-            <div class="save-option">
-                <input type="checkbox" id="save-connection">
-                <div>
-                    <div class="option-label">Save this person to "My Connections"</div>
-                    <div class="option-description">Add them to your contacts for future messages</div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Progress Steps -->
+            <div class="progress-container">
+                <div class="progress-steps">
+                    <div class="progress-step completed">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Intention</div>
+                    </div>
+                    <div class="progress-step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Recipient</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Tone</div>
+                    </div>
+                    <div class="progress-step">
+                        <div class="step-number">4</div>
+                        <div class="step-label">Message</div>
+                    </div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-indicator" style="width: 50%"></div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Error message container -->
-        <div id="error-message" class="input-container hidden" style="background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.2);">
-            <p style="margin: 0; color: #ff6666;">Please complete all required fields before continuing.</p>
-        </div>
-        
-        <div class="btn-container">
-            <button id="back-btn" class="btn btn-back">
-                <i class="fas fa-arrow-left"></i> Back
-            </button>
-            <button id="next-btn" class="btn btn-next">
-                Next <i class="fas fa-arrow-right"></i>
-            </button>
-        </div>
-    </main>
+            
+            <div class="intent-display">
+                <div class="intent-icon" id="intentIcon">
+                    <i class="fas fa-question"></i>
+                </div>
+                <div class="intent-details">
+                    <h4 class="intent-title" id="intentTitle">Loading intention...</h4>
+                    <div class="intent-description" id="intentDescription">Preparing...</div>
+                </div>
+            </div>
+            
+            <div class="page-header">
+                <h1 class="page-title">Who's on your mind?</h1>
+                <p class="page-description">Tell us about the person you're creating this message for.</p>
+            </div>
+            
+            <!-- Recipient Form -->
+            <div class="card">
+                <div class="form-group">
+                    <label for="recipientName" class="form-label">Their Name</label>
+                    <input type="text" id="recipientName" class="input-field" placeholder="Enter their name">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Relationship</label>
+                    <div class="relationship-grid">
+                        <div class="relationship-option" data-relationship="friend">
+                            <div class="relationship-icon">
+                                <i class="fas fa-user-friends"></i>
+                            </div>
+                            <div class="relationship-label">Friend</div>
+                        </div>
+                        
+                        <div class="relationship-option" data-relationship="family">
+                            <div class="relationship-icon">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="relationship-label">Family</div>
+                        </div>
+                        
+                        <div class="relationship-option" data-relationship="partner">
+                            <div class="relationship-icon">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="relationship-label">Partner</div>
+                        </div>
+                        
+                        <div class="relationship-option" data-relationship="colleague">
+                            <div class="relationship-icon">
+                                <i class="fas fa-briefcase"></i>
+                            </div>
+                            <div class="relationship-label">Colleague</div>
+                        </div>
+                        
+                        <div class="relationship-option" data-relationship="acquaintance">
+                            <div class="relationship-icon">
+                                <i class="fas fa-handshake"></i>
+                            </div>
+                            <div class="relationship-label">Acquaintance</div>
+                        </div>
+                        
+                        <div class="relationship-option" data-relationship="other">
+                            <div class="relationship-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="relationship-label">Other</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="otherRelationshipSection" class="form-group" style="display: none;">
+                    <label for="otherRelationship" class="form-label">Specify Relationship</label>
+                    <input type="text" id="otherRelationship" class="input-field" placeholder="Describe your relationship">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Save for later use?</label>
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="saveRecipient" class="checkbox-input">
+                        <label for="saveRecipient" class="checkbox-label">Save this person to my connections</label>
+                    </div>
+                    <p class="form-help">They'll appear in your dashboard for quicker message creation in the future.</p>
+                </div>
+            </div>
+            
+            <!-- Navigation Buttons -->
+            <div class="navigation-buttons">
+                <button id="backBtn" class="secondary-button">
+                    <i class="fas fa-arrow-left"></i>
+                    Back
+                </button>
+                <button id="nextBtn" class="primary-button" disabled>
+                    Next Step
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </main>
+    </div>
     
-    <!-- Simple Firebase initialization -->
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-container">
+            <div class="heart-animation">
+                <div class="heart-shape"></div>
+                <div class="heart-glow"></div>
+            </div>
+            <div id="loadingContext" class="loading-context">Processing your selection...</div>
+        </div>
+    </div>
+    
+    <!-- Alert Container -->
+    <div id="alertContainer" class="alert-container"></div>
+    
+    <!-- Firebase Config -->
     <script>
         // Initialize Firebase
         const firebaseConfig = {
-          apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
-          authDomain: "heartglowai.firebaseapp.com",
-          projectId: "heartglowai",
-          storageBucket: "heartglowai.firebasestorage.app",
-          messagingSenderId: "196565711798",
-          appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
-          measurementId: "G-KJMPL1DNPY"
+            apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+            authDomain: "heartglowai.firebaseapp.com",
+            projectId: "heartglowai",
+            storageBucket: "heartglowai.firebasestorage.app",
+            messagingSenderId: "196565711798",
+            appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+            measurementId: "G-KJMPL1DNPY"
         };
         
-        // Initialize Firebase if not already initialized
-        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
     </script>
     

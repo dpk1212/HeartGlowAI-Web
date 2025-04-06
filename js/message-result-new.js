@@ -832,103 +832,60 @@ function initNavigation() {
 }
 
 /**
- * Set up navigation buttons in a clean, consistent way
+ * Setup the navigation buttons
  */
 function setupNavigationButtons() {
-    // Find or create the navigation container
-    let navButtons = document.querySelector('.navigation-buttons');
+    // Get all necessary buttons
+    const backButton = document.getElementById('backBtn');
+    const dashboardButton = document.getElementById('dashboardBtn');
     
-    if (!navButtons) {
-        navButtons = document.createElement('div');
-        navButtons.className = 'navigation-buttons';
-        const mainContent = document.querySelector('.main-content');
-        if (mainContent) {
-            mainContent.appendChild(navButtons);
-        } else {
-            document.body.appendChild(navButtons);
-        }
+    // Add event listeners
+    if (backButton) {
+        console.log('Setting up back button');
+        backButton.addEventListener('click', function() {
+            console.log('Back button clicked');
+            window.location.href = 'tone-selection-new.html';
+        });
     } else {
-        // Clear existing buttons to avoid duplicates
-        navButtons.innerHTML = '';
+        console.warn('Back button not found');
     }
     
-    // Remove any duplicate navigation buttons that might exist elsewhere
-    const existingBackBtn = document.getElementById('backBtn');
-    if (existingBackBtn && existingBackBtn.parentNode !== navButtons) {
-        existingBackBtn.remove();
-    }
-    
-    const existingDashboardBtns = document.querySelectorAll('[id^="dashboardBtn"]');
-    existingDashboardBtns.forEach(btn => {
-        if (btn.parentNode !== navButtons) {
-            btn.remove();
-        }
-    });
-    
-    // Create Back button
-    const backButton = document.createElement('button');
-    backButton.id = 'backBtn';
-    backButton.className = 'secondary-button';
-    backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
-    
-    // Add event listener for Back button
-    backButton.addEventListener('click', function() {
-        window.location.href = 'message-tone-new.html';
-    });
-    
-    // Create Dashboard button
-    const dashboardButton = document.createElement('button');
-    dashboardButton.id = 'dashboardBtn';
-    dashboardButton.className = 'primary-button';
-    dashboardButton.innerHTML = '<i class="fas fa-home"></i> Back to Dashboard';
-    
-    // Add event listener for Dashboard button
-    dashboardButton.addEventListener('click', function() {
-        window.location.href = 'home.html';
-    });
-    
-    // Create Regenerate button
-    const regenerateButton = document.createElement('button');
-    regenerateButton.id = 'regenerateBtn';
-    regenerateButton.className = 'secondary-button';
-    regenerateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate';
-    
-    // Add event listener for Regenerate button
-    regenerateButton.addEventListener('click', function() {
-        // Show regenerate options
-        const regenerateOptions = document.getElementById('regenerateOptions');
-        if (regenerateOptions) {
-            if (regenerateOptions.style.display === 'none' || !regenerateOptions.style.display) {
-                regenerateOptions.style.display = 'block';
-                
-                // Smooth scroll to regenerate options
-                regenerateOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // Initialize options if not already done
-                initializeRegenerateOptions();
-            } else {
-                // If already visible, hide it
-                regenerateOptions.style.display = 'none';
+    if (dashboardButton) {
+        console.log('Setting up dashboard button');
+        dashboardButton.addEventListener('click', function() {
+            console.log('Dashboard button clicked');
+            // Save the generated message before redirecting if available
+            if (generatedMessage) {
+                console.log('Message available, saving before navigation');
+                // Save to local storage for future reference
+                const savedMessages = JSON.parse(localStorage.getItem('savedMessages') || '[]');
+                savedMessages.push({
+                    message: typeof generatedMessage === 'string' ? generatedMessage : generatedMessage.content || generatedMessage,
+                    timestamp: new Date().toISOString(),
+                    recipientName: recipientData ? recipientData.name : 'Unknown',
+                    relationship: recipientData ? recipientData.relationship : 'Unknown',
+                    intent: intentData ? intentData.type : 'General',
+                    tone: toneData ? toneData.type : 'Warm'
+                });
+                localStorage.setItem('savedMessages', JSON.stringify(savedMessages));
             }
-        } else {
-            // If options not available, just regenerate with different variation
-            showLoadingState();
-            generateMessage('different');
-        }
-    });
+            
+            // Navigate to dashboard
+            window.location.href = 'home.html';
+        });
+    } else {
+        console.warn('Dashboard button not found');
+    }
     
-    // Add buttons to navigation container
-    navButtons.appendChild(backButton);
-    navButtons.appendChild(regenerateButton);
-    navButtons.appendChild(dashboardButton);
-    
-    // Add proper styling to ensure buttons look good
-    navButtons.style.display = 'flex';
-    navButtons.style.justifyContent = 'space-between';
-    navButtons.style.marginTop = '30px';
-    
-    // Add special styling for the regenerate button (middle button)
-    regenerateButton.style.margin = '0 10px';
+    // Add a simple function to handle the retry button for error state
+    const retryButton = document.getElementById('retryButton');
+    if (retryButton) {
+        console.log('Setting up retry button');
+        retryButton.addEventListener('click', function() {
+            console.log('Retry button clicked');
+            generateMessage();
+        });
+    }
 }
 
 /**
@@ -939,19 +896,29 @@ function generateMessage(variation = null) {
     showLoadingState();
     
     try {
+        console.log("Starting message generation process");
+        
         // Get data from localStorage
         const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
         // Log the input data
+        console.log(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
+        
+        // Hide any error state that might be showing
+        const errorState = document.getElementById('errorState');
+        if (errorState) {
+            errorState.style.display = 'none';
+        }
         
         // Build the message prompt that would be sent to OpenAI
         // Now handles additional connection data asynchronously
         buildOpenAIPrompt(intentData, recipientData, toneData, variation)
             .then(messagePrompt => {
                 // Log the prompt for debugging
+                console.log("Message prompt built successfully:", messagePrompt);
                 logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
                 
                 // Get auth token if available
@@ -961,8 +928,11 @@ function generateMessage(variation = null) {
                 return callGenerationAPI(messagePrompt, authToken);
             })
             .then(response => {
+                console.log("API response received:", response);
+                
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
+                console.log("Parsed response:", parsedResponse);
                 
                 // Display the message and insights
                 displayGeneratedMessage(parsedResponse.message);
@@ -975,11 +945,13 @@ function generateMessage(variation = null) {
                 logDebug('Message generated successfully');
             })
             .catch(error => {
-                console.error('Error calling message generation API:', error);
+                console.error('Error in message generation flow:', error);
+                logDebug(`Error in message generation: ${error.message || 'Unknown error'}`);
                 showError('Failed to generate message: ' + (error.message || 'Unknown error'));
             });
     } catch (error) {
-        console.error('Error generating message:', error);
+        console.error('Exception in generateMessage:', error);
+        logDebug(`Exception in generateMessage: ${error.message || 'Unknown error'}`);
         showError('Failed to generate message. Please check your inputs and try again.');
     }
 }
@@ -1179,6 +1151,7 @@ function saveMessageWithoutConnection(userId, messageData, savingIndicator) {
  */
 function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null) {
     // Log all available data for debugging
+    console.log('Building prompt with data:', { intentData, recipientData, toneData, variation });
     logDebug('Building prompt with recipient data: ' + JSON.stringify(recipientData));
     
     // Create a structured request object that matches our cloud function expectations
@@ -1206,8 +1179,9 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
     // Return a promise to allow proper async handling
     return new Promise((resolve) => {
         // Try to fetch additional data if available
-        if (recipientData.id && firebase.auth().currentUser) {
+        if (recipientData.id && firebase.auth && firebase.auth().currentUser) {
             const userId = firebase.auth().currentUser.uid;
+            console.log(`Fetching additional connection data for ID: ${recipientData.id}`);
             
             // Try to get the full connection data from Firestore
             firebase.firestore()
@@ -1219,45 +1193,123 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
                 .then(doc => {
                     if (doc.exists) {
                         const fullConnectionData = doc.data();
+                        console.log('Retrieved full connection data:', fullConnectionData);
                         logDebug('Retrieved full connection data: ' + JSON.stringify(fullConnectionData));
                         
                         // Update the request data with any additional fields
                         requestData.recipient.yearsKnown = fullConnectionData.yearsKnown || requestData.recipient.yearsKnown;
                         requestData.recipient.communicationStyle = fullConnectionData.communicationStyle || requestData.recipient.communicationStyle;
                         requestData.recipient.personalNotes = fullConnectionData.notes || requestData.recipient.personalNotes;
-                        requestData.recipient.relationshipCategory = fullConnectionData.specificRelationship || requestData.recipient.relationshipCategory;
-                        requestData.recipient.relationshipFocus = fullConnectionData.relationshipGoal || requestData.recipient.relationshipFocus;
+                        requestData.recipient.relationshipCategory = fullConnectionData.specificRelationship || fullConnectionData.relationshipCategory || requestData.recipient.relationshipCategory;
+                        requestData.recipient.relationshipFocus = fullConnectionData.relationshipGoal || fullConnectionData.relationshipFocus || requestData.recipient.relationshipFocus;
+                        
+                        // Add any additional fields that might be useful
+                        if (fullConnectionData.birthday) {
+                            requestData.recipient.birthday = fullConnectionData.birthday;
+                        }
+                        
+                        if (fullConnectionData.interests) {
+                            requestData.recipient.interests = fullConnectionData.interests;
+                        }
                         
                         // Log the updated request for debugging
+                        console.log('Updated prompt with full connection data:', requestData);
                         logDebug('Updated prompt with full connection data: ' + JSON.stringify(requestData));
                         resolve(requestData);
                     } else {
-                        logDebug('Connection document not found, using basic data');
+                        console.log('No connection document found, using existing data');
+                        logDebug('No connection document found');
                         resolve(requestData);
                     }
                 })
                 .catch(error => {
-                    console.error('Error fetching full connection data:', error);
-                    // Still resolve with basic data on error
+                    console.error('Error fetching connection data:', error);
+                    logDebug('Error fetching connection data: ' + error.message);
+                    // Return the initial request data if there's an error
                     resolve(requestData);
                 });
         } else {
-            // No connection ID or user, resolve with basic data
-            logDebug('No connection ID or user, using basic data');
+            // No connection ID or not logged in, use what we have
+            console.log('No connection ID or user not logged in, using existing data');
+            logDebug('No connection ID or user not logged in');
             resolve(requestData);
         }
     });
 }
 
 /**
- * Parse the OpenAI response to extract message and insights
+ * Parse OpenAI response to extract message and insights
  */
 function parseOpenAIResponse(response) {
-    // The response from our cloud function should already be in the correct format
-    return {
-        message: response.message || '',
-        insights: response.insights || []
-    };
+    try {
+        console.log("Parsing API response:", response);
+        
+        // If the response is already a string, try to parse it as JSON
+        if (typeof response === 'string') {
+            try {
+                response = JSON.parse(response);
+            } catch (e) {
+                console.error("Error parsing response string as JSON:", e);
+                // If parsing fails, assume it's just the message text
+                return {
+                    message: response,
+                    insights: ["This message was generated with AI assistance."]
+                };
+            }
+        }
+        
+        // Handle various response formats
+        if (response.message) {
+            // If response has a message property, use that
+            return {
+                message: response.message,
+                insights: response.insights || ["This message was generated with AI assistance."]
+            };
+        } else if (response.content) {
+            // If response has a content property, use that
+            return {
+                message: response.content,
+                insights: response.insights || ["This message was generated with AI assistance."]
+            };
+        } else if (response.text) {
+            // If response has a text property, use that
+            return {
+                message: response.text,
+                insights: response.insights || ["This message was generated with AI assistance."]
+            };
+        } else if (typeof response === 'object' && !Array.isArray(response)) {
+            // Try to find message-like properties in the response object
+            const possibleMessageKeys = ['text', 'content', 'message', 'generated_text', 'result'];
+            for (const key of possibleMessageKeys) {
+                if (response[key] && typeof response[key] === 'string') {
+                    return {
+                        message: response[key],
+                        insights: response.insights || ["This message was generated with AI assistance."]
+                    };
+                }
+            }
+            
+            // If no message property found, stringify the whole response
+            console.warn("No message property found in response, using full response");
+            return {
+                message: JSON.stringify(response),
+                insights: ["This message was generated with AI assistance."]
+            };
+        } else {
+            // Default case: assume the response is the message itself
+            console.warn("Using raw response as message");
+            return {
+                message: String(response),
+                insights: ["This message was generated with AI assistance."]
+            };
+        }
+    } catch (error) {
+        console.error("Error parsing OpenAI response:", error);
+        return {
+            message: "Sorry, we couldn't generate a proper message at this time.",
+            insights: ["There was an error processing the AI response."]
+        };
+    }
 }
 
 /**
@@ -1412,39 +1464,66 @@ function displayMessageInsights(insights) {
  * Display the generated message in the UI
  */
 function displayGeneratedMessage(message) {
-    // Hide loading and error states
-    const loadingState = document.getElementById('loadingState');
-    const errorState = document.getElementById('errorState');
-    
-    if (loadingState) {
-        loadingState.style.display = 'none';
-    }
-    
-    if (errorState) {
-        errorState.style.display = 'none';
-    }
-    
-    // Set current date in the message header if it's not already set
-    const currentDateElement = document.getElementById('currentDate');
-    if (currentDateElement && !currentDateElement.textContent) {
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        currentDateElement.textContent = now.toLocaleDateString('en-US', options);
-    }
-    
-    // Store the message for copy functionality
-    generatedMessage = message;
-    
-    // Set the message content
-    const contentElement = document.getElementById('content');
-    if (contentElement) {
-        contentElement.textContent = message;
-    }
-    
-    // Make the message content visible
-    const messageContent = document.getElementById('messageContent');
-    if (messageContent) {
-        messageContent.style.display = 'block';
+    try {
+        console.log("Displaying generated message:", message);
+        
+        // Hide loading and error states
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        
+        if (loadingState) {
+            loadingState.style.display = 'none';
+        }
+        
+        if (errorState) {
+            errorState.style.display = 'none';
+        }
+        
+        // Set current date in the message header
+        const currentDateElement = document.getElementById('currentDate');
+        if (currentDateElement) {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+        }
+        
+        // Store the message for copy functionality
+        generatedMessage = message;
+        
+        // Set the message content
+        const contentElement = document.getElementById('content');
+        if (contentElement) {
+            contentElement.textContent = message;
+            console.log("Message content set successfully");
+        } else {
+            console.error("Content element not found!");
+        }
+        
+        // Make the message container and content visible
+        const messageContent = document.getElementById('messageContent');
+        if (messageContent) {
+            messageContent.style.display = 'block';
+            messageContent.style.opacity = '1';
+            console.log("Message content display set to block");
+        } else {
+            console.error("Message content element not found!");
+        }
+        
+        // Make sure the parent container is visible
+        const messageState = document.getElementById('messageState');
+        if (messageState) {
+            messageState.style.display = 'block';
+            console.log("Message state display set to block");
+        }
+        
+        // Initialize regenerate options
+        initializeRegenerateOptions();
+        
+        // Log success
+        logDebug("Message displayed successfully");
+    } catch (error) {
+        console.error("Error displaying message:", error);
+        logDebug(`Error in displayGeneratedMessage: ${error.message}`);
     }
 }
 
@@ -1457,20 +1536,25 @@ function initializeRegenerateOptions() {
     
     if (!regenerateOptions) {
         console.error('Regenerate options container not found');
+        logDebug('Regenerate options container not found in the DOM');
         return;
     }
+    
+    console.log('Initializing regenerate options');
     
     // Make sure it's visible
     regenerateOptions.style.display = 'block';
     
     // Get all the option cards
     const optionCards = regenerateOptions.querySelectorAll('.option-card');
+    console.log(`Found ${optionCards.length} regenerate option cards`);
     
     // Add click event to each option
     optionCards.forEach(card => {
         card.addEventListener('click', function() {
             // Get variation type
             const variation = this.getAttribute('data-variation');
+            console.log(`Selected variation: ${variation}`);
             
             // Remove selected class from all cards
             optionCards.forEach(c => c.classList.remove('selected'));
@@ -1488,4 +1572,51 @@ function initializeRegenerateOptions() {
             generateMessage(variation);
         });
     });
+    
+    // Add buttons to show/hide regenerate options
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', function() {
+            console.log('Regenerate button clicked');
+            const messageContent = document.getElementById('messageContent');
+            if (messageContent) {
+                messageContent.style.display = 'none';
+            }
+            
+            const messageInsights = document.getElementById('messageInsights');
+            if (messageInsights) {
+                messageInsights.style.display = 'none';
+            }
+            
+            regenerateOptions.style.display = 'block';
+        });
+    }
+    
+    // Add a button to cancel regeneration
+    const cancelRegenerateBtn = document.createElement('button');
+    cancelRegenerateBtn.id = 'cancelRegenerateBtn';
+    cancelRegenerateBtn.className = 'secondary-button';
+    cancelRegenerateBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+    cancelRegenerateBtn.style.marginTop = '20px';
+    
+    // Add event listener to cancel button
+    cancelRegenerateBtn.addEventListener('click', function() {
+        console.log('Cancel regenerate button clicked');
+        regenerateOptions.style.display = 'none';
+        
+        const messageContent = document.getElementById('messageContent');
+        if (messageContent) {
+            messageContent.style.display = 'block';
+        }
+        
+        const messageInsights = document.getElementById('messageInsights');
+        if (messageInsights) {
+            messageInsights.style.display = 'block';
+        }
+    });
+    
+    // Add the cancel button to the regenerate options container
+    if (!document.getElementById('cancelRegenerateBtn')) {
+        regenerateOptions.appendChild(cancelRegenerateBtn);
+    }
 } 

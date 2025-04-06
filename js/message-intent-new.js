@@ -159,10 +159,26 @@ function setupEventListeners() {
         
         // Create an intent object that matches what recipient-selection-new.js expects
         const intentObject = {
-            title: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-title`).textContent,
-            description: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-description`).textContent,
-            icon: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-icon i`).className.replace('fas ', '')
+            title: '',
+            description: '',
+            icon: ''
         };
+        
+        // Safely get the title, description and icon
+        const selectedCard = document.querySelector(`.option-card[data-intent="${selectedIntent}"]`);
+        if (selectedCard) {
+            const titleElement = selectedCard.querySelector('.option-title');
+            const descriptionElement = selectedCard.querySelector('.option-description');
+            const iconElement = selectedCard.querySelector('.option-icon i');
+            
+            intentObject.title = titleElement ? titleElement.textContent : selectedIntent;
+            intentObject.description = descriptionElement ? descriptionElement.textContent : '';
+            intentObject.icon = iconElement ? iconElement.className.replace('fas ', '') : 'fa-heart';
+        } else {
+            // Fallback values if we can't find the card elements
+            intentObject.title = selectedIntent.charAt(0).toUpperCase() + selectedIntent.slice(1);
+            intentObject.icon = 'fa-heart';
+        }
         
         console.log('Saving intent data:', intentData);
         console.log('Saving intent object for recipient page:', intentObject);

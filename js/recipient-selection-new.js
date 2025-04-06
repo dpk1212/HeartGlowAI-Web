@@ -694,7 +694,10 @@ async function saveDataAndNavigate() {
         
         // Navigate to the tone selection page
         setTimeout(() => {
-            window.location.href = 'message-tone-new.html';
+            // Get the current URL path and build the correct next URL
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+            window.location.href = baseUrl + 'message-tone-new.html';
         }, 500);
     } catch (error) {
         console.error('Error saving recipient data:', error);

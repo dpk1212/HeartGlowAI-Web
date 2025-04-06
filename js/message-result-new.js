@@ -95,9 +95,6 @@ document.addEventListener('DOMContentLoaded', initPage);
 function initPage() {
     console.log('Initializing message result page...');
     
-    // Show loading state
-    showLoadingState();
-    
     // Initialize user menu
     initUserMenu();
     
@@ -107,8 +104,33 @@ function initPage() {
     // Initialize UI elements
     initButtons();
     
-    // Since we have all the data now, try to generate message
-    generateMessage();
+    // Set up authentication check
+    authStatePromise.then(user => {
+        // Show loading state
+        showLoadingState();
+        
+        if (user) {
+            console.log('User authenticated, generating message');
+            // Since we have the auth now, try to generate message
+            generateMessage();
+        } else {
+            // Try to use saved token
+            const savedToken = localStorage.getItem('authToken');
+            if (savedToken) {
+                console.log('Using saved auth token');
+                callCloudFunction(savedToken);
+            } else {
+                console.error('No authenticated user and no saved token');
+                showError('Authentication required. Please sign in to generate messages.');
+            }
+        }
+    }).catch(error => {
+        console.error('Auth promise error:', error);
+        showError('Authentication error. Please try signing in again.');
+    });
+    
+    // Start the auth check process
+    checkAuthentication();
 }
 
 /**
@@ -283,7 +305,7 @@ function updateToneDisplay() {
 }
 
 /**
- * Generate message using cloud function
+ * Generate message based on selected data
  */
 function generateMessage() {
     console.log('Generating message...');
@@ -292,57 +314,41 @@ function generateMessage() {
     // Check if we have all required data
     if (!recipientData || !intentData || !toneData) {
         showError('Missing required information. Please complete all previous steps.');
-         return;
+        return;
     }
-    
-    // For development/testing, allow bypassing authentication
-    // This makes it easier to test the message generation even without being logged in
-    const bypassAuth = window.location.href.includes('localhost') || 
-                      window.location.href.includes('127.0.0.1') ||
-                      window.location.search.includes('bypass=true');
     
     // Get authentication token from Firebase
     if (firebase.auth && firebase.auth().currentUser) {
+        console.log('Getting fresh token from current user');
         firebase.auth().currentUser.getIdToken(true)
             .then(token => {
+                // Save token for future use
+                localStorage.setItem('authToken', token);
                 // Call cloud function with token
                 callCloudFunction(token);
             })
             .catch(error => {
                 console.error('Failed to get auth token:', error);
-                if (bypassAuth) {
-                    console.log('Bypassing authentication for development environment');
-                    callCloudFunction(null);
+                
+                // Try using saved token as fallback
+                const savedToken = localStorage.getItem('authToken');
+                if (savedToken) {
+                    console.log('Using saved token as fallback');
+                    callCloudFunction(savedToken);
                 } else {
                     showError('Authentication error. Please try refreshing the page or sign in again.');
                 }
             });
     } else {
-        // No authenticated user
-        console.error('No authenticated user found');
-        if (bypassAuth) {
-            console.log('Bypassing authentication for development environment');
-            callCloudFunction(null); // Call without token in development mode
+        // No authenticated user, try using saved token
+        const savedToken = localStorage.getItem('authToken');
+        if (savedToken) {
+            console.log('No current user, using saved token');
+            callCloudFunction(savedToken);
         } else {
-            // Try to re-authenticate
-            if (firebase.auth) {
-                firebase.auth().signInAnonymously()
-                    .then(() => {
-                        console.log('Anonymous auth successful');
-                        firebase.auth().currentUser.getIdToken(true)
-                            .then(token => callCloudFunction(token))
-                            .catch(err => {
-                                console.error('Error getting token after anon auth:', err);
-                                showError('Could not authenticate. Try refreshing the page.');
-                            });
-                    })
-                    .catch(error => {
-                        console.error('Anonymous auth failed:', error);
-                        showError('Authentication required. Please sign in to generate messages. Try refreshing the page or logging in again.');
-                    });
-            } else {
-                showError('Authentication required. Please sign in to generate messages.');
-            }
+            // No authentication available
+            console.error('No authenticated user found and no saved token');
+            showError('Authentication required. Please sign in to generate messages.');
         }
     }
 }
@@ -374,7 +380,7 @@ function callCloudFunction(idToken) {
         'Content-Type': 'application/json'
     };
     
-    // Add auth token if available
+    // Add auth token
     if (idToken) {
         headers['Authorization'] = `Bearer ${idToken}`;
     }
@@ -383,10 +389,6 @@ function callCloudFunction(idToken) {
     const timeout = 30000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    // Debug URL
-    console.log(`API URL: ${apiUrl}`);
-    console.log('Headers:', headers);
     
     // Make request
     fetch(apiUrl, {
@@ -398,29 +400,39 @@ function callCloudFunction(idToken) {
     .then(response => {
         clearTimeout(timeoutId);
         
-        // Log response status for debugging
-        console.log(`API response status: ${response.status}`);
+        // Handle different response status codes
+        if (response.status === 401 || response.status === 403) {
+            // Auth token invalid or expired - clear it and try re-authenticating
+            console.error('Authentication token invalid or expired');
+            localStorage.removeItem('authToken');
+            
+            if (firebase.auth && firebase.auth().currentUser) {
+                // Try refreshing the token
+                return firebase.auth().currentUser.getIdToken(true)
+                    .then(newToken => {
+                        console.log('Got fresh token, retrying call');
+                        localStorage.setItem('authToken', newToken);
+                        // Retry with new token - call recursively
+                        return callCloudFunction(newToken);
+                    })
+                    .catch(error => {
+                        throw new Error('Failed to refresh authentication. Please sign in again.');
+                    });
+            } else {
+                throw new Error('Authentication required. Please sign in again.');
+            }
+        }
         
         if (!response.ok) {
-            // Try to get response text for better error message
-            return response.text().then(text => {
-                let errorMessage = `API returned status ${response.status}`;
-                if (text) {
-                    try {
-                        // Try to parse as JSON first
-                        const errorJson = JSON.parse(text);
-                        errorMessage += `: ${errorJson.error || errorJson.message || text}`;
-                    } catch (e) {
-                        // If not JSON, just use the text
-                        errorMessage += `: ${text}`;
-                    }
-                }
-                throw new Error(errorMessage);
-            });
+            throw new Error(`API returned status ${response.status}: ${response.statusText}`);
         }
-         return response.json();
+        
+        return response.json();
     })
     .then(data => {
+        if (!data) {
+            throw new Error('No data returned from API');
+        }
         console.log('Message generated successfully:', data);
         displayGeneratedMessage(data);
     })
@@ -434,15 +446,10 @@ function callCloudFunction(idToken) {
             setTimeout(() => {
                 callCloudFunction(idToken); // Retry once
             }, 1000);
-        } else if (error.message.includes('401') || error.message.includes('403')) {
-            // Authentication issues
-            showError('Authentication error: You may need to sign in again. ' + error.message);
-        } else if (error.message.includes('429')) {
-            // Rate limiting
-            showError('Too many requests. Please wait a moment and try again.');
-        } else if (error.message.includes('500')) {
-            // Server error
-            showError('Server error. Our team has been notified. Please try again later.');
+        } else if (error.message.includes('Authentication required') || 
+                   error.message.includes('Authentication token invalid')) {
+            // Handle auth errors - don't retry, just show error
+            showError(error.message);
         } else {
             // For other errors, show a specific error message
             showError('Could not generate message: ' + error.message + '. Please try again.');
@@ -706,10 +713,32 @@ function showError(message = 'An error occurred') {
                     loadingState.style.display = 'flex';
                 }
                 
-                // Try generating again after a short delay
-                setTimeout(() => {
-                    generateMessage();
-                }, 500);
+                // Try to clean up any token issues first
+                if (message.includes('Authentication') || message.includes('auth')) {
+                    // Try to get a fresh token
+                    if (firebase.auth && firebase.auth().currentUser) {
+                        firebase.auth().currentUser.getIdToken(true)
+                            .then(newToken => {
+                                localStorage.setItem('authToken', newToken);
+                                console.log('Got fresh token on retry');
+                                // Call directly with new token
+                                callCloudFunction(newToken);
+                            })
+                            .catch(error => {
+                                console.error('Failed to get token on retry:', error);
+                                // Fall back to normal generation
+                                generateMessage();
+                            });
+                    } else {
+                        // No current user, just try generation which will use any saved token
+                        generateMessage();
+                    }
+                } else {
+                    // For non-auth errors, just try generation again after a short delay
+                    setTimeout(() => {
+                        generateMessage();
+                    }, 500);
+                }
             });
         }
     } else {
@@ -918,191 +947,9 @@ function initButtons() {
         } else {
             console.error('DEBUG: ERROR: Next button not found');
         }
-        
-        // Initialize dev mode if URL contains dev=true
-        if (window.location.search.includes('dev=true')) {
-            initDevMode();
-        }
     } catch (error) {
         console.error('Error initializing buttons:', error);
     }
-}
-
-/**
- * Initialize developer mode features
- * This adds additional debugging options not visible in production
- */
-function initDevMode() {
-    console.log('🔧 Initializing developer mode');
-    
-    // Create dev panel
-    const devPanel = document.createElement('div');
-    devPanel.className = 'dev-panel';
-    devPanel.style.position = 'fixed';
-    devPanel.style.bottom = '10px';
-    devPanel.style.right = '10px';
-    devPanel.style.backgroundColor = '#333';
-    devPanel.style.color = '#fff';
-    devPanel.style.padding = '10px';
-    devPanel.style.borderRadius = '5px';
-    devPanel.style.zIndex = '1000';
-    devPanel.style.fontSize = '12px';
-    devPanel.style.maxWidth = '300px';
-    
-    // Add bypass auth button
-    const bypassAuthBtn = document.createElement('button');
-    bypassAuthBtn.textContent = 'Bypass Auth';
-    bypassAuthBtn.style.marginRight = '5px';
-    bypassAuthBtn.style.padding = '5px';
-    bypassAuthBtn.style.cursor = 'pointer';
-    bypassAuthBtn.addEventListener('click', function() {
-        const url = new URL(window.location.href);
-        url.searchParams.set('bypass', 'true');
-        window.location.href = url.toString();
-    });
-    
-    // Add regenerate button
-    const regenerateBtn = document.createElement('button');
-    regenerateBtn.textContent = 'Regenerate';
-    regenerateBtn.style.marginRight = '5px';
-    regenerateBtn.style.padding = '5px';
-    regenerateBtn.style.cursor = 'pointer';
-    regenerateBtn.addEventListener('click', function() {
-        generateMessage();
-    });
-    
-    // Add clear localStorage button
-    const clearStorageBtn = document.createElement('button');
-    clearStorageBtn.textContent = 'Clear Storage';
-    clearStorageBtn.style.padding = '5px';
-    clearStorageBtn.style.cursor = 'pointer';
-    clearStorageBtn.addEventListener('click', function() {
-        localStorage.clear();
-        showAlert('localStorage cleared', 'info');
-    });
-    
-    // Add status display
-    const statusDisplay = document.createElement('div');
-    statusDisplay.id = 'devStatus';
-    statusDisplay.style.marginTop = '10px';
-    statusDisplay.style.fontSize = '11px';
-    statusDisplay.style.wordBreak = 'break-all';
-    statusDisplay.innerHTML = '<strong>Dev Mode Active</strong><br>' +
-                             'URL: ' + window.location.href + '<br>' +
-                             'Auth: ' + (firebase.auth && firebase.auth().currentUser ? 'Yes' : 'No');
-    
-    // Assemble dev panel
-    devPanel.appendChild(bypassAuthBtn);
-    devPanel.appendChild(regenerateBtn);
-    devPanel.appendChild(clearStorageBtn);
-    devPanel.appendChild(statusDisplay);
-    
-    // Add to body
-    document.body.appendChild(devPanel);
-}
-
-/**
- * Initialize navigation buttons
- */
-function initNavigation() {
-    // Dashboard button
-    const dashboardBtn = document.getElementById('dashboard-btn');
-    if (dashboardBtn) {
-        dashboardBtn.addEventListener('click', function() {
-            window.location.href = 'home.html';
-        });
-    }
-    
-    // History button
-    const historyBtn = document.getElementById('history-btn');
-    if (historyBtn) {
-        historyBtn.addEventListener('click', function() {
-            window.location.href = 'history.html';
-        });
-    }
-    
-    // Learn button
-    const learnBtn = document.getElementById('learn-btn');
-    if (learnBtn) {
-        learnBtn.addEventListener('click', function() {
-            window.location.href = 'learn.html';
-        });
-    }
-    
-    // Logout button
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (window.firebase && firebase.auth) {
-                firebase.auth().signOut()
-                    .then(() => {
-                        window.location.href = 'index.html';
-                    })
-                    .catch((error) => {
-                        console.error('Logout error:', error);
-                    });
-            } else {
-                window.location.href = 'index.html';
-            }
-        });
-    }
-}
-
-/**
- * Initialize bypass auth button
- */
-function initBypassAuth() {
-    const bypassAuthBtn = document.getElementById('bypass-auth-btn');
-    if (bypassAuthBtn) {
-        bypassAuthBtn.addEventListener('click', function() {
-            logDebug('AUTH BYPASS ACTIVATED - signing in anonymously');
-            authBypass = true;
-            
-            // Sign in anonymously instead of just bypassing
-            if (window.firebase && firebase.auth) {
-                firebase.auth().signInAnonymously()
-                    .then(() => {
-                        logDebug('Anonymous authentication successful');
-                        // Regenerate message
-                        generateMessage();
-                    })
-                    .catch((error) => {
-                        logDebug(`ERROR: Anonymous authentication failed: ${error.message}`);
-                        showError(`Authentication error: ${error.message}`);
-                    });
-            }
-            
-            // Show debug console
-            document.getElementById('debug-console').style.display = 'block';
-        });
-    }
-}
-
-/**
- * Create and add a debug button to the page
- */
-function createDebugButton() {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'Debug';
-    debugBtn.style.position = 'fixed';
-    debugBtn.style.bottom = '10px';
-    debugBtn.style.right = '10px';
-    debugBtn.style.zIndex = '9999';
-    debugBtn.style.padding = '5px 10px';
-    debugBtn.style.background = '#333';
-    debugBtn.style.color = '#fff';
-    debugBtn.style.border = 'none';
-    debugBtn.style.borderRadius = '4px';
-    debugBtn.style.cursor = 'pointer';
-    
-    debugBtn.addEventListener('click', function() {
-        const debugConsole = document.getElementById('debug-console');
-        if (debugConsole) {
-            debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
-        }
-    });
-    
-    document.body.appendChild(debugBtn);
 }
 
 /**
@@ -1174,16 +1021,48 @@ function logDebug(message) {
 }
 
 /**
- * Initialize dev mode toggle button
+ * Initialize navigation buttons
  */
-function initDevModeToggle() {
-    const toggleDevModeBtn = document.getElementById('toggle-dev-mode-btn');
-    const devModeStatus = document.getElementById('dev-mode-status');
+function initNavigation() {
+    // Dashboard button
+    const dashboardBtn = document.getElementById('dashboard-btn');
+    if (dashboardBtn) {
+        dashboardBtn.addEventListener('click', function() {
+            window.location.href = 'home.html';
+        });
+    }
     
-    if (toggleDevModeBtn && devModeStatus) {
-        // Dev mode disabled - hide button
-        toggleDevModeBtn.style.display = 'none';
-        devModeStatus.textContent = 'USING API ONLY';
-        devModeStatus.style.color = '#4CAF50';
+    // History button
+    const historyBtn = document.getElementById('history-btn');
+    if (historyBtn) {
+        historyBtn.addEventListener('click', function() {
+            window.location.href = 'history.html';
+        });
+    }
+    
+    // Learn button
+    const learnBtn = document.getElementById('learn-btn');
+    if (learnBtn) {
+        learnBtn.addEventListener('click', function() {
+            window.location.href = 'learn.html';
+        });
+    }
+    
+    // Logout button
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            if (window.firebase && firebase.auth) {
+                firebase.auth().signOut()
+                    .then(() => {
+                        window.location.href = 'index.html';
+                    })
+                    .catch((error) => {
+                        console.error('Logout error:', error);
+                    });
+            } else {
+                window.location.href = 'index.html';
+            }
+        });
     }
 } 

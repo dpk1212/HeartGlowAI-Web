@@ -80,7 +80,22 @@ function initializeHomePage() {
       console.warn('Add connection button not found');
     }
     
-    // Initialize create message button
+    // Ensure all "Add New Connection" buttons work
+    document.addEventListener('click', function(e) {
+      // Use event delegation for all possible add connection buttons
+      if (e.target && 
+          (e.target.classList.contains('add-connection-button') || 
+           e.target.classList.contains('add-new-connection-btn') ||
+           e.target.matches('.add-connection-button *') ||
+           e.target.matches('.add-new-connection-btn *') ||
+           (e.target.textContent && e.target.textContent.includes('Add New Connection')))) {
+        console.log('Add connection button clicked via delegation');
+        e.preventDefault();
+        openConnectionModal();
+      }
+    });
+    
+    // Create message button
     const createMessageBtn = document.getElementById('create-message-btn');
     if (createMessageBtn) {
       createMessageBtn.addEventListener('click', function() {
@@ -359,6 +374,14 @@ function openConnectionModal(connectionId = null) {
   const idField = document.getElementById('connection-id');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
+  
+  // New enhanced fields
+  const yearsKnownField = document.getElementById('connection-years');
+  const birthdayField = document.getElementById('connection-birthday');
+  const interestsField = document.getElementById('connection-interests');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const notesField = document.getElementById('connection-notes');
+  
   let deleteBtn = document.querySelector('.delete-connection-btn');
   
   if (!form) {
@@ -417,6 +440,13 @@ function openConnectionModal(connectionId = null) {
           nameField.value = data.name || '';
           relationshipField.value = data.relationship || '';
           
+          // Fill enhanced fields if they exist
+          if (yearsKnownField) yearsKnownField.value = data.yearsKnown || '';
+          if (birthdayField) birthdayField.value = data.birthday || '';
+          if (interestsField) interestsField.value = data.interests || '';
+          if (communicationStyleField) communicationStyleField.value = data.communicationStyle || '';
+          if (notesField) notesField.value = data.notes || '';
+          
           // Show modal after data is loaded to ensure it's visible
           showModalWithFallback(modal);
         } else {
@@ -464,22 +494,75 @@ function createConnectionModal() {
         <div class="modal-body">
           <form id="connection-form">
             <input type="hidden" id="connection-id">
-            <div class="form-group">
-              <label for="connection-name">Name</label>
-              <input type="text" id="connection-name" placeholder="Enter name" required>
+            
+            <!-- Basic Information Section -->
+            <div class="field-group">
+              <h4>Basic Information</h4>
+              <div class="form-group">
+                <label for="connection-name">Name*</label>
+                <input type="text" id="connection-name" class="input-field" placeholder="Enter name" required>
+              </div>
+              <div class="form-group">
+                <label for="connection-relationship">Relationship*</label>
+                <select id="connection-relationship" class="input-field" required>
+                  <option value="">Select relationship</option>
+                  <option value="friend">Friend</option>
+                  <option value="family">Family</option>
+                  <option value="partner">Partner</option>
+                  <option value="colleague">Colleague</option>
+                  <option value="acquaintance">Acquaintance</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="connection-years">Years Known</label>
+                <input type="number" id="connection-years" class="input-field" min="0" max="100" placeholder="How many years have you known them?">
+                <div class="field-help">Helps tailor messages to the depth of your relationship</div>
+              </div>
             </div>
-            <div class="form-group">
-              <label for="connection-relationship">Relationship</label>
-              <select id="connection-relationship" required>
-                <option value="">Select relationship</option>
-                <option value="friend">Friend</option>
-                <option value="family">Family</option>
-                <option value="partner">Partner</option>
-                <option value="colleague">Colleague</option>
-                <option value="acquaintance">Acquaintance</option>
-                <option value="other">Other</option>
-              </select>
+            
+            <!-- Personal Details Section -->
+            <div class="field-group">
+              <h4>Personal Details</h4>
+              <div class="form-group">
+                <label for="connection-birthday">Birthday (Optional)</label>
+                <input type="date" id="connection-birthday" class="input-field" placeholder="Their birthday (if known)">
+                <div class="field-help">We'll use this to create personalized birthday messages</div>
+              </div>
+              <div class="form-group">
+                <label for="connection-interests">Interests/Hobbies</label>
+                <input type="text" id="connection-interests" class="input-field" placeholder="e.g., hiking, reading, cooking">
+                <div class="field-help">Separate multiple interests with commas</div>
+              </div>
             </div>
+            
+            <!-- Communication Preferences -->
+            <div class="field-group">
+              <h4>Communication Preferences</h4>
+              <div class="form-group">
+                <label for="connection-communication-style">Communication Style</label>
+                <select id="connection-communication-style" class="input-field">
+                  <option value="">Select style (optional)</option>
+                  <option value="direct">Direct and straightforward</option>
+                  <option value="warm">Warm and emotional</option>
+                  <option value="formal">Formal and respectful</option>
+                  <option value="casual">Casual and relaxed</option>
+                  <option value="humorous">Humorous and playful</option>
+                </select>
+                <div class="field-help">Helps us match the tone of messages to their preferences</div>
+              </div>
+            </div>
+            
+            <!-- Additional Notes -->
+            <div class="field-group" style="border-bottom: none; margin-bottom: 10px;">
+              <h4>Additional Notes</h4>
+              <div class="form-group">
+                <label for="connection-notes">Personal Notes</label>
+                <textarea id="connection-notes" rows="3" placeholder="Any personal details or conversation topics they enjoy"></textarea>
+                <div class="field-help">Add memorable moments, important life events, or topics they love discussing</div>
+              </div>
+            </div>
+            
             <div class="modal-actions">
               <button type="button" id="cancel-connection" class="btn-secondary">Cancel</button>
               <button type="submit" class="btn-primary">Save</button>
@@ -717,6 +800,13 @@ function saveConnection() {
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
   
+  // New enhanced fields
+  const yearsKnownField = document.getElementById('connection-years');
+  const birthdayField = document.getElementById('connection-birthday');
+  const interestsField = document.getElementById('connection-interests');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const notesField = document.getElementById('connection-notes');
+  
   if (!nameField) {
     console.error('Name field not found');
     return;
@@ -730,7 +820,22 @@ function saveConnection() {
   const name = nameField.value.trim();
   const relationship = relationshipField.value;
   
-  console.log('Form data:', { name, relationship });
+  // Get values from new fields (with defaults for optional fields)
+  const yearsKnown = yearsKnownField ? yearsKnownField.value : '';
+  const birthday = birthdayField ? birthdayField.value : '';
+  const interests = interestsField ? interestsField.value.trim() : '';
+  const communicationStyle = communicationStyleField ? communicationStyleField.value : '';
+  const notes = notesField ? notesField.value.trim() : '';
+  
+  console.log('Form data:', { 
+    name, 
+    relationship, 
+    yearsKnown, 
+    birthday, 
+    interests, 
+    communicationStyle, 
+    notes 
+  });
   
   if (!name) {
     showAlert('Please enter a name', 'error');
@@ -747,6 +852,11 @@ function saveConnection() {
   const connectionData = {
     name: name,
     relationship: relationship,
+    yearsKnown: yearsKnown || 0,
+    birthday: birthday || '',
+    interests: interests || '',
+    communicationStyle: communicationStyle || '',
+    notes: notes || '',
     updatedAt: firebase.firestore.FieldValue.serverTimestamp()
   };
   
@@ -1084,11 +1194,11 @@ async function loadUserConnections() {
       connectionsContainer.appendChild(viewAllItem);
     }
     
-    // Add "Add connection" button at the end
+    // Add "Add connection" button at the end - now with proper styling
     const addConnectionItem = document.createElement('li');
-    addConnectionItem.className = 'add-connection-item';
+    addConnectionItem.className = 'add-new-connection';
     addConnectionItem.innerHTML = `
-      <button class="add-connection-button">
+      <button class="add-new-connection-btn">
         <i class="fas fa-plus"></i> Add New Connection
       </button>
     `;

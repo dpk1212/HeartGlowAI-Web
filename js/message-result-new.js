@@ -295,22 +295,21 @@ function generateMessage() {
         return;
     }
     
-    // Try to get an authentication token from Firebase
+    // Get authentication token from Firebase
     if (firebase.auth && firebase.auth().currentUser) {
         firebase.auth().currentUser.getIdToken(true)
             .then(token => {
-                // Try to call cloud function with token
+                // Call cloud function with token
                 callCloudFunction(token);
             })
             .catch(error => {
                 console.error('Failed to get auth token:', error);
-                // Fall back to using local sample data
-                generateFallbackMessage();
+                showError('Authentication error. Please try refreshing the page or sign in again.');
             });
     } else {
-        // No authenticated user, use fallback message
-        console.log('No authenticated user, using fallback message generation');
-        generateFallbackMessage();
+        // No authenticated user
+        console.error('No authenticated user found');
+        showError('Authentication required. Please sign in to generate messages.');
     }
 }
 
@@ -341,13 +340,13 @@ function callCloudFunction(idToken) {
         'Content-Type': 'application/json'
     };
     
-    // Add auth token if available
+    // Add auth token
     if (idToken) {
         headers['Authorization'] = `Bearer ${idToken}`;
     }
     
-    // Set timeout of 15 seconds
-    const timeout = 15000;
+    // Set timeout of 30 seconds
+    const timeout = 30000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
     
@@ -371,65 +370,18 @@ function callCloudFunction(idToken) {
     })
     .catch(error => {
         console.error('Error calling cloud function:', error);
-        // Fall back to local generation
-        generateFallbackMessage();
+        // For timeout or network errors, retry once
+        if (error.name === 'AbortError' || error.message.includes('NetworkError')) {
+            console.log('Connection timed out or network error. Retrying...');
+            showAlert('Connection issue. Retrying...', 'info');
+            setTimeout(() => {
+                callCloudFunction(idToken); // Retry once
+            }, 1000);
+        } else {
+            // For other errors, show a specific error message
+            showError('Could not generate message: ' + error.message + '. Please try again.');
+        }
     });
-}
-
-/**
- * Generate a fallback message using local data
- */
-function generateFallbackMessage() {
-    console.log('Using fallback message generation');
-    
-    try {
-        // Get the sample message based on intent and tone
-        let message = getSampleMessage();
-        
-        // Replace recipient name in the message
-        message = message.replace(/\[NAME\]/g, recipientData.name);
-        
-        // Create a response object similar to the API response
-        const response = {
-            message: {
-                greeting: '',
-                content: message,
-                closing: 'Best wishes',
-                signature: 'Me'
-            },
-            insights: {
-                sentiment: 'positive',
-                language: 'conversational',
-                formality: toneData.type === 'formal' ? 'high' : 'medium'
-            }
-        };
-        
-        // Display the generated message
-        displayGeneratedMessage(response);
-    } catch (error) {
-        console.error('Error generating fallback message:', error);
-        showError('Could not generate a message at this time.');
-    }
-}
-
-/**
- * Get a sample message based on intent and tone
- */
-function getSampleMessage() {
-    const intent = intentData.type || 'custom';
-    const tone = toneData.type || 'warm';
-    
-    // Get the appropriate sample message
-    if (sampleMessages[intent] && sampleMessages[intent][tone]) {
-        return sampleMessages[intent][tone];
-    } else if (sampleMessages[intent]) {
-        // Use the first available tone for this intent
-        const firstTone = Object.keys(sampleMessages[intent])[0];
-        return sampleMessages[intent][firstTone];
-    } else {
-        // Fallback to generic message
-        return `Dear [NAME], this is a message with ${tone} tone for my ${intent} intention.`;
-    }
 }
 
 /**
@@ -444,18 +396,34 @@ function displayGeneratedMessage(data) {
     
     // Show message content
     const messageContent = document.getElementById('messageContent');
-    messageContent.style.display = 'block';
+    if (messageContent) {
+        messageContent.style.display = 'block';
+    }
     
-    // Update message parts
-    const greeting = document.getElementById('greeting');
-    const content = document.getElementById('content');
-    const closing = document.getElementById('closing');
-    const signature = document.getElementById('signature');
+    // Create full message text
+    let fullMessageText = '';
     
-    if (greeting) greeting.textContent = data.message.greeting || '';
-    if (content) content.textContent = data.message.content || '';
-    if (closing) closing.textContent = data.message.closing || '';
-    if (signature) signature.textContent = data.message.signature || '';
+    if (data.message.greeting) {
+        fullMessageText += data.message.greeting + '\n\n';
+    }
+    
+    if (data.message.content) {
+        fullMessageText += data.message.content;
+    }
+    
+    if (data.message.closing) {
+        fullMessageText += '\n\n' + data.message.closing;
+    }
+    
+    if (data.message.signature) {
+        fullMessageText += '\n' + data.message.signature;
+    }
+    
+    // Set message in content area
+    const messageElement = document.getElementById('content');
+    if (messageElement) {
+        messageElement.textContent = fullMessageText;
+    }
     
     // Store the generated message for later use
     generatedMessage = data.message;
@@ -484,16 +452,12 @@ function initMessageActions() {
             const editMessage = document.getElementById('editMessage');
             
             if (editContainer && messageContent && editMessage) {
-                // Combine message parts for editing
-                const fullMessage = [
-                    generatedMessage.greeting || '',
-                    generatedMessage.content || '',
-                    generatedMessage.closing || '',
-                    generatedMessage.signature || ''
-                ].filter(Boolean).join('\n\n');
+                // Get current content
+                const content = document.getElementById('content');
+                const currentText = content ? content.textContent : '';
                 
                 // Set textarea value
-                editMessage.value = fullMessage;
+                editMessage.value = currentText;
                 
                 // Hide message content and show edit container
                 messageContent.style.display = 'none';
@@ -528,13 +492,17 @@ function initMessageActions() {
             const editMessage = document.getElementById('editMessage');
             
             if (editMessage) {
-                // Update content
-                generatedMessage.content = editMessage.value.trim();
+                const updatedText = editMessage.value.trim();
                 
-                // Update display
+                // Update content
                 const content = document.getElementById('content');
                 if (content) {
-                    content.textContent = generatedMessage.content;
+                    content.textContent = updatedText;
+                }
+                
+                // Update the stored message object
+                if (generatedMessage) {
+                    generatedMessage.content = updatedText;
                 }
                 
                 // Hide edit container and show message content
@@ -556,23 +524,20 @@ function initMessageActions() {
     const copyBtn = document.getElementById('copyBtn');
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
-            // Combine message parts for copying
-            const fullMessage = [
-                generatedMessage.greeting || '',
-                generatedMessage.content || '',
-                generatedMessage.closing || '',
-                generatedMessage.signature || ''
-            ].filter(Boolean).join('\n\n');
+            const content = document.getElementById('content');
+            const messageText = content ? content.textContent : '';
             
-            // Copy to clipboard
-            navigator.clipboard.writeText(fullMessage)
-                .then(() => {
-                    showAlert('Message copied to clipboard!', 'success');
-                })
-                .catch(err => {
-                    console.error('Error copying message:', err);
-                    showAlert('Failed to copy message. Please try again.', 'error');
-                });
+            if (messageText) {
+                // Copy to clipboard
+                navigator.clipboard.writeText(messageText)
+                    .then(() => {
+                        showAlert('Message copied to clipboard!', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Error copying message:', err);
+                        showAlert('Failed to copy message. Please try again.', 'error');
+                    });
+            }
         });
     }
     
@@ -580,19 +545,19 @@ function initMessageActions() {
     const shareBtn = document.getElementById('shareBtn');
     if (shareBtn) {
         shareBtn.addEventListener('click', function() {
+            const content = document.getElementById('content');
+            const messageText = content ? content.textContent : '';
+            
+            if (!messageText) {
+                showAlert('No message to share.', 'error');
+                return;
+            }
+            
             // Check if Web Share API is supported
             if (navigator.share) {
-                // Combine message parts for sharing
-                const fullMessage = [
-                    generatedMessage.greeting || '',
-                    generatedMessage.content || '',
-                    generatedMessage.closing || '',
-                    generatedMessage.signature || ''
-                ].filter(Boolean).join('\n\n');
-                
                 navigator.share({
-                    title: `Message for ${recipientData.name}`,
-                    text: fullMessage
+                    title: `Message for ${recipientData ? recipientData.name : 'You'}`,
+                    text: messageText
                 })
                 .then(() => {
                     console.log('Message shared successfully');
@@ -600,7 +565,7 @@ function initMessageActions() {
                 .catch(err => {
                     console.error('Error sharing message:', err);
                     // Fall back to clipboard
-                    navigator.clipboard.writeText(fullMessage)
+                    navigator.clipboard.writeText(messageText)
                         .then(() => {
                             showAlert('Message copied to clipboard for sharing!', 'success');
                         })
@@ -611,7 +576,7 @@ function initMessageActions() {
                 });
             } else {
                 // Web Share API not supported, fall back to clipboard
-                navigator.clipboard.writeText(fullMessage)
+                navigator.clipboard.writeText(messageText)
                     .then(() => {
                         showAlert('Message copied to clipboard for sharing!', 'success');
                     })
@@ -640,7 +605,7 @@ function showLoadingState() {
 function showError(message = 'An error occurred') {
     const loadingState = document.getElementById('loadingState');
     const errorState = document.getElementById('errorState');
-    const messageContainer = document.getElementById('messageContainer');
+    const messageContent = document.getElementById('messageContent');
     const regenerateOptions = document.getElementById('regenerateOptions');
     
     if (loadingState) {
@@ -650,32 +615,44 @@ function showError(message = 'An error occurred') {
     if (errorState) {
         errorState.style.display = 'block';
         
-        const errorMessage = errorState.querySelector('.error-message');
-        if (errorMessage) {
-            errorMessage.textContent = message;
+        const errorText = document.getElementById('errorText');
+        if (errorText) {
+            errorText.textContent = message;
         }
         
-        const retryBtn = document.getElementById('retry-btn');
-        if (retryBtn) {
-            // Remove any existing event listeners to prevent duplicates
-            const newRetryBtn = retryBtn.cloneNode(true);
-            retryBtn.parentNode.replaceChild(newRetryBtn, retryBtn);
+        const retryButton = document.getElementById('retryButton');
+        if (retryButton) {
+            // Remove existing event listeners to prevent duplicates
+            const newRetryButton = retryButton.cloneNode(true);
+            if (retryButton.parentNode) {
+                retryButton.parentNode.replaceChild(newRetryButton, retryButton);
+            }
             
-            newRetryBtn.addEventListener('click', function() {
-                if (errorState) errorState.style.display = 'none';
-                if (loadingState) loadingState.style.display = 'flex';
+            // Add click event listener to retry
+            newRetryButton.addEventListener('click', function() {
+                // Hide error state
+                if (errorState) {
+                    errorState.style.display = 'none';
+                }
+                
+                // Show loading state
+                if (loadingState) {
+                    loadingState.style.display = 'flex';
+                }
+                
+                // Try generating again after a short delay
                 setTimeout(() => {
                     generateMessage();
-                }, 1000);
+                }, 500);
             });
         }
     } else {
-        // Fallback to alert if error-state element doesn't exist
+        // Fallback to alert if error state element doesn't exist
         showAlert(message, 'error');
     }
     
-    if (messageContainer) {
-        messageContainer.style.display = 'none';
+    if (messageContent) {
+        messageContent.style.display = 'none';
     }
     
     if (regenerateOptions) {

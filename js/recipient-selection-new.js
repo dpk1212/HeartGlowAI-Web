@@ -694,7 +694,7 @@ async function saveDataAndNavigate() {
         
         // Navigate to the tone selection page
         setTimeout(() => {
-            window.location.href = 'tone-selection-new.html';
+            window.location.href = 'message-tone-new.html';
         }, 500);
     } catch (error) {
         console.error('Error saving recipient data:', error);

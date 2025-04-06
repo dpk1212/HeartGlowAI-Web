@@ -283,11 +283,10 @@ function preSelectToneBasedOnContext() {
  */
 function initButtons() {
     // Back button
-    const backBtn = document.getElementById('backBtn');
+    const backBtn = document.querySelector('.secondary-button');
     if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.href = 'recipient-selection-new.html';
-        });
+        // Back button link is already set in HTML to message-intent-new.html
+        console.log('Back button initialized');
     } else {
         logDebug('ERROR: Back button not found');
     }

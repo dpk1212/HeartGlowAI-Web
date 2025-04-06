@@ -71,13 +71,13 @@
             <!-- Progress Steps -->
             <div class="progress-container">
                 <div class="progress-steps">
-                    <div class="progress-step">
-                        <div class="step-number">1</div>
-                        <div class="step-label">Intention</div>
-                    </div>
-                    <div class="progress-step">
-                        <div class="step-number">2</div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Recipient</div>
+                    </div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
+                        <div class="step-label">Intention</div>
                     </div>
                     <div class="progress-step active">
                         <div class="step-number">3</div>
@@ -188,10 +188,10 @@
             
             <!-- Navigation Buttons -->
             <div class="navigation-buttons">
-                <button id="backBtn" class="secondary-button">
+                <a href="message-intent-new.html" class="secondary-button">
                     <i class="fas fa-arrow-left"></i>
-                    Back
-                </button>
+                    Back to Intention
+                </a>
                 <button id="nextBtn" class="primary-button" disabled>
                     Next Step
                     <i class="fas fa-arrow-right"></i>

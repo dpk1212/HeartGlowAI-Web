@@ -19,9 +19,6 @@ document.addEventListener('DOMContentLoaded', initPage);
 function initPage() {
     console.log('Initializing recipient selection page...');
     
-    // Load the selected intent from the previous page
-    loadSelectedIntent();
-    
     // Initialize UI elements and event listeners
     initUserMenu();
     initRelationshipSelection();
@@ -422,97 +419,11 @@ function handleLogout() {
  * Load the selected intent from previous page
  */
 function loadSelectedIntent() {
-    try {
-        console.log('Attempting to load selectedIntent from localStorage');
-        const storedIntent = localStorage.getItem('selectedIntent');
-        console.log('Retrieved stored intent:', storedIntent);
-        
-        if (storedIntent) {
-            selectedIntent = JSON.parse(storedIntent);
-            console.log('Parsed selectedIntent:', selectedIntent);
-            displayIntent(selectedIntent);
-        } else {
-            // Try to load from intentData as a fallback
-            const intentData = localStorage.getItem('intentData');
-            if (intentData) {
-                try {
-                    const parsedIntentData = JSON.parse(intentData);
-                    // Create a simplified intent object
-                    selectedIntent = {
-                        title: parsedIntentData.type.charAt(0).toUpperCase() + parsedIntentData.type.slice(1),
-                        description: getIntentDescription(parsedIntentData.type),
-                        icon: getIntentIcon(parsedIntentData.type)
-                    };
-                    displayIntent(selectedIntent);
-                    console.log('Created fallback intent from intentData:', selectedIntent);
-                    return;
-                } catch (e) {
-                    console.error('Error parsing fallback intent data:', e);
-                }
-            }
-            
-            console.log('No intent found in localStorage, redirecting to intent selection');
-            showAlert('No message intention found. Redirecting to select an intention.', 'info');
-            setTimeout(() => {
-                window.location.href = 'message-intent-new.html';
-            }, 1500);
-        }
-    } catch (e) {
-        console.error('Error loading intent data:', e);
-        showAlert('Something went wrong. Please start over.', 'error');
-    }
-}
-
-/**
- * Get a description for an intent type when missing
- */
-function getIntentDescription(type) {
-    const descriptions = {
-        'appreciate': 'Express gratitude and thank someone for their support, kindness, or actions.',
-        'apologize': 'Say sorry and express remorse for a mistake or misunderstanding.',
-        'celebrate': 'Congratulate someone on their achievements or special occasions.',
-        'reconnect': 'Reach out to someone you\'ve lost touch with and rebuild your connection.',
-        'encourage': 'Motivate and support someone facing challenges or pursuing goals.',
-        'custom': 'Craft a message with your own specific intention in mind.'
-    };
-    
-    return descriptions[type] || 'Create a heartfelt message';
-}
-
-/**
- * Get an icon class for an intent type when missing
- */
-function getIntentIcon(type) {
-    const icons = {
-        'appreciate': 'fa-heart',
-        'apologize': 'fa-dove',
-        'celebrate': 'fa-trophy',
-        'reconnect': 'fa-handshake',
-        'encourage': 'fa-star',
-        'custom': 'fa-edit'
-    };
-    
-    return icons[type] || 'fa-heart';
-}
-
-/**
- * Display the selected intent in the UI
- */
-function displayIntent(intent) {
-    const intentIcon = document.getElementById('intentIcon');
-    const intentTitle = document.getElementById('intentTitle');
-    const intentDescription = document.getElementById('intentDescription');
-    
-    if (intentIcon && intent.icon) {
-        intentIcon.innerHTML = `<i class="fas ${intent.icon}"></i>`;
-    }
-    
-    if (intentTitle && intent.title) {
-        intentTitle.textContent = intent.title;
-    }
-    
-    if (intentDescription && intent.description) {
-        intentDescription.textContent = intent.description;
+    // Since recipient is now the first page, we don't need to load intent data
+    // Hide the intent summary card since there's no intent yet
+    const intentSummaryCard = document.querySelector('.intent-summary-card');
+    if (intentSummaryCard) {
+        intentSummaryCard.style.display = 'none';
     }
 }
 
@@ -640,129 +551,92 @@ function validateForm() {
  * Initialize navigation buttons
  */
 function initNavigation() {
-    const backBtn = document.getElementById('backBtn');
     const nextBtn = document.getElementById('nextBtn');
-    
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.href = 'message-intent-new.html';
+    if (nextBtn) {
+        nextBtn.addEventListener('click', async () => {
+            // Validate the form first
+            if (!validateForm()) {
+                showAlert('Please complete all required fields.', 'error');
+                return;
+            }
+            
+            // Save the recipient data and navigate to the intention page
+            await saveDataAndNavigate();
         });
     }
     
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
-            saveDataAndNavigate();
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', () => {
+            window.location.href = 'home.html';
         });
     }
 }
 
 /**
- * Save selected data and navigate to the next page
+ * Save data and navigate to the next page
  */
 async function saveDataAndNavigate() {
     showLoading('Saving your selection...');
     
     try {
-        // Log selection state
-        console.log('Current selection state:', {
-            savedRecipient: selectedSavedRecipient ? { ...selectedSavedRecipient } : null,
-            manualName: document.getElementById('recipientName').value.trim(),
-            selectedRelationship: selectedRelationship,
-        });
+        // Get form values
+        const name = document.getElementById('recipientName').value.trim();
+        const otherRelationship = selectedRelationship === 'other' 
+            ? document.getElementById('otherRelationship').value.trim()
+            : '';
         
-        // Get the name and relationship data
-        let name, relationship, otherRelationship, connectionId;
-        
-        // Prepare additional data fields
-        let yearsKnown = '';
-        let communicationStyle = '';
-        let notes = '';
-        let relationshipFocus = '';
-        
-        if (selectedSavedRecipient) {
-            // If a saved recipient is selected, use that data with ALL fields
-            console.log('Using selected saved recipient:', selectedSavedRecipient);
-            
-            // Basic fields
-            name = selectedSavedRecipient.name;
-            relationship = selectedSavedRecipient.relationship;
-            otherRelationship = selectedSavedRecipient.otherRelationship || '';
-            connectionId = selectedSavedRecipient.id; // Include the connection ID
-            
-            // Additional fields if available
-            yearsKnown = selectedSavedRecipient.yearsKnown || '';
-            communicationStyle = selectedSavedRecipient.communicationStyle || '';
-            notes = selectedSavedRecipient.notes || '';
-            relationshipFocus = selectedSavedRecipient.relationshipGoal || '';
-        } else {
-            // Otherwise use the form data
-            name = document.getElementById('recipientName').value.trim();
-            relationship = selectedRelationship;
-            
-            // Get other relationship value if applicable
-            if (relationship === 'other') {
-                otherRelationship = document.getElementById('otherRelationship').value.trim();
-            }
-        }
-        
-        // Create recipient data object with ALL fields
+        // Create recipient data object
         const recipientData = {
             name: name,
-            relationship: relationship,
-            otherRelationship: otherRelationship || '',
-            yearsKnown: yearsKnown,
-            communicationStyle: communicationStyle,
-            notes: notes,
-            relationshipFocus: relationshipFocus
+            relationship: selectedRelationship,
+            otherRelationship: otherRelationship
         };
         
-        // Add connection ID if available
-        if (connectionId) {
-            recipientData.id = connectionId;
-        }
+        // For displaying in the UI
+        const displayRelationship = selectedRelationship === 'other' 
+            ? otherRelationship 
+            : capitalizeFirstLetter(selectedRelationship);
         
-        // Log the data we're about to save
-        console.log('Saving recipient data to localStorage:', recipientData);
+        // Create a simplified recipient object for the message flow
+        const selectedRecipient = {
+            name: name,
+            relationship: displayRelationship,
+            initial: name.charAt(0).toUpperCase()
+        };
         
-        // Save to localStorage for next pages
+        // Save both objects to localStorage for persistence
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
+        localStorage.setItem('selectedRecipient', JSON.stringify(selectedRecipient));
         
-        // Check if user wants to save this recipient
-        const saveRecipientCheckbox = document.getElementById('saveRecipient');
-        const saveRecipient = saveRecipientCheckbox && saveRecipientCheckbox.checked;
-        
-        console.log('Save recipient checked:', saveRecipient);
-        
-        // If checked and not already a saved recipient, save to Firestore
-        if (saveRecipient && !selectedSavedRecipient) {
+        // If save checkbox is checked, save to Firestore
+        const saveCheckbox = document.getElementById('saveRecipient');
+        if (saveCheckbox && saveCheckbox.checked) {
             const user = firebase.auth().currentUser;
             if (user) {
-                console.log('Attempting to save recipient to Firestore');
-                const newConnectionId = await saveRecipientToFirestore(user.uid, name, relationship, otherRelationship);
-                
-                // If successfully saved, update the recipientData with the new connection ID
-                if (newConnectionId) {
-                    recipientData.id = newConnectionId;
-                    localStorage.setItem('recipientData', JSON.stringify(recipientData));
-                    console.log('Updated recipientData with new connection ID:', newConnectionId);
+                try {
+                    // Only save if this is a new recipient or if we're updating an existing one
+                    await saveRecipientToFirestore(
+                        user.uid, 
+                        name, 
+                        selectedRelationship, 
+                        otherRelationship
+                    );
+                } catch (error) {
+                    console.error('Error saving recipient to Firestore:', error);
+                    // Continue with the flow even if saving to Firestore fails
                 }
-            } else {
-                console.error('User not authenticated, cannot save connection');
-                showAlert('You must be signed in to save connections', 'error');
             }
         }
         
-        // Navigate to the tone selection page
+        // Navigate to the intention selection page
         setTimeout(() => {
-            // Get the current URL path and build the correct next URL
-            const currentUrl = window.location.href;
-            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
-            window.location.href = baseUrl + 'message-tone-new.html';
-        }, 500);
+            window.location.href = 'message-intent-new.html';
+        }, 800);
     } catch (error) {
-        console.error('Error saving recipient data:', error);
+        console.error('Error in saveDataAndNavigate:', error);
         hideLoading();
-        showAlert('Failed to save recipient data. Please try again.', 'error');
+        showAlert('Could not save your selection. Please try again.', 'error');
     }
 }
 

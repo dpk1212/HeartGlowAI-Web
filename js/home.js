@@ -1894,8 +1894,19 @@ function showAllMessagesModal(messages, connectionMap) {
     document.body.appendChild(modalElement);
   }
   
+  // Generate HTML for modal header and controls
+  let modalHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">All Messages (${messages.length})</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-messages-list">
+  `;
+  
   // Generate message items HTML
-  const messagesHTML = messages.map(message => {
+  messages.forEach(message => {
     // Get recipient info
     let recipientName = message.recipientName || 'Unknown';
     
@@ -1920,11 +1931,11 @@ function showAllMessagesModal(messages, connectionMap) {
     
     // Truncate content
     const truncatedContent = message.content
-      ? message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '')
+      ? message.content.substring(0, 120) + (message.content.length > 120 ? '...' : '')
       : 'No message content';
     
-    return `
-      <div class="modal-message-item" data-id="${message.id}" style="border-left-color: ${accentColor}">
+    modalHTML += `
+      <div class="modal-message-item enhanced-message-item" data-id="${message.id}" style="border-left-color: ${accentColor}">
         <div class="message-content">
           <div class="message-header">
             <div class="message-recipient-info">
@@ -1952,18 +1963,10 @@ function showAllMessagesModal(messages, connectionMap) {
         </div>
       </div>
     `;
-  }).join('');
+  });
   
-  // Populate modal content
-  modalElement.innerHTML = `
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2 class="modal-title">All Messages</h2>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div class="modal-messages-list">
-          ${messagesHTML}
+  // Close the HTML for the modal
+  modalHTML += `
         </div>
       </div>
       <div class="modal-footer">
@@ -1973,6 +1976,9 @@ function showAllMessagesModal(messages, connectionMap) {
       </div>
     </div>
   `;
+  
+  // Set the HTML content
+  modalElement.innerHTML = modalHTML;
   
   // Show modal with a slight delay to ensure DOM is ready
   setTimeout(() => {
@@ -2958,4 +2964,60 @@ function openConnectionsManagement() {
       connectionsSection.classList.remove('highlight-section');
     }, 2000);
   }
+}
+
+// View a message - now displays in a popup instead of redirecting
+function viewMessage(messageId) {
+  if (!currentUser) return;
+  
+  // Show loading state
+  showLoading('Loading message...');
+  
+  // Get the message from Firestore
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('messages')
+    .doc(messageId)
+    .get()
+    .then(doc => {
+      hideLoading();
+      
+      if (doc.exists) {
+        const message = {
+          id: doc.id,
+          ...doc.data()
+        };
+        
+        // Get connection details if needed
+        if (message.connectionId) {
+          return firebase.firestore()
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('connections')
+            .doc(message.connectionId)
+            .get()
+            .then(connectionDoc => {
+              const connectionMap = {};
+              if (connectionDoc.exists) {
+                connectionMap[connectionDoc.id] = connectionDoc.data();
+              }
+              return { message, connectionMap };
+            });
+        } else {
+          return { message, connectionMap: {} };
+        }
+      } else {
+        throw new Error('Message not found');
+      }
+    })
+    .then(({ message, connectionMap }) => {
+      // Show message in popup
+      showMessagePopup(message, connectionMap);
+    })
+    .catch(error => {
+      console.error('Error loading message:', error);
+      hideLoading();
+      showAlert('Could not load the message. Please try again.', 'error');
+    });
 } 

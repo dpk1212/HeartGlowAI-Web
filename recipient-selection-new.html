@@ -72,7 +72,7 @@
             <div class="progress-container">
                 <div class="progress-steps">
                     <div class="progress-step completed">
-                        <div class="step-number">1</div>
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Intention</div>
                     </div>
                     <div class="progress-step active">
@@ -106,6 +106,40 @@
             <div class="page-header">
                 <h1 class="page-title">Who's on your mind?</h1>
                 <p class="page-description">Tell us about the person you're creating this message for.</p>
+            </div>
+            
+            <!-- Saved Recipients Section -->
+            <div id="savedRecipientsSection" class="saved-recipients-section">
+                <h2 class="section-title">Your Saved Connections</h2>
+                <p class="section-description">Select a saved connection or create a new one below.</p>
+                
+                <div id="savedRecipientsList" class="saved-recipients-grid">
+                    <!-- Saved recipients will be populated here dynamically -->
+                    <!-- Loading state placeholder -->
+                    <div class="saved-recipient-card loading">
+                        <div class="recipient-avatar"></div>
+                        <div class="recipient-info">
+                            <div class="skeleton-text skeleton-name"></div>
+                            <div class="skeleton-text skeleton-relationship"></div>
+                        </div>
+                    </div>
+                    <div class="saved-recipient-card loading">
+                        <div class="recipient-avatar"></div>
+                        <div class="recipient-info">
+                            <div class="skeleton-text skeleton-name"></div>
+                            <div class="skeleton-text skeleton-relationship"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="noSavedRecipients" class="no-data-message" style="display: none;">
+                    <i class="fas fa-user-plus"></i>
+                    <p>You don't have any saved connections yet. Create your first one below!</p>
+                </div>
+                
+                <div class="section-divider">
+                    <span>Or create a new connection</span>
+                </div>
             </div>
             
             <!-- Recipient Form -->

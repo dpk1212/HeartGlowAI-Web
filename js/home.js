@@ -60,6 +60,9 @@ function initializeHomePage() {
   }
   
   try {
+    // Hide any static empty states on page load
+    checkAndHideStaticEmptyStates();
+    
     // Initialize UI elements that don't depend on Firestore data
     initNavigationButtons();
     initializeQuickActions();
@@ -134,6 +137,72 @@ function initializeHomePage() {
     // Show a general error if basic initialization fails
     showAlert('A critical error occurred initializing the page. Please refresh.', 'error');
   }
+}
+
+// Check for static empty state elements in the HTML and hide them
+function checkAndHideStaticEmptyStates() {
+  if (!currentUser) return;
+  
+  const userUid = currentUser.uid;
+  
+  // Check if there are actual connections and messages in Firestore
+  // This avoids showing "No connections yet" when there are actually connections
+  
+  // Check connections
+  firebase.firestore()
+    .collection('users')
+    .doc(userUid)
+    .collection('connections')
+    .limit(1)
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        console.log('User has connections, hiding empty states');
+        hideEmptyState('connections');
+        
+        // Also hide any container that has the text "No connections yet"
+        const elementsToCheck = document.querySelectorAll('*');
+        elementsToCheck.forEach(el => {
+          if (el.textContent && el.textContent.includes('No connections yet')) {
+            if (el.parentElement && 
+               !el.closest('.connections-list') && 
+               !el.closest('.messages-list')) {
+              console.log('Hiding element with "No connections yet" text:', el);
+              el.style.display = 'none';
+            }
+          }
+        });
+      }
+    })
+    .catch(error => console.error('Error checking for connections:', error));
+  
+  // Check messages
+  firebase.firestore()
+    .collection('users')
+    .doc(userUid)
+    .collection('messages')
+    .limit(1)
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        console.log('User has messages, hiding empty states');
+        hideEmptyState('messages');
+        
+        // Also hide any container that has the text "No messages yet"
+        const elementsToCheck = document.querySelectorAll('*');
+        elementsToCheck.forEach(el => {
+          if (el.textContent && el.textContent.includes('No messages yet')) {
+            if (el.parentElement && 
+               !el.closest('.connections-list') && 
+               !el.closest('.messages-list')) {
+              console.log('Hiding element with "No messages yet" text:', el);
+              el.style.display = 'none';
+            }
+          }
+        });
+      }
+    })
+    .catch(error => console.error('Error checking for messages:', error));
 }
 
 // Initialize navigation buttons
@@ -520,20 +589,25 @@ function openConnectionsManagement() {
 // Display empty states for data sections (called when query is empty)
 function displayEmptyStates(type) {
   if (type === 'connections') {
-    const connectionsList = document.getElementById('connections-list');
+    // First, hide any existing "No connections" elements to avoid duplicates
+    hideEmptyState('connections');
+    
+    const connectionsList = document.querySelector('.connections-list');
     if (connectionsList) {
       connectionsList.innerHTML = `
         <li class="empty-state">
-          <div class="empty-icon"><i class="fas fa-user-friends"></i></div>
-          <div class="empty-title">No people added yet</div>
-          <div class="empty-description">Add important people in your life to stay connected</div>
-          <button id="empty-add-connection-btn" class="create-btn" style="margin: 20px auto; display: block;">
-            <i class="fas fa-plus-circle"></i> Add a Person
-          </button>
+          <div class="empty-icon"><i class="fas fa-user-plus"></i></div>
+          <div class="empty-text">
+            <p>No saved connections yet</p>
+            <p class="empty-subtext">Add people you message frequently</p>
+            <button id="add-first-connection-btn" class="primary-button">
+              <i class="fas fa-plus"></i> Add First Connection
+            </button>
+          </div>
         </li>
       `;
       // Add listener for the new button
-      const emptyAddBtn = document.getElementById('empty-add-connection-btn');
+      const emptyAddBtn = document.getElementById('add-first-connection-btn');
       if (emptyAddBtn) {
           emptyAddBtn.addEventListener('click', function() {
             console.log('Empty state add person button clicked');
@@ -544,18 +618,30 @@ function displayEmptyStates(type) {
       }
     }
   } else if (type === 'messages') {
-    const recentMessages = document.getElementById('recent-messages');
-    if (recentMessages) {
-      recentMessages.innerHTML = `
+    // First, hide any existing "No messages" elements to avoid duplicates
+    hideEmptyState('messages');
+    
+    const messagesList = document.querySelector('.messages-list');
+    if (messagesList) {
+      messagesList.innerHTML = `
         <li class="empty-state">
           <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
-          <div class="empty-title">No messages yet</div>
-          <div class="empty-description">Start crafting heartfelt messages to build your history</div>
-          <a href="emotional-entry.html" class="empty-action">
-            <i class="fas fa-pen-fancy"></i> Create your first message
-          </a>
+          <div class="empty-text">
+            <p>No messages yet</p>
+            <p class="empty-subtext">Create your first message to see it here</p>
+            <button id="create-first-message-btn" class="primary-button">
+              <i class="fas fa-magic"></i> Create First Message
+            </button>
+          </div>
         </li>
       `;
+      
+      const createFirstMessageBtn = document.getElementById('create-first-message-btn');
+      if (createFirstMessageBtn) {
+        createFirstMessageBtn.addEventListener('click', () => {
+          window.location.href = 'message-intent-new.html';
+        });
+      }
     }
   } else if (type === 'reminders') {
     const remindersList = document.getElementById('reminders-list');
@@ -638,6 +724,9 @@ async function loadUserConnections() {
     return;
   }
   
+  // Hide any existing no connections messages before showing the loading spinner
+  hideEmptyState('connections');
+  
   connectionsContainer.innerHTML = `
     <li class="loading-item">
       <div class="loading-spinner"></div>
@@ -659,23 +748,7 @@ async function loadUserConnections() {
     
     if (snapshot.empty) {
       console.log('No connections found for user');
-      connectionsContainer.innerHTML = `
-        <li class="empty-state">
-          <div class="empty-icon"><i class="fas fa-user-plus"></i></div>
-          <div class="empty-text">
-            <p>No saved connections yet</p>
-            <p class="empty-subtext">Add people you message frequently</p>
-            <button id="add-first-connection-btn" class="primary-button">
-              <i class="fas fa-plus"></i> Add First Connection
-            </button>
-          </div>
-        </li>
-      `;
-      
-      const addFirstConnectionBtn = document.getElementById('add-first-connection-btn');
-      if (addFirstConnectionBtn) {
-        addFirstConnectionBtn.addEventListener('click', () => openConnectionModal());
-      }
+      displayEmptyStates('connections');
       return;
     }
     
@@ -688,6 +761,9 @@ async function loadUserConnections() {
         created: doc.data().created || doc.data().createdAt || new Date(0)
       });
     });
+    
+    // Hide any static empty state messages in the DOM
+    hideEmptyState('connections');
     
     // Sort by most recently created first
     connections.sort((a, b) => {
@@ -976,6 +1052,9 @@ async function loadUserMessages() {
     return;
   }
   
+  // Hide any existing no messages messages before showing the loading spinner
+  hideEmptyState('messages');
+  
   messagesContainer.innerHTML = `
     <li class="loading-item">
       <div class="loading-spinner"></div>
@@ -999,25 +1078,7 @@ async function loadUserMessages() {
     
     if (snapshot.empty) {
       console.log('No messages found for user');
-      messagesContainer.innerHTML = `
-        <li class="empty-state">
-          <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
-          <div class="empty-text">
-            <p>No messages yet</p>
-            <p class="empty-subtext">Create your first message to see it here</p>
-            <button id="create-first-message-btn" class="primary-button">
-              <i class="fas fa-magic"></i> Create First Message
-            </button>
-          </div>
-        </li>
-      `;
-      
-      const createFirstMessageBtn = document.getElementById('create-first-message-btn');
-      if (createFirstMessageBtn) {
-        createFirstMessageBtn.addEventListener('click', () => {
-          window.location.href = 'message-intent-new.html';
-        });
-      }
+      displayEmptyStates('messages');
       return;
     }
     
@@ -1031,6 +1092,9 @@ async function loadUserMessages() {
         timestamp: data.timestamp || new Date(0)
       });
     });
+    
+    // Hide any static empty state messages in the DOM
+    hideEmptyState('messages');
     
     // Get all connection information for message recipients
     const connectionIds = new Set(messages.filter(m => m.connectionId).map(m => m.connectionId));
@@ -1724,5 +1788,141 @@ function showAlert(message, type = 'info') {
     if (type === 'error') {
       alert(message);
     }
+  }
+}
+
+// Hide empty state in dashboard
+function hideEmptyState(type) {
+  if (type === 'connections') {
+    // Hide all possible empty state elements for connections
+    const noConnectionsMessages = document.querySelectorAll(
+      '.no-connections-message, .no-connections-yet, #no-connections-message, ' +
+      '[class*="connection"][class*="empty"], [id*="connection"][id*="empty"]'
+    );
+    
+    noConnectionsMessages.forEach(el => {
+      if (el) {
+        console.log('Hiding empty connections state element:', el);
+        el.style.display = 'none';
+      }
+    });
+    
+    // Also check for static elements in the DOM with icons/text indicating no connections
+    const emptyStateElements = document.querySelectorAll(
+      '.connections-list .empty-state, .connections-section .empty-state, ' +
+      '.dashboard-section .empty-state'
+    );
+    
+    emptyStateElements.forEach(el => {
+      if (el) {
+        console.log('Removing empty state element from connections list');
+        el.remove();
+      }
+    });
+    
+    // Hide any text elements containing phrases about no connections
+    const allTextElements = document.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, span');
+    const phrasesToCheck = [
+      'no connection', 'no connections', 
+      'no saved connection', 'no saved connections',
+      'no people', 'add your first', 'add first connection',
+      'connections yet', 'add people'
+    ];
+    
+    allTextElements.forEach(el => {
+      if (el && el.textContent) {
+        const lowerText = el.textContent.toLowerCase();
+        for (const phrase of phrasesToCheck) {
+          if (lowerText.includes(phrase)) {
+            // Make sure we're not in a list already being populated
+            if (!el.closest('.connections-list') && !el.closest('.messages-list')) {
+              console.log(`Hiding element with "${phrase}" text:`, el);
+              // Hide the element or its closest container
+              const container = el.closest('.empty-state') || el.closest('.no-data-message') || el;
+              container.style.display = 'none';
+            }
+            break;
+          }
+        }
+      }
+    });
+    
+  } else if (type === 'messages') {
+    // Hide all possible empty state elements for messages
+    const noMessagesMessages = document.querySelectorAll(
+      '.no-messages-message, .no-messages-yet, #no-messages-message, ' +
+      '[class*="message"][class*="empty"], [id*="message"][id*="empty"]'
+    );
+    
+    noMessagesMessages.forEach(el => {
+      if (el) {
+        console.log('Hiding empty messages state element:', el);
+        el.style.display = 'none';
+      }
+    });
+    
+    // Also check for static elements in the DOM with icons/text indicating no messages
+    const emptyStateElements = document.querySelectorAll(
+      '.messages-list .empty-state, .messages-section .empty-state, ' +
+      '.recent-messages .empty-state, #recent-messages .empty-state'
+    );
+    
+    emptyStateElements.forEach(el => {
+      if (el) {
+        console.log('Removing empty state element from messages list');
+        el.remove();
+      }
+    });
+    
+    // Hide any text elements containing phrases about no messages
+    const allTextElements = document.querySelectorAll('p, div, h1, h2, h3, h4, h5, h6, span');
+    const phrasesToCheck = [
+      'no message', 'no messages', 
+      'create your first', 'no messages yet',
+      'start crafting', 'create first message'
+    ];
+    
+    allTextElements.forEach(el => {
+      if (el && el.textContent) {
+        const lowerText = el.textContent.toLowerCase();
+        for (const phrase of phrasesToCheck) {
+          if (lowerText.includes(phrase)) {
+            // Make sure we're not in a list already being populated
+            if (!el.closest('.connections-list') && !el.closest('.messages-list')) {
+              console.log(`Hiding element with "${phrase}" text:`, el);
+              // Hide the element or its closest container
+              const container = el.closest('.empty-state') || el.closest('.no-data-message') || el;
+              container.style.display = 'none';
+            }
+            break;
+          }
+        }
+      }
+    });
+  }
+  
+  // Also hide specific elements that might be in home.html
+  const specificStaticElements = {
+    'connections': [
+      document.querySelector('.no-connections-container'),
+      document.querySelector('#no-connections-container'),
+      document.querySelector('.empty-connections-state'),
+      document.querySelector('#empty-connections-state')
+    ],
+    'messages': [
+      document.querySelector('.no-messages-container'),
+      document.querySelector('#no-messages-container'),
+      document.querySelector('.empty-messages-state'),
+      document.querySelector('#empty-messages-state')
+    ]
+  };
+  
+  if (specificStaticElements[type]) {
+    specificStaticElements[type].forEach(el => {
+      if (el) {
+        console.log(`Hiding specific static ${type} element:`, el);
+        el.style.display = 'none';
+      }
+    });
   }
 } 

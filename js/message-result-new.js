@@ -283,17 +283,23 @@ function updateToneDisplay() {
 }
 
 /**
- * Generate message based on selected data
+ * Generate message using cloud function
  */
 function generateMessage() {
-    // Show loading state while we attempt to generate
+    console.log('Generating message...');
     showLoadingState();
     
     // Check if we have all required data
     if (!recipientData || !intentData || !toneData) {
         showError('Missing required information. Please complete all previous steps.');
-        return;
+         return;
     }
+    
+    // For development/testing, allow bypassing authentication
+    // This makes it easier to test the message generation even without being logged in
+    const bypassAuth = window.location.href.includes('localhost') || 
+                      window.location.href.includes('127.0.0.1') ||
+                      window.location.search.includes('bypass=true');
     
     // Get authentication token from Firebase
     if (firebase.auth && firebase.auth().currentUser) {
@@ -304,12 +310,40 @@ function generateMessage() {
             })
             .catch(error => {
                 console.error('Failed to get auth token:', error);
-                showError('Authentication error. Please try refreshing the page or sign in again.');
+                if (bypassAuth) {
+                    console.log('Bypassing authentication for development environment');
+                    callCloudFunction(null);
+                } else {
+                    showError('Authentication error. Please try refreshing the page or sign in again.');
+                }
             });
     } else {
         // No authenticated user
         console.error('No authenticated user found');
-        showError('Authentication required. Please sign in to generate messages.');
+        if (bypassAuth) {
+            console.log('Bypassing authentication for development environment');
+            callCloudFunction(null); // Call without token in development mode
+        } else {
+            // Try to re-authenticate
+            if (firebase.auth) {
+                firebase.auth().signInAnonymously()
+                    .then(() => {
+                        console.log('Anonymous auth successful');
+                        firebase.auth().currentUser.getIdToken(true)
+                            .then(token => callCloudFunction(token))
+                            .catch(err => {
+                                console.error('Error getting token after anon auth:', err);
+                                showError('Could not authenticate. Try refreshing the page.');
+                            });
+                    })
+                    .catch(error => {
+                        console.error('Anonymous auth failed:', error);
+                        showError('Authentication required. Please sign in to generate messages. Try refreshing the page or logging in again.');
+                    });
+            } else {
+                showError('Authentication required. Please sign in to generate messages.');
+            }
+        }
     }
 }
 
@@ -340,7 +374,7 @@ function callCloudFunction(idToken) {
         'Content-Type': 'application/json'
     };
     
-    // Add auth token
+    // Add auth token if available
     if (idToken) {
         headers['Authorization'] = `Bearer ${idToken}`;
     }
@@ -349,6 +383,10 @@ function callCloudFunction(idToken) {
     const timeout = 30000;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeout);
+    
+    // Debug URL
+    console.log(`API URL: ${apiUrl}`);
+    console.log('Headers:', headers);
     
     // Make request
     fetch(apiUrl, {
@@ -359,10 +397,28 @@ function callCloudFunction(idToken) {
     })
     .then(response => {
         clearTimeout(timeoutId);
+        
+        // Log response status for debugging
+        console.log(`API response status: ${response.status}`);
+        
         if (!response.ok) {
-            throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+            // Try to get response text for better error message
+            return response.text().then(text => {
+                let errorMessage = `API returned status ${response.status}`;
+                if (text) {
+                    try {
+                        // Try to parse as JSON first
+                        const errorJson = JSON.parse(text);
+                        errorMessage += `: ${errorJson.error || errorJson.message || text}`;
+                    } catch (e) {
+                        // If not JSON, just use the text
+                        errorMessage += `: ${text}`;
+                    }
+                }
+                throw new Error(errorMessage);
+            });
         }
-        return response.json();
+         return response.json();
     })
     .then(data => {
         console.log('Message generated successfully:', data);
@@ -370,6 +426,7 @@ function callCloudFunction(idToken) {
     })
     .catch(error => {
         console.error('Error calling cloud function:', error);
+        
         // For timeout or network errors, retry once
         if (error.name === 'AbortError' || error.message.includes('NetworkError')) {
             console.log('Connection timed out or network error. Retrying...');
@@ -377,6 +434,15 @@ function callCloudFunction(idToken) {
             setTimeout(() => {
                 callCloudFunction(idToken); // Retry once
             }, 1000);
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+            // Authentication issues
+            showError('Authentication error: You may need to sign in again. ' + error.message);
+        } else if (error.message.includes('429')) {
+            // Rate limiting
+            showError('Too many requests. Please wait a moment and try again.');
+        } else if (error.message.includes('500')) {
+            // Server error
+            showError('Server error. Our team has been notified. Please try again later.');
         } else {
             // For other errors, show a specific error message
             showError('Could not generate message: ' + error.message + '. Please try again.');
@@ -825,35 +891,114 @@ function initMessageOptions() {
 }
 
 /**
- * Initialize back and next buttons
+ * Initialize buttons and UI elements
  */
 function initButtons() {
-    // Back button
-    const backBtn = document.getElementById('back-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.href = 'message-tone-new.html?emotion=' + selectedEmotion;
-        });
-    } else {
-        logDebug('ERROR: Back button not found');
+    try {
+        // Back button
+        const backBtn = document.getElementById('backBtn');
+        if (backBtn) {
+            backBtn.addEventListener('click', function() {
+                window.location.href = 'message-tone-new.html';
+            });
+        } else {
+            console.error('DEBUG: ERROR: Back button not found');
+        }
+        
+        // Next/Done button
+        const nextBtn = document.getElementById('nextBtn');
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function() {
+                // In a real implementation, this might save the message and go to home
+                showAlert('Message process completed!', 'success');
+                setTimeout(() => {
+                    window.location.href = 'home.html';
+                }, 1500);
+            });
+        } else {
+            console.error('DEBUG: ERROR: Next button not found');
+        }
+        
+        // Initialize dev mode if URL contains dev=true
+        if (window.location.search.includes('dev=true')) {
+            initDevMode();
+        }
+    } catch (error) {
+        console.error('Error initializing buttons:', error);
     }
+}
+
+/**
+ * Initialize developer mode features
+ * This adds additional debugging options not visible in production
+ */
+function initDevMode() {
+    console.log('🔧 Initializing developer mode');
     
-    // Next/Done button
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
-            // In a real implementation, this might save the message and go to home
-            showAlert('Message process completed!', 'success');
-            setTimeout(() => {
-                window.location.href = 'home.html';
-            }, 1500);
-        });
-    } else {
-        logDebug('ERROR: Next button not found');
-    }
+    // Create dev panel
+    const devPanel = document.createElement('div');
+    devPanel.className = 'dev-panel';
+    devPanel.style.position = 'fixed';
+    devPanel.style.bottom = '10px';
+    devPanel.style.right = '10px';
+    devPanel.style.backgroundColor = '#333';
+    devPanel.style.color = '#fff';
+    devPanel.style.padding = '10px';
+    devPanel.style.borderRadius = '5px';
+    devPanel.style.zIndex = '1000';
+    devPanel.style.fontSize = '12px';
+    devPanel.style.maxWidth = '300px';
     
-    // Init message-specific options
-    initMessageOptions();
+    // Add bypass auth button
+    const bypassAuthBtn = document.createElement('button');
+    bypassAuthBtn.textContent = 'Bypass Auth';
+    bypassAuthBtn.style.marginRight = '5px';
+    bypassAuthBtn.style.padding = '5px';
+    bypassAuthBtn.style.cursor = 'pointer';
+    bypassAuthBtn.addEventListener('click', function() {
+        const url = new URL(window.location.href);
+        url.searchParams.set('bypass', 'true');
+        window.location.href = url.toString();
+    });
+    
+    // Add regenerate button
+    const regenerateBtn = document.createElement('button');
+    regenerateBtn.textContent = 'Regenerate';
+    regenerateBtn.style.marginRight = '5px';
+    regenerateBtn.style.padding = '5px';
+    regenerateBtn.style.cursor = 'pointer';
+    regenerateBtn.addEventListener('click', function() {
+        generateMessage();
+    });
+    
+    // Add clear localStorage button
+    const clearStorageBtn = document.createElement('button');
+    clearStorageBtn.textContent = 'Clear Storage';
+    clearStorageBtn.style.padding = '5px';
+    clearStorageBtn.style.cursor = 'pointer';
+    clearStorageBtn.addEventListener('click', function() {
+        localStorage.clear();
+        showAlert('localStorage cleared', 'info');
+    });
+    
+    // Add status display
+    const statusDisplay = document.createElement('div');
+    statusDisplay.id = 'devStatus';
+    statusDisplay.style.marginTop = '10px';
+    statusDisplay.style.fontSize = '11px';
+    statusDisplay.style.wordBreak = 'break-all';
+    statusDisplay.innerHTML = '<strong>Dev Mode Active</strong><br>' +
+                             'URL: ' + window.location.href + '<br>' +
+                             'Auth: ' + (firebase.auth && firebase.auth().currentUser ? 'Yes' : 'No');
+    
+    // Assemble dev panel
+    devPanel.appendChild(bypassAuthBtn);
+    devPanel.appendChild(regenerateBtn);
+    devPanel.appendChild(clearStorageBtn);
+    devPanel.appendChild(statusDisplay);
+    
+    // Add to body
+    document.body.appendChild(devPanel);
 }
 
 /**

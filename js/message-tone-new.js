@@ -36,16 +36,11 @@ function initPage() {
     initToneSelection();
     initButtons();
     initNavigation();
-    initBypassAuth();
     
-    // Show debug button
-    createDebugButton();
+    // Check authentication state
+    checkAuthState();
     
-    // Check authentication (with bypass option)
-    checkAuthentication();
-    
-    // Log page loaded
-    logDebug('Page initialized successfully');
+    console.log('Page initialized successfully');
 }
 
 /**
@@ -197,9 +192,10 @@ function updateIntentDisplay(intentData) {
  * Initialize tone selection
  */
 function initToneSelection() {
-    const toneOptions = document.querySelectorAll('.tone-option');
-    const nextBtn = document.getElementById('next-btn');
-    const customToneForm = document.getElementById('custom-tone-form');
+    const toneOptions = document.querySelectorAll('.option-card');
+    const nextBtn = document.getElementById('nextBtn');
+    const customToneSection = document.getElementById('customToneSection');
+    const customToneInput = document.getElementById('customToneInput');
     
     if (!toneOptions.length) {
         logDebug('ERROR: No tone options found');
@@ -221,10 +217,13 @@ function initToneSelection() {
             logDebug(`Selected tone: ${selectedTone}`);
             
             // Show/hide custom tone form
-            if (selectedTone === 'custom' && customToneForm) {
-                customToneForm.classList.add('active');
-            } else if (customToneForm) {
-                customToneForm.classList.remove('active');
+            if (selectedTone === 'custom' && customToneSection) {
+                customToneSection.style.display = 'block';
+                if (customToneInput) {
+                    customToneInput.focus();
+                }
+            } else if (customToneSection) {
+                customToneSection.style.display = 'none';
             }
             
             // Enable next button
@@ -272,7 +271,7 @@ function preSelectToneBasedOnContext() {
     }
     
     // Find and click the matching tone option
-    const toneOption = document.querySelector(`.tone-option[data-tone="${toneToSelect}"]`);
+    const toneOption = document.querySelector(`.option-card[data-tone="${toneToSelect}"]`);
     if (toneOption) {
         toneOption.click();
         logDebug(`Pre-selected tone: ${toneToSelect} based on emotion: ${selectedEmotion} and intent: ${intentData.type}`);
@@ -284,23 +283,23 @@ function preSelectToneBasedOnContext() {
  */
 function initButtons() {
     // Back button
-    const backBtn = document.getElementById('back-btn');
+    const backBtn = document.getElementById('backBtn');
     if (backBtn) {
         backBtn.addEventListener('click', function() {
-            window.location.href = 'message-intent-new.html?emotion=' + selectedEmotion;
+            window.location.href = 'recipient-selection-new.html';
         });
     } else {
         logDebug('ERROR: Back button not found');
     }
     
     // Next button
-    const nextBtn = document.getElementById('next-btn');
+    const nextBtn = document.getElementById('nextBtn');
     if (nextBtn) {
         nextBtn.addEventListener('click', function() {
             if (validateSelection()) {
                 saveToneAndNavigate();
             } else {
-                showError();
+                showAlert('Please select a tone before continuing.', 'error');
             }
         });
     } else {
@@ -312,43 +311,24 @@ function initButtons() {
  * Initialize navigation buttons
  */
 function initNavigation() {
-    // Dashboard button
-    const dashboardBtn = document.getElementById('dashboard-btn');
-    if (dashboardBtn) {
-        dashboardBtn.addEventListener('click', function() {
-            window.location.href = 'home.html';
-        });
-    }
+    // We're already handling the main navigation buttons in initButtons()
     
-    // History button
-    const historyBtn = document.getElementById('history-btn');
-    if (historyBtn) {
-        historyBtn.addEventListener('click', function() {
-            window.location.href = 'history.html';
-        });
-    }
+    // User menu functionality is already added in the DOMContentLoaded event
     
-    // Learn button
-    const learnBtn = document.getElementById('learn-btn');
-    if (learnBtn) {
-        learnBtn.addEventListener('click', function() {
-            window.location.href = 'learn.html';
-        });
-    }
-    
-    // Logout button
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (window.firebase && firebase.auth) {
-                firebase.auth().signOut()
-                    .then(() => {
-                        window.location.href = 'index.html';
-                    })
-                    .catch((error) => {
-                        console.error('Logout error:', error);
-                    });
+    // Add any additional navigation button handling here
+}
+
+/**
+ * Check authentication state and update UI accordingly
+ */
+function checkAuthState() {
+    if (firebase.auth) {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                // User is signed in
+                updateUserInfo(user);
             } else {
+                // User is not signed in, redirect to login page
                 window.location.href = 'index.html';
             }
         });
@@ -356,181 +336,23 @@ function initNavigation() {
 }
 
 /**
- * Initialize bypass auth button
+ * Update user information in the UI
  */
-function initBypassAuth() {
-    const bypassAuthBtn = document.getElementById('bypass-auth-btn');
-    if (bypassAuthBtn) {
-        bypassAuthBtn.addEventListener('click', function() {
-            logDebug('AUTH BYPASS ACTIVATED - continuing without authentication');
-            authBypass = true;
-            
-            // Show debug console
-            document.getElementById('debug-console').style.display = 'block';
-        });
-    }
-}
-
-/**
- * Create and add a debug button to the page
- */
-function createDebugButton() {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'Debug';
-    debugBtn.style.position = 'fixed';
-    debugBtn.style.bottom = '10px';
-    debugBtn.style.right = '10px';
-    debugBtn.style.zIndex = '9999';
-    debugBtn.style.padding = '5px 10px';
-    debugBtn.style.background = '#333';
-    debugBtn.style.color = '#fff';
-    debugBtn.style.border = 'none';
-    debugBtn.style.borderRadius = '4px';
-    debugBtn.style.cursor = 'pointer';
+function updateUserInfo(user) {
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
     
-    debugBtn.addEventListener('click', function() {
-        const debugConsole = document.getElementById('debug-console');
-        if (debugConsole) {
-            debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
-        }
-    });
-    
-    document.body.appendChild(debugBtn);
-}
-
-/**
- * Simple authentication check with bypass option
- */
-function checkAuthentication() {
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-        logDebug('Found auth token in localStorage. Assuming authenticated initially.');
-    }
-
-    if (window.firebase && firebase.auth) {
-        logDebug('Setting up onAuthStateChanged listener...');
-        let initialCheckDone = false; // Flag to track if initial listener has run
-
-        firebase.auth().onAuthStateChanged(function(user) {
-            logDebug(`>>> onAuthStateChanged Fired! User: ${user ? user.uid : 'null'}. Already resolved: ${authStateResolved}`);
-            
-            // Logic for the FIRST time the listener fires after page load
-            if (!authStateResolved) {
-                 if (user) {
-                    logDebug(`   [Listener Initial] User found directly. Resolving promise with user.`);
-                    user.getIdToken(true).then(token => localStorage.setItem('authToken', token)).catch(e => logDebug('Error refreshing token initial', e)); 
-                    authStatePromiseResolver(user);
-                    authStateResolved = true;
-                } else {
-                    logDebug('   [Listener Initial] Initial trigger is NULL. Setting 250ms timeout to check persisted state...');
-                    setTimeout(() => {
-                        logDebug('   [Listener Timeout Check] Timeout finished.');
-                        if (!authStateResolved) { // Check again, maybe resolved by a rapid second fire
-                            const currentUserAfterDelay = firebase.auth().currentUser;
-                            logDebug(`   [Listener Timeout Check] State after delay: ${currentUserAfterDelay ? currentUserAfterDelay.uid : 'null'}`);
-                            if (currentUserAfterDelay) {
-                                logDebug('   [Listener Timeout Check] User found after delay. Resolving promise with user.');
-                                authStatePromiseResolver(currentUserAfterDelay);
-                            } else {
-                                logDebug('   [Listener Timeout Check] No user after delay. ***NOT deleting token***. Resolving promise with null.');
-                                authStatePromiseResolver(null);
-                                if (!authBypass && !storedToken) { // Only show error if no token existed initially either
-                                    logDebug('   [Listener Timeout Check] Authentication potentially required (no initial token either). Showing debug console.');
-                                    document.getElementById('debug-console').style.display = 'block';
-                                }
-                            }
-                            authStateResolved = true;
-                        } else {
-                            logDebug('   [Listener Timeout Check] Auth state was already resolved before timeout check finished.');
-                        }
-                    }, 250); 
-                }
-            } 
-            // Logic for SUBSEQUENT times the listener fires (e.g., user logs out in another tab)
-            else {
-                 logDebug('   [Listener Subsequent] Fired again after promise was resolved.');
-                 if (!user) {
-                      logDebug('   [Listener Subsequent] Subsequent fire reports logged out user. Clearing token NOW.');
-                      localStorage.removeItem('authToken'); // OK to clear token now if state changes AFTER initial resolution
-                      // Optionally update UI or redirect if needed based on logout
-                 } else {
-                     // User is still logged in or logged in again
-                     logDebug('   [Listener Subsequent] Subsequent fire reports logged in user.');
-                 }
-            }
-            initialCheckDone = true; // Mark that the listener logic has run at least once
-        });
-    } else {
-        logDebug('WARNING: Firebase auth not available. Resolving promise with null.');
-        authStatePromiseResolver(null); 
-        authStateResolved = true;
-    }
-}
-
-/**
- * Show error message
- */
-function showError() {
-    const errorMessage = document.getElementById('error-message');
-    if (errorMessage) {
-        errorMessage.classList.remove('hidden');
-        setTimeout(() => {
-            errorMessage.classList.add('hidden');
-        }, 5000);
-    }
-}
-
-/**
- * Show alert message
- */
-function showAlert(message, type = 'info') {
-    // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert');
-    existingAlerts.forEach(alert => {
-        document.body.removeChild(alert);
-    });
-    
-    // Create alert element
-    const alertElement = document.createElement('div');
-    alertElement.className = `alert alert-${type}`;
-    alertElement.innerHTML = `
-        <div class="alert-content">
-            <span class="alert-message">${message}</span>
-            <button class="alert-close">&times;</button>
-        </div>
-    `;
-    
-    // Add to document
-    document.body.appendChild(alertElement);
-    
-    // Show after a small delay (for animation)
-    setTimeout(() => {
-        alertElement.classList.add('show');
-    }, 10);
-    
-    // Add close button handler
-    const closeBtn = alertElement.querySelector('.alert-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            alertElement.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(alertElement)) {
-                    document.body.removeChild(alertElement);
-                }
-            }, 300);
-        });
+    if (userDisplayName && user.displayName) {
+        userDisplayName.textContent = user.displayName;
     }
     
-    // Auto remove for non-error alerts
-    if (type !== 'error') {
-        setTimeout(() => {
-            alertElement.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(alertElement)) {
-                    document.body.removeChild(alertElement);
-                }
-            }, 300);
-        }, 5000);
+    if (userEmail && user.email) {
+        userEmail.textContent = user.email;
+    }
+    
+    if (userAvatar && user.photoURL) {
+        userAvatar.src = user.photoURL;
     }
 }
 
@@ -539,14 +361,15 @@ function showAlert(message, type = 'info') {
  */
 function validateSelection() {
     if (!selectedTone) {
-        logDebug('ERROR: No tone selected');
+        console.log('ERROR: No tone selected');
         return false;
     }
     
     if (selectedTone === 'custom') {
-        const customToneInput = document.getElementById('custom-tone');
+        const customToneInput = document.getElementById('customToneInput');
         if (!customToneInput || !customToneInput.value.trim()) {
-            logDebug('ERROR: Custom tone selected but no description provided');
+            console.log('ERROR: Custom tone selected but no description provided');
+            showAlert('Please describe your custom tone before continuing.', 'error');
             return false;
         }
     }
@@ -555,64 +378,39 @@ function validateSelection() {
 }
 
 /**
- * Save tone data and navigate to message result page
+ * Save tone data and navigate to the next page
  */
 async function saveToneAndNavigate() {
-    logDebug('Attempting to save tone and navigate...');
+    console.log('Attempting to save tone and navigate...');
+    showLoading('Preparing your message...');
+    
     try {
-        logDebug('   Waiting for authStatePromise to resolve...');
-        await authStatePromise;
-        logDebug('>>> authStatePromise Resolved. Proceeding with navigation logic.');
-
         // Create tone data object
         const toneData = {
             type: selectedTone
         };
         
         if (selectedTone === 'custom') {
-            const customToneInput = document.getElementById('custom-tone');
+            const customToneInput = document.getElementById('customToneInput');
             if (customToneInput) {
                 toneData.customText = customToneInput.value.trim();
             }
         }
+        
+        // Save tone data to localStorage
         localStorage.setItem('toneData', JSON.stringify(toneData));
-        logDebug('   Tone data saved.');
-
-        const currentUser = firebase.auth().currentUser;
-        const storedToken = localStorage.getItem('authToken');
-        logDebug(`   State post-await: currentUser = ${currentUser ? currentUser.uid : 'null'}, storedToken exists = ${!!storedToken}`);
-
-        if (currentUser) {
-            logDebug('   Condition: currentUser is valid. Getting fresh token...');
-            currentUser.getIdToken(true) // Force refresh token
-                .then(token => {
-                    logDebug('      Successfully got fresh token post-wait.');
-                    localStorage.setItem('authToken', token);
-                    const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-                    logDebug(`      Navigating to: ${nextPage}`);
-                    window.location.href = nextPage;
-                })
-                .catch(error => {
-                    logDebug(`      ERROR getting fresh token post-wait: ${error.message}`);
-                    showAlert('Could not verify authentication. Please try refreshing the page.', 'error');
-                });
-        } else if (storedToken && !authBypass) {
-            logDebug('   Condition: currentUser is null, but storedToken exists. Navigating with assumption...');
-            const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-            logDebug(`      Navigating (using stored token assumption) to: ${nextPage}`);
-            window.location.href = nextPage; 
-        } else if (authBypass) {
-             logDebug('   Condition: Auth bypass enabled. Navigating...');
-             const nextPage = `message-result-new.html?emotion=${selectedEmotion}`;
-             logDebug(`      Navigating (bypass) to: ${nextPage}`);
-             window.location.href = nextPage;
-        } else {
-            logDebug('   Condition: No currentUser, no storedToken, no bypass. Showing error.');
-            showAlert('Authentication required. Please ensure you are logged in or try refreshing.', 'error');
-        }
+        localStorage.setItem('selectedTone', JSON.stringify(toneData));
+        
+        console.log('Tone data saved:', toneData);
+        
+        // Navigate to the next page after a short delay
+        setTimeout(() => {
+            window.location.href = 'message-result-new.html';
+        }, 800);
     } catch (error) {
-        logDebug(`   ERROR during saveToneAndNavigate: ${error.message}`);
-        showAlert('There was a problem proceeding to the next step.', 'error');
+        console.error('Error during tone saving:', error);
+        hideLoading();
+        showAlert('There was a problem saving your tone selection. Please try again.', 'error');
     }
 }
 
@@ -650,4 +448,89 @@ function getInitials(name) {
 function capitalizeFirstLetter(string) {
     if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Show alert message
+ * @param {string} message - The message to display
+ * @param {string} type - The type of alert: 'info', 'error', or 'success'
+ */
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alertContainer');
+    
+    if (!alertContainer) {
+        console.error('Alert container not found');
+        return;
+    }
+    
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = `
+        <div class="alert-icon">
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 
+                         type === 'success' ? 'fa-check-circle' : 
+                         'fa-info-circle'}"></i>
+        </div>
+        <div class="alert-content">${message}</div>
+        <button class="alert-close"><i class="fas fa-times"></i></button>
+    `;
+    
+    // Add close functionality
+    const closeBtn = alertBox.querySelector('.alert-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            alertBox.classList.add('alert-closing');
+            setTimeout(() => {
+                if (alertContainer.contains(alertBox)) {
+                    alertContainer.removeChild(alertBox);
+                }
+            }, 300);
+        });
+    }
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertContainer.contains(alertBox)) {
+            alertBox.classList.add('alert-closing');
+            setTimeout(() => {
+                if (alertContainer.contains(alertBox)) {
+                    alertContainer.removeChild(alertBox);
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // Add to container
+    alertContainer.appendChild(alertBox);
+    
+    // Force reflow to trigger transition
+    alertBox.offsetHeight;
+    alertBox.classList.add('show');
+}
+
+/**
+ * Show loading overlay with custom message
+ */
+function showLoading(message = 'Loading...') {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingContext = document.getElementById('loadingContext');
+    
+    if (loadingContext) {
+        loadingContext.textContent = message;
+    }
+    
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('active');
+    }
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+    }
 } 

@@ -951,6 +951,9 @@ function generateMessage(variation = null) {
                 displayGeneratedMessage(parsedResponse.message);
                 displayMessageInsights(parsedResponse.insights);
                 
+                // Save the message to Firebase for the current user
+                saveMessageToFirebase(parsedResponse.message, parsedResponse.insights);
+                
                 // Log success
                 logDebug('Message generated successfully');
             })
@@ -961,6 +964,53 @@ function generateMessage(variation = null) {
     } catch (error) {
         console.error('Error generating message:', error);
         showError('Failed to generate message. Please check your inputs and try again.');
+    }
+}
+
+/**
+ * Save the generated message to Firebase
+ */
+function saveMessageToFirebase(messageText, insights) {
+    // Only proceed if the user is authenticated
+    if (!firebase || !firebase.auth || !firebase.auth().currentUser) {
+        logDebug('User not authenticated, message not saved to Firebase');
+        return;
+    }
+    
+    try {
+        // Get data from localStorage
+        const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
+        const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
+        const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
+        
+        // Create message object
+        const messageData = {
+            content: messageText,
+            insights: insights || [],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            recipientName: recipientData.name || 'Unknown',
+            relationship: recipientData.relationship || 'friend',
+            connectionId: recipientData.id || null,
+            type: intentData.type || 'general',
+            tone: toneData.type || 'warm',
+            toneIntensity: toneData.intensity || 'medium'
+        };
+        
+        // Save to Firestore
+        firebase.firestore()
+            .collection('users')
+            .doc(firebase.auth().currentUser.uid)
+            .collection('messages')
+            .add(messageData)
+            .then(docRef => {
+                logDebug(`Message saved to Firebase with ID: ${docRef.id}`);
+            })
+            .catch(error => {
+                console.error('Error saving message to Firebase:', error);
+                // Don't show error to user as this is a background operation
+            });
+    } catch (error) {
+        console.error('Error preparing message for Firebase:', error);
     }
 }
 

@@ -299,24 +299,94 @@
       <div class="modal-body">
         <form id="connection-form">
           <div class="form-group">
-            <label for="connection-name">Name</label>
-            <input type="text" id="connection-name" name="connection-name" required>
+            <label for="connection-name" class="form-label">Name</label>
+            <div class="input-with-icon">
+              <i class="fas fa-user input-icon"></i>
+              <input type="text" id="connection-name" name="connection-name" class="form-control" placeholder="Enter their name" required>
+            </div>
           </div>
+          
           <div class="form-group">
-            <label for="connection-relationship">Relationship</label>
-            <select id="connection-relationship" name="connection-relationship" required>
-              <option value="">Select relationship</option>
-              <option value="family">Family</option>
-              <option value="friend">Friend</option>
-              <option value="romantic">Romantic</option>
-              <option value="colleague">Colleague</option>
-              <option value="other">Other</option>
+            <label class="form-label">Relationship Type</label>
+            <div class="relationship-grid">
+              <div class="relationship-option" data-relationship="family">
+                <div class="relationship-icon">
+                  <i class="fas fa-home"></i>
+                </div>
+                <div class="relationship-label">Family</div>
+              </div>
+              
+              <div class="relationship-option" data-relationship="friend">
+                <div class="relationship-icon">
+                  <i class="fas fa-user-friends"></i>
+                </div>
+                <div class="relationship-label">Friend</div>
+              </div>
+              
+              <div class="relationship-option" data-relationship="romantic">
+                <div class="relationship-icon">
+                  <i class="fas fa-heart"></i>
+                </div>
+                <div class="relationship-label">Romantic</div>
+              </div>
+              
+              <div class="relationship-option" data-relationship="colleague">
+                <div class="relationship-icon">
+                  <i class="fas fa-briefcase"></i>
+                </div>
+                <div class="relationship-label">Colleague</div>
+              </div>
+              
+              <div class="relationship-option" data-relationship="acquaintance">
+                <div class="relationship-icon">
+                  <i class="fas fa-handshake"></i>
+                </div>
+                <div class="relationship-label">Acquaintance</div>
+              </div>
+              
+              <div class="relationship-option" data-relationship="other">
+                <div class="relationship-icon">
+                  <i class="fas fa-plus"></i>
+                </div>
+                <div class="relationship-label">Other</div>
+              </div>
+            </div>
+            <input type="hidden" id="connection-relationship" name="connection-relationship" required>
+          </div>
+          
+          <div class="form-group" id="other-relationship-group" style="display: none;">
+            <label for="other-relationship" class="form-label">Specify Relationship</label>
+            <div class="input-with-icon">
+              <i class="fas fa-pencil-alt input-icon"></i>
+              <input type="text" id="other-relationship" name="other-relationship" class="form-control" placeholder="Describe your relationship">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="connection-importance" class="form-label">How important is this relationship to you?</label>
+            <select id="connection-importance" name="connection-importance" class="form-select">
+              <option value="very-important">Very important - One of the most important people in my life</option>
+              <option value="important" selected>Important - Someone I care about deeply</option>
+              <option value="somewhat-important">Somewhat important - A person I want to maintain a connection with</option>
+              <option value="casual">Casual - Someone I interact with occasionally</option>
             </select>
           </div>
-          <div class="form-group" id="other-relationship-group" style="display: none;">
-            <label for="other-relationship">Specify relationship</label>
-            <input type="text" id="other-relationship" name="other-relationship">
+          
+          <div class="form-group">
+            <label for="connection-history" class="form-label">How long have you known each other?</label>
+            <select id="connection-history" name="connection-history" class="form-select">
+              <option value="new">Just met recently (less than 6 months)</option>
+              <option value="short" selected>Known for a while (6 months to 2 years)</option>
+              <option value="medium">Long-term relationship (2-10 years)</option>
+              <option value="long">Lifelong connection (more than 10 years)</option>
+            </select>
           </div>
+          
+          <div class="form-group">
+            <label for="connection-notes" class="form-label">Personal notes (optional)</label>
+            <textarea id="connection-notes" name="connection-notes" class="form-control" placeholder="Add details that would help personalize messages (interests, important dates, etc.)"></textarea>
+          </div>
+          
           <div class="form-actions">
             <button type="button" class="form-cancel-btn">Cancel</button>
             <button type="submit" class="form-submit-btn">Save Connection</button>

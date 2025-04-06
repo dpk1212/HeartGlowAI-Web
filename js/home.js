@@ -291,15 +291,32 @@ function initializeManageButtons() {
 function initializeConnectionModal() {
   const modal = document.getElementById('connection-modal');
   const form = document.getElementById('connection-form');
-  const cancelBtn = document.getElementById('cancel-connection-btn');
+  const cancelBtn = document.getElementById('cancel-connection');
+  const closeBtn = document.getElementById('close-modal');
   
-  if (!modal || !form || !cancelBtn) {
-    console.warn('Connection modal elements not found');
+  if (!modal) {
+    console.warn('Connection modal not found');
     return;
   }
   
+  if (!form) {
+    console.warn('Connection form not found');
+    return;
+  }
+  
+  // Close modal when clicking X button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeConnectionModal);
+  } else {
+    console.warn('Modal close button not found');
+  }
+  
   // Close modal when clicking cancel button
-  cancelBtn.addEventListener('click', closeConnectionModal);
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeConnectionModal);
+  } else {
+    console.warn('Modal cancel button not found');
+  }
   
   // Close modal when clicking outside of it
   modal.addEventListener('click', function(e) {
@@ -309,10 +326,12 @@ function initializeConnectionModal() {
   });
   
   // Handle form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveConnection();
-  });
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveConnection();
+    });
+  }
 }
 
 // Open connection modal for adding new connection

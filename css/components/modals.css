@@ -292,18 +292,17 @@ select option {
 
 /* Specific relationship section animation */
 #specific-relationship-container {
-  transition: all 0.3s ease;
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  margin: 0;
+  transition: all 0.3s ease !important;
+  overflow: visible !important;
+  max-height: none !important;
+  opacity: 1 !important;
+  margin-top: 12px !important;
+  margin-bottom: 16px !important;
 }
 
 #specific-relationship-container[style*="block"] {
-  max-height: 120px;
-  opacity: 1;
-  margin-top: 12px;
-  margin-bottom: 16px;
+  display: block !important;
+  visibility: visible !important;
 }
 
 /* Error messages */

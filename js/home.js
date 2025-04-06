@@ -811,6 +811,15 @@ function createConnectionModal() {
       input.style.borderColor = "rgba(255, 255, 255, 0.2)";
       input.style.color = "#ffffff";
     });
+    
+    // Make sure specific relationship container is initialized correctly
+    const specificRelationshipContainer = document.getElementById('specific-relationship-container');
+    if (specificRelationshipContainer) {
+      specificRelationshipContainer.style.display = 'none';
+      specificRelationshipContainer.style.transition = 'all 0.3s ease';
+      specificRelationshipContainer.style.marginTop = '12px';
+      specificRelationshipContainer.style.marginBottom = '16px';
+    }
   }
   
   // Close modal when clicking X button
@@ -835,7 +844,14 @@ function createConnectionModal() {
   // Set up relationship type change handler
   const relationshipTypeSelect = document.getElementById('connection-relationship');
   if (relationshipTypeSelect) {
-    relationshipTypeSelect.addEventListener('change', updateSpecificRelationshipOptions);
+    // Ensure we remove any existing event listeners to prevent duplicates
+    relationshipTypeSelect.removeEventListener('change', updateSpecificRelationshipOptions);
+    
+    // Add the event listener
+    relationshipTypeSelect.addEventListener('change', function() {
+      console.log('Relationship type changed to:', this.value);
+      updateSpecificRelationshipOptions();
+    });
   }
   
   // Handle form submission
@@ -854,6 +870,7 @@ function createConnectionModal() {
 
 // Update specific relationship options based on primary relationship type
 function updateSpecificRelationshipOptions() {
+  console.log('Updating specific relationship options');
   const primaryType = document.getElementById('connection-relationship').value;
   const specificContainer = document.getElementById('specific-relationship-container');
   const specificSelect = document.getElementById('connection-specific-relationship');
@@ -863,6 +880,10 @@ function updateSpecificRelationshipOptions() {
     return;
   }
   
+  console.log('Primary relationship type:', primaryType);
+  console.log('Container found:', specificContainer);
+  console.log('Select found:', specificSelect);
+  
   // Clear existing options except the first one
   while (specificSelect.options.length > 1) {
     specificSelect.remove(1);
@@ -871,6 +892,7 @@ function updateSpecificRelationshipOptions() {
   // Show/hide and populate based on primary type
   if (primaryType && primaryType !== 'other') {
     specificContainer.style.display = 'block';
+    console.log('Showing specific relationship container');
     
     const relationshipOptions = {
       family: [
@@ -929,14 +951,17 @@ function updateSpecificRelationshipOptions() {
     
     // Add options for the selected relationship type
     if (relationshipOptions[primaryType]) {
+      console.log('Adding options for:', primaryType);
       relationshipOptions[primaryType].forEach(option => {
         const newOption = document.createElement('option');
         newOption.value = option.value;
         newOption.textContent = option.text;
         specificSelect.appendChild(newOption);
       });
+      console.log('Options added:', specificSelect.options.length - 1);
     }
   } else {
+    console.log('Hiding specific relationship container');
     specificContainer.style.display = 'none';
   }
 }

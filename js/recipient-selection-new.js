@@ -1,11 +1,12 @@
 /**
- * Recipient Selection Page - Simplified Version
+ * Recipient Selection Page - HeartGlowAI
  * This handles selecting the recipient and relationship type for message creation
  */
 
 // Global variables
-let selectedRelation = null;
-let urlEmotion = null;
+let selectedRelationship = null;
+let selectedIntent = null;
+let userMenuOpen = false;
 
 // Main initialization function - runs when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initPage);
@@ -16,129 +17,65 @@ document.addEventListener('DOMContentLoaded', initPage);
 function initPage() {
     console.log('Initializing recipient selection page...');
     
-    // Get the emotion from URL parameter
-    urlEmotion = getEmotionFromUrl();
-    console.log('Emotion from URL:', urlEmotion);
+    // Load the selected intent from the previous page
+    loadSelectedIntent();
     
-    // Initialize UI elements
+    // Initialize UI elements and event listeners
+    initUserMenu();
     initRelationshipSelection();
-    initButtons();
     initNavigation();
-    initBypassAuth();
+    initFormValidation();
     
-    // Show debug button
-    createDebugButton();
-    
-    // Log page loaded
-    logDebug('Page initialized successfully');
+    // Check authentication state
+    checkAuthState();
 }
 
 /**
- * Get the emotion parameter from the URL
+ * Initialize the user menu dropdown
  */
-function getEmotionFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
-}
-
-/**
- * Initialize relationship type selection
- */
-function initRelationshipSelection() {
-    const relationshipTypes = document.querySelectorAll('.relationship-type');
+function initUserMenu() {
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
     
-    if (!relationshipTypes.length) {
-        logDebug('ERROR: No relationship types found');
-        return;
-    }
-    
-    logDebug(`Found ${relationshipTypes.length} relationship types`);
-    
-    relationshipTypes.forEach(type => {
-        type.addEventListener('click', function() {
-            // Remove selected class from all types
-            relationshipTypes.forEach(t => t.classList.remove('selected'));
-            
-            // Add selected class to clicked type
-            this.classList.add('selected');
-            
-            // Save selected relation
-            selectedRelation = this.getAttribute('data-relation');
-            logDebug(`Selected relationship: ${selectedRelation}`);
+    if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userMenuOpen = !userMenuOpen;
+            userDropdown.style.display = userMenuOpen ? 'block' : 'none';
         });
-    });
-}
-
-/**
- * Initialize back and next buttons
- */
-function initButtons() {
-    // Back button
-    const backBtn = document.getElementById('back-btn');
-    if (backBtn) {
-        backBtn.addEventListener('click', function() {
-            window.location.href = 'emotional-entry.html';
-        });
-    } else {
-        logDebug('ERROR: Back button not found');
-    }
-    
-    // Next button
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-        nextBtn.addEventListener('click', function() {
-            if (validateForm()) {
-                saveDataAndNavigate();
-            } else {
-                showError();
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            if (userMenuOpen) {
+                userMenuOpen = false;
+                userDropdown.style.display = 'none';
             }
         });
-    } else {
-        logDebug('ERROR: Next button not found');
+        
+        // Prevent dropdown from closing when clicking inside
+        userDropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+        
+        // Setup logout functionality
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', handleLogout);
+        }
     }
 }
 
 /**
- * Initialize navigation buttons
+ * Check authentication state and update UI accordingly
  */
-function initNavigation() {
-    // Dashboard button
-    const dashboardBtn = document.getElementById('dashboard-btn');
-    if (dashboardBtn) {
-        dashboardBtn.addEventListener('click', function() {
-            window.location.href = 'home.html';
-        });
-    }
-    
-    // History button
-    const historyBtn = document.getElementById('history-btn');
-    if (historyBtn) {
-        historyBtn.addEventListener('click', function() {
-            window.location.href = 'history.html';
-        });
-    }
-    
-    // Learn button
-    const learnBtn = document.getElementById('learn-btn');
-    if (learnBtn) {
-        learnBtn.addEventListener('click', function() {
-            window.location.href = 'learn.html';
-        });
-    }
-    
-    // Logout button
-    const logoutBtn = document.getElementById('logout-btn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            if (window.firebase && firebase.auth) {
-                firebase.auth().signOut()
-                    .then(() => {
-                        window.location.href = 'index.html';
-                    })
-                    .catch((error) => {
-                        console.error('Logout error:', error);
-                    });
+function checkAuthState() {
+    if (firebase.auth) {
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                // User is signed in
+                updateUserInfo(user);
             } else {
+                // User is not signed in, redirect to login page
                 window.location.href = 'index.html';
             }
         });
@@ -146,63 +83,135 @@ function initNavigation() {
 }
 
 /**
- * Initialize bypass auth button
+ * Update user information in the UI
  */
-function initBypassAuth() {
-    const bypassAuthBtn = document.getElementById('bypass-auth-btn');
-    if (bypassAuthBtn) {
-        bypassAuthBtn.addEventListener('click', function() {
-            logDebug('AUTH BYPASS ACTIVATED - continuing without authentication');
-            
-            // Disable save connection option
-            const saveConnectionOption = document.getElementById('save-connection');
-            if (saveConnectionOption) {
-                saveConnectionOption.disabled = true;
-                saveConnectionOption.parentElement.style.opacity = '0.5';
-            }
-            
-            document.getElementById('debug-console').style.display = 'block';
-        });
+function updateUserInfo(user) {
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    
+    if (userDisplayName && user.displayName) {
+        userDisplayName.textContent = user.displayName;
+    }
+    
+    if (userEmail && user.email) {
+        userEmail.textContent = user.email;
+    }
+    
+    if (userAvatar && user.photoURL) {
+        userAvatar.src = user.photoURL;
     }
 }
 
 /**
- * Create and add a debug button to the page
+ * Handle user logout
  */
-function createDebugButton() {
-    const debugBtn = document.createElement('button');
-    debugBtn.textContent = 'Debug';
-    debugBtn.style.position = 'fixed';
-    debugBtn.style.bottom = '10px';
-    debugBtn.style.right = '10px';
-    debugBtn.style.zIndex = '9999';
-    debugBtn.style.padding = '5px 10px';
-    debugBtn.style.background = '#333';
-    debugBtn.style.color = '#fff';
-    debugBtn.style.border = 'none';
-    debugBtn.style.borderRadius = '4px';
-    debugBtn.style.cursor = 'pointer';
+function handleLogout() {
+    showLoading('Signing out...');
     
-    debugBtn.addEventListener('click', function() {
-        const debugConsole = document.getElementById('debug-console');
-        if (debugConsole) {
-            debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
-        }
-    });
-    
-    document.body.appendChild(debugBtn);
+    if (firebase.auth) {
+        firebase.auth().signOut()
+            .then(() => {
+                window.location.href = 'index.html';
+            })
+            .catch((error) => {
+                hideLoading();
+                showAlert('Logout failed: ' + error.message, 'error');
+                console.error('Logout error:', error);
+            });
+    } else {
+        window.location.href = 'index.html';
+    }
 }
 
 /**
- * Show error message
+ * Load the selected intent from previous page
  */
-function showError() {
-    const errorMessage = document.getElementById('error-message');
-    if (errorMessage) {
-        errorMessage.classList.remove('hidden');
-        setTimeout(() => {
-            errorMessage.classList.add('hidden');
-        }, 5000);
+function loadSelectedIntent() {
+    try {
+        const storedIntent = localStorage.getItem('selectedIntent');
+        if (storedIntent) {
+            selectedIntent = JSON.parse(storedIntent);
+            displayIntent(selectedIntent);
+        } else {
+            // If no intent found, redirect back to intent selection page
+            window.location.href = 'message-intent-new.html';
+        }
+    } catch (e) {
+        console.error('Error loading intent data:', e);
+        showAlert('Something went wrong. Please start over.', 'error');
+    }
+}
+
+/**
+ * Display the selected intent in the UI
+ */
+function displayIntent(intent) {
+    const intentIcon = document.getElementById('intentIcon');
+    const intentTitle = document.getElementById('intentTitle');
+    const intentDescription = document.getElementById('intentDescription');
+    
+    if (intentIcon && intent.icon) {
+        intentIcon.innerHTML = `<i class="fas ${intent.icon}"></i>`;
+    }
+    
+    if (intentTitle && intent.title) {
+        intentTitle.textContent = intent.title;
+    }
+    
+    if (intentDescription && intent.description) {
+        intentDescription.textContent = intent.description;
+    }
+}
+
+/**
+ * Initialize relationship type selection
+ */
+function initRelationshipSelection() {
+    const relationshipOptions = document.querySelectorAll('.relationship-option');
+    
+    if (!relationshipOptions.length) {
+        console.error('No relationship options found');
+        return;
+    }
+    
+    relationshipOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            // Remove selected class from all types
+            relationshipOptions.forEach(o => o.classList.remove('selected'));
+            
+            // Add selected class to clicked type
+            this.classList.add('selected');
+            
+            // Save selected relation
+            selectedRelationship = this.getAttribute('data-relationship');
+            console.log(`Selected relationship: ${selectedRelationship}`);
+            
+            // Show "other" input field if "other" relationship is selected
+            const otherSection = document.getElementById('otherRelationshipSection');
+            if (otherSection) {
+                otherSection.style.display = selectedRelationship === 'other' ? 'block' : 'none';
+            }
+            
+            // Enable Next button if name is also completed
+            validateForm();
+        });
+    });
+}
+
+/**
+ * Initialize form validation
+ */
+function initFormValidation() {
+    const recipientName = document.getElementById('recipientName');
+    const otherRelationship = document.getElementById('otherRelationship');
+    
+    if (recipientName) {
+        recipientName.addEventListener('input', validateForm);
+    }
+    
+    if (otherRelationship) {
+        otherRelationship.addEventListener('input', validateForm);
     }
 }
 
@@ -210,102 +219,214 @@ function showError() {
  * Validate the form
  */
 function validateForm() {
-    const nameInput = document.getElementById('recipient-name');
-    if (!nameInput) {
-        logDebug('ERROR: Recipient name input not found');
+    const nameInput = document.getElementById('recipientName');
+    const nextBtn = document.getElementById('nextBtn');
+    const otherRelationship = document.getElementById('otherRelationship');
+    
+    if (!nameInput || !nextBtn) {
+        console.error('Required form elements not found');
         return false;
     }
     
     const name = nameInput.value.trim();
-    if (!name) {
-        logDebug('Validation failed: No recipient name');
-        return false;
+    let isValid = name.length > 0 && selectedRelationship;
+    
+    // If "other" relationship is selected, require the "other" field to be filled
+    if (selectedRelationship === 'other' && otherRelationship) {
+        isValid = isValid && otherRelationship.value.trim().length > 0;
     }
     
-    if (!selectedRelation) {
-        logDebug('Validation failed: No relationship selected');
-        return false;
+    // Enable/disable next button
+    nextBtn.disabled = !isValid;
+    
+    return isValid;
+}
+
+/**
+ * Initialize navigation buttons
+ */
+function initNavigation() {
+    // Back button
+    const backBtn = document.getElementById('backBtn');
+    if (backBtn) {
+        backBtn.addEventListener('click', function() {
+            window.location.href = 'message-intent-new.html';
+        });
     }
     
-    return true;
+    // Next button
+    const nextBtn = document.getElementById('nextBtn');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+            if (validateForm()) {
+                saveDataAndNavigate();
+            } else {
+                showAlert('Please complete all required fields.', 'error');
+            }
+        });
+    }
 }
 
 /**
  * Save data and navigate to the next page
  */
 async function saveDataAndNavigate() {
-    logDebug('Attempting to save data and navigate...');
     try {
-        const nameInput = document.getElementById('recipient-name');
-        const name = nameInput.value.trim();
-        const saveConnectionCheckbox = document.getElementById('save-connection');
-        const shouldSave = saveConnectionCheckbox ? saveConnectionCheckbox.checked : false;
-        const isSaveDisabled = saveConnectionCheckbox ? saveConnectionCheckbox.disabled : false; // Check if disabled (e.g., by bypass)
+        showLoading('Saving your selection...');
         
-        // Prepare recipient data for localStorage (for next page)
-        const recipientDataForStorage = {
-            name: name,
-            relationship: selectedRelation,
-            // We won't pass shouldSave to the next page via localStorage
-        };
-        localStorage.setItem('recipientData', JSON.stringify(recipientDataForStorage));
-        logDebug('Recipient data saved to localStorage for next page.');
-
-        // Save to Firestore if requested and not disabled
-        if (shouldSave && !isSaveDisabled) {
-            logDebug('Save connection checkbox is checked. Attempting to save to Firestore...');
-            const user = firebase.auth().currentUser;
-            if (user) {
-                const connectionData = {
-                    name: name,
-                    relationship: selectedRelation,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp() 
-                    // Add any other fields you want to save for a connection
-                };
-                
-                try {
-                    // Use await here to ensure saving completes (or fails) before navigation attempt
-                    const docRef = await firebase.firestore()
-                        .collection('users')
-                        .doc(user.uid)
-                        .collection('connections')
-                        .add(connectionData);
-                    logDebug(`Connection successfully saved to Firestore with ID: ${docRef.id}`);
-                } catch (error) {
-                    logDebug(`ERROR: Failed to save connection to Firestore: ${error.message}`);
-                    // Decide how to handle save failure - maybe alert user but still navigate?
-                    showAlert('Could not save connection: ' + error.message, 'error'); 
-                    // Don't return here, proceed to navigation anyway
-                }
-            } else {
-                logDebug('WARNING: Cannot save connection because user is not logged in.');
-                // Optionally alert the user they need to be logged in to save
+        const nameInput = document.getElementById('recipientName');
+        const name = nameInput.value.trim();
+        
+        // Get "other" relationship value if applicable
+        let relationshipValue = selectedRelationship;
+        if (selectedRelationship === 'other') {
+            const otherRelationship = document.getElementById('otherRelationship');
+            if (otherRelationship && otherRelationship.value.trim()) {
+                relationshipValue = otherRelationship.value.trim();
             }
-        } else {
-             logDebug('Not saving connection to Firestore (checkbox unchecked or disabled).');
         }
         
-        // Navigate to the next page regardless of save success/failure for now
-        const nextPage = `message-intent-new.html?emotion=${urlEmotion}`;
-        logDebug(`Navigating to: ${nextPage}`);
-        window.location.href = nextPage;
-
+        // Check if we should save the recipient
+        const saveRecipient = document.getElementById('saveRecipient');
+        const shouldSave = saveRecipient ? saveRecipient.checked : false;
+        
+        // Prepare recipient data for localStorage (for next page)
+        const recipientData = {
+            name: name,
+            relationship: relationshipValue
+        };
+        
+        // Store in localStorage for next page
+        localStorage.setItem('selectedRecipient', JSON.stringify(recipientData));
+        
+        // If user checked "save recipient", save to database
+        if (shouldSave && firebase.auth && firebase.auth().currentUser) {
+            const currentUser = firebase.auth().currentUser;
+            await saveRecipientToFirestore(currentUser.uid, name, relationshipValue);
+        }
+        
+        // Navigate to the next page after a short delay
+        setTimeout(() => {
+            window.location.href = 'message-tone-new.html';
+        }, 500);
     } catch (error) {
-        logDebug(`ERROR in saveDataAndNavigate: ${error.message}`);
-        showAlert('An unexpected error occurred.', 'error');
+        console.error('Error saving data:', error);
+        hideLoading();
+        showAlert('Could not save your data. Please try again.', 'error');
     }
 }
 
 /**
- * Log debug message to console and debug output
+ * Save recipient to Firestore database
  */
-function logDebug(message) {
-    console.log('DEBUG:', message);
-    
-    const debugOutput = document.getElementById('debug-output');
-    if (debugOutput) {
-        const logEntry = document.createElement('div');
-        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        debugOutput.appendChild(logEntry);
+async function saveRecipientToFirestore(userId, name, relationship) {
+    try {
+        if (!firebase.firestore) {
+            console.error('Firestore not available');
+            return;
+        }
+        
+        const db = firebase.firestore();
+        const connectionRef = db.collection('users').doc(userId).collection('connections');
+        
+        // Check if this connection already exists
+        const querySnapshot = await connectionRef.where('name', '==', name).get();
+        
+        if (querySnapshot.empty) {
+            // Create new connection
+            await connectionRef.add({
+                name: name,
+                relationship: relationship,
+                created: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log('New connection saved to database');
+        } else {
+            // Update existing connection
+            const docId = querySnapshot.docs[0].id;
+            await connectionRef.doc(docId).update({
+                relationship: relationship,
+                updated: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            console.log('Existing connection updated');
+        }
+    } catch (error) {
+        console.error('Error saving to Firestore:', error);
+        // We don't throw here to prevent blocking navigation
     }
+}
+
+/**
+ * Show loading overlay with custom message
+ */
+function showLoading(message = 'Loading...') {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const loadingContext = document.getElementById('loadingContext');
+    
+    if (loadingContext) {
+        loadingContext.textContent = message;
+    }
+    
+    if (loadingOverlay) {
+        loadingOverlay.classList.add('active');
+    }
+}
+
+/**
+ * Hide loading overlay
+ */
+function hideLoading() {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('active');
+    }
+}
+
+/**
+ * Show alert message
+ * @param {string} message - The message to display
+ * @param {string} type - The type of alert: 'info', 'error', or 'success'
+ */
+function showAlert(message, type = 'info') {
+    const alertContainer = document.getElementById('alertContainer');
+    
+    if (!alertContainer) return;
+    
+    const alertBox = document.createElement('div');
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = `
+        <div class="alert-icon">
+            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 
+                         type === 'success' ? 'fa-check-circle' : 
+                         'fa-info-circle'}"></i>
+        </div>
+        <div class="alert-content">${message}</div>
+        <button class="alert-close"><i class="fas fa-times"></i></button>
+    `;
+    
+    // Add close functionality
+    const closeBtn = alertBox.querySelector('.alert-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            alertBox.classList.add('alert-closing');
+            setTimeout(() => {
+                alertContainer.removeChild(alertBox);
+            }, 300);
+        });
+    }
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertBox.parentNode === alertContainer) {
+            alertBox.classList.add('alert-closing');
+            setTimeout(() => {
+                if (alertBox.parentNode === alertContainer) {
+                    alertContainer.removeChild(alertBox);
+                }
+            }, 300);
+        }
+    }, 5000);
+    
+    // Add to container
+    alertContainer.appendChild(alertBox);
 } 

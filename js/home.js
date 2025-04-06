@@ -3901,67 +3901,173 @@ function confirmDeleteConnection(connectionId) {
   // Store the ID for the delete operation
   editingConnectionId = connectionId;
   
-  // Create or get the confirmation dialog
-  let dialog = document.getElementById('delete-confirmation-dialog');
-  
-  // Create if it doesn't exist
-  if (!dialog) {
-    dialog = document.createElement('div');
-    dialog.id = 'delete-confirmation-dialog';
-    dialog.className = 'modal';
-    dialog.innerHTML = `
-      <div class="modal-content" style="max-width: 400px;">
-        <div class="modal-header">
-          <h3>Delete Connection</h3>
-          <button class="close-btn" data-action="cancel">×</button>
+  // Create the dialog HTML
+  const dialogHTML = `
+    <div id="delete-confirmation-dialog" class="modal" style="display:flex;z-index:10000;">
+      <div class="modal-content" style="max-width: 400px;background:#1a1530;color:white;">
+        <div class="modal-header" style="background:linear-gradient(135deg, #7e57c2, #5e35b1);">
+          <h3 style="color:white;">Delete Connection</h3>
+          <button id="close-delete-btn" style="background:none;border:none;color:white;font-size:24px;cursor:pointer;">×</button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="padding:20px;">
           <p>Are you sure you want to delete this connection? This action cannot be undone.</p>
-          <div class="modal-actions" style="margin-top: 20px;">
-            <button class="btn-secondary" data-action="cancel">Cancel</button>
-            <button class="btn-danger" data-action="confirm">Delete</button>
+          <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:10px;">
+            <button id="cancel-delete-btn" style="padding:10px 20px;background:rgba(255,255,255,0.1);color:white;border:1px solid rgba(255,255,255,0.2);border-radius:4px;cursor:pointer;">Cancel</button>
+            <button id="confirm-delete-btn" style="padding:10px 20px;background:#e53935;color:white;border:none;border-radius:4px;cursor:pointer;">Delete</button>
           </div>
         </div>
       </div>
-    `;
+    </div>
+  `;
+  
+  // Remove any existing dialog
+  const existingDialog = document.getElementById('delete-confirmation-dialog');
+  if (existingDialog) {
+    existingDialog.remove();
+  }
+  
+  // Add the dialog to the body
+  document.body.insertAdjacentHTML('beforeend', dialogHTML);
+  
+  // Get the new dialog and buttons
+  const dialog = document.getElementById('delete-confirmation-dialog');
+  const closeBtn = document.getElementById('close-delete-btn');
+  const cancelBtn = document.getElementById('cancel-delete-btn');
+  const confirmBtn = document.getElementById('confirm-delete-btn');
+  
+  // Set up direct onclick handlers
+  closeBtn.onclick = function() {
+    dialog.remove();
+    editingConnectionId = null;
+  };
+  
+  cancelBtn.onclick = function() {
+    dialog.remove();
+    editingConnectionId = null;
+  };
+  
+  confirmBtn.onclick = function() {
+    deleteConnection(connectionId);
+    dialog.remove();
+  };
+  
+  // Click outside to close
+  dialog.onclick = function(e) {
+    if (e.target === dialog) {
+      dialog.remove();
+      editingConnectionId = null;
+    }
+  };
+}
+
+// Create a direct, reliable way to handle edit buttons
+document.addEventListener('DOMContentLoaded', function() {
+  // Direct click handler for edit buttons
+  document.body.addEventListener('click', function(e) {
+    // Check if we clicked an edit button
+    let editButton = null;
     
-    document.body.appendChild(dialog);
+    // Check for the pencil icon
+    if (e.target.classList.contains('fa-edit') || e.target.classList.contains('fa-pencil-alt')) {
+      editButton = e.target;
+    }
     
-    // Add a single event listener for all buttons in the dialog
-    dialog.addEventListener('click', function(e) {
-      // Handle dialog background click (cancel)
-      if (e.target === dialog) {
-        hideDeleteDialog();
+    // Check for a button containing the icon
+    if (!editButton && (e.target.querySelector('.fa-edit') || e.target.querySelector('.fa-pencil-alt'))) {
+      editButton = e.target;
+    }
+    
+    // Check for a parent button
+    if (!editButton) {
+      const parentButton = e.target.closest('.home-page__connection-button, .edit-btn');
+      if (parentButton && 
+          (parentButton.querySelector('.fa-edit') || 
+           parentButton.querySelector('.fa-pencil-alt') ||
+           parentButton.classList.contains('edit-btn'))) {
+        editButton = parentButton;
+      }
+    }
+    
+    // If we found an edit button, handle it
+    if (editButton) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Find the connection element
+      const connectionElement = editButton.closest('.home-page__connection') || 
+                                editButton.closest('.modal-connection-item');
+      
+      if (!connectionElement) {
+        console.error('Could not find parent connection element');
         return;
       }
       
-      // Find clicked button by checking if it or its ancestor has a data-action attribute
-      const actionElement = e.target.closest('[data-action]');
-      if (!actionElement) return;
+      // Get the connection ID
+      const connectionId = connectionElement.dataset.connectionId || 
+                          connectionElement.getAttribute('data-id');
       
-      const action = actionElement.getAttribute('data-action');
-      
-      if (action === 'cancel') {
-        hideDeleteDialog();
-      } else if (action === 'confirm') {
-        deleteConnection(editingConnectionId);
-        hideDeleteDialog();
+      if (!connectionId) {
+        console.error('Could not find connection ID');
+        return;
       }
-    });
-  }
-  
-  // Show the dialog
-  dialog.style.display = 'flex';
-}
-
-// Clean function to hide the delete dialog
-function hideDeleteDialog() {
-  const dialog = document.getElementById('delete-confirmation-dialog');
-  if (dialog) {
-    dialog.style.display = 'none';
-  }
-  editingConnectionId = null;
-}
+      
+      console.log('Edit button clicked for connection:', connectionId);
+      openConnectionModal(connectionId);
+      return false;
+    }
+    
+    // Also handle delete (trash) buttons directly
+    let deleteButton = null;
+    
+    // Check for the trash icon
+    if (e.target.classList.contains('fa-trash')) {
+      deleteButton = e.target;
+    }
+    
+    // Check for a button containing the icon
+    if (!deleteButton && e.target.querySelector('.fa-trash')) {
+      deleteButton = e.target;
+    }
+    
+    // Check for a parent button
+    if (!deleteButton) {
+      const parentButton = e.target.closest('.home-page__connection-button, .delete-btn');
+      if (parentButton && 
+          (parentButton.querySelector('.fa-trash') ||
+           parentButton.classList.contains('delete-btn'))) {
+        deleteButton = parentButton;
+      }
+    }
+    
+    // If we found a delete button, handle it
+    if (deleteButton) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Find the connection element
+      const connectionElement = deleteButton.closest('.home-page__connection') || 
+                               deleteButton.closest('.modal-connection-item');
+      
+      if (!connectionElement) {
+        console.error('Could not find parent connection element');
+        return;
+      }
+      
+      // Get the connection ID
+      const connectionId = connectionElement.dataset.connectionId || 
+                          connectionElement.getAttribute('data-id');
+      
+      if (!connectionId) {
+        console.error('Could not find connection ID');
+        return;
+      }
+      
+      console.log('Delete button clicked for connection:', connectionId);
+      confirmDeleteConnection(connectionId);
+      return false;
+    }
+  });
+});
 
 // Clean function to actually delete the connection
 function deleteConnection(connectionId) {

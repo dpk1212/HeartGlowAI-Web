@@ -824,18 +824,27 @@ function createConnectionModal() {
   
   // Close modal when clicking X button
   if (closeBtn) {
-    closeBtn.addEventListener('click', closeConnectionModal);
+    closeBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Close button clicked');
+      closeConnectionModal();
+    });
   }
   
   // Close modal when clicking cancel button
   if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeConnectionModal);
+    cancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      console.log('Cancel button clicked');
+      closeConnectionModal();
+    });
   }
   
   // Close modal when clicking outside of it
   if (modal) {
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
+        console.log('Clicked outside modal content');
         closeConnectionModal();
       }
     });
@@ -858,6 +867,7 @@ function createConnectionModal() {
   if (form) {
     form.addEventListener('submit', function(e) {
       e.preventDefault();
+      console.log('Form submitted');
       saveConnection();
     });
     
@@ -1072,11 +1082,14 @@ function saveConnection() {
         loadAllConnections();
       }
       
-      hideLoading();
+      // Reset editing state
+      editingConnectionId = null;
     })
     .catch(error => {
       console.error('Error saving connection:', error);
-      showAlert('Error saving connection', 'error');
+      showAlert('Error saving connection: ' + error.message, 'error');
+    })
+    .finally(() => {
       hideLoading();
     });
 }
@@ -3080,11 +3093,14 @@ function saveConnection() {
         loadAllConnections();
       }
       
-      hideLoading();
+      // Reset editing state
+      editingConnectionId = null;
     })
     .catch(error => {
       console.error('Error saving connection:', error);
-      showAlert('Error saving connection', 'error');
+      showAlert('Error saving connection: ' + error.message, 'error');
+    })
+    .finally(() => {
       hideLoading();
     });
 }

@@ -1244,6 +1244,7 @@ body::after {
     overflow: hidden;
     transition: all 0.3s ease;
     margin-bottom: 20px; /* Add spacing between content and insights */
+    display: block; /* Ensure content is displayed */
 }
 
 .message-content::before {
@@ -1283,6 +1284,7 @@ body::after {
 
 .message-body {
     padding: 10px 0;
+    margin-bottom: 15px;
 }
 
 .message-text {
@@ -1292,6 +1294,7 @@ body::after {
     white-space: pre-wrap;
     padding: 10px;
     border-radius: 8px;
+    display: block; /* Ensure text is displayed */
 }
 
 .message-actions {
@@ -1333,6 +1336,7 @@ body::after {
     box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
+    display: block; /* Ensure insights are displayed */
 }
 
 .message-insights h3 {
@@ -1353,6 +1357,7 @@ body::after {
     list-style: none;
     padding-left: 10px;
     margin: 0;
+    display: block; /* Ensure list is displayed */
 }
 
 .message-insights li {
@@ -1362,6 +1367,7 @@ body::after {
     font-size: 14px;
     line-height: 1.5;
     color: var(--text-secondary, #555);
+    display: list-item; /* Ensure list items are displayed as list items */
 }
 
 .message-insights li::before {
@@ -1431,6 +1437,25 @@ body::after {
 /* Regenerate options styling */
 .regenerate-options {
     margin-top: 30px;
+    display: block; /* Ensure regenerate options are displayed */
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.option-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Edit container styling */

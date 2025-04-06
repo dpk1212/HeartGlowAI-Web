@@ -569,17 +569,24 @@ function initializeConnectionModal() {
 function openConnectionModal(connectionId = null) {
   console.log('Opening connection modal. Editing connection ID:', connectionId);
   
-  const modal = document.getElementById('connection-modal');
+  let modal = document.getElementById('connection-modal');
   if (!modal) {
-    console.error('Connection modal not found');
-    return;
+    // If we're not finding the modal, create it dynamically
+    createConnectionModal();
+    
+    // Try to get the modal again
+    modal = document.getElementById('connection-modal');
+    if (!modal) {
+      console.error('Could not find or create connection modal');
+      return;
+    }
   }
   
   // Set global editing state
   editingConnectionId = connectionId;
   
   // Update modal title
-  const modalTitle = document.getElementById('connection-modal-title');
+  const modalTitle = document.getElementById('modal-title');
   if (modalTitle) {
     modalTitle.textContent = connectionId ? 'Edit Connection' : 'Add New Connection';
   }
@@ -588,23 +595,20 @@ function openConnectionModal(connectionId = null) {
   const form = document.getElementById('connection-form');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const otherRelationshipField = document.getElementById('other-relationship');
-  const otherRelationshipGroup = document.getElementById('other-relationship-group');
-  const importanceField = document.getElementById('connection-importance');
-  const historyField = document.getElementById('connection-history');
+  const specificRelationshipContainer = document.getElementById('specific-relationship-container');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  const yearsField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
-  // Reset form and relationship grid selection
+  // Reset form
   if (form) {
     form.reset();
     
-    // Reset the relationship grid (remove 'selected' class from all options)
-    const relationshipOptions = document.querySelectorAll('.relationship-option');
-    relationshipOptions.forEach(option => option.classList.remove('selected'));
-    
-    // Hide the other relationship input field initially
-    if (otherRelationshipGroup) {
-      otherRelationshipGroup.style.display = 'none';
+    // Hide specific relationship container initially
+    if (specificRelationshipContainer) {
+      specificRelationshipContainer.style.display = 'none';
     }
   }
   
@@ -634,27 +638,25 @@ function openConnectionModal(connectionId = null) {
           if (nameField) nameField.value = data.name || '';
           if (relationshipField) relationshipField.value = data.relationship || '';
           
-          // Select the relationship in the grid
-          if (data.relationship) {
-            const relationshipOptions = document.querySelectorAll('.relationship-option');
-            relationshipOptions.forEach(option => {
-              if (option.getAttribute('data-relationship') === data.relationship) {
-                option.classList.add('selected');
-                
-                // Handle "other" relationship type
-                if (data.relationship === 'other' && otherRelationshipGroup) {
-                  otherRelationshipGroup.style.display = 'block';
-                  if (otherRelationshipField && data.otherRelationship) {
-                    otherRelationshipField.value = data.otherRelationship;
-                  }
-                }
+          // Handle specific relationship selection
+          if (data.relationship && data.relationship !== 'other' && specificRelationshipContainer) {
+            specificRelationshipContainer.style.display = 'block';
+            
+            // Trigger relationship change to populate the specific options
+            updateSpecificRelationshipOptions();
+            
+            // Then set the specific relationship value
+            setTimeout(() => {
+              if (specificRelationshipField && data.specificRelationship) {
+                specificRelationshipField.value = data.specificRelationship;
               }
-            });
+            }, 100);  // Slight delay to ensure options are populated
           }
           
           // Populate additional fields
-          if (importanceField) importanceField.value = data.importance || 'important';
-          if (historyField) historyField.value = data.history || 'short';
+          if (yearsField) yearsField.value = data.yearsKnown || '';
+          if (communicationStyleField) communicationStyleField.value = data.communicationStyle || '';
+          if (goalField) goalField.value = data.relationshipGoal || '';
           if (notesField) notesField.value = data.notes || '';
           
           hideLoading();
@@ -933,9 +935,10 @@ function saveConnection() {
   // Get form values
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const otherRelationshipField = document.getElementById('other-relationship');
-  const importanceField = document.getElementById('connection-importance');
-  const historyField = document.getElementById('connection-history');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  const yearsField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
   if (!nameField || !relationshipField) {
@@ -958,18 +961,6 @@ function saveConnection() {
     return;
   }
   
-  // Get other relationship if applicable
-  let otherRelationship = '';
-  if (relationship === 'other' && otherRelationshipField) {
-    otherRelationship = otherRelationshipField.value.trim();
-    
-    if (!otherRelationship) {
-      showAlert('Please specify the relationship type', 'error');
-      otherRelationshipField.focus();
-      return;
-    }
-  }
-  
   // Prepare data to save
   const connectionData = {
     name,
@@ -977,20 +968,27 @@ function saveConnection() {
     updatedAt: new Date()
   };
   
-  // Add other relationship if applicable
-  if (relationship === 'other') {
-    connectionData.otherRelationship = otherRelationship;
+  // Add specific relationship if selected
+  if (specificRelationshipField && specificRelationshipField.value) {
+    connectionData.specificRelationship = specificRelationshipField.value;
   }
   
-  // Add additional fields if they exist and have values
-  if (importanceField) {
-    connectionData.importance = importanceField.value;
+  // Add years known if provided
+  if (yearsField && yearsField.value) {
+    connectionData.yearsKnown = parseInt(yearsField.value);
   }
   
-  if (historyField) {
-    connectionData.history = historyField.value;
+  // Add communication style if selected
+  if (communicationStyleField && communicationStyleField.value) {
+    connectionData.communicationStyle = communicationStyleField.value;
   }
   
+  // Add relationship goal/focus if selected
+  if (goalField && goalField.value) {
+    connectionData.relationshipGoal = goalField.value;
+  }
+  
+  // Add notes if provided
   if (notesField && notesField.value.trim()) {
     connectionData.notes = notesField.value.trim();
   }
@@ -2945,9 +2943,10 @@ function saveConnection() {
   // Get form values
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const otherRelationshipField = document.getElementById('other-relationship');
-  const importanceField = document.getElementById('connection-importance');
-  const historyField = document.getElementById('connection-history');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  const yearsField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
   if (!nameField || !relationshipField) {
@@ -2970,18 +2969,6 @@ function saveConnection() {
     return;
   }
   
-  // Get other relationship if applicable
-  let otherRelationship = '';
-  if (relationship === 'other' && otherRelationshipField) {
-    otherRelationship = otherRelationshipField.value.trim();
-    
-    if (!otherRelationship) {
-      showAlert('Please specify the relationship type', 'error');
-      otherRelationshipField.focus();
-      return;
-    }
-  }
-  
   // Prepare data to save
   const connectionData = {
     name,
@@ -2989,20 +2976,27 @@ function saveConnection() {
     updatedAt: new Date()
   };
   
-  // Add other relationship if applicable
-  if (relationship === 'other') {
-    connectionData.otherRelationship = otherRelationship;
+  // Add specific relationship if selected
+  if (specificRelationshipField && specificRelationshipField.value) {
+    connectionData.specificRelationship = specificRelationshipField.value;
   }
   
-  // Add additional fields if they exist and have values
-  if (importanceField) {
-    connectionData.importance = importanceField.value;
+  // Add years known if provided
+  if (yearsField && yearsField.value) {
+    connectionData.yearsKnown = parseInt(yearsField.value);
   }
   
-  if (historyField) {
-    connectionData.history = historyField.value;
+  // Add communication style if selected
+  if (communicationStyleField && communicationStyleField.value) {
+    connectionData.communicationStyle = communicationStyleField.value;
   }
   
+  // Add relationship goal/focus if selected
+  if (goalField && goalField.value) {
+    connectionData.relationshipGoal = goalField.value;
+  }
+  
+  // Add notes if provided
   if (notesField && notesField.value.trim()) {
     connectionData.notes = notesField.value.trim();
   }

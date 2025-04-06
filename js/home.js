@@ -150,11 +150,43 @@ function initializeHomePage() {
       showRemindersError('Failed to initiate reminder loading.');
     }
     
+    // Add event handlers to clean up any stale modals
+    window.addEventListener('resize', checkAndCleanupModals);
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden) {
+        // When tab becomes visible again, check for stale modals
+        checkAndCleanupModals();
+      }
+    });
+    
   } catch (error) {
     console.error('Critical Error in initializeHomePage:', error);
     // Show a general error if basic initialization fails
     showAlert('A critical error occurred initializing the page. Please refresh.', 'error');
   }
+}
+
+/**
+ * Check for and clean up any stale modals that might be stuck open
+ */
+function checkAndCleanupModals() {
+  console.log('Checking for stale modals...');
+  
+  // Check for stale delete confirmation dialog
+  const deleteDialog = document.getElementById('delete-confirmation-dialog');
+  if (deleteDialog) {
+    console.log('Found stale delete dialog, cleaning up');
+    try {
+      deleteDialog.style.display = 'none';
+      document.body.removeChild(deleteDialog);
+    } catch (e) {
+      // Ignore errors
+    }
+    editingConnectionId = null;
+  }
+  
+  // Close any open connection modals
+  closeConnectionModal();
 }
 
 // Check for static empty state elements in the HTML and hide them
@@ -750,127 +782,125 @@ function updateSpecificRelationshipOptions() {
 
 // Save connection to Firestore
 function saveConnection() {
-  console.log('Attempting to save connection');
-  
-  if (!currentUser) {
-    console.error('No current user for saving connection');
-    showAlert('You must be logged in to save connections', 'error');
+  // Add a submission tracking flag to prevent duplicates
+  if (document.getElementById('connection-form').dataset.submitting === 'true') {
+    console.log('Form submission already in progress, preventing duplicate');
     return;
   }
   
-  // Ensure Firestore is initialized
-  if (!firebase.firestore) {
-    console.error('Firestore is not initialized');
-    showAlert('Firebase Firestore is not available', 'error');
-    return;
-  }
+  // Mark form as being submitted
+  document.getElementById('connection-form').dataset.submitting = 'true';
   
+  // Show loading state
+  showLoading('Saving connection...');
+  
+  // Get form data
+  const connectionForm = document.getElementById('connection-form');
   const idField = document.getElementById('connection-id');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const specificRelationshipField = document.getElementById('connection-specific-relationship');
   
-  // Enhanced fields
+  // Get enhanced fields
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
   const yearsKnownField = document.getElementById('connection-years');
   const communicationStyleField = document.getElementById('connection-communication-style');
   const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
-  if (!nameField) {
-    console.error('Name field not found');
-    return;
-  }
-  
-  if (!relationshipField) {
-    console.error('Relationship field not found');
-    return;
-  }
-  
-  const name = nameField.value.trim();
-  const relationship = relationshipField.value;
-  
-  // Get values from fields (with defaults for optional fields)
-  const specificRelationship = specificRelationshipField && specificRelationshipField.style.display !== 'none' ? 
-                               specificRelationshipField.value : '';
-  const yearsKnown = yearsKnownField ? yearsKnownField.value : '';
-  const communicationStyle = communicationStyleField ? communicationStyleField.value : '';
-  const goal = goalField ? goalField.value : '';
-  const notes = notesField ? notesField.value.trim() : '';
-  
-  console.log('Form data:', { 
-    name, 
-    relationship, 
-    specificRelationship,
-    yearsKnown, 
-    communicationStyle,
-    goal,
-    notes 
-  });
-  
-  if (!name) {
+  // Validate required fields
+  if (!nameField.value.trim()) {
+    hideLoading();
     showAlert('Please enter a name', 'error');
+    nameField.focus();
+    document.getElementById('connection-form').dataset.submitting = 'false';
     return;
   }
   
-  if (!relationship) {
+  if (!relationshipField.value) {
+    hideLoading();
     showAlert('Please select a relationship type', 'error');
+    relationshipField.focus();
+    document.getElementById('connection-form').dataset.submitting = 'false';
     return;
   }
   
-  showLoading('Saving connection...');
+  // Check if user is authenticated
+  if (!firebase.auth().currentUser) {
+    hideLoading();
+    showAlert('You must be logged in to save connections', 'error');
+    document.getElementById('connection-form').dataset.submitting = 'false';
+    return;
+  }
   
+  // Prepare connection data
   const connectionData = {
-    name: name,
-    relationship: relationship,
-    specificRelationship: specificRelationship || '',
-    yearsKnown: yearsKnown || 0,
-    communicationStyle: communicationStyle || '',
-    relationshipGoal: goal || '',
-    notes: notes || '',
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    name: nameField.value.trim(),
+    relationship: relationshipField.value,
+    updated: firebase.firestore.FieldValue.serverTimestamp()
   };
   
-  // If new connection, add createdAt field
-  if (!editingConnectionId) {
-    connectionData.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+  // Add enhanced fields if they exist and have values
+  if (specificRelationshipField && specificRelationshipField.value) {
+    connectionData.specificRelationship = specificRelationshipField.value;
   }
   
-  const connectionId = editingConnectionId || idField.value;
-  const isNewConnection = !connectionId;
+  if (yearsKnownField && yearsKnownField.value) {
+    connectionData.yearsKnown = yearsKnownField.value;
+  }
   
-  console.log(`Saving ${isNewConnection ? 'new' : 'existing'} connection:`, connectionData);
+  if (communicationStyleField && communicationStyleField.value) {
+    connectionData.communicationStyle = communicationStyleField.value;
+  }
   
-  // Reference to the connections collection
-  const connectionsRef = firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('connections');
+  if (goalField && goalField.value) {
+    connectionData.relationshipGoal = goalField.value;
+  }
   
-  // Save to Firestore
+  if (notesField && notesField.value.trim()) {
+    connectionData.notes = notesField.value.trim();
+  }
+  
+  // If editing existing connection
+  const isEditing = !!idField.value;
+  const userUid = firebase.auth().currentUser.uid;
+  const connectionsRef = firebase.firestore().collection('users').doc(userUid).collection('connections');
+  
+  // Determine if we're adding or updating
   let savePromise;
-  if (isNewConnection) {
-    console.log('Adding new connection to Firestore');
-    savePromise = connectionsRef.add(connectionData);
+  if (isEditing) {
+    // Add updated timestamp
+    connectionData.updated = firebase.firestore.FieldValue.serverTimestamp();
+    
+    // Update existing connection
+    savePromise = connectionsRef.doc(idField.value).update(connectionData);
   } else {
-    console.log(`Updating existing connection: ${connectionId}`);
-    savePromise = connectionsRef.doc(connectionId).update(connectionData);
+    // Add creation timestamp for new connections
+    connectionData.created = firebase.firestore.FieldValue.serverTimestamp();
+    
+    // Create new connection
+    savePromise = connectionsRef.add(connectionData);
   }
   
+  // Process save operation
   savePromise
-    .then((result) => {
-      console.log(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, result);
+    .then(result => {
       hideLoading();
-      showAlert(`Person ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
+      showAlert(`Connection ${isEditing ? 'updated' : 'added'} successfully`, 'success');
       closeConnectionModal();
-      // Wait a moment before refreshing the list
-      setTimeout(() => {
-        loadUserConnections(); // Refresh the list
-      }, 500);
+      
+      // Refresh the connections list
+      loadUserConnections();
+      
+      // Reset submission state
+      document.getElementById('connection-form').dataset.submitting = 'false';
     })
-    .catch((error) => {
-      console.error(`Error ${isNewConnection ? 'adding' : 'updating'} connection:`, error);
+    .catch(error => {
       hideLoading();
+      console.error('Error saving connection:', error);
       showAlert(`Error saving connection: ${error.message}`, 'error');
+      
+      // Reset submission state
+      document.getElementById('connection-form').dataset.submitting = 'false';
     });
 }
 
@@ -936,39 +966,72 @@ function closeDeleteDialog() {
   const dialog = document.getElementById('delete-confirmation-dialog');
   if (dialog) {
     dialog.style.opacity = '0';
-    document.querySelector('#delete-confirmation-dialog .modal-content').style.transform = 'translateY(-20px)';
+    
+    const modalContent = document.querySelector('#delete-confirmation-dialog .modal-content');
+    if (modalContent) {
+      modalContent.style.transform = 'translateY(-20px)';
+    }
+    
     setTimeout(() => {
       dialog.style.display = 'none';
+      
+      // Make sure we fully remove the dialog from the DOM to prevent stale state
+      try {
+        document.body.removeChild(dialog);
+      } catch (err) {
+        // Element might already be removed, ignore
+      }
     }, 300);
   }
+  
+  // Also try closing any stale connection modals
+  closeConnectionModal();
+  
+  // Reset the editing state
+  editingConnectionId = null;
 }
 
 // Actually perform the delete operation
 function performDeleteConnection() {
   if (!currentUser || !editingConnectionId) {
     showAlert('Cannot delete connection', 'error');
+    closeDeleteDialog();
     return;
   }
   
+  // Show loading state
   showLoading('Deleting connection...');
+  
+  // Track deletion state
+  const connectionIdToDelete = editingConnectionId;
   
   firebase.firestore()
     .collection('users')
     .doc(currentUser.uid)
     .collection('connections')
-    .doc(editingConnectionId)
+    .doc(connectionIdToDelete)
     .delete()
     .then(() => {
       hideLoading();
       showAlert('Connection deleted successfully', 'success');
+      
+      // Make sure to clear the editing connection ID
+      editingConnectionId = null;
+      
+      // Close all modals
       closeDeleteDialog();
       closeConnectionModal();
-      loadUserConnections(); // Refresh the list
+      
+      // Refresh the connections list
+      loadUserConnections();
     })
     .catch((error) => {
       hideLoading();
       console.error('Error deleting connection:', error);
       showAlert(`Error deleting connection: ${error.message}`, 'error');
+      
+      // Still try to close the dialog
+      closeDeleteDialog();
     });
 }
 

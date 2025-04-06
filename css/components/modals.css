@@ -1,3 +1,61 @@
+/* CRITICAL: Fix for modal appearance issues */
+:root {
+  --modal-bg-color: #1a1530;
+  --modal-text-color: #ffffff;
+  --modal-input-bg: rgba(255, 255, 255, 0.05);
+  --modal-input-border: rgba(255, 255, 255, 0.2);
+}
+
+/* Force modal styling */
+#connection-modal {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+#connection-modal .modal-content {
+  background-color: var(--modal-bg-color) !important;
+  color: var(--modal-text-color) !important;
+  opacity: 1 !important;
+}
+
+#connection-modal .modal-body {
+  background-color: var(--modal-bg-color) !important;
+  color: var(--modal-text-color) !important;
+}
+
+#connection-modal .modal-header {
+  background: linear-gradient(135deg, #7e57c2, #5e35b1) !important;
+  color: var(--modal-text-color) !important;
+}
+
+#connection-modal label {
+  color: var(--modal-text-color) !important;
+}
+
+#connection-modal input, 
+#connection-modal select, 
+#connection-modal textarea {
+  background-color: var(--modal-input-bg) !important;
+  border: 1px solid var(--modal-input-border) !important;
+  color: var(--modal-text-color) !important;
+  width: 100% !important;
+  padding: 12px 16px !important;
+  border-radius: 8px !important;
+  box-sizing: border-box !important;
+}
+
+#connection-modal .field-help {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+#connection-modal .field-group h4 {
+  color: #a67df4 !important;
+}
+
+/* Reset any unexpected styling that might be causing issues */
+#connection-modal * {
+  box-sizing: border-box;
+}
+
 /* Modal Component Styles */
 
 /* Base modal styling */
@@ -25,7 +83,7 @@
 }
 
 .modal-content {
-  background: rgba(20, 20, 30, 0.95);
+  background: #1a1530 !important; /* Darker and more opaque background */
   border-radius: 16px;
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 90%;
@@ -37,12 +95,14 @@
   animation: slideUp 0.3s forwards;
   transform: translateY(20px);
   opacity: 0;
-  color: #ffffff;
+  color: #ffffff !important; /* Force white text color */
 }
 
-.modal[style*="display: block"] .modal-content {
-  opacity: 1;
-  transform: translateY(0);
+.modal[style*="display: block"] .modal-content,
+.modal[style*="display: flex"] .modal-content,
+.modal-visible .modal-content {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
 }
 
 .modal-header {
@@ -51,14 +111,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, rgba(126, 87, 194, 0.2), rgba(94, 53, 177, 0.1));
+  background: linear-gradient(135deg, rgba(126, 87, 194, 0.5), rgba(94, 53, 177, 0.3)) !important;
+  color: white !important;
 }
 
 .modal-title {
   font-size: 20px;
   font-weight: 700;
   margin: 0;
-  color: #ffffff;
+  color: #ffffff !important;
 }
 
 .close-modal {
@@ -86,8 +147,9 @@
   overflow-y: auto;
   padding: 20px 25px;
   max-height: calc(85vh - 140px);
-  background: rgba(20, 20, 30, 0.95);
-  color: #ffffff;
+  background: #1a1530 !important; /* Darker, non-transparent background */
+  color: #ffffff !important;
+  border-radius: 0 0 16px 16px;
 }
 
 /* Scrollbar styling for modal body */
@@ -134,11 +196,12 @@
   max-width: 650px;
 }
 
-/* Form styling */
+/* Form styling - ensure labels and text are visible */
 #connection-form {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  color: white !important;
 }
 
 .field-group {
@@ -155,7 +218,7 @@
 .field-group h4 {
   font-size: 16px;
   font-weight: 600;
-  color: #a67df4;
+  color: white !important;
   margin: 0 0 16px 0;
   display: flex;
   align-items: center;
@@ -180,7 +243,7 @@
   font-size: 14px;
   font-weight: 500;
   margin-bottom: 8px;
-  color: rgba(255, 255, 255, 0.9);
+  color: white !important; /* Force white color for labels */
 }
 
 .form-group label::after {
@@ -196,15 +259,12 @@
   display: inline;
 }
 
-.input-field, select, textarea, input[type="text"], input[type="number"] {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 14px;
-  transition: all 0.2s ease;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
 }
 
 .input-field:focus, select:focus, textarea:focus, 
@@ -226,7 +286,7 @@ select option {
 
 .field-help {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
+  color: white !important;
   margin-top: 6px;
 }
 
@@ -256,8 +316,8 @@ select option {
 
 /* Error styling for form fields */
 .field-error {
-  border-color: rgba(255, 87, 87, 0.7) !important;
-  background: rgba(255, 87, 87, 0.05) !important;
+  border-color: #ff5757 !important;
+  background-color: rgba(255, 87, 87, 0.1) !important;
   box-shadow: 0 0 0 2px rgba(255, 87, 87, 0.15) !important;
 }
 

@@ -675,10 +675,8 @@ function createConnectionModal() {
     <div id="connection-modal" class="modal">
       <div class="modal-content">
         <div class="modal-header">
-          <h3 id="modal-title">Add New Person</h3>
-          <button id="close-modal" class="modal-close">
-            <i class="fas fa-times"></i>
-          </button>
+          <h3 id="modal-title" class="modal-title">Add New Connection</h3>
+          <button id="close-modal" class="close-modal">×</button>
         </div>
         <div class="modal-body">
           <form id="connection-form">
@@ -689,13 +687,13 @@ function createConnectionModal() {
               <h4>Basic Information</h4>
               <div class="form-group">
                 <label for="connection-name">Name*</label>
-                <input type="text" id="connection-name" class="input-field" placeholder="Enter name" required>
+                <input type="text" id="connection-name" class="input-field" placeholder="Enter name" required style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
               </div>
               
               <!-- Primary Relationship Type -->
               <div class="form-group">
                 <label for="connection-relationship">Relationship Type*</label>
-                <select id="connection-relationship" class="input-field" required>
+                <select id="connection-relationship" class="input-field" required style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
                   <option value="">Select relationship type</option>
                   <option value="family">Family</option>
                   <option value="friend">Friend</option>
@@ -709,7 +707,7 @@ function createConnectionModal() {
               <!-- Specific Relationship - dynamically shown based on primary type -->
               <div class="form-group" id="specific-relationship-container" style="display: none;">
                 <label for="connection-specific-relationship">Specific Relationship</label>
-                <select id="connection-specific-relationship" class="input-field">
+                <select id="connection-specific-relationship" class="input-field" style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
                   <option value="">Select specific relationship</option>
                   <!-- Options will be dynamically populated based on primary relationship -->
                 </select>
@@ -718,7 +716,7 @@ function createConnectionModal() {
               
               <div class="form-group">
                 <label for="connection-years">Years Known</label>
-                <input type="number" id="connection-years" class="input-field" min="0" max="100" placeholder="How many years have you known them?">
+                <input type="number" id="connection-years" class="input-field" min="0" max="100" placeholder="How many years have you known them?" style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
                 <div class="field-help">Helps tailor messages to the depth of your relationship</div>
               </div>
             </div>
@@ -728,7 +726,7 @@ function createConnectionModal() {
               <h4>Communication Preferences</h4>
               <div class="form-group">
                 <label for="connection-communication-style">Communication Style</label>
-                <select id="connection-communication-style" class="input-field">
+                <select id="connection-communication-style" class="input-field" style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
                   <option value="">Select style (optional)</option>
                   <option value="direct">Direct and straightforward</option>
                   <option value="warm">Warm and emotional</option>
@@ -742,7 +740,7 @@ function createConnectionModal() {
               <!-- Relationship Goal Field -->
               <div class="form-group">
                 <label for="connection-goal">Relationship Focus</label>
-                <select id="connection-goal" class="input-field">
+                <select id="connection-goal" class="input-field" style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;">
                   <option value="">Select focus (optional)</option>
                   <option value="maintain">Maintain current connection</option>
                   <option value="strengthen">Strengthen the relationship</option>
@@ -761,7 +759,7 @@ function createConnectionModal() {
               <h4>Additional Notes</h4>
               <div class="form-group">
                 <label for="connection-notes">Personal Notes</label>
-                <textarea id="connection-notes" rows="3" placeholder="Any personal details or conversation topics they enjoy"></textarea>
+                <textarea id="connection-notes" rows="3" placeholder="Any personal details or conversation topics they enjoy" style="width: 100%; padding: 12px 16px; border-radius: 8px; font-size: 14px; transition: all 0.2s ease;"></textarea>
                 <div class="field-help">Add memorable moments, important life events, or topics they love discussing</div>
               </div>
             </div>
@@ -784,6 +782,36 @@ function createConnectionModal() {
   const form = document.getElementById('connection-form');
   const cancelBtn = document.getElementById('cancel-connection');
   const closeBtn = document.getElementById('close-modal');
+  
+  // Apply custom styles to ensure dark background
+  if (modal) {
+    modal.style.backgroundColor = "rgba(0, 0, 0, 0.85)";
+    
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+      modalContent.style.backgroundColor = "#1a1530";
+      modalContent.style.color = "#ffffff";
+    }
+    
+    const modalBody = modal.querySelector('.modal-body');
+    if (modalBody) {
+      modalBody.style.backgroundColor = "#1a1530";
+      modalBody.style.color = "#ffffff";
+    }
+    
+    // Ensure form elements have proper styling
+    const labels = modal.querySelectorAll('label');
+    labels.forEach(label => {
+      label.style.color = "#ffffff";
+    });
+    
+    const inputs = modal.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+      input.style.backgroundColor = "rgba(255, 255, 255, 0.05)";
+      input.style.borderColor = "rgba(255, 255, 255, 0.2)";
+      input.style.color = "#ffffff";
+    });
+  }
   
   // Close modal when clicking X button
   if (closeBtn) {
@@ -816,9 +844,12 @@ function createConnectionModal() {
       e.preventDefault();
       saveConnection();
     });
+    
+    // Apply form validation enhancement
+    enhanceFormValidation(form);
   }
   
-  console.log('Connection modal created and initialized');
+  console.log('Connection modal created and initialized with enhanced styling');
 }
 
 // Update specific relationship options based on primary relationship type

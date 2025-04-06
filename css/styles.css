@@ -2960,3 +2960,46 @@ body::after {
   animation-name: fadeIn;
 }
 
+/* Connection actions */
+.connection-actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.connection-action {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.connection-action.message-action {
+  background: rgba(126, 87, 194, 0.1);
+  color: rgba(126, 87, 194, 0.9);
+}
+
+.connection-action.message-action:hover {
+  background: rgba(126, 87, 194, 0.2);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 8px rgba(126, 87, 194, 0.3);
+}
+
+.connection-action.edit-action {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--text-secondary);
+}
+
+.connection-action.edit-action:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--text-color);
+  transform: scale(1.1);
+}
+

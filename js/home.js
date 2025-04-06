@@ -602,7 +602,7 @@ function displayEmptyStates(type) {
             <p class="empty-subtext">Add people you message frequently</p>
             <button id="add-first-connection-btn" class="primary-button">
               <i class="fas fa-plus"></i> Add First Connection
-            </button>
+          </button>
           </div>
         </li>
       `;
@@ -748,12 +748,12 @@ async function loadUserConnections() {
     
     if (snapshot.empty) {
       console.log('No connections found for user');
-      displayEmptyStates('connections');
-      return;
-    }
-    
+            displayEmptyStates('connections');
+            return;
+          }
+          
     // Process all connections
-    const connections = [];
+          const connections = [];
     snapshot.forEach(doc => {
       connections.push({
         id: doc.id,
@@ -766,7 +766,7 @@ async function loadUserConnections() {
     hideEmptyState('connections');
     
     // Sort by most recently created first
-    connections.sort((a, b) => {
+          connections.sort((a, b) => {
       const dateA = a.created instanceof Date ? a.created : a.created.toDate();
       const dateB = b.created instanceof Date ? b.created : b.created.toDate();
       return dateB - dateA;
@@ -788,39 +788,55 @@ async function loadUserConnections() {
       else if (connection.relationship === 'partner') relationshipIcon = 'fa-heart';
       else if (connection.relationship === 'colleague') relationshipIcon = 'fa-briefcase';
       else if (connection.relationship === 'acquaintance') relationshipIcon = 'fa-handshake';
-      
-      const connectionItem = document.createElement('li');
+            
+            const connectionItem = document.createElement('li');
       connectionItem.className = 'connection-item animate__animated animate__fadeIn';
       connectionItem.setAttribute('data-id', connection.id);
       
-      connectionItem.innerHTML = `
+            connectionItem.innerHTML = `
         <div class="connection-avatar">
           <i class="fas ${relationshipIcon}"></i>
         </div>
-        <div class="connection-details">
+              <div class="connection-details">
           <div class="connection-name">${connection.name}</div>
-          <div class="connection-meta">
+                <div class="connection-meta">
             <span class="connection-relation">${relationshipText}</span>
+                </div>
+              </div>
+        <div class="connection-actions">
+          <div class="connection-action message-action" title="Create message">
+            <i class="fas fa-paper-plane"></i>
           </div>
-        </div>
-        <div class="connection-action primary-action" title="Create message">
-          <i class="fas fa-pen"></i>
+          <div class="connection-action edit-action" title="Edit connection">
+            <i class="fas fa-pencil-alt"></i>
+          </div>
         </div>
       `;
       
-      // Add click event to the main item to create message
+      // Add click event to the main item to view connection
       connectionItem.addEventListener('click', function(e) {
+        // Only proceed if not clicking on an action button
         if (!e.target.closest('.connection-action')) {
+          // Show connection details or open message creation
           createMessageForConnection(connection);
         }
       });
       
-      // Add click event to action button
-      const actionButton = connectionItem.querySelector('.connection-action');
-      if (actionButton) {
-        actionButton.addEventListener('click', (e) => {
+      // Add click event to message action button (paper airplane)
+      const messageAction = connectionItem.querySelector('.message-action');
+      if (messageAction) {
+        messageAction.addEventListener('click', (e) => {
           e.stopPropagation();
           createMessageForConnection(connection);
+        });
+      }
+      
+      // Add click event to edit action button (pencil)
+      const editAction = connectionItem.querySelector('.edit-action');
+      if (editAction) {
+        editAction.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openConnectionModal(connection.id);
         });
       }
       
@@ -1065,9 +1081,9 @@ async function loadUserMessages() {
   try {
     console.log('Loading messages for user', userUid);
     const messagesRef = firebase.firestore()
-      .collection('users')
+    .collection('users')
       .doc(userUid)
-      .collection('messages')
+    .collection('messages')
       .orderBy('timestamp', 'desc')
       .limit(10);
     
@@ -1078,14 +1094,14 @@ async function loadUserMessages() {
     
     if (snapshot.empty) {
       console.log('No messages found for user');
-      displayEmptyStates('messages');
-      return;
-    }
-    
+          displayEmptyStates('messages');
+          return;
+        }
+        
     // Process all messages
-    const messages = [];
+        const messages = [];
     snapshot.forEach(doc => {
-      const data = doc.data();
+            const data = doc.data();
       messages.push({
         id: doc.id,
         ...data,
@@ -1285,14 +1301,14 @@ function showAllMessagesModal(messages, connectionMap) {
     return `
       <div class="modal-message-item" data-id="${message.id}">
         <div class="message-content">
-          <div class="message-header">
+            <div class="message-header">
             <span class="message-recipient">${recipientName}</span>
             <span class="message-date">${messageDateText}</span>
-          </div>
+            </div>
           <div class="message-body">${truncatedContent}</div>
           <div class="message-footer">
             <span class="message-intent">${intentLabel}</span>
-          </div>
+              </div>
         </div>
         <div class="message-actions">
           <button class="message-action view-btn" title="View message">

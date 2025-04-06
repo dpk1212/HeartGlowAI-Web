@@ -129,12 +129,17 @@ function handleLogout() {
  */
 function loadSelectedIntent() {
     try {
+        console.log('Attempting to load selectedIntent from localStorage');
         const storedIntent = localStorage.getItem('selectedIntent');
+        console.log('Retrieved stored intent:', storedIntent);
+        
         if (storedIntent) {
             selectedIntent = JSON.parse(storedIntent);
+            console.log('Parsed selectedIntent:', selectedIntent);
             displayIntent(selectedIntent);
         } else {
             // If no intent found, redirect back to intent selection page
+            console.log('No intent found in localStorage, redirecting to intent selection');
             window.location.href = 'message-intent-new.html';
         }
     } catch (e) {

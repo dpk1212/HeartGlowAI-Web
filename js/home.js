@@ -638,14 +638,19 @@ async function loadUserConnections() {
     return;
   }
   
+  connectionsContainer.innerHTML = `
+    <li class="loading-item">
+      <div class="loading-spinner"></div>
+      <span>Loading your connections...</span>
+    </li>
+  `;
+  
   try {
     console.log('Loading connections for user', userUid);
     const connectionsRef = firebase.firestore()
       .collection('users')
       .doc(userUid)
-      .collection('connections')
-      .orderBy('created', 'desc')
-      .limit(20);
+      .collection('connections');
     
     const snapshot = await connectionsRef.get();
     
@@ -654,37 +659,52 @@ async function loadUserConnections() {
     
     if (snapshot.empty) {
       console.log('No connections found for user');
-      displayEmptyStates('connections');
+      connectionsContainer.innerHTML = `
+        <li class="empty-state">
+          <div class="empty-icon"><i class="fas fa-user-plus"></i></div>
+          <div class="empty-text">
+            <p>No saved connections yet</p>
+            <p class="empty-subtext">Add people you message frequently</p>
+            <button id="add-first-connection-btn" class="primary-button">
+              <i class="fas fa-plus"></i> Add First Connection
+            </button>
+          </div>
+        </li>
+      `;
+      
+      const addFirstConnectionBtn = document.getElementById('add-first-connection-btn');
+      if (addFirstConnectionBtn) {
+        addFirstConnectionBtn.addEventListener('click', () => openConnectionModal());
+      }
       return;
     }
     
-    // We have connections, so hide the no connections message even if we don't show them all
-    const noConnectionsEl = document.querySelector('.no-connections-message');
-    if (noConnectionsEl) {
-      noConnectionsEl.style.display = 'none';
-    }
-    
-    let connectionCount = 0;
+    // Process all connections
+    const connections = [];
     snapshot.forEach(doc => {
-      connectionCount++;
-      const connection = doc.data();
-      connection.id = doc.id;
-      
-      // Format the connection data
+      connections.push({
+        id: doc.id,
+        ...doc.data(),
+        created: doc.data().created || doc.data().createdAt || new Date(0)
+      });
+    });
+    
+    // Sort by most recently created first
+    connections.sort((a, b) => {
+      const dateA = a.created instanceof Date ? a.created : a.created.toDate();
+      const dateB = b.created instanceof Date ? b.created : b.created.toDate();
+      return dateB - dateA;
+    });
+    
+    // Only show the first 3 connections
+    const displayConnections = connections.slice(0, 3);
+    
+    // Add connections to container
+    displayConnections.forEach(connection => {
+      // Format relationship text
       const relationshipText = connection.relationship === 'other' && connection.otherRelationship
         ? connection.otherRelationship
         : capitalizeFirstLetter(connection.relationship || 'friend');
-      
-      const lastMessageText = connection.lastMessage 
-        ? connection.lastMessage.substring(0, 30) + (connection.lastMessage.length > 30 ? '...' : '')
-        : 'No messages yet';
-      
-      const initials = getInitials(connection.name);
-      
-      // Create the connection item
-      const connectionItem = document.createElement('li');
-      connectionItem.className = 'connection-item';
-      connectionItem.setAttribute('data-id', connection.id);
       
       // Choose icon based on relationship
       let relationshipIcon = 'fa-user-friends';
@@ -692,6 +712,10 @@ async function loadUserConnections() {
       else if (connection.relationship === 'partner') relationshipIcon = 'fa-heart';
       else if (connection.relationship === 'colleague') relationshipIcon = 'fa-briefcase';
       else if (connection.relationship === 'acquaintance') relationshipIcon = 'fa-handshake';
+      
+      const connectionItem = document.createElement('li');
+      connectionItem.className = 'connection-item animate__animated animate__fadeIn';
+      connectionItem.setAttribute('data-id', connection.id);
       
       connectionItem.innerHTML = `
         <div class="connection-avatar">
@@ -701,77 +725,239 @@ async function loadUserConnections() {
           <div class="connection-name">${connection.name}</div>
           <div class="connection-meta">
             <span class="connection-relation">${relationshipText}</span>
-            <span class="connection-last-message">${lastMessageText}</span>
           </div>
         </div>
-        <div class="connection-actions">
-          <span class="connection-action message-action" title="Create a message">
-            <i class="fas fa-paper-plane"></i>
-          </span>
-          <span class="connection-action edit-action" title="Edit connection">
-            <i class="fas fa-pencil-alt"></i>
-          </span>
+        <div class="connection-action primary-action" title="Create message">
+          <i class="fas fa-pen"></i>
         </div>
       `;
       
-      // Add the connection item to the container
-      connectionsContainer.appendChild(connectionItem);
-      
-      // Event listener for clicking on the entire connection
+      // Add click event to the main item to create message
       connectionItem.addEventListener('click', function(e) {
-        // Only proceed if not clicking on an action button
         if (!e.target.closest('.connection-action')) {
-          // Navigate to message creation with this connection pre-selected
-          localStorage.setItem('preselectedConnection', JSON.stringify({
-            id: connection.id,
-            name: connection.name,
-            relationship: connection.relationship,
-            otherRelationship: connection.otherRelationship || ''
-          }));
-          
-          window.location.href = 'message-intent-new.html';
+          createMessageForConnection(connection);
         }
       });
       
-      // Event listener for the message action (airplane icon)
-      const messageAction = connectionItem.querySelector('.message-action');
-      if (messageAction) {
-        messageAction.addEventListener('click', function(e) {
+      // Add click event to action button
+      const actionButton = connectionItem.querySelector('.connection-action');
+      if (actionButton) {
+        actionButton.addEventListener('click', (e) => {
           e.stopPropagation();
-          
-          // Store connection info for the message creation flow
-          localStorage.setItem('recipientData', JSON.stringify({
-            name: connection.name,
-            relationship: connection.relationship,
-            otherRelationship: connection.otherRelationship || ''
-          }));
-          
-          // Navigate to the message creation flow
-          window.location.href = 'message-intent-new.html';
+          createMessageForConnection(connection);
         });
       }
       
-      // Event listener for the edit action (pencil icon)
-      const editAction = connectionItem.querySelector('.edit-action');
-      if (editAction) {
-        editAction.addEventListener('click', function(e) {
-          e.stopPropagation();
-          openConnectionModal(connection.id);
-        });
-      }
+      connectionsContainer.appendChild(connectionItem);
     });
     
-    console.log(`Loaded ${connectionCount} connections`);
-    
-    // If we have connections but none in the list (shouldn't happen), still show empty state
-    if (connectionCount === 0) {
-      displayEmptyStates('connections');
+    // Add "View all" button if there are more connections
+    if (connections.length > 3) {
+      const viewAllItem = document.createElement('li');
+      viewAllItem.className = 'view-all-item';
+      viewAllItem.innerHTML = `
+        <button class="view-all-button">
+          <i class="fas fa-users"></i> View All Connections (${connections.length})
+        </button>
+      `;
+      
+      viewAllItem.addEventListener('click', () => {
+        // Show all connections modal
+        showAllConnectionsModal(connections);
+      });
+      
+      connectionsContainer.appendChild(viewAllItem);
     }
     
+    // Add "Add connection" button at the end
+    const addConnectionItem = document.createElement('li');
+    addConnectionItem.className = 'add-connection-item';
+    addConnectionItem.innerHTML = `
+      <button class="add-connection-button">
+        <i class="fas fa-plus"></i> Add New Connection
+      </button>
+    `;
+    
+    addConnectionItem.addEventListener('click', () => {
+      openConnectionModal();
+    });
+    
+    connectionsContainer.appendChild(addConnectionItem);
+    
+    console.log(`Displayed ${displayConnections.length} of ${connections.length} connections`);
   } catch (error) {
     console.error('Error loading connections:', error);
-    showConnectionsError(`Failed to load connections: ${error.message}`);
+    connectionsContainer.innerHTML = `
+      <li class="error-state">
+        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="error-message">
+          <p>Couldn't load your connections</p>
+          <button class="retry-button" id="retry-connections-btn">Retry</button>
+        </div>
+      </li>
+    `;
+    
+    const retryBtn = document.getElementById('retry-connections-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => loadUserConnections());
+    }
   }
+}
+
+// Show all connections in a modal
+function showAllConnectionsModal(connections) {
+  // Create modal element
+  let modalElement = document.getElementById('all-connections-modal');
+  
+  if (!modalElement) {
+    modalElement = document.createElement('div');
+    modalElement.id = 'all-connections-modal';
+    modalElement.className = 'modal';
+    document.body.appendChild(modalElement);
+  }
+  
+  // Create relationship icons map
+  const relationshipIcons = {
+    'friend': 'fa-user-friends',
+    'family': 'fa-home',
+    'partner': 'fa-heart',
+    'colleague': 'fa-briefcase',
+    'acquaintance': 'fa-handshake',
+    'other': 'fa-user'
+  };
+  
+  // Generate connection items HTML
+  const connectionsHTML = connections.map(connection => {
+    const relationshipText = connection.relationship === 'other' && connection.otherRelationship
+      ? connection.otherRelationship
+      : capitalizeFirstLetter(connection.relationship || 'friend');
+    
+    const relationshipIcon = relationshipIcons[connection.relationship] || 'fa-user';
+    
+    return `
+      <div class="modal-connection-item" data-id="${connection.id}">
+        <div class="connection-avatar">
+          <i class="fas ${relationshipIcon}"></i>
+        </div>
+        <div class="connection-details">
+          <div class="connection-name">${connection.name}</div>
+          <div class="connection-meta">
+            <span class="connection-relation">${relationshipText}</span>
+          </div>
+        </div>
+        <div class="connection-actions">
+          <button class="connection-action message-btn" title="Create message">
+            <i class="fas fa-pen"></i>
+          </button>
+          <button class="connection-action edit-btn" title="Edit connection">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Populate modal content
+  modalElement.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">All Connections</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-connections-list">
+          ${connectionsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-add-button">
+          <i class="fas fa-plus"></i> Add New Connection
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Show modal
+  modalElement.style.display = 'flex';
+  
+  // Add event listeners
+  const closeBtn = modalElement.querySelector('.modal-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modalElement.style.display = 'none';
+    });
+  }
+  
+  // Close modal when clicking outside
+  modalElement.addEventListener('click', (e) => {
+    if (e.target === modalElement) {
+      modalElement.style.display = 'none';
+    }
+  });
+  
+  // Add New Connection button
+  const addButton = modalElement.querySelector('.modal-add-button');
+  if (addButton) {
+    addButton.addEventListener('click', () => {
+      modalElement.style.display = 'none';
+      openConnectionModal();
+    });
+  }
+  
+  // Message buttons
+  const messageButtons = modalElement.querySelectorAll('.message-btn');
+  messageButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-connection-item');
+      const connectionId = item.getAttribute('data-id');
+      const connection = connections.find(c => c.id === connectionId);
+      
+      if (connection) {
+        modalElement.style.display = 'none';
+        createMessageForConnection(connection);
+      }
+    });
+  });
+  
+  // Edit buttons
+  const editButtons = modalElement.querySelectorAll('.edit-btn');
+  editButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-connection-item');
+      const connectionId = item.getAttribute('data-id');
+      
+      modalElement.style.display = 'none';
+      openConnectionModal(connectionId);
+    });
+  });
+  
+  // Make connection items clickable to message
+  const connectionItems = modalElement.querySelectorAll('.modal-connection-item');
+  connectionItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (!e.target.closest('.connection-action')) {
+        const connectionId = item.getAttribute('data-id');
+        
+        modalElement.style.display = 'none';
+        createMessageForConnection(connections.find(c => c.id === connectionId));
+      }
+    });
+  });
+}
+
+// Create message for a connection
+function createMessageForConnection(connection) {
+  // Store recipient data in localStorage
+  localStorage.setItem('recipientData', JSON.stringify({
+    name: connection.name,
+    relationship: connection.relationship,
+    otherRelationship: connection.otherRelationship || ''
+  }));
+  
+  // Navigate to message intent page
+  window.location.href = 'message-intent-new.html';
 }
 
 // Load user messages from Firestore
@@ -790,6 +976,13 @@ async function loadUserMessages() {
     return;
   }
   
+  messagesContainer.innerHTML = `
+    <li class="loading-item">
+      <div class="loading-spinner"></div>
+      <span>Loading your messages...</span>
+    </li>
+  `;
+  
   try {
     console.log('Loading messages for user', userUid);
     const messagesRef = firebase.firestore()
@@ -797,7 +990,7 @@ async function loadUserMessages() {
       .doc(userUid)
       .collection('messages')
       .orderBy('timestamp', 'desc')
-      .limit(20);
+      .limit(10);
     
     const snapshot = await messagesRef.get();
     
@@ -806,29 +999,43 @@ async function loadUserMessages() {
     
     if (snapshot.empty) {
       console.log('No messages found for user');
-      displayEmptyStates('messages');
+      messagesContainer.innerHTML = `
+        <li class="empty-state">
+          <div class="empty-icon"><i class="fas fa-comment-dots"></i></div>
+          <div class="empty-text">
+            <p>No messages yet</p>
+            <p class="empty-subtext">Create your first message to see it here</p>
+            <button id="create-first-message-btn" class="primary-button">
+              <i class="fas fa-magic"></i> Create First Message
+            </button>
+          </div>
+        </li>
+      `;
+      
+      const createFirstMessageBtn = document.getElementById('create-first-message-btn');
+      if (createFirstMessageBtn) {
+        createFirstMessageBtn.addEventListener('click', () => {
+          window.location.href = 'message-intent-new.html';
+        });
+      }
       return;
     }
     
-    // We have messages, so hide the no messages elements
-    const noMessagesEl = document.querySelector('.no-messages-message');
-    if (noMessagesEl) {
-      noMessagesEl.style.display = 'none';
-    }
-    
-    let messageCount = 0;
-    
-    // Get connection information for message recipients
-    const connectionIds = new Set();
+    // Process all messages
+    const messages = [];
     snapshot.forEach(doc => {
-      const message = doc.data();
-      if (message.connectionId) {
-        connectionIds.add(message.connectionId);
-      }
+      const data = doc.data();
+      messages.push({
+        id: doc.id,
+        ...data,
+        timestamp: data.timestamp || new Date(0)
+      });
     });
     
-    // Batch get the connections if needed
+    // Get all connection information for message recipients
+    const connectionIds = new Set(messages.filter(m => m.connectionId).map(m => m.connectionId));
     let connectionMap = {};
+    
     if (connectionIds.size > 0) {
       try {
         const connectionsSnapshot = await Promise.all(
@@ -847,114 +1054,310 @@ async function loadUserMessages() {
             connectionMap[doc.id] = doc.data();
           }
         });
-        
-        console.log('Loaded connection details for messages:', Object.keys(connectionMap).length);
       } catch (error) {
         console.error('Error loading connection details for messages:', error);
-        // Continue anyway with what we have
       }
     }
     
-    snapshot.forEach(doc => {
-      messageCount++;
-      const message = doc.data();
-      message.id = doc.id;
-      
-      // Try to get connection info
+    // Only show the first 3 messages
+    const displayMessages = messages.slice(0, 3);
+    
+    // Add messages to container
+    displayMessages.forEach(message => {
+      // Get recipient info
       let recipientName = message.recipientName || 'Unknown';
       let relationship = message.relationship || 'friend';
       
-      // If we have connection info, use it
+      // Use connection data if available
       if (message.connectionId && connectionMap[message.connectionId]) {
         const connection = connectionMap[message.connectionId];
         recipientName = connection.name || recipientName;
         relationship = connection.relationship || relationship;
       }
       
-      // Format the message data
-      const messageDateText = message.timestamp ? formatDate(message.timestamp.toDate()) : 'Recently';
+      // Format date
+      const messageDateText = message.timestamp instanceof Date 
+        ? formatDate(message.timestamp) 
+        : formatDate(message.timestamp.toDate());
+      
+      // Get message type
       const messageType = message.type || 'general';
-      const intentTag = formatIntentTag(messageType);
+      const intentLabel = formatIntentTag(messageType);
       
-      // Create the message item
-      const messageItem = document.createElement('li');
-      messageItem.className = 'message-item';
-      messageItem.setAttribute('data-id', message.id);
-      
-      // Truncate the message content for display
+      // Truncate content
       const truncatedContent = message.content
-        ? message.content.substring(0, 50) + (message.content.length > 50 ? '...' : '')
+        ? message.content.substring(0, 60) + (message.content.length > 60 ? '...' : '')
         : 'No message content';
       
+      const messageItem = document.createElement('li');
+      messageItem.className = 'message-item animate__animated animate__fadeIn';
+      messageItem.setAttribute('data-id', message.id);
+      
       messageItem.innerHTML = `
-        <div class="message-header">
-          <div class="message-recipient">${recipientName}</div>
-          <div class="message-date">${messageDateText}</div>
-        </div>
-        <div class="message-preview">${truncatedContent}</div>
-        <div class="message-footer">
-          <div class="message-intent">${intentTag}</div>
-          <div class="message-actions">
-            <span class="message-action view-action" title="View message">
-              <i class="fas fa-eye"></i>
-            </span>
-            <span class="message-action edit-action" title="Edit message">
-              <i class="fas fa-pencil-alt"></i>
-            </span>
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-recipient">${recipientName}</span>
+            <span class="message-date">${messageDateText}</span>
           </div>
+          <div class="message-body">${truncatedContent}</div>
+          <div class="message-footer">
+            <span class="message-intent">${intentLabel}</span>
+          </div>
+        </div>
+        <div class="message-action" title="View message">
+          <i class="fas fa-eye"></i>
         </div>
       `;
       
-      // Add the message item to the container
-      messagesContainer.appendChild(messageItem);
-      
-      // Event listener for clicking on the message
+      // Add click event to view message
       messageItem.addEventListener('click', function(e) {
-        // Only proceed if not clicking on an action button
         if (!e.target.closest('.message-action')) {
-          // Navigate to view the message
-          localStorage.setItem('viewingMessageId', message.id);
-          window.location.href = 'message-result-new.html?id=' + message.id;
+          viewMessage(message.id);
         }
       });
       
-      // Event listener for the view action
-      const viewAction = messageItem.querySelector('.view-action');
-      if (viewAction) {
-        viewAction.addEventListener('click', function(e) {
+      // Add click event to action button
+      const actionButton = messageItem.querySelector('.message-action');
+      if (actionButton) {
+        actionButton.addEventListener('click', (e) => {
           e.stopPropagation();
-          localStorage.setItem('viewingMessageId', message.id);
-          window.location.href = 'message-result-new.html?id=' + message.id;
+          viewMessage(message.id);
         });
       }
       
-      // Event listener for the edit action
-      const editAction = messageItem.querySelector('.edit-action');
-      if (editAction) {
-        editAction.addEventListener('click', function(e) {
-          e.stopPropagation();
-          // Store message info for editing
-          localStorage.setItem('editingMessageId', message.id);
-          localStorage.setItem('recipientData', JSON.stringify({
-            name: recipientName,
-            relationship: relationship
-          }));
-          window.location.href = 'message-tone-new.html?edit=true';
-        });
-      }
+      messagesContainer.appendChild(messageItem);
     });
     
-    console.log(`Loaded ${messageCount} messages`);
-    
-    // If we have messages in Firestore but none in the list (shouldn't happen), still show empty state
-    if (messageCount === 0) {
-      displayEmptyStates('messages');
+    // Add "View all" button if there are more messages
+    if (messages.length > 3) {
+      const viewAllItem = document.createElement('li');
+      viewAllItem.className = 'view-all-item';
+      viewAllItem.innerHTML = `
+        <button class="view-all-button">
+          <i class="fas fa-list"></i> View All Messages (${messages.length})
+        </button>
+      `;
+      
+      viewAllItem.addEventListener('click', () => {
+        // Show all messages modal
+        showAllMessagesModal(messages, connectionMap);
+      });
+      
+      messagesContainer.appendChild(viewAllItem);
     }
     
+    // Add "Create message" button at the end
+    const createMessageItem = document.createElement('li');
+    createMessageItem.className = 'create-message-item';
+    createMessageItem.innerHTML = `
+      <button class="create-message-button">
+        <i class="fas fa-magic"></i> Create New Message
+      </button>
+    `;
+    
+    createMessageItem.addEventListener('click', () => {
+      window.location.href = 'message-intent-new.html';
+    });
+    
+    messagesContainer.appendChild(createMessageItem);
+    
+    console.log(`Displayed ${displayMessages.length} of ${messages.length} messages`);
   } catch (error) {
     console.error('Error loading messages:', error);
-    showMessagesError(`Failed to load messages: ${error.message}`);
+    messagesContainer.innerHTML = `
+      <li class="error-state">
+        <div class="error-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="error-message">
+          <p>Couldn't load your messages</p>
+          <button class="retry-button" id="retry-messages-btn">Retry</button>
+        </div>
+      </li>
+    `;
+    
+    const retryBtn = document.getElementById('retry-messages-btn');
+    if (retryBtn) {
+      retryBtn.addEventListener('click', () => loadUserMessages());
+    }
   }
+}
+
+// Show all messages in a modal
+function showAllMessagesModal(messages, connectionMap) {
+  // Create modal element
+  let modalElement = document.getElementById('all-messages-modal');
+  
+  if (!modalElement) {
+    modalElement = document.createElement('div');
+    modalElement.id = 'all-messages-modal';
+    modalElement.className = 'modal';
+    document.body.appendChild(modalElement);
+  }
+  
+  // Generate message items HTML
+  const messagesHTML = messages.map(message => {
+    // Get recipient info
+    let recipientName = message.recipientName || 'Unknown';
+    
+    // Use connection data if available
+    if (message.connectionId && connectionMap[message.connectionId]) {
+      const connection = connectionMap[message.connectionId];
+      recipientName = connection.name || recipientName;
+    }
+    
+    // Format date
+    const messageDateText = message.timestamp instanceof Date 
+      ? formatDate(message.timestamp) 
+      : formatDate(message.timestamp.toDate());
+    
+    // Get message type
+    const messageType = message.type || 'general';
+    const intentLabel = formatIntentTag(messageType);
+    
+    // Truncate content
+    const truncatedContent = message.content
+      ? message.content.substring(0, 100) + (message.content.length > 100 ? '...' : '')
+      : 'No message content';
+    
+    return `
+      <div class="modal-message-item" data-id="${message.id}">
+        <div class="message-content">
+          <div class="message-header">
+            <span class="message-recipient">${recipientName}</span>
+            <span class="message-date">${messageDateText}</span>
+          </div>
+          <div class="message-body">${truncatedContent}</div>
+          <div class="message-footer">
+            <span class="message-intent">${intentLabel}</span>
+          </div>
+        </div>
+        <div class="message-actions">
+          <button class="message-action view-btn" title="View message">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="message-action edit-btn" title="Edit message">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  
+  // Populate modal content
+  modalElement.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">All Messages</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-messages-list">
+          ${messagesHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-create-button">
+          <i class="fas fa-magic"></i> Create New Message
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Show modal
+  modalElement.style.display = 'flex';
+  
+  // Add event listeners
+  const closeBtn = modalElement.querySelector('.modal-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      modalElement.style.display = 'none';
+    });
+  }
+  
+  // Close modal when clicking outside
+  modalElement.addEventListener('click', (e) => {
+    if (e.target === modalElement) {
+      modalElement.style.display = 'none';
+    }
+  });
+  
+  // Create new message button
+  const createButton = modalElement.querySelector('.modal-create-button');
+  if (createButton) {
+    createButton.addEventListener('click', () => {
+      modalElement.style.display = 'none';
+      window.location.href = 'message-intent-new.html';
+    });
+  }
+  
+  // View buttons
+  const viewButtons = modalElement.querySelectorAll('.view-btn');
+  viewButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-message-item');
+      const messageId = item.getAttribute('data-id');
+      
+      modalElement.style.display = 'none';
+      viewMessage(messageId);
+    });
+  });
+  
+  // Edit buttons
+  const editButtons = modalElement.querySelectorAll('.edit-btn');
+  editButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-message-item');
+      const messageId = item.getAttribute('data-id');
+      const message = messages.find(m => m.id === messageId);
+      
+      if (message) {
+        modalElement.style.display = 'none';
+        editMessage(message, connectionMap);
+      }
+    });
+  });
+  
+  // Make message items clickable to view
+  const messageItems = modalElement.querySelectorAll('.modal-message-item');
+  messageItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+      if (!e.target.closest('.message-action')) {
+        const messageId = item.getAttribute('data-id');
+        
+        modalElement.style.display = 'none';
+        viewMessage(messageId);
+      }
+    });
+  });
+}
+
+// View a message
+function viewMessage(messageId) {
+  localStorage.setItem('viewingMessageId', messageId);
+  window.location.href = 'message-result-new.html?id=' + messageId;
+}
+
+// Edit a message
+function editMessage(message, connectionMap) {
+  // Get recipient info
+  let recipientName = message.recipientName || 'Unknown';
+  let relationship = message.relationship || 'friend';
+  
+  // Use connection data if available
+  if (message.connectionId && connectionMap[message.connectionId]) {
+    const connection = connectionMap[message.connectionId];
+    recipientName = connection.name || recipientName;
+    relationship = connection.relationship || relationship;
+  }
+  
+  localStorage.setItem('editingMessageId', message.id);
+  localStorage.setItem('recipientData', JSON.stringify({
+    name: recipientName,
+    relationship: relationship
+  }));
+  
+  window.location.href = 'message-tone-new.html?edit=true';
 }
 
 // Load user's reminders from Firestore

@@ -591,6 +591,9 @@ function openConnectionModal(connectionId = null) {
     if (specificRelationshipContainer) {
       specificRelationshipContainer.style.display = 'none';
     }
+    
+    // Apply validation enhancements
+    enhanceFormValidation(form);
   }
   
   // If editing an existing connection, fetch and populate data
@@ -657,7 +660,8 @@ function openConnectionModal(connectionId = null) {
   }
   
   // Show the modal
-  modal.style.display = 'block';
+  modal.style.display = 'flex';
+  modal.classList.add('modal-visible');
 }
 
 // Create the connection modal if it doesn't exist
@@ -3325,6 +3329,9 @@ function openConnectionModal(connectionId = null) {
     if (specificRelationshipContainer) {
       specificRelationshipContainer.style.display = 'none';
     }
+    
+    // Apply validation enhancements
+    enhanceFormValidation(form);
   }
   
   // If editing an existing connection, fetch and populate data
@@ -3391,5 +3398,6 @@ function openConnectionModal(connectionId = null) {
   }
   
   // Show the modal
-  modal.style.display = 'block';
+  modal.style.display = 'flex';
+  modal.classList.add('modal-visible');
 }

@@ -269,14 +269,7 @@
 
             <!-- Navigation Buttons -->
         <div class="navigation-buttons">
-                <button id="backBtn" class="secondary-button">
-                    <i class="fas fa-arrow-left"></i>
-                    Back
-                </button>
-                <button id="homeBtn" class="primary-button">
-                    Back to Dashboard
-                    <i class="fas fa-home"></i>
-                </button>
+            <!-- These will be dynamically inserted by JavaScript -->
         </div>
         </main>
     </div>
@@ -323,5 +316,31 @@
         <h3>Debug Console</h3>
         <div id="debug-output"></div>
     </div>
+
+    <!-- Remove duplicate buttons -->
+    <script>
+        // Remove any existing Back/Dashboard buttons that might be hardcoded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all buttons with text containing "Back" or "Dashboard" that are not in navigation-buttons
+            const standaloneButtons = Array.from(document.querySelectorAll('button')).filter(button => {
+                const buttonText = button.textContent.toLowerCase();
+                const isInNavigationContainer = button.closest('.navigation-buttons') !== null;
+                return (buttonText.includes('back') || buttonText.includes('dashboard')) && !isInNavigationContainer;
+            });
+            
+            // Remove these standalone buttons
+            standaloneButtons.forEach(button => {
+                if (button.parentNode) {
+                    button.parentNode.removeChild(button);
+                }
+            });
+            
+            // Also hide the regenerate options section as we're not using it
+            const regenerateOptions = document.getElementById('regenerateOptions');
+            if (regenerateOptions) {
+                regenerateOptions.style.display = 'none';
+            }
+        });
+    </script>
 </body>
 </html> 

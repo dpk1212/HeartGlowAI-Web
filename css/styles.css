@@ -4142,3 +4142,51 @@ textarea.input-field:focus, #connection-notes:focus {
   background: rgba(255, 82, 82, 0.15);
 }
 
+/* Message Result Page specific styles - Scoped to avoid affecting other pages */
+.message-result-page .message-container {
+    margin: 25px 0 40px;
+    position: relative;
+    display: block;
+}
+
+.message-result-page .message-content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+/* Message text specific styles */
+#content.message-text {
+    display: block;
+    font-size: 16px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Message insights specific styles */
+#messageInsights.message-insights {
+    background-color: white;
+    border-radius: 12px;
+    padding: 20px 25px;
+    margin-top: 20px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+}
+
+#messageInsights.message-insights ul {
+    list-style: disc;
+    padding-left: 20px;
+    margin: 0;
+}
+
+#messageInsights.message-insights li {
+    margin-bottom: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--text-secondary, #555);
+}
+

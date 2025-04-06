@@ -1192,14 +1192,13 @@ body::after {
 }
 
 .message-content {
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-    padding: 30px;
-    transition: all 0.3s ease;
-    border: 1px solid rgba(126, 87, 194, 0.1);
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
     position: relative;
     overflow: hidden;
+    transition: all 0.3s ease;
 }
 
 .message-content::before {
@@ -1207,10 +1206,9 @@ body::after {
     position: absolute;
     top: 0;
     left: 0;
-    width: 6px;
-    height: 100%;
-    background: linear-gradient(180deg, #9c64ff 0%, #7e57c2 100%);
-    border-radius: 6px 0 0 6px;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #ff5e95, #ff8474);
 }
 
 .message-header {
@@ -1244,11 +1242,10 @@ body::after {
 }
 
 .message-text {
-    font-size: 16px;
-    line-height: 1.6;
-    color: #444;
-    font-weight: 400;
     white-space: pre-wrap;
+    line-height: 1.6;
+    font-size: 16px;
+    color: #333;
 }
 
 .message-actions {
@@ -1281,46 +1278,54 @@ body::after {
     font-size: 14px;
 }
 
-/* Message insights styles */
+/* Message insights styling */
 .message-insights {
-    margin-top: 25px;
-    padding: 25px;
-    background-color: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    border-left: 6px solid #7e57c2;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #ff5e95;
+    transition: all 0.3s ease;
 }
 
 .message-insights h3 {
+    display: flex;
+    align-items: center;
     font-size: 18px;
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #7e57c2;
     font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #444;
+}
+
+.message-insights h3 i {
+    color: #ff5e95;
+    margin-right: 10px;
+    font-size: 20px;
 }
 
 .message-insights ul {
-    margin: 0;
-    padding-left: 20px;
+    padding-left: 25px;
+    margin: 10px 0;
 }
 
 .message-insights li {
-    margin-bottom: 12px;
+    position: relative;
+    padding: 5px 0;
+    margin-bottom: 8px;
     font-size: 15px;
     line-height: 1.5;
     color: #555;
-    position: relative;
 }
 
 .message-insights li::before {
-    content: "";
+    content: "•";
     position: absolute;
-    left: -20px;
-    top: 8px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #7e57c2;
+    left: -15px;
+    color: #ff5e95;
+    font-size: 18px;
+    line-height: 1;
 }
 
 /* Regenerate Options */
@@ -1346,6 +1351,7 @@ body::after {
 }
 
 .small-grid {
+    display: grid;
     grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     gap: 15px;
 }
@@ -1356,31 +1362,143 @@ body::after {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     border: 1px solid rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
+    cursor: pointer;
+    text-align: center;
 }
 
 .small-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    border-color: rgba(126, 87, 194, 0.3);
+    border-color: rgba(255, 94, 149, 0.3);
+}
+
+.small-card.selected {
+    border-color: #ff5e95;
+    background-color: rgba(255, 94, 149, 0.05);
+    box-shadow: 0 8px 20px rgba(255, 94, 149, 0.1);
 }
 
 .small-card .option-icon {
     margin-bottom: 10px;
     font-size: 20px;
-    color: #7e57c2;
+    color: #ff5e95;
     width: 45px;
     height: 45px;
-    background-color: rgba(126, 87, 194, 0.1);
+    background-color: rgba(255, 94, 149, 0.1);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
 }
 
 .small-card .option-title {
     font-size: 16px;
     margin-bottom: 6px;
+    font-weight: 600;
 }
 
 .small-card .option-description {
     font-size: 13px;
     line-height: 1.4;
+    color: #666;
+}
+
+/* Enhanced navigation buttons */
+.navigation-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+    align-items: center;
+}
+
+.navigation-buttons button {
+    min-width: 120px;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.navigation-buttons button i {
+    margin-right: 8px;
+}
+
+/* Responsive adjustments for regenerate options */
+@media (max-width: 768px) {
+    .small-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .small-card {
+        padding: 15px 10px;
+    }
+    
+    .small-card .option-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+    
+    .small-card .option-title {
+        font-size: 14px;
+    }
+    
+    .small-card .option-description {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .navigation-buttons {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .navigation-buttons button {
+        flex: 1 0 calc(50% - 10px);
+        min-width: 0;
+    }
+}
+
+/* Make message content container styles more refined */
+.message-content {
+    background-color: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.08);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.message-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(to right, #ff5e95, #ff8474);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message-insights {
+        padding: 15px;
+    }
+    
+    .message-insights h3 {
+        font-size: 16px;
+    }
+    
+    .message-insights li {
+        font-size: 14px;
+    }
 }
 
 /* Improved edit container styles */

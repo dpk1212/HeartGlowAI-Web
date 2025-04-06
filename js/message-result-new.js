@@ -939,14 +939,48 @@ function setupNavigationButtons() {
         window.location.href = 'home.html';
     });
     
-    // Add buttons to navigation container (back on left, dashboard on right)
+    // Create Regenerate button
+    const regenerateButton = document.createElement('button');
+    regenerateButton.id = 'regenerateBtn';
+    regenerateButton.className = 'secondary-button';
+    regenerateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate';
+    
+    // Add event listener for Regenerate button
+    regenerateButton.addEventListener('click', function() {
+        // Show regenerate options
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        if (regenerateOptions) {
+            if (regenerateOptions.style.display === 'none' || !regenerateOptions.style.display) {
+                regenerateOptions.style.display = 'block';
+                
+                // Smooth scroll to regenerate options
+                regenerateOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Initialize options if not already done
+                initializeRegenerateOptions();
+            } else {
+                // If already visible, hide it
+                regenerateOptions.style.display = 'none';
+            }
+        } else {
+            // If options not available, just regenerate with different variation
+            showLoadingState();
+            generateMessage('different');
+        }
+    });
+    
+    // Add buttons to navigation container
     navButtons.appendChild(backButton);
+    navButtons.appendChild(regenerateButton);
     navButtons.appendChild(dashboardButton);
     
     // Add proper styling to ensure buttons look good
     navButtons.style.display = 'flex';
     navButtons.style.justifyContent = 'space-between';
     navButtons.style.marginTop = '30px';
+    
+    // Add special styling for the regenerate button (middle button)
+    regenerateButton.style.margin = '0 10px';
 }
 
 /**
@@ -957,6 +991,7 @@ function generateMessage(variation = null) {
     showLoadingState();
     
     try {
+        // Get data from localStorage
         const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
@@ -964,29 +999,234 @@ function generateMessage(variation = null) {
         // Log the input data
         logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         
+        // Build the message prompt that would be sent to OpenAI
+        const messagePrompt = buildOpenAIPrompt(intentData, recipientData, toneData, variation);
+        
+        // Log the prompt for debugging
+        logDebug(`Prompt for OpenAI: ${messagePrompt}`);
+        
         // Get auth token if available
         const authToken = localStorage.getItem('authToken');
         
-        // Call API to generate message
-        // This would call your actual server API
-        setTimeout(() => {
-            // IMPORTANT: In production, this would be replaced with a real API call
-            // This timeout is just a placeholder for the API response timing
-            // The actual message content would come from your server
-            const serverResponseContent = ""; // Empty placeholder - your actual API would return content
-            
-            // Just displaying what was already received from the server (shown in the mockup UI)
-            const element = document.getElementById('content');
-            if (element && element.textContent) {
-                displayGeneratedMessage(element.textContent);
-            } else {
-                showError('Could not retrieve message content. Please try again.');
-            }
-        }, 500);
+        // Call the message generation API (or use the mock implementation for now)
+        callGenerationAPI(messagePrompt, authToken)
+            .then(response => {
+                // Parse the response to extract message and insights
+                const parsedResponse = parseOpenAIResponse(response);
+                
+                // Display the message and insights
+                displayGeneratedMessage(parsedResponse.message);
+                displayMessageInsights(parsedResponse.insights);
+                
+                // Log success
+                logDebug('Message generated successfully');
+            })
+            .catch(error => {
+                console.error('Error calling message generation API:', error);
+                showError('Failed to generate message: ' + (error.message || 'Unknown error'));
+            });
     } catch (error) {
         console.error('Error generating message:', error);
         showError('Failed to generate message. Please check your inputs and try again.');
     }
+}
+
+/**
+ * Build OpenAI prompt based on user inputs
+ */
+function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null) {
+    // Default to medium length if not specified
+    const messageLength = variation === 'longer' ? 'longer' : (variation === 'shorter' ? 'shorter' : 'medium-length');
+    
+    // Get tone from data
+    const tone = toneData.type || 'warm';
+    
+    // Get recipient info
+    const recipientName = recipientData.name || 'them';
+    const relationshipType = recipientData.relationship || 'friend';
+    
+    // Handle specific relationship if available
+    const specificRelationship = recipientData.specificRelationship || '';
+    const customRelationshipClause = specificRelationship ? 
+        ` (specifically ${specificRelationship})` : '';
+    
+    // Get intent info
+    const intentType = intentData.type || 'connect';
+    
+    // Map intent type to appropriate clause
+    let messageIntentClause = '';
+    switch (intentType) {
+        case 'reconnect':
+            messageIntentClause = 'reconnect after some time apart';
+            break;
+        case 'appreciate':
+            messageIntentClause = 'express my appreciation for them';
+            break;
+        case 'apologize':
+            messageIntentClause = 'apologize for something that happened';
+            break;
+        case 'celebrate':
+            messageIntentClause = 'celebrate their achievement or special occasion';
+            break;
+        case 'encourage':
+            messageIntentClause = 'encourage them during a challenging time';
+            break;
+        case 'invite':
+            messageIntentClause = 'invite them to get together';
+            break;
+        case 'custom':
+            messageIntentClause = intentData.customText || 'connect with them';
+            break;
+        default:
+            messageIntentClause = 'connect with them in a meaningful way';
+    }
+    
+    // Add relationship goal if available
+    const relationshipGoal = recipientData.relationshipGoal || '';
+    const closenessClause = relationshipGoal ? 
+        ` I'm hoping to ${relationshipGoal} through this message.` : '';
+    
+    // Add any additional context
+    const contextNotes = recipientData.notes || '';
+    const contextClause = contextNotes ? 
+        ` Additional context: ${contextNotes}.` : '';
+    
+    // Add variation as an outcome clause if applicable
+    let outcomeClause = '';
+    if (variation === 'deeper') {
+        outcomeClause = ' I want the message to be more emotionally expressive.';
+    } else if (variation === 'different') {
+        outcomeClause = ' Please try a completely different approach than you might normally use.';
+    }
+    
+    // Format clause - in this case, we just want clean formatting
+    const formatClause = '';
+    
+    // Construct the full prompt
+    const prompt = `Please write a ${messageLength}, ${tone} message from me to ${recipientName}, who is my ${relationshipType}${customRelationshipClause}.
+
+This message is meant to ${messageIntentClause}.${closenessClause}${contextClause}${outcomeClause}
+
+Use a warm, human voice — as if I'm speaking directly to them. The message should feel emotionally appropriate and natural, not scripted or overly formal.
+
+Then provide 2–3 brief insights that explain why this message works emotionally or relationally. Use plain, supportive language.${formatClause}`;
+
+    return prompt;
+}
+
+/**
+ * Parse and display the OpenAI response - in a real implementation, this would parse the API response
+ */
+function parseOpenAIResponse(apiResponse) {
+    // In a real implementation, this would extract message and insights from the API response
+    // For now, we'll assume the response format and parse it
+    
+    try {
+        // For demo purposes - this would be replaced with actual parsing logic
+        const messagePart = apiResponse.message || '';
+        const insights = apiResponse.insights || [];
+        
+        return {
+            message: messagePart,
+            insights: insights
+        };
+    } catch (error) {
+        console.error('Error parsing OpenAI response:', error);
+        return {
+            message: 'Could not parse the response properly.',
+            insights: ['The message could not be generated correctly.']
+        };
+    }
+}
+
+/**
+ * Call the API to generate a message
+ * In a real implementation, this would make an HTTP request to the OpenAI API
+ */
+function callGenerationAPI(prompt, authToken = null) {
+    return new Promise((resolve, reject) => {
+        // This would be replaced with the actual API call in production
+        // For now, we'll simulate a response after a short delay
+        
+        // Check if there's already content in the UI (for demo purposes)
+        const existingContent = document.getElementById('content')?.textContent || '';
+        
+        // In production, you would make an API call to OpenAI here
+        // Example of what the API call might look like:
+        /*
+        fetch('https://api.yourbackend.com/generate-message', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken ? `Bearer ${authToken}` : ''
+            },
+            body: JSON.stringify({ prompt })
+        })
+        .then(response => response.json())
+        .then(data => resolve(data))
+        .catch(error => reject(error));
+        */
+        
+        // For now, simulate an API response
+        setTimeout(() => {
+            try {
+                // If there's existing content, use it; otherwise, use a default message
+                // In a real implementation, this would use the response from the API
+                const message = existingContent || "Hey Test, \n\nI know you're facing challenges right now, but I wanted you to know that I believe in you completely. You have shown such strength and resilience in the past, and those same qualities will help you overcome what you're facing now. Remember how far you've already come. One of the things I value most about you is your ability to bring joy to those around you. It's rare to find someone who balances strength and compassion so effortlessly, and I'm grateful that you're in my life. Sometimes I think back to how you helped me see a situation from a completely different angle, and it always brings a smile to my face.\n\nThinking of you warmly and sending my best wishes your way.\n\nWith love,";
+                
+                // Generate insights based on the message
+                // In a real implementation, these would come from the API
+                const insights = [
+                    "Used emotional language to create connection",
+                    "Included personal details specific to your relationship",
+                    "Balanced warmth with respect appropriate for this relationship",
+                    "Incorporated themes relevant to your intent"
+                ];
+                
+                // Simulate a response object
+                const response = {
+                    message: message,
+                    insights: insights
+                };
+                
+                resolve(response);
+            } catch (error) {
+                reject(error);
+            }
+        }, 2000);
+    });
+}
+
+/**
+ * Display message insights
+ */
+function displayMessageInsights(insights) {
+    const insightsContainer = document.getElementById('messageInsights');
+    const insightsContent = document.getElementById('insightsContent');
+    
+    if (!insightsContainer || !insightsContent) {
+        console.error('Insights containers not found');
+        return;
+    }
+    
+    // Clear previous content
+    insightsContent.innerHTML = '';
+    
+    // Create insights list
+    const insightsList = document.createElement('ul');
+    
+    // Add each insight as a list item
+    insights.forEach(insight => {
+        const listItem = document.createElement('li');
+        listItem.textContent = insight;
+        insightsList.appendChild(listItem);
+    });
+    
+    // Add list to container
+    insightsContent.appendChild(insightsList);
+    
+    // Show insights container
+    insightsContainer.style.display = 'block';
 }
 
 /**
@@ -1016,9 +1256,57 @@ function displayGeneratedMessage(message) {
     // Store the message for copy functionality
     generatedMessage = message;
     
+    // Set the message content
+    const contentElement = document.getElementById('content');
+    if (contentElement) {
+        contentElement.textContent = message;
+    }
+    
     // Make the message content visible
     const messageContent = document.getElementById('messageContent');
     if (messageContent) {
         messageContent.style.display = 'block';
     }
+}
+
+/**
+ * Initialize the regenerate options section
+ */
+function initializeRegenerateOptions() {
+    // Get the regenerate options container
+    const regenerateOptions = document.getElementById('regenerateOptions');
+    
+    if (!regenerateOptions) {
+        console.error('Regenerate options container not found');
+        return;
+    }
+    
+    // Make sure it's visible
+    regenerateOptions.style.display = 'block';
+    
+    // Get all the option cards
+    const optionCards = regenerateOptions.querySelectorAll('.option-card');
+    
+    // Add click event to each option
+    optionCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Get variation type
+            const variation = this.getAttribute('data-variation');
+            
+            // Remove selected class from all cards
+            optionCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Hide regenerate options
+            regenerateOptions.style.display = 'none';
+            
+            // Generate new message with variation
+            generateMessage(variation);
+        });
+    });
 } 

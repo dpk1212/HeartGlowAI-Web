@@ -1,0 +1,33 @@
+/*
+ * HeartGlowAI - Main CSS
+ * This file imports all stylesheets in the proper order
+ */
+
+/* Base styles */
+@import url('base/variables.css');
+@import url('base/reset.css');
+@import url('base/typography.css');
+
+/* Layout styles */
+/* @import url('layouts/grid.css'); */
+/* @import url('layouts/header.css'); */
+/* @import url('layouts/footer.css'); */
+
+/* Component styles */
+@import url('components/cards.css');
+/* @import url('components/buttons.css'); */
+/* @import url('components/forms.css'); */
+/* @import url('components/modals.css'); */
+/* @import url('components/navigation.css'); */
+
+/* Page-specific styles */
+@import url('pages/intention.css');
+/* @import url('pages/tone.css'); */
+/* @import url('pages/home.css'); */
+/* @import url('pages/message.css'); */
+
+/*
+ * Legacy styles - To be phased out as we migrate to the component-based architecture
+ * Eventually, all these styles will be moved to the appropriate component files
+ */
+@import url('styles.css'); 

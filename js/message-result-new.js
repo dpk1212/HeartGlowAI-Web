@@ -172,27 +172,41 @@ function loadData() {
         const storedRecipientData = localStorage.getItem('recipientData') || localStorage.getItem('selectedRecipient');
         if (storedRecipientData) {
             recipientData = JSON.parse(storedRecipientData);
+            logDebug(`Loaded recipient data from localStorage: ${JSON.stringify(recipientData)}`);
+            
+            // Ensure that connection ID is available if it exists in the data
+            if (recipientData.id) {
+                logDebug(`Found connection ID in recipient data: ${recipientData.id}`);
+            } else {
+                logDebug('No connection ID found in recipient data');
+            }
+            
             updateRecipientDisplay();
         } else {
             console.error('No recipient data found');
+            logDebug('No recipient data found in localStorage');
         }
         
         // Load intent data
         const storedIntentData = localStorage.getItem('intentData');
         if (storedIntentData) {
             intentData = JSON.parse(storedIntentData);
+            logDebug(`Loaded intent data from localStorage: ${JSON.stringify(intentData)}`);
             updateIntentDisplay();
         } else {
             console.error('No intent data found');
+            logDebug('No intent data found in localStorage');
         }
         
         // Load tone data
         const storedToneData = localStorage.getItem('toneData') || localStorage.getItem('selectedTone');
         if (storedToneData) {
             toneData = JSON.parse(storedToneData);
+            logDebug(`Loaded tone data from localStorage: ${JSON.stringify(toneData)}`);
             updateToneDisplay();
         } else {
             console.error('No tone data found');
+            logDebug('No tone data found in localStorage');
         }
         
         // If any data is missing, show error
@@ -201,6 +215,7 @@ function loadData() {
         }
     } catch (error) {
         console.error('Error loading data:', error);
+        logDebug(`Error loading data: ${error.message}`);
         showError('There was a problem loading your information.');
     }
 }
@@ -1000,6 +1015,10 @@ function saveMessageToFirebase(messageText, insights) {
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
+        // Log the recipient data to verify connection ID
+        logDebug(`Saving message to Firebase with recipient data: ${JSON.stringify(recipientData)}`);
+        logDebug(`Connection ID from recipientData: ${recipientData.id}`);
+        
         // Get current user ID
         const userId = firebase.auth().currentUser.uid;
         
@@ -1017,11 +1036,15 @@ function saveMessageToFirebase(messageText, insights) {
             createdBy: userId
         };
         
+        // Log the final message data with connection ID
+        logDebug(`Message data being saved to Firebase: ${JSON.stringify(messageData)}`);
+        
         // Reference to Firestore
         const db = firebase.firestore();
         
         // If we have a connection ID, update the connection's message count
         if (recipientData.id) {
+            logDebug(`Connection ID found: ${recipientData.id}. Updating connection with new message.`);
             // Use a transaction to ensure data consistency
             db.runTransaction(async (transaction) => {
                 // Reference to the connection

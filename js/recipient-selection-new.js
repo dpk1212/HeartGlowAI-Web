@@ -186,6 +186,10 @@ async function loadSavedRecipients(userId) {
  * Create a recipient card element
  */
 function createRecipientCard(recipient) {
+    // Log the recipient data being used to create the card
+    console.log('Creating recipient card with data:', recipient);
+    console.log('Connection ID for card:', recipient.id);
+    
     const card = document.createElement('div');
     card.className = 'saved-recipient-card';
     card.dataset.recipientId = recipient.id;
@@ -278,6 +282,13 @@ function selectSavedRecipient(recipient, cardElement) {
     
     // Fill the form with the selected recipient data
     document.getElementById('recipientName').value = recipient.name;
+    
+    // Log selected recipient data for debugging
+    console.log('Selected recipient data:', recipient);
+    console.log('Connection ID for selected recipient:', recipient.id);
+    
+    // Verify the ID is present and correctly stored in the selectedSavedRecipient
+    console.log('Connection ID in selectedSavedRecipient:', selectedSavedRecipient.id);
     
     // Select the appropriate relationship option
     const relationshipOptions = document.querySelectorAll('.relationship-option');
@@ -652,15 +663,37 @@ async function saveDataAndNavigate() {
     showLoading('Saving your selection...');
     
     try {
+        // Log selection state
+        console.log('Current selection state:', {
+            savedRecipient: selectedSavedRecipient ? { ...selectedSavedRecipient } : null,
+            manualName: document.getElementById('recipientName').value.trim(),
+            selectedRelationship: selectedRelationship,
+        });
+        
         // Get the name and relationship data
         let name, relationship, otherRelationship, connectionId;
         
+        // Prepare additional data fields
+        let yearsKnown = '';
+        let communicationStyle = '';
+        let notes = '';
+        let relationshipFocus = '';
+        
         if (selectedSavedRecipient) {
-            // If a saved recipient is selected, use that data
+            // If a saved recipient is selected, use that data with ALL fields
+            console.log('Using selected saved recipient:', selectedSavedRecipient);
+            
+            // Basic fields
             name = selectedSavedRecipient.name;
             relationship = selectedSavedRecipient.relationship;
             otherRelationship = selectedSavedRecipient.otherRelationship || '';
             connectionId = selectedSavedRecipient.id; // Include the connection ID
+            
+            // Additional fields if available
+            yearsKnown = selectedSavedRecipient.yearsKnown || '';
+            communicationStyle = selectedSavedRecipient.communicationStyle || '';
+            notes = selectedSavedRecipient.notes || '';
+            relationshipFocus = selectedSavedRecipient.relationshipGoal || '';
         } else {
             // Otherwise use the form data
             name = document.getElementById('recipientName').value.trim();
@@ -672,17 +705,24 @@ async function saveDataAndNavigate() {
             }
         }
         
-        // Create recipient data object
+        // Create recipient data object with ALL fields
         const recipientData = {
             name: name,
             relationship: relationship,
-            otherRelationship: otherRelationship || ''
+            otherRelationship: otherRelationship || '',
+            yearsKnown: yearsKnown,
+            communicationStyle: communicationStyle,
+            notes: notes,
+            relationshipFocus: relationshipFocus
         };
         
         // Add connection ID if available
         if (connectionId) {
             recipientData.id = connectionId;
         }
+        
+        // Log the data we're about to save
+        console.log('Saving recipient data to localStorage:', recipientData);
         
         // Save to localStorage for next pages
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
@@ -704,6 +744,7 @@ async function saveDataAndNavigate() {
                 if (newConnectionId) {
                     recipientData.id = newConnectionId;
                     localStorage.setItem('recipientData', JSON.stringify(recipientData));
+                    console.log('Updated recipientData with new connection ID:', newConnectionId);
                 }
             } else {
                 console.error('User not authenticated, cannot save connection');

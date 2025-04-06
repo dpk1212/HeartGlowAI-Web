@@ -933,16 +933,18 @@ function generateMessage(variation = null) {
         logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         
         // Build the message prompt that would be sent to OpenAI
-        const messagePrompt = buildOpenAIPrompt(intentData, recipientData, toneData, variation);
-        
-        // Log the prompt for debugging
-        logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
-        
-        // Get auth token if available
-        const authToken = localStorage.getItem('authToken');
-        
-        // Call the message generation API (or use the mock implementation for now)
-        callGenerationAPI(messagePrompt, authToken)
+        // Now handles additional connection data asynchronously
+        buildOpenAIPrompt(intentData, recipientData, toneData, variation)
+            .then(messagePrompt => {
+                // Log the prompt for debugging
+                logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
+                
+                // Get auth token if available
+                const authToken = localStorage.getItem('authToken');
+                
+                // Call the message generation API with the complete prompt
+                return callGenerationAPI(messagePrompt, authToken);
+            })
             .then(response => {
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
@@ -1150,8 +1152,12 @@ function saveMessageWithoutConnection(userId, messageData, savingIndicator) {
 
 /**
  * Build the OpenAI prompt based on user inputs
+ * @returns {Promise<Object>} Promise that resolves to the complete request data
  */
 function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null) {
+    // Log all available data for debugging
+    logDebug('Building prompt with recipient data: ' + JSON.stringify(recipientData));
+    
     // Create a structured request object that matches our cloud function expectations
     const requestData = {
         intent: {
@@ -1161,11 +1167,11 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
         recipient: {
             name: recipientData.name || 'Friend',
             relationship: recipientData.relationship || 'Friend',
-            relationshipCategory: recipientData.relationshipCategory || '',
-            relationshipFocus: recipientData.relationshipFocus || '',
+            relationshipCategory: recipientData.specificRelationship || recipientData.relationshipCategory || '',
+            relationshipFocus: recipientData.relationshipGoal || recipientData.relationshipFocus || '',
             yearsKnown: recipientData.yearsKnown || '',
             communicationStyle: recipientData.communicationStyle || '',
-            personalNotes: recipientData.personalNotes || ''
+            personalNotes: recipientData.notes || recipientData.personalNotes || ''
         },
         tone: {
             type: toneData.type || 'Warm',
@@ -1174,7 +1180,50 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
         variation: variation
     };
     
-    return requestData;
+    // Return a promise to allow proper async handling
+    return new Promise((resolve) => {
+        // Try to fetch additional data if available
+        if (recipientData.id && firebase.auth().currentUser) {
+            const userId = firebase.auth().currentUser.uid;
+            
+            // Try to get the full connection data from Firestore
+            firebase.firestore()
+                .collection('users')
+                .doc(userId)
+                .collection('connections')
+                .doc(recipientData.id)
+                .get()
+                .then(doc => {
+                    if (doc.exists) {
+                        const fullConnectionData = doc.data();
+                        logDebug('Retrieved full connection data: ' + JSON.stringify(fullConnectionData));
+                        
+                        // Update the request data with any additional fields
+                        requestData.recipient.yearsKnown = fullConnectionData.yearsKnown || requestData.recipient.yearsKnown;
+                        requestData.recipient.communicationStyle = fullConnectionData.communicationStyle || requestData.recipient.communicationStyle;
+                        requestData.recipient.personalNotes = fullConnectionData.notes || requestData.recipient.personalNotes;
+                        requestData.recipient.relationshipCategory = fullConnectionData.specificRelationship || requestData.recipient.relationshipCategory;
+                        requestData.recipient.relationshipFocus = fullConnectionData.relationshipGoal || requestData.recipient.relationshipFocus;
+                        
+                        // Log the updated request for debugging
+                        logDebug('Updated prompt with full connection data: ' + JSON.stringify(requestData));
+                        resolve(requestData);
+                    } else {
+                        logDebug('Connection document not found, using basic data');
+                        resolve(requestData);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching full connection data:', error);
+                    // Still resolve with basic data on error
+                    resolve(requestData);
+                });
+        } else {
+            // No connection ID or user, resolve with basic data
+            logDebug('No connection ID or user, using basic data');
+            resolve(requestData);
+        }
+    });
 }
 
 /**

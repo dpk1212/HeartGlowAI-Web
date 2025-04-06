@@ -659,6 +659,60 @@ function openConnectionModal(connectionId = null) {
       });
   }
   
+  // AGGRESSIVE FIX: Ensure close buttons work by attaching fresh handlers
+  const closeBtn = document.getElementById('close-modal');
+  if (closeBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    
+    // Add the event listener to the fresh button
+    newCloseBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('X Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
+  }
+  
+  // AGGRESSIVE FIX: Ensure cancel button works
+  const cancelBtn = document.getElementById('cancel-connection');
+  if (cancelBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add the event listener to the fresh button
+    newCancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Cancel Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
+  }
+  
   // Show the modal
   modal.style.display = 'flex';
   modal.classList.add('modal-visible');
@@ -1271,16 +1325,49 @@ function closeConnectionModal() {
   console.log('Closing connection modal');
   const modal = document.getElementById('connection-modal');
   if (modal) {
-    // Reset all visibility settings - don't remove the modal, just hide it
+    // AGGRESSIVE CLOSE: Try multiple approaches to hide the modal
+    
+    // 1. Reset all visibility settings
     modal.style.cssText = '';
     modal.style.display = 'none';
     modal.style.opacity = '0';
     modal.style.visibility = 'hidden';
     
-    // Remove custom classes
+    // 2. Remove custom classes
     modal.classList.remove('modal-visible');
     
-    console.log('Modal display style set to none');
+    // 3. Try hiding with jQuery if available
+    if (typeof $ !== 'undefined') {
+      try {
+        $(modal).hide();
+      } catch (e) {
+        console.error('jQuery hide failed:', e);
+      }
+    }
+    
+    // 4. Force style changes with !important via direct style application
+    const importantStyles = 'display: none !important; visibility: hidden !important; opacity: 0 !important;';
+    modal.setAttribute('style', importantStyles);
+    
+    // 5. Remove from DOM temporarily and reattach (extreme measure)
+    try {
+      const parent = modal.parentNode;
+      const sibling = modal.nextSibling;
+      parent.removeChild(modal);
+      // Immediately reattach to not lose the element
+      setTimeout(() => {
+        if (sibling) {
+          parent.insertBefore(modal, sibling);
+        } else {
+          parent.appendChild(modal);
+        }
+        modal.style.cssText = importantStyles;
+      }, 5);
+    } catch (e) {
+      console.error('DOM manipulation error:', e);
+    }
+    
+    console.log('Modal aggressively hidden with multiple techniques');
     
     // Clear any emergency cloned modals
     const clonedModals = document.querySelectorAll('#connection-modal:not(:first-of-type)');
@@ -2889,87 +2976,174 @@ function initializeConnectionModal() {
  * Open the connection modal
  */
 function openConnectionModal(connectionId = null) {
-  const modal = document.getElementById('connection-modal');
+  console.log('Opening connection modal. Editing connection ID:', connectionId);
+  
+  let modal = document.getElementById('connection-modal');
   if (!modal) {
-    console.error('Connection modal not found');
-    return;
+    // If we're not finding the modal, create it dynamically
+    createConnectionModal();
+    
+    // Try to get the modal again
+    modal = document.getElementById('connection-modal');
+    if (!modal) {
+      console.error('Could not find or create connection modal');
+      return;
+    }
   }
   
-  // Set modal title based on whether we're editing or creating
-  const modalTitle = document.getElementById('connection-modal-title');
+  // Set global editing state
+  editingConnectionId = connectionId;
+  
+  // Update modal title
+  const modalTitle = document.getElementById('modal-title');
   if (modalTitle) {
     modalTitle.textContent = connectionId ? 'Edit Connection' : 'Add New Connection';
   }
   
-  // Reset form
+  // Get form elements
   const form = document.getElementById('connection-form');
+  const nameField = document.getElementById('connection-name');
+  const relationshipField = document.getElementById('connection-relationship');
+  const specificRelationshipContainer = document.getElementById('specific-relationship-container');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  const yearsField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
+  const notesField = document.getElementById('connection-notes');
+  
+  // Reset form
   if (form) {
     form.reset();
-  }
-  
-  // Hide the "other relationship" field by default
-  const otherRelationshipGroup = document.getElementById('other-relationship-group');
-  if (otherRelationshipGroup) {
-    otherRelationshipGroup.style.display = 'none';
-  }
-  
-  // If editing an existing connection, pre-fill form fields
-  if (connectionId) {
-    editingConnectionId = connectionId;
     
-    // Load connection data from Firestore
-    if (currentUser) {
-      showLoading('Loading connection details...');
-      
-      firebase.firestore()
-        .collection('users')
-        .doc(currentUser.uid)
-        .collection('connections')
-        .doc(connectionId)
-        .get()
-        .then(doc => {
-          if (doc.exists) {
-            const data = doc.data();
+    // Hide specific relationship container initially
+    if (specificRelationshipContainer) {
+      specificRelationshipContainer.style.display = 'none';
+    }
+    
+    // Apply validation enhancements
+    enhanceFormValidation(form);
+  }
+  
+  // If editing an existing connection, fetch and populate data
+  if (connectionId) {
+    if (!currentUser) {
+      showAlert('You must be logged in to edit connections', 'error');
+      return;
+    }
+    
+    // Show loading indicator
+    showLoading('Loading connection details...');
+    
+    // Fetch connection data
+    firebase.firestore()
+      .collection('users')
+      .doc(currentUser.uid)
+      .collection('connections')
+      .doc(connectionId)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          console.log('Loaded connection data:', data);
+          
+          // Populate basic fields
+          if (nameField) nameField.value = data.name || '';
+          if (relationshipField) relationshipField.value = data.relationship || '';
+          
+          // Handle specific relationship selection
+          if (data.relationship && data.relationship !== 'other' && specificRelationshipContainer) {
+            specificRelationshipContainer.style.display = 'block';
             
-            // Fill form fields
-            const nameField = document.getElementById('connection-name');
-            const relationshipField = document.getElementById('connection-relationship');
-            const otherRelationshipField = document.getElementById('other-relationship');
+            // Trigger relationship change to populate the specific options
+            updateSpecificRelationshipOptions();
             
-            if (nameField) nameField.value = data.name || '';
-            
-            if (relationshipField) {
-              relationshipField.value = data.relationship || '';
-              
-              // Show "other" field if needed
-              if (data.relationship === 'other' && otherRelationshipGroup) {
-                otherRelationshipGroup.style.display = 'block';
-                
-                if (otherRelationshipField && data.otherRelationship) {
-                  otherRelationshipField.value = data.otherRelationship;
-                }
+            // Then set the specific relationship value
+            setTimeout(() => {
+              if (specificRelationshipField && data.specificRelationship) {
+                specificRelationshipField.value = data.specificRelationship;
               }
-            }
-          } else {
-            console.error('Connection document not found');
-            showAlert('Could not find connection details', 'error');
+            }, 100);  // Slight delay to ensure options are populated
           }
           
+          // Populate additional fields
+          if (yearsField) yearsField.value = data.yearsKnown || '';
+          if (communicationStyleField) communicationStyleField.value = data.communicationStyle || '';
+          if (goalField) goalField.value = data.relationshipGoal || '';
+          if (notesField) notesField.value = data.notes || '';
+          
           hideLoading();
-        })
-        .catch(error => {
-          console.error('Error loading connection:', error);
-          showAlert('Error loading connection details', 'error');
+        } else {
+          console.error('Connection not found:', connectionId);
+          showAlert('Connection not found', 'error');
           hideLoading();
-        });
-    }
-  } else {
-    // New connection
-    editingConnectionId = null;
+          closeConnectionModal();
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching connection:', error);
+        showAlert('Error loading connection details', 'error');
+        hideLoading();
+        closeConnectionModal();
+      });
+  }
+  
+  // AGGRESSIVE FIX: Ensure close buttons work by attaching fresh handlers
+  const closeBtn = document.getElementById('close-modal');
+  if (closeBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    
+    // Add the event listener to the fresh button
+    newCloseBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('X Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
+  }
+  
+  // AGGRESSIVE FIX: Ensure cancel button works
+  const cancelBtn = document.getElementById('cancel-connection');
+  if (cancelBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add the event listener to the fresh button
+    newCancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Cancel Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
   }
   
   // Show the modal
-  modal.style.display = 'block';
+  modal.style.display = 'flex';
+  modal.classList.add('modal-visible');
 }
 
 /**
@@ -2979,6 +3153,7 @@ function closeConnectionModal() {
   const modal = document.getElementById('connection-modal');
   if (modal) {
     modal.style.display = 'none';
+    modal.classList.remove('modal-visible');
   }
   
   // Reset editing state
@@ -3467,6 +3642,60 @@ function openConnectionModal(connectionId = null) {
         hideLoading();
         closeConnectionModal();
       });
+  }
+  
+  // AGGRESSIVE FIX: Ensure close buttons work by attaching fresh handlers
+  const closeBtn = document.getElementById('close-modal');
+  if (closeBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCloseBtn = closeBtn.cloneNode(true);
+    closeBtn.parentNode.replaceChild(newCloseBtn, closeBtn);
+    
+    // Add the event listener to the fresh button
+    newCloseBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('X Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
+  }
+  
+  // AGGRESSIVE FIX: Ensure cancel button works
+  const cancelBtn = document.getElementById('cancel-connection');
+  if (cancelBtn) {
+    // Remove any existing event listeners by cloning and replacing the button
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    // Add the event listener to the fresh button
+    newCancelBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      console.log('Cancel Button clicked - closing modal');
+      
+      // Directly manipulate the modal's style
+      if (modal) {
+        modal.style.display = 'none';
+        modal.style.visibility = 'hidden';
+        modal.style.opacity = '0';
+        modal.classList.remove('modal-visible');
+      }
+      
+      // Also call the close function
+      closeConnectionModal();
+      return false;
+    });
   }
   
   // Show the modal

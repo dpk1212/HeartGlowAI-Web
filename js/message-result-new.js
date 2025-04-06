@@ -1085,9 +1085,8 @@ function callGenerationAPI(prompt, authToken = null) {
         // Log the API call attempt
         logDebug('Calling message generation API...');
         
-        // Set up the API endpoint URL
-        // In production, this would point to your deployed cloud function
-        const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
+        // Set up the API endpoint URL for the new V2 function
+        const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
         
         // Make the API call
         fetch(apiUrl, {

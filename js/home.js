@@ -1732,24 +1732,44 @@ async function loadUserMessages() {
             <span class="message-intent">${intentLabel}</span>
           </div>
         </div>
-        <div class="message-action" title="View message">
-          <i class="fas fa-eye"></i>
+        <div class="message-actions">
+          <div class="message-action view-action" title="View message">
+            <i class="fas fa-eye"></i>
+          </div>
+          <div class="message-action delete-action" title="Delete message">
+            <i class="fas fa-trash-alt"></i>
+          </div>
         </div>
       `;
+      
+      // Store the full message object for use in event handlers
+      messageItem._messageData = message;
       
       // Add click event to view message
       messageItem.addEventListener('click', function(e) {
         if (!e.target.closest('.message-action')) {
-          viewMessage(message.id);
+          // Show message in popup
+          showMessagePopup(message, connectionMap);
         }
       });
       
-      // Add click event to action button
-      const actionButton = messageItem.querySelector('.message-action');
-      if (actionButton) {
-        actionButton.addEventListener('click', (e) => {
+      // Add click event to view button
+      const viewButton = messageItem.querySelector('.view-action');
+      if (viewButton) {
+        viewButton.addEventListener('click', (e) => {
           e.stopPropagation();
-          viewMessage(message.id);
+          // Show message in popup
+          showMessagePopup(message, connectionMap);
+        });
+      }
+      
+      // Add click event to delete button
+      const deleteButton = messageItem.querySelector('.delete-action');
+      if (deleteButton) {
+        deleteButton.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Show delete confirmation
+          showDeleteMessageConfirmation(message, messageItem, connectionMap);
         });
       }
       
@@ -1865,6 +1885,9 @@ function showAllMessagesModal(messages, connectionMap) {
           <button class="message-action edit-btn" title="Edit message">
             <i class="fas fa-pencil-alt"></i>
           </button>
+          <button class="message-action delete-btn" title="Delete message">
+            <i class="fas fa-trash-alt"></i>
+          </button>
         </div>
       </div>
     `;
@@ -1924,9 +1947,12 @@ function showAllMessagesModal(messages, connectionMap) {
       e.stopPropagation();
       const item = button.closest('.modal-message-item');
       const messageId = item.getAttribute('data-id');
+      const message = messages.find(m => m.id === messageId);
       
-      modalElement.style.display = 'none';
-      viewMessage(messageId);
+      if (message) {
+        // Show message in popup instead of redirecting
+        showMessagePopup(message, connectionMap);
+      }
     });
   });
   
@@ -1946,24 +1972,333 @@ function showAllMessagesModal(messages, connectionMap) {
     });
   });
   
+  // Delete buttons
+  const deleteButtons = modalElement.querySelectorAll('.delete-btn');
+  deleteButtons.forEach(button => {
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const item = button.closest('.modal-message-item');
+      const messageId = item.getAttribute('data-id');
+      const message = messages.find(m => m.id === messageId);
+      
+      if (message) {
+        // Show delete confirmation
+        showDeleteMessageConfirmation(message, item, connectionMap);
+      }
+    });
+  });
+  
   // Make message items clickable to view
   const messageItems = modalElement.querySelectorAll('.modal-message-item');
   messageItems.forEach(item => {
     item.addEventListener('click', (e) => {
       if (!e.target.closest('.message-action')) {
         const messageId = item.getAttribute('data-id');
+        const message = messages.find(m => m.id === messageId);
         
-        modalElement.style.display = 'none';
-        viewMessage(messageId);
+        if (message) {
+          // Show message in popup instead of redirecting
+          showMessagePopup(message, connectionMap);
+        }
       }
     });
   });
 }
 
-// View a message
+// View a message - now displays in a popup instead of redirecting
 function viewMessage(messageId) {
-  localStorage.setItem('viewingMessageId', messageId);
-  window.location.href = 'message-result-new.html?id=' + messageId;
+  if (!currentUser) return;
+  
+  // Show loading state
+  showLoading('Loading message...');
+  
+  // Get the message from Firestore
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('messages')
+    .doc(messageId)
+    .get()
+    .then(doc => {
+      hideLoading();
+      
+      if (doc.exists) {
+        const message = {
+          id: doc.id,
+          ...doc.data()
+        };
+        
+        // Get connection details if needed
+        if (message.connectionId) {
+          return firebase.firestore()
+            .collection('users')
+            .doc(currentUser.uid)
+            .collection('connections')
+            .doc(message.connectionId)
+            .get()
+            .then(connectionDoc => {
+              const connectionMap = {};
+              if (connectionDoc.exists) {
+                connectionMap[connectionDoc.id] = connectionDoc.data();
+              }
+              return { message, connectionMap };
+            });
+        } else {
+          return { message, connectionMap: {} };
+        }
+      } else {
+        throw new Error('Message not found');
+      }
+    })
+    .then(({ message, connectionMap }) => {
+      // Show message in popup
+      showMessagePopup(message, connectionMap);
+    })
+    .catch(error => {
+      console.error('Error loading message:', error);
+      hideLoading();
+      showAlert('Could not load the message. Please try again.', 'error');
+    });
+}
+
+// Show a message in a popup
+function showMessagePopup(message, connectionMap) {
+  // Get recipient info
+  let recipientName = message.recipientName || 'Unknown';
+  let relationship = message.relationship || 'friend';
+  
+  // Use connection data if available
+  if (message.connectionId && connectionMap[message.connectionId]) {
+    const connection = connectionMap[message.connectionId];
+    recipientName = connection.name || recipientName;
+    relationship = connection.relationship || relationship;
+  }
+  
+  // Format date
+  const messageDateText = message.timestamp instanceof Date 
+    ? formatDate(message.timestamp) 
+    : formatDate(message.timestamp.toDate());
+  
+  // Get message type and tone
+  const messageType = message.type || 'general';
+  const messageTone = message.tone || 'warm';
+  const intentLabel = formatIntentTag(messageType);
+  
+  // Create modal for message display
+  let popupModal = document.getElementById('message-popup-modal');
+  if (!popupModal) {
+    popupModal = document.createElement('div');
+    popupModal.id = 'message-popup-modal';
+    popupModal.className = 'modal';
+    document.body.appendChild(popupModal);
+  }
+  
+  // Generate insights HTML if available
+  let insightsHTML = '';
+  if (message.insights && message.insights.length > 0) {
+    const insightItems = message.insights.map(insight => `<li>${insight}</li>`).join('');
+    insightsHTML = `
+      <div class="message-insights">
+        <h3>Message Insights</h3>
+        <ul>${insightItems}</ul>
+      </div>
+    `;
+  }
+  
+  // Populate modal content
+  popupModal.innerHTML = `
+    <div class="modal-content message-view-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">Message to ${recipientName}</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="message-info">
+          <div class="message-meta">
+            <span class="recipient"><strong>To:</strong> ${recipientName} (${relationship})</span>
+            <span class="date"><strong>Date:</strong> ${messageDateText}</span>
+            <span class="intent"><strong>Intent:</strong> ${intentLabel}</span>
+            <span class="tone"><strong>Tone:</strong> ${messageTone}</span>
+          </div>
+          <div class="message-full-content">
+            <h3>Message</h3>
+            <div class="message-text">${message.content || 'No content'}</div>
+          </div>
+          ${insightsHTML}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="copy-message-btn">
+          <i class="fas fa-copy"></i> Copy
+        </button>
+        <button class="edit-message-btn">
+          <i class="fas fa-pencil-alt"></i> Edit
+        </button>
+        <button class="delete-message-btn">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </div>
+    </div>
+  `;
+  
+  // Show modal
+  popupModal.style.display = 'flex';
+  
+  // Add event listeners
+  const closeBtn = popupModal.querySelector('.modal-close');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      popupModal.style.display = 'none';
+    });
+  }
+  
+  // Close modal when clicking outside
+  popupModal.addEventListener('click', (e) => {
+    if (e.target === popupModal) {
+      popupModal.style.display = 'none';
+    }
+  });
+  
+  // Copy button
+  const copyBtn = popupModal.querySelector('.copy-message-btn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const messageText = message.content || '';
+      navigator.clipboard.writeText(messageText)
+        .then(() => {
+          showAlert('Message copied to clipboard!', 'success');
+        })
+        .catch(err => {
+          console.error('Error copying text:', err);
+          showAlert('Failed to copy message', 'error');
+        });
+    });
+  }
+  
+  // Edit button
+  const editBtn = popupModal.querySelector('.edit-message-btn');
+  if (editBtn) {
+    editBtn.addEventListener('click', () => {
+      popupModal.style.display = 'none';
+      editMessage(message, connectionMap);
+    });
+  }
+  
+  // Delete button
+  const deleteBtn = popupModal.querySelector('.delete-message-btn');
+  if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => {
+      popupModal.style.display = 'none';
+      showDeleteMessageConfirmation(message, null, connectionMap);
+    });
+  }
+}
+
+// Show confirmation dialog for deleting a message
+function showDeleteMessageConfirmation(message, messageElement, connectionMap) {
+  // Create confirmation dialog
+  let dialog = document.getElementById('delete-message-dialog');
+  if (!dialog) {
+    dialog = document.createElement('div');
+    dialog.id = 'delete-message-dialog';
+    dialog.className = 'modal';
+    document.body.appendChild(dialog);
+  }
+  
+  // Get recipient name
+  let recipientName = message.recipientName || 'Unknown';
+  if (message.connectionId && connectionMap[message.connectionId]) {
+    recipientName = connectionMap[message.connectionId].name || recipientName;
+  }
+  
+  // Set dialog content
+  dialog.innerHTML = `
+    <div class="modal-content delete-confirmation">
+      <div class="modal-header">
+        <h2 class="modal-title">Delete Message</h2>
+        <button class="modal-close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to delete this message to ${recipientName}?</p>
+        <p class="warning">This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="cancel-btn">Cancel</button>
+        <button class="confirm-delete-btn">Delete</button>
+      </div>
+    </div>
+  `;
+  
+  // Show dialog
+  dialog.style.display = 'flex';
+  
+  // Add event listeners
+  const closeBtn = dialog.querySelector('.modal-close');
+  const cancelBtn = dialog.querySelector('.cancel-btn');
+  const confirmBtn = dialog.querySelector('.confirm-delete-btn');
+  
+  const closeDialog = () => {
+    dialog.style.display = 'none';
+  };
+  
+  // Close buttons
+  if (closeBtn) closeBtn.addEventListener('click', closeDialog);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeDialog);
+  
+  // Confirm delete
+  if (confirmBtn) {
+    confirmBtn.addEventListener('click', () => {
+      deleteMessage(message.id, messageElement);
+      closeDialog();
+    });
+  }
+  
+  // Close when clicking outside
+  dialog.addEventListener('click', (e) => {
+    if (e.target === dialog) {
+      closeDialog();
+    }
+  });
+}
+
+// Delete a message
+function deleteMessage(messageId, messageElement) {
+  if (!currentUser || !messageId) {
+    showAlert('Cannot delete message. Please try again.', 'error');
+    return;
+  }
+  
+  showLoading('Deleting message...');
+  
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('messages')
+    .doc(messageId)
+    .delete()
+    .then(() => {
+      hideLoading();
+      showAlert('Message deleted successfully', 'success');
+      
+      // Remove message element from DOM if provided
+      if (messageElement) {
+        messageElement.remove();
+      }
+      
+      // Refresh messages list
+      loadUserMessages();
+      
+      // Close any open message popup
+      const popup = document.getElementById('message-popup-modal');
+      if (popup) {
+        popup.style.display = 'none';
+      }
+    })
+    .catch(error => {
+      console.error('Error deleting message:', error);
+      hideLoading();
+      showAlert('Failed to delete message. Please try again.', 'error');
+    });
 }
 
 // Edit a message

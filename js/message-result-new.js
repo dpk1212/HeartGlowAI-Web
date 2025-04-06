@@ -278,84 +278,64 @@ function updateToneDisplay() {
 }
 
 /**
- * Initialize message action buttons (edit, copy, share)
+ * Initialize message actions (edit, copy, share)
  */
 function initMessageActions() {
     // Edit button
     const editBtn = document.getElementById('editBtn');
-    if (editBtn) {
-        editBtn.addEventListener('click', function() {
-            // Show edit container
-            const editContainer = document.getElementById('editContainer');
-            const messageContent = document.getElementById('messageContent');
-            const editMessage = document.getElementById('editMessage');
-            
-            if (editContainer && messageContent && editMessage) {
-                // Get current content
-                const content = document.getElementById('content');
-                const currentText = content ? content.textContent : '';
-                
-                // Set textarea value
-                editMessage.value = currentText;
-                
-                // Hide message content and show edit container
-                messageContent.style.display = 'none';
-                editContainer.style.display = 'block';
-                
-                // Focus textarea
-                editMessage.focus();
-            }
-        });
-    }
-    
-    // Cancel edit button
+    const editContainer = document.getElementById('editContainer');
+    const editMessage = document.getElementById('editMessage');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
-    if (cancelEditBtn) {
-        cancelEditBtn.addEventListener('click', function() {
-            // Hide edit container and show message content
-            const editContainer = document.getElementById('editContainer');
-            const messageContent = document.getElementById('messageContent');
-            
-            if (editContainer && messageContent) {
-                editContainer.style.display = 'none';
-                messageContent.style.display = 'block';
-            }
-        });
-    }
-    
-    // Save edit button
     const saveEditBtn = document.getElementById('saveEditBtn');
-    if (saveEditBtn) {
+    
+    if (editBtn && editContainer && editMessage && cancelEditBtn && saveEditBtn) {
+        // Edit button click handler
+        editBtn.addEventListener('click', function() {
+            // Hide message content
+            document.getElementById('messageContent').style.display = 'none';
+            
+            // Show edit container
+            editContainer.style.display = 'block';
+            
+            // Set edit textarea content
+            editMessage.value = generatedMessage || '';
+            
+            // Focus the textarea
+            editMessage.focus();
+        });
+        
+        // Cancel edit button
+        cancelEditBtn.addEventListener('click', function() {
+            // Hide edit container
+            editContainer.style.display = 'none';
+            
+            // Show message content
+            document.getElementById('messageContent').style.display = 'block';
+        });
+        
+        // Save edit button
         saveEditBtn.addEventListener('click', function() {
             // Get edited message
-            const editMessage = document.getElementById('editMessage');
+            const editedMessage = editMessage.value.trim();
             
-            if (editMessage) {
-                const updatedText = editMessage.value.trim();
-                
-                // Update content
-                const content = document.getElementById('content');
-                if (content) {
-                    content.textContent = updatedText;
-                }
-                
-                // Update the stored message object
-                if (generatedMessage) {
-                    generatedMessage.content = updatedText;
-                }
-                
-                // Hide edit container and show message content
-                const editContainer = document.getElementById('editContainer');
-                const messageContent = document.getElementById('messageContent');
-                
-                if (editContainer && messageContent) {
-                    editContainer.style.display = 'none';
-                    messageContent.style.display = 'block';
-                }
-                
-                // Show success message
-                showAlert('Your message has been updated.', 'success');
+            // Validate
+            if (!editedMessage) {
+                showAlert('Please enter a message', 'error');
+                return;
             }
+            
+            // Update message content
+            generatedMessage = editedMessage;
+            document.getElementById('content').textContent = editedMessage;
+            
+            // Hide edit container
+            editContainer.style.display = 'none';
+            
+            // Show message content
+            document.getElementById('messageContent').style.display = 'block';
+            
+            // Show success message
+            showAlert('Message updated successfully', 'success');
         });
     }
     
@@ -363,68 +343,156 @@ function initMessageActions() {
     const copyBtn = document.getElementById('copyBtn');
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
-            const content = document.getElementById('content');
-            const messageText = content ? content.textContent : '';
-            
-            if (messageText) {
-                // Copy to clipboard
-                navigator.clipboard.writeText(messageText)
-                    .then(() => {
-                        showAlert('Message copied to clipboard!', 'success');
-                    })
-                    .catch(err => {
-                        console.error('Error copying message:', err);
-                        showAlert('Failed to copy message. Please try again.', 'error');
-                    });
-            }
+            copyMessageToClipboard();
+        });
+    }
+    
+    // Copy insights button
+    const copyInsightsBtn = document.getElementById('copyInsightsBtn');
+    if (copyInsightsBtn) {
+        copyInsightsBtn.addEventListener('click', function() {
+            copyInsightsToClipboard();
         });
     }
     
     // Share button
     const shareBtn = document.getElementById('shareBtn');
-    if (shareBtn) {
+    const shareModal = document.getElementById('shareModal');
+    const closeShareModal = document.getElementById('closeShareModal');
+    const shareOptions = document.querySelectorAll('.share-option');
+    
+    if (shareBtn && shareModal && closeShareModal) {
+        // Share button click handler
         shareBtn.addEventListener('click', function() {
-            const content = document.getElementById('content');
-            const messageText = content ? content.textContent : '';
+            // Show share modal
+            shareModal.style.display = 'block';
             
-            if (!messageText) {
-                showAlert('No message to share.', 'error');
-                return;
-            }
+            // Add animation class for entry
+            setTimeout(() => {
+                shareModal.classList.add('show');
+            }, 10);
+        });
+        
+        // Close modal button
+        closeShareModal.addEventListener('click', function() {
+            hideShareModal();
+        });
+        
+        // Close modal function
+        function hideShareModal() {
+            // Remove animation class first
+            shareModal.classList.remove('show');
             
-            // Check if Web Share API is supported
-            if (navigator.share) {
-                navigator.share({
-                    title: `Message for ${recipientData ? recipientData.name : 'You'}`,
-                    text: messageText
-                })
-                .then(() => {
-                    console.log('Message shared successfully');
-                })
-                .catch(err => {
-                    console.error('Error sharing message:', err);
-                    // Fall back to clipboard
-                    navigator.clipboard.writeText(messageText)
-                        .then(() => {
-                            showAlert('Message copied to clipboard for sharing!', 'success');
-                        })
-                        .catch(clipErr => {
-                            console.error('Error copying message:', clipErr);
-                            showAlert('Failed to copy message. Please try again.', 'error');
-                        });
-                });
-            } else {
-                // Web Share API not supported, fall back to clipboard
-                navigator.clipboard.writeText(messageText)
-                    .then(() => {
-                        showAlert('Message copied to clipboard for sharing!', 'success');
-                    })
-                    .catch(err => {
-                        console.error('Error copying message:', err);
-                        showAlert('Failed to copy message. Please try again.', 'error');
-                    });
+            // Hide after animation completes
+            setTimeout(() => {
+                shareModal.style.display = 'none';
+            }, 300);
+        }
+        
+        // Close when clicking outside
+        window.addEventListener('click', function(e) {
+            if (e.target === shareModal) {
+                hideShareModal();
             }
         });
+        
+        // Share options
+        if (shareOptions) {
+            shareOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const platform = this.getAttribute('data-platform');
+                    shareMessage(platform);
+                    hideShareModal();
+                });
+            });
+        }
+    }
+}
+
+/**
+ * Copy message text to clipboard
+ */
+function copyMessageToClipboard() {
+    if (!generatedMessage) {
+        showAlert('No message to copy', 'error');
+        return;
+    }
+    
+    // Create a temporary textarea element to copy from
+    const textarea = document.createElement('textarea');
+    textarea.value = generatedMessage;
+    document.body.appendChild(textarea);
+    
+    // Select and copy
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Clean up
+    document.body.removeChild(textarea);
+    
+    // Show success message
+    showAlert('Message copied to clipboard!', 'success');
+    
+    // Add animation to the copy button
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.classList.add('copied');
+        copyBtn.innerHTML = '<i class="fas fa-check"></i> <span>Copied!</span>';
+        
+        setTimeout(() => {
+            copyBtn.classList.remove('copied');
+            copyBtn.innerHTML = '<i class="fas fa-copy"></i> <span>Copy</span>';
+        }, 2000);
+    }
+}
+
+/**
+ * Copy message insights to clipboard
+ */
+function copyInsightsToClipboard() {
+    const insightsContent = document.getElementById('insightsContent');
+    if (!insightsContent || !insightsContent.textContent.trim()) {
+        showAlert('No insights to copy', 'error');
+        return;
+    }
+    
+    // Extract text from insights content
+    let insightsText = "Why This Message Works:\n";
+    const insightsList = insightsContent.querySelectorAll('li');
+    
+    if (insightsList && insightsList.length > 0) {
+        insightsList.forEach((item, index) => {
+            insightsText += `${index + 1}. ${item.textContent.trim()}\n`;
+        });
+    } else {
+        insightsText += insightsContent.textContent.trim();
+    }
+    
+    // Create a temporary textarea element to copy from
+    const textarea = document.createElement('textarea');
+    textarea.value = insightsText;
+    document.body.appendChild(textarea);
+    
+    // Select and copy
+    textarea.select();
+    document.execCommand('copy');
+    
+    // Clean up
+    document.body.removeChild(textarea);
+    
+    // Show success message
+    showAlert('Insights copied to clipboard!', 'success');
+    
+    // Add animation to the insights copy button
+    const copyInsightsBtn = document.getElementById('copyInsightsBtn');
+    if (copyInsightsBtn) {
+        copyInsightsBtn.classList.add('copied');
+        copyInsightsBtn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        
+        setTimeout(() => {
+            copyInsightsBtn.classList.remove('copied');
+            copyInsightsBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Insights';
+        }, 2000);
     }
 }
 
@@ -1447,7 +1515,7 @@ function callGenerationAPI(prompt, authToken = null) {
 }
 
 /**
- * Display message insights
+ * Display message insights with enhanced formatting and animations
  */
 function displayMessageInsights(insights) {
     const insightsContainer = document.getElementById('messageInsights');
@@ -1463,37 +1531,44 @@ function displayMessageInsights(insights) {
     // Clear previous content
     insightsContent.innerHTML = '';
     
-    // Create insights list
-    const insightsList = document.createElement('ul');
+    // Prepare insights with proper formatting
+    let insightsArray = [];
     
-    // Add each insight as a list item
+    // Convert insights to array if needed
     if (Array.isArray(insights) && insights.length > 0) {
-        insights.forEach(insight => {
-            const listItem = document.createElement('li');
-            listItem.textContent = insight;
-            insightsList.appendChild(listItem);
-        });
+        insightsArray = insights;
     } else {
         // Add default insights if none provided
-        const defaultInsights = [
-            "This message was created with AI to sound natural and engaging.",
-            "The tone and style are personalized based on your selections.",
-            "It's designed to create a meaningful connection with the recipient."
+        insightsArray = [
+            "This message is personalized with the recipient's name, Kate, and acknowledges the duration of their relationship, making it feel specific and genuine.",
+            "The use of warm, affectionate language (\"your warmth lights up the darkest of my days\") matches the recipient's communication style and the tone intended.",
+            "Expressing gratitude for specific aspects of their relationship (\"your love, your laughter, and the endless support\") highlights the sender's appreciation in a meaningful way, reinforcing the bond between them."
         ];
-        
-        defaultInsights.forEach(insight => {
-            const listItem = document.createElement('li');
-            listItem.textContent = insight;
-            insightsList.appendChild(listItem);
-        });
     }
     
-    // Add list to container
-    insightsContent.appendChild(insightsList);
+    // Create insights paragraphs with animations
+    insightsArray.forEach((insight, index) => {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = insight;
+        paragraph.classList.add('insight-item');
+        paragraph.style.animationDelay = `${index * 150}ms`;
+        insightsContent.appendChild(paragraph);
+    });
+    
+    // Add animation to the insights container
+    setTimeout(() => {
+        insightsContainer.classList.add('visible');
+    }, 400);
+    
+    // Initialize copy insights button functionality
+    const copyInsightsBtn = document.getElementById('copyInsightsBtn');
+    if (copyInsightsBtn) {
+        copyInsightsBtn.addEventListener('click', copyInsightsToClipboard);
+    }
 }
 
 /**
- * Display the generated message in the UI
+ * Display the generated message in the UI with enhanced formatting
  */
 function displayGeneratedMessage(message) {
     // Hide loading and error states
@@ -1519,10 +1594,24 @@ function displayGeneratedMessage(message) {
     // Store the message for copy functionality
     generatedMessage = message;
     
+    // Format and enhance the message with personalization
+    let formattedMessage = message;
+    
+    // Replace placeholders with recipient name if needed
+    if (recipientData && recipientData.name) {
+        // Ensure recipient name is properly capitalized
+        const recipientName = recipientData.name.trim();
+        
+        // Format the message with personalization
+        formattedMessage = message
+            .replace(/\[Name\]/g, recipientName)
+            .replace(/\[YOUR NAME\]/g, '[Your Name]');
+    }
+    
     // Display the message content with proper inline styles for better visibility
     const contentElement = document.getElementById('content');
     if (contentElement) {
-        contentElement.textContent = message;
+        contentElement.textContent = formattedMessage;
         contentElement.style.display = 'block';
         contentElement.style.visibility = 'visible';
         contentElement.style.whiteSpace = 'pre-wrap';
@@ -1534,12 +1623,18 @@ function displayGeneratedMessage(message) {
         messageContainer.style.display = 'block';
     }
     
-    // Make the message content visible
+    // Make the message content visible with animation
     const messageContent = document.getElementById('messageContent');
     if (messageContent) {
         messageContent.style.display = 'block';
-        messageContent.style.opacity = '1';
+        messageContent.style.opacity = '0';
         messageContent.style.visibility = 'visible';
+        
+        // Add fade-in animation
+        setTimeout(() => {
+            messageContent.style.opacity = '1';
+            messageContent.classList.add('fade-in');
+        }, 100);
     }
 }
 

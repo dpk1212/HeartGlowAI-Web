@@ -260,13 +260,20 @@ function openConnectionModal(connectionId = null) {
   
   if (!modal) {
     console.error('Connection modal not found');
+    alert('Error: Connection modal not found in the DOM');
     return;
   }
   
   if (!form) {
     console.error('Connection form not found');
+    alert('Error: Connection form not found in the DOM');
     return;
   }
+  
+  // Add debugging elements
+  console.log('Modal DOM element:', modal);
+  console.log('Current modal display style:', modal.style.display);
+  console.log('Computed style:', window.getComputedStyle(modal).display);
   
   // Reset form
   form.reset();
@@ -275,7 +282,7 @@ function openConnectionModal(connectionId = null) {
   if (connectionId) {
     // Editing existing connection
     editingConnectionId = connectionId;
-    modalTitle.textContent = 'Edit Connection';
+    modalTitle.textContent = 'Edit Person';
     idField.value = connectionId;
     
     // Add delete button if it doesn't exist
@@ -294,6 +301,13 @@ function openConnectionModal(connectionId = null) {
       }
     } else {
       deleteBtn.style.display = 'inline-block';
+    }
+    
+    // Check if user is authenticated
+    if (!currentUser) {
+      console.error('User not authenticated for loading connection data');
+      showAlert('You must be logged in to edit connections', 'error');
+      return;
     }
     
     // Fetch connection data
@@ -322,7 +336,7 @@ function openConnectionModal(connectionId = null) {
   } else {
     // Adding new connection
     editingConnectionId = null;
-    modalTitle.textContent = 'Add New Connection';
+    modalTitle.textContent = 'Add New Person';
     idField.value = '';
     
     // Hide delete button if it exists
@@ -331,16 +345,29 @@ function openConnectionModal(connectionId = null) {
     }
   }
   
-  // Show modal
-  modal.style.display = 'flex';
-  console.log('Modal should now be visible');
+  // Force visible modal with !important
+  modal.style.cssText = 'display: flex !important; z-index: 9999 !important;';
+  console.log('Modal should now be visible with display:', modal.style.display);
+  
+  // Add a small delay to ensure DOM updates
+  setTimeout(() => {
+    console.log('Modal visibility check (after timeout):', 
+      modal.style.display, 
+      window.getComputedStyle(modal).display, 
+      window.getComputedStyle(modal).visibility
+    );
+  }, 100);
 }
 
 // Close connection modal
 function closeConnectionModal() {
+  console.log('Closing connection modal');
   const modal = document.getElementById('connection-modal');
   if (modal) {
     modal.style.display = 'none';
+    console.log('Modal display style set to none');
+  } else {
+    console.error('Modal element not found when trying to close');
   }
   editingConnectionId = null;
 }
@@ -352,6 +379,13 @@ function saveConnection() {
   if (!currentUser) {
     console.error('No current user for saving connection');
     showAlert('You must be logged in to save connections', 'error');
+    return;
+  }
+  
+  // Ensure Firestore is initialized
+  if (!firebase.firestore) {
+    console.error('Firestore is not initialized');
+    showAlert('Firebase Firestore is not available', 'error');
     return;
   }
   
@@ -422,7 +456,7 @@ function saveConnection() {
     .then((result) => {
       console.log(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, result);
       hideLoading();
-      showAlert(`Connection ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
+      showAlert(`Person ${isNewConnection ? 'added' : 'updated'} successfully`, 'success');
       closeConnectionModal();
       // Wait a moment before refreshing the list
       setTimeout(() => {

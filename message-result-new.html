@@ -61,8 +61,8 @@
                             <i class="fas fa-sign-out-alt"></i>
                             Sign Out
                         </button>
-                    </div>
-                </div>
+        </div>
+        </div>
             </div>
         </header>
         
@@ -86,11 +86,11 @@
                     <div class="progress-step active">
                         <div class="step-number">4</div>
                         <div class="step-label">Message</div>
-                    </div>
-                </div>
+        </div>
+        </div>
                 <div class="progress-bar">
                     <div class="progress-indicator" style="width: 100%"></div>
-                </div>
+        </div>
             </div>
             
             <!-- Message Information -->
@@ -126,7 +126,7 @@
                     <div class="heart-animation">
                         <div class="heart-shape"></div>
                         <div class="heart-glow"></div>
-                    </div>
+        </div>
                     <p>Creating your message with heart...</p>
                 </div>
                 
@@ -256,10 +256,10 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
+        </div>
+
             <!-- Navigation Buttons -->
-            <div class="navigation-buttons">
+        <div class="navigation-buttons">
                 <button id="backBtn" class="secondary-button">
                     <i class="fas fa-arrow-left"></i>
                     Back
@@ -268,10 +268,10 @@
                     Back to Dashboard
                     <i class="fas fa-home"></i>
                 </button>
-            </div>
+        </div>
         </main>
     </div>
-    
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-container">
@@ -282,7 +282,7 @@
             <div id="loadingContext" class="loading-context">Creating your message with heart...</div>
         </div>
     </div>
-    
+
     <!-- Alert Container -->
     <div id="alertContainer" class="alert-container"></div>
     
@@ -307,5 +307,12 @@
     
     <!-- JavaScript -->
     <script src="js/message-result-new.js"></script>
+
+    <!-- Add debug console before the closing body tag -->
+    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; max-height: 300px; overflow: auto; background: #000; color: #0f0; font-family: monospace; padding: 10px; font-size: 12px; z-index: 999999;">
+        <button onclick="document.getElementById('debug-console').style.display='none'" style="position: absolute; top: 5px; right: 5px; background: #333; color: #fff; border: none; padding: 3px 8px; cursor: pointer;">Close</button>
+        <h3>Debug Console</h3>
+        <div id="debug-output"></div>
+    </div>
 </body>
 </html> 

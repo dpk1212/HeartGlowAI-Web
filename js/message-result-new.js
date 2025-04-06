@@ -104,6 +104,9 @@ function initPage() {
     // Initialize UI elements
     initButtons();
     
+    // Add debug button for troubleshooting
+    createDebugButton();
+    
     // Set up authentication check
     authStatePromise.then(user => {
         // Show loading state
@@ -131,6 +134,33 @@ function initPage() {
     
     // Start the auth check process
     checkAuthentication();
+}
+
+/**
+ * Create and add a debug button to the page
+ */
+function createDebugButton() {
+    const debugBtn = document.createElement('button');
+    debugBtn.textContent = 'Debug';
+    debugBtn.style.position = 'fixed';
+    debugBtn.style.bottom = '10px';
+    debugBtn.style.right = '10px';
+    debugBtn.style.zIndex = '9999';
+    debugBtn.style.padding = '5px 10px';
+    debugBtn.style.background = '#333';
+    debugBtn.style.color = '#fff';
+    debugBtn.style.border = 'none';
+    debugBtn.style.borderRadius = '4px';
+    debugBtn.style.cursor = 'pointer';
+    
+    debugBtn.addEventListener('click', function() {
+        const debugConsole = document.getElementById('debug-console');
+        if (debugConsole) {
+            debugConsole.style.display = debugConsole.style.display === 'none' ? 'block' : 'none';
+        }
+    });
+    
+    document.body.appendChild(debugBtn);
 }
 
 /**
@@ -359,21 +389,22 @@ function generateMessage() {
 function callCloudFunction(idToken) {
     const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
     
-    // Prepare payload
+    // Prepare payload - ensure correct format for API
     const payload = {
-        intent: intentData.type,
+        intent: intentData.type || "",
         recipient: {
-            name: recipientData.name,
-            relationship: recipientData.relationship
+            name: recipientData.name || "",
+            relationship: recipientData.relationship || ""
         },
-        tone: toneData.type,
+        tone: toneData.type || "",
         customizations: {
             custom_intent: intentData.customText || '',
             custom_tone: toneData.customText || ''
         }
     };
     
-    console.log('Calling cloud function with payload:', payload);
+    // Log for debugging
+    logDebug('Calling cloud function with payload: ' + JSON.stringify(payload));
     
     // Set up headers
     const headers = {
@@ -403,14 +434,14 @@ function callCloudFunction(idToken) {
         // Handle different response status codes
         if (response.status === 401 || response.status === 403) {
             // Auth token invalid or expired - clear it and try re-authenticating
-            console.error('Authentication token invalid or expired');
+            logDebug('Authentication token invalid or expired');
             localStorage.removeItem('authToken');
             
             if (firebase.auth && firebase.auth().currentUser) {
                 // Try refreshing the token
                 return firebase.auth().currentUser.getIdToken(true)
                     .then(newToken => {
-                        console.log('Got fresh token, retrying call');
+                        logDebug('Got fresh token, retrying call');
                         localStorage.setItem('authToken', newToken);
                         // Retry with new token - call recursively
                         return callCloudFunction(newToken);
@@ -424,7 +455,26 @@ function callCloudFunction(idToken) {
         }
         
         if (!response.ok) {
-            throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+            // Get detailed error response if possible
+            return response.text().then(errorText => {
+                let errorMessage = `API returned status ${response.status}`;
+                try {
+                    // Try to parse error as JSON
+                    const errorJson = JSON.parse(errorText);
+                    if (errorJson.error) {
+                        errorMessage += `: ${errorJson.error}`;
+                    } else {
+                        errorMessage += `: ${errorText}`;
+                    }
+                } catch (e) {
+                    // Not JSON, just use text
+                    if (errorText) {
+                        errorMessage += `: ${errorText}`;
+                    }
+                }
+                logDebug(`API Error: ${errorMessage}`);
+                throw new Error(errorMessage);
+            });
         }
         
         return response.json();
@@ -433,15 +483,15 @@ function callCloudFunction(idToken) {
         if (!data) {
             throw new Error('No data returned from API');
         }
-        console.log('Message generated successfully:', data);
+        logDebug('Message generated successfully: ' + JSON.stringify(data));
         displayGeneratedMessage(data);
     })
     .catch(error => {
-        console.error('Error calling cloud function:', error);
+        logDebug('Error calling cloud function: ' + error.message);
         
         // For timeout or network errors, retry once
         if (error.name === 'AbortError' || error.message.includes('NetworkError')) {
-            console.log('Connection timed out or network error. Retrying...');
+            logDebug('Connection timed out or network error. Retrying...');
             showAlert('Connection issue. Retrying...', 'info');
             setTimeout(() => {
                 callCloudFunction(idToken); // Retry once
@@ -925,17 +975,17 @@ function initMessageOptions() {
 function initButtons() {
     try {
         // Back button
-        const backBtn = document.getElementById('backBtn');
+        const backBtn = document.getElementById('back-btn');
         if (backBtn) {
             backBtn.addEventListener('click', function() {
                 window.location.href = 'message-tone-new.html';
             });
         } else {
-            console.error('DEBUG: ERROR: Back button not found');
+            logDebug('ERROR: Back button not found');
         }
         
         // Next/Done button
-        const nextBtn = document.getElementById('nextBtn');
+        const nextBtn = document.getElementById('next-btn');
         if (nextBtn) {
             nextBtn.addEventListener('click', function() {
                 // In a real implementation, this might save the message and go to home
@@ -945,8 +995,11 @@ function initButtons() {
                 }, 1500);
             });
         } else {
-            console.error('DEBUG: ERROR: Next button not found');
+            logDebug('ERROR: Next button not found');
         }
+        
+        // Initialize message options
+        initMessageOptions();
     } catch (error) {
         console.error('Error initializing buttons:', error);
     }

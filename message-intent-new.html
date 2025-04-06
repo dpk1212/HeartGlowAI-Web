@@ -71,13 +71,13 @@
             <!-- Progress Steps -->
             <div class="progress-container">
                 <div class="progress-steps">
-                    <div class="progress-step active">
-                        <div class="step-number">1</div>
-                        <div class="step-label">Intention</div>
-                    </div>
-                    <div class="progress-step">
-                        <div class="step-number">2</div>
+                    <div class="progress-step completed">
+                        <div class="step-number"><i class="fas fa-check"></i></div>
                         <div class="step-label">Recipient</div>
+                    </div>
+                    <div class="progress-step active">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Intention</div>
                     </div>
                     <div class="progress-step">
                         <div class="step-number">3</div>
@@ -89,7 +89,18 @@
                     </div>
                 </div>
                 <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 25%"></div>
+                    <div class="progress-indicator" style="width: 50%"></div>
+                </div>
+            </div>
+            
+            <!-- Add recipient summary card -->
+            <div class="recipient-summary-card">
+                <div class="recipient-avatar" id="recipientAvatar">
+                    <span id="recipientInitial">R</span>
+                </div>
+                <div class="recipient-details">
+                    <h4 class="recipient-name" id="recipientName">Loading recipient...</h4>
+                    <div class="recipient-relationship" id="recipientRelationship">Preparing...</div>
                 </div>
             </div>
             
@@ -157,9 +168,9 @@
             
             <!-- Navigation Buttons -->
             <div class="navigation-buttons">
-                <a href="home.html" class="secondary-button">
+                <a href="recipient-selection-new.html" class="secondary-button">
                     <i class="fas fa-arrow-left"></i>
-                    Back to Dashboard
+                    Back to Recipient
                 </a>
                 <button id="nextBtn" class="primary-button" disabled>
                     Next Step

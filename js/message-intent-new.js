@@ -136,35 +136,29 @@ function setupEventListeners() {
     // Next button
     nextBtn.addEventListener('click', () => {
         if (!selectedIntent) {
-            showAlert('Please select an intent before continuing.', 'error');
+            showAlert('Please select an intention for your message', 'error');
             return;
         }
         
-        // Validate custom intent if needed
-        if (selectedIntent === 'custom' && !customIntent) {
-            showAlert('Please describe your custom intent before continuing.', 'error');
-            customIntentInput.focus();
-            return;
-        }
-        
-        // Create intent data object for storage
-        const intentData = {
-            type: selectedIntent
+        // Create intent data
+        let intentData = {
+            type: selectedIntent,
+            timestamp: new Date().toISOString()
         };
         
-        // Add custom intent if applicable
-        if (selectedIntent === 'custom') {
+        // Add custom intent text if applicable
+        if (selectedIntent === 'custom' && customIntent) {
             intentData.customText = customIntent;
         }
         
-        // Create an intent object that matches what recipient-selection-new.js expects
-        const intentObject = {
+        // Create an intent object for easier access on the tone page
+        let intentObject = {
             title: '',
             description: '',
             icon: ''
         };
         
-        // Safely get the title, description and icon
+        // Get data from the selected card
         const selectedCard = document.querySelector(`.option-card[data-intent="${selectedIntent}"]`);
         if (selectedCard) {
             const titleElement = selectedCard.querySelector('.option-title');
@@ -181,12 +175,10 @@ function setupEventListeners() {
         }
         
         console.log('Saving intent data:', intentData);
-        console.log('Saving intent object for recipient page:', intentObject);
+        console.log('Saving intent object for tone page:', intentObject);
         
         try {
-            // Clear any existing data to prevent confusion
-            localStorage.removeItem('recipientData');
-            localStorage.removeItem('selectedRecipient');
+            // Keep recipient data but clear any existing tone data
             localStorage.removeItem('toneData');
             localStorage.removeItem('selectedTone');
             
@@ -197,9 +189,9 @@ function setupEventListeners() {
             // Show loading overlay
             showLoading('Saving your selection...');
             
-            // Proceed to next page (recipient selection)
+            // Proceed to next page (tone selection)
             setTimeout(() => {
-                window.location.href = 'recipient-selection-new.html';
+                window.location.href = 'message-tone-new.html';
             }, 800);
         } catch (error) {
             console.error('Error saving to localStorage:', error);
@@ -207,6 +199,12 @@ function setupEventListeners() {
             showAlert('Could not save your selection. Please try again.', 'error');
         }
     });
+    
+    // Back button
+    const backBtn = document.querySelector('.secondary-button');
+    if (backBtn) {
+        backBtn.href = 'recipient-selection-new.html';
+    }
 }
 
 // Check for previous data
@@ -282,4 +280,73 @@ function showAlert(message, type = 'info') {
             setTimeout(() => alert.remove(), 300);
         }
     }, 5000);
+}
+
+/**
+ * Check for recipient data from previous page
+ */
+function checkRecipientData() {
+    const recipientData = localStorage.getItem('recipientData');
+    const selectedRecipient = localStorage.getItem('selectedRecipient');
+    
+    if (!recipientData || !selectedRecipient) {
+        // Redirect to recipient selection if no data found
+        showAlert('Please select a recipient first', 'error');
+        setTimeout(() => {
+            window.location.href = 'recipient-selection-new.html';
+        }, 1500);
+        return false;
+    }
+    
+    return true;
+}
+
+/**
+ * Display recipient information in the summary card
+ */
+function displayRecipientInfo() {
+    try {
+        const selectedRecipient = JSON.parse(localStorage.getItem('selectedRecipient'));
+        if (!selectedRecipient) return;
+        
+        const recipientName = document.getElementById('recipientName');
+        const recipientRelationship = document.getElementById('recipientRelationship');
+        const recipientInitial = document.getElementById('recipientInitial');
+        
+        if (recipientName) {
+            recipientName.textContent = selectedRecipient.name || 'Unknown';
+        }
+        
+        if (recipientRelationship) {
+            recipientRelationship.textContent = selectedRecipient.relationship || 'Unknown relationship';
+        }
+        
+        if (recipientInitial) {
+            recipientInitial.textContent = selectedRecipient.initial || selectedRecipient.name.charAt(0).toUpperCase() || '?';
+        }
+    } catch (error) {
+        console.error('Error displaying recipient info:', error);
+    }
+}
+
+/**
+ * Initialize page: set up UI and event handlers
+ */
+function initPage() {
+    console.log('Message Intent Page Initialized');
+    
+    // Initialize authentication
+    initializeAuthState();
+    
+    // Check for existing recipient data first
+    if (checkRecipientData()) {
+        // Display recipient information if it exists
+        displayRecipientInfo();
+    }
+    
+    // Set up event handlers
+    setupEventListeners();
+    
+    // Check for previous intent data
+    checkPreviousData();
 } 

@@ -157,8 +157,19 @@ function setupEventListeners() {
             intentData.customText = customIntent;
         }
         
-        // Save to localStorage for persistence
+        // Create an intent object that matches what recipient-selection-new.js expects
+        const intentObject = {
+            title: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-title`).textContent,
+            description: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-description`).textContent,
+            icon: document.querySelector(`.option-card[data-intent="${selectedIntent}"] .option-icon i`).className.replace('fas ', '')
+        };
+        
+        console.log('Saving intent data:', intentData);
+        console.log('Saving intent object for recipient page:', intentObject);
+        
+        // Save both objects to localStorage for persistence
         localStorage.setItem('intentData', JSON.stringify(intentData));
+        localStorage.setItem('selectedIntent', JSON.stringify(intentObject));
         
         // Show loading overlay
         showLoading('Saving your selection...');

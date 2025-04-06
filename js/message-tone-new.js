@@ -61,18 +61,34 @@ function getEmotionFromUrl() {
  */
 function loadRecipientData() {
     try {
-        const storedRecipientData = localStorage.getItem('recipientData');
+        console.log('Attempting to load recipient data...');
+        
+        // Try both storage keys for maximum compatibility
+        let storedRecipientData = localStorage.getItem('recipientData');
+        if (!storedRecipientData) {
+            storedRecipientData = localStorage.getItem('selectedRecipient');
+        }
+        
         if (storedRecipientData) {
             recipientData = JSON.parse(storedRecipientData);
             logDebug(`Loaded recipient data: ${recipientData.name} (${recipientData.relationship})`);
             updateRecipientDisplay();
+            return true;
         } else {
             logDebug('ERROR: No recipient data found in localStorage');
             showAlert('No recipient information found. Please go back and enter recipient details.', 'error');
+            
+            // After a delay, redirect back to recipient selection
+            setTimeout(() => {
+                window.location.href = 'recipient-selection-new.html';
+            }, 2000);
+            
+            return false;
         }
     } catch (error) {
         logDebug(`ERROR: Failed to parse recipient data: ${error.message}`);
         showAlert('There was a problem loading your recipient information.', 'error');
+        return false;
     }
 }
 
@@ -81,17 +97,42 @@ function loadRecipientData() {
  */
 function loadIntentData() {
     try {
-        const storedIntentData = localStorage.getItem('intentData');
+        console.log('Attempting to load intent data...');
+        
+        // Try both storage keys for maximum compatibility
+        let storedIntentData = localStorage.getItem('intentData');
+        let selectedIntent = localStorage.getItem('selectedIntent');
+        
         if (storedIntentData) {
             intentData = JSON.parse(storedIntentData);
             logDebug(`Loaded intent data: ${intentData.type}`);
+            
+            // Also parse the selectedIntent if available for display purposes
+            if (selectedIntent) {
+                try {
+                    const intentDisplay = JSON.parse(selectedIntent);
+                    updateIntentDisplay(intentDisplay);
+                } catch (e) {
+                    console.error('Error parsing selectedIntent for display:', e);
+                }
+            }
+            
+            return true;
         } else {
             logDebug('ERROR: No intent data found in localStorage');
             showAlert('No intent information found. Please go back and select an intent.', 'error');
+            
+            // After a delay, redirect back to intent selection
+            setTimeout(() => {
+                window.location.href = 'message-intent-new.html';
+            }, 2000);
+            
+            return false;
         }
     } catch (error) {
         logDebug(`ERROR: Failed to parse intent data: ${error.message}`);
         showAlert('There was a problem loading your intent information.', 'error');
+        return false;
     }
 }
 
@@ -105,6 +146,11 @@ function updateRecipientDisplay() {
     const nameDisplay = document.getElementById('recipient-name-display');
     const relationshipDisplay = document.getElementById('recipient-relationship-display');
     const avatarDisplay = document.getElementById('recipient-avatar');
+    const recipientInfo = document.querySelector('.recipient-info');
+    
+    if (recipientInfo) {
+        recipientInfo.classList.remove('loading');
+    }
     
     if (nameDisplay) {
         nameDisplay.textContent = recipientData.name || 'Unknown recipient';
@@ -116,6 +162,34 @@ function updateRecipientDisplay() {
     
     if (avatarDisplay) {
         avatarDisplay.textContent = getInitials(recipientData.name);
+    }
+}
+
+/**
+ * Update the intent display with loaded data
+ */
+function updateIntentDisplay(intentData) {
+    if (!intentData) return;
+    
+    const intentIcon = document.getElementById('intent-icon');
+    const intentTitle = document.getElementById('intent-title');
+    const intentDescription = document.getElementById('intent-description');
+    const intentInfo = document.querySelector('.intent-info');
+    
+    if (intentInfo) {
+        intentInfo.classList.remove('loading');
+    }
+    
+    if (intentIcon && intentData.icon) {
+        intentIcon.innerHTML = `<i class="fas ${intentData.icon}"></i>`;
+    }
+    
+    if (intentTitle && intentData.title) {
+        intentTitle.textContent = intentData.title;
+    }
+    
+    if (intentDescription && intentData.description) {
+        intentDescription.textContent = intentData.description;
     }
 }
 

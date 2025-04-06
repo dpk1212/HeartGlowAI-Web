@@ -93,24 +93,26 @@
                 </div>
             </div>
             
-            <!-- Display Current Message Information -->
-            <div class="recipient-card">
-                <div class="recipient-avatar" id="recipientAvatar">
-                    <span id="recipientInitial">?</span>
+            <!-- Recipient and Intent Info -->
+            <div class="context-section">
+                <div class="recipient-info loading">
+                    <div class="recipient-avatar" id="recipient-avatar">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <div class="recipient-details">
+                        <h4 class="recipient-name" id="recipient-name-display">Loading recipient...</h4>
+                        <div class="recipient-relationship" id="recipient-relationship-display">Preparing...</div>
+                    </div>
                 </div>
-                <div class="recipient-info">
-                    <h3 class="recipient-name" id="recipientName">Loading recipient...</h3>
-                    <div class="recipient-relation" id="recipientRelation">Preparing...</div>
-                </div>
-            </div>
-            
-            <div class="intent-display">
-                <div class="intent-icon" id="intentIcon">
-                    <i class="fas fa-question"></i>
-                </div>
-                <div class="intent-details">
-                    <h4 class="intent-title" id="intentTitle">Loading intention...</h4>
-                    <div class="intent-description" id="intentDescription">Preparing...</div>
+                
+                <div class="intent-info loading">
+                    <div class="intent-icon" id="intent-icon">
+                        <i class="fas fa-question"></i>
+                    </div>
+                    <div class="intent-details">
+                        <h4 class="intent-title" id="intent-title">Loading intention...</h4>
+                        <div class="intent-description" id="intent-description">Preparing...</div>
+                    </div>
                 </div>
             </div>
             

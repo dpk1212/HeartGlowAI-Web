@@ -183,17 +183,29 @@ function setupEventListeners() {
         console.log('Saving intent data:', intentData);
         console.log('Saving intent object for recipient page:', intentObject);
         
-        // Save both objects to localStorage for persistence
-        localStorage.setItem('intentData', JSON.stringify(intentData));
-        localStorage.setItem('selectedIntent', JSON.stringify(intentObject));
-        
-        // Show loading overlay
-        showLoading('Saving your selection...');
-        
-        // Proceed to next page (recipient selection)
-        setTimeout(() => {
-            window.location.href = 'recipient-selection-new.html';
-        }, 800);
+        try {
+            // Clear any existing data to prevent confusion
+            localStorage.removeItem('recipientData');
+            localStorage.removeItem('selectedRecipient');
+            localStorage.removeItem('toneData');
+            localStorage.removeItem('selectedTone');
+            
+            // Save both objects to localStorage for persistence
+            localStorage.setItem('intentData', JSON.stringify(intentData));
+            localStorage.setItem('selectedIntent', JSON.stringify(intentObject));
+            
+            // Show loading overlay
+            showLoading('Saving your selection...');
+            
+            // Proceed to next page (recipient selection)
+            setTimeout(() => {
+                window.location.href = 'recipient-selection-new.html';
+            }, 800);
+        } catch (error) {
+            console.error('Error saving to localStorage:', error);
+            hideLoading();
+            showAlert('Could not save your selection. Please try again.', 'error');
+        }
     });
 }
 

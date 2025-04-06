@@ -138,14 +138,67 @@ function loadSelectedIntent() {
             console.log('Parsed selectedIntent:', selectedIntent);
             displayIntent(selectedIntent);
         } else {
-            // If no intent found, redirect back to intent selection page
+            // Try to load from intentData as a fallback
+            const intentData = localStorage.getItem('intentData');
+            if (intentData) {
+                try {
+                    const parsedIntentData = JSON.parse(intentData);
+                    // Create a simplified intent object
+                    selectedIntent = {
+                        title: parsedIntentData.type.charAt(0).toUpperCase() + parsedIntentData.type.slice(1),
+                        description: getIntentDescription(parsedIntentData.type),
+                        icon: getIntentIcon(parsedIntentData.type)
+                    };
+                    displayIntent(selectedIntent);
+                    console.log('Created fallback intent from intentData:', selectedIntent);
+                    return;
+                } catch (e) {
+                    console.error('Error parsing fallback intent data:', e);
+                }
+            }
+            
             console.log('No intent found in localStorage, redirecting to intent selection');
-            window.location.href = 'message-intent-new.html';
+            showAlert('No message intention found. Redirecting to select an intention.', 'info');
+            setTimeout(() => {
+                window.location.href = 'message-intent-new.html';
+            }, 1500);
         }
     } catch (e) {
         console.error('Error loading intent data:', e);
         showAlert('Something went wrong. Please start over.', 'error');
     }
+}
+
+/**
+ * Get a description for an intent type when missing
+ */
+function getIntentDescription(type) {
+    const descriptions = {
+        'appreciate': 'Express gratitude and thank someone for their support, kindness, or actions.',
+        'apologize': 'Say sorry and express remorse for a mistake or misunderstanding.',
+        'celebrate': 'Congratulate someone on their achievements or special occasions.',
+        'reconnect': 'Reach out to someone you've lost touch with and rebuild your connection.',
+        'encourage': 'Motivate and support someone facing challenges or pursuing goals.',
+        'custom': 'Craft a message with your own specific intention in mind.'
+    };
+    
+    return descriptions[type] || 'Create a heartfelt message';
+}
+
+/**
+ * Get an icon class for an intent type when missing
+ */
+function getIntentIcon(type) {
+    const icons = {
+        'appreciate': 'fa-heart',
+        'apologize': 'fa-dove',
+        'celebrate': 'fa-trophy',
+        'reconnect': 'fa-handshake',
+        'encourage': 'fa-star',
+        'custom': 'fa-edit'
+    };
+    
+    return icons[type] || 'fa-heart';
 }
 
 /**
@@ -277,7 +330,7 @@ function initNavigation() {
  */
 async function saveDataAndNavigate() {
     try {
-        showLoading('Saving your selection...');
+        showLoading('Saving your recipient information...');
         
         const nameInput = document.getElementById('recipientName');
         const name = nameInput.value.trim();
@@ -298,22 +351,32 @@ async function saveDataAndNavigate() {
         // Prepare recipient data for localStorage (for next page)
         const recipientData = {
             name: name,
-            relationship: relationshipValue
+            relationship: relationshipValue,
+            saved: shouldSave
         };
         
-        // Store in localStorage for next page
+        console.log('Saving recipient data:', recipientData);
+        
+        // Store in localStorage for next page - save as both formats for compatibility
         localStorage.setItem('selectedRecipient', JSON.stringify(recipientData));
+        localStorage.setItem('recipientData', JSON.stringify(recipientData));
         
         // If user checked "save recipient", save to database
         if (shouldSave && firebase.auth && firebase.auth().currentUser) {
-            const currentUser = firebase.auth().currentUser;
-            await saveRecipientToFirestore(currentUser.uid, name, relationshipValue);
+            try {
+                const currentUser = firebase.auth().currentUser;
+                await saveRecipientToFirestore(currentUser.uid, name, relationshipValue);
+                console.log('Saved recipient to Firestore');
+            } catch (error) {
+                console.error('Error saving to Firestore:', error);
+                // Continue with navigation despite Firestore error
+            }
         }
         
         // Navigate to the next page after a short delay
         setTimeout(() => {
             window.location.href = 'message-tone-new.html';
-        }, 500);
+        }, 800);
     } catch (error) {
         console.error('Error saving data:', error);
         hideLoading();

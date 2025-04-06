@@ -111,11 +111,17 @@
             <!-- Saved Recipients Section -->
             <div id="savedRecipientsSection" class="saved-recipients-section">
                 <h2 class="section-title">Your Saved Connections</h2>
-                <p class="section-description">Select a saved connection or create a new one below.</p>
+                <p class="section-description">Select someone you've messaged before or create a new connection below.</p>
                 
                 <div id="savedRecipientsList" class="saved-recipients-grid">
-                    <!-- Saved recipients will be populated here dynamically -->
-                    <!-- Loading state placeholder -->
+                    <!-- Loading state placeholders -->
+                    <div class="saved-recipient-card loading">
+                        <div class="recipient-avatar"></div>
+                        <div class="recipient-info">
+                            <div class="skeleton-text skeleton-name"></div>
+                            <div class="skeleton-text skeleton-relationship"></div>
+                        </div>
+                    </div>
                     <div class="saved-recipient-card loading">
                         <div class="recipient-avatar"></div>
                         <div class="recipient-info">
@@ -134,7 +140,7 @@
                 
                 <div id="noSavedRecipients" class="no-data-message" style="display: none;">
                     <i class="fas fa-user-plus"></i>
-                    <p>You don't have any saved connections yet. Create your first one below!</p>
+                    <p>You don't have any saved connections yet.<br>Create your first one below!</p>
                 </div>
                 
                 <div class="section-divider">
@@ -144,6 +150,8 @@
             
             <!-- Recipient Form -->
             <div class="card">
+                <h3 class="card-title">Create New Connection</h3>
+                
                 <div class="form-group">
                     <label for="recipientName" class="form-label">Their Name</label>
                     <input type="text" id="recipientName" class="input-field" placeholder="Enter their name">
@@ -202,9 +210,8 @@
                 </div>
                 
                 <div class="form-group">
-                    <label class="form-label">Save for later use?</label>
                     <div class="checkbox-wrapper">
-                        <input type="checkbox" id="saveRecipient" class="checkbox-input">
+                        <input type="checkbox" id="saveRecipient" class="checkbox-input" checked>
                         <label for="saveRecipient" class="checkbox-label">Save this person to my connections</label>
                     </div>
                     <p class="form-help">They'll appear in your dashboard for quicker message creation in the future.</p>

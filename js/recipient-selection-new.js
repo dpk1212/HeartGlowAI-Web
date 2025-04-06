@@ -92,8 +92,9 @@ function initSavedRecipients() {
  */
 async function loadSavedRecipients(userId) {
     try {
-        const recipientsRef = firebase.firestore().collection('users').doc(userId).collection('recipients');
-        const snapshot = await recipientsRef.get();
+        // Use connections collection instead of recipients
+        const connectionsRef = firebase.firestore().collection('users').doc(userId).collection('connections');
+        const snapshot = await connectionsRef.get();
         
         // Clear any previous loading state
         const savedRecipientsList = document.getElementById('savedRecipientsList');
@@ -101,7 +102,7 @@ async function loadSavedRecipients(userId) {
         
         if (snapshot.empty) {
             // No saved recipients found
-            console.log('No saved recipients found');
+            console.log('No saved connections found');
             document.getElementById('noSavedRecipients').style.display = 'block';
             document.getElementById('savedRecipientsList').style.display = 'none';
             return;
@@ -125,10 +126,59 @@ async function loadSavedRecipients(userId) {
             savedRecipientsList.appendChild(card);
         });
         
-        console.log(`Loaded ${savedRecipients.length} saved recipients`);
+        console.log(`Loaded ${savedRecipients.length} saved connections`);
+        
+        // Add fade-in animation to cards
+        const cards = document.querySelectorAll('.saved-recipient-card');
+        cards.forEach((card, index) => {
+            setTimeout(() => {
+                card.classList.add('fade-in');
+            }, index * 50); // Stagger the animations
+        });
+        
     } catch (error) {
-        console.error('Error loading saved recipients:', error);
-        showAlert('Failed to load your saved connections.', 'error');
+        console.error('Error loading saved connections:', error);
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'connection-error';
+        errorMessage.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Failed to load your saved connections. <button id="retryConnectionsBtn" class="text-button">Try again</button></p>
+        `;
+        
+        // Clear loading placeholders
+        const savedRecipientsList = document.getElementById('savedRecipientsList');
+        savedRecipientsList.innerHTML = '';
+        savedRecipientsList.appendChild(errorMessage);
+        
+        // Add retry button functionality
+        const retryBtn = document.getElementById('retryConnectionsBtn');
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                // Show loading state again
+                savedRecipientsList.innerHTML = `
+                    <div class="saved-recipient-card loading">
+                        <div class="recipient-avatar"></div>
+                        <div class="recipient-info">
+                            <div class="skeleton-text skeleton-name"></div>
+                            <div class="skeleton-text skeleton-relationship"></div>
+                        </div>
+                    </div>
+                    <div class="saved-recipient-card loading">
+                        <div class="recipient-avatar"></div>
+                        <div class="recipient-info">
+                            <div class="skeleton-text skeleton-name"></div>
+                            <div class="skeleton-text skeleton-relationship"></div>
+                        </div>
+                    </div>
+                `;
+                
+                // Try loading again
+                const user = firebase.auth().currentUser;
+                if (user) {
+                    loadSavedRecipients(user.uid);
+                }
+            });
+        }
     }
 }
 
@@ -140,15 +190,13 @@ function createRecipientCard(recipient) {
     card.className = 'saved-recipient-card';
     card.dataset.recipientId = recipient.id;
     
-    // Create the avatar with first letter of name
+    // Get relationship icon
+    const relationshipIcon = getRelationshipIcon(recipient.relationship);
+    
+    // Create the avatar with the relationship icon instead of just a letter
     const avatar = document.createElement('div');
     avatar.className = 'recipient-avatar';
-    
-    const firstLetter = recipient.name.charAt(0).toUpperCase();
-    avatar.textContent = firstLetter;
-    
-    // Relationship icon based on type
-    const relationshipIcon = getRelationshipIcon(recipient.relationship);
+    avatar.innerHTML = `<i class="fas ${relationshipIcon}"></i>`;
     
     // Create the recipient info
     const info = document.createElement('div');
@@ -160,7 +208,16 @@ function createRecipientCard(recipient) {
     
     const relationship = document.createElement('div');
     relationship.className = 'recipient-relationship';
-    relationship.innerHTML = `<i class="fas ${relationshipIcon}"></i> ${capitalizeFirstLetter(recipient.relationship)}`;
+    
+    // Format the relationship nicely (handle 'other' case)
+    let relationshipText = recipient.relationship;
+    if (recipient.relationship === 'other' && recipient.otherRelationship) {
+        relationshipText = recipient.otherRelationship;
+    } else {
+        relationshipText = capitalizeFirstLetter(recipient.relationship);
+    }
+    
+    relationship.textContent = relationshipText;
     
     // Assemble the card
     info.appendChild(name);
@@ -238,16 +295,32 @@ function selectSavedRecipient(recipient, cardElement) {
             if (relationshipType === 'other' && recipient.otherRelationship) {
                 const otherSection = document.getElementById('otherRelationshipSection');
                 otherSection.style.display = 'block';
-                document.getElementById('otherRelationship').value = recipient.otherRelationship;
+                // Add visible class for animation
+                setTimeout(() => {
+                    otherSection.classList.add('visible');
+                }, 10);
+                document.getElementById('otherRelationship').value = recipient.otherRelationship || '';
+            } else {
+                // Hide the other input field
+                const otherSection = document.getElementById('otherRelationshipSection');
+                otherSection.classList.remove('visible');
+                setTimeout(() => {
+                    otherSection.style.display = 'none';
+                }, 300);
             }
         }
     });
     
-    // Update checkbox state - we don't need to save it again
+    // Uncheck the save checkbox since this is already saved
     document.getElementById('saveRecipient').checked = false;
     
     // Validate form
     validateForm();
+    
+    // Scroll to form area
+    setTimeout(() => {
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 300);
 }
 
 /**
@@ -262,11 +335,17 @@ function clearRecipientForm() {
     
     // Hide other relationship section and clear it
     const otherSection = document.getElementById('otherRelationshipSection');
-    otherSection.style.display = 'none';
-    document.getElementById('otherRelationship').value = '';
+    otherSection.classList.remove('visible');
+    setTimeout(() => {
+        otherSection.style.display = 'none';
+        document.getElementById('otherRelationship').value = '';
+    }, 300);
     
     // Reset selected relationship
     selectedRelationship = null;
+    
+    // Reset the save checkbox to checked (default)
+    document.getElementById('saveRecipient').checked = true;
 }
 
 /**
@@ -463,9 +542,22 @@ function initRelationshipSelection() {
             if (otherSection) {
                 if (selectedRelationship === 'other') {
                     otherSection.style.display = 'block';
+                    // Add visible class for animation
+                    setTimeout(() => {
+                        otherSection.classList.add('visible');
+                    }, 10);
+                    // Focus the input field
+                    setTimeout(() => {
+                        document.getElementById('otherRelationship').focus();
+                    }, 300);
                 } else {
-                    otherSection.style.display = 'none';
-                    document.getElementById('otherRelationship').value = '';
+                    // Remove visible class first for animation
+                    otherSection.classList.remove('visible');
+                    // Then hide after animation completes
+                    setTimeout(() => {
+                        otherSection.style.display = 'none';
+                        document.getElementById('otherRelationship').value = '';
+                    }, 300);
                 }
             }
             
@@ -616,38 +708,43 @@ async function saveDataAndNavigate() {
  */
 async function saveRecipientToFirestore(userId, name, relationship, otherRelationship) {
     try {
-        // Reference to the recipients collection for this user
-        const recipientsRef = firebase.firestore().collection('users').doc(userId).collection('recipients');
+        // Reference to the connections collection for this user (not recipients)
+        const connectionsRef = firebase.firestore().collection('users').doc(userId).collection('connections');
         
-        // Check if this recipient already exists to avoid duplicates
-        const querySnapshot = await recipientsRef
+        // Check if this connection already exists to avoid duplicates
+        const querySnapshot = await connectionsRef
             .where('name', '==', name)
             .where('relationship', '==', relationship)
             .limit(1)
             .get();
         
         if (!querySnapshot.empty) {
-            console.log('Recipient already exists, skipping save');
+            console.log('Connection already exists, skipping save');
             return;
         }
         
-        // Create recipient object
-        const recipientData = {
+        // Create connection object
+        const connectionData = {
             name: name,
             relationship: relationship,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            created: firebase.firestore.FieldValue.serverTimestamp() // Match existing field name in rules
         };
         
         // Add otherRelationship if applicable
         if (relationship === 'other' && otherRelationship) {
-            recipientData.otherRelationship = otherRelationship;
+            connectionData.otherRelationship = otherRelationship;
         }
         
         // Add to Firestore
-        await recipientsRef.add(recipientData);
-        console.log('Recipient saved successfully');
+        await connectionsRef.add(connectionData);
+        console.log('Connection saved successfully');
+        
+        // Refresh the connections list
+        loadSavedRecipients(userId);
+        
     } catch (error) {
-        console.error('Error saving recipient to Firestore:', error);
+        console.error('Error saving connection to Firestore:', error);
+        showAlert('Failed to save connection. Please try again later.', 'error');
         // Don't stop the flow if saving fails
     }
 }

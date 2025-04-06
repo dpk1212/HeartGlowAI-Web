@@ -29,7 +29,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/styles.css">
 </head>
-<body>
+<body class="tone-page">
     <div id="app">
         <!-- App Header -->
         <header class="app-header">
@@ -63,7 +63,7 @@
                         </button>
                     </div>
                 </div>
-            </div>
+        </div>
         </header>
         
         <!-- Main Content -->
@@ -91,8 +91,8 @@
                 <div class="progress-bar">
                     <div class="progress-indicator" style="width: 75%"></div>
                 </div>
-            </div>
-            
+        </div>
+
             <!-- Recipient and Intent Info -->
             <div class="context-section">
                 <div class="recipient-info loading">
@@ -103,8 +103,8 @@
                         <h4 class="recipient-name" id="recipient-name-display">Loading recipient...</h4>
                         <div class="recipient-relationship" id="recipient-relationship-display">Preparing...</div>
                     </div>
-                </div>
-                
+        </div>
+
                 <div class="intent-info loading">
                     <div class="intent-icon" id="intent-icon">
                         <i class="fas fa-question"></i>
@@ -112,8 +112,8 @@
                     <div class="intent-details">
                         <h4 class="intent-title" id="intent-title">Loading intention...</h4>
                         <div class="intent-description" id="intent-description">Preparing...</div>
-                    </div>
-                </div>
+            </div>
+        </div>
             </div>
             
             <div class="page-header">
@@ -169,18 +169,18 @@
                     </div>
                     <h3 class="option-title">Sincere</h3>
                     <p class="option-description">Earnest, heartfelt language that expresses genuine emotion.</p>
-                </div>
+            </div>
                 
                 <div class="option-card" data-tone="custom">
                     <div class="option-icon">
                         <i class="fas fa-edit"></i>
-                    </div>
+            </div>
                     <h3 class="option-title">Custom</h3>
                     <p class="option-description">Create your own specific tone for this message.</p>
                     <div id="customToneSection" style="display: none; margin-top: 15px;">
                         <input type="text" id="customToneInput" class="input-field" placeholder="Describe your tone..." style="width: 100%;">
-                    </div>
-                </div>
+            </div>
+            </div>
             </div>
             
             <!-- Navigation Buttons -->
@@ -195,19 +195,19 @@
                 </button>
             </div>
         </main>
-    </div>
-    
+        </div>
+
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
         <div class="loading-container">
             <div class="heart-animation">
                 <div class="heart-shape"></div>
                 <div class="heart-glow"></div>
-            </div>
+        </div>
             <div id="loadingContext" class="loading-context">Processing your selection...</div>
         </div>
     </div>
-    
+
     <!-- Alert Container -->
     <div id="alertContainer" class="alert-container"></div>
     

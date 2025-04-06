@@ -3747,3 +3747,220 @@ textarea.input-field:focus, #connection-notes:focus {
     opacity: 0.75;
 }
 
+.enhanced-message-item {
+    margin-bottom: 16px;
+    transition: transform 0.2s ease;
+}
+
+.enhanced-message-item:hover {
+    transform: translateY(-3px);
+}
+
+.enhanced-message-item .message-card {
+    background-color: #2D2A3B;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+    position: relative;
+    padding: 16px;
+}
+
+.enhanced-message-item .message-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+.enhanced-message-item .message-content {
+    position: relative;
+}
+
+.enhanced-message-item .message-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.enhanced-message-item .message-recipient-info {
+    display: flex;
+    align-items: center;
+}
+
+.enhanced-message-item .message-recipient {
+    font-weight: 600;
+    color: #E8E6F1;
+    margin-right: 12px;
+}
+
+.enhanced-message-item .message-type {
+    display: inline-flex;
+    align-items: center;
+    font-size: 12px;
+    color: #b8b5c7;
+    background: rgba(138, 87, 222, 0.1);
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.enhanced-message-item .message-type i {
+    margin-right: 4px;
+}
+
+.enhanced-message-item .message-date {
+    font-size: 12px;
+    color: #b8b5c7;
+    display: flex;
+    align-items: center;
+}
+
+.enhanced-message-item .message-date i {
+    margin-right: 5px;
+}
+
+.enhanced-message-item .message-body {
+    color: #E8E6F1;
+    font-size: 14px;
+    line-height: 1.5;
+    max-height: 4.5em;
+    overflow: hidden;
+    position: relative;
+    margin: 0;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+}
+
+.enhanced-message-item .message-card:hover .message-body {
+    color: #ffffff;
+}
+
+.enhanced-message-item .message-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.enhanced-message-item .message-card:hover .message-actions {
+    opacity: 1;
+}
+
+.enhanced-message-item .message-action {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #b8b5c7;
+    padding: 4px 10px;
+    margin-left: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.enhanced-message-item .message-action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.enhanced-message-item .view-action:hover {
+    color: #8a57de;
+}
+
+.enhanced-message-item .delete-action:hover {
+    color: #f06292;
+}
+
+/* Intention and Tone page specific option cards */
+.intention-page .option-card,
+.tone-page .option-card {
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.intention-page .option-card:hover,
+.tone-page .option-card:hover {
+    background-color: rgba(255, 255, 255, 0.95);
+    transform: translateY(-5px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+    border-color: rgba(126, 87, 194, 0.5);
+}
+
+.intention-page .option-card.selected,
+.tone-page .option-card.selected {
+    background-color: rgba(126, 87, 194, 0.15);
+    border-color: var(--accent-color, #7e57c2);
+    box-shadow: 0 4px 20px rgba(126, 87, 194, 0.25);
+}
+
+.intention-page .option-icon,
+.tone-page .option-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: rgba(126, 87, 194, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+    font-size: 24px;
+    color: var(--accent-color, #7e57c2);
+    transition: all 0.3s ease;
+}
+
+.intention-page .option-card:hover .option-icon,
+.tone-page .option-card:hover .option-icon,
+.intention-page .option-card.selected .option-icon,
+.tone-page .option-card.selected .option-icon {
+    background-color: var(--accent-color, #7e57c2);
+    color: white;
+    transform: scale(1.1);
+}
+
+.intention-page .option-title,
+.tone-page .option-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333333;
+}
+
+.intention-page .option-description,
+.tone-page .option-description {
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.4;
+}
+
+/* Keep the message card styles dark */
+.enhanced-message-item .message-card {
+    background-color: #2D2A3B;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+    position: relative;
+    padding: 16px;
+}
+
+.enhanced-message-item .message-body {
+    color: #E8E6F1;
+}
+

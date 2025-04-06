@@ -1048,31 +1048,28 @@ function callGenerationAPI(prompt, authToken = null) {
                 return firebase.firestore().collection('secrets').doc('secrets').get()
                     .then(doc => {
                         if (doc.exists && doc.data().openaikey) {
-                            logDebug('API keys retrieved successfully');
+                            logDebug('API key retrieved successfully');
                             return { 
                                 token: token, 
-                                apiKey: doc.data().openaikey,
-                                perplexitykey: doc.data().perplexitykey 
+                                apiKey: doc.data().openaikey
                             };
                         } else {
-                            throw new Error('API keys not found in Firestore');
+                            throw new Error('API key not found in Firestore');
                         }
                     });
             })
-            .then(({ token, apiKey, perplexitykey }) => {
+            .then(({ token, apiKey }) => {
                 // Now that we have the API key, we can make a direct call to OpenAI
                 // or use our cloud function with the key included in the request
                 
-                // Option 1: Use cloud function but include the API key in the request
                 const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
                 
-                logDebug('Making API call with auth token and API key');
+                logDebug('Making API call with auth token and OpenAI API key');
                 
                 // Prepare request with API key included
                 const requestBody = {
                     ...prompt,
-                    apiKey: apiKey, // Include API key in the request body
-                    perplexitykey: perplexitykey // Include perplexity key if available
+                    apiKey: apiKey // Include OpenAI API key in the request body
                 };
                 
                 // Make the API call to your cloud function

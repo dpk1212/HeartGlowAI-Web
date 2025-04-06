@@ -118,7 +118,7 @@ function initializeHomePage() {
       createMessageBtn.addEventListener('click', function(e) {
         e.preventDefault();
         console.log('Create message button clicked');
-        window.location.href = 'message-intent-new.html';
+        window.location.href = 'recipient-selection-new.html';
       });
     } else {
       console.warn('Create message button not found');
@@ -245,7 +245,26 @@ function initializeHomePage() {
         const connectionEl = e.target.closest('.home-page__connection');
         if (connectionEl && connectionEl.dataset.connectionId) {
           console.log('Create message for connection ID:', connectionEl.dataset.connectionId);
-          window.location.href = `message-intent-new.html?connectionId=${connectionEl.dataset.connectionId}`;
+          
+          // Get the connection details from the DOM elements or fetch from Firestore
+          const connectionName = connectionEl.querySelector('.home-page__connection-name')?.textContent;
+          const connectionType = connectionEl.querySelector('.home-page__connection-type')?.textContent;
+          
+          if (connectionName) {
+            // Store recipient data in localStorage before redirecting
+            localStorage.setItem('recipientData', JSON.stringify({
+              id: connectionEl.dataset.connectionId,
+              name: connectionName,
+              relationship: connectionType || 'friend',
+              bypassRecipientPage: true // Flag to indicate we're bypassing recipient page
+            }));
+            
+            // Redirect directly to message intent page
+            window.location.href = 'message-intent-new.html';
+          } else {
+            // Fallback if we can't get the data from the DOM
+            window.location.href = `message-intent-new.html?connectionId=${connectionEl.dataset.connectionId}`;
+          }
         }
       }
       

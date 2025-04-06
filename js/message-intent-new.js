@@ -286,10 +286,37 @@ function showAlert(message, type = 'info') {
  * Check for recipient data from previous page
  */
 function checkRecipientData() {
-    const recipientData = localStorage.getItem('recipientData');
-    const selectedRecipient = localStorage.getItem('selectedRecipient');
+    const recipientDataStr = localStorage.getItem('recipientData');
+    const selectedRecipientStr = localStorage.getItem('selectedRecipient');
     
-    if (!recipientData || !selectedRecipient) {
+    // Parse recipientData to check for bypass flag
+    try {
+        if (recipientDataStr) {
+            const recipientData = JSON.parse(recipientDataStr);
+            
+            // If we have recipientData with the bypass flag, create the selectedRecipient format too
+            if (recipientData.bypassRecipientPage && recipientData.name) {
+                console.log('Found bypass flag in recipient data, proceeding with intent selection');
+                
+                // Create the selectedRecipient format if it doesn't exist
+                if (!selectedRecipientStr) {
+                    const selectedRecipient = {
+                        name: recipientData.name,
+                        relationship: recipientData.relationship || 'friend',
+                        initial: recipientData.name.charAt(0).toUpperCase()
+                    };
+                    localStorage.setItem('selectedRecipient', JSON.stringify(selectedRecipient));
+                }
+                
+                return true;
+            }
+        }
+    } catch (error) {
+        console.error('Error parsing recipient data:', error);
+    }
+    
+    // Standard check if no bypass flag was found
+    if (!recipientDataStr || !selectedRecipientStr) {
         // Redirect to recipient selection if no data found
         showAlert('Please select a recipient first', 'error');
         setTimeout(() => {
@@ -306,23 +333,48 @@ function checkRecipientData() {
  */
 function displayRecipientInfo() {
     try {
-        const selectedRecipient = JSON.parse(localStorage.getItem('selectedRecipient'));
-        if (!selectedRecipient) return;
+        // Try both storage formats
+        let recipientInfo = null;
         
+        // First try selectedRecipient format
+        const selectedRecipientStr = localStorage.getItem('selectedRecipient');
+        if (selectedRecipientStr) {
+            recipientInfo = JSON.parse(selectedRecipientStr);
+        }
+        
+        // If not found, try recipientData format
+        if (!recipientInfo) {
+            const recipientDataStr = localStorage.getItem('recipientData');
+            if (recipientDataStr) {
+                const recipientData = JSON.parse(recipientDataStr);
+                recipientInfo = {
+                    name: recipientData.name,
+                    relationship: recipientData.relationship,
+                    initial: recipientData.name ? recipientData.name.charAt(0).toUpperCase() : '?'
+                };
+            }
+        }
+        
+        // Exit if no recipient info found
+        if (!recipientInfo) return;
+        
+        // Update the UI elements
         const recipientName = document.getElementById('recipientName');
         const recipientRelationship = document.getElementById('recipientRelationship');
         const recipientInitial = document.getElementById('recipientInitial');
         
         if (recipientName) {
-            recipientName.textContent = selectedRecipient.name || 'Unknown';
+            recipientName.textContent = recipientInfo.name || 'Unknown';
         }
         
         if (recipientRelationship) {
-            recipientRelationship.textContent = selectedRecipient.relationship || 'Unknown relationship';
+            const relationship = recipientInfo.relationship || 'Unknown relationship';
+            recipientRelationship.textContent = relationship.charAt(0).toUpperCase() + relationship.slice(1);
         }
         
         if (recipientInitial) {
-            recipientInitial.textContent = selectedRecipient.initial || selectedRecipient.name.charAt(0).toUpperCase() || '?';
+            recipientInitial.textContent = recipientInfo.initial || 
+                (recipientInfo.name ? recipientInfo.name.charAt(0).toUpperCase() : '?');
         }
     } catch (error) {
         console.error('Error displaying recipient info:', error);

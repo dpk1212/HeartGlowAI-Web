@@ -1495,3 +1495,143 @@ body::after {
     font-weight: 500;
 }
 
+/* Saved Recipients Section */
+.saved-recipients-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-color);
+    margin-bottom: 8px;
+}
+
+.section-description {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.saved-recipients-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 25px;
+}
+
+.saved-recipient-card {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.saved-recipient-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.saved-recipient-card.selected {
+    background: linear-gradient(135deg, rgba(126, 87, 194, 0.15), rgba(94, 53, 177, 0.1));
+    border: 1px solid var(--primary-color);
+}
+
+.saved-recipient-card .recipient-avatar {
+    width: 40px;
+    height: 40px;
+    margin-right: 12px;
+}
+
+.saved-recipient-card.loading {
+    pointer-events: none;
+}
+
+.skeleton-text {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    background-size: 200% 100%;
+    animation: shine 1.5s infinite;
+    border-radius: 4px;
+    height: 14px;
+}
+
+.skeleton-name {
+    width: 70%;
+    height: 16px;
+    margin-bottom: 6px;
+}
+
+.skeleton-relationship {
+    width: 50%;
+    height: 12px;
+}
+
+@keyframes shine {
+    to {
+        background-position: -200% 0;
+    }
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 25px;
+}
+
+.no-data-message i {
+    font-size: 32px;
+    color: var(--primary-color);
+    opacity: 0.7;
+    margin-bottom: 10px;
+}
+
+.no-data-message p {
+    color: var(--text-secondary);
+    font-size: 15px;
+}
+
+.section-divider {
+    position: relative;
+    text-align: center;
+    margin: 30px 0;
+}
+
+.section-divider::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+    z-index: 1;
+}
+
+.section-divider span {
+    position: relative;
+    background: var(--background-color);
+    padding: 0 16px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    z-index: 2;
+}
+
+/* Fix the spacing between the cards and field below */
+.card {
+    margin-top: 10px;
+}
+
+/* Media query for smaller screens */
+@media (max-width: 768px) {
+    .saved-recipients-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+}
+

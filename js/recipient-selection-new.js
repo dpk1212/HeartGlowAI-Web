@@ -7,6 +7,8 @@
 let selectedRelationship = null;
 let selectedIntent = null;
 let userMenuOpen = false;
+let savedRecipients = [];
+let selectedSavedRecipient = null;
 
 // Main initialization function - runs when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', initPage);
@@ -23,6 +25,7 @@ function initPage() {
     // Initialize UI elements and event listeners
     initUserMenu();
     initRelationshipSelection();
+    initSavedRecipients();
     initNavigation();
     initFormValidation();
     
@@ -63,6 +66,207 @@ function initUserMenu() {
             logoutBtn.addEventListener('click', handleLogout);
         }
     }
+}
+
+/**
+ * Initialize the saved recipients section
+ */
+function initSavedRecipients() {
+    const savedRecipientsSection = document.getElementById('savedRecipientsSection');
+    
+    if (!savedRecipientsSection) {
+        console.error('Saved recipients section not found');
+        return;
+    }
+    
+    // Wait for authentication before loading recipients
+    firebase.auth().onAuthStateChanged(user => {
+        if (user) {
+            loadSavedRecipients(user.uid);
+        }
+    });
+}
+
+/**
+ * Load saved recipients from Firestore
+ */
+async function loadSavedRecipients(userId) {
+    try {
+        const recipientsRef = firebase.firestore().collection('users').doc(userId).collection('recipients');
+        const snapshot = await recipientsRef.get();
+        
+        // Clear any previous loading state
+        const savedRecipientsList = document.getElementById('savedRecipientsList');
+        savedRecipientsList.innerHTML = '';
+        
+        if (snapshot.empty) {
+            // No saved recipients found
+            console.log('No saved recipients found');
+            document.getElementById('noSavedRecipients').style.display = 'block';
+            document.getElementById('savedRecipientsList').style.display = 'none';
+            return;
+        }
+        
+        // Hide the no recipients message if showing
+        document.getElementById('noSavedRecipients').style.display = 'none';
+        document.getElementById('savedRecipientsList').style.display = 'grid';
+        
+        // Process saved recipients
+        savedRecipients = [];
+        snapshot.forEach(doc => {
+            const recipient = {
+                id: doc.id,
+                ...doc.data()
+            };
+            savedRecipients.push(recipient);
+            
+            // Create and append recipient card
+            const card = createRecipientCard(recipient);
+            savedRecipientsList.appendChild(card);
+        });
+        
+        console.log(`Loaded ${savedRecipients.length} saved recipients`);
+    } catch (error) {
+        console.error('Error loading saved recipients:', error);
+        showAlert('Failed to load your saved connections.', 'error');
+    }
+}
+
+/**
+ * Create a recipient card element
+ */
+function createRecipientCard(recipient) {
+    const card = document.createElement('div');
+    card.className = 'saved-recipient-card';
+    card.dataset.recipientId = recipient.id;
+    
+    // Create the avatar with first letter of name
+    const avatar = document.createElement('div');
+    avatar.className = 'recipient-avatar';
+    
+    const firstLetter = recipient.name.charAt(0).toUpperCase();
+    avatar.textContent = firstLetter;
+    
+    // Relationship icon based on type
+    const relationshipIcon = getRelationshipIcon(recipient.relationship);
+    
+    // Create the recipient info
+    const info = document.createElement('div');
+    info.className = 'recipient-info';
+    
+    const name = document.createElement('div');
+    name.className = 'recipient-name';
+    name.textContent = recipient.name;
+    
+    const relationship = document.createElement('div');
+    relationship.className = 'recipient-relationship';
+    relationship.innerHTML = `<i class="fas ${relationshipIcon}"></i> ${capitalizeFirstLetter(recipient.relationship)}`;
+    
+    // Assemble the card
+    info.appendChild(name);
+    info.appendChild(relationship);
+    
+    card.appendChild(avatar);
+    card.appendChild(info);
+    
+    // Add click event to select this recipient
+    card.addEventListener('click', () => selectSavedRecipient(recipient, card));
+    
+    return card;
+}
+
+/**
+ * Get icon for relationship type
+ */
+function getRelationshipIcon(relationship) {
+    const icons = {
+        'friend': 'fa-user-friends',
+        'family': 'fa-home',
+        'partner': 'fa-heart',
+        'colleague': 'fa-briefcase',
+        'acquaintance': 'fa-handshake'
+    };
+    
+    return icons[relationship] || 'fa-user';
+}
+
+/**
+ * Capitalize first letter of a string
+ */
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Handle selection of a saved recipient
+ */
+function selectSavedRecipient(recipient, cardElement) {
+    // If there was a previously selected card, deselect it
+    const previousSelection = document.querySelector('.saved-recipient-card.selected');
+    if (previousSelection) {
+        previousSelection.classList.remove('selected');
+    }
+    
+    // If we're selecting the same recipient, deselect it
+    if (selectedSavedRecipient && selectedSavedRecipient.id === recipient.id) {
+        selectedSavedRecipient = null;
+        clearRecipientForm();
+        validateForm();
+        return;
+    }
+    
+    // Select new recipient
+    selectedSavedRecipient = recipient;
+    cardElement.classList.add('selected');
+    
+    // Fill the form with the selected recipient data
+    document.getElementById('recipientName').value = recipient.name;
+    
+    // Select the appropriate relationship option
+    const relationshipOptions = document.querySelectorAll('.relationship-option');
+    relationshipOptions.forEach(option => {
+        const relationshipType = option.getAttribute('data-relationship');
+        if (relationshipType === recipient.relationship) {
+            // Remove selected class from all types
+            relationshipOptions.forEach(o => o.classList.remove('selected'));
+            
+            // Add selected class to this option
+            option.classList.add('selected');
+            selectedRelationship = relationshipType;
+            
+            // If it's "other", show the other input
+            if (relationshipType === 'other' && recipient.otherRelationship) {
+                const otherSection = document.getElementById('otherRelationshipSection');
+                otherSection.style.display = 'block';
+                document.getElementById('otherRelationship').value = recipient.otherRelationship;
+            }
+        }
+    });
+    
+    // Update checkbox state - we don't need to save it again
+    document.getElementById('saveRecipient').checked = false;
+    
+    // Validate form
+    validateForm();
+}
+
+/**
+ * Clear the recipient form
+ */
+function clearRecipientForm() {
+    document.getElementById('recipientName').value = '';
+    
+    // Deselect relationship options
+    const relationshipOptions = document.querySelectorAll('.relationship-option');
+    relationshipOptions.forEach(option => option.classList.remove('selected'));
+    
+    // Hide other relationship section and clear it
+    const otherSection = document.getElementById('otherRelationshipSection');
+    otherSection.style.display = 'none';
+    document.getElementById('otherRelationship').value = '';
+    
+    // Reset selected relationship
+    selectedRelationship = null;
 }
 
 /**
@@ -235,6 +439,15 @@ function initRelationshipSelection() {
     
     relationshipOptions.forEach(option => {
         option.addEventListener('click', function() {
+            // If selecting from the form, clear any saved recipient selection
+            if (selectedSavedRecipient) {
+                selectedSavedRecipient = null;
+                const previousSelection = document.querySelector('.saved-recipient-card.selected');
+                if (previousSelection) {
+                    previousSelection.classList.remove('selected');
+                }
+            }
+            
             // Remove selected class from all types
             relationshipOptions.forEach(o => o.classList.remove('selected'));
             
@@ -248,183 +461,199 @@ function initRelationshipSelection() {
             // Show "other" input field if "other" relationship is selected
             const otherSection = document.getElementById('otherRelationshipSection');
             if (otherSection) {
-                otherSection.style.display = selectedRelationship === 'other' ? 'block' : 'none';
+                if (selectedRelationship === 'other') {
+                    otherSection.style.display = 'block';
+                } else {
+                    otherSection.style.display = 'none';
+                    document.getElementById('otherRelationship').value = '';
+                }
             }
             
-            // Enable Next button if name is also completed
+            // Validate to enable/disable the Next button
             validateForm();
         });
     });
+    
+    // Add event listener for recipient name to clear saved selection
+    const recipientNameInput = document.getElementById('recipientName');
+    if (recipientNameInput) {
+        recipientNameInput.addEventListener('input', function() {
+            if (selectedSavedRecipient && this.value !== selectedSavedRecipient.name) {
+                // User is changing the name, so clear saved selection
+                selectedSavedRecipient = null;
+                const previousSelection = document.querySelector('.saved-recipient-card.selected');
+                if (previousSelection) {
+                    previousSelection.classList.remove('selected');
+                }
+            }
+            
+            // Validate to enable/disable the Next button
+            validateForm();
+        });
+    }
 }
 
 /**
  * Initialize form validation
  */
 function initFormValidation() {
-    const recipientName = document.getElementById('recipientName');
-    const otherRelationship = document.getElementById('otherRelationship');
+    // Add event listeners for input fields
+    document.getElementById('recipientName').addEventListener('input', validateForm);
+    document.getElementById('otherRelationship').addEventListener('input', validateForm);
     
-    if (recipientName) {
-        recipientName.addEventListener('input', validateForm);
-    }
-    
-    if (otherRelationship) {
-        otherRelationship.addEventListener('input', validateForm);
-    }
+    // Initial validation
+    validateForm();
 }
 
 /**
- * Validate the form
+ * Validate the form and enable/disable the Next button
  */
 function validateForm() {
-    const nameInput = document.getElementById('recipientName');
     const nextBtn = document.getElementById('nextBtn');
-    const otherRelationship = document.getElementById('otherRelationship');
+    const recipientNameInput = document.getElementById('recipientName');
+    const otherRelationshipInput = document.getElementById('otherRelationship');
+    const otherSection = document.getElementById('otherRelationshipSection');
     
-    if (!nameInput || !nextBtn) {
-        console.error('Required form elements not found');
-        return false;
-    }
+    // Basic validation - name required
+    let isValid = recipientNameInput.value.trim() !== '';
     
-    const name = nameInput.value.trim();
-    let isValid = name.length > 0 && selectedRelationship;
-    
-    // If "other" relationship is selected, require the "other" field to be filled
-    if (selectedRelationship === 'other' && otherRelationship) {
-        isValid = isValid && otherRelationship.value.trim().length > 0;
+    // If using a relationship type, it must be selected
+    if (isValid && !selectedSavedRecipient) {
+        isValid = selectedRelationship !== null;
+        
+        // If 'other' is selected, the other field must be filled
+        if (isValid && selectedRelationship === 'other' && otherSection.style.display !== 'none') {
+            isValid = otherRelationshipInput.value.trim() !== '';
+        }
     }
     
     // Enable/disable next button
-    nextBtn.disabled = !isValid;
-    
-    return isValid;
+    if (nextBtn) {
+        nextBtn.disabled = !isValid;
+    }
 }
 
 /**
  * Initialize navigation buttons
  */
 function initNavigation() {
-    // Back button
     const backBtn = document.getElementById('backBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
     if (backBtn) {
         backBtn.addEventListener('click', function() {
             window.location.href = 'message-intent-new.html';
         });
     }
     
-    // Next button
-    const nextBtn = document.getElementById('nextBtn');
     if (nextBtn) {
         nextBtn.addEventListener('click', function() {
-            if (validateForm()) {
-                saveDataAndNavigate();
-            } else {
-                showAlert('Please complete all required fields.', 'error');
-            }
+            saveDataAndNavigate();
         });
     }
 }
 
 /**
- * Save data and navigate to the next page
+ * Save recipient data and navigate to next page
  */
 async function saveDataAndNavigate() {
+    showLoading('Saving your selection...');
+    
     try {
-        showLoading('Saving your recipient information...');
+        // Get the name and relationship data
+        let name, relationship, otherRelationship;
         
-        const nameInput = document.getElementById('recipientName');
-        const name = nameInput.value.trim();
-        
-        // Get "other" relationship value if applicable
-        let relationshipValue = selectedRelationship;
-        if (selectedRelationship === 'other') {
-            const otherRelationship = document.getElementById('otherRelationship');
-            if (otherRelationship && otherRelationship.value.trim()) {
-                relationshipValue = otherRelationship.value.trim();
+        if (selectedSavedRecipient) {
+            // If a saved recipient is selected, use that data
+            name = selectedSavedRecipient.name;
+            relationship = selectedSavedRecipient.relationship;
+            otherRelationship = selectedSavedRecipient.otherRelationship || '';
+        } else {
+            // Otherwise use the form data
+            name = document.getElementById('recipientName').value.trim();
+            relationship = selectedRelationship;
+            
+            // Get other relationship value if applicable
+            if (relationship === 'other') {
+                otherRelationship = document.getElementById('otherRelationship').value.trim();
             }
         }
         
-        // Check if we should save the recipient
-        const saveRecipient = document.getElementById('saveRecipient');
-        const shouldSave = saveRecipient ? saveRecipient.checked : false;
-        
-        // Prepare recipient data for localStorage (for next page)
+        // Create recipient data object
         const recipientData = {
             name: name,
-            relationship: relationshipValue,
-            saved: shouldSave
+            relationship: relationship,
+            otherRelationship: otherRelationship || ''
         };
         
-        console.log('Saving recipient data:', recipientData);
-        
-        // Store in localStorage for next page - save as both formats for compatibility
-        localStorage.setItem('selectedRecipient', JSON.stringify(recipientData));
+        // Save to localStorage for next pages
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
         
-        // If user checked "save recipient", save to database
-        if (shouldSave && firebase.auth && firebase.auth().currentUser) {
-            try {
-                const currentUser = firebase.auth().currentUser;
-                await saveRecipientToFirestore(currentUser.uid, name, relationshipValue);
-                console.log('Saved recipient to Firestore');
-                } catch (error) {
-                console.error('Error saving to Firestore:', error);
-                // Continue with navigation despite Firestore error
+        // Check if user wants to save this recipient
+        const saveRecipient = document.getElementById('saveRecipient').checked;
+        
+        // If checked and not already a saved recipient, save to Firestore
+        if (saveRecipient && !selectedSavedRecipient) {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                await saveRecipientToFirestore(user.uid, name, relationship, otherRelationship);
             }
         }
         
-        // Navigate to the next page after a short delay
+        // Navigate to the tone selection page
         setTimeout(() => {
-            window.location.href = 'message-tone-new.html';
-        }, 800);
+            window.location.href = 'tone-selection-new.html';
+        }, 500);
     } catch (error) {
-        console.error('Error saving data:', error);
+        console.error('Error saving recipient data:', error);
         hideLoading();
-        showAlert('Could not save your data. Please try again.', 'error');
+        showAlert('Failed to save recipient data. Please try again.', 'error');
     }
 }
 
 /**
- * Save recipient to Firestore database
+ * Save a recipient to Firestore
  */
-async function saveRecipientToFirestore(userId, name, relationship) {
+async function saveRecipientToFirestore(userId, name, relationship, otherRelationship) {
     try {
-        if (!firebase.firestore) {
-            console.error('Firestore not available');
+        // Reference to the recipients collection for this user
+        const recipientsRef = firebase.firestore().collection('users').doc(userId).collection('recipients');
+        
+        // Check if this recipient already exists to avoid duplicates
+        const querySnapshot = await recipientsRef
+            .where('name', '==', name)
+            .where('relationship', '==', relationship)
+            .limit(1)
+            .get();
+        
+        if (!querySnapshot.empty) {
+            console.log('Recipient already exists, skipping save');
             return;
         }
         
-        const db = firebase.firestore();
-        const connectionRef = db.collection('users').doc(userId).collection('connections');
+        // Create recipient object
+        const recipientData = {
+            name: name,
+            relationship: relationship,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
         
-        // Check if this connection already exists
-        const querySnapshot = await connectionRef.where('name', '==', name).get();
-        
-        if (querySnapshot.empty) {
-            // Create new connection
-            await connectionRef.add({
-                name: name,
-                relationship: relationship,
-                created: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            console.log('New connection saved to database');
-        } else {
-            // Update existing connection
-            const docId = querySnapshot.docs[0].id;
-            await connectionRef.doc(docId).update({
-                relationship: relationship,
-                updated: firebase.firestore.FieldValue.serverTimestamp()
-            });
-            console.log('Existing connection updated');
+        // Add otherRelationship if applicable
+        if (relationship === 'other' && otherRelationship) {
+            recipientData.otherRelationship = otherRelationship;
         }
+        
+        // Add to Firestore
+        await recipientsRef.add(recipientData);
+        console.log('Recipient saved successfully');
     } catch (error) {
-        console.error('Error saving to Firestore:', error);
-        // We don't throw here to prevent blocking navigation
+        console.error('Error saving recipient to Firestore:', error);
+        // Don't stop the flow if saving fails
     }
 }
 
 /**
- * Show loading overlay with custom message
+ * Show loading overlay
  */
 function showLoading(message = 'Loading...') {
     const loadingOverlay = document.getElementById('loadingOverlay');
@@ -451,50 +680,52 @@ function hideLoading() {
 }
 
 /**
- * Show alert message
- * @param {string} message - The message to display
- * @param {string} type - The type of alert: 'info', 'error', or 'success'
+ * Show an alert message
  */
 function showAlert(message, type = 'info') {
     const alertContainer = document.getElementById('alertContainer');
     
     if (!alertContainer) return;
     
-    const alertBox = document.createElement('div');
-    alertBox.className = `alert alert-${type}`;
-    alertBox.innerHTML = `
-        <div class="alert-icon">
-            <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 
-                         type === 'success' ? 'fa-check-circle' : 
-                         'fa-info-circle'}"></i>
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    
+    alertDiv.innerHTML = `
+        <div class="alert-content">
+            <div class="alert-message">${message}</div>
+            <button class="alert-close">&times;</button>
         </div>
-        <div class="alert-content">${message}</div>
-        <button class="alert-close"><i class="fas fa-times"></i></button>
     `;
     
-    // Add close functionality
-    const closeBtn = alertBox.querySelector('.alert-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            alertBox.classList.add('alert-closing');
+    alertContainer.appendChild(alertDiv);
+    
+    // Show the alert with animation
+    setTimeout(() => {
+        alertDiv.classList.add('show');
+    }, 10);
+    
+    // Setup close button
+    const closeButton = alertDiv.querySelector('.alert-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', function() {
+            alertDiv.classList.remove('show');
             setTimeout(() => {
-                alertContainer.removeChild(alertBox);
+                alertDiv.remove();
             }, 300);
         });
     }
     
-    // Auto-remove after 5 seconds
-    setTimeout(() => {
-        if (alertBox.parentNode === alertContainer) {
-            alertBox.classList.add('alert-closing');
-            setTimeout(() => {
-                if (alertBox.parentNode === alertContainer) {
-                    alertContainer.removeChild(alertBox);
-                }
-            }, 300);
-        }
-    }, 5000);
-    
-    // Add to container
-    alertContainer.appendChild(alertBox);
+    // Auto-remove after 5 seconds for info and success
+    if (type !== 'error') {
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.classList.remove('show');
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
 } 

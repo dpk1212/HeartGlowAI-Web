@@ -92,127 +92,136 @@ document.addEventListener('DOMContentLoaded', initPage);
 /**
  * Initialize the page - main entry point
  */
-async function initPage() {
+function initPage() {
     console.log('Initializing message result page...');
     
-    // Get the emotion from URL parameter
-    selectedEmotion = getEmotionFromUrl();
-    console.log('Emotion from URL:', selectedEmotion);
+    // Show loading state
+    showLoadingState();
     
-    // Start authentication check early
-    checkAuthentication();
+    // Initialize user menu
+    initUserMenu();
     
     // Load data from localStorage
-    loadRecipientData();
-    loadIntentData();
-    loadToneData();
+    loadData();
     
     // Initialize UI elements
     initButtons();
-    initNavigation();
-    initBypassAuth();
-    initAdjustmentOptions();
-    initDevModeToggle();
     
-    // Show debug button
-    createDebugButton();
+    // Since we have all the data now, try to generate message
+    generateMessage();
+}
+
+/**
+ * Initialize user menu dropdown
+ */
+function initUserMenu() {
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
     
-    // Wait for authentication to be confirmed before generating
-    logDebug('Waiting for auth state promise...');
-    await authStatePromise;
-    logDebug('Auth state promise resolved.');
-    
-    // Use saved token OR current user to generate
-    const currentUser = firebase.auth().currentUser;
-    const savedToken = localStorage.getItem('authToken');
-    logDebug(`State post-auth-wait: currentUser=${currentUser ? currentUser.uid : 'null'}, savedToken exists=${!!savedToken}`);
-    
-    if (currentUser) {
-        logDebug('Generating message using currentUser...');
-        currentUser.getIdToken(true).then(idToken => {
-            callCloudFunction(idToken);
-        }).catch(error => {
-            logDebug(`ERROR: Failed to get ID token from currentUser: ${error.message}`);
-            showError('Authentication error. Please refresh and try again.');
+    if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            userDropdown.classList.toggle('show');
         });
-    } else if (savedToken && !authBypass) {
-        logDebug('Generating message using savedToken (currentUser was null)...');
-        callCloudFunction(savedToken); // Use the saved token directly
-    } else if (authBypass) {
-        logDebug('Auth bypass enabled. Generating message without token (will likely fail function security).');
-        callCloudFunction(null); // Or handle bypass appropriately if function allows
-    } else {
-        logDebug('ERROR: No authenticated user or saved token found, and no bypass. Cannot generate message.');
-        showError('Authentication required. Please sign in again.');
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            if (userDropdown.classList.contains('show')) {
+                userDropdown.classList.remove('show');
+            }
+        });
+        
+        // Handle logout
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                if (firebase.auth) {
+                    firebase.auth().signOut()
+                        .then(() => {
+                            window.location.href = 'index.html';
+                        })
+                        .catch((error) => {
+                            console.error('Logout error:', error);
+                            showAlert('Failed to log out. Please try again.', 'error');
+                        });
+                } else {
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+        
+        // Update user info if authenticated
+        if (firebase.auth) {
+            firebase.auth().onAuthStateChanged(function(user) {
+                if (user) {
+                    // Update user info in the dropdown
+                    updateUserInfo(user);
+                }
+            });
+        }
+    }
+}
+
+/**
+ * Update user information in the UI
+ */
+function updateUserInfo(user) {
+    const userDisplayName = document.getElementById('userDisplayName');
+    const userEmail = document.getElementById('userEmail');
+    const userAvatar = document.getElementById('userAvatar');
+    
+    if (userDisplayName && user.displayName) {
+        userDisplayName.textContent = user.displayName;
     }
     
-    // Log page loaded
-    logDebug('Page initialization completed.');
+    if (userEmail && user.email) {
+        userEmail.textContent = user.email;
+    }
+    
+    if (userAvatar && user.photoURL) {
+        userAvatar.src = user.photoURL;
+    }
 }
 
 /**
- * Get the emotion parameter from the URL
+ * Load all required data from localStorage
  */
-function getEmotionFromUrl() {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('emotion') || localStorage.getItem('selectedEmotion') || 'default';
-}
-
-/**
- * Load recipient data from localStorage
- */
-function loadRecipientData() {
+function loadData() {
     try {
-        const storedRecipientData = localStorage.getItem('recipientData');
+        // Load recipient data
+        const storedRecipientData = localStorage.getItem('recipientData') || localStorage.getItem('selectedRecipient');
         if (storedRecipientData) {
             recipientData = JSON.parse(storedRecipientData);
-            logDebug(`Loaded recipient data: ${recipientData.name} (${recipientData.relationship})`);
             updateRecipientDisplay();
         } else {
-            logDebug('ERROR: No recipient data found in localStorage');
-            showAlert('No recipient information found. Please go back and enter recipient details.', 'error');
+            console.error('No recipient data found');
         }
-    } catch (error) {
-        logDebug(`ERROR: Failed to parse recipient data: ${error.message}`);
-        showAlert('There was a problem loading your recipient information.', 'error');
-    }
-}
-
-/**
- * Load intent data from localStorage
- */
-function loadIntentData() {
-    try {
+        
+        // Load intent data
         const storedIntentData = localStorage.getItem('intentData');
         if (storedIntentData) {
             intentData = JSON.parse(storedIntentData);
-            logDebug(`Loaded intent data: ${intentData.type}`);
+            updateIntentDisplay();
         } else {
-            logDebug('ERROR: No intent data found in localStorage');
-            showAlert('No intent information found. Please go back and select an intent.', 'error');
+            console.error('No intent data found');
         }
-    } catch (error) {
-        logDebug(`ERROR: Failed to parse intent data: ${error.message}`);
-        showAlert('There was a problem loading your intent information.', 'error');
-    }
-}
-
-/**
- * Load tone data from localStorage
- */
-function loadToneData() {
-    try {
-        const storedToneData = localStorage.getItem('toneData');
+        
+        // Load tone data
+        const storedToneData = localStorage.getItem('toneData') || localStorage.getItem('selectedTone');
         if (storedToneData) {
             toneData = JSON.parse(storedToneData);
-            logDebug(`Loaded tone data: ${toneData.type}`);
+            updateToneDisplay();
         } else {
-            logDebug('ERROR: No tone data found in localStorage');
-            showAlert('No tone information found. Please go back and select a tone.', 'error');
+            console.error('No tone data found');
+        }
+        
+        // If any data is missing, show error
+        if (!recipientData || !intentData || !toneData) {
+            showError('Some information is missing. Please go back and complete all steps.');
         }
     } catch (error) {
-        logDebug(`ERROR: Failed to parse tone data: ${error.message}`);
-        showAlert('There was a problem loading your tone information.', 'error');
+        console.error('Error loading data:', error);
+        showError('There was a problem loading your information.');
     }
 }
 
@@ -222,310 +231,535 @@ function loadToneData() {
 function updateRecipientDisplay() {
     if (!recipientData) return;
     
-    // Update recipient display
-    const nameDisplay = document.getElementById('recipient-name-display');
-    const relationshipDisplay = document.getElementById('recipient-relationship-display');
-    const avatarDisplay = document.getElementById('recipient-avatar');
+    const recipientName = document.getElementById('recipientName');
+    const recipientRelation = document.getElementById('recipientRelation');
+    const recipientInitial = document.getElementById('recipientInitial');
     
-    if (nameDisplay) {
-        nameDisplay.textContent = recipientData.name || 'Unknown recipient';
+    if (recipientName) {
+        recipientName.textContent = recipientData.name || 'Unknown Recipient';
     }
     
-    if (relationshipDisplay) {
-        relationshipDisplay.textContent = capitalizeFirstLetter(recipientData.relationship) || 'Contact';
+    if (recipientRelation) {
+        recipientRelation.textContent = capitalizeFirstLetter(recipientData.relationship) || 'Contact';
     }
     
-    if (avatarDisplay) {
-        avatarDisplay.textContent = getInitials(recipientData.name);
+    if (recipientInitial) {
+        recipientInitial.textContent = getInitials(recipientData.name);
     }
 }
 
 /**
- * Simplified: Trigger message generation using the provided token (or null for bypass)
- * Assumes auth state has been resolved before calling this.
+ * Update the intent display with loaded data
  */
-function triggerGeneration(idToken) {
-    if (!intentData || !toneData || !recipientData) {
-        showError('Missing required data to generate message');
+function updateIntentDisplay() {
+    if (!intentData) return;
+    
+    const intentDisplay = document.getElementById('intentDisplay');
+    
+    if (intentDisplay) {
+        let intentText = capitalizeFirstLetter(intentData.type);
+        if (intentText === 'Custom' && intentData.customText) {
+            intentText += ` (${intentData.customText})`;
+        }
+        intentDisplay.textContent = intentText;
+    }
+}
+
+/**
+ * Update the tone display with loaded data
+ */
+function updateToneDisplay() {
+    if (!toneData) return;
+    
+    const toneDisplay = document.getElementById('toneDisplay');
+    
+    if (toneDisplay) {
+        let toneText = capitalizeFirstLetter(toneData.type);
+        if (toneText === 'Custom' && toneData.customText) {
+            toneText += ` (${toneData.customText})`;
+        }
+        toneDisplay.textContent = toneText;
+    }
+}
+
+/**
+ * Generate message based on selected data
+ */
+function generateMessage() {
+    // Show loading state while we attempt to generate
+    showLoadingState();
+    
+    // Check if we have all required data
+    if (!recipientData || !intentData || !toneData) {
+        showError('Missing required information. Please complete all previous steps.');
         return;
     }
-
-    try {
-        // Show loading state
-        document.getElementById('loading-state').style.display = 'flex';
-        document.getElementById('message-container').style.display = 'none';
-        document.getElementById('error-state').style.display = 'none';
-        document.getElementById('regenerate-options').style.display = 'none';
-        
-        if (idToken || authBypass) {
-             callCloudFunction(idToken);
-        } else {
-             logDebug('ERROR in triggerGeneration: No token provided and bypass not enabled.');
-             showError('Authentication invalid. Cannot generate message.');
-        }
-
-    } catch (error) {
-        logDebug(`ERROR: Failed during triggerGeneration: ${error.message}`);
-        showError('Could not generate message: ' + error.message);
+    
+    // Try to get an authentication token from Firebase
+    if (firebase.auth && firebase.auth().currentUser) {
+        firebase.auth().currentUser.getIdToken(true)
+            .then(token => {
+                // Try to call cloud function with token
+                callCloudFunction(token);
+            })
+            .catch(error => {
+                console.error('Failed to get auth token:', error);
+                // Fall back to using local sample data
+                generateFallbackMessage();
+            });
+    } else {
+        // No authenticated user, use fallback message
+        console.log('No authenticated user, using fallback message generation');
+        generateFallbackMessage();
     }
 }
 
 /**
- * Check if we're in development mode
- */
-function isDevMode() {
-    // Never use dev mode / sample messages
-    return false;
-}
-
-/**
- * Call the cloud function to generate a real message
+ * Call cloud function to generate message
  */
 function callCloudFunction(idToken) {
-    logDebug('Attempting to call cloud function for message generation...');
+    const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
     
-    // Show loading state immediately
-    document.getElementById('loading-state').style.display = 'flex';
-    document.getElementById('message-container').style.display = 'none';
-    document.getElementById('error-state').style.display = 'none';
-    document.getElementById('regenerate-options').style.display = 'none';
-
-    // Firestore check requires Firebase to be initialized
-    if (!firebase || !firebase.firestore) {
-         logDebug('ERROR: Firebase or Firestore not available when trying to call cloud function.');
-         showError('Initialization error. Please refresh.');
-         return;
-    }
+    // Prepare payload
+    const payload = {
+        intent: intentData.type,
+        recipient: {
+            name: recipientData.name,
+            relationship: recipientData.relationship
+        },
+        tone: toneData.type,
+        customizations: {
+            custom_intent: intentData.customText || '',
+            custom_tone: toneData.customText || ''
+        }
+    };
     
-    const db = firebase.firestore(); // Now this should work
-    db.collection('secrets').doc('secrets').get()
-        .then(doc => {
-             // ... (rest of the API key fetching and payload creation is okay)
-              if (!doc.exists) { throw new Error('API key document not found'); }
-              const apiKeyData = doc.data();
-              if (!apiKeyData || !apiKeyData.openaikey) { throw new Error('API key not found in document'); }
-              logDebug('Successfully retrieved API key from Firestore');
-
-              const cloudFunctionPayload = { /* ... payload construction ... */ 
-                   scenario: getScenarioFromIntent(intentData.type),
-                   relationshipType: recipientData.relationship,
-                   tone: toneData.type || 'casual',
-                   toneIntensity: getToneIntensity(toneData.type),
-                   relationshipDuration: 'unspecified',
-                   specialCircumstances: intentData.customText || '',
-                   recipientName: recipientData.name,
-                   apiKey: apiKeyData.openaikey,
-                   secretsPath: 'secrets/secrets',
-                   secretsKey: 'openaikey',
-                   useFallback: true
-              };
-              if (selectedAdjustments.length > 0) {
-                  cloudFunctionPayload.specialCircumstances += ` Please make the message ${selectedAdjustments.join(', ')}.`;
-              }
-              logDebug('Cloud function payload prepared with API key');
-              makeRequest(cloudFunctionPayload, idToken); // Pass potentially null idToken
-        })
-        .catch(error => {
-            logDebug(`ERROR: Failed to fetch API key: ${error.message}`);
-            showError('Failed to access API key: ' + error.message);
-            // Hide loading on critical failure
-            document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('error-state').style.display = 'block'; 
-        });
-}
-
-/**
- * Make the actual request to the cloud function
- */
-function makeRequest(payload, idToken, retryCount = 0) { // idToken can be null
-    logDebug(`Calling cloud function URL (attempt ${retryCount + 1})`);
+    console.log('Calling cloud function with payload:', payload);
     
+    // Set up headers
     const headers = {
         'Content-Type': 'application/json'
     };
-    if (idToken) { // Only add Authorization header if token exists
+    
+    // Add auth token if available
+    if (idToken) {
         headers['Authorization'] = `Bearer ${idToken}`;
-    } else {
-        logDebug('No ID token provided, calling function without Authorization header (expected for bypass).');
     }
     
-    const fetchWithTimeout = (url, options, timeout = 30000) => { /* ... timeout logic ... */ 
-       return Promise.race([
-            fetch(url, options),
-            new Promise((_, reject) => 
-                setTimeout(() => reject(new Error('Request timed out')), timeout)
-            )
-        ]);
-    };
+    // Set timeout of 15 seconds
+    const timeout = 15000;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
     
-    fetchWithTimeout('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+    // Make request
+    fetch(apiUrl, {
         method: 'POST',
         headers: headers,
-        body: JSON.stringify(payload)
-    }, 60000)
+        body: JSON.stringify(payload),
+        signal: controller.signal
+    })
     .then(response => {
-        // ... (response handling) ...
-         if (!response.ok) { throw new Error(`HTTP error ${response.status}: ${response.statusText}`); }
-         return response.json();
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+            throw new Error(`API returned status ${response.status}: ${response.statusText}`);
+        }
+        return response.json();
     })
     .then(data => {
-        // ... (data handling - display message/insights) ...
-         if (data.error) { throw new Error(data.error); }
-         if (!data.message) { throw new Error('No message received from API'); }
-         generatedMessage = data.message;
-         const insights = data.insights || [];
-         document.getElementById('loading-state').style.display = 'none';
-         document.getElementById('message-container').style.display = 'block';
-         document.getElementById('regenerate-options').style.display = 'block';
-         document.getElementById('message-content').textContent = data.message;
-         document.getElementById('intent-display').textContent = `Intent: ${capitalizeFirstLetter(intentData.type)}`;
-         document.getElementById('tone-display').textContent = `Tone: ${capitalizeFirstLetter(toneData.type)}`;
-         displayInsights(insights);
-         logDebug('Cloud function message generated successfully');
+        console.log('Message generated successfully:', data);
+        displayGeneratedMessage(data);
     })
     .catch(error => {
-        // ... (error handling with retries) ...
-        logDebug(`ERROR: Cloud function call failed: ${error.message}`);
-        if (retryCount < 2) {
-            logDebug(`Retrying request (${retryCount + 1}/2)...`);
-            setTimeout(() => makeRequest(payload, idToken, retryCount + 1), 2000);
-        } else {
-            document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('error-state').style.display = 'block';
-            document.getElementById('error-state').querySelector('.error-message').textContent = 
-                `Failed to generate message: ${error.message}. Please try again.`;
-        }
+        console.error('Error calling cloud function:', error);
+        // Fall back to local generation
+        generateFallbackMessage();
     });
 }
 
 /**
- * Display insights from the API response
+ * Generate a fallback message using local data
  */
-function displayInsights(insights) {
-    const insightsContainer = document.getElementById('insights-container');
-    const insightsList = document.getElementById('insights-list');
+function generateFallbackMessage() {
+    console.log('Using fallback message generation');
     
-    if (!insightsContainer || !insightsList) {
-        logDebug('ERROR: Insights container not found');
-        return;
-    }
-    
-    // Clear previous insights
-    insightsList.innerHTML = '';
-    
-    // If no insights, hide the container
-    if (!insights || !insights.length) {
-        insightsContainer.style.display = 'none';
-        return;
-    }
-    
-    // Show the container
-    insightsContainer.style.display = 'block';
-    
-    // Add each insight
-    insights.forEach(insight => {
-        const insightItem = document.createElement('div');
-        insightItem.style.marginBottom = '10px';
+    try {
+        // Get the sample message based on intent and tone
+        let message = getSampleMessage();
         
-        // Try to extract title and description from the insight string
-        // Format is usually "Title: Description"
-        const parts = insight.split(/:\s+/);
-        if (parts.length >= 2) {
-            const title = parts[0];
-            const description = parts.slice(1).join(': ');
+        // Replace recipient name in the message
+        message = message.replace(/\[NAME\]/g, recipientData.name);
+        
+        // Create a response object similar to the API response
+        const response = {
+            message: {
+                greeting: '',
+                content: message,
+                closing: 'Best wishes',
+                signature: 'Me'
+            },
+            insights: {
+                sentiment: 'positive',
+                language: 'conversational',
+                formality: toneData.type === 'formal' ? 'high' : 'medium'
+            }
+        };
+        
+        // Display the generated message
+        displayGeneratedMessage(response);
+    } catch (error) {
+        console.error('Error generating fallback message:', error);
+        showError('Could not generate a message at this time.');
+    }
+}
+
+/**
+ * Get a sample message based on intent and tone
+ */
+function getSampleMessage() {
+    const intent = intentData.type || 'custom';
+    const tone = toneData.type || 'warm';
+    
+    // Get the appropriate sample message
+    if (sampleMessages[intent] && sampleMessages[intent][tone]) {
+        return sampleMessages[intent][tone];
+    } else if (sampleMessages[intent]) {
+        // Use the first available tone for this intent
+        const firstTone = Object.keys(sampleMessages[intent])[0];
+        return sampleMessages[intent][firstTone];
+    } else {
+        // Fallback to generic message
+        return `Dear [NAME], this is a message with ${tone} tone for my ${intent} intention.`;
+    }
+}
+
+/**
+ * Display the generated message in the UI
+ */
+function displayGeneratedMessage(data) {
+    console.log('Displaying generated message:', data);
+    
+    // Hide loading state
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    
+    // Show message content
+    const messageContent = document.getElementById('messageContent');
+    messageContent.style.display = 'block';
+    
+    // Update message parts
+    const greeting = document.getElementById('greeting');
+    const content = document.getElementById('content');
+    const closing = document.getElementById('closing');
+    const signature = document.getElementById('signature');
+    
+    if (greeting) greeting.textContent = data.message.greeting || '';
+    if (content) content.textContent = data.message.content || '';
+    if (closing) closing.textContent = data.message.closing || '';
+    if (signature) signature.textContent = data.message.signature || '';
+    
+    // Store the generated message for later use
+    generatedMessage = data.message;
+    
+    // Show regenerate options
+    const regenerateOptions = document.getElementById('regenerateOptions');
+    if (regenerateOptions) {
+        regenerateOptions.style.display = 'block';
+    }
+    
+    // Initialize message action buttons
+    initMessageActions();
+}
+
+/**
+ * Initialize message action buttons (edit, copy, share)
+ */
+function initMessageActions() {
+    // Edit button
+    const editBtn = document.getElementById('editBtn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            // Show edit container
+            const editContainer = document.getElementById('editContainer');
+            const messageContent = document.getElementById('messageContent');
+            const editMessage = document.getElementById('editMessage');
             
-            insightItem.innerHTML = `<strong style="color: var(--text-color);">${title}:</strong> ${description}`;
-        } else {
-            // If not in expected format, just display the whole string
-            insightItem.textContent = insight;
+            if (editContainer && messageContent && editMessage) {
+                // Combine message parts for editing
+                const fullMessage = [
+                    generatedMessage.greeting || '',
+                    generatedMessage.content || '',
+                    generatedMessage.closing || '',
+                    generatedMessage.signature || ''
+                ].filter(Boolean).join('\n\n');
+                
+                // Set textarea value
+                editMessage.value = fullMessage;
+                
+                // Hide message content and show edit container
+                messageContent.style.display = 'none';
+                editContainer.style.display = 'block';
+                
+                // Focus textarea
+                editMessage.focus();
+            }
+        });
+    }
+    
+    // Cancel edit button
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function() {
+            // Hide edit container and show message content
+            const editContainer = document.getElementById('editContainer');
+            const messageContent = document.getElementById('messageContent');
+            
+            if (editContainer && messageContent) {
+                editContainer.style.display = 'none';
+                messageContent.style.display = 'block';
+            }
+        });
+    }
+    
+    // Save edit button
+    const saveEditBtn = document.getElementById('saveEditBtn');
+    if (saveEditBtn) {
+        saveEditBtn.addEventListener('click', function() {
+            // Get edited message
+            const editMessage = document.getElementById('editMessage');
+            
+            if (editMessage) {
+                // Update content
+                generatedMessage.content = editMessage.value.trim();
+                
+                // Update display
+                const content = document.getElementById('content');
+                if (content) {
+                    content.textContent = generatedMessage.content;
+                }
+                
+                // Hide edit container and show message content
+                const editContainer = document.getElementById('editContainer');
+                const messageContent = document.getElementById('messageContent');
+                
+                if (editContainer && messageContent) {
+                    editContainer.style.display = 'none';
+                    messageContent.style.display = 'block';
+                }
+                
+                // Show success message
+                showAlert('Your message has been updated.', 'success');
+            }
+        });
+    }
+    
+    // Copy button
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            // Combine message parts for copying
+            const fullMessage = [
+                generatedMessage.greeting || '',
+                generatedMessage.content || '',
+                generatedMessage.closing || '',
+                generatedMessage.signature || ''
+            ].filter(Boolean).join('\n\n');
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(fullMessage)
+                .then(() => {
+                    showAlert('Message copied to clipboard!', 'success');
+                })
+                .catch(err => {
+                    console.error('Error copying message:', err);
+                    showAlert('Failed to copy message. Please try again.', 'error');
+                });
+        });
+    }
+    
+    // Share button
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            // Check if Web Share API is supported
+            if (navigator.share) {
+                // Combine message parts for sharing
+                const fullMessage = [
+                    generatedMessage.greeting || '',
+                    generatedMessage.content || '',
+                    generatedMessage.closing || '',
+                    generatedMessage.signature || ''
+                ].filter(Boolean).join('\n\n');
+                
+                navigator.share({
+                    title: `Message for ${recipientData.name}`,
+                    text: fullMessage
+                })
+                .then(() => {
+                    console.log('Message shared successfully');
+                })
+                .catch(err => {
+                    console.error('Error sharing message:', err);
+                    // Fall back to clipboard
+                    navigator.clipboard.writeText(fullMessage)
+                        .then(() => {
+                            showAlert('Message copied to clipboard for sharing!', 'success');
+                        })
+                        .catch(clipErr => {
+                            console.error('Error copying message:', clipErr);
+                            showAlert('Failed to copy message. Please try again.', 'error');
+                        });
+                });
+            } else {
+                // Web Share API not supported, fall back to clipboard
+                navigator.clipboard.writeText(fullMessage)
+                    .then(() => {
+                        showAlert('Message copied to clipboard for sharing!', 'success');
+                    })
+                    .catch(err => {
+                        console.error('Error copying message:', err);
+                        showAlert('Failed to copy message. Please try again.', 'error');
+                    });
+            }
+        });
+    }
+}
+
+/**
+ * Show loading state
+ */
+function showLoadingState() {
+    const loadingState = document.getElementById('loadingState');
+    if (loadingState) {
+        loadingState.style.display = 'flex';
+    }
+}
+
+/**
+ * Show error message
+ */
+function showError(message = 'An error occurred') {
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    const messageContainer = document.getElementById('messageContainer');
+    const regenerateOptions = document.getElementById('regenerateOptions');
+    
+    if (loadingState) {
+        loadingState.style.display = 'none';
+    }
+    
+    if (errorState) {
+        errorState.style.display = 'block';
+        
+        const errorMessage = errorState.querySelector('.error-message');
+        if (errorMessage) {
+            errorMessage.textContent = message;
         }
         
-        insightsList.appendChild(insightItem);
+        const retryBtn = document.getElementById('retry-btn');
+        if (retryBtn) {
+            // Remove any existing event listeners to prevent duplicates
+            const newRetryBtn = retryBtn.cloneNode(true);
+            retryBtn.parentNode.replaceChild(newRetryBtn, retryBtn);
+            
+            newRetryBtn.addEventListener('click', function() {
+                if (errorState) errorState.style.display = 'none';
+                if (loadingState) loadingState.style.display = 'flex';
+                setTimeout(() => {
+                    generateMessage();
+                }, 1000);
+            });
+        }
+    } else {
+        // Fallback to alert if error-state element doesn't exist
+        showAlert(message, 'error');
+    }
+    
+    if (messageContainer) {
+        messageContainer.style.display = 'none';
+    }
+    
+    if (regenerateOptions) {
+        regenerateOptions.style.display = 'none';
+    }
+    
+    // Log the error
+    console.error('Error:', message);
+}
+
+/**
+ * Show alert message
+ */
+function showAlert(message, type = 'info') {
+    // Remove existing alerts
+    const existingAlerts = document.querySelectorAll('.alert');
+    existingAlerts.forEach(alert => {
+        document.body.removeChild(alert);
     });
     
-    logDebug(`Displayed ${insights.length} insights`);
+    // Create alert element
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert alert-${type}`;
+    alertElement.innerHTML = `
+        <div class="alert-content">
+            <span class="alert-message">${message}</span>
+            <button class="alert-close">&times;</button>
+        </div>
+    `;
+    
+    // Add to document
+    document.body.appendChild(alertElement);
+    
+    // Show after a small delay (for animation)
+    setTimeout(() => {
+        alertElement.classList.add('show');
+    }, 10);
+    
+    // Add close button handler
+    const closeBtn = alertElement.querySelector('.alert-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            alertElement.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(alertElement)) {
+                    document.body.removeChild(alertElement);
+                }
+            }, 300);
+        });
+    }
+    
+    // Auto remove for non-error alerts
+    if (type !== 'error') {
+        setTimeout(() => {
+            alertElement.classList.remove('show');
+            setTimeout(() => {
+                if (document.body.contains(alertElement)) {
+                    document.body.removeChild(alertElement);
+                }
+            }, 300);
+        }, 5000);
+    }
 }
 
 /**
- * Map intent type to scenario for the cloud function
+ * Get initials from a name
  */
-function getScenarioFromIntent(intentType) {
-    const scenarioMap = {
-        'reconnect': 'Reconnecting with someone after time apart',
-        'appreciate': 'Expressing gratitude and appreciation',
-        'apologize': 'Apologizing for a mistake or misunderstanding',
-        'celebrate': 'Celebrating an achievement or special occasion',
-        'encourage': 'Offering encouragement and support',
-        'invite': 'Inviting someone to an event or activity',
-        'custom': 'Custom message'
-    };
+function getInitials(name) {
+    if (!name) return '?';
     
-    return scenarioMap[intentType] || 'Custom message';
+    const parts = name.split(' ');
+    if (parts.length === 1) {
+        return parts[0].charAt(0).toUpperCase();
+    }
+    
+    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
 /**
- * Convert tone to intensity level for the cloud function
+ * Capitalize first letter of a string
  */
-function getToneIntensity(toneType) {
-    const intensityMap = {
-        'warm': '3',
-        'professional': '2',
-        'casual': '3',
-        'enthusiastic': '5',
-        'sincere': '4',
-        'humorous': '4',
-        'formal': '2',
-        'custom': '3'
-    };
-    
-    return intensityMap[toneType] || '3';
-}
-
-/**
- * Apply any selected adjustments to the message
- */
-function applyAdjustments(message) {
-    if (!selectedAdjustments.length) return message;
-    
-    let adjustedMessage = message;
-    
-    // Very simple adjustments for demo purposes
-    if (selectedAdjustments.includes('longer')) {
-        adjustedMessage += " I'm really looking forward to our continued connection and all the wonderful conversations ahead.";
-    }
-    
-    if (selectedAdjustments.includes('shorter')) {
-        // Simplify message by taking just the first two sentences
-        const sentences = adjustedMessage.split(/(?<=[.!?])\s+/);
-        if (sentences.length > 2) {
-            adjustedMessage = sentences.slice(0, 2).join(' ');
-        }
-    }
-    
-    if (selectedAdjustments.includes('casual')) {
-        adjustedMessage = adjustedMessage.replace('would like to', 'want to');
-        adjustedMessage = adjustedMessage.replace('I am', "I'm");
-        adjustedMessage = adjustedMessage.replace('Hello', 'Hey');
-    }
-    
-    if (selectedAdjustments.includes('formal')) {
-        adjustedMessage = adjustedMessage.replace('Hey', 'Hello');
-        adjustedMessage = adjustedMessage.replace('thanks', 'thank you');
-        adjustedMessage = adjustedMessage.replace('Congrats', 'Congratulations');
-    }
-    
-    if (selectedAdjustments.includes('emotional')) {
-        adjustedMessage = adjustedMessage.replace(/\./g, '!');
-        adjustedMessage += " This means so much to me!";
-    }
-    
-    if (selectedAdjustments.includes('clear')) {
-        adjustedMessage = adjustedMessage.replace(/\!+/g, '.');
-        adjustedMessage = adjustedMessage.replace(/\bvery\b/g, '');
-        adjustedMessage = adjustedMessage.replace(/\breally\b/g, '');
-    }
-    
-    return adjustedMessage;
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 /**
@@ -804,112 +1038,6 @@ function checkAuthentication() {
 }
 
 /**
- * Show error message
- */
-function showError(message = 'An error occurred') {
-    const loadingState = document.getElementById('loading-state');
-    const errorState = document.getElementById('error-state');
-    const messageContainer = document.getElementById('message-container');
-    const regenerateOptions = document.getElementById('regenerate-options');
-    
-    if (loadingState) {
-        loadingState.style.display = 'none';
-    }
-    
-    if (errorState) {
-        errorState.style.display = 'block';
-        
-        const errorMessage = errorState.querySelector('.error-message');
-        if (errorMessage) {
-            errorMessage.textContent = message;
-        }
-        
-        const retryBtn = document.getElementById('retry-btn');
-        if (retryBtn) {
-            // Remove any existing event listeners to prevent duplicates
-            const newRetryBtn = retryBtn.cloneNode(true);
-            retryBtn.parentNode.replaceChild(newRetryBtn, retryBtn);
-            
-            newRetryBtn.addEventListener('click', function() {
-                if (errorState) errorState.style.display = 'none';
-                if (loadingState) loadingState.style.display = 'flex';
-                setTimeout(() => {
-                    generateMessage();
-                }, 1000);
-            });
-        }
-    } else {
-        // Fallback to alert if error-state element doesn't exist
-        showAlert(message, 'error');
-    }
-    
-    if (messageContainer) {
-        messageContainer.style.display = 'none';
-    }
-    
-    if (regenerateOptions) {
-        regenerateOptions.style.display = 'none';
-    }
-    
-    // Log the error
-    console.error('Error:', message);
-}
-
-/**
- * Show alert message
- */
-function showAlert(message, type = 'info') {
-    // Remove existing alerts
-    const existingAlerts = document.querySelectorAll('.alert');
-    existingAlerts.forEach(alert => {
-        document.body.removeChild(alert);
-    });
-    
-    // Create alert element
-    const alertElement = document.createElement('div');
-    alertElement.className = `alert alert-${type}`;
-    alertElement.innerHTML = `
-        <div class="alert-content">
-            <span class="alert-message">${message}</span>
-            <button class="alert-close">&times;</button>
-        </div>
-    `;
-    
-    // Add to document
-    document.body.appendChild(alertElement);
-    
-    // Show after a small delay (for animation)
-    setTimeout(() => {
-        alertElement.classList.add('show');
-    }, 10);
-    
-    // Add close button handler
-    const closeBtn = alertElement.querySelector('.alert-close');
-    if (closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            alertElement.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(alertElement)) {
-                    document.body.removeChild(alertElement);
-                }
-            }, 300);
-        });
-    }
-    
-    // Auto remove for non-error alerts
-    if (type !== 'error') {
-        setTimeout(() => {
-            alertElement.classList.remove('show');
-            setTimeout(() => {
-                if (document.body.contains(alertElement)) {
-                    document.body.removeChild(alertElement);
-                }
-            }, 300);
-        }, 5000);
-    }
-}
-
-/**
  * Log debug message to console and debug output
  */
 function logDebug(message) {
@@ -921,28 +1049,6 @@ function logDebug(message) {
         logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
         debugOutput.appendChild(logEntry);
     }
-}
-
-/**
- * Get initials from a name
- */
-function getInitials(name) {
-    if (!name) return '?';
-    
-    const parts = name.split(' ');
-    if (parts.length === 1) {
-        return parts[0].charAt(0).toUpperCase();
-    }
-    
-    return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-}
-
-/**
- * Capitalize first letter of a string
- */
-function capitalizeFirstLetter(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 /**

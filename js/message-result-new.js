@@ -1085,51 +1085,80 @@ function callGenerationAPI(prompt, authToken = null) {
         // Log the API call attempt
         logDebug('Calling message generation API...');
         
-        // Set up the API endpoint URL for the new V2 function
-        const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
+        // Ensure we have a valid auth token
+        const getAuthToken = new Promise((resolveToken, rejectToken) => {
+            if (authToken) {
+                logDebug('Using existing auth token from localStorage');
+                resolveToken(authToken);
+            } else if (firebase && firebase.auth && firebase.auth().currentUser) {
+                logDebug('Getting fresh token from current Firebase user');
+                firebase.auth().currentUser.getIdToken(true)
+                    .then(token => {
+                        localStorage.setItem('authToken', token);
+                        resolveToken(token);
+                    })
+                    .catch(error => {
+                        console.error('Error getting auth token:', error);
+                        rejectToken(error);
+                    });
+            } else {
+                logDebug('No authentication method available, proceeding without token');
+                resolveToken(null);
+            }
+        });
         
-        // Make the API call
-        fetch(apiUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken ? `Bearer ${authToken}` : ''
-            },
-            body: JSON.stringify(prompt)
-        })
-        .then(response => {
-            // Check if the request was successful
-            if (!response.ok) {
-                throw new Error(`API responded with status ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            // Log success
-            logDebug('API call successful');
+        getAuthToken.then(token => {
+            // Set up the API endpoint URL for the new V2 function
+            const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
             
-            // If there's an error in the response
-            if (data.error) {
-                throw new Error(data.error);
-            }
+            logDebug(`Making API call with auth token: ${token ? 'Available' : 'Not available'}`);
             
-            // Resolve with the data
-            resolve(data);
-        })
-        .catch(error => {
-            // Log error
-            console.error('API call failed:', error);
-            
-            // Show error in UI
-            const loadingState = document.getElementById('loadingState');
-            const errorState = document.getElementById('errorState');
-            const errorText = document.getElementById('errorText');
-            
-            if (loadingState) loadingState.style.display = 'none';
-            if (errorState) errorState.style.display = 'block';
-            if (errorText) errorText.textContent = `Failed to generate message: ${error.message || 'Server error'}`;
-            
-            reject(error);
+            // Make the API call
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': token ? `Bearer ${token}` : ''
+                },
+                body: JSON.stringify(prompt)
+            })
+            .then(response => {
+                // Check if the request was successful
+                if (!response.ok) {
+                    throw new Error(`API responded with status ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Log success
+                logDebug('API call successful');
+                
+                // If there's an error in the response
+                if (data.error) {
+                    throw new Error(data.error);
+                }
+                
+                // Resolve with the data
+                resolve(data);
+            })
+            .catch(error => {
+                // Log error
+                console.error('API call failed:', error);
+                
+                // Show error in UI
+                const loadingState = document.getElementById('loadingState');
+                const errorState = document.getElementById('errorState');
+                const errorText = document.getElementById('errorText');
+                
+                if (loadingState) loadingState.style.display = 'none';
+                if (errorState) errorState.style.display = 'block';
+                if (errorText) errorText.textContent = `Failed to generate message: ${error.message || 'Server error'}`;
+                
+                reject(error);
+            });
+        }).catch(error => {
+            console.error('Error getting authentication token:', error);
+            reject(new Error('Authentication failed. Please try signing in again.'));
         });
     });
 }

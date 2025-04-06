@@ -3818,3 +3818,181 @@ document.addEventListener('click', function(e) {
     }
   }
 });
+
+// Simplified, reliable event handlers for connection actions - replaces all previous implementations
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Setting up unified connection action handlers');
+  
+  // SINGLE EVENT HANDLER FOR ALL CONNECTION ACTIONS
+  document.addEventListener('click', function(e) {
+    // Find the action button that was clicked (if any)
+    const button = e.target.closest('.home-page__connection-button') || 
+                   e.target.closest('.connection-action') ||
+                   (e.target.classList.contains('fa-edit') || 
+                    e.target.classList.contains('fa-trash') || 
+                    e.target.classList.contains('fa-paper-plane') || 
+                    e.target.classList.contains('fa-pencil-alt')) ? e.target : null;
+    
+    if (!button) return; // Not a connection action button
+    
+    // Determine what type of button was clicked
+    const isEditButton = button.classList.contains('edit-btn') || 
+                         button.classList.contains('fa-edit') || 
+                         button.classList.contains('fa-pencil-alt') ||
+                         button.querySelector('.fa-edit') || 
+                         button.querySelector('.fa-pencil-alt');
+                         
+    const isDeleteButton = button.classList.contains('delete-btn') || 
+                           button.classList.contains('fa-trash') ||
+                           button.querySelector('.fa-trash');
+                           
+    const isMessageButton = button.classList.contains('message-btn') || 
+                            button.classList.contains('fa-paper-plane') ||
+                            button.querySelector('.fa-paper-plane');
+    
+    if (!isEditButton && !isDeleteButton && !isMessageButton) return;
+    
+    // Find the connection item and ID
+    const connectionItem = button.closest('.home-page__connection') || button.closest('.modal-connection-item');
+    if (!connectionItem) {
+      console.error('Connection item not found for button:', button);
+      return;
+    }
+    
+    // Get connection ID consistently
+    const connectionId = connectionItem.dataset.connectionId || connectionItem.getAttribute('data-id');
+    if (!connectionId) {
+      console.error('Connection ID not found for item:', connectionItem);
+      return;
+    }
+    
+    // Debug info
+    console.log('Connection action:', isEditButton ? 'EDIT' : isDeleteButton ? 'DELETE' : 'MESSAGE', 'for ID:', connectionId);
+    
+    // Prevent default and stop propagation
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Perform the appropriate action
+    if (isEditButton) {
+      // Open the connection modal for editing
+      openConnectionModal(connectionId);
+    } else if (isDeleteButton) {
+      // Show the delete confirmation dialog
+      confirmDeleteConnection(connectionId);
+    } else if (isMessageButton) {
+      // Create message for connection
+      window.location.href = `message-intent-new.html?connectionId=${connectionId}`;
+    }
+    
+    return false; // Extra guarantee to stop event propagation
+  });
+});
+
+// Clean, simplified delete confirmation function
+function confirmDeleteConnection(connectionId) {
+  if (!connectionId) {
+    console.error('No connection ID provided for deletion');
+    return;
+  }
+  
+  console.log('Confirming deletion for connection ID:', connectionId);
+  
+  // Store the ID for the delete operation
+  editingConnectionId = connectionId;
+  
+  // Create or get the confirmation dialog
+  let dialog = document.getElementById('delete-confirmation-dialog');
+  
+  // Create if it doesn't exist
+  if (!dialog) {
+    dialog = document.createElement('div');
+    dialog.id = 'delete-confirmation-dialog';
+    dialog.className = 'modal';
+    dialog.innerHTML = `
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3>Delete Connection</h3>
+          <button class="close-btn" data-action="cancel">×</button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this connection? This action cannot be undone.</p>
+          <div class="modal-actions" style="margin-top: 20px;">
+            <button class="btn-secondary" data-action="cancel">Cancel</button>
+            <button class="btn-danger" data-action="confirm">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(dialog);
+    
+    // Add a single event listener for all buttons in the dialog
+    dialog.addEventListener('click', function(e) {
+      // Handle dialog background click (cancel)
+      if (e.target === dialog) {
+        hideDeleteDialog();
+        return;
+      }
+      
+      // Find clicked button by checking if it or its ancestor has a data-action attribute
+      const actionElement = e.target.closest('[data-action]');
+      if (!actionElement) return;
+      
+      const action = actionElement.getAttribute('data-action');
+      
+      if (action === 'cancel') {
+        hideDeleteDialog();
+      } else if (action === 'confirm') {
+        deleteConnection(editingConnectionId);
+        hideDeleteDialog();
+      }
+    });
+  }
+  
+  // Show the dialog
+  dialog.style.display = 'flex';
+}
+
+// Clean function to hide the delete dialog
+function hideDeleteDialog() {
+  const dialog = document.getElementById('delete-confirmation-dialog');
+  if (dialog) {
+    dialog.style.display = 'none';
+  }
+  editingConnectionId = null;
+}
+
+// Clean function to actually delete the connection
+function deleteConnection(connectionId) {
+  if (!currentUser || !connectionId) {
+    showAlert('Could not delete connection', 'error');
+    return;
+  }
+  
+  console.log('Deleting connection ID:', connectionId);
+  showLoading('Deleting connection...');
+  
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('connections')
+    .doc(connectionId)
+    .delete()
+    .then(() => {
+      showAlert('Connection deleted successfully', 'success');
+      
+      // Reload connections
+      loadUserConnections();
+      
+      // Reset editing ID
+      editingConnectionId = null;
+      
+      hideLoading();
+    })
+    .catch(error => {
+      console.error('Error deleting connection:', error);
+      showAlert('Error deleting connection: ' + error.message, 'error');
+      hideLoading();
+    });
+}

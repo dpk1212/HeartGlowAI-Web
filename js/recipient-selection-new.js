@@ -536,7 +536,7 @@ function validateForm() {
         isValid = selectedRelationship !== null;
         
         // If 'other' is selected, the other field must be filled
-        if (isValid && selectedRelationship === 'other' && otherSection.style.display !== 'none') {
+        if (isValid && selectedRelationship === 'other' && otherSection.classList.contains('visible')) {
             isValid = otherRelationshipInput.value.trim() !== '';
         }
     }
@@ -545,6 +545,16 @@ function validateForm() {
     if (nextBtn) {
         nextBtn.disabled = !isValid;
     }
+    
+    console.log('Form validation result:', {
+        isValid,
+        name: recipientNameInput.value.trim(),
+        relationship: selectedRelationship,
+        otherVisible: otherSection ? otherSection.classList.contains('visible') : false,
+        otherValue: otherRelationshipInput ? otherRelationshipInput.value.trim() : ''
+    });
+    
+    return isValid;
 }
 
 /**

@@ -13,11 +13,11 @@
   <link rel="preload" href="css/styles.css" as="style">
   <link rel="preload" href="js/home.js" as="script">
   
-  <!-- Font Loading -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   
-  <!-- Font Awesome - FIX: Update to working CDN link -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- FontAwesome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -763,230 +763,213 @@
   </style>
 </head>
 <body>
-  <!-- Debug Console (for development) -->
-  <div id="debug-console" style="display: none;">
-    <div class="debug-header">
-      <h3>Debug Console</h3>
-      <button onclick="document.getElementById('debug-console').style.display='none'">Close</button>
-    </div>
-    <div id="debug-output"></div>
-  </div>
-
-  <!-- Header and Navigation -->
-  <header class="header">
-    <div class="logo-container">
-      <div class="logo-heart">❤️</div>
-      <div class="logo-text">HeartGlowAI</div>
-    </div>
-    <nav class="nav-bar">
-      <button id="dashboard-btn" class="nav-button active">
-        <i class="fas fa-columns"></i> Dashboard
-      </button>
-      <button id="history-btn" class="nav-button">
-        <i class="fas fa-history"></i> History
-      </button>
-      <button id="learn-btn" class="nav-button">
-        <i class="fas fa-brain"></i> Learn
-      </button>
-      <button id="logout-btn" class="nav-button">
-        <i class="fas fa-sign-out-alt"></i> Logout
-      </button>
-    </nav>
-  </header>
-
-  <main class="dashboard-container" style="display: block !important; visibility: visible !important; opacity: 1 !important;">
-    <h1 class="dashboard-title">Your Heartfelt Messages</h1>
-    <p class="dashboard-subtitle">Welcome back! Connect with the people who matter most to you.</p>
-    
-    <!-- Dashboard Grid -->
-    <div class="dashboard-grid">
-      <!-- Left Column -->
-      <div class="dashboard-main">
-        <!-- Create New Message Section -->
-        <div class="create-section">
-          <h2 class="create-title">Say something real.</h2>
-          <p class="create-description">Let's help you craft a message that expresses what's truly in your heart.</p>
-          <button id="create-message-btn" class="create-btn">
-            <i class="fas fa-pen-fancy"></i> Create New Message
-          </button>
-        </div>
-        
-        <!-- Recent Messages Section -->
-        <div class="dashboard-section">
-          <div class="section-header">
-            <div class="section-title">
-              <i class="fas fa-comment-dots"></i> Recent Messages
-            </div>
-            <div class="section-actions">
-              <a href="history.html">View All <i class="fas fa-chevron-right"></i></a>
-            </div>
-          </div>
-          <div class="section-content">
-            <ul class="messages-list" id="recent-messages">
-              <!-- Loading State -->
-              <li class="loading-state">
-                <span class="loading-spinner"></span> Loading recent messages...
-              </li>
-              
-              <!-- Messages will be loaded here dynamically -->
-            </ul>
-          </div>
-        </div>
-        
-        <!-- Your People Section -->
-        <div class="dashboard-section">
-          <div class="section-header">
-            <div class="section-title">
-              <i class="fas fa-users section-icon"></i>Your People
-              <button id="add-connection-btn" class="manage-btn-inline" title="Add New Person">
-                <i class="fas fa-plus-circle"></i> Add
-              </button>
-            </div>
-            <div class="section-actions">
-              <a href="#" id="manage-connections-btn" class="manage-link">Manage <i class="fas fa-cog"></i></a>
-            </div>
-          </div>
-          <div class="section-content">
-            <ul class="connections-list" id="connections-list">
-              <!-- Loading State -->
-              <li class="loading-state">
-                <span class="loading-spinner"></span> Loading your connections...
-              </li>
-              
-              <!-- Connections will be loaded here dynamically -->
-            </ul>
-          </div>
-        </div>
+  <div id="app">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="brand-logo">
+        <div class="logo-heart"></div>
+        <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
       </div>
       
-      <!-- Right Column -->
-      <div class="dashboard-sidebar">
-        <!-- Upcoming Reminders Section -->
-        <div class="dashboard-section">
-          <div class="section-header">
-            <div class="section-title">
-              <i class="fas fa-bell"></i> Upcoming Reminders
+      <div class="user-menu">
+        <div class="user-profile">
+          <button id="userMenuBtn" class="user-avatar">
+            <img id="userAvatar" src="images/default-avatar.png" alt="Profile">
+          </button>
+          <div id="userDropdown" class="dropdown-menu">
+            <div class="dropdown-header">
+              <div id="userDisplayName" class="dropdown-name">User</div>
+              <div id="userEmail" class="dropdown-email">user@example.com</div>
             </div>
-            <div class="section-actions">
-              <a href="#" id="manage-reminders-btn">Manage <i class="fas fa-cog"></i></a>
-            </div>
-          </div>
-          <div class="section-content">
-            <div class="reminders-list" id="reminders-list">
-              <!-- Loading State -->
-              <div class="loading-state">
-                <span class="loading-spinner"></span> Loading reminders...
-              </div>
-              
-              <!-- Reminders will be loaded here dynamically -->
-            </div>
-          </div>
-        </div>
-        
-        <!-- Quick Actions Section -->
-        <div class="dashboard-section">
-          <div class="section-header">
-            <div class="section-title">
-              <i class="fas fa-bolt"></i> Quick Actions
-            </div>
-          </div>
-          <div class="section-content">
-            <ul class="quick-actions-list">
-              <li class="message-item">
-                <div class="message-recipient">
-                  <i class="fas fa-exchange-alt" style="color: var(--accent-pink); margin-right: 10px;"></i> 
-                  Reconnect with someone
-                </div>
-              </li>
-              <li class="message-item">
-                <div class="message-recipient">
-                  <i class="fas fa-heart" style="color: var(--accent-pink); margin-right: 10px;"></i> 
-                  Express appreciation
-                </div>
-              </li>
-              <li class="message-item">
-                <div class="message-recipient">
-                  <i class="fas fa-hand-holding-heart" style="color: var(--accent-pink); margin-right: 10px;"></i> 
-                  Make an apology
-                </div>
-              </li>
-              <li class="message-item">
-                <div class="message-recipient">
-                  <i class="fas fa-random" style="color: var(--accent-pink); margin-right: 10px;"></i> 
-                  Create from scratch
-                </div>
-              </li>
-            </ul>
+            <div class="dropdown-divider"></div>
+            <a href="home.html" class="dropdown-item active">
+              <i class="fas fa-home"></i>
+              Dashboard
+            </a>
+            <a href="settings.html" class="dropdown-item">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+            <button id="logoutBtn" class="dropdown-item">
+              <i class="fas fa-sign-out-alt"></i>
+              Sign Out
+            </button>
           </div>
         </div>
       </div>
-    </div>
-  </main>
+    </header>
+    
+    <main class="main-content">
+      <!-- Page Header -->
+      <div class="page-header">
+        <h1 class="page-title">Welcome to HeartGlowAI</h1>
+        <p class="page-description">Create heartfelt messages for your loved ones with our AI-powered assistant.</p>
+      </div>
 
-  <!-- Ambient background particles -->
-  <div class="particles-container">
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
-    <div class="particle"></div>
+      <!-- Rest of the dashboard content remains here -->
+    
+      <div class="dashboard-container">
+        <!-- Dashboard actions section -->
+        <div class="create-section">
+          <h2 class="create-title">Create a Heartfelt Message</h2>
+          <p class="create-description">Our AI will help you craft the perfect message for any occasion. Express your feelings with authenticity and warmth.</p>
+          <a href="message-intent-new.html" class="create-btn">
+            <i class="fas fa-magic"></i>
+            Create New Message
+          </a>
+        </div>
+        
+        <!-- Main dashboard content -->
+        <div class="dashboard-grid">
+          <!-- Left column -->
+          <div class="dashboard-main">
+            <!-- Connections section -->
+            <div class="dashboard-section" id="connections-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <i class="fas fa-users"></i>
+                  My Connections
+                </div>
+                <div class="section-actions">
+                  <a href="manage-connections.html">
+                    <i class="fas fa-plus"></i>
+                    Add New
+                  </a>
+                </div>
+              </div>
+              
+              <div class="section-content" id="connections-list-container">
+                <!-- This will be populated by JavaScript -->
+                <div class="empty-state" id="connections-empty-state">
+                  <div class="empty-icon">
+                    <i class="fas fa-user-friends"></i>
+                  </div>
+                  <h3 class="empty-title">No connections yet</h3>
+                  <p class="empty-description">Add people to your connections to easily create messages for them.</p>
+                  <a href="manage-connections.html" class="empty-action">
+                    <i class="fas fa-plus"></i>
+                    Add Your First Connection
+                  </a>
+                </div>
+                
+                <ul class="connections-list" id="connections-list">
+                  <!-- Connection items will be added here dynamically -->
+                </ul>
+              </div>
+            </div>
+            
+            <!-- Messages section -->
+            <div class="dashboard-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <i class="fas fa-envelope-open-heart"></i>
+                  Recent Messages
+                </div>
+                <div class="section-actions">
+                  <a href="message-history.html">
+                    <i class="fas fa-history"></i>
+                    View All
+                  </a>
+                </div>
+              </div>
+              
+              <div class="section-content" id="messages-list-container">
+                <!-- This will be populated by JavaScript -->
+                <div class="empty-state" id="messages-empty-state">
+                  <div class="empty-icon">
+                    <i class="fas fa-envelope"></i>
+                  </div>
+                  <h3 class="empty-title">No messages yet</h3>
+                  <p class="empty-description">Your created messages will appear here.</p>
+                  <a href="message-intent-new.html" class="empty-action">
+                    <i class="fas fa-plus"></i>
+                    Create Your First Message
+                  </a>
+                </div>
+                
+                <ul class="messages-list" id="messages-list">
+                  <!-- Message items will be added here dynamically -->
+                </ul>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Right column -->
+          <div class="dashboard-sidebar">
+            <!-- Reminders section -->
+            <div class="dashboard-section">
+              <div class="section-header">
+                <div class="section-title">
+                  <i class="fas fa-bell"></i>
+                  Upcoming Reminders
+                </div>
+                <div class="section-actions">
+                  <a href="reminders.html">
+                    <i class="fas fa-cog"></i>
+                    Manage
+                  </a>
+                </div>
+              </div>
+              
+              <div class="section-content" id="reminders-list-container">
+                <!-- This will be populated by JavaScript -->
+                <div class="empty-state" id="reminders-empty-state">
+                  <div class="empty-icon">
+                    <i class="fas fa-calendar"></i>
+                  </div>
+                  <h3 class="empty-title">No reminders set</h3>
+                  <p class="empty-description">Set reminders for birthdays, anniversaries, and special occasions.</p>
+                  <a href="reminders.html" class="empty-action">
+                    <i class="fas fa-plus"></i>
+                    Add a Reminder
+                  </a>
+                </div>
+                
+                <div id="reminders-list">
+                  <!-- Reminder items will be added here dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   </div>
-
-  <!-- JavaScript -->
-  <script>
-    // Logging function for debug console
-    function debugLog(message) {
-      console.log('DEBUG:', message);
-      const debugOutput = document.getElementById('debug-output');
-      if (debugOutput) {
-        const logEntry = document.createElement('div');
-        logEntry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
-        debugOutput.appendChild(logEntry);
-      }
-    }
-    
-    // Show debug console on certain errors
-    window.addEventListener('error', function(e) {
-      const debugConsole = document.getElementById('debug-console');
-      if (debugConsole) {
-        debugConsole.style.display = 'block';
-        debugLog(`ERROR: ${e.message} at ${e.filename}:${e.lineno}`);
-      }
-    });
-    
-    // Check if the page is loaded
-    debugLog('Page script section loaded');
-  </script>
-  <script src="js/home.js"></script>
-
-  <!-- Add Connection Modal -->
-  <div id="connection-modal" class="modal-overlay" style="display: none;">
+  
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-container">
+      <div class="heart-animation">
+        <div class="heart-shape"></div>
+        <div class="heart-glow"></div>
+      </div>
+      <div id="loadingContext" class="loading-context">Loading your dashboard...</div>
+    </div>
+  </div>
+  
+  <!-- Alert Container -->
+  <div id="alertContainer" class="alert-container"></div>
+  
+  <!-- Delete Confirmation Modal -->
+  <div id="deleteModal" class="modal">
     <div class="modal-content">
-      <h2 id="modal-title">Add New Connection</h2>
-      <form id="connection-form">
-        <input type="hidden" id="connection-id"> <!-- Used for editing -->
-        <div class="form-group">
-          <label for="connection-name">Name:</label>
-          <input type="text" id="connection-name" required>
-        </div>
-        <div class="form-group">
-          <label for="connection-relationship">Relationship:</label>
-          <select id="connection-relationship" required>
-            <option value="" disabled selected>Select relationship...</option>
-            <option value="partner">Partner</option>
-            <option value="friend">Friend</option>
-            <option value="family">Family</option>
-            <option value="colleague">Colleague</option>
-            <option value="acquaintance">Acquaintance</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
+      <div class="modal-header">
+        <h3 class="modal-title">Delete Confirmation</h3>
+        <button id="closeDeleteModal" class="modal-close">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p id="deleteMessage">Are you sure you want to delete this item?</p>
         <div class="modal-actions">
-          <button type="submit" id="save-connection-btn" class="btn-primary">Save Connection</button>
-          <button type="button" id="cancel-connection-btn" class="btn-secondary">Cancel</button>
+          <button id="cancelDelete" class="secondary-button">Cancel</button>
+          <button id="confirmDelete" class="danger-button">Delete</button>
         </div>
-      </form>
+      </div>
     </div>
   </div>
+  
+  <!-- JavaScript -->
+  <script src="js/home.js"></script>
 </body>
 </html> 

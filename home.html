@@ -969,6 +969,55 @@
     </div>
   </div>
   
+  <!-- Message View Modal -->
+  <div class="modal" id="message-view-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog message-view-modal" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Message Details</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="message-info">
+            <div class="message-meta">
+              <span><strong>Recipient:</strong> <span id="message-recipient-display"></span></span>
+              <span><strong>Intent:</strong> <span id="message-intent-display"></span></span>
+              <span><strong>Tone:</strong> <span id="message-tone-display"></span></span>
+              <span><strong>Date:</strong> <span id="message-date-display"></span></span>
+            </div>
+          </div>
+          
+          <div id="message-content-container">
+            <div class="message-full-content">
+              <h3>Message</h3>
+              <div id="message-content-display" class="message-text"></div>
+            </div>
+          </div>
+          
+          <div id="message-insights-container">
+            <h3><i class="fas fa-lightbulb"></i> Message Insights</h3>
+            <ul id="message-insights-list"></ul>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="message-actions">
+            <button class="message-action copy-action" onclick="copyMessage()">
+              <i class="fas fa-copy"></i> Copy
+            </button>
+            <button class="message-action edit-action" onclick="editMessage()">
+              <i class="fas fa-edit"></i> Edit
+            </button>
+            <button class="message-action delete-action" onclick="confirmDeleteMessage()">
+              <i class="fas fa-trash-alt"></i> Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
   <!-- JavaScript -->
   <script src="js/home.js"></script>
 </body>

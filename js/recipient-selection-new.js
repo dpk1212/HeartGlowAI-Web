@@ -110,18 +110,18 @@ function handleLogout() {
     showLoading('Signing out...');
     
     if (firebase.auth) {
-        firebase.auth().signOut()
-            .then(() => {
-                window.location.href = 'index.html';
-            })
-            .catch((error) => {
+                firebase.auth().signOut()
+                    .then(() => {
+                        window.location.href = 'index.html';
+                    })
+                    .catch((error) => {
                 hideLoading();
                 showAlert('Logout failed: ' + error.message, 'error');
-                console.error('Logout error:', error);
-            });
-    } else {
-        window.location.href = 'index.html';
-    }
+                        console.error('Logout error:', error);
+                    });
+            } else {
+                window.location.href = 'index.html';
+            }
 }
 
 /**
@@ -177,7 +177,7 @@ function getIntentDescription(type) {
         'appreciate': 'Express gratitude and thank someone for their support, kindness, or actions.',
         'apologize': 'Say sorry and express remorse for a mistake or misunderstanding.',
         'celebrate': 'Congratulate someone on their achievements or special occasions.',
-        'reconnect': 'Reach out to someone you've lost touch with and rebuild your connection.',
+        'reconnect': 'Reach out to someone you\'ve lost touch with and rebuild your connection.',
         'encourage': 'Motivate and support someone facing challenges or pursuing goals.',
         'custom': 'Craft a message with your own specific intention in mind.'
     };
@@ -367,7 +367,7 @@ async function saveDataAndNavigate() {
                 const currentUser = firebase.auth().currentUser;
                 await saveRecipientToFirestore(currentUser.uid, name, relationshipValue);
                 console.log('Saved recipient to Firestore');
-            } catch (error) {
+                } catch (error) {
                 console.error('Error saving to Firestore:', error);
                 // Continue with navigation despite Firestore error
             }

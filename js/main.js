@@ -80,8 +80,9 @@
     
     // Tab navigation functionality
     function initTabNavigation() {
-      const navTabs = document.querySelectorAll('.nav-tab');
-      const typeContents = document.querySelectorAll('.type-content');
+      // Using the new BEM class names
+      const navTabs = document.querySelectorAll('.landing-page__tab');
+      const typeContents = document.querySelectorAll('.landing-page__type');
       
       // If elements don't exist, log and exit early
       if (navTabs.length === 0 || typeContents.length === 0) {
@@ -98,16 +99,16 @@
           console.log("Tab clicked:", tab.getAttribute('data-type'));
           
           // Update active tab
-          navTabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
+          navTabs.forEach(t => t.classList.remove('landing-page__tab--active'));
+          tab.classList.add('landing-page__tab--active');
           
           // Update content visibility
           const type = tab.getAttribute('data-type');
           selectedType = type;
           typeContents.forEach(content => {
-            content.classList.remove('active');
+            content.classList.remove('landing-page__type--active');
             if (content.id === `${type}-content`) {
-              content.classList.add('active');
+              content.classList.add('landing-page__type--active');
             }
           });
           

@@ -170,6 +170,12 @@
                     </div>
                 </div>
                 
+                <!-- Message Insights Section - Now inside the message container for better layout -->
+                <div id="messageInsights" class="message-insights" style="display: none;">
+                    <h3><i class="fas fa-lightbulb"></i> Why This Message Works</h3>
+                    <div id="insightsContent"></div>
+                </div>
+                
                 <div id="editContainer" class="edit-container" style="display: none;">
                     <textarea id="editMessage" class="edit-textarea"></textarea>
                     <div class="edit-actions">
@@ -179,12 +185,7 @@
                 </div>
             </div>
             
-            <!-- Add message insights container after the message content -->
-            <div id="messageInsights" class="message-insights" style="display: none;">
-                <h3><i class="fas fa-lightbulb"></i> Message Insights</h3>
-                <div id="insightsContent"></div>
-            </div>
-            
+            <!-- Options for regenerating the message with different attributes -->
             <div id="regenerateOptions" class="regenerate-options" style="display: none;">
                 <h3 class="options-title">Not quite right?</h3>
                 <p class="options-description">You can try a different approach:</p>

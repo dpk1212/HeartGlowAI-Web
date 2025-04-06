@@ -682,13 +682,20 @@ async function saveDataAndNavigate() {
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
         
         // Check if user wants to save this recipient
-        const saveRecipient = document.getElementById('saveRecipient').checked;
+        const saveRecipientCheckbox = document.getElementById('saveRecipient');
+        const saveRecipient = saveRecipientCheckbox && saveRecipientCheckbox.checked;
+        
+        console.log('Save recipient checked:', saveRecipient);
         
         // If checked and not already a saved recipient, save to Firestore
         if (saveRecipient && !selectedSavedRecipient) {
             const user = firebase.auth().currentUser;
             if (user) {
+                console.log('Attempting to save recipient to Firestore');
                 await saveRecipientToFirestore(user.uid, name, relationship, otherRelationship);
+            } else {
+                console.error('User not authenticated, cannot save connection');
+                showAlert('You must be signed in to save connections', 'error');
             }
         }
         
@@ -726,11 +733,12 @@ async function saveRecipientToFirestore(userId, name, relationship, otherRelatio
             return;
         }
         
-        // Create connection object
+        // Create connection object with enhanced fields
         const connectionData = {
             name: name,
             relationship: relationship,
-            created: firebase.firestore.FieldValue.serverTimestamp() // Match existing field name in rules
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         
         // Add otherRelationship if applicable
@@ -738,17 +746,24 @@ async function saveRecipientToFirestore(userId, name, relationship, otherRelatio
             connectionData.otherRelationship = otherRelationship;
         }
         
+        console.log('Saving connection data:', connectionData);
+        
         // Add to Firestore
-        await connectionsRef.add(connectionData);
-        console.log('Connection saved successfully');
+        const docRef = await connectionsRef.add(connectionData);
+        console.log('Connection saved successfully with ID:', docRef.id);
+        
+        // Show success message
+        showAlert('Connection saved to your dashboard!', 'success');
         
         // Refresh the connections list
         loadSavedRecipients(userId);
         
+        return docRef.id;
     } catch (error) {
         console.error('Error saving connection to Firestore:', error);
         showAlert('Failed to save connection. Please try again later.', 'error');
         // Don't stop the flow if saving fails
+        return null;
     }
 }
 

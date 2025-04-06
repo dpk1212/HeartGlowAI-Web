@@ -93,47 +93,51 @@ document.addEventListener('DOMContentLoaded', initPage);
  * Initialize the page - main entry point
  */
 function initPage() {
-    console.log('Initializing message result page...');
+    // Debug output
+    // createDebugButton();
     
-    // Initialize user menu
-    initUserMenu();
+    logDebug(`[Result Page] Starting initialization, Auth State: ${authStateResolved ? 'Resolved' : 'Not Resolved'}`);
     
-    // Load data from localStorage
-    loadData();
-    
-    // Initialize UI elements
-    initButtons();
-    
-    // Add debug button for troubleshooting
-    createDebugButton();
-    
-    // Set up authentication check
-    authStatePromise.then(user => {
-        // Show loading state
-        showLoadingState();
+    try {
+        // Initialize user menu functionality
+        initUserMenu();
         
-        if (user) {
-            console.log('User authenticated, generating message');
-            // Since we have the auth now, try to generate message
-            generateMessage();
-        } else {
-            // Try to use saved token
-            const savedToken = localStorage.getItem('authToken');
-            if (savedToken) {
-                console.log('Using saved auth token');
-                callCloudFunction(savedToken);
+        // Check authentication state
+        checkAuthentication();
+        
+        // Initialize message actions (edit, copy, share)
+        initMessageActions();
+        
+        // Show adjustment/regenerate options
+        initAdjustmentOptions();
+        
+        // Load data from previous steps
+        loadData();
+        
+        // Add dashboard button next to other buttons
+        addDashboardButton();
+        
+        // Add regenerate button
+        addRegenerateButton();
+        
+        // Firebase will try to load previous data
+        // authStatePromise will resolve with user object or null
+        authStatePromise.then(user => {
+            if (user) {
+                // User is signed in, try to generate message
+                generateMessage();
             } else {
-                console.error('No authenticated user and no saved token');
-                showError('Authentication required. Please sign in to generate messages.');
+                // No user signed in, still try to generate with local storage data
+                generateMessage();
             }
-        }
-    }).catch(error => {
-        console.error('Auth promise error:', error);
-        showError('Authentication error. Please try signing in again.');
-    });
-    
-    // Start the auth check process
-    checkAuthentication();
+        }).catch(error => {
+            console.error('Auth state promise error:', error);
+            showError('Authentication error. Please try again later.');
+        });
+    } catch (error) {
+        console.error('Error in initPage:', error);
+        showError('Failed to initialize. Please refresh the page.');
+    }
 }
 
 /**
@@ -332,269 +336,6 @@ function updateToneDisplay() {
         }
         toneDisplay.textContent = toneText;
     }
-}
-
-/**
- * Generate message based on selected data
- */
-function generateMessage() {
-    console.log('Generating message...');
-    showLoadingState();
-    
-    // Check if we have all required data
-    if (!recipientData || !intentData || !toneData) {
-        showError('Missing required information. Please complete all previous steps.');
-        return;
-    }
-    
-    // Get authentication token from Firebase
-    if (firebase.auth && firebase.auth().currentUser) {
-        console.log('Getting fresh token from current user');
-        firebase.auth().currentUser.getIdToken(true)
-            .then(token => {
-                // Save token for future use
-                localStorage.setItem('authToken', token);
-                // Call cloud function with token
-                callCloudFunction(token);
-            })
-            .catch(error => {
-                console.error('Failed to get auth token:', error);
-                
-                // Try using saved token as fallback
-                const savedToken = localStorage.getItem('authToken');
-                if (savedToken) {
-                    console.log('Using saved token as fallback');
-                    callCloudFunction(savedToken);
-                } else {
-                    showError('Authentication error. Please try refreshing the page or sign in again.');
-                }
-            });
-    } else {
-        // No authenticated user, try using saved token
-        const savedToken = localStorage.getItem('authToken');
-        if (savedToken) {
-            console.log('No current user, using saved token');
-            callCloudFunction(savedToken);
-        } else {
-            // No authentication available
-            console.error('No authenticated user found and no saved token');
-            showError('Authentication required. Please sign in to generate messages.');
-        }
-    }
-}
-
-/**
- * Call cloud function to generate message
- */
-function callCloudFunction(idToken) {
-    const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
-    
-    // Prepare payload - ensure correct format for API
-    // Transform our data to match the cloud function's expected format
-    const payload = {
-        // Required core fields
-        scenario: intentData.type || "",  // Mapped from intent
-        relationshipType: recipientData.relationship || "", // Relationship type
-        
-        // Tone settings with defaults
-        tone: toneData.type || "casual",
-        toneIntensity: toneData.intensity || "3",
-        
-        // Additional context
-        relationshipDuration: recipientData.duration || "unspecified",
-        
-        // Custom fields go into special circumstances
-        specialCircumstances: [
-            intentData.customText ? `Custom intent: ${intentData.customText}` : '',
-            toneData.customText ? `Custom tone: ${toneData.customText}` : ''
-        ].filter(item => item).join('. '),
-        
-        // Detailed relationship blueprint
-        blueprintData: {
-            personName: recipientData.name || "",
-            relationshipType: recipientData.relationship || "",
-            relationshipDescription: recipientData.notes || recipientData.details || '',
-            goal: intentData.description || '',
-            // If we have any saved Q&A or additional details about the recipient
-            qanda: recipientData.additionalDetails || null
-        }
-    };
-    
-    // Log for debugging
-    logDebug('Calling cloud function with payload: ' + JSON.stringify(payload));
-    
-    // Set up headers
-    const headers = {
-        'Content-Type': 'application/json'
-    };
-    
-    // Add auth token
-    if (idToken) {
-        headers['Authorization'] = `Bearer ${idToken}`;
-    }
-    
-    // Set timeout of 30 seconds
-    const timeout = 30000;
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), timeout);
-    
-    // Make request
-    fetch(apiUrl, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(payload),
-        signal: controller.signal
-    })
-    .then(response => {
-        clearTimeout(timeoutId);
-        
-        // Handle different response status codes
-        if (response.status === 401 || response.status === 403) {
-            // Auth token invalid or expired - clear it and try re-authenticating
-            logDebug('Authentication token invalid or expired');
-            localStorage.removeItem('authToken');
-            
-            if (firebase.auth && firebase.auth().currentUser) {
-                // Try refreshing the token
-                return firebase.auth().currentUser.getIdToken(true)
-                    .then(newToken => {
-                        logDebug('Got fresh token, retrying call');
-                        localStorage.setItem('authToken', newToken);
-                        // Retry with new token - call recursively
-                        return callCloudFunction(newToken);
-                    })
-                    .catch(error => {
-                        throw new Error('Failed to refresh authentication. Please sign in again.');
-                    });
-            } else {
-                throw new Error('Authentication required. Please sign in again.');
-            }
-        }
-        
-        if (!response.ok) {
-            // Get detailed error response if possible
-            return response.text().then(errorText => {
-                let errorMessage = `API returned status ${response.status}`;
-                try {
-                    // Try to parse error as JSON
-                    const errorJson = JSON.parse(errorText);
-                    if (errorJson.error) {
-                        errorMessage += `: ${errorJson.error}`;
-                    } else {
-                        errorMessage += `: ${errorText}`;
-                    }
-                } catch (e) {
-                    // Not JSON, just use text
-                    if (errorText) {
-                        errorMessage += `: ${errorText}`;
-                    }
-                }
-                logDebug(`API Error: ${errorMessage}`);
-                throw new Error(errorMessage);
-            });
-        }
-        
-        return response.json();
-    })
-    .then(data => {
-        if (!data) {
-            throw new Error('No data returned from API');
-        }
-        logDebug('Message generated successfully: ' + JSON.stringify(data));
-        displayGeneratedMessage(data);
-    })
-    .catch(error => {
-        logDebug('Error calling cloud function: ' + error.message);
-        
-        // For timeout or network errors, retry once
-        if (error.name === 'AbortError' || error.message.includes('NetworkError')) {
-            logDebug('Connection timed out or network error. Retrying...');
-            showAlert('Connection issue. Retrying...', 'info');
-            setTimeout(() => {
-                callCloudFunction(idToken); // Retry once
-            }, 1000);
-        } else if (error.message.includes('Authentication required') || 
-                   error.message.includes('Authentication token invalid')) {
-            // Handle auth errors - don't retry, just show error
-            showError(error.message);
-        } else if (error.message.includes('Scenario and relationshipType are required')) {
-            // Special handling for missing required fields
-            logDebug("Missing required fields error, showing more helpful message");
-            showError('Missing required information. Please complete all steps of the message creation process.');
-        } else {
-            // For other errors, show a specific error message
-            showError('Could not generate message: ' + error.message + '. Please try again.');
-        }
-    });
-}
-
-/**
- * Display the generated message in the UI
- */
-function displayGeneratedMessage(message) {
-    logDebug('Generated message:', message);
-    
-    // Hide loading and error states
-    document.getElementById('loadingState').style.display = 'none';
-    document.getElementById('errorState').style.display = 'none';
-    
-    let messageText = '';
-    let insights = [];
-    
-    // Check if the message is a string or an object
-    if (typeof message === 'string') {
-        messageText = message;
-    } else if (message && typeof message === 'object') {
-        // For object responses, construct the full message from its parts
-        if (message.greeting) messageText += message.greeting + '\n\n';
-        if (message.content) messageText += message.content;
-        if (message.closing) messageText += '\n\n' + message.closing;
-        if (message.signature) messageText += '\n' + message.signature;
-        
-        // Store insights if available
-        if (message.insights && Array.isArray(message.insights)) {
-            insights = message.insights;
-        }
-    } else {
-        // Handle unexpected format
-        console.error('Unexpected message format:', message);
-        messageText = "Your message was generated but couldn't be displayed properly. Please try again.";
-    }
-    
-    // Store the generated message
-    generatedMessage = messageText;
-    
-    // Set the current date in the message header
-    const now = new Date();
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
-    
-    // Display the message content
-    document.getElementById('content').textContent = messageText;
-    document.getElementById('messageContent').style.display = 'block';
-    
-    // Display insights if available
-    if (insights.length > 0) {
-        const insightsContainer = document.getElementById('messageInsights');
-        const insightsContent = document.getElementById('insightsContent');
-        insightsContent.innerHTML = ''; // Clear previous insights
-        
-        const ul = document.createElement('ul');
-        insights.forEach(insight => {
-            const li = document.createElement('li');
-            li.textContent = insight;
-            ul.appendChild(li);
-        });
-        
-        insightsContent.appendChild(ul);
-        insightsContainer.style.display = 'block';
-    }
-    
-    // Show regeneration options
-    document.getElementById('regenerateOptions').style.display = 'block';
-    
-    // Initialize message action buttons
-    initMessageActions();
 }
 
 /**
@@ -808,7 +549,7 @@ function showError(message = 'An error occurred') {
                                 localStorage.setItem('authToken', newToken);
                                 console.log('Got fresh token on retry');
                                 // Call directly with new token
-                                callCloudFunction(newToken);
+                                generateMessage();
                             })
                             .catch(error => {
                                 console.error('Failed to get token on retry:', error);
@@ -924,43 +665,38 @@ function capitalizeFirstLetter(string) {
  * Initialize adjustment options
  */
 function initAdjustmentOptions() {
-    const adjustmentOptions = document.querySelectorAll('.adjustment-option');
-    const regenerateBtn = document.getElementById('regenerate-btn');
+    const regenerateOptions = document.getElementById('regenerateOptions');
     
-    if (!adjustmentOptions.length) {
-        logDebug('No adjustment options found');
+    if (!regenerateOptions) {
+        console.error('Regenerate options container not found');
         return;
     }
     
-    adjustmentOptions.forEach(option => {
-        option.addEventListener('click', function() {
-            const adjustment = this.getAttribute('data-adjust');
+    // Get all the option cards
+    const optionCards = regenerateOptions.querySelectorAll('.option-card');
+    
+    // Add click event to each option
+    optionCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Get variation type
+            const variation = this.getAttribute('data-variation');
             
-            // Toggle selection
-            if (this.classList.contains('selected')) {
-                this.classList.remove('selected');
-                selectedAdjustments = selectedAdjustments.filter(a => a !== adjustment);
-            } else {
-                this.classList.add('selected');
-                selectedAdjustments.push(adjustment);
-            }
+            // Remove selected class from all cards
+            optionCards.forEach(c => c.classList.remove('selected'));
             
-            logDebug(`Adjustments selected: ${selectedAdjustments.join(', ')}`);
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Show loading state
+            showLoadingState();
+            
+            // Hide regenerate options
+            regenerateOptions.style.display = 'none';
+            
+            // Generate new message with variation
+            generateMessage(variation);
         });
     });
-    
-    if (regenerateBtn) {
-        regenerateBtn.addEventListener('click', function() {
-            if (generatedMessage) {
-                document.getElementById('loading-state').style.display = 'flex';
-                document.getElementById('message-container').style.display = 'none';
-                document.getElementById('regenerate-options').style.display = 'none';
-                
-                // Call generateMessage to regenerate with the selected adjustments
-                generateMessage();
-            }
-        });
-    }
 }
 
 /**
@@ -1154,4 +890,395 @@ function initNavigation() {
             }
         });
     }
+}
+
+/**
+ * Add Back to Dashboard button
+ */
+function addDashboardButton() {
+    // Find the navigation container or create one if it doesn't exist
+    let navButtons = document.querySelector('.navigation-buttons');
+    
+    if (!navButtons) {
+        navButtons = document.createElement('div');
+        navButtons.className = 'navigation-buttons';
+        document.querySelector('.main-content').appendChild(navButtons);
+    }
+    
+    // Create Dashboard button
+    const dashboardButton = document.createElement('button');
+    dashboardButton.id = 'dashboardBtn';
+    dashboardButton.className = 'primary-button';
+    dashboardButton.innerHTML = '<i class="fas fa-home"></i> Back to Dashboard';
+    
+    // Add event listener
+    dashboardButton.addEventListener('click', function() {
+        window.location.href = 'home.html';
+    });
+    
+    // Add to the navigation
+    navButtons.appendChild(dashboardButton);
+}
+
+/**
+ * Add Regenerate button
+ */
+function addRegenerateButton() {
+    // Find the navigation container
+    let navButtons = document.querySelector('.navigation-buttons');
+    
+    if (!navButtons) {
+        return;
+    }
+    
+    // Create Regenerate button
+    const regenerateButton = document.createElement('button');
+    regenerateButton.id = 'regenerateBtn';
+    regenerateButton.className = 'secondary-button';
+    regenerateButton.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate';
+    
+    // Add event listener
+    regenerateButton.addEventListener('click', function() {
+        // Show regenerate options
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        if (regenerateOptions) {
+            regenerateOptions.style.display = 'block';
+            
+            // Scroll to the options
+            regenerateOptions.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+    
+    // Add to the navigation, as the first button
+    navButtons.prepend(regenerateButton);
+}
+
+/**
+ * Generate message based on user inputs
+ */
+function generateMessage(variation = null) {
+    // Show loading state
+    showLoadingState();
+    
+    try {
+        const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
+        const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
+        const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
+        
+        // Log the input data
+        logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
+        
+        if (variation) {
+            logDebug(`Using variation: ${variation}`);
+        }
+        
+        // Get auth token if available
+        const authToken = localStorage.getItem('authToken');
+        
+        // In a real implementation, we would call a cloud function or API
+        // For the prototype, we'll simulate a delay and then show a generated message
+        if (authToken) {
+            // Use Firebase Cloud Function with auth token
+            callCloudFunction(authToken, variation)
+                .then(result => {
+                    if (result && result.message) {
+                        displayGeneratedMessage(result.message);
+                        
+                        // If insights are available, display them
+                        if (result.insights) {
+                            displayMessageInsights(result.insights);
+                        }
+                    } else {
+                        showError('Failed to generate message. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Cloud function error:', error);
+                    showError('Error generating message: ' + (error.message || 'Unknown error'));
+                });
+        } else {
+            // Fallback to local mock data
+            setTimeout(() => {
+                const mockMessage = generateMockMessage(intentData, recipientData, toneData, variation);
+                displayGeneratedMessage(mockMessage);
+            }, 2000);
+        }
+    } catch (error) {
+        console.error('Error generating message:', error);
+        showError('Failed to generate message. Please check your inputs and try again.');
+    }
+}
+
+/**
+ * Call cloud function to generate message
+ */
+function callCloudFunction(idToken, variation = null) {
+    return new Promise((resolve, reject) => {
+        try {
+            // Get data from localStorage
+            const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
+            const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
+            const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
+            
+            // Validate required data
+            if (!intentData.type || !recipientData.name || !toneData.type) {
+                reject(new Error('Missing required input data'));
+                return;
+            }
+            
+            // Prepare request data
+            const requestData = {
+                intent: intentData.type,
+                intentDetails: intentData.details || {},
+                recipient: {
+                    name: recipientData.name,
+                    relationship: recipientData.relationship,
+                    otherRelationship: recipientData.otherRelationship
+                },
+                tone: toneData.type,
+                customTone: toneData.customTone,
+                variation: variation
+            };
+            
+            // In a real implementation, this would call a cloud function
+            // For the prototype, we'll simulate a response
+            setTimeout(() => {
+                const responseMessage = generateMockMessage(intentData, recipientData, toneData, variation);
+                
+                // Generate some mock insights
+                const insights = [
+                    "Used emotional language to create connection",
+                    "Included personal details specific to your relationship",
+                    "Balanced warmth with respect appropriate for this relationship",
+                    "Incorporated themes relevant to your intent"
+                ];
+                
+                // Simulate successful response
+                resolve({
+                    success: true,
+                    message: responseMessage,
+                    insights: insights
+                });
+            }, 3000);
+        } catch (error) {
+            console.error('Error in callCloudFunction:', error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * Display message insights
+ */
+function displayMessageInsights(insights) {
+    const insightsContainer = document.getElementById('messageInsights');
+    const insightsContent = document.getElementById('insightsContent');
+    
+    if (!insightsContainer || !insightsContent) {
+        console.error('Insights containers not found');
+        return;
+    }
+    
+    // Clear previous content
+    insightsContent.innerHTML = '';
+    
+    // Create insights list
+    const insightsList = document.createElement('ul');
+    
+    // Add each insight as a list item
+    insights.forEach(insight => {
+        const listItem = document.createElement('li');
+        listItem.textContent = insight;
+        insightsList.appendChild(listItem);
+    });
+    
+    // Add list to container
+    insightsContent.appendChild(insightsList);
+    
+    // Show insights container
+    insightsContainer.style.display = 'block';
+}
+
+/**
+ * Generate a mock message for the prototype based on the user's inputs
+ */
+function generateMockMessage(intentData, recipientData, toneData, variation = null) {
+    // Default message parts
+    let greeting = '';
+    let body = '';
+    let closing = '';
+    let signature = '';
+    
+    // Create appropriate greeting based on relationship
+    const name = recipientData.name || 'Friend';
+    const relationship = recipientData.relationship || 'friend';
+    
+    // Greeting based on relationship
+    switch (relationship) {
+        case 'partner':
+            greeting = `My dearest ${name},`;
+            break;
+        case 'family':
+            greeting = `Dear ${name},`;
+            break;
+        case 'colleague':
+            greeting = `Hi ${name},`;
+            break;
+        case 'acquaintance':
+            greeting = `Hello ${name},`;
+            break;
+        default:
+            greeting = `Hey ${name},`;
+    }
+    
+    // Body based on intent
+    const intent = intentData.type || 'appreciation';
+    
+    switch (intent) {
+        case 'appreciation':
+            body = `I wanted to take a moment to express how much I appreciate you and everything you've done. Your kindness, support, and presence in my life mean more to me than words can express. You have a way of brightening even the darkest days with your unique spirit.`;
+            break;
+        case 'reconnect':
+            body = `It's been too long since we've been in touch, and I've been thinking about you lately. I miss our conversations and the time we spent together. Life gets busy, but some connections are worth maintaining no matter how much time passes. I'd love to catch up and hear what's been happening in your life.`;
+            break;
+        case 'celebrate':
+            body = `I wanted to celebrate this special moment with you! Your accomplishments deserve to be recognized, and I'm so proud of everything you've achieved. Your hard work, dedication, and perseverance are truly inspirational.`;
+            break;
+        case 'apologize':
+            body = `I've been reflecting on our interaction, and I want to sincerely apologize for my part in what happened. I value our relationship too much to let misunderstandings or mistakes come between us. I understand that my actions may have caused hurt, and for that I am truly sorry.`;
+            break;
+        case 'encourage':
+            body = `I know you're facing challenges right now, but I wanted you to know that I believe in you completely. You have shown such strength and resilience in the past, and those same qualities will help you overcome what you're facing now. Remember how far you've already come.`;
+            break;
+        default:
+            body = `I've been thinking about you and wanted to reach out. Sometimes in the busy pace of life, we don't take enough time to nurture the connections that matter most. You're someone who means a lot to me, and I wanted you to know that.`;
+    }
+    
+    // Apply tone adjustments
+    const tone = toneData.type || 'casual';
+    
+    switch (tone) {
+        case 'professional':
+            body = body.replace(/I've been/g, 'I have been')
+                       .replace(/you've/g, 'you have')
+                       .replace(/I'm/g, 'I am')
+                       .replace(/don't/g, 'do not');
+            closing = 'I look forward to our continued connection.';
+            signature = 'Best regards,';
+            break;
+        case 'warm':
+            closing = 'Thinking of you warmly and sending my best wishes your way.';
+            signature = 'With love,';
+            break;
+        case 'humorous':
+            body += ` And hey, if nothing else, at least my message saved you from a few minutes of doomscrolling, right?`;
+            closing = 'Keep being your awesome self!';
+            signature = 'Cheers,';
+            break;
+        case 'poetic':
+            body += ` Like stars that guide sailors home, your presence has been a beacon in my life's journey.`;
+            closing = 'Until our paths cross again in this beautiful dance of life...';
+            signature = 'With heartfelt sincerity,';
+            break;
+        default: // casual
+            closing = 'Looking forward to connecting soon!';
+            signature = 'Take care,';
+    }
+    
+    // Apply variations if specified
+    if (variation) {
+        switch (variation) {
+            case 'longer':
+                body += ` One of the things I value most about you is your ability to ${getRandomTrait()}. It's rare to find someone who ${getRandomQuality()}, and I'm grateful that you're in my life. Sometimes I think back to ${getRandomMemory()}, and it always brings a smile to my face.`;
+                break;
+            case 'shorter':
+                // Make it more concise
+                body = body.split('.').slice(0, 2).join('.') + '.';
+                closing = 'Hope to connect soon!';
+                break;
+            case 'deeper':
+                body += ` When I reflect on what you mean to me, I'm filled with a profound sense of gratitude that words can barely capture. Some connections transcend ordinary friendship, and what we share is truly special.`;
+                closing = 'With the deepest appreciation and warmest thoughts,';
+                break;
+            case 'different':
+                // Completely different approach
+                body = `Sometimes I find myself pausing in the middle of a busy day, and thoughts of our connection come to mind. It's in these quiet moments that I realize how fortunate I am to have you in my life. We may not always express these feelings openly, but I wanted to take this opportunity to let you know what a difference you've made.`;
+                break;
+        }
+    }
+    
+    // Combine message parts
+    return `${greeting}\n\n${body}\n\n${closing}\n\n${signature}`;
+}
+
+/**
+ * Helper function to get random traits for the mock message
+ */
+function getRandomTrait() {
+    const traits = [
+        "see the best in people",
+        "remain positive even in difficult times",
+        "listen with such genuine attention",
+        "bring joy to those around you",
+        "tackle challenges with such creativity",
+        "support others without expecting anything in return"
+    ];
+    return traits[Math.floor(Math.random() * traits.length)];
+}
+
+/**
+ * Helper function to get random qualities for the mock message
+ */
+function getRandomQuality() {
+    const qualities = [
+        "combines such wisdom with humility",
+        "shows such authentic kindness in every interaction",
+        "balances strength and compassion so effortlessly",
+        "brings such unique perspective to conversations",
+        "makes everyone feel valued and heard",
+        "inspires others simply by being themselves"
+    ];
+    return qualities[Math.floor(Math.random() * qualities.length)];
+}
+
+/**
+ * Helper function to get random memories for the mock message
+ */
+function getRandomMemory() {
+    const memories = [
+        "that time we spent hours in conversation, losing track of time completely",
+        "when you offered your support exactly when I needed it most",
+        "the way you celebrated my achievements as if they were your own",
+        "how you helped me see a situation from a completely different angle",
+        "the laughter we shared over something that only we would find funny",
+        "that perfect piece of advice you gave that made all the difference"
+    ];
+    return memories[Math.floor(Math.random() * memories.length)];
+}
+
+/**
+ * Display the generated message in the UI
+ */
+function displayGeneratedMessage(message) {
+    // Hide loading and error states
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'none';
+    
+    // Set the current date in the message header
+    const now = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+    
+    // Store the generated message (for copying later)
+    generatedMessage = message;
+    
+    // Display the message content
+    document.getElementById('content').textContent = message;
+    document.getElementById('messageContent').style.display = 'block';
+    
+    // Show regenerate options
+    document.getElementById('regenerateOptions').style.display = 'block';
+    
+    // Initialize message action buttons if not already done
+    initMessageActions();
 } 

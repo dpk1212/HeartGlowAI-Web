@@ -63,6 +63,9 @@ function initializeHomePage() {
     // Hide any static empty states on page load
     checkAndHideStaticEmptyStates();
     
+    // Create the expanded connection modal to ensure it's always available
+    createConnectionModal();
+    
     // Initialize UI elements that don't depend on Firestore data
     initNavigationButtons();
     initializeQuickActions();
@@ -349,49 +352,58 @@ function initializeConnectionModal() {
   }
 }
 
-// Open connection modal for adding new connection
+// Open the connection modal
 function openConnectionModal(connectionId = null) {
-  console.log('Opening connection modal', connectionId ? `for editing connection: ${connectionId}` : 'for adding new connection');
+  console.log('Opening connection modal. Editing connection ID:', connectionId);
   
-  // First check if the modal exists
-  let modal = document.getElementById('connection-modal');
-  
-  // If modal doesn't exist, create it
-  if (!modal) {
-    console.log('Modal not found, creating it');
-    createConnectionModal();
-    modal = document.getElementById('connection-modal');
+  // Check for and remove any simplified version of the modal that might exist in the HTML
+  const existingModal = document.getElementById('connection-modal');
+  if (existingModal) {
+    // Check if this is the simplified version by looking for expanded fields
+    const hasExpandedFields = document.getElementById('connection-years') || 
+                             document.getElementById('connection-communication-style') ||
+                             document.getElementById('connection-goal');
     
-    if (!modal) {
-      console.error('Failed to create connection modal');
-      alert('Error: Could not create connection modal. Please refresh the page.');
-      return;
+    if (!hasExpandedFields) {
+      console.log('Found simplified modal, removing it to use expanded version');
+      existingModal.parentNode.removeChild(existingModal);
     }
   }
   
+  // Ensure the expanded modal exists
+  createConnectionModal();
+  
+  // Get modal elements
+  let modal = document.getElementById('connection-modal');
+  if (!modal) {
+    console.error('Could not find or create connection modal');
+    return;
+  }
+  
+  // Get form elements
   const modalTitle = document.getElementById('modal-title');
   const form = document.getElementById('connection-form');
   const idField = document.getElementById('connection-id');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const specificRelationshipField = document.getElementById('connection-specific-relationship');
   
-  // Enhanced fields
+  // Get enhanced fields that are only in the expanded version
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
   const yearsKnownField = document.getElementById('connection-years');
   const communicationStyleField = document.getElementById('connection-communication-style');
   const goalField = document.getElementById('connection-goal');
   const notesField = document.getElementById('connection-notes');
   
+  // Get delete button if it exists
   let deleteBtn = document.querySelector('.delete-connection-btn');
   
-  if (!form) {
+  // Reset form
+  if (form) {
+    form.reset();
+  } else {
     console.error('Connection form not found');
-    alert('Error: Connection form not found in the DOM');
     return;
   }
-  
-  // Reset form
-  form.reset();
   
   // Hide specific relationship field initially
   const specificContainer = document.getElementById('specific-relationship-container');

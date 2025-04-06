@@ -896,15 +896,12 @@ function generateMessage(variation = null) {
     showLoadingState();
     
     try {
-        console.log("Starting message generation process");
-        
         // Get data from localStorage
         const intentData = JSON.parse(localStorage.getItem('intentData') || '{}');
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
         // Log the input data
-        console.log(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         logDebug(`Generating message with intent: ${intentData.type}, recipient: ${recipientData.name}, tone: ${toneData.type}`);
         
         // Hide any error state that might be showing
@@ -914,11 +911,9 @@ function generateMessage(variation = null) {
         }
         
         // Build the message prompt that would be sent to OpenAI
-        // Now handles additional connection data asynchronously
         buildOpenAIPrompt(intentData, recipientData, toneData, variation)
             .then(messagePrompt => {
                 // Log the prompt for debugging
-                console.log("Message prompt built successfully:", messagePrompt);
                 logDebug(`Prompt for OpenAI: ${JSON.stringify(messagePrompt)}`);
                 
                 // Get auth token if available
@@ -928,15 +923,15 @@ function generateMessage(variation = null) {
                 return callGenerationAPI(messagePrompt, authToken);
             })
             .then(response => {
-                console.log("API response received:", response);
-                
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
-                console.log("Parsed response:", parsedResponse);
                 
                 // Display the message and insights
                 displayGeneratedMessage(parsedResponse.message);
                 displayMessageInsights(parsedResponse.insights);
+                
+                // Setup the regenerate options
+                initializeRegenerateOptions();
                 
                 // Save the message to Firebase for the current user
                 saveMessageToFirebase(parsedResponse.message, parsedResponse.insights);
@@ -946,12 +941,10 @@ function generateMessage(variation = null) {
             })
             .catch(error => {
                 console.error('Error in message generation flow:', error);
-                logDebug(`Error in message generation: ${error.message || 'Unknown error'}`);
                 showError('Failed to generate message: ' + (error.message || 'Unknown error'));
             });
     } catch (error) {
         console.error('Exception in generateMessage:', error);
-        logDebug(`Exception in generateMessage: ${error.message || 'Unknown error'}`);
         showError('Failed to generate message. Please check your inputs and try again.');
     }
 }
@@ -1432,164 +1425,101 @@ function callGenerationAPI(prompt, authToken = null) {
  * Display message insights
  */
 function displayMessageInsights(insights) {
-    try {
-        console.log("Displaying message insights:", insights);
-        
-        const insightsContainer = document.getElementById('messageInsights');
-        const insightsContent = document.getElementById('insightsContent');
-        
-        if (!insightsContainer || !insightsContent) {
-            console.error('Insights containers not found');
-            return;
-        }
-        
-        // Clear previous content
-        insightsContent.innerHTML = '';
-        
-        // Create insights list
-        const insightsList = document.createElement('ul');
-        insightsList.style.display = 'block'; // Ensure the list is visible
-        
-        // Add each insight as a list item
-        if (Array.isArray(insights) && insights.length > 0) {
-            insights.forEach((insight, index) => {
-                const listItem = document.createElement('li');
-                listItem.textContent = insight;
-                listItem.style.display = 'list-item'; // Ensure list items are visible
-                insightsList.appendChild(listItem);
-                console.log(`Added insight ${index + 1}:`, insight.substring(0, 30) + "...");
-            });
-        } else {
-            // Add a default insight if none provided
-            const listItem = document.createElement('li');
-            listItem.textContent = "This message was carefully crafted with AI assistance.";
-            listItem.style.display = 'list-item';
-            insightsList.appendChild(listItem);
-            console.log("Added default insight (no insights provided)");
-        }
-        
-        // Add list to container
-        insightsContent.appendChild(insightsList);
-        
-        // Show insights container
-        insightsContainer.style.display = 'block';
-        console.log("Insights container displayed");
-        
-        // Force visibility after a slight delay to ensure rendering
-        setTimeout(() => {
-            insightsContainer.style.display = 'block';
-            console.log("Reinforced insights visibility after delay");
-        }, 200);
-    } catch (error) {
-        console.error("Error displaying insights:", error);
+    const insightsContainer = document.getElementById('messageInsights');
+    const insightsContent = document.getElementById('insightsContent');
+    
+    if (!insightsContainer || !insightsContent) {
+        console.error('Insights containers not found');
+        return;
     }
+    
+    // Clear previous content
+    insightsContent.innerHTML = '';
+    
+    // Create insights list
+    const insightsList = document.createElement('ul');
+    
+    // Add each insight as a list item
+    if (Array.isArray(insights) && insights.length > 0) {
+        insights.forEach(insight => {
+            const listItem = document.createElement('li');
+            listItem.textContent = insight;
+            insightsList.appendChild(listItem);
+        });
+    } else {
+        // Add a default insight if none provided
+        const listItem = document.createElement('li');
+        listItem.textContent = "This message was crafted with AI assistance.";
+        insightsList.appendChild(listItem);
+    }
+    
+    // Add list to container
+    insightsContent.appendChild(insightsList);
+    
+    // Show insights container
+    insightsContainer.style.display = 'block';
 }
 
 /**
  * Display the generated message in the UI
  */
 function displayGeneratedMessage(message) {
-    try {
-        console.log("Displaying generated message:", message);
-        
-        // Hide loading and error states
-        const loadingState = document.getElementById('loadingState');
-        const errorState = document.getElementById('errorState');
-        
-        if (loadingState) {
-            loadingState.style.display = 'none';
-        }
-        
-        if (errorState) {
-            errorState.style.display = 'none';
-        }
-        
-        // Set current date in the message header
-        const currentDateElement = document.getElementById('currentDate');
-        if (currentDateElement) {
-            const now = new Date();
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            currentDateElement.textContent = now.toLocaleDateString('en-US', options);
-        }
-        
-        // Store the message for copy functionality
-        generatedMessage = message;
-        
-        // Set the message content
-        const contentElement = document.getElementById('content');
-        if (contentElement) {
-            // Ensure the content is set and visible
-            contentElement.textContent = message;
-            contentElement.style.display = 'block';
-            console.log("Message content set successfully:", message.substring(0, 30) + "...");
-        } else {
-            console.error("Content element not found!");
-        }
-        
-        // Explicitly force-show all containers
-        document.querySelectorAll('.message-container, .message-content, .message-body, .message-text').forEach(el => {
-            if (el) {
-                el.style.display = 'block';
-                console.log(`Forced display:block on ${el.className}`);
-            }
-        });
-        
-        // Make the message container and content visible
-        const messageContent = document.getElementById('messageContent');
-        if (messageContent) {
-            messageContent.style.display = 'block';
-            messageContent.style.opacity = '1';
-            console.log("Message content display set to block");
-            
-            // Force visibility after a small delay to ensure rendering
-            setTimeout(() => {
-                messageContent.style.display = 'block';
-                messageContent.style.opacity = '1';
-                console.log("Reinforced message content visibility after delay");
-            }, 100);
-        } else {
-            console.error("Message content element not found!");
-        }
-        
-        // Make sure the parent container is visible
-        const messageState = document.getElementById('messageState');
-        if (messageState) {
-            messageState.style.display = 'block';
-            console.log("Message state display set to block");
-        }
-        
-        // Hide any global loading overlay
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        if (loadingOverlay) {
-            loadingOverlay.style.display = 'none';
-        }
-        
-        // Initialize regenerate options but don't display them yet
-        // (they'll be shown when the user clicks the regenerate button)
-        const regenerateOptions = document.getElementById('regenerateOptions');
-        if (regenerateOptions) {
-            regenerateOptions.style.display = 'none';
-        }
-        
-        // Log success
-        logDebug("Message displayed successfully");
-    } catch (error) {
-        console.error("Error displaying message:", error);
-        logDebug(`Error in displayGeneratedMessage: ${error.message}`);
+    // Hide loading and error states
+    const loadingState = document.getElementById('loadingState');
+    const errorState = document.getElementById('errorState');
+    
+    if (loadingState) {
+        loadingState.style.display = 'none';
+    }
+    
+    if (errorState) {
+        errorState.style.display = 'none';
+    }
+    
+    // Set current date in the message header
+    const currentDateElement = document.getElementById('currentDate');
+    if (currentDateElement) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        currentDateElement.textContent = now.toLocaleDateString('en-US', options);
+    }
+    
+    // Store the message for copy functionality
+    generatedMessage = message;
+    
+    // Set the message content
+    const contentElement = document.getElementById('content');
+    if (contentElement) {
+        contentElement.textContent = message;
+    }
+    
+    // Make the message content visible
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        messageContent.style.display = 'block';
+    }
+    
+    // Make sure message container is visible
+    const messageContainer = document.getElementById('messageState');
+    if (messageContainer) {
+        messageContainer.style.display = 'block';
+    }
+    
+    // Display message insights
+    const insightsContainer = document.getElementById('messageInsights');
+    if (insightsContainer) {
+        insightsContainer.style.display = 'block';
     }
 }
 
 /**
- * Initialize the regenerate options section and button
+ * Initialize the regenerate options section
  */
 function initializeRegenerateOptions() {
-    // Initialize the regenerate button first
+    // Get the regenerate button 
     const regenerateBtn = document.getElementById('regenerateBtn');
     if (regenerateBtn) {
-        console.log('Setting up regenerate button');
         regenerateBtn.addEventListener('click', function() {
-            console.log('Regenerate button clicked');
-            
             // Hide message content and insights
             const messageContent = document.getElementById('messageContent');
             if (messageContent) {
@@ -1605,91 +1535,62 @@ function initializeRegenerateOptions() {
             const regenerateOptions = document.getElementById('regenerateOptions');
             if (regenerateOptions) {
                 regenerateOptions.style.display = 'block';
-                console.log('Showing regenerate options');
                 
-                // Setup option cards if not already done
-                setupRegenerateOptionCards();
+                // Make sure the option cards have click handlers
+                const optionCards = regenerateOptions.querySelectorAll('.option-card');
+                optionCards.forEach(card => {
+                    if (!card.hasEventListener) {
+                        card.hasEventListener = true;
+                        card.addEventListener('click', function() {
+                            // Get variation type
+                            const variation = this.getAttribute('data-variation');
+                            
+                            // Hide regenerate options
+                            regenerateOptions.style.display = 'none';
+                            
+                            // Show loading state
+                            showLoadingState();
+                            
+                            // Generate new message with variation
+                            generateMessage(variation);
+                        });
+                    }
+                });
             }
         });
     }
     
-    // Call the function to set up the option cards
-    setupRegenerateOptionCards();
-}
-
-/**
- * Setup the regenerate option cards with event listeners
- */
-function setupRegenerateOptionCards() {
-    // Get the regenerate options container
-    const regenerateOptions = document.getElementById('regenerateOptions');
-    
-    if (!regenerateOptions) {
-        console.error('Regenerate options container not found');
-        return;
-    }
-    
-    // Get all the option cards
-    const optionCards = regenerateOptions.querySelectorAll('.option-card');
-    console.log(`Found ${optionCards.length} regenerate option cards`);
-    
-    // Add click event to each option
-    optionCards.forEach(card => {
-        // Remove any existing event listeners by cloning and replacing the element
-        const newCard = card.cloneNode(true);
-        card.parentNode.replaceChild(newCard, card);
-        
-        newCard.addEventListener('click', function() {
-            // Get variation type
-            const variation = this.getAttribute('data-variation');
-            console.log(`Selected variation: ${variation}`);
+    // Add event listener to cancel button if it exists
+    const cancelBtn = document.getElementById('cancelRegenerateBtn');
+    if (!cancelBtn) {
+        // Create a cancel button
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        if (regenerateOptions) {
+            const cancelBtn = document.createElement('button');
+            cancelBtn.id = 'cancelRegenerateBtn';
+            cancelBtn.className = 'secondary-button';
+            cancelBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
+            cancelBtn.style.margin = '20px auto 0';
+            cancelBtn.style.display = 'block';
             
-            // Remove selected class from all cards
-            optionCards.forEach(c => c.classList.remove('selected'));
+            cancelBtn.addEventListener('click', function() {
+                // Hide regenerate options
+                regenerateOptions.style.display = 'none';
+                
+                // Show message content and insights again
+                const messageContent = document.getElementById('messageContent');
+                if (messageContent) {
+                    messageContent.style.display = 'block';
+                }
+                
+                const messageInsights = document.getElementById('messageInsights');
+                if (messageInsights) {
+                    messageInsights.style.display = 'block';
+                }
+            });
             
-            // Add selected class to clicked card
-            this.classList.add('selected');
-            
-            // Show loading state
-            showLoadingState();
-            
-            // Hide regenerate options
-            regenerateOptions.style.display = 'none';
-            
-            // Generate new message with variation
-            generateMessage(variation);
-        });
-    });
-    
-    // Add a cancel button if it doesn't exist
-    if (!document.getElementById('cancelRegenerateBtn')) {
-        const cancelRegenerateBtn = document.createElement('button');
-        cancelRegenerateBtn.id = 'cancelRegenerateBtn';
-        cancelRegenerateBtn.className = 'secondary-button';
-        cancelRegenerateBtn.innerHTML = '<i class="fas fa-times"></i> Cancel';
-        cancelRegenerateBtn.style.marginTop = '20px';
-        cancelRegenerateBtn.style.display = 'block';
-        cancelRegenerateBtn.style.margin = '20px auto 0';
-        
-        // Add event listener to cancel button
-        cancelRegenerateBtn.addEventListener('click', function() {
-            console.log('Cancel regenerate button clicked');
-            regenerateOptions.style.display = 'none';
-            
-            // Show message content and insights again
-            const messageContent = document.getElementById('messageContent');
-            if (messageContent) {
-                messageContent.style.display = 'block';
-            }
-            
-            const messageInsights = document.getElementById('messageInsights');
-            if (messageInsights) {
-                messageInsights.style.display = 'block';
-            }
-        });
-        
-        // Add the cancel button to the regenerate options container
-        regenerateOptions.appendChild(cancelRegenerateBtn);
+            regenerateOptions.appendChild(cancelBtn);
+        }
     }
 }
 

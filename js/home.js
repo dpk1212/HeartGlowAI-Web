@@ -338,19 +338,28 @@ function initializeConnectionModal() {
 function openConnectionModal(connectionId = null) {
   console.log('Opening connection modal', connectionId ? `for editing connection: ${connectionId}` : 'for adding new connection');
   
-  const modal = document.getElementById('connection-modal');
+  // First check if the modal exists
+  let modal = document.getElementById('connection-modal');
+  
+  // If modal doesn't exist, create it
+  if (!modal) {
+    console.log('Modal not found, creating it');
+    createConnectionModal();
+    modal = document.getElementById('connection-modal');
+    
+    if (!modal) {
+      console.error('Failed to create connection modal');
+      alert('Error: Could not create connection modal. Please refresh the page.');
+      return;
+    }
+  }
+  
   const modalTitle = document.getElementById('modal-title');
   const form = document.getElementById('connection-form');
   const idField = document.getElementById('connection-id');
   const nameField = document.getElementById('connection-name');
   const relationshipField = document.getElementById('connection-relationship');
-  const deleteBtn = document.querySelector('.delete-connection-btn');
-  
-  if (!modal) {
-    console.error('Connection modal not found');
-    alert('Error: Connection modal not found in the DOM');
-    return;
-  }
+  let deleteBtn = document.querySelector('.delete-connection-btn');
   
   if (!form) {
     console.error('Connection form not found');
@@ -372,12 +381,13 @@ function openConnectionModal(connectionId = null) {
     if (!deleteBtn) {
       const actionDiv = document.querySelector('.modal-actions');
       if (actionDiv) {
-        const deleteButton = document.createElement('button');
-        deleteButton.type = 'button';
-        deleteButton.className = 'btn-danger delete-connection-btn';
-        deleteButton.textContent = 'Delete';
-        deleteButton.addEventListener('click', deleteConnection);
-        actionDiv.appendChild(deleteButton);
+        // Create a delete button if it doesn't exist
+        deleteBtn = document.createElement('button');
+        deleteBtn.type = 'button';
+        deleteBtn.className = 'btn-danger delete-connection-btn';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', showDeleteConfirmation);
+        actionDiv.appendChild(deleteBtn);
         console.log('Added delete button to modal');
       } else {
         console.warn('Modal actions div not found');
@@ -435,6 +445,188 @@ function openConnectionModal(connectionId = null) {
   }
 }
 
+// Create the connection modal if it doesn't exist
+function createConnectionModal() {
+  // Only create if it doesn't already exist
+  if (document.getElementById('connection-modal')) {
+    return;
+  }
+  
+  const modalHTML = `
+    <div id="connection-modal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 id="modal-title">Add New Person</h3>
+          <button id="close-modal" class="modal-close">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="connection-form">
+            <input type="hidden" id="connection-id">
+            <div class="form-group">
+              <label for="connection-name">Name</label>
+              <input type="text" id="connection-name" placeholder="Enter name" required>
+            </div>
+            <div class="form-group">
+              <label for="connection-relationship">Relationship</label>
+              <select id="connection-relationship" required>
+                <option value="">Select relationship</option>
+                <option value="friend">Friend</option>
+                <option value="family">Family</option>
+                <option value="partner">Partner</option>
+                <option value="colleague">Colleague</option>
+                <option value="acquaintance">Acquaintance</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            <div class="modal-actions">
+              <button type="button" id="cancel-connection" class="btn-secondary">Cancel</button>
+              <button type="submit" class="btn-primary">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  // Append to body
+  document.body.insertAdjacentHTML('beforeend', modalHTML);
+  
+  // Initialize event listeners
+  const modal = document.getElementById('connection-modal');
+  const form = document.getElementById('connection-form');
+  const cancelBtn = document.getElementById('cancel-connection');
+  const closeBtn = document.getElementById('close-modal');
+  
+  // Close modal when clicking X button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeConnectionModal);
+  }
+  
+  // Close modal when clicking cancel button
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', closeConnectionModal);
+  }
+  
+  // Close modal when clicking outside of it
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeConnectionModal();
+      }
+    });
+  }
+  
+  // Handle form submission
+  if (form) {
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      saveConnection();
+    });
+  }
+  
+  console.log('Connection modal created and initialized');
+}
+
+// Show delete confirmation before deleting a connection
+function showDeleteConfirmation() {
+  if (!editingConnectionId) {
+    console.error('No connection ID to delete');
+    return;
+  }
+  
+  // Create confirmation dialog
+  let confirmDialog = document.getElementById('delete-confirmation-dialog');
+  
+  if (!confirmDialog) {
+    // Create dialog if it doesn't exist
+    confirmDialog = document.createElement('div');
+    confirmDialog.id = 'delete-confirmation-dialog';
+    confirmDialog.className = 'modal modal-visible';
+    confirmDialog.innerHTML = `
+      <div class="modal-content" style="max-width: 400px;">
+        <div class="modal-header">
+          <h3>Delete Connection</h3>
+          <button class="modal-close" id="close-delete-dialog">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete this connection? This action cannot be undone.</p>
+          <div class="modal-actions" style="margin-top: 20px;">
+            <button class="btn-secondary" id="cancel-delete">Cancel</button>
+            <button class="btn-danger" id="confirm-delete">Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+    
+    document.body.appendChild(confirmDialog);
+    
+    // Add event listeners
+    const closeBtn = document.getElementById('close-delete-dialog');
+    const cancelBtn = document.getElementById('cancel-delete');
+    const confirmBtn = document.getElementById('confirm-delete');
+    
+    if (closeBtn) closeBtn.addEventListener('click', closeDeleteDialog);
+    if (cancelBtn) cancelBtn.addEventListener('click', closeDeleteDialog);
+    if (confirmBtn) confirmBtn.addEventListener('click', performDeleteConnection);
+    
+    confirmDialog.addEventListener('click', function(e) {
+      if (e.target === confirmDialog) closeDeleteDialog();
+    });
+  }
+  
+  // Show dialog with CSS transitions
+  confirmDialog.style.display = 'flex';
+  setTimeout(() => {
+    confirmDialog.style.opacity = '1';
+    document.querySelector('#delete-confirmation-dialog .modal-content').style.transform = 'translateY(0)';
+  }, 10);
+}
+
+// Close delete confirmation dialog
+function closeDeleteDialog() {
+  const dialog = document.getElementById('delete-confirmation-dialog');
+  if (dialog) {
+    dialog.style.opacity = '0';
+    document.querySelector('#delete-confirmation-dialog .modal-content').style.transform = 'translateY(-20px)';
+    setTimeout(() => {
+      dialog.style.display = 'none';
+    }, 300);
+  }
+}
+
+// Actually perform the delete operation
+function performDeleteConnection() {
+  if (!currentUser || !editingConnectionId) {
+    showAlert('Cannot delete connection', 'error');
+    return;
+  }
+  
+  showLoading('Deleting connection...');
+  
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('connections')
+    .doc(editingConnectionId)
+    .delete()
+    .then(() => {
+      hideLoading();
+      showAlert('Connection deleted successfully', 'success');
+      closeDeleteDialog();
+      closeConnectionModal();
+      loadUserConnections(); // Refresh the list
+    })
+    .catch((error) => {
+      hideLoading();
+      console.error('Error deleting connection:', error);
+      showAlert(`Error deleting connection: ${error.message}`, 'error');
+    });
+}
+
 // Helper function to ensure modal is visible
 function showModalWithFallback(modal) {
   // Try multiple approaches to ensure modal visibility
@@ -481,7 +673,7 @@ function closeConnectionModal() {
   console.log('Closing connection modal');
   const modal = document.getElementById('connection-modal');
   if (modal) {
-    // Reset all visibility settings
+    // Reset all visibility settings - don't remove the modal, just hide it
     modal.style.cssText = '';
     modal.style.display = 'none';
     modal.style.opacity = '0';
@@ -599,38 +791,6 @@ function saveConnection() {
       console.error(`Error ${isNewConnection ? 'adding' : 'updating'} connection:`, error);
       hideLoading();
       showAlert(`Error saving connection: ${error.message}`, 'error');
-    });
-}
-
-// Delete connection from Firestore
-function deleteConnection() {
-  if (!currentUser || !editingConnectionId) {
-    showAlert('Cannot delete connection', 'error');
-    return;
-  }
-  
-  if (!confirm('Are you sure you want to delete this connection? This cannot be undone.')) {
-    return;
-  }
-  
-  showLoading('Deleting connection...');
-  
-  firebase.firestore()
-    .collection('users')
-    .doc(currentUser.uid)
-    .collection('connections')
-    .doc(editingConnectionId)
-    .delete()
-    .then(() => {
-      hideLoading();
-      showAlert('Connection deleted successfully', 'success');
-      closeConnectionModal();
-      loadUserConnections(); // Refresh the list
-    })
-    .catch((error) => {
-      hideLoading();
-      console.error('Error deleting connection:', error);
-      showAlert(`Error deleting connection: ${error.message}`, 'error');
     });
 }
 

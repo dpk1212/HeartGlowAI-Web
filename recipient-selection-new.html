@@ -67,7 +67,7 @@
         </header>
         
         <!-- Main Content -->
-        <main class="main-content">
+        <main class="main-content recipient-selection-page">
             <!-- Progress Steps -->
             <div class="progress-container">
                 <div class="progress-steps">
@@ -93,13 +93,14 @@
                 </div>
             </div>
             
-            <div class="intent-display">
+            <!-- Intent Summary Card -->
+            <div class="intent-summary-card">
                 <div class="intent-icon" id="intentIcon">
-                    <i class="fas fa-question"></i>
+                    <i class="fas fa-heart"></i>
                 </div>
                 <div class="intent-details">
-                    <h4 class="intent-title" id="intentTitle">Loading intention...</h4>
-                    <div class="intent-description" id="intentDescription">Preparing...</div>
+                    <h4 class="intent-title" id="intentTitle">Reconnect</h4>
+                    <div class="intent-description" id="intentDescription">Reach out to someone you've lost touch with and rebuild your connection.</div>
                 </div>
             </div>
             
@@ -108,113 +109,133 @@
                 <p class="page-description">Tell us about the person you're creating this message for.</p>
             </div>
             
-            <!-- Saved Recipients Section -->
-            <div id="savedRecipientsSection" class="saved-recipients-section">
-                <h2 class="section-title">Your Saved Connections</h2>
-                <p class="section-description">Select someone you've messaged before or create a new connection below.</p>
-                
-                <div id="savedRecipientsList" class="saved-recipients-grid">
-                    <!-- Loading state placeholders -->
-                    <div class="saved-recipient-card loading">
-                        <div class="recipient-avatar"></div>
-                        <div class="recipient-info">
-                            <div class="skeleton-text skeleton-name"></div>
-                            <div class="skeleton-text skeleton-relationship"></div>
-                        </div>
-                    </div>
-                    <div class="saved-recipient-card loading">
-                        <div class="recipient-avatar"></div>
-                        <div class="recipient-info">
-                            <div class="skeleton-text skeleton-name"></div>
-                            <div class="skeleton-text skeleton-relationship"></div>
-                        </div>
-                    </div>
-                    <div class="saved-recipient-card loading">
-                        <div class="recipient-avatar"></div>
-                        <div class="recipient-info">
-                            <div class="skeleton-text skeleton-name"></div>
-                            <div class="skeleton-text skeleton-relationship"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="noSavedRecipients" class="no-data-message" style="display: none;">
-                    <i class="fas fa-user-plus"></i>
-                    <p>You don't have any saved connections yet.<br>Create your first one below!</p>
-                </div>
-                
-                <div class="section-divider">
-                    <span>Or create a new connection</span>
-                </div>
-            </div>
-            
-            <!-- Recipient Form -->
-            <div class="card">
-                <h3 class="card-title">Create New Connection</h3>
-                
-                <div class="form-group">
-                    <label for="recipientName" class="form-label">Their Name</label>
-                    <input type="text" id="recipientName" class="input-field" placeholder="Enter their name">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Relationship</label>
-                    <div class="relationship-grid">
-                        <div class="relationship-option" data-relationship="friend">
-                            <div class="relationship-icon">
-                                <i class="fas fa-user-friends"></i>
+            <div class="content-container">
+                <!-- Left Column: Saved Recipients -->
+                <div class="content-column saved-connections-column">
+                    <div id="savedRecipientsSection" class="saved-recipients-section">
+                        <div class="section-header">
+                            <h2 class="section-title">Saved Connections</h2>
+                            <div class="section-controls">
+                                <div class="search-container">
+                                    <input type="text" id="searchConnections" class="search-input" placeholder="Search...">
+                                    <i class="fas fa-search search-icon"></i>
+                                </div>
                             </div>
-                            <div class="relationship-label">Friend</div>
                         </div>
                         
-                        <div class="relationship-option" data-relationship="family">
-                            <div class="relationship-icon">
-                                <i class="fas fa-home"></i>
+                        <div id="savedRecipientsList" class="saved-recipients-grid">
+                            <!-- Loading state placeholders -->
+                            <div class="saved-recipient-card loading">
+                                <div class="recipient-avatar"></div>
+                                <div class="recipient-info">
+                                    <div class="skeleton-text skeleton-name"></div>
+                                    <div class="skeleton-text skeleton-relationship"></div>
+                                </div>
                             </div>
-                            <div class="relationship-label">Family</div>
+                            <div class="saved-recipient-card loading">
+                                <div class="recipient-avatar"></div>
+                                <div class="recipient-info">
+                                    <div class="skeleton-text skeleton-name"></div>
+                                    <div class="skeleton-text skeleton-relationship"></div>
+                                </div>
+                            </div>
+                            <div class="saved-recipient-card loading">
+                                <div class="recipient-avatar"></div>
+                                <div class="recipient-info">
+                                    <div class="skeleton-text skeleton-name"></div>
+                                    <div class="skeleton-text skeleton-relationship"></div>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="relationship-option" data-relationship="partner">
-                            <div class="relationship-icon">
-                                <i class="fas fa-heart"></i>
-                            </div>
-                            <div class="relationship-label">Partner</div>
-                        </div>
-                        
-                        <div class="relationship-option" data-relationship="colleague">
-                            <div class="relationship-icon">
-                                <i class="fas fa-briefcase"></i>
-                            </div>
-                            <div class="relationship-label">Colleague</div>
-                        </div>
-                        
-                        <div class="relationship-option" data-relationship="acquaintance">
-                            <div class="relationship-icon">
-                                <i class="fas fa-handshake"></i>
-                            </div>
-                            <div class="relationship-label">Acquaintance</div>
-                        </div>
-                        
-                        <div class="relationship-option" data-relationship="other">
-                            <div class="relationship-icon">
-                                <i class="fas fa-plus"></i>
-                            </div>
-                            <div class="relationship-label">Other</div>
+                        <div id="noSavedRecipients" class="no-data-message" style="display: none;">
+                            <i class="fas fa-user-plus"></i>
+                            <p>You don't have any saved connections yet</p>
+                            <span class="helper-text">Create your first one with the form</span>
                         </div>
                     </div>
                 </div>
                 
-                <div id="otherRelationshipSection" class="form-group" style="display: none;">
-                    <label for="otherRelationship" class="form-label">Specify Relationship</label>
-                    <input type="text" id="otherRelationship" class="input-field" placeholder="Describe your relationship">
-                </div>
-                
-                <div class="form-group">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="saveRecipient" class="checkbox-input" checked>
-                        <label for="saveRecipient" class="checkbox-label">Save this person to my connections</label>
+                <!-- Right Column: Create New -->
+                <div class="content-column create-new-column">
+                    <!-- Recipient Form -->
+                    <div class="create-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Create New Connection</h3>
+                            <p class="card-subtitle">Fill in the details below to create a new connection</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="recipientName" class="form-label">Name</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-user input-icon"></i>
+                                <input type="text" id="recipientName" class="input-field" placeholder="Enter their name">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Relationship</label>
+                            <div class="relationship-grid">
+                                <div class="relationship-option" data-relationship="friend">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-user-friends"></i>
+                                    </div>
+                                    <div class="relationship-label">Friend</div>
+                                </div>
+                                
+                                <div class="relationship-option" data-relationship="family">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-home"></i>
+                                    </div>
+                                    <div class="relationship-label">Family</div>
+                                </div>
+                                
+                                <div class="relationship-option" data-relationship="partner">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-heart"></i>
+                                    </div>
+                                    <div class="relationship-label">Partner</div>
+                                </div>
+                                
+                                <div class="relationship-option" data-relationship="colleague">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-briefcase"></i>
+                                    </div>
+                                    <div class="relationship-label">Colleague</div>
+                                </div>
+                                
+                                <div class="relationship-option" data-relationship="acquaintance">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div class="relationship-label">Acquaintance</div>
+                                </div>
+                                
+                                <div class="relationship-option" data-relationship="other">
+                                    <div class="relationship-icon">
+                                        <i class="fas fa-plus"></i>
+                                    </div>
+                                    <div class="relationship-label">Other</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="otherRelationshipSection" class="form-group" style="display: none;">
+                            <label for="otherRelationship" class="form-label">Specify Relationship</label>
+                            <div class="input-with-icon">
+                                <i class="fas fa-pencil-alt input-icon"></i>
+                                <input type="text" id="otherRelationship" class="input-field" placeholder="Describe your relationship">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-wrapper premium-checkbox">
+                                <input type="checkbox" id="saveRecipient" class="checkbox-input" checked>
+                                <label for="saveRecipient" class="checkbox-label">Save to my connections</label>
+                            </div>
+                            <p class="form-help">They'll appear in your dashboard for quicker message creation in the future.</p>
+                        </div>
                     </div>
-                    <p class="form-help">They'll appear in your dashboard for quicker message creation in the future.</p>
                 </div>
             </div>
             

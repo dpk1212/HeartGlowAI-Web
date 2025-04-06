@@ -3068,3 +3068,100 @@ body::after {
   box-shadow: 0 8px 20px rgba(255, 87, 87, 0.4);
 }
 
+/* Enhanced connection form fields */
+textarea.input-field, #connection-notes {
+  resize: vertical;
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  width: 100%;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  transition: all 0.3s ease;
+}
+
+textarea.input-field:focus, #connection-notes:focus {
+  border-color: var(--accent-pink);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(227, 80, 170, 0.25);
+}
+
+.add-connection-button, .view-all-button, .create-message-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 30px;
+  padding: 10px 20px;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-connection-button:hover, .view-all-button:hover, .create-message-button:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.1));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlighted add connection button */
+.add-new-connection {
+  padding: 15px 25px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  border-radius: 0 0 20px 20px;
+}
+
+.add-new-connection-btn {
+  background: linear-gradient(135deg, rgba(227, 80, 170, 0.2), rgba(227, 80, 170, 0.1));
+  color: white;
+  border: 1px solid rgba(227, 80, 170, 0.3);
+  padding: 10px 20px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.add-new-connection-btn:hover {
+  background: linear-gradient(135deg, rgba(227, 80, 170, 0.3), rgba(227, 80, 170, 0.2));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Field groups in connection modal */
+.field-group {
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
+}
+
+.field-group h4 {
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: var(--accent-pink);
+  font-weight: 600;
+}
+
+/* Help text for form fields */
+.field-help {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin-top: 4px;
+  font-style: italic;
+}
+

@@ -4102,3 +4102,224 @@ function deleteConnection(connectionId) {
       hideLoading();
     });
 }
+
+// Add reliable handlers for message actions (copy, edit, share) and View All button
+document.addEventListener('DOMContentLoaded', function() {
+  console.log('Setting up message action handlers');
+  
+  // Handle all message button clicks with a direct click handler
+  document.body.addEventListener('click', function(e) {
+    // COPY BUTTON
+    if (e.target.classList.contains('fa-copy') || 
+        (e.target.closest('.home-page__message-button') && e.target.closest('.home-page__message-button').querySelector('.fa-copy'))) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Find the message card
+      const messageCard = e.target.closest('.home-page__message-card');
+      if (!messageCard) return;
+      
+      // Get the message text
+      const messageText = messageCard.querySelector('.home-page__message-text');
+      if (!messageText) return;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(messageText.textContent.trim())
+        .then(() => showAlert('Message copied to clipboard!', 'success'))
+        .catch(() => showAlert('Could not copy message', 'error'));
+      
+      return false;
+    }
+    
+    // EDIT BUTTON
+    if (e.target.classList.contains('fa-edit') || 
+        (e.target.closest('.home-page__message-button') && e.target.closest('.home-page__message-button').querySelector('.fa-edit'))) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Find the message card
+      const messageCard = e.target.closest('.home-page__message-card');
+      if (!messageCard) return;
+      
+      // Get the message ID
+      const messageId = messageCard.dataset.messageId;
+      if (!messageId) return;
+      
+      console.log('Edit message clicked for ID:', messageId);
+      
+      // Navigate to message editor with this message ID
+      window.location.href = `message-editor.html?messageId=${messageId}`;
+      
+      return false;
+    }
+    
+    // SHARE BUTTON
+    if (e.target.classList.contains('fa-share') || 
+        (e.target.closest('.home-page__message-button') && e.target.closest('.home-page__message-button').querySelector('.fa-share'))) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Find the message card
+      const messageCard = e.target.closest('.home-page__message-card');
+      if (!messageCard) return;
+      
+      // Get the message text
+      const messageText = messageCard.querySelector('.home-page__message-text');
+      if (!messageText) return;
+      
+      const textToShare = messageText.textContent.trim();
+      
+      // Try to use the Web Share API if available
+      if (navigator.share) {
+        navigator.share({
+          title: 'A heartfelt message from HeartGlowAI',
+          text: textToShare
+        })
+        .then(() => console.log('Message shared successfully'))
+        .catch((error) => {
+          console.log('Error sharing:', error);
+          // Fallback to clipboard
+          navigator.clipboard.writeText(textToShare)
+            .then(() => showAlert('Message copied to clipboard for sharing!', 'success'))
+            .catch(() => showAlert('Could not copy message', 'error'));
+        });
+      } else {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(textToShare)
+          .then(() => showAlert('Message copied to clipboard for sharing!', 'success'))
+          .catch(() => showAlert('Could not copy message', 'error'));
+      }
+      
+      return false;
+    }
+    
+    // VIEW ALL LINKS
+    if (e.target.id === 'view-all-messages' || 
+        e.target.closest('#view-all-messages') ||
+        (e.target.textContent === 'View All' && e.target.closest('a')) ||
+        (e.target.classList.contains('manage-link') && e.target.closest('.section-header'))) {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      console.log('View All clicked for messages');
+      
+      // Get all messages and show them in a modal
+      loadAllMessages();
+      
+      return false;
+    }
+  });
+});
+
+// Function to load and display all messages in a modal
+function loadAllMessages() {
+  if (!currentUser) {
+    showAlert('You must be logged in to view messages', 'error');
+    return;
+  }
+  
+  showLoading('Loading all messages...');
+  
+  firebase.firestore()
+    .collection('users')
+    .doc(currentUser.uid)
+    .collection('messages')
+    .orderBy('timestamp', 'desc')
+    .get()
+    .then((snapshot) => {
+      // Create or get modal
+      let messagesModal = document.getElementById('all-messages-modal');
+      
+      if (!messagesModal) {
+        messagesModal = document.createElement('div');
+        messagesModal.id = 'all-messages-modal';
+        messagesModal.className = 'modal';
+        document.body.appendChild(messagesModal);
+      }
+      
+      // Generate HTML for messages
+      const messages = [];
+      snapshot.forEach((doc) => {
+        messages.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+      
+      // Create modal content
+      messagesModal.innerHTML = `
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">All Messages</h2>
+            <button class="modal-close" id="close-messages-modal">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="modal-messages-list">
+              ${messages.length > 0 ? renderMessagesList(messages) : '<p>No messages yet</p>'}
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Show modal
+      messagesModal.style.display = 'flex';
+      
+      // Add event listener to close button
+      const closeBtn = document.getElementById('close-messages-modal');
+      if (closeBtn) {
+        closeBtn.onclick = function() {
+          messagesModal.style.display = 'none';
+        };
+      }
+      
+      // Close when clicking outside
+      messagesModal.onclick = function(e) {
+        if (e.target === messagesModal) {
+          messagesModal.style.display = 'none';
+        }
+      };
+      
+      hideLoading();
+    })
+    .catch((error) => {
+      console.error('Error loading messages:', error);
+      showAlert('Error loading messages', 'error');
+      hideLoading();
+    });
+}
+
+// Helper function to render messages list
+function renderMessagesList(messages) {
+  return messages.map(message => {
+    const date = message.timestamp?.toDate() || new Date();
+    const timeAgo = getTimeAgo(date);
+    
+    return `
+      <div class="modal-message-item" data-id="${message.id}">
+        <div class="message-details">
+          <div class="message-type">${formatIntentTag(message.type || 'general')}</div>
+          <div class="message-time">${timeAgo}</div>
+          <div class="message-preview">${message.content?.substring(0, 80)}...</div>
+        </div>
+        <div class="message-actions">
+          <button class="message-action view-btn" title="View message" onclick="viewMessage('${message.id}')">
+            <i class="fas fa-eye"></i>
+          </button>
+          <button class="message-action edit-btn" title="Edit message" onclick="window.location.href='message-editor.html?messageId=${message.id}'">
+            <i class="fas fa-pencil-alt"></i>
+          </button>
+          <button class="message-action copy-btn" title="Copy message" onclick="copyMessage('${message.id}', '${message.content?.replace(/'/g, "\\'")}')">
+            <i class="fas fa-copy"></i>
+          </button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Helper function to copy a message
+function copyMessage(id, content) {
+  navigator.clipboard.writeText(content)
+    .then(() => showAlert('Message copied to clipboard!', 'success'))
+    .catch(() => showAlert('Could not copy message', 'error'));
+}

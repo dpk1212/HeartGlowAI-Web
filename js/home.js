@@ -459,19 +459,19 @@ function initializeQuickActions() {
         switch (index) {
           case 0: // Reconnect
             localStorage.setItem('selectedEmotion', 'reconnect');
-            window.location.href = 'emotional-entry.html';
+            window.location.href = 'message-intent-new.html';
             break;
           case 1: // Express appreciation
             localStorage.setItem('selectedEmotion', 'appreciation');
-            window.location.href = 'emotional-entry.html';
+            window.location.href = 'message-intent-new.html';
             break;
           case 2: // Make an apology
             localStorage.setItem('selectedEmotion', 'vulnerability');
-            window.location.href = 'emotional-entry.html';
+            window.location.href = 'message-intent-new.html';
             break;
           case 3: // Create from scratch
             localStorage.setItem('selectedEmotion', 'explore');
-            window.location.href = 'emotional-entry.html';
+            window.location.href = 'message-intent-new.html';
             break;
         }
       });

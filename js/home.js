@@ -510,59 +510,40 @@ function initializeManageButtons() {
 
 // Initialize connection modal functionality
 function initializeConnectionModal() {
-  const modal = document.getElementById('connection-modal');
-  const form = document.getElementById('connection-form');
-  const cancelBtn = modal?.querySelector('.form-cancel-btn');
-  const closeBtn = modal?.querySelector('.close-modal');
-  
-  if (!modal || !form) {
-    console.error('Connection modal or form not found');
-    return;
-  }
-  
-  // Handle relationship grid selection
-  const relationshipOptions = document.querySelectorAll('.relationship-option');
-  const relationshipInput = document.getElementById('connection-relationship');
-  const otherRelationshipGroup = document.getElementById('other-relationship-group');
-  
-  relationshipOptions.forEach(option => {
-    option.addEventListener('click', function() {
-      // Remove 'selected' class from all options
-      relationshipOptions.forEach(opt => opt.classList.remove('selected'));
-      
-      // Add 'selected' class to clicked option
-      this.classList.add('selected');
-      
-      // Get the relationship type from the data attribute
-      const relationshipType = this.getAttribute('data-relationship');
-      
-      // Set the hidden input value
-      if (relationshipInput) {
-        relationshipInput.value = relationshipType;
-      }
-      
-      // Show/hide the "other" relationship input field if needed
-      if (otherRelationshipGroup) {
-        otherRelationshipGroup.style.display = relationshipType === 'other' ? 'block' : 'none';
-      }
+    console.log("Initializing connection modal");
+    
+    // Get the modal elements
+    const modal = document.getElementById('connection-modal');
+    const form = document.getElementById('connection-form');
+    const relationshipSelect = document.getElementById('connection-relationship');
+    const specificRelationshipContainer = document.getElementById('specific-relationship-container');
+    const specificRelationshipSelect = document.getElementById('connection-specific-relationship');
+    const cancelButton = document.getElementById('cancel-connection');
+    
+    // Add event listeners
+    if (relationshipSelect) {
+        relationshipSelect.addEventListener('change', updateSpecificRelationshipOptions);
+    }
+    
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            saveConnection();
+        });
+        
+        // Enhance form validation with custom messages
+        enhanceFormValidation(form);
+    }
+    
+    if (cancelButton) {
+        cancelButton.addEventListener('click', closeConnectionModal);
+    }
+    
+    // Close modal when clicking on the x button
+    const closeButtons = modal.querySelectorAll('.close-modal');
+    closeButtons.forEach(button => {
+        button.addEventListener('click', closeConnectionModal);
     });
-  });
-  
-  // Close the modal when clicking the close button
-  if (closeBtn) {
-    closeBtn.addEventListener('click', closeConnectionModal);
-  }
-  
-  // Close the modal when clicking the cancel button
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', closeConnectionModal);
-  }
-  
-  // Form submission
-  form.addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveConnection();
-  });
 }
 
 // Open the connection modal
@@ -3210,3 +3191,205 @@ function displayEmptyState(container, type) {
 }
 
 // ... existing code ... 
+
+// Add this function after initializeConnectionModal
+// New function to enhance form validation
+function enhanceFormValidation(form) {
+    const requiredFields = form.querySelectorAll('[required]');
+    
+    // Remove default validation messages
+    requiredFields.forEach(field => {
+        field.addEventListener('invalid', function(e) {
+            e.preventDefault();
+            
+            // Remove any existing validation messages
+            const existingMessages = form.querySelectorAll('.validation-message');
+            existingMessages.forEach(msg => msg.remove());
+            
+            // Create custom validation message
+            const message = document.createElement('div');
+            message.className = 'validation-message';
+            
+            if (this.validity.valueMissing) {
+                if (this.tagName === 'SELECT') {
+                    message.textContent = 'Please select an option from the list';
+                } else {
+                    message.textContent = 'This field is required';
+                }
+            } else if (this.validity.typeMismatch) {
+                message.textContent = 'Please enter a valid value';
+            }
+            
+            // Insert message after the field
+            this.parentNode.insertBefore(message, this.nextSibling);
+            
+            // Highlight the field
+            this.classList.add('field-error');
+        });
+        
+        // Remove error styling when field is valid
+        field.addEventListener('input', function() {
+            this.classList.remove('field-error');
+            
+            // Remove any validation messages
+            const nextSibling = this.nextElementSibling;
+            if (nextSibling && nextSibling.classList.contains('validation-message')) {
+                nextSibling.remove();
+            }
+        });
+        
+        // Also handle change event for select elements
+        if (field.tagName === 'SELECT') {
+            field.addEventListener('change', function() {
+                this.classList.remove('field-error');
+                
+                // Remove any validation messages
+                const nextSibling = this.nextElementSibling;
+                if (nextSibling && nextSibling.classList.contains('validation-message')) {
+                    nextSibling.remove();
+                }
+            });
+        }
+    });
+    
+    // Add a submit handler to show all errors at once
+    form.addEventListener('submit', function(e) {
+        let hasErrors = false;
+        
+        requiredFields.forEach(field => {
+            if (!field.validity.valid) {
+                hasErrors = true;
+                field.classList.add('field-error');
+                
+                // Trigger the invalid event to show error message
+                const invalidEvent = new Event('invalid', { cancelable: true });
+                field.dispatchEvent(invalidEvent);
+            }
+        });
+        
+        if (hasErrors) {
+            e.preventDefault();
+            
+            // Scroll to the first error
+            const firstError = form.querySelector('.field-error');
+            if (firstError) {
+                firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                firstError.focus();
+            }
+        }
+    });
+}
+
+// Open the connection modal
+function openConnectionModal(connectionId = null) {
+  console.log('Opening connection modal. Editing connection ID:', connectionId);
+  
+  let modal = document.getElementById('connection-modal');
+  if (!modal) {
+    // If we're not finding the modal, create it dynamically
+    createConnectionModal();
+    
+    // Try to get the modal again
+    modal = document.getElementById('connection-modal');
+    if (!modal) {
+      console.error('Could not find or create connection modal');
+      return;
+    }
+  }
+  
+  // Set global editing state
+  editingConnectionId = connectionId;
+  
+  // Update modal title
+  const modalTitle = document.getElementById('modal-title');
+  if (modalTitle) {
+    modalTitle.textContent = connectionId ? 'Edit Connection' : 'Add New Connection';
+  }
+  
+  // Get form elements
+  const form = document.getElementById('connection-form');
+  const nameField = document.getElementById('connection-name');
+  const relationshipField = document.getElementById('connection-relationship');
+  const specificRelationshipContainer = document.getElementById('specific-relationship-container');
+  const specificRelationshipField = document.getElementById('connection-specific-relationship');
+  const yearsField = document.getElementById('connection-years');
+  const communicationStyleField = document.getElementById('connection-communication-style');
+  const goalField = document.getElementById('connection-goal');
+  const notesField = document.getElementById('connection-notes');
+  
+  // Reset form
+  if (form) {
+    form.reset();
+    
+    // Hide specific relationship container initially
+    if (specificRelationshipContainer) {
+      specificRelationshipContainer.style.display = 'none';
+    }
+  }
+  
+  // If editing an existing connection, fetch and populate data
+  if (connectionId) {
+    if (!currentUser) {
+      showAlert('You must be logged in to edit connections', 'error');
+      return;
+    }
+    
+    // Show loading indicator
+    showLoading('Loading connection details...');
+    
+    // Fetch connection data
+    firebase.firestore()
+      .collection('users')
+      .doc(currentUser.uid)
+      .collection('connections')
+      .doc(connectionId)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const data = doc.data();
+          console.log('Loaded connection data:', data);
+          
+          // Populate basic fields
+          if (nameField) nameField.value = data.name || '';
+          if (relationshipField) relationshipField.value = data.relationship || '';
+          
+          // Handle specific relationship selection
+          if (data.relationship && data.relationship !== 'other' && specificRelationshipContainer) {
+            specificRelationshipContainer.style.display = 'block';
+            
+            // Trigger relationship change to populate the specific options
+            updateSpecificRelationshipOptions();
+            
+            // Then set the specific relationship value
+            setTimeout(() => {
+              if (specificRelationshipField && data.specificRelationship) {
+                specificRelationshipField.value = data.specificRelationship;
+              }
+            }, 100);  // Slight delay to ensure options are populated
+          }
+          
+          // Populate additional fields
+          if (yearsField) yearsField.value = data.yearsKnown || '';
+          if (communicationStyleField) communicationStyleField.value = data.communicationStyle || '';
+          if (goalField) goalField.value = data.relationshipGoal || '';
+          if (notesField) notesField.value = data.notes || '';
+          
+          hideLoading();
+        } else {
+          console.error('Connection not found:', connectionId);
+          showAlert('Connection not found', 'error');
+          hideLoading();
+          closeConnectionModal();
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching connection:', error);
+        showAlert('Error loading connection details', 'error');
+        hideLoading();
+        closeConnectionModal();
+      });
+  }
+  
+  // Show the modal
+  modal.style.display = 'block';
+}

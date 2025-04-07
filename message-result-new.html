@@ -16,6 +16,7 @@
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -59,11 +60,29 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <style>
-        /* Professional Premium Message Display */
+        /* Professional Premium Message Display - HeartGlowAI Branded */
         body {
-            background: linear-gradient(135deg, #0a0824 0%, #1a1942 100%);
             min-height: 100vh;
-            overflow-y: auto;
+            background-color: #1A1625;
+            background-image: linear-gradient(135deg, #0c0a18, #1a1628);
+            color: #E8E6F1;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="%238a57de" opacity="0.03"/></svg>');
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
         }
         
         .premium-background {
@@ -71,6 +90,65 @@
             min-height: 100vh;
             overflow-y: auto;
             padding-bottom: 5rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        
+        .logo-heart {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            transform: rotate(45deg);
+            position: relative;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .logo-heart:before, .logo-heart:after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .logo-heart:before {
+            top: -15px;
+            left: 0;
+        }
+        
+        .logo-heart:after {
+            top: 0;
+            left: -15px;
+        }
+        
+        .brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #E8E6F1;
+        }
+        
+        .brand-ai {
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
         }
         
         /* Executive-level message card */
@@ -81,8 +159,77 @@
             position: relative;
             z-index: 1;
             max-width: 800px;
-            margin: 0 auto;
+            margin: 2rem auto;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+            animation: cardFadeIn 0.8s ease-out;
+        }
+        
+        @keyframes cardFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        /* Recipient card styling */
+        .recipient-card {
+            background: rgba(33, 30, 46, 0.7);
+            backdrop-filter: blur(15px);
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(138, 87, 222, 0.15);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .recipient-card:hover {
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(138, 87, 222, 0.25);
+            transform: translateY(-2px);
+        }
+        
+        .recipient-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8a57de, #b296ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: white;
+            margin-right: 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 12px rgba(138, 87, 222, 0.2);
+        }
+        
+        .recipient-details {
+            flex: 1;
+        }
+        
+        .recipient-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem;
+            letter-spacing: -0.01em;
+            color: #E8E6F1;
+        }
+        
+        .recipient-relationship {
+            font-size: 0.95rem;
+            color: #b8b5c7;
+            font-weight: 500;
         }
         
         /* Professional white message container */
@@ -181,12 +328,29 @@
             color: #555;
             transition: all 0.2s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .message-action::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(138, 87, 222, 0.1), transparent);
+            transition: all 0.6s;
         }
         
         .message-action:hover {
             background: rgba(138, 87, 222, 0.08);
             color: #8a57de;
             transform: translateY(-2px);
+        }
+        
+        .message-action:hover::after {
+            left: 100%;
         }
         
         .message-action-icon {
@@ -197,30 +361,35 @@
         /* Elegant insights card */
         .message-insights {
             margin-top: 2rem;
-            background: #2a2a40;
+            background: #211E2E;
             border-radius: 16px;
             padding: 0;
             overflow: hidden;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(138, 87, 222, 0.15);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .insights-header {
-            background: #23233a;
+            background: #1A1625;
             padding: 1.5rem 2rem;
             display: flex;
             align-items: center;
             gap: 0.8rem;
+            border-bottom: 1px solid rgba(138, 87, 222, 0.15);
         }
         
         .insights-header__title {
-            color: #ffffff;
+            color: #E8E6F1;
             font-size: 1.2rem;
             font-weight: 600;
             margin: 0;
         }
         
         .insights-header__icon {
-            color: #ffd54f;
+            color: #b296ff;
             font-size: 1.3rem;
         }
         
@@ -233,7 +402,7 @@
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             position: relative;
             padding-left: 1.5rem;
-            color: #e0e0e0;
+            color: #b8b5c7;
             line-height: 1.6;
         }
         
@@ -249,789 +418,436 @@
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: #a57dff;
+            background: linear-gradient(135deg, #8a57de, #b296ff);
         }
         
-        /* Executive-level loading state */
-        .loading-container {
+        /* Copy insights button */
+        .copy-insights-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 1rem 2rem;
+            background: rgba(138, 87, 222, 0.1);
+            color: #E8E6F1;
+            border: 1px solid rgba(138, 87, 222, 0.2);
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .copy-insights-btn::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: all 0.6s;
+        }
+        
+        .copy-insights-btn:hover {
+            background: rgba(138, 87, 222, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .copy-insights-btn:hover::after {
+            left: 100%;
+        }
+        
+        .copy-insights-btn:active {
+            transform: translateY(0);
+        }
+        
+        .copy-insights-btn i {
+            font-size: 1.1rem;
+        }
+        
+        /* Enhanced loading state */
+        .loading-state {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 5rem 2rem;
-            text-align: center;
-            min-height: 400px;
-            background: rgba(255, 255, 255, 0.98);
+            padding: 4rem 2rem;
+            background: rgba(33, 30, 46, 0.7);
+            backdrop-filter: blur(15px);
             border-radius: 16px;
+            border: 1px solid rgba(138, 87, 222, 0.15);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            margin: 3rem auto;
         }
         
-        .pulse-heart {
+        .loading-state__icon {
             width: 80px;
             height: 80px;
             position: relative;
             margin-bottom: 2rem;
         }
         
-        .pulse-heart svg {
+        .loading-heart {
             width: 100%;
             height: 100%;
-            fill: #8a57de;
-            filter: drop-shadow(0 0 5px rgba(138, 87, 222, 0.5));
+            background: #8a57de;
+            transform: rotate(45deg);
+            animation: pulse 1.5s infinite;
+            position: relative;
+            border-radius: 8px;
         }
         
-        .pulse-heart-circle {
+        .loading-heart:before,
+        .loading-heart:after {
+            content: '';
+            width: 100%;
+            height: 100%;
+            background: #8a57de;
+            border-radius: 50%;
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        }
+        
+        .loading-heart:before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .loading-heart:after {
+            top: 0;
+            left: -50%;
+        }
+        
+        .loading-heart-glow {
+            position: absolute;
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            background: rgba(138, 87, 222, 0.1);
+            filter: blur(20px);
+            background: rgba(138, 87, 222, 0.6);
             z-index: -1;
-            animation: pulse 2s infinite ease-out;
+            animation: glow 1.5s infinite alternate;
         }
         
         @keyframes pulse {
             0% {
-                transform: translate(-50%, -50%) scale(0.9);
-                opacity: 0.8;
+                transform: rotate(45deg) scale(0.8);
             }
             50% {
-                transform: translate(-50%, -50%) scale(1.3);
-                opacity: 0;
+                transform: rotate(45deg) scale(1);
             }
             100% {
-                transform: translate(-50%, -50%) scale(0.9);
-                opacity: 0;
+                transform: rotate(45deg) scale(0.8);
             }
         }
         
-        .loading-text {
-            font-size: 1.1rem;
-            font-weight: 500;
-            color: #333;
-            margin-top: 1rem;
+        @keyframes glow {
+            0% {
+                opacity: 0.5;
+                filter: blur(20px);
+            }
+            100% {
+                opacity: 0.8;
+                filter: blur(30px);
+            }
         }
         
-        .loading-dots span {
+        .loading-state__text {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #E8E6F1;
+            margin-bottom: 1rem;
+        }
+        
+        .loading-dots {
             display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: #8a57de;
-            margin: 0 2px;
+            position: relative;
+            width: 20px;
+            height: 20px;
+        }
+        
+        .loading-dots::after {
+            content: '';
             animation: loadingDots 1.5s infinite;
-            opacity: 0.7;
-            vertical-align: middle;
-        }
-        
-        .loading-dots span:nth-child(2) {
-            animation-delay: 0.2s;
-        }
-        
-        .loading-dots span:nth-child(3) {
-            animation-delay: 0.4s;
         }
         
         @keyframes loadingDots {
-            0%, 100% {
-                transform: translateY(0);
+            0%, 20% {
+                content: '.';
             }
-            50% {
-                transform: translateY(-5px);
+            40% {
+                content: '..';
+            }
+            60%, 80% {
+                content: '...';
             }
         }
         
-        /* Recipient info styling */
-        .recipient-card {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            max-width: 800px;
-            margin: 1.5rem auto;
-            backdrop-filter: blur(10px);
-        }
-        
-        .recipient-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #7645c5 0%, #a57dff 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: white;
-            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.4);
-        }
-        
-        .recipient-info {
-            flex: 1;
-        }
-        
-        .recipient-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 0.3rem;
-        }
-        
-        .recipient-relation {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-        
-        /* Page header styling */
-        .page-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin: 0 auto 2rem;
-        }
-        
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #a57dff 0%, #7645c5 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        
-        .page-description {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
-            max-width: 600px;
+        .loading-state__subtext {
+            color: #b8b5c7;
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 400px;
             margin: 0 auto;
         }
         
-        /* Professional error state */
+        /* Error state */
         .error-state {
-            display: none;
-            padding: 3rem 2rem;
-            text-align: center;
-            background: #ffffff;
+            background: rgba(33, 30, 46, 0.7);
+            backdrop-filter: blur(15px);
             border-radius: 16px;
+            padding: 2rem;
+            border: 1px solid rgba(240, 98, 146, 0.2);
+            text-align: center;
+            max-width: 600px;
+            margin: 3rem auto;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         }
         
-        .error-icon {
+        .error-state__icon {
             font-size: 3rem;
-            color: #f44336;
+            color: #f06292;
             margin-bottom: 1.5rem;
         }
         
-        .error-title {
-            font-size: 1.5rem;
+        .error-state__title {
+            font-size: 1.4rem;
             font-weight: 600;
-            margin-bottom: 0.8rem;
-            color: #333;
+            color: #E8E6F1;
+            margin-bottom: 1rem;
         }
         
-        .error-message {
-            color: #777;
+        .error-state__message {
+            color: #b8b5c7;
+            font-size: 1rem;
+            line-height: 1.6;
             margin-bottom: 2rem;
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
         }
         
-        .retry-button {
-            background: #8a57de;
+        .error-state__button {
+            background: linear-gradient(45deg, #8a57de, #b296ff);
             color: white;
             border: none;
-            padding: 0.9rem 1.8rem;
-            border-radius: 8px;
+            border-radius: 12px;
+            padding: 0.8rem 2rem;
             font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
-            gap: 0.6rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25);
+            gap: 0.5rem;
+            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.3);
         }
         
-        .retry-button:hover {
-            background: #7645c5;
+        .error-state__button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(138, 87, 222, 0.35);
+            box-shadow: 0 8px 20px rgba(138, 87, 222, 0.4);
         }
         
-        /* Toast notifications */
-        .toast-container {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        .toast {
-            padding: 12px 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            animation: toastIn 0.3s ease forwards;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .toast--success {
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            color: white;
-        }
-        
-        .toast--error {
-            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
-            color: white;
-        }
-        
-        @keyframes toastIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* Navigation buttons */
-        .page-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin: 2rem auto;
-            max-width: 800px;
-        }
-        
-        .secondary-button, .primary-button {
-            padding: 0.8rem 1.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
+        /* Navigation button back to home */
+        .back-to-home {
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            transition: all 0.2s ease;
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: #E8E6F1;
+            border: 1px solid rgba(138, 87, 222, 0.2);
+            border-radius: 12px;
+            font-weight: 600;
+            margin: 2rem auto;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            max-width: fit-content;
+            text-decoration: none;
         }
         
-        .primary-button {
-            background: #8a57de;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.25);
-        }
-        
-        .secondary-button {
-            background: rgba(138, 87, 222, 0.08);
-            color: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .primary-button:hover {
-            background: #7645c5;
+        .back-to-home:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(138, 87, 222, 0.3);
             transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(138, 87, 222, 0.35);
         }
         
-        .secondary-button:hover {
-            background: rgba(138, 87, 222, 0.15);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(138, 87, 222, 0.1);
+        /* Screen reader only */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
         }
         
-        /* Mobile responsiveness */
+        /* Responsive adjustments */
         @media (max-width: 768px) {
             .message-body {
                 padding: 2rem;
             }
             
-            .message-header {
-                padding: 1.2rem 1.5rem;
-            }
-            
             .message-footer {
-                padding: 1.5rem;
                 flex-wrap: wrap;
+                justify-content: space-around;
+                gap: 0.5rem;
             }
             
             .message-action {
                 padding: 0.6rem 1rem;
             }
             
-            .page-title {
-                font-size: 2rem;
+            .insights-content {
+                padding: 1.2rem 1.5rem 1.5rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .message-card__text {
+                font-size: 1.1rem;
+                line-height: 1.7;
+            }
+            
+            .message-header, .message-footer {
+                padding: 1.2rem 1.5rem;
+            }
+            
+            .drop-cap {
+                font-size: 3.2em;
+            }
+            
+            .insights-header {
+                padding: 1.2rem 1.5rem;
+            }
+            
+            .recipient-card {
+                padding: 1.2rem;
+            }
+            
+            .recipient-avatar {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
             }
         }
     </style>
 </head>
-<body class="message-result-page premium-background">
-    <div id="app">
+<body>
+    <div class="premium-background">
         <!-- App Header -->
         <header class="app-header">
-            <div class="brand-logo">
+            <a href="home.html" class="brand-logo">
                 <div class="logo-heart"></div>
                 <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
-            </div>
-            
-            <div class="user-menu">
-                <div class="user-profile">
-                    <button id="userMenuBtn" class="user-avatar">
-                        <img id="userAvatar" src="images/default-avatar.png" alt="Profile">
-                    </button>
-                    <div id="userDropdown" class="dropdown-menu">
-                        <div class="dropdown-header">
-                            <div id="userDisplayName" class="dropdown-name">User</div>
-                            <div id="userEmail" class="dropdown-email">user@example.com</div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="home.html" class="dropdown-item">
-                            <i class="fas fa-home"></i>
-                            Dashboard
-                        </a>
-                        <a href="settings.html" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            Settings
-                        </a>
-                        <button id="logoutBtn" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Sign Out
-                        </button>
-                    </div>
-                </div>
-            </div>
+            </a>
         </header>
         
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Progress Steps -->
-            <div class="progress-container">
-                <div class="progress-steps">
-                    <div class="progress-step completed">
-                        <div class="step-number"><i class="fas fa-check"></i></div>
-                        <div class="step-label">Intention</div>
-                    </div>
-                    <div class="progress-step completed">
-                        <div class="step-number"><i class="fas fa-check"></i></div>
-                        <div class="step-label">Recipient</div>
-                    </div>
-                    <div class="progress-step completed">
-                        <div class="step-number"><i class="fas fa-check"></i></div>
-                        <div class="step-label">Tone</div>
-                    </div>
-                    <div class="progress-step active">
-                        <div class="step-number">4</div>
-                        <div class="step-label">Message</div>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 100%"></div>
-                </div>
+        <!-- Recipient Info -->
+        <div class="recipient-card" id="recipient-info">
+            <div class="recipient-avatar" id="recipient-avatar">
+                <!-- Will be populated with recipient initial or icon -->
             </div>
-            
-            <div class="page-header">
-                <h1 class="page-title">Your Message</h1>
-                <p class="page-description">Here's your personalized message. You can edit it, regenerate or share it.</p>
+            <div class="recipient-details">
+                <h3 class="recipient-name" id="recipient-name">Loading recipient...</h3>
+                <div class="recipient-relationship" id="recipient-relationship">Preparing...</div>
             </div>
-            
-            <!-- Navigation Buttons -->
-            <div class="page-navigation">
-                <button id="backBtn" class="secondary-button">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <button id="dashboardBtn" class="primary-button">
-                    <i class="fas fa-home"></i> Dashboard
-                </button>
+        </div>
+        
+        <!-- Loading State -->
+        <div class="loading-state" id="loading-state">
+            <div class="loading-state__icon">
+                <div class="loading-heart"></div>
+                <div class="loading-heart-glow"></div>
             </div>
-            
-            <!-- Message Information -->
-            <div class="recipient-card">
-                <div class="recipient-avatar" id="recipientAvatar">
-                    <span id="recipientInitial">?</span>
-                </div>
-                <div class="recipient-info">
-                    <h3 class="recipient-name" id="recipientName">Loading recipient...</h3>
-                    <div class="recipient-relation" id="recipientRelation">Preparing...</div>
-                </div>
-            </div>
-            
-            <div class="message-details">
-                <div class="detail-item">
-                    <div class="detail-label">Intention:</div>
-                    <div class="detail-value" id="intentDisplay">Loading...</div>
-                </div>
-                <div class="detail-item">
-                    <div class="detail-label">Tone:</div>
-                    <div class="detail-value" id="toneDisplay">Loading...</div>
-                </div>
-            </div>
-            
-            <!-- Message Display -->
-            <div id="messageState" class="message-card message-card--premium">
-                <!-- Loading State -->
-                <div id="loadingState" class="loading-container">
-                    <div class="pulse-heart">
-                        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M16,28.261c0,0-14-7.926-14-17.046c0-8.565,9.85-9.685,14,3.516c4.151-13.201,14-12.081,14-3.516
-                            C30,20.335,16,28.261,16,28.261z"/>
-                        </svg>
-                        <div class="pulse-heart-circle"></div>
-                    </div>
-                    <p class="loading-text">Creating your heartfelt message</p>
-                    <div class="loading-dots">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                </div>
-                
-                <!-- Error State -->
-                <div id="errorState" class="error-state">
-                    <div class="error-icon">
-                        <i class="fas fa-exclamation-circle"></i>
-                    </div>
-                    <h3 class="error-title">Something went wrong</h3>
-                    <p class="error-message" id="errorText">We couldn't create your message at this time.</p>
-                    <button id="retryButton" class="retry-button">
-                        <i class="fas fa-redo"></i> Try Again
-                    </button>
-                </div>
-                
-                <!-- Message Content - Empty until generated -->
-                <div id="messageContent" class="message-card__content message-card__content--premium" style="display: none;">
-                    <div class="message-container">
-                        <div class="message-header">
-                            <div class="message-header__badge">
-                                <i class="fas fa-heart"></i>
-                                <span>Created with HeartGlowAI</span>
-                            </div>
-                            <div class="message-header__date">
-                                <i class="fas fa-calendar-alt"></i>
-                                <span id="currentDate"></span>
-                            </div>
-                        </div>
-                        
-                        <div class="message-body">
-                            <!-- Content will be inserted here dynamically -->
-                            <p id="content" class="message-card__text"></p>
-                        </div>
-                        
-                        <div class="message-footer">
-                            <button id="editBtn" class="message-action">
-                                <i class="message-action-icon fas fa-edit"></i>
-                                <span>Edit</span>
-                            </button>
-                            <button id="copyBtn" class="message-action">
-                                <i class="message-action-icon fas fa-copy"></i>
-                                <span>Copy</span>
-                            </button>
-                            <button id="shareBtn" class="message-action">
-                                <i class="message-action-icon fas fa-share-alt"></i>
-                                <span>Share</span>
-                            </button>
-                            <button id="regenerateBtn" class="message-action">
-                                <i class="message-action-icon fas fa-sync"></i>
-                                <span>Regenerate</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Message Insights - Initially hidden until generated -->
-                <div id="messageInsights" class="message-insights" style="display: none;">
-                    <div class="insights-header">
-                        <i class="insights-header__icon fas fa-lightbulb"></i>
-                        <h3 class="insights-header__title">Why This Message Works</h3>
-                    </div>
-                    <div class="insights-content" id="insightsContent">
-                        <!-- Insights will be dynamically generated -->
-                    </div>
-                </div>
-                
-                <!-- Edit Container -->
-                <div id="editContainer" class="message-card__edit" style="display: none;">
-                    <textarea id="editMessage" class="message-card__edit-textarea"></textarea>
-                    <div class="message-card__edit-actions">
-                        <button id="cancelEditBtn" class="secondary-button">Cancel</button>
-                        <button id="saveEditBtn" class="primary-button">Save Changes</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Options for regenerating the message with different attributes -->
-            <div id="regenerateOptions" class="regenerate-options" style="display: none;">
-                <h3 class="options-title">Not quite right?</h3>
-                <p class="options-description">You can try a different approach:</p>
-                
-                <div class="options-grid small-grid">
-                    <div class="option-card small-card" data-variation="longer">
-                        <div class="option-icon">
-                            <i class="fas fa-plus"></i>
-                        </div>
-                        <h3 class="option-title">Longer</h3>
-                        <p class="option-description">Add more content and detail</p>
-                    </div>
-                    
-                    <div class="option-card small-card" data-variation="shorter">
-                        <div class="option-icon">
-                            <i class="fas fa-minus"></i>
-                        </div>
-                        <h3 class="option-title">Shorter</h3>
-                        <p class="option-description">More concise and to the point</p>
-                    </div>
-                    
-                    <div class="option-card small-card" data-variation="deeper">
-                        <div class="option-icon">
+            <h2 class="loading-state__text">Creating your heartfelt message<span class="loading-dots"></span></h2>
+            <p class="loading-state__subtext">We're crafting a personalized message that captures exactly what you want to express.</p>
+        </div>
+        
+        <!-- Message Card -->
+        <div class="message-card--premium" id="message-card" style="display: none;">
+            <div class="message-card__content--premium">
+                <div class="message-container">
+                    <!-- Message Header -->
+                    <div class="message-header">
+                        <div class="message-header__badge">
                             <i class="fas fa-heart"></i>
+                            Created with HeartGlowAI
                         </div>
-                        <h3 class="option-title">More Emotional</h3>
-                        <p class="option-description">Add deeper emotional expression</p>
+                        <div class="message-header__date" id="current-date">
+                            <i class="far fa-calendar"></i>
+                            <!-- Will be populated with current date -->
+                        </div>
                     </div>
                     
-                    <div class="option-card small-card" data-variation="different">
-                        <div class="option-icon">
-                            <i class="fas fa-random"></i>
-                        </div>
-                        <h3 class="option-title">Try Different</h3>
-                        <p class="option-description">New approach, same parameters</p>
+                    <!-- Message Body -->
+                    <div class="message-body">
+                        <p class="message-card__text" id="message-text">
+                            <!-- Will be populated with AI generated message -->
+                        </p>
                     </div>
-                </div>
-                
-                <button id="cancelRegenerateBtn" class="secondary-button" style="margin: 20px auto 0; display: block;">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
-            </div>
-            
-            <!-- Share Modal -->
-            <div id="shareModal" class="modal" style="display: none;">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 class="modal-title">Share Your Message</h3>
-                        <button id="closeShareModal" class="modal-close">
-                            <i class="fas fa-times"></i>
+                    
+                    <!-- Message Footer -->
+                    <div class="message-footer">
+                        <button class="message-action" id="edit-btn">
+                            <i class="fas fa-edit message-action-icon"></i>
+                            Edit
+                        </button>
+                        <button class="message-action" id="copy-btn">
+                            <i class="fas fa-copy message-action-icon"></i>
+                            Copy
+                        </button>
+                        <button class="message-action" id="share-btn">
+                            <i class="fas fa-share-alt message-action-icon"></i>
+                            Share
+                        </button>
+                        <button class="message-action" id="regenerate-btn">
+                            <i class="fas fa-sync-alt message-action-icon"></i>
+                            Regenerate
                         </button>
                     </div>
-                    <div class="modal-body">
-                        <div class="share-options">
-                            <button class="share-option" data-platform="email">
-                                <i class="fas fa-envelope"></i>
-                                <span>Email</span>
-                            </button>
-                            <button class="share-option" data-platform="sms">
-                                <i class="fas fa-comment"></i>
-                                <span>Text Message</span>
-                            </button>
-                            <button class="share-option" data-platform="copy">
-                                <i class="fas fa-link"></i>
-                                <span>Copy Link</span>
-                            </button>
-                            <button class="share-option" data-platform="whatsapp">
-                                <i class="fab fa-whatsapp"></i>
-                                <span>WhatsApp</span>
-                            </button>
-                        </div>
-                        
-                        <div class="share-link-container">
-                            <input type="text" id="shareLink" class="share-link" readonly>
-                            <button id="copyShareLink" class="copy-button">
-                                <i class="fas fa-copy"></i>
-                            </button>
-                        </div>
-                        
-                        <div id="shareSuccess" class="share-success" style="display: none;">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Link copied to clipboard!</span>
-                        </div>
-                    </div>
                 </div>
             </div>
-        </main>
-    </div>
-    
-    <!-- Scripts -->
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/message-result-new.js"></script>
-    <script>
-        // Fix for back button navigation
-        document.addEventListener('DOMContentLoaded', function() {
-            const backBtn = document.getElementById('backBtn');
-            if (backBtn) {
-                backBtn.addEventListener('click', function() {
-                    window.location.href = 'message-tone-new.html';
-                });
-            }
-            
-            // Set current date
-            const currentDateElem = document.getElementById('currentDate');
-            if (currentDateElem) {
-                const now = new Date();
-                currentDateElem.textContent = now.toLocaleDateString('en-US', { 
-                    month: 'long', 
-                    day: 'numeric', 
-                    year: 'numeric' 
-                });
-            }
-            
-            // Ensure content is visible
-            const messageContent = document.getElementById('messageContent');
-            if (messageContent) {
-                // Only force display if no message is being generated
-                const loadingState = document.getElementById('loadingState');
-                if (loadingState && loadingState.style.display === 'none') {
-                    messageContent.style.display = 'block';
-                }
-            }
-            
-            // Setup share modal
-            const shareBtn = document.getElementById('shareBtn');
-            const shareModal = document.getElementById('shareModal');
-            const closeShareModal = document.getElementById('closeShareModal');
-            
-            if (shareBtn && shareModal) {
-                shareBtn.addEventListener('click', function() {
-                    shareModal.classList.add('show');
-                    shareModal.style.display = 'flex';
-                    
-                    // Generate share link
-                    const shareLink = document.getElementById('shareLink');
-                    if (shareLink) {
-                        // Create a unique ID for this message
-                        const uniqueId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-                        const shareUrl = `${window.location.origin}/shared-message.html?id=${uniqueId}`;
-                        shareLink.value = shareUrl;
-                    }
-                });
-            }
-            
-            if (closeShareModal && shareModal) {
-                closeShareModal.addEventListener('click', function() {
-                    shareModal.classList.remove('show');
-                    setTimeout(() => {
-                        shareModal.style.display = 'none';
-                    }, 300);
-                });
-            }
-            
-            // Copy message link
-            const copyShareLink = document.getElementById('copyShareLink');
-            const shareLink = document.getElementById('shareLink');
-            const shareSuccess = document.getElementById('shareSuccess');
-            
-            if (copyShareLink && shareLink && shareSuccess) {
-                copyShareLink.addEventListener('click', function() {
-                    shareLink.select();
-                    document.execCommand('copy');
-                    
-                    shareSuccess.style.display = 'flex';
-                    setTimeout(() => {
-                        shareSuccess.style.display = 'none';
-                    }, 3000);
-                });
-            }
-            
-            // Setup copy button
-            const copyBtn = document.getElementById('copyBtn');
-            const content = document.getElementById('content');
-            
-            if (copyBtn && content) {
-                copyBtn.addEventListener('click', function() {
-                    // Create a temporary textarea
-                    const textarea = document.createElement('textarea');
-                    textarea.value = content.innerText;
-                    document.body.appendChild(textarea);
-                    textarea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textarea);
-                    
-                    // Show success toast
-                    showToast('Message copied to clipboard!');
-                });
-            }
-            
-            // Setup edit button
-            const editBtn = document.getElementById('editBtn');
-            const regenerateBtn = document.getElementById('regenerateBtn');
-            
-            if (editBtn) {
-                editBtn.addEventListener('click', function() {
-                    // For now just show a toast until edit functionality is implemented
-                    showToast('Edit mode coming soon!');
-                });
-            }
-            
-            if (regenerateBtn) {
-                regenerateBtn.addEventListener('click', function() {
-                    const regenerateOptions = document.getElementById('regenerateOptions');
-                    if (regenerateOptions) {
-                        regenerateOptions.style.display = 'block';
-                    }
-                });
-            }
-            
-            // Cancel regenerate
-            const cancelRegenerateBtn = document.getElementById('cancelRegenerateBtn');
-            if (cancelRegenerateBtn) {
-                cancelRegenerateBtn.addEventListener('click', function() {
-                    const regenerateOptions = document.getElementById('regenerateOptions');
-                    if (regenerateOptions) {
-                        regenerateOptions.style.display = 'none';
-                    }
-                });
-            }
-        });
+        </div>
         
-        // Show toast notification
-        function showToast(message, type = 'success') {
-            // Check if a toast container already exists
-            let toastContainer = document.querySelector('.toast-container');
-            
-            // Create the container if it doesn't exist
-            if (!toastContainer) {
-                toastContainer = document.createElement('div');
-                toastContainer.className = 'toast-container';
-                document.body.appendChild(toastContainer);
-            }
-            
-            // Create the toast element
-            const toast = document.createElement('div');
-            toast.className = `toast toast--${type}`;
-            
-            // Add icon based on type
-            const icon = document.createElement('i');
-            icon.className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle';
-            toast.appendChild(icon);
-            
-            // Add message
-            const messageSpan = document.createElement('span');
-            messageSpan.textContent = message;
-            toast.appendChild(messageSpan);
-            
-            // Add the toast to the container
-            toastContainer.appendChild(toast);
-            
-            // Remove the toast after a delay
-            setTimeout(() => {
-                toast.classList.add('toast-exit');
-                
-                // Remove the element after transition
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                    
-                    // Remove the container if it's empty
-                    if (toastContainer.children.length === 0 && toastContainer.parentNode) {
-                        toastContainer.parentNode.removeChild(toastContainer);
-                    }
-                }, 300);
-            }, 3000);
-        }
-    </script>
+        <!-- Message Insights -->
+        <div class="message-insights" id="message-insights" style="display: none;">
+            <div class="insights-header">
+                <i class="fas fa-lightbulb insights-header__icon"></i>
+                <h3 class="insights-header__title">Why This Message Works</h3>
+            </div>
+            <div class="insights-content" id="insights-content">
+                <!-- Will be populated with message insights -->
+            </div>
+        </div>
+        
+        <!-- Error State -->
+        <div class="error-state" id="error-state" style="display: none;">
+            <div class="error-state__icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <h2 class="error-state__title">Something went wrong</h2>
+            <p class="error-state__message" id="error-message">
+                We couldn't generate your message. Please try again.
+            </p>
+            <button class="error-state__button" id="retry-btn">
+                <i class="fas fa-redo"></i>
+                Try Again
+            </button>
+        </div>
+        
+        <!-- Back to Home -->
+        <a href="home.html" class="back-to-home">
+            <i class="fas fa-arrow-left"></i>
+            Back to Dashboard
+        </a>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/message-result-new.js"></script>
 </body>
 </html> 

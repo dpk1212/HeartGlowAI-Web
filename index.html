@@ -564,19 +564,22 @@
     
     /* Message Cards Grid */
     .message-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: var(--spacing-lg);
       margin: var(--spacing-xl) 0;
       perspective: 1000px;
+      max-width: 600px;
+      width: 100%;
+      margin: var(--spacing-xl) auto;
     }
     
     .message-card {
       position: relative;
-      height: 200px;
+      height: 120px;
       cursor: pointer;
       transform-style: preserve-3d;
-      transition: transform 0.6s;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .message-card.flipped {
@@ -588,17 +591,23 @@
       position: absolute;
       width: 100%;
       height: 100%;
+      -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       border-radius: var(--border-radius-lg);
       padding: var(--spacing-lg);
       display: flex;
-      flex-direction: column;
-      justify-content: center;
       align-items: center;
-      text-align: center;
       background: rgba(45, 42, 59, 0.7);
       border: 1px solid rgba(138, 87, 222, 0.1);
       transition: all 0.3s ease;
+      overflow: hidden;
+    }
+    
+    .message-card__front {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+      padding: var(--spacing-lg);
     }
     
     .message-card__front:hover {
@@ -610,24 +619,39 @@
     .message-card__back {
       transform: rotateY(180deg);
       background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.9));
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: var(--spacing-md);
     }
     
     .message-card__icon {
       font-size: 2em;
-      margin-bottom: var(--spacing-md);
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(138, 87, 222, 0.1);
+      border-radius: var(--border-radius-md);
     }
     
     .message-card__title {
       font-weight: 500;
       color: var(--text-light);
-      margin-bottom: var(--spacing-sm);
+      margin: 0;
+      text-align: left;
+      font-size: var(--font-size-md);
+      line-height: 1.4;
     }
     
     .message-card__preview {
       color: var(--text-muted);
       font-size: var(--font-size-sm);
       line-height: 1.6;
-      margin-bottom: var(--spacing-lg);
+      margin: 0;
+      flex-grow: 1;
     }
     
     .message-card__button {
@@ -639,6 +663,11 @@
       font-weight: 500;
       cursor: pointer;
       transition: all 0.3s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
     }
     
     .message-card__button:hover {
@@ -653,6 +682,7 @@
       color: var(--text-muted);
       font-size: 1.2em;
       cursor: help;
+      z-index: 2;
     }
     
     .message-card__insights:hover::after {
@@ -668,6 +698,7 @@
       white-space: nowrap;
       margin-right: var(--spacing-sm);
       z-index: 1;
+      box-shadow: var(--shadow-md);
     }
     
     /* CTA Section */
@@ -771,7 +802,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
           </div>
         </div>
@@ -783,7 +814,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
           </div>
         </div>
@@ -795,7 +826,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
           </div>
         </div>
@@ -875,9 +906,27 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Card flip functionality
       const messageCards = document.querySelectorAll('.message-card');
+      
       messageCards.forEach(card => {
-        card.addEventListener('click', () => {
-          card.classList.toggle('flipped');
+        const frontSide = card.querySelector('.message-card__front');
+        const backSide = card.querySelector('.message-card__back');
+        const button = card.querySelector('.message-card__button');
+        
+        frontSide.addEventListener('click', () => {
+          card.classList.add('flipped');
+        });
+        
+        // Prevent card from flipping back when clicking the button
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Handle button click - redirect or show message editor
+        });
+        
+        // Allow clicking anywhere on the back to flip back
+        backSide.addEventListener('click', (e) => {
+          if (e.target === backSide || e.target.classList.contains('message-card__preview')) {
+            card.classList.remove('flipped');
+          }
         });
       });
       
@@ -888,20 +937,16 @@
       
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-          // Remove active class from all tabs
           tabs.forEach(t => t.classList.remove('active'));
-          
-          // Add active class to clicked tab
           tab.classList.add('active');
           
-          // Show the corresponding cards
           const type = tab.getAttribute('data-type');
           if (type === 'professional') {
-            professionalCards.style.display = 'grid';
+            professionalCards.style.display = 'flex';
             personalCards.style.display = 'none';
           } else if (type === 'personal') {
             professionalCards.style.display = 'none';
-            personalCards.style.display = 'grid';
+            personalCards.style.display = 'flex';
           }
         });
       });

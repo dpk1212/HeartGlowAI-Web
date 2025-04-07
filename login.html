@@ -124,7 +124,7 @@
       position: absolute;
       top: var(--spacing-md);
       right: var(--spacing-md);
-      font-size: 24px;
+      font-size: var(--font-size-md);
       color: rgba(255, 255, 255, 0.2);
       z-index: 1;
     }
@@ -483,15 +483,38 @@
       color: var(--text-light);
     }
 
-    /* Responsive styles */
-    @media (max-width: 480px) {
+    /* Responsive adjustments */
+    @media (max-width: 500px) {
       .auth-card {
-        width: 90%;
-        padding: var(--spacing-lg);
+        padding: var(--spacing-lg); /* Slightly reduce padding */
+        margin: var(--spacing-md) var(--spacing-sm); /* Add small side margins */
+      }
+
+      .auth-card__title {
+        font-size: calc(var(--font-size-xl) - 4px); /* Slightly smaller title */
+      }
+
+      .auth-card__subtitle {
+        font-size: var(--font-size-sm); /* Smaller subtitle */
+        margin-bottom: var(--spacing-lg); /* Reduce bottom margin */
+      }
+
+      .auth-btn {
+        height: 46px; /* Slightly shorter buttons */
+        font-size: var(--font-size-sm);
       }
       
-      .auth-card__title {
-        font-size: var(--font-size-lg);
+      .auth-form__input {
+         height: 46px; /* Match button height */
+         padding: var(--spacing-sm); /* Adjust padding if needed */
+      }
+
+      .auth-form__group {
+        margin-bottom: var(--spacing-md); /* Reduce space between fields */
+      }
+      
+      .auth-links {
+        font-size: var(--font-size-sm); /* Smaller links */
       }
     }
 

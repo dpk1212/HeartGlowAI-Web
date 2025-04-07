@@ -4430,9 +4430,9 @@ function copyMessage(id, content) {
 // --- Additions for Message Configurator ---
 function initializeMessageConfigurator() {
   const configurator = document.querySelector('.message-configurator');
-  const categoryToggle = document.querySelector('.category-toggle');
-  const formatOptions = document.querySelector('.format-options');
-  const intentionSections = document.querySelectorAll('.intention-options');
+  const categoryToggle = document.querySelector('.message-configurator__category-toggle');
+  const formatOptions = document.querySelector('.message-configurator__format-options');
+  const intentionSections = document.querySelectorAll('.message-configurator__intention-options');
   const startCraftingBtn = document.getElementById('start-crafting-btn');
   const backButton = document.getElementById('configurator-back-btn');
 
@@ -4443,10 +4443,10 @@ function initializeMessageConfigurator() {
 
   // --- Category Toggle Logic ---
   categoryToggle.addEventListener('click', (event) => {
-    if (event.target.classList.contains('toggle-btn') && !event.target.classList.contains('active')) {
+    if (event.target.classList.contains('message-configurator__toggle-btn') && !event.target.classList.contains('message-configurator__toggle-btn--active')) {
       // ... (logic to set active button and update selectedConfig.category) ...
-      categoryToggle.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      categoryToggle.querySelectorAll('.message-configurator__toggle-btn').forEach(btn => btn.classList.remove('message-configurator__toggle-btn--active'));
+      event.target.classList.add('message-configurator__toggle-btn--active');
       selectedConfig.category = event.target.dataset.category;
       console.log('Category selected:', selectedConfig.category);
 
@@ -4454,8 +4454,8 @@ function initializeMessageConfigurator() {
       showCorrectIntentions();
 
       // If already flipped, flip back and reset format/intention
-      if (configurator.classList.contains('flipped')) {
-        configurator.classList.remove('flipped');
+      if (configurator.classList.contains('message-configurator--flipped')) {
+        configurator.classList.remove('message-configurator--flipped');
         resetFormatSelection();
         resetIntentionSelection();
         updateStartCraftingButtonState(); 
@@ -4468,10 +4468,10 @@ function initializeMessageConfigurator() {
 
   // --- Format Selection Logic ---
   formatOptions.addEventListener('click', (event) => {
-    const formatBtn = event.target.closest('.format-btn');
+    const formatBtn = event.target.closest('.message-configurator__format-btn');
     if (formatBtn) {
-      formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
-      formatBtn.classList.add('selected');
+      formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
+      formatBtn.classList.add('message-configurator__format-btn--selected');
       selectedConfig.format = formatBtn.dataset.format;
       console.log('Format selected:', selectedConfig.format);
 
@@ -4483,10 +4483,10 @@ function initializeMessageConfigurator() {
   // --- Intention Selection Logic ---
   intentionSections.forEach(section => {
     section.addEventListener('click', (event) => {
-      const card = event.target.closest('.intention-card');
+      const card = event.target.closest('.message-configurator__intention-card');
       if (card) {
-         intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
-         card.classList.add('selected');
+         intentionSections.forEach(s => s.querySelectorAll('.message-configurator__intention-card').forEach(c => c.classList.remove('message-configurator__intention-card--selected')));
+         card.classList.add('message-configurator__intention-card--selected');
          selectedConfig.intention = card.dataset.intention;
          console.log('Intention selected:', selectedConfig.intention);
          updateStartCraftingButtonState(); // Update button now that intention is selected
@@ -4496,12 +4496,12 @@ function initializeMessageConfigurator() {
   
   // --- Helper Functions ---
   function resetFormatSelection() {
-    formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
+    formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
     selectedConfig.format = null;
   }
 
   function resetIntentionSelection() {
-    intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
+    intentionSections.forEach(s => s.querySelectorAll('.message-configurator__intention-card').forEach(c => c.classList.remove('message-configurator__intention-card--selected')));
     selectedConfig.intention = null;
   }
 
@@ -4516,9 +4516,9 @@ function initializeMessageConfigurator() {
   }
 
   function checkAndFlipConfigurator() {
-    if (selectedConfig.category && selectedConfig.format && !configurator.classList.contains('flipped')) {
+    if (selectedConfig.category && selectedConfig.format && !configurator.classList.contains('message-configurator--flipped')) {
       console.log('Flipping configurator to back');
-      configurator.classList.add('flipped');
+      configurator.classList.add('message-configurator--flipped');
       showCorrectIntentions(); // Ensure correct intentions are shown after flip
       // Button state updated when intention is picked
     }
@@ -4557,7 +4557,7 @@ function initializeMessageConfigurator() {
   if (backButton) {
     backButton.addEventListener('click', () => {
       console.log('Back button clicked, flipping to front');
-      configurator.classList.remove('flipped');
+      configurator.classList.remove('message-configurator--flipped');
       // Don't reset format selection to preserve the user's choices
       // resetFormatSelection();
       // We can reset intention selection since it's not visible on front face

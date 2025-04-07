@@ -1,0 +1,460 @@
+/*
+ * HeartGlowAI - Message Configurator Component
+ * This file contains styles for the message configurator component used on the home page
+ */
+
+/* Base container */
+.message-configurator {
+  display: block;
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  min-height: 520px;
+  margin: 2rem auto;
+  border-radius: 24px;
+  overflow: hidden;
+  perspective: 2000px;
+  z-index: 2;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(240, 245, 255, 0.8));
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 50, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.3) inset,
+    0 0 60px rgba(120, 150, 255, 0.15) inset;
+  animation: gentleGlow 8s infinite alternate;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+@keyframes gentleGlow {
+  0% { box-shadow: 0 20px 40px rgba(0, 0, 50, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.3) inset, 0 0 60px rgba(120, 150, 255, 0.15) inset; }
+  50% { box-shadow: 0 20px 40px rgba(0, 0, 50, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.3) inset, 0 0 80px rgba(120, 150, 255, 0.25) inset; }
+  100% { box-shadow: 0 20px 40px rgba(0, 0, 50, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.3) inset, 0 0 60px rgba(120, 150, 255, 0.15) inset; }
+}
+
+/* Add a subtle background pattern/texture */
+.message-configurator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23a0b5ff' fill-opacity='0.06' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+  opacity: 0.4;
+  z-index: -1;
+}
+
+/* Inner container for 3D flip animation */
+.message-configurator__inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.message-configurator--flipped .message-configurator__inner {
+  transform: rotateY(180deg);
+}
+
+/* Front and back faces */
+.message-configurator__front,
+.message-configurator__back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  padding: 2rem;
+}
+
+.message-configurator__front {
+  background: transparent;
+}
+
+.message-configurator__back {
+  background: transparent;
+  transform: rotateY(180deg);
+}
+
+/* Title styling */
+.message-configurator__title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  background: linear-gradient(135deg, #3a63d2, #6c8aee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Step styling */
+.message-configurator__step {
+  margin-bottom: 2rem;
+}
+
+.message-configurator__step-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #2c4482;
+  transition: color 0.3s ease;
+}
+
+.message-configurator__step-title::before {
+  content: '';
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, #5a7ae2, #8aa2ff);
+  margin-right: 10px;
+  border-radius: 50%;
+  background-size: 14px;
+  background-position: center;
+  background-repeat: no-repeat;
+  box-shadow: 0 2px 4px rgba(60, 80, 200, 0.2);
+}
+
+/* Category toggle styling */
+.message-configurator__category-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  margin: 1rem 0;
+}
+
+.message-configurator__toggle-btn {
+  position: relative;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  border-radius: 50px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 2px 10px rgba(0, 20, 80, 0.08),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  color: #4a5568;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.message-configurator__toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #5a7ae2, #8aa2ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  border-radius: 50px;
+}
+
+.message-configurator__toggle-btn:hover::before {
+  opacity: 0.1;
+}
+
+.message-configurator__toggle-btn--active {
+  color: #fff;
+  background: linear-gradient(135deg, #5a7ae2, #8aa2ff);
+  box-shadow: 0 4px 12px rgba(90, 122, 226, 0.3);
+  transform: translateY(-1px);
+}
+
+/* Format options styling */
+.message-configurator__format-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  justify-content: center;
+  margin: 0 auto;
+  max-width: 650px;
+}
+
+.message-configurator__format-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 16px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(0, 20, 80, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  height: 140px;
+}
+
+.message-configurator__format-btn:hover,
+.message-configurator__format-btn--selected {
+  background: linear-gradient(145deg, #ffffff, #f5f9ff);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(100, 130, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+.message-configurator__format-btn--selected {
+  box-shadow: 
+    0 8px 20px rgba(100, 130, 255, 0.2),
+    0 0 0 2px rgba(90, 122, 226, 0.5) inset;
+}
+
+/* Format button icon and label styling */
+.message-configurator__format-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  transition: transform 0.3s ease;
+}
+
+.message-configurator__format-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  transition: color 0.3s ease;
+}
+
+.message-configurator__format-btn:hover .message-configurator__format-icon {
+  transform: scale(1.1);
+}
+
+.message-configurator__format-btn:hover .message-configurator__format-label,
+.message-configurator__format-btn--selected .message-configurator__format-label {
+  color: #3a63d2;
+}
+
+.message-configurator__format-btn--selected .message-configurator__format-icon {
+  transform: scale(1.1);
+}
+
+/* Intention options styling */
+.message-configurator__intention-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.message-configurator__intention-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 16px;
+  padding: 24px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 12px rgba(0, 20, 80, 0.06),
+    0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+  z-index: 1;
+  overflow: hidden;
+  text-align: center;
+  height: 140px;
+}
+
+.message-configurator__intention-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #5a7ae2, #8aa2ff);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  border-radius: 16px;
+}
+
+.message-configurator__intention-card:hover,
+.message-configurator__intention-card--selected {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 8px 20px rgba(100, 130, 255, 0.12),
+    0 0 0 1px rgba(255, 255, 255, 0.9) inset;
+}
+
+.message-configurator__intention-card--selected::before,
+.message-configurator__intention-card:hover::before {
+  opacity: 0.05;
+}
+
+/* Intention card icon and text styling */
+.message-configurator__intention-icon {
+  font-size: 28px;
+  margin-bottom: 12px;
+  transition: transform 0.3s ease;
+  display: block;
+  height: 32px;
+  margin-bottom: 8px;
+}
+
+.message-configurator__intention-text {
+  font-size: 14px;
+  font-weight: 500;
+  color: #4a5568;
+  transition: color 0.3s ease;
+  line-height: 1.4;
+}
+
+.message-configurator__intention-card:hover .message-configurator__intention-icon {
+  transform: scale(1.1);
+}
+
+.message-configurator__intention-card--selected .message-configurator__intention-icon {
+  transform: scale(1.1);
+}
+
+/* Action button container */
+.message-configurator__action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2rem;
+}
+
+/* Start crafting button */
+.message-configurator__start-button {
+  background: linear-gradient(135deg, #5a7ae2, #8aa2ff);
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 28px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(90, 122, 226, 0.3);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  margin-left: auto;
+}
+
+.message-configurator__start-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #6d87e6, #98adff);
+  z-index: -1;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.message-configurator__start-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(90, 122, 226, 0.4);
+}
+
+.message-configurator__start-button:hover:not(:disabled)::after {
+  opacity: 1;
+}
+
+.message-configurator__start-button:disabled {
+  background: linear-gradient(135deg, #c4cdec, #d8e0ff);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Back button */
+.message-configurator__back-button {
+  background: transparent;
+  border: 1px solid rgba(90, 122, 226, 0.3);
+  color: #5a7ae2;
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-configurator__back-button:hover {
+  background: rgba(90, 122, 226, 0.05);
+  border-color: rgba(90, 122, 226, 0.5);
+  color: #3a63d2;
+}
+
+.message-configurator__back-icon {
+  margin-right: 8px;
+  transition: transform 0.3s ease;
+}
+
+.message-configurator__back-button:hover .message-configurator__back-icon {
+  transform: translateX(-3px);
+}
+
+.message-configurator__back-text {
+  font-weight: 500;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .message-configurator {
+    min-height: 480px;
+    margin: 1rem auto;
+  }
+  
+  .message-configurator__front,
+  .message-configurator__back {
+    padding: 1.5rem;
+  }
+  
+  .message-configurator__format-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .message-configurator__intention-options {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .message-configurator {
+    min-height: 440px;
+  }
+  
+  .message-configurator__title {
+    font-size: 24px;
+  }
+  
+  .message-configurator__action {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .message-configurator__back-button {
+    width: 100%;
+  }
+  
+  .message-configurator__start-button {
+    width: 100%;
+    margin-left: 0;
+  }
+} 

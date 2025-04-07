@@ -101,112 +101,110 @@
 
     <!-- New Message Configurator Section -->
     <section class="message-configurator">
-      <div class="configurator-inner">
+      <div class="message-configurator__inner">
         <!-- Front Face: Category & Format -->
-        <div class="configurator-front">
-          <h2 class="configurator-title">Start Crafting Your Message</h2>
+        <div class="message-configurator__front">
+          <h2 class="message-configurator__title">Start Crafting Your Message</h2>
           
           <!-- Step 1: Category Toggle -->
-          <div class="configurator-step">
-            <h3 class="step-title">1. Choose Context</h3>
-            <div class="category-toggle">
-              <button class="toggle-btn active" data-category="professional">
+          <div class="message-configurator__step">
+            <h3 class="message-configurator__step-title">1. Choose Context</h3>
+            <div class="message-configurator__category-toggle">
+              <button class="message-configurator__toggle-btn message-configurator__toggle-btn--active" data-category="professional">
                 💼 Professional
               </button>
-              <button class="toggle-btn" data-category="personal">
+              <button class="message-configurator__toggle-btn" data-category="personal">
                 💖 Personal
               </button>
             </div>
           </div>
     
           <!-- Step 2: Format Selection -->
-          <div class="configurator-step">
-            <h3 class="step-title">2. Select Format</h3>
-            <div class="format-options">
-              <button class="format-btn" data-format="text">
-                <span class="format-icon">📱</span>
-                <span class="format-label">Text Message</span>
+          <div class="message-configurator__step">
+            <h3 class="message-configurator__step-title">2. Select Format</h3>
+            <div class="message-configurator__format-options">
+              <button class="message-configurator__format-btn" data-format="text">
+                <span class="message-configurator__format-icon">📱</span>
+                <span class="message-configurator__format-label">Text Message</span>
               </button>
-              <button class="format-btn" data-format="email">
-                <span class="format-icon">📧</span>
-                <span class="format-label">Email</span>
+              <button class="message-configurator__format-btn" data-format="email">
+                <span class="message-configurator__format-icon">📧</span>
+                <span class="message-configurator__format-label">Email</span>
               </button>
-              <button class="format-btn" data-format="card">
-                <span class="format-icon">💌</span>
-                <span class="format-label">Card</span>
+              <button class="message-configurator__format-btn" data-format="card">
+                <span class="message-configurator__format-icon">💌</span>
+                <span class="message-configurator__format-label">Card</span>
               </button>
-              <button class="format-btn" data-format="conversation">
-                <span class="format-icon">🗣️</span>
-                <span class="format-label">Conversation Topics</span>
+              <button class="message-configurator__format-btn" data-format="conversation">
+                <span class="message-configurator__format-icon">🗣️</span>
+                <span class="message-configurator__format-label">Conversation Topics</span>
               </button>
             </div>
           </div>
         </div> 
         
         <!-- Back Face: Intention & Action -->
-        <div class="configurator-back">
-          <!-- Back Button -->
-          <button id="configurator-back-btn" class="back-button">
-            <span class="back-icon"><i class="fas fa-arrow-left"></i></span>
-            <span class="back-text">Back</span>
-          </button>
-          
-          <h2 class="configurator-title">Refine Your Message</h2> 
+        <div class="message-configurator__back">
+          <h2 class="message-configurator__title">Refine Your Message</h2> 
           
           <!-- Step 3: Intention Selection -->
-          <div class="configurator-step">
-            <h3 class="step-title">3. Pick Your Starting Point</h3>
+          <div class="message-configurator__step">
+            <h3 class="message-configurator__step-title">3. Pick Your Starting Point</h3>
             <!-- Professional Intentions (Visible by default) -->
-            <div class="intention-options professional-intentions">
-              <button class="intention-card" data-intention="recognize_effort">
-                <span class="intention-icon">💬</span>
-                <span class="intention-text">"I want to recognize someone's effort."</span>
+            <div class="message-configurator__intention-options professional-intentions">
+              <button class="message-configurator__intention-card" data-intention="recognize_effort">
+                <span class="message-configurator__intention-icon">💬</span>
+                <span class="message-configurator__intention-text">"I want to recognize someone's effort."</span>
               </button>
-              <button class="intention-card" data-intention="give_feedback">
-                <span class="intention-icon">🧠</span>
-                <span class="intention-text">"I need to give feedback — with care."</span>
+              <button class="message-configurator__intention-card" data-intention="give_feedback">
+                <span class="message-configurator__intention-icon">🧠</span>
+                <span class="message-configurator__intention-text">"I need to give feedback — with care."</span>
               </button>
-              <button class="intention-card" data-intention="thank_support">
-                <span class="intention-icon">🙏</span>
-                <span class="intention-text">"I want to thank someone for their support."</span>
+              <button class="message-configurator__intention-card" data-intention="thank_support">
+                <span class="message-configurator__intention-icon">🙏</span>
+                <span class="message-configurator__intention-text">"I want to thank someone for their support."</span>
               </button>
-              <button class="intention-card" data-intention="express_clearly">
-                <span class="intention-icon">🎯</span>
-                <span class="intention-text">"I need to express something clearly and respectfully."</span>
+              <button class="message-configurator__intention-card" data-intention="express_clearly">
+                <span class="message-configurator__intention-icon">🎯</span>
+                <span class="message-configurator__intention-text">"I need to express something clearly and respectfully."</span>
               </button>
-              <button class="intention-card" data-intention="acknowledge_impact">
-                <span class="intention-icon">👏</span>
-                <span class="intention-text">"Someone deserves to feel seen for their impact."</span>
+              <button class="message-configurator__intention-card" data-intention="acknowledge_impact">
+                <span class="message-configurator__intention-icon">👏</span>
+                <span class="message-configurator__intention-text">"Someone deserves to feel seen for their impact."</span>
               </button>
             </div>
             <!-- Personal Intentions (Hidden by default) -->
-            <div class="intention-options personal-intentions" style="display: none;">
-              <button class="intention-card" data-intention="thinking_of_you">
-                <span class="intention-icon">❤️</span>
-                <span class="intention-text">"I've been thinking about someone..."</span>
+            <div class="message-configurator__intention-options personal-intentions" style="display: none;">
+              <button class="message-configurator__intention-card" data-intention="thinking_of_you">
+                <span class="message-configurator__intention-icon">❤️</span>
+                <span class="message-configurator__intention-text">"I've been thinking about someone..."</span>
               </button>
-              <button class="intention-card" data-intention="say_thank_you">
-                <span class="intention-icon">🙏</span>
-                <span class="intention-text">"I want to say thank you — properly."</span>
+              <button class="message-configurator__intention-card" data-intention="say_thank_you">
+                <span class="message-configurator__intention-icon">🙏</span>
+                <span class="message-configurator__intention-text">"I want to say thank you — properly."</span>
               </button>
-              <button class="intention-card" data-intention="reconnect">
-                <span class="intention-icon">🤝</span>
-                <span class="intention-text">"We haven't talked in a while."</span>
+              <button class="message-configurator__intention-card" data-intention="reconnect">
+                <span class="message-configurator__intention-icon">🤝</span>
+                <span class="message-configurator__intention-text">"We haven't talked in a while."</span>
               </button>
-              <button class="intention-card" data-intention="express_feelings">
-                <span class="intention-icon">✍️</span>
-                <span class="intention-text">"I want to say something I've been holding in."</span>
+              <button class="message-configurator__intention-card" data-intention="express_feelings">
+                <span class="message-configurator__intention-icon">✍️</span>
+                <span class="message-configurator__intention-text">"I want to say something I've been holding in."</span>
               </button>
-              <button class="intention-card" data-intention="make_smile">
-                <span class="intention-icon">💬</span>
-                <span class="intention-text">"I just want to make someone smile."</span>
+              <button class="message-configurator__intention-card" data-intention="make_smile">
+                <span class="message-configurator__intention-icon">💬</span>
+                <span class="message-configurator__intention-text">"I just want to make someone smile."</span>
               </button>
             </div>
           </div>
     
           <!-- Step 4: Action Button -->
-          <div class="configurator-action">
-            <button id="start-crafting-btn" class="start-crafting-button" disabled>
+          <div class="message-configurator__action">
+            <button id="configurator-back-btn" class="message-configurator__back-button">
+              <span class="message-configurator__back-icon"><i class="fas fa-arrow-left"></i></span>
+              <span class="message-configurator__back-text">Back</span>
+            </button>
+            <button id="start-crafting-btn" class="message-configurator__start-button" disabled>
               Select Format & Starting Point
             </button>
           </div>

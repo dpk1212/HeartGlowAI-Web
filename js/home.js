@@ -4429,198 +4429,187 @@ function copyMessage(id, content) {
 
 // --- Additions for Message Configurator ---
 function initializeMessageConfigurator() {
-  const configurator = document.querySelector('.message-configurator');
-  const categoryToggle = document.querySelector('.message-configurator__category-toggle');
-  const formatOptions = document.querySelector('.message-configurator__format-options');
-  const intentionSections = document.querySelectorAll('.message-configurator__intention-options');
+  console.log('Initializing message configurator...');
+  
+  // Get references to all configurator elements
+  const categoryToggleBtns = document.querySelectorAll('.message-configurator__toggle-btn');
+  const intentionCards = document.querySelectorAll('.message-configurator__intention-card');
+  const formatBtns = document.querySelectorAll('.message-configurator__format-btn');
+  const continueBtn = document.getElementById('continue-to-format-btn');
   const startCraftingBtn = document.getElementById('start-crafting-btn');
-  const continueToFormatBtn = document.getElementById('continue-to-format-btn');
-  const backButton = document.getElementById('configurator-back-btn');
-
-  if (!configurator || !categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn || !continueToFormatBtn) {
-    console.error('Message Configurator elements not found!');
-    return;
-  }
-
-  // Initialize configuration object
-  const selectedConfig = {
-    category: 'professional', // Default category
-    intention: null,
-    format: null
-  };
-
-  // --- Category Toggle Logic ---
-  categoryToggle.addEventListener('click', (event) => {
-    const toggleBtn = event.target.closest('.message-configurator__toggle-btn');
-    
-    if (toggleBtn && !toggleBtn.classList.contains('message-configurator__toggle-btn--active')) {
-      // Remove active class from all buttons
-      categoryToggle.querySelectorAll('.message-configurator__toggle-btn').forEach(btn => {
-        btn.classList.remove('message-configurator__toggle-btn--active');
-      });
+  const backBtn = document.getElementById('configurator-back-btn');
+  const messageConfigurator = document.querySelector('.message-configurator');
+  
+  // Track selected elements
+  let selectedIntentionCard = null;
+  let selectedFormatBtn = null;
+  
+  // Initialize category toggle
+  categoryToggleBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // Remove active class from all toggle buttons
+      categoryToggleBtns.forEach(b => b.classList.remove('message-configurator__toggle-btn--active'));
       
       // Add active class to clicked button
-      toggleBtn.classList.add('message-configurator__toggle-btn--active');
+      this.classList.add('message-configurator__toggle-btn--active');
       
-      // Update selected category
-      selectedConfig.category = toggleBtn.dataset.category;
-      console.log('Category selected:', selectedConfig.category);
+      // Update the selected category
+      selectedConfig.category = this.dataset.category;
       
-      // Update the toggle indicator position via class
-      if (selectedConfig.category === 'personal') {
-        categoryToggle.classList.add('personal-active');
+      // Toggle visibility of intention options
+      if (this.dataset.category === 'professional') {
+        document.querySelector('.professional-intentions').style.display = 'grid';
+        document.querySelector('.personal-intentions').style.display = 'none';
       } else {
-        categoryToggle.classList.remove('personal-active');
+        document.querySelector('.professional-intentions').style.display = 'none';
+        document.querySelector('.personal-intentions').style.display = 'grid';
       }
-
-      // Show correct intention section based on category
-      showCorrectIntentions();
       
-      // Reset intention selection
-      resetIntentionSelection();
-      updateContinueButtonState();
-    }
-  });
-
-  // --- Intention Selection Logic (now on front page) ---
-  intentionSections.forEach(section => {
-    section.addEventListener('click', (event) => {
-      const card = event.target.closest('.message-configurator__intention-card');
-      if (card) {
-         // Clear previous selections
-         intentionSections.forEach(s => {
-           s.querySelectorAll('.message-configurator__intention-card').forEach(c => {
-             c.classList.remove('message-configurator__intention-card--selected');
-           });
-         });
-         
-         // Mark selected card
-         card.classList.add('message-configurator__intention-card--selected');
-         selectedConfig.intention = card.dataset.intention;
-         console.log('Intention selected:', selectedConfig.intention);
-         
-         // Enable continue button
-         updateContinueButtonState();
-         
-         // Auto-flip to format selection after a short delay
-         if (selectedConfig.intention) {
-           setTimeout(() => {
-             configurator.classList.add('message-configurator--flipped');
-           }, 300);
-         }
+      // Reset selected intention
+      if (selectedIntentionCard) {
+        selectedIntentionCard.classList.remove('message-configurator__intention-card--selected');
+        selectedIntentionCard = null;
       }
+      
+      // Disable continue button
+      continueBtn.disabled = true;
+      continueBtn.textContent = 'Select a Starting Point';
+      
+      // Reset the selected intention in the config
+      selectedConfig.intention = null;
     });
   });
   
-  // --- Format Selection Logic (now on back page) ---
-  formatOptions.addEventListener('click', (event) => {
-    const formatBtn = event.target.closest('.message-configurator__format-btn');
-    if (formatBtn) {
-      formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
-      formatBtn.classList.add('message-configurator__format-btn--selected');
-      selectedConfig.format = formatBtn.dataset.format;
-      console.log('Format selected:', selectedConfig.format);
-      updateStartCraftingButtonState(); // Update the start crafting button state
-    }
-  });
-  
-  // --- Continue Button Logic (to flip to format selection) ---
-  continueToFormatBtn.addEventListener('click', () => {
-    if (!continueToFormatBtn.disabled && selectedConfig.intention) {
-      console.log('Continuing to format selection with intention:', selectedConfig.intention);
-      configurator.classList.add('message-configurator--flipped');
-    }
-  });
-  
-  // --- Helper Functions ---
-  function resetIntentionSelection() {
-    intentionSections.forEach(s => s.querySelectorAll('.message-configurator__intention-card').forEach(c => c.classList.remove('message-configurator__intention-card--selected')));
-    selectedConfig.intention = null;
-  }
-
-  function resetFormatSelection() {
-    formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
-    selectedConfig.format = null;
-  }
-
-  function showCorrectIntentions() {
-    intentionSections.forEach(section => {
-      if (section.classList.contains(selectedConfig.category + '-intentions')) {
-        section.style.display = 'grid'; // Or 'flex'
-      } else {
-        section.style.display = 'none';
+  // Initialize intention cards
+  intentionCards.forEach(card => {
+    card.addEventListener('click', function() {
+      // If there's a previously selected card, deselect it
+      if (selectedIntentionCard) {
+        selectedIntentionCard.classList.remove('message-configurator__intention-card--selected');
       }
+      
+      // Select this card
+      this.classList.add('message-configurator__intention-card--selected');
+      selectedIntentionCard = this;
+      
+      // Update the selected intention
+      selectedConfig.intention = this.dataset.intention;
+      
+      // Enable continue button
+      continueBtn.disabled = false;
+      continueBtn.textContent = 'Continue to Format Selection';
     });
-  }
-
-  function updateContinueButtonState() {
-    if (selectedConfig.intention) { 
-      continueToFormatBtn.disabled = false;
-      continueToFormatBtn.textContent = 'Continue to Format Selection →';
-    } else {
-      continueToFormatBtn.disabled = true;
-      continueToFormatBtn.textContent = 'Select a Starting Point';
-    }
-  }
-
-  function updateStartCraftingButtonState() {
-    if (selectedConfig.format) { 
+  });
+  
+  // Initialize format buttons
+  formatBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      // If there's a previously selected format, deselect it
+      if (selectedFormatBtn) {
+        selectedFormatBtn.classList.remove('message-configurator__format-btn--selected');
+      }
+      
+      // Select this format
+      this.classList.add('message-configurator__format-btn--selected');
+      selectedFormatBtn = this;
+      
+      // Update the selected format
+      selectedConfig.format = this.dataset.format;
+      
+      // Enable start button
       startCraftingBtn.disabled = false;
-      startCraftingBtn.textContent = 'Start Crafting Message →';
-    } else {
-      startCraftingBtn.disabled = true;
-      startCraftingBtn.textContent = 'Select Format';
-    }
+      startCraftingBtn.textContent = 'Start Crafting';
+    });
+  });
+  
+  // Initialize continue button
+  if (continueBtn) {
+    continueBtn.addEventListener('click', function() {
+      if (!selectedConfig.intention) {
+        showAlert('Please select a starting point first', 'warning');
+        return;
+      }
+      
+      // Flip the configurator to show the format selection
+      messageConfigurator.classList.add('message-configurator--flipped');
+    });
   }
-
-  // --- Start Crafting Button Action ---
-  startCraftingBtn.addEventListener('click', () => {
-    if (!startCraftingBtn.disabled && selectedConfig.format) {
-      console.log('Starting message crafting with config:', selectedConfig);
-      try {
-        // Store all necessary data for the message generator API
-        sessionStorage.setItem('messageCategory', selectedConfig.category);
-        sessionStorage.setItem('messageFormat', selectedConfig.format);
-        sessionStorage.setItem('messageIntention', selectedConfig.intention);
-        
-        // Additional metadata that might be helpful for the API
-        sessionStorage.setItem('messageConfigTimestamp', new Date().toISOString());
-        sessionStorage.setItem('messageConfigComplete', 'true');
-        
-        // Log for debugging
-        console.log('Configuration saved to sessionStorage:', {
-          category: selectedConfig.category,
-          format: selectedConfig.format,
-          intention: selectedConfig.intention,
-          timestamp: new Date().toISOString()
-        });
-        
-        // Navigate to the next page in the flow
+  
+  // Initialize back button
+  if (backBtn) {
+    backBtn.addEventListener('click', function() {
+      // Flip back to the first side
+      messageConfigurator.classList.remove('message-configurator--flipped');
+    });
+  }
+  
+  // Initialize start crafting button
+  if (startCraftingBtn) {
+    startCraftingBtn.addEventListener('click', function() {
+      if (!selectedConfig.format) {
+        showAlert('Please select a message format first', 'warning');
+        return;
+      }
+      
+      // Store selected config in localStorage
+      localStorage.setItem('messageConfig', JSON.stringify(selectedConfig));
+      
+      // Show loading state
+      showLoading('Preparing your message creation...');
+      
+      // Navigate to the appropriate page
+      setTimeout(() => {
+        hideLoading();
         window.location.href = 'recipient-selection-new.html';
-      } catch (error) {
-        console.error('Error saving configuration to sessionStorage:', error);
-        showAlert('Could not save your selections. Please try again.', 'error');
+      }, 800);
+    });
+  }
+  
+  // Add keyboard navigation support
+  document.addEventListener('keydown', function(e) {
+    if (messageConfigurator.classList.contains('message-configurator--flipped')) {
+      // When on format selection side
+      if (e.key === 'Escape' || e.key === 'Backspace') {
+        backBtn.click();
+      } else if (e.key === 'Enter' && !startCraftingBtn.disabled) {
+        startCraftingBtn.click();
+      }
+    } else {
+      // When on intention selection side
+      if (e.key === 'Enter' && !continueBtn.disabled) {
+        continueBtn.click();
       }
     }
   });
-
-  // Back button functionality
-  if (backButton) {
-    backButton.addEventListener('click', () => {
-      console.log('Back button clicked, flipping to front');
-      configurator.classList.remove('message-configurator--flipped');
-    });
-  } else {
-    console.warn('Back button not found');
-  }
-
-  // Initial setup
-  showCorrectIntentions();
-  updateContinueButtonState();
-  updateStartCraftingButtonState();
   
-  // Set initial active state for category toggle (professional is default)
-  categoryToggle.classList.remove('personal-active');
+  // Add touch swipe support for mobile
+  let touchStartX = 0;
+  let touchEndX = 0;
+  
+  messageConfigurator.addEventListener('touchstart', function(e) {
+    touchStartX = e.changedTouches[0].screenX;
+  }, false);
+  
+  messageConfigurator.addEventListener('touchend', function(e) {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  }, false);
+  
+  function handleSwipe() {
+    const swipeThreshold = 100; // Minimum swipe distance
+    
+    if (touchEndX - touchStartX > swipeThreshold) {
+      // Swipe right - go back to front face
+      if (messageConfigurator.classList.contains('message-configurator--flipped')) {
+        backBtn.click();
+      }
+    } else if (touchStartX - touchEndX > swipeThreshold) {
+      // Swipe left - continue to back face
+      if (!messageConfigurator.classList.contains('message-configurator--flipped') && !continueBtn.disabled) {
+        continueBtn.click();
+      }
+    }
+  }
 }
 // --- End of Configurator Additions ---
 

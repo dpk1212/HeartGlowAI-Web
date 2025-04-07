@@ -58,8 +58,139 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
+    <style>
+        /* Additional inline styles for better UI */
+        .message-card--premium {
+            background: linear-gradient(145deg, #fcfcff 0%, #f5f5ff 100%);
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(138, 87, 222, 0.15);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .message-card__content--premium {
+            padding: 2.5rem;
+            position: relative;
+        }
+        
+        .message-card__premium-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(138, 87, 222, 0.05) 0%, rgba(255, 255, 255, 0) 100%);
+            z-index: -1;
+            opacity: 0.7;
+        }
+        
+        .message-card__text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            white-space: pre-wrap;
+            color: #333;
+            position: relative;
+        }
+        
+        .message-card__loading-heart {
+            transform: scale(1.2);
+        }
+        
+        .drop-cap {
+            font-size: 3.2em !important;
+            font-weight: 600 !important;
+            color: #8a57de !important;
+            float: left !important;
+            line-height: 0.8 !important;
+            margin-right: 0.1em !important;
+            margin-top: 0.1em !important;
+            text-shadow: 1px 1px 2px rgba(138, 87, 222, 0.3) !important;
+        }
+        
+        .premium-background {
+            background: linear-gradient(135deg, #121139 0%, #1e1c3b 100%);
+        }
+        
+        .message-insights {
+            margin-top: 2rem;
+            background: rgba(138, 87, 222, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid #8a57de;
+        }
+        
+        .message-insights__title {
+            color: #8a57de;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .insight-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid rgba(138, 87, 222, 0.1);
+            animation: fadeIn 0.5s ease forwards;
+            opacity: 0;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 1.5rem 0;
+        }
+        
+        /* Fix button styles */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .primary-button, .secondary-button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .primary-button {
+            background: #8a57de;
+            color: white;
+            border: none;
+        }
+        
+        .secondary-button {
+            background: transparent;
+            color: #8a57de;
+            border: 1px solid #8a57de;
+        }
+        
+        .primary-button:hover {
+            background: #7645c5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(138, 87, 222, 0.2);
+        }
+        
+        .secondary-button:hover {
+            background: rgba(138, 87, 222, 0.05);
+            transform: translateY(-2px);
+        }
+    </style>
 </head>
-<body class="message-result-page">
+<body class="message-result-page premium-background">
     <div id="app">
         <!-- App Header -->
         <header class="app-header">
@@ -126,6 +257,16 @@
             <div class="page-header">
                 <h1 class="page-title">Your Message</h1>
                 <p class="page-description">Here's your personalized message. You can edit it, regenerate or share it.</p>
+            </div>
+            
+            <!-- Navigation Buttons (Adding these to fix the console errors) -->
+            <div class="page-navigation">
+                <button id="backBtn" class="secondary-button">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <button id="dashboardBtn" class="primary-button">
+                    <i class="fas fa-home"></i> Dashboard
+                </button>
             </div>
             
             <!-- Message Information -->
@@ -273,6 +414,11 @@
                         <p class="option-description">New approach, same parameters</p>
                     </div>
                 </div>
+                
+                <!-- Added cancel button for regenerate options -->
+                <button id="cancelRegenerateBtn" class="secondary-button" style="margin: 20px auto 0; display: block;">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
             </div>
             
             <!-- Share Modal -->

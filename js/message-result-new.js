@@ -1620,7 +1620,7 @@ function displayGeneratedMessage(message) {
     let signatureText = '';
     
     // Look for common signature patterns like "Love," or "Sincerely," followed by name
-    const signaturePattern = /\n\s*(Love|Sincerely|Best|Regards|Yours|Warmly|Warmest regards|Best wishes|Cheers|Affectionately|Fondly|With all my respect|Respectfully|With all my love),?\s*\n\s*(.+?)$/i;
+    const signaturePattern = /\n\s*(Love|Sincerely|Best|Regards|Yours|Warmly|Warmest regards|Best wishes|Cheers|Affectionately|Fondly|With all my respect|Respectfully|With all my love|Looking forward|Take care),?\s*\n\s*(.+?)$/i;
     const signatureMatch = formattedMessage.match(signaturePattern);
     
     if (signatureMatch) {
@@ -1634,11 +1634,11 @@ function displayGeneratedMessage(message) {
     // Create formatted HTML with appropriate styling elements
     const contentElement = document.getElementById('content');
     if (contentElement) {
+        // Clear previous content
+        contentElement.innerHTML = '';
+        
         // Apply special styling to the first letter (drop cap effect)
         if (mainContent.length > 0) {
-            // Clear previous content
-            contentElement.innerHTML = '';
-            
             // Get the first letter for drop cap
             const firstLetter = mainContent.charAt(0);
             const restOfText = mainContent.substring(1);
@@ -1647,11 +1647,27 @@ function displayGeneratedMessage(message) {
             const dropCapSpan = document.createElement('span');
             dropCapSpan.className = 'drop-cap';
             dropCapSpan.textContent = firstLetter;
-            dropCapSpan.style.cssText = 'font-size: 3.2em; font-weight: 600; color: #8a57de; float: left; line-height: 0.8; margin-right: 0.1em; margin-top: 0.1em; text-shadow: 1px 1px 2px rgba(138, 87, 222, 0.3);';
             
             // Create text content
             const textSpan = document.createElement('span');
-            textSpan.textContent = restOfText;
+            
+            // Split by paragraphs
+            const paragraphs = restOfText.split('\n\n');
+            if (paragraphs.length > 1) {
+                textSpan.textContent = paragraphs[0]; // First paragraph text
+                
+                // Create and append each paragraph separately
+                for (let i = 1; i < paragraphs.length; i++) {
+                    if (paragraphs[i].trim()) {
+                        const para = document.createElement('p');
+                        para.textContent = paragraphs[i];
+                        para.style.marginTop = '1rem';
+                        contentElement.appendChild(para);
+                    }
+                }
+            } else {
+                textSpan.textContent = restOfText;
+            }
             
             // Add main text content with drop cap
             contentElement.appendChild(dropCapSpan);
@@ -1682,36 +1698,32 @@ function displayGeneratedMessage(message) {
         // Make the content visible
         contentElement.style.display = 'block';
         contentElement.style.visibility = 'visible';
-        contentElement.style.whiteSpace = 'pre-wrap';
     }
     
-    // Make the message container visible
-    const messageContainer = document.getElementById('messageState');
-    if (messageContainer) {
-        messageContainer.style.display = 'block';
-    }
-    
-    // Add quote marks through JavaScript for better cross-browser support
-    const messageBody = document.querySelector('.message-body');
-    if (messageBody) {
+    // Add decorative quotes
+    const messageCard = document.querySelector('.message-card__content');
+    if (messageCard) {
         // Create opening quote mark
         const openingQuote = document.createElement('div');
-        openingQuote.className = 'opening-quote';
-        openingQuote.textContent = '"';
-        openingQuote.style.cssText = 'position: absolute; left: -15px; top: -40px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
+        openingQuote.className = 'decorative-quote opening-quote';
+        openingQuote.innerHTML = '"';
+        openingQuote.style.cssText = 'position: absolute; left: 0; top: -30px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
         
         // Create closing quote mark
         const closingQuote = document.createElement('div');
-        closingQuote.className = 'closing-quote';
-        closingQuote.textContent = '"';
-        closingQuote.style.cssText = 'position: absolute; right: 0; bottom: -60px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
+        closingQuote.className = 'decorative-quote closing-quote';
+        closingQuote.innerHTML = '"';
+        closingQuote.style.cssText = 'position: absolute; right: 10px; bottom: -25px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
         
-        // Add quotes to the message body
-        messageBody.appendChild(openingQuote);
-        messageBody.appendChild(closingQuote);
+        // Check if quotes already exist to avoid duplicates
+        const existingQuotes = messageCard.querySelectorAll('.decorative-quote');
+        if (existingQuotes.length === 0) {
+            messageCard.appendChild(openingQuote);
+            messageCard.appendChild(closingQuote);
+        }
     }
     
-    // Make the message content visible with animation
+    // Make the message container visible with animation
     const messageContent = document.getElementById('messageContent');
     if (messageContent) {
         messageContent.style.display = 'block';
@@ -1727,7 +1739,10 @@ function displayGeneratedMessage(message) {
             messageContent.classList.add('premium-animation');
             
             // Add animation to the message container
-            messageContainer.classList.add('premium-container');
+            const messageContainer = document.getElementById('messageState');
+            if (messageContainer) {
+                messageContainer.classList.add('premium-container');
+            }
         }, 100);
     }
 }

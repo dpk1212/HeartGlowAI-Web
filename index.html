@@ -227,44 +227,25 @@
     
     .card {
       background: var(--card-bg);
+      background-image: linear-gradient(125deg, rgba(138, 87, 222, 0.05), rgba(45, 42, 59, 0.7), rgba(138, 87, 222, 0.05));
       backdrop-filter: blur(10px);
       border-radius: var(--border-radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-lg);
       margin-bottom: var(--spacing-xl);
-      border: 1px solid rgba(138, 87, 222, 0.1);
+      border: 1px solid rgba(138, 87, 222, 0.15);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
     }
     
     .card:hover {
       transform: translateY(-5px);
       box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.2);
+      border-color: rgba(138, 87, 222, 0.3);
     }
     
-    .card-image {
-      position: relative;
-      height: 200px;
-      overflow: hidden;
-    }
-    
-    .card-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.5s ease;
-    }
-    
-    .card:hover .card-img {
-      transform: scale(1.05);
-    }
-    
-    .card-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(to bottom, rgba(26, 22, 37, 0.2), rgba(26, 22, 37, 0.8));
+    .card-content {
+      padding: var(--spacing-xl);
     }
     
     .premium-badge {
@@ -282,10 +263,6 @@
       gap: var(--spacing-xs);
       z-index: 2;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    }
-    
-    .card-content {
-      padding: var(--spacing-lg);
     }
     
     .card-title {
@@ -334,6 +311,8 @@
       position: relative;
       color: var(--text-light);
       border-left: 3px solid var(--primary);
+      margin-top: var(--spacing-lg);
+      box-shadow: inset 0 0 20px rgba(138, 87, 222, 0.05);
     }
     
     .sample::before {
@@ -500,12 +479,8 @@
       <!-- Card Section -->
       <div class="card-container">
         <div class="card" id="romantic-card">
-          <div class="card-image">
-            <img src="images/romantic-background.jpg" alt="Romantic connection" class="card-img" onerror="this.src='data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';">
-            <div class="card-overlay"></div>
-            <div class="premium-badge">
-              <i class="fas fa-sparkles"></i> Premium
-            </div>
+          <div class="premium-badge">
+            <i class="fas fa-sparkles"></i> Premium
           </div>
           <div class="card-content">
             <h2 class="card-title">Romantic Messages</h2>
@@ -526,6 +501,60 @@
             </div>
             <div class="sample">
               "I've been thinking about you lately, and I realized I never properly told you how much your presence means to me. Your laugh, your kindness, the way you see the world - it all brings so much joy into my life."
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" id="professional-card" style="display: none;">
+          <div class="premium-badge">
+            <i class="fas fa-sparkles"></i> Premium
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Professional Messages</h2>
+            <p class="card-description">Communicate with clarity and impact in your workplace relationships, whether with colleagues, clients, or leadership. Craft messages that resonate professionally.</p>
+            <div class="features">
+              <div class="feature">
+                <span>📊</span>
+                <span>Clear communication</span>
+              </div>
+              <div class="feature">
+                <span>🤝</span>
+                <span>Professional tone</span>
+              </div>
+              <div class="feature">
+                <span>🎯</span>
+                <span>Impactful messaging</span>
+              </div>
+            </div>
+            <div class="sample">
+              "Your guidance on the recent project helped us navigate complex challenges with remarkable clarity and purpose. Your leadership created a vision that inspired the entire team to deliver beyond expectations."
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" id="personal-card" style="display: none;">
+          <div class="premium-badge">
+            <i class="fas fa-sparkles"></i> Premium
+          </div>
+          <div class="card-content">
+            <h2 class="card-title">Personal Messages</h2>
+            <p class="card-description">Reconnect with friends or family through meaningful, heartfelt communication that strengthens your relationship. Create messages that bridge any distance.</p>
+            <div class="features">
+              <div class="feature">
+                <span>🌟</span>
+                <span>Genuine connection</span>
+              </div>
+              <div class="feature">
+                <span>🤗</span>
+                <span>Heartfelt sentiment</span>
+              </div>
+              <div class="feature">
+                <span>🔄</span>
+                <span>Relationship building</span>
+              </div>
+            </div>
+            <div class="sample">
+              "Our friendship has been a constant source of strength for me, especially during these changing times. I wanted to reach out and let you know how much I appreciate having you in my life through all these years."
             </div>
           </div>
         </div>
@@ -564,7 +593,11 @@
     document.addEventListener('DOMContentLoaded', function() {
       // Tab switching functionality
       const tabs = document.querySelectorAll('.tab');
-      const cards = document.querySelectorAll('.card');
+      const cards = {
+        'romantic': document.getElementById('romantic-card'),
+        'professional': document.getElementById('professional-card'),
+        'personal': document.getElementById('personal-card')
+      };
       
       tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -577,9 +610,13 @@
           // Show the corresponding card
           const type = tab.getAttribute('data-type');
           
-          // Here you would normally show/hide cards based on type
-          // This is just a placeholder since we're only showing one card for simplicity
-          document.getElementById('romantic-card').style.display = type === 'romantic' ? 'block' : 'none';
+          // Hide all cards
+          Object.values(cards).forEach(card => {
+            if (card) card.style.display = 'none';
+          });
+          
+          // Show the selected card
+          if (cards[type]) cards[type].style.display = 'block';
         });
       });
       

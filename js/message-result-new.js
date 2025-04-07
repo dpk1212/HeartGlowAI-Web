@@ -499,119 +499,65 @@ function copyInsightsToClipboard() {
 }
 
 /**
- * Show loading state
+ * Show loading state with improved loading indicator
  */
 function showLoadingState() {
     try {
+        console.log("Showing loading state...");
+        
+        // Get all the elements we need to control
         const loadingState = document.getElementById('loadingState');
         const messageContent = document.getElementById('messageContent');
         const errorState = document.getElementById('errorState');
         const regenerateOptions = document.getElementById('regenerateOptions');
+        const messageInsights = document.getElementById('messageInsights');
         
-        if (loadingState) {
-            loadingState.style.display = 'flex';
-        }
+        // Hide everything except loading
+        if (messageContent) messageContent.style.display = 'none';
+        if (errorState) errorState.style.display = 'none';
+        if (regenerateOptions) regenerateOptions.style.display = 'none';
+        if (messageInsights) messageInsights.style.display = 'none';
         
-        if (messageContent) {
-            messageContent.style.display = 'none';
-        }
-        
-        if (errorState) {
-            errorState.style.display = 'none';
-        }
-        
-        if (regenerateOptions) {
-            regenerateOptions.style.display = 'none';
-        }
+        // Show loading state
+        if (loadingState) loadingState.style.display = 'flex';
     } catch (error) {
         console.error('Error showing loading state:', error);
     }
 }
 
 /**
- * Show error message
+ * Show error state with better UI
  */
-function showError(message = 'An error occurred') {
-    const loadingState = document.getElementById('loadingState');
-    const errorState = document.getElementById('errorState');
-    const messageContent = document.getElementById('messageContent');
-    const regenerateOptions = document.getElementById('regenerateOptions');
-    
-    if (loadingState) {
-        loadingState.style.display = 'none';
-    }
-    
-    if (errorState) {
-        errorState.style.display = 'block';
+function showError(message) {
+    try {
+        console.error("Showing error state:", message);
         
+        // Get all the elements we need to control
+        const loadingState = document.getElementById('loadingState');
+        const messageContent = document.getElementById('messageContent');
+        const errorState = document.getElementById('errorState');
         const errorText = document.getElementById('errorText');
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        const messageInsights = document.getElementById('messageInsights');
+        
+        // Hide everything except error
+        if (loadingState) loadingState.style.display = 'none';
+        if (messageContent) messageContent.style.display = 'none';
+        if (regenerateOptions) regenerateOptions.style.display = 'none';
+        if (messageInsights) messageInsights.style.display = 'none';
+        
+        // Update error message
         if (errorText) {
-            errorText.textContent = message;
+            errorText.textContent = message || 'An error occurred while generating your message. Please try again.';
         }
         
-        const retryButton = document.getElementById('retryButton');
-        if (retryButton) {
-            // Remove existing event listeners to prevent duplicates
-            const newRetryButton = retryButton.cloneNode(true);
-            if (retryButton.parentNode) {
-                retryButton.parentNode.replaceChild(newRetryButton, retryButton);
-            }
-            
-            // Add click event listener to retry
-            newRetryButton.addEventListener('click', function() {
-                // Hide error state
-                if (errorState) {
-                    errorState.style.display = 'none';
-                }
-                
-                // Show loading state
-                if (loadingState) {
-                    loadingState.style.display = 'flex';
-                }
-                
-                // Try to clean up any token issues first
-                if (message.includes('Authentication') || message.includes('auth')) {
-                    // Try to get a fresh token
-                    if (firebase.auth && firebase.auth().currentUser) {
-                        firebase.auth().currentUser.getIdToken(true)
-                            .then(newToken => {
-                                localStorage.setItem('authToken', newToken);
-                                console.log('Got fresh token on retry');
-                                // Call directly with new token
-                                generateMessage();
-                            })
-                            .catch(error => {
-                                console.error('Failed to get token on retry:', error);
-                                // Fall back to normal generation
-                                generateMessage();
-                            });
-                    } else {
-                        // No current user, just try generation which will use any saved token
-                        generateMessage();
-                    }
-                } else {
-                    // For non-auth errors, just try generation again after a short delay
-                    setTimeout(() => {
-                        generateMessage();
-                    }, 500);
-                }
-            });
+        // Show error state
+        if (errorState) {
+            errorState.style.display = 'block';
         }
-    } else {
-        // Fallback to alert if error state element doesn't exist
-        showAlert(message, 'error');
+    } catch (error) {
+        console.error('Error showing error state:', error);
     }
-    
-    if (messageContent) {
-        messageContent.style.display = 'none';
-    }
-    
-    if (regenerateOptions) {
-        regenerateOptions.style.display = 'none';
-    }
-    
-    // Log the error
-    console.error('Error:', message);
 }
 
 /**
@@ -1095,9 +1041,13 @@ function generateMessage(variation = null) {
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
                 
-                // Display the message and insights
+                // Display the message
                 displayGeneratedMessage(parsedResponse.message);
-                displayMessageInsights(parsedResponse.insights);
+                
+                // Only display insights if we actually have them from the API
+                if (parsedResponse.insights && parsedResponse.insights.length > 0) {
+                    displayMessageInsights(parsedResponse.insights);
+                }
                 
                 // Setup the regenerate options
                 initializeRegenerateOptions();
@@ -1397,76 +1347,77 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
 }
 
 /**
- * Parse OpenAI response to extract message and insights
+ * Parse the OpenAI API response to extract message and insights
  */
 function parseOpenAIResponse(response) {
     try {
-        console.log("Parsing API response:", response);
+        console.log("Parsing API response...");
         
-        // If the response is already a string, try to parse it as JSON
+        // Initialize with default values
+        let message = '';
+        let insights = [];
+        
+        // Handle different response formats
         if (typeof response === 'string') {
-            try {
-                response = JSON.parse(response);
-            } catch (e) {
-                console.error("Error parsing response string as JSON:", e);
-                // If parsing fails, assume it's just the message text
-                return {
-                    message: response,
-                    insights: ["This message was generated with AI assistance."]
-                };
-            }
-        }
-        
-        // Handle various response formats
-        if (response.message) {
-            // If response has a message property, use that
-            return {
-                message: response.message,
-                insights: response.insights || ["This message was generated with AI assistance."]
-            };
-        } else if (response.content) {
-            // If response has a content property, use that
-            return {
-                message: response.content,
-                insights: response.insights || ["This message was generated with AI assistance."]
-            };
-        } else if (response.text) {
-            // If response has a text property, use that
-            return {
-                message: response.text,
-                insights: response.insights || ["This message was generated with AI assistance."]
-            };
-        } else if (typeof response === 'object' && !Array.isArray(response)) {
-            // Try to find message-like properties in the response object
-            const possibleMessageKeys = ['text', 'content', 'message', 'generated_text', 'result'];
-            for (const key of possibleMessageKeys) {
-                if (response[key] && typeof response[key] === 'string') {
-                    return {
-                        message: response[key],
-                        insights: response.insights || ["This message was generated with AI assistance."]
-                    };
+            // Simple string response - use it as message
+            message = response;
+        } else if (response && typeof response === 'object') {
+            // Complex object response
+            if (response.choices && response.choices.length > 0) {
+                // Standard OpenAI API response format
+                const choice = response.choices[0];
+                
+                if (choice.message && choice.message.content) {
+                    message = choice.message.content;
+                } else if (choice.text) {
+                    message = choice.text;
+                }
+            } else if (response.content) {
+                // Our custom format
+                message = response.content;
+                
+                if (response.insights && Array.isArray(response.insights)) {
+                    insights = response.insights;
+                }
+            } else if (response.message) {
+                // Another possible format
+                message = response.message;
+                
+                if (response.insights && Array.isArray(response.insights)) {
+                    insights = response.insights;
                 }
             }
-            
-            // If no message property found, stringify the whole response
-            console.warn("No message property found in response, using full response");
-            return {
-                message: JSON.stringify(response),
-                insights: ["This message was generated with AI assistance."]
-            };
-        } else {
-            // Default case: assume the response is the message itself
-            console.warn("Using raw response as message");
-            return {
-                message: String(response),
-                insights: ["This message was generated with AI assistance."]
-            };
         }
-    } catch (error) {
-        console.error("Error parsing OpenAI response:", error);
+        
+        // If we don't have explicit insights but have a message,
+        // try to extract insights by detecting a specific pattern in the message
+        if (insights.length === 0 && message) {
+            const insightsMatch = message.match(/###\s*INSIGHTS\s*###([\s\S]*?)(?=###|$)/i);
+            
+            if (insightsMatch && insightsMatch[1]) {
+                // Extract insights section and clean the original message
+                const insightsText = insightsMatch[1].trim();
+                
+                // Remove the insights section from the message
+                message = message.replace(/###\s*INSIGHTS\s*###[\s\S]*?(###|$)/i, '$1').trim();
+                
+                // Split insights by lines or bullet points
+                insights = insightsText
+                    .split(/\n+/)
+                    .map(line => line.replace(/^[-*•]\s*/, '').trim())
+                    .filter(line => line.length > 0);
+            }
+        }
+        
         return {
-            message: "Sorry, we couldn't generate a proper message at this time.",
-            insights: ["There was an error processing the AI response."]
+            message: message,
+            insights: insights
+        };
+    } catch (error) {
+        console.error('Error parsing API response:', error);
+        return {
+            message: response.toString(),
+            insights: []
         };
     }
 }
@@ -1595,68 +1546,95 @@ function callGenerationAPI(prompt, authToken = null) {
 }
 
 /**
- * Display message insights with enhanced formatting and animations
+ * Display message insights in the UI
+ * Only called after insights are actually generated
  */
 function displayMessageInsights(insights) {
-    const insightsContainer = document.getElementById('messageInsights');
-    const insightsContent = document.getElementById('insightsContent');
-    
-    if (!insightsContainer || !insightsContent) {
-        return;
-    }
-    
-    // Make insights container visible
-    insightsContainer.style.display = 'block';
-    
-    // Clear previous content
-    insightsContent.innerHTML = '';
-    
-    // Prepare insights with proper formatting
-    let insightsArray = [];
-    
-    // Convert insights to array if needed
-    if (Array.isArray(insights) && insights.length > 0) {
-        insightsArray = insights;
-    } else {
-        // Add default insights if none provided
-        insightsArray = [
-            "This message is personalized with the recipient's name, Kate, and acknowledges the duration of their relationship, making it feel specific and genuine.",
-            "The use of warm, affectionate language (\"your warmth lights up the darkest of my days\") matches the recipient's communication style and the tone intended.",
-            "Expressing gratitude for specific aspects of their relationship (\"your love, your laughter, and the endless support\") highlights the sender's appreciation in a meaningful way, reinforcing the bond between them."
-        ];
-    }
-    
-    // Create insights paragraphs with animations
-    insightsArray.forEach((insight, index) => {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = insight;
-        paragraph.classList.add('insight-item');
-        paragraph.style.animationDelay = `${index * 150}ms`;
-        insightsContent.appendChild(paragraph);
-    });
-    
-    // Add animation to the insights container
-    setTimeout(() => {
-        insightsContainer.classList.add('visible');
-    }, 400);
-    
-    // Initialize copy insights button functionality
-    const copyInsightsBtn = document.getElementById('copyInsightsBtn');
-    if (copyInsightsBtn) {
-        copyInsightsBtn.addEventListener('click', copyInsightsToClipboard);
+    try {
+        console.log("Displaying message insights...");
+        if (!insights || !Array.isArray(insights) || insights.length === 0) {
+            console.log("No insights to display");
+            return;
+        }
+        
+        // Get the insights container and content
+        const insightsContainer = document.getElementById('messageInsights');
+        const insightsContent = document.getElementById('insightsContent');
+        
+        if (!insightsContainer || !insightsContent) {
+            console.error("Insights container or content element not found");
+            return;
+        }
+        
+        // Clear any existing content
+        insightsContent.innerHTML = '';
+        
+        // Add each insight as a separate item
+        insights.forEach((insight) => {
+            const insightElement = document.createElement('div');
+            insightElement.className = 'insight-item';
+            insightElement.innerHTML = insight;
+            insightsContent.appendChild(insightElement);
+        });
+        
+        // Show the insights container only if we have insights
+        if (insights.length > 0) {
+            insightsContainer.style.display = 'block';
+            
+            // Add a "Copy Insights" button if it doesn't exist
+            if (!document.getElementById('copyInsightsBtn')) {
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'message-insights__actions';
+                actionsDiv.style.marginTop = '1.5rem';
+                actionsDiv.style.textAlign = 'right';
+                
+                const copyBtn = document.createElement('button');
+                copyBtn.id = 'copyInsightsBtn';
+                copyBtn.className = 'secondary-button';
+                copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Insights';
+                copyBtn.style.padding = '0.5rem 1rem';
+                copyBtn.style.fontSize = '0.9rem';
+                
+                // Add event listener for copying
+                copyBtn.addEventListener('click', function() {
+                    const insightText = Array.from(insightsContent.querySelectorAll('.insight-item'))
+                        .map(item => item.textContent.trim())
+                        .join('\n\n');
+                    
+                    navigator.clipboard.writeText(insightText)
+                        .then(() => showToast('Insights copied to clipboard!'))
+                        .catch(err => {
+                            console.error('Failed to copy insights:', err);
+                            showToast('Failed to copy insights', 'error');
+                        });
+                });
+                
+                actionsDiv.appendChild(copyBtn);
+                insightsContainer.appendChild(actionsDiv);
+            }
+        } else {
+            insightsContainer.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error displaying insights:', error);
     }
 }
 
 /**
- * Display the generated message in the UI with enhanced formatting
+ * Display the generated message in the UI with proper formatting
  */
 function displayGeneratedMessage(message) {
     try {
+        console.log("Displaying generated message...");
+        
         // Hide loading state
         const loadingState = document.getElementById('loadingState');
         if (loadingState) {
             loadingState.style.display = 'none';
         }
+        
+        // Store the message for later reference
+        generatedMessage = message;
         
         // Show message content
         const messageContent = document.getElementById('messageContent');
@@ -1667,13 +1645,12 @@ function displayGeneratedMessage(message) {
         // Update message content with drop cap on first letter
         const contentElement = document.getElementById('content');
         if (contentElement && message) {
-            // Store the message for later reference
-            generatedMessage = message;
-            
-            // Add drop cap to first letter
+            // Format message with proper styling
             if (message.length > 0) {
                 const firstLetter = message.charAt(0);
                 const restOfMessage = message.substring(1);
+                
+                // Apply drop cap to first letter
                 contentElement.innerHTML = `<span class="drop-cap">${firstLetter}</span>${restOfMessage}`;
             } else {
                 contentElement.textContent = message;

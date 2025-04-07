@@ -59,191 +59,145 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <style>
-        /* Additional inline styles for better UI */
+        /* Core styles for message display - professional and polished */
         .message-card--premium {
-            background: linear-gradient(145deg, #ffffff 0%, #f7f5ff 100%);
+            background: linear-gradient(145deg, #ffffff 0%, #f9faff 100%);
             border-radius: 24px;
-            box-shadow: 0 15px 40px rgba(138, 87, 222, 0.25);
+            box-shadow: 0 15px 40px rgba(72, 45, 130, 0.15);
             transition: all 0.3s ease;
             overflow: hidden;
             position: relative;
             z-index: 1;
             max-width: 800px;
             margin: 0 auto;
-            transform: translateZ(0);
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            animation: floatCard 6s ease-in-out infinite;
+            transform: none;
+            animation: none;
         }
         
         .message-card__content--premium {
             padding: 3rem;
             position: relative;
-            background: linear-gradient(135deg, #ffffff 0%, #f9f7ff 100%);
+            background: #ffffff;
             border-radius: 18px;
-            box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.9), 0 5px 15px rgba(138, 87, 222, 0.1);
-            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(138, 87, 222, 0.1);
         }
         
-        .message-card__premium-background {
+        /* Professional loading animation */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+            min-height: 400px;
+        }
+        
+        .pulse-heart {
+            width: 70px;
+            height: 70px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .pulse-heart svg {
+            width: 100%;
+            height: 100%;
+            fill: #8a57de;
+            filter: drop-shadow(0 0 5px rgba(138, 87, 222, 0.5));
+        }
+        
+        .pulse-heart-circle {
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, rgba(138, 87, 222, 0.08) 0%, rgba(255, 255, 255, 0) 100%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: rgba(138, 87, 222, 0.1);
             z-index: -1;
-            opacity: 0.8;
+            animation: pulse 2s infinite ease-out;
+        }
+        
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0.8;
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(0.9);
+                opacity: 0;
+            }
+        }
+        
+        .loading-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #555;
+            margin-top: 1rem;
+        }
+        
+        .loading-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: #8a57de;
+            margin: 0 2px;
+            animation: loadingDots 1.5s infinite;
+            opacity: 0.7;
+            vertical-align: middle;
+        }
+        
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes loadingDots {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        /* Professional message display */
+        .message-card__body {
+            position: relative;
+            z-index: 1;
+            padding: 0.5rem 0;
         }
         
         .message-card__text {
             font-size: 1.2rem;
             line-height: 1.8;
-            white-space: pre-wrap;
             color: #333;
-            position: relative;
-            padding: 0.5rem 0;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+            font-weight: 400;
+            white-space: pre-wrap;
             letter-spacing: 0.01em;
         }
         
-        .message-card__text::selection {
-            background: rgba(138, 87, 222, 0.2);
-        }
-        
-        .message-card__loading-heart {
-            transform: scale(1.5);
-            margin-bottom: 2rem;
-        }
-        
         .drop-cap {
-            font-size: 3.5em !important;
-            font-weight: 600 !important;
-            color: #8a57de !important;
-            float: left !important;
-            line-height: 0.8 !important;
-            margin-right: 0.15em !important;
-            margin-top: 0.1em !important;
-            text-shadow: 1px 1px 2px rgba(138, 87, 222, 0.3) !important;
-        }
-        
-        .premium-background {
-            background: linear-gradient(135deg, #0c0a30 0%, #1e1c3b 100%);
-            min-height: 100vh;
-            overflow-y: auto;
-            padding-bottom: 5rem;
-        }
-        
-        .message-insights {
-            margin-top: 2rem;
-            background: rgba(255, 255, 255, 0.97);
-            border-radius: 16px;
-            padding: 1.8rem;
-            border-left: 4px solid #8a57de;
-            box-shadow: 0 10px 25px rgba(138, 87, 222, 0.12);
-            animation: fadeInUp 0.8s ease-out forwards;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .message-insights::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: radial-gradient(circle at bottom right, rgba(138, 87, 222, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
-            border-radius: 50%;
-        }
-        
-        .message-insights__title {
-            color: #8a57de;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            margin-bottom: 1.2rem;
+            font-size: 3.5em;
             font-weight: 600;
-        }
-        
-        .insight-item {
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(138, 87, 222, 0.1);
-            animation: fadeIn 0.5s ease forwards;
-            opacity: 0;
-            position: relative;
-            padding-left: 1.2rem;
-        }
-        
-        .insight-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8a57de 0%, #5091F5 100%);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .page-navigation {
-            display: flex;
-            justify-content: space-between;
-            margin: 1.5rem 0;
-            max-width: 800px;
-            margin: 2rem auto;
-        }
-        
-        /* Fix button styles */
-        .action-buttons {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        
-        .primary-button, .secondary-button {
-            padding: 0.8rem 1.8rem;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: all 0.2s ease;
-        }
-        
-        .primary-button {
-            background: #8a57de;
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.25);
-        }
-        
-        .secondary-button {
-            background: rgba(138, 87, 222, 0.08);
             color: #8a57de;
-            border: 1px solid rgba(138, 87, 222, 0.3);
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.15em;
+            margin-top: 0.1em;
         }
         
-        .primary-button:hover {
-            background: #7645c5;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(138, 87, 222, 0.35);
-        }
-        
-        .secondary-button:hover {
-            background: rgba(138, 87, 222, 0.12);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(138, 87, 222, 0.1);
-        }
-        
+        /* Refined message header */
         .message-card__header {
             display: flex;
             justify-content: space-between;
@@ -261,23 +215,27 @@
             color: #8a57de;
             font-size: 0.9rem;
             font-weight: 600;
-            background: rgba(138, 87, 222, 0.08);
+            background: rgba(138, 87, 222, 0.05);
             padding: 0.6rem 1rem;
             border-radius: 30px;
             border: 1px solid rgba(138, 87, 222, 0.15);
-            box-shadow: 0 2px 5px rgba(138, 87, 222, 0.1);
-            animation: pulse-badge 3s infinite alternate ease-in-out;
         }
         
-        @keyframes pulse-badge {
-            0% { box-shadow: 0 2px 5px rgba(138, 87, 222, 0.1); }
-            100% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
+        .message-card__date {
+            color: #777;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.03);
+            padding: 0.6rem 1rem;
+            border-radius: 30px;
         }
         
+        /* Professional action buttons */
         .message-card__actions {
             display: flex;
             justify-content: center;
-            gap: 1.2rem;
+            gap: 1.5rem;
             margin-top: 2.5rem;
             padding-top: 1.5rem;
             border-top: 1px solid rgba(138, 87, 222, 0.1);
@@ -292,262 +250,59 @@
             border-radius: 12px;
             background: transparent;
             border: none;
-            color: #666;
+            color: #555;
             transition: all 0.2s ease;
             cursor: pointer;
         }
         
         .message-card__action:hover {
-            background: rgba(138, 87, 222, 0.08);
+            background: rgba(138, 87, 222, 0.05);
             color: #8a57de;
             transform: translateY(-2px);
         }
         
-        .message-card__action:hover .message-card__action-icon {
-            transform: scale(1.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
         .message-card__action-icon {
             font-size: 1.2rem;
-            margin-bottom: 0.3rem;
             color: #8a57de;
         }
-
-        #app {
-            height: auto;
-            min-height: 100vh;
-            overflow-y: auto;
+        
+        /* Professionally styled insights section - initially hidden */
+        .message-insights {
+            margin-top: 2rem;
+            background: #fafafe;
+            border-radius: 16px;
+            padding: 1.8rem;
+            border-left: 4px solid #8a57de;
+            box-shadow: 0 10px 25px rgba(138, 87, 222, 0.08);
+            display: none; /* Initially hidden until generated */
         }
         
-        .main-content {
-            padding-bottom: 4rem;
-        }
-
-        /* Container with animation effect for the message */
-        .message-container {
-            position: relative;
-            overflow: hidden;
-            border-radius: 18px;
-            background: #fff;
-            padding: 2rem;
-            margin: 2rem auto;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            max-width: 750px;
-        }
-
-        .message-container::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            right: -10px;
-            bottom: -10px;
-            background: linear-gradient(135deg, #8a57de 0%, #5091F5 100%);
-            z-index: -1;
-            filter: blur(20px);
-            opacity: 0.15;
-            animation: pulse 3s infinite alternate;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.1; transform: scale(0.98); }
-            100% { opacity: 0.2; transform: scale(1); }
-        }
-
-        /* Make page scrollable with fixed header */
-        body {
-            overflow-y: auto;
-        }
-
-        .app-header {
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        /* More vibrant elements */
-        .recipient-card {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            max-width: 800px;
-            margin: 1.5rem auto;
-            backdrop-filter: blur(10px);
-        }
-
-        .recipient-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #7645c5 0%, #5091F5 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: white;
-            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.4);
-        }
-
-        .recipient-info {
-            flex: 1;
-        }
-
-        .recipient-name {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 0.3rem;
-        }
-
-        .recipient-relation {
-            font-size: 0.95rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .message-details {
-            display: flex;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin: 0 auto 2rem;
-        }
-
-        .detail-item {
+        .message-insights__title {
+            color: #8a57de;
             display: flex;
             align-items: center;
             gap: 0.5rem;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 0.6rem 1.2rem;
-            border-radius: 30px;
-            backdrop-filter: blur(5px);
-        }
-
-        .detail-label {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .detail-value {
-            color: white;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
             font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        /* Update page header */
-        .page-header {
-            text-align: center;
-            margin-bottom: 2rem;
-            max-width: 800px;
-            margin: 2rem auto;
-        }
-
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: white;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #8a57de 0%, #5091F5 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-
-        .page-description {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1.1rem;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        /* Enhanced animations and effects */
-        @keyframes floatCard {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0); }
-        }
-        
-        .message-card__content--premium::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            right: -50%;
-            bottom: -50%;
-            background: linear-gradient(
-                to bottom right,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.3) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            transform: rotate(25deg);
-            animation: shimmer 8s infinite linear;
-            z-index: 0;
-        }
-        
-        @keyframes shimmer {
-            0% { transform: translateX(-200%) rotate(25deg); }
-            100% { transform: translateX(200%) rotate(25deg); }
-        }
-        
-        .message-card__body {
-            position: relative;
-            z-index: 1;
-        }
-        
-        .message-card__badge {
-            animation: pulse-badge 3s infinite alternate ease-in-out;
-        }
-        
-        @keyframes pulse-badge {
-            0% { box-shadow: 0 2px 5px rgba(138, 87, 222, 0.1); }
-            100% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
-        }
-        
-        .message-card__action:hover .message-card__action-icon {
-            transform: scale(1.2);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .message-insights {
-            animation: fadeInUp 0.8s ease-out forwards;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        @keyframes fadeInUp {
-            from { 
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
         
         .insight-item {
+            padding: 1rem 0;
+            border-bottom: 1px solid rgba(138, 87, 222, 0.1);
             position: relative;
-            padding-left: 1.2rem;
+            padding-left: 1.5rem;
         }
         
         .insight-item::before {
             content: '';
             position: absolute;
             left: 0;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 1.6rem;
             width: 6px;
             height: 6px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #8a57de 0%, #5091F5 100%);
+            background: #8a57de;
         }
         
         /* Toast notifications */
@@ -586,152 +341,56 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Share modal enhancements */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(10, 10, 38, 0.85);
-            backdrop-filter: blur(8px);
-            z-index: 9999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+        /* Error state styling */
+        .error-state {
+            display: none;
+            padding: 2rem;
+            text-align: center;
         }
         
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
+        .error-icon {
+            font-size: 3rem;
+            color: #f44336;
+            margin-bottom: 1rem;
         }
         
-        .modal-content {
-            background: white;
-            border-radius: 16px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            transform: scale(0.9);
-            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .modal.show .modal-content {
-            transform: scale(1);
-        }
-        
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 1.5rem;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        }
-        
-        .modal-title {
-            font-size: 1.25rem;
+        .error-title {
+            font-size: 1.5rem;
             font-weight: 600;
+            margin-bottom: 0.5rem;
             color: #333;
-            margin: 0;
         }
         
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.25rem;
+        .error-message {
             color: #777;
-            cursor: pointer;
-            padding: 0.5rem;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-        }
-        
-        .modal-close:hover {
-            background: rgba(0, 0, 0, 0.05);
-            color: #333;
-        }
-        
-        .modal-body {
-            padding: 1.5rem;
-        }
-        
-        .share-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 1rem;
             margin-bottom: 1.5rem;
         }
         
-        .share-option {
-            display: flex;
-            flex-direction: column;
+        .retry-button {
+            background: #8a57de;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-            padding: 1rem;
-            border-radius: 12px;
-            background: #f5f5f5;
-            border: none;
-            cursor: pointer;
             transition: all 0.2s ease;
         }
         
-        .share-option:hover {
-            background: #e9e9f9;
+        .retry-button:hover {
+            background: #7645c5;
             transform: translateY(-2px);
         }
         
-        .share-option i {
-            font-size: 1.5rem;
-            color: #8a57de;
-        }
-        
-        .share-link-container {
-            display: flex;
-            border: 1px solid rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        
-        .share-link {
-            flex: 1;
-            padding: 0.75rem 1rem;
-            border: none;
-            font-size: 0.9rem;
-            color: #333;
-        }
-        
-        .copy-button {
-            padding: 0.75rem 1rem;
-            background: #f5f5f5;
-            border: none;
-            border-left: 1px solid rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .copy-button:hover {
-            background: #e9e9f9;
-        }
-        
-        .share-success {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
-            margin-top: 1rem;
-            border-radius: 8px;
-            background: #e6f7e6;
-            color: #2e7d32;
+        /* Premium background */
+        .premium-background {
+            background: linear-gradient(135deg, #0c0a30 0%, #1e1c3b 100%);
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 5rem;
         }
     </style>
 </head>
@@ -804,7 +463,7 @@
                 <p class="page-description">Here's your personalized message. You can edit it, regenerate or share it.</p>
             </div>
             
-            <!-- Navigation Buttons (Adding these to fix the console errors) -->
+            <!-- Navigation Buttons -->
             <div class="page-navigation">
                 <button id="backBtn" class="secondary-button">
                     <i class="fas fa-arrow-left"></i> Back
@@ -838,30 +497,37 @@
             
             <!-- Message Display -->
             <div id="messageState" class="message-card message-card--premium">
-                <div class="message-card__premium-background"></div>
-                
-                <div id="loadingState" class="message-card__loading">
-                    <div class="message-card__loading-heart">
-                        <div class="message-card__loading-heart-shape"></div>
-                        <div class="message-card__loading-heart-glow"></div>
+                <!-- Loading State -->
+                <div id="loadingState" class="loading-container">
+                    <div class="pulse-heart">
+                        <svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16,28.261c0,0-14-7.926-14-17.046c0-8.565,9.85-9.685,14,3.516c4.151-13.201,14-12.081,14-3.516
+                            C30,20.335,16,28.261,16,28.261z"/>
+                        </svg>
+                        <div class="pulse-heart-circle"></div>
                     </div>
-                    <p class="message-card__loading-text">Creating your message with heart<span class="message-card__loading-dots"><span></span><span></span><span></span></span></p>
+                    <p class="loading-text">Creating your heartfelt message</p>
+                    <div class="loading-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
                 </div>
                 
-                <div id="errorState" class="message-card__error" style="display: none;">
-                    <div class="message-card__error-icon">
+                <!-- Error State -->
+                <div id="errorState" class="error-state">
+                    <div class="error-icon">
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
-                    <div class="message-card__error-content">
-                        <h3>Something went wrong</h3>
-                        <p id="errorText">We couldn't create your message at this time.</p>
-                        <button id="retryButton" class="secondary-button">
-                            <i class="fas fa-redo"></i> Try Again
-                        </button>
-                    </div>
+                    <h3 class="error-title">Something went wrong</h3>
+                    <p class="error-message" id="errorText">We couldn't create your message at this time.</p>
+                    <button id="retryButton" class="retry-button">
+                        <i class="fas fa-redo"></i> Try Again
+                    </button>
                 </div>
                 
-                <div id="messageContent" class="message-card__content message-card__content--premium" style="display: block;">
+                <!-- Message Content - Empty until generated -->
+                <div id="messageContent" class="message-card__content message-card__content--premium" style="display: none;">
                     <div class="message-card__header">
                         <div class="message-card__badge">
                             <i class="message-card__badge-icon fas fa-heart"></i>
@@ -874,16 +540,8 @@
                     </div>
                     
                     <div class="message-card__body">
-                        <p id="content" class="message-card__text">
-                            <span class="drop-cap">E</span>very moment with you feels like discovering a new chapter in the most beautiful story ever written. These two years have flown by, painting our canvas with colors I never knew existed. Your kindness, intelligence, and the way you care so deeply about everything around you continue to amaze me each day.
-
-                            When I think about our journey together, I'm filled with profound gratitude. Thank you for being my partner, my confidant, and my favorite person to share life's adventures with. You've taught me what true appreciation means - seeing someone completely and valuing every part of who they are.
-
-                            You make ordinary days extraordinary, simply by being you. I appreciate everything about us - our quiet moments, our silly jokes, our big dreams, and even our challenges that have made us stronger together.
-
-                            With all my heart,
-                            David
-                        </p>
+                        <!-- Content will be inserted here dynamically -->
+                        <p id="content" class="message-card__text"></p>
                     </div>
                     
                     <div class="message-card__actions">
@@ -906,35 +564,19 @@
                     </div>
                 </div>
                 
-                <!-- Enhanced Message Insights Section -->
-                <div id="messageInsights" class="message-insights">
+                <!-- Message Insights - Initially hidden until generated -->
+                <div id="messageInsights" class="message-insights" style="display: none;">
                     <h3 class="message-insights__title">
-                        <i class="message-insights__icon fas fa-lightbulb"></i>
+                        <i class="fas fa-lightbulb"></i>
                         Why This Message Works
                     </h3>
                     <div id="insightsContent" class="message-insights__content">
-                        <div class="insight-item">
-                            <strong>Personal Connection:</strong> The message references your specific relationship duration (two years), creating authenticity.
-                        </div>
-                        <div class="insight-item">
-                            <strong>Specific Appreciation:</strong> It highlights specific qualities (kindness, intelligence, caring nature) that make the recipient feel truly seen.
-                        </div>
-                        <div class="insight-item">
-                            <strong>Emotional Depth:</strong> The message balances everyday moments with deeper emotional connection, creating warmth.
-                        </div>
-                        <div class="insight-item">
-                            <strong>Poetic Elements:</strong> Metaphors like "painting our canvas" add beauty without being overly flowery.
-                        </div>
-                    </div>
-                    <div class="message-insights__actions">
-                        <button id="copyInsightsBtn" class="message-insights__action">
-                            <i class="message-insights__action-icon fas fa-copy"></i>
-                            Copy Insights
-                        </button>
+                        <!-- Insights will be dynamically generated -->
                     </div>
                 </div>
                 
-                <div id="editContainer" class="message-card__edit">
+                <!-- Edit Container -->
+                <div id="editContainer" class="message-card__edit" style="display: none;">
                     <textarea id="editMessage" class="message-card__edit-textarea"></textarea>
                     <div class="message-card__edit-actions">
                         <button id="cancelEditBtn" class="secondary-button">Cancel</button>
@@ -982,7 +624,6 @@
                     </div>
                 </div>
                 
-                <!-- Added cancel button for regenerate options -->
                 <button id="cancelRegenerateBtn" class="secondary-button" style="margin: 20px auto 0; display: block;">
                     <i class="fas fa-times"></i> Cancel
                 </button>

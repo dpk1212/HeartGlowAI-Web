@@ -110,8 +110,12 @@
           <div class="configurator-step">
             <h3 class="step-title">1. Choose Context</h3>
             <div class="category-toggle">
-              <button class="toggle-btn active" data-category="professional">💼 Professional</button>
-              <button class="toggle-btn" data-category="personal">💖 Personal</button>
+              <button class="toggle-btn active" data-category="professional">
+                💼 Professional
+              </button>
+              <button class="toggle-btn" data-category="personal">
+                💖 Personal
+              </button>
             </div>
           </div>
     
@@ -119,11 +123,22 @@
           <div class="configurator-step">
             <h3 class="step-title">2. Select Format</h3>
             <div class="format-options">
-              <button class="format-btn" data-format="text">📱 Text Message</button>
-              <button class="format-btn" data-format="email">📧 Email</button>
-              <button class="format-btn" data-format="card">💌 Card</button>
-              <button class="format-btn" data-format="conversation">🗣️ Conversation Topics</button>
-              <!-- Add more format buttons as needed -->
+              <button class="format-btn" data-format="text">
+                <span class="format-icon">📱</span>
+                <span class="format-label">Text Message</span>
+              </button>
+              <button class="format-btn" data-format="email">
+                <span class="format-icon">📧</span>
+                <span class="format-label">Email</span>
+              </button>
+              <button class="format-btn" data-format="card">
+                <span class="format-icon">💌</span>
+                <span class="format-label">Card</span>
+              </button>
+              <button class="format-btn" data-format="conversation">
+                <span class="format-icon">🗣️</span>
+                <span class="format-label">Conversation Topics</span>
+              </button>
             </div>
           </div>
         </div> 
@@ -137,19 +152,49 @@
             <h3 class="step-title">3. Pick Your Starting Point</h3>
             <!-- Professional Intentions (Visible by default) -->
             <div class="intention-options professional-intentions">
-              <button class="intention-card" data-intention="recognize_effort">💬 "I want to recognize someone's effort."</button>
-              <button class="intention-card" data-intention="give_feedback">🧠 "I need to give feedback — with care."</button>
-              <button class="intention-card" data-intention="thank_support">🙏 "I want to thank someone for their support."</button>
-              <button class="intention-card" data-intention="express_clearly">🎯 "I need to express something clearly and respectfully."</button>
-              <button class="intention-card" data-intention="acknowledge_impact">👏 "Someone deserves to feel seen for their impact."</button>
+              <button class="intention-card" data-intention="recognize_effort">
+                <span class="intention-icon">💬</span>
+                <span class="intention-text">"I want to recognize someone's effort."</span>
+              </button>
+              <button class="intention-card" data-intention="give_feedback">
+                <span class="intention-icon">🧠</span>
+                <span class="intention-text">"I need to give feedback — with care."</span>
+              </button>
+              <button class="intention-card" data-intention="thank_support">
+                <span class="intention-icon">🙏</span>
+                <span class="intention-text">"I want to thank someone for their support."</span>
+              </button>
+              <button class="intention-card" data-intention="express_clearly">
+                <span class="intention-icon">🎯</span>
+                <span class="intention-text">"I need to express something clearly and respectfully."</span>
+              </button>
+              <button class="intention-card" data-intention="acknowledge_impact">
+                <span class="intention-icon">👏</span>
+                <span class="intention-text">"Someone deserves to feel seen for their impact."</span>
+              </button>
             </div>
             <!-- Personal Intentions (Hidden by default) -->
             <div class="intention-options personal-intentions" style="display: none;">
-              <button class="intention-card" data-intention="thinking_of_you">❤️ "I've been thinking about someone..."</button>
-              <button class="intention-card" data-intention="say_thank_you">🙏 "I want to say thank you — properly."</button>
-              <button class="intention-card" data-intention="reconnect">🤝 "We haven't talked in a while."</button>
-              <button class="intention-card" data-intention="express_feelings">✍️ "I want to say something I've been holding in."</button>
-              <button class="intention-card" data-intention="make_smile">💬 "I just want to make someone smile."</button>
+              <button class="intention-card" data-intention="thinking_of_you">
+                <span class="intention-icon">❤️</span>
+                <span class="intention-text">"I've been thinking about someone..."</span>
+              </button>
+              <button class="intention-card" data-intention="say_thank_you">
+                <span class="intention-icon">🙏</span>
+                <span class="intention-text">"I want to say thank you — properly."</span>
+              </button>
+              <button class="intention-card" data-intention="reconnect">
+                <span class="intention-icon">🤝</span>
+                <span class="intention-text">"We haven't talked in a while."</span>
+              </button>
+              <button class="intention-card" data-intention="express_feelings">
+                <span class="intention-icon">✍️</span>
+                <span class="intention-text">"I want to say something I've been holding in."</span>
+              </button>
+              <button class="intention-card" data-intention="make_smile">
+                <span class="intention-icon">💬</span>
+                <span class="intention-text">"I just want to make someone smile."</span>
+              </button>
             </div>
           </div>
     
@@ -159,9 +204,6 @@
               Select Format & Starting Point
             </button>
           </div>
-          
-          <!-- Optional: Add a 'Back' button? -->
-          <!-- <button id="configurator-back-btn" class="back-button">← Back</button> -->
         </div>
       </div>
     </section>

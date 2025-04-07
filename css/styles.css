@@ -5694,25 +5694,50 @@ textarea.input-field:focus, #connection-notes:focus {
 
 /* Message Configurator Styles */
 .message-configurator {
-  /* Existing styles */
-  background: rgba(33, 30, 46, 0.7);
-  backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
-  border-radius: var(--border-radius-lg, 16px);
-  padding: var(--spacing-lg, 1.5rem);
-  margin-bottom: var(--spacing-xl, 2rem);
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
+  /* Base container styles */
+  background: linear-gradient(to bottom, rgba(33, 30, 46, 0.8), rgba(25, 22, 36, 0.9));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(138, 87, 222, 0.1);
   border: 1px solid rgba(138, 87, 222, 0.15);
-  /* New styles for flip */
+  /* 3D perspective for flip */
   perspective: 1000px;
-  min-height: 400px; /* Adjust as needed based on content */
+  min-height: 480px;
+  overflow: hidden;
+  position: relative;
+  padding: 0;
+  margin-bottom: var(--spacing-xl, 2rem);
+  /* Add subtle glow effect */
+  animation: gentle-glow 4s infinite alternate;
+}
+
+@keyframes gentle-glow {
+  0% {
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(138, 87, 222, 0.1);
+  }
+  100% {
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), 0 0 15px rgba(138, 87, 222, 0.2);
+  }
+}
+
+/* Add a subtle background pattern/texture */
+.message-configurator::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  z-index: -1;
 }
 
 .configurator-inner {
   position: relative;
   width: 100%;
-  height: 100%; /* Or set min-height */
-  transition: transform 0.6s;
+  height: 100%;
+  transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Add bounce effect */
   transform-style: preserve-3d;
 }
 
@@ -5724,192 +5749,351 @@ textarea.input-field:focus, #connection-notes:focus {
 .configurator-back {
   position: absolute;
   width: 100%;
-  height: 100%; /* Ensure faces cover the area */
-  -webkit-backface-visibility: hidden; /* Safari */
+  height: 100%;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  /* Add padding inside faces if needed, remove from .message-configurator */
-  padding: var(--spacing-lg, 1.5rem); 
-  box-sizing: border-box; /* Include padding in size */
+  padding: 2.5rem; /* Increased padding for better spacing */
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
 }
 
 .configurator-back {
   transform: rotateY(180deg);
-  /* Ensure back face background matches if needed, or is transparent */
-  background-color: rgba(33, 30, 46, 0.9); /* Slightly more opaque for back? */
-  border-radius: var(--border-radius-lg, 16px);
+  background: linear-gradient(to bottom, rgba(33, 30, 46, 0.9), rgba(25, 22, 36, 0.95));
+  border-radius: 24px;
 }
 
-/* Remove padding from main container if added to faces */
-.message-configurator {
-  padding: 0; /* Remove padding here */
-  overflow: hidden; /* Hide anything sticking out during flip */
-}
-
-
-/* Adapt existing styles to be within front/back */
+/* Title styling */
 .configurator-front .configurator-title, 
 .configurator-back .configurator-title {
   text-align: center;
-  font-size: var(--font-size-xl, 1.5rem);
-  font-weight: 600;
-  margin-bottom: var(--spacing-xl, 2rem);
-  color: var(--text-light, #fff);
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 2.25rem;
+  color: #fff;
+  letter-spacing: -0.5px;
+  background: linear-gradient(45deg, #ffffff, #e8e6f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
+/* Step styling */
 .configurator-front .configurator-step,
 .configurator-back .configurator-step {
-  margin-bottom: var(--spacing-lg, 1.5rem);
+  margin-bottom: 2rem;
 }
 
 .configurator-front .step-title,
 .configurator-back .step-title {
-  font-size: var(--font-size-md, 1rem);
-  font-weight: 500;
-  color: var(--text-muted, rgba(255,255,255,0.7));
-  margin-bottom: var(--spacing-md, 1rem);
-  padding-bottom: var(--spacing-sm, 0.5rem);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  position: relative;
 }
 
+/* Add subtle indicator before step titles */
+.configurator-front .step-title::before,
+.configurator-back .step-title::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(138, 87, 222, 0.8), rgba(138, 87, 222, 0.2));
+  border-radius: 3px;
+}
+
+/* Category toggle styling */
 .configurator-front .category-toggle {
-  /* Existing styles */
   display: flex;
   justify-content: center;
-  gap: var(--spacing-md, 1rem);
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .configurator-front .toggle-btn {
-  /* Existing styles */
-  padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
-  border-radius: var(--border-radius-full, 50px);
+  padding: 0.75rem 1.75rem;
+  border-radius: 50px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: var(--text-muted, rgba(255,255,255,0.7));
-  font-size: var(--font-size-md, 1rem);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 1.1rem;
+  letter-spacing: 0.2px;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.configurator-front .toggle-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: all 0.5s;
+  z-index: -1;
+}
+
+.configurator-front .toggle-btn:hover::before {
+  left: 100%;
 }
 
 .configurator-front .toggle-btn.active {
-  /* Existing styles */
-  background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
+  background: linear-gradient(45deg, #8a57de, #b296ff);
   color: white;
   border-color: transparent;
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+  box-shadow: 0 5px 15px rgba(138, 87, 222, 0.3);
+  transform: translateY(-2px);
 }
 
+/* Format options styling */
 .configurator-front .format-options {
-  /* Existing styles */
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--spacing-md, 1rem);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
   justify-content: center;
+  margin-top: 0.5rem;
 }
 
 .configurator-front .format-btn {
-  /* Existing styles */
-  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
-  border-radius: var(--border-radius-md, 12px);
+  padding: 1rem 1.25rem;
+  border-radius: 14px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-light, #fff);
-  font-size: var(--font-size-sm, 0.875rem);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  height: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Add icon styling for format buttons */
+.configurator-front .format-btn::before {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+  opacity: 0.9;
 }
 
 .configurator-front .format-btn:hover,
 .configurator-front .format-btn.selected {
-  /* Existing styles */
   background: rgba(138, 87, 222, 0.15);
   border-color: rgba(138, 87, 222, 0.3);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+  transform: translateY(-3px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
-/* Styles for back face content */
+.configurator-front .format-btn.selected {
+  background: rgba(138, 87, 222, 0.25);
+  border-color: rgba(138, 87, 222, 0.5);
+  box-shadow: 0 6px 18px rgba(138, 87, 222, 0.2);
+}
+
+/* Intention cards styling */
 .configurator-back .intention-options {
-  /* Existing styles */
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: var(--spacing-md, 1rem);
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
 }
 
 .configurator-back .intention-card {
-  /* Existing styles */
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--border-radius-md, 12px);
-  padding: var(--spacing-md, 1rem);
+  border-radius: 14px;
+  padding: 1.25rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.35s ease;
   text-align: left;
-  font-size: var(--font-size-sm, 0.875rem);
-  color: var(--text-light, #fff);
+  font-size: 0.95rem;
+  color: #fff;
   line-height: 1.5;
+  position: relative;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.configurator-back .intention-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
 }
 
 .configurator-back .intention-card:hover,
 .configurator-back .intention-card.selected {
-  /* Existing styles */
-  transform: translateY(-3px);
+  transform: translateY(-4px);
   background: rgba(138, 87, 222, 0.1);
   border-color: rgba(138, 87, 222, 0.3);
-  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
+.configurator-back .intention-card.selected::before,
+.configurator-back .intention-card:hover::before {
+  opacity: 1;
+  background: linear-gradient(90deg, rgba(138, 87, 222, 0.7), rgba(138, 87, 222, 0.3));
+}
+
+/* Action button styling */
 .configurator-back .configurator-action {
-  /* Existing styles */
   text-align: center;
-  margin-top: auto; /* Push action button to bottom */
-  padding-top: var(--spacing-lg); /* Add space above button */
+  margin-top: auto;
+  padding-top: 2rem;
 }
 
 .configurator-back .start-crafting-button {
-  /* Existing styles */
-  padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
-  border-radius: var(--border-radius-full, 50px);
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
   font-weight: 600;
-  font-size: var(--font-size-md, 1rem);
+  font-size: 1.1rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: linear-gradient(45deg, var(--primary-dark, #6a3cb2), var(--primary, #8a57de));
+  background: linear-gradient(45deg, #6a3cb2, #8a57de);
   color: white;
   border: none;
-  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
+  box-shadow: 0 4px 20px rgba(106, 60, 178, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.configurator-back .start-crafting-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: all 0.6s;
 }
 
 .configurator-back .start-crafting-button:hover:not(:disabled) {
-  /* Existing styles */
-  background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.4);
+  background: linear-gradient(45deg, #8a57de, #b296ff);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(138, 87, 222, 0.4);
+}
+
+.configurator-back .start-crafting-button:hover:not(:disabled)::after {
+  left: 100%;
 }
 
 .configurator-back .start-crafting-button:disabled {
-  /* Existing styles */
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-muted, rgba(255,255,255,0.7));
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.5);
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* Responsive adjustments for flip */
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .message-configurator {
+    min-height: 520px;
+  }
+  
+  .configurator-front,
+  .configurator-back {
+    padding: 1.75rem;
+  }
+  
+  .configurator-front .format-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 600px) {
   .configurator-back .intention-options {
     grid-template-columns: 1fr; 
   }
-  .configurator-front .format-options {
-     justify-content: flex-start; 
-  }
+  
   .message-configurator {
-     min-height: 450px; /* Increase min height on mobile if needed */
+    min-height: 570px;
+  }
+  
+  .configurator-front .configurator-title, 
+  .configurator-back .configurator-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.75rem;
   }
 }
 
-/* ... rest of styles ... */
+/* Format button icon and label styling */
+.configurator-front .format-icon {
+  font-size: 1.7rem;
+  display: block;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+.configurator-front .format-label {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+  transition: color 0.3s ease;
+}
+
+.configurator-front .format-btn:hover .format-icon {
+  transform: translateY(-3px) scale(1.1);
+}
+
+.configurator-front .format-btn:hover .format-label,
+.configurator-front .format-btn.selected .format-label {
+  color: #fff;
+}
+
+.configurator-front .format-btn.selected .format-icon {
+  transform: translateY(-2px);
+}
+
+/* Intention card styling */
+.configurator-back .intention-icon {
+  font-size: 1.3rem;
+  margin-right: 0.75rem;
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+
+.configurator-back .intention-text {
+  font-weight: 500;
+  line-height: 1.5;
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.configurator-back .intention-card:hover .intention-icon {
+  transform: scale(1.2);
+}
+
+.configurator-back .intention-card.selected .intention-icon {
+  transform: scale(1.15);
+}
+
+/* Make sure the intention cards are properly laid out */
+.configurator-back .intention-card {
+  display: flex;
+  align-items: center;
+}
 

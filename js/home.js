@@ -4429,12 +4429,14 @@ function copyMessage(id, content) {
 
 // --- Additions for Message Configurator ---
 function initializeMessageConfigurator() {
+  const configurator = document.querySelector('.message-configurator');
   const categoryToggle = document.querySelector('.category-toggle');
   const formatOptions = document.querySelector('.format-options');
   const intentionSections = document.querySelectorAll('.intention-options');
   const startCraftingBtn = document.getElementById('start-crafting-btn');
+  // const backButton = document.getElementById('configurator-back-btn'); // Optional back button
 
-  if (!categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn) {
+  if (!configurator || !categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn) {
     console.error('Message Configurator elements not found!');
     return;
   }
@@ -4442,99 +4444,133 @@ function initializeMessageConfigurator() {
   // --- Category Toggle Logic ---
   categoryToggle.addEventListener('click', (event) => {
     if (event.target.classList.contains('toggle-btn') && !event.target.classList.contains('active')) {
-      // Remove active class from all toggle buttons
+      // ... (logic to set active button and update selectedConfig.category) ...
       categoryToggle.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-      // Add active class to the clicked button
       event.target.classList.add('active');
-      
       selectedConfig.category = event.target.dataset.category;
       console.log('Category selected:', selectedConfig.category);
 
-      // Show/Hide intention options based on category
-      intentionSections.forEach(section => {
-        if (section.classList.contains(selectedConfig.category + '-intentions')) {
-          section.style.display = 'grid'; // Or 'flex', depending on desired layout
-        } else {
-          section.style.display = 'none';
-        }
-      });
+      // Show correct intention section (even if on back face)
+      showCorrectIntentions();
 
-      // Reset intention selection when category changes
-      resetIntentionSelection();
-      updateStartCraftingButtonState();
+      // If already flipped, flip back and reset format/intention
+      if (configurator.classList.contains('flipped')) {
+        configurator.classList.remove('flipped');
+        resetFormatSelection();
+        resetIntentionSelection();
+        updateStartCraftingButtonState(); 
+      }
+      
+      // Check if ready to flip (might flip immediately if format already chosen)
+      checkAndFlipConfigurator();
     }
   });
 
   // --- Format Selection Logic ---
   formatOptions.addEventListener('click', (event) => {
     if (event.target.classList.contains('format-btn')) {
-      // Remove selected class from all format buttons
+      // ... (logic to set selected button and update selectedConfig.format) ...
       formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
-      // Add selected class to the clicked button
       event.target.classList.add('selected');
-      
       selectedConfig.format = event.target.dataset.format;
       console.log('Format selected:', selectedConfig.format);
-      updateStartCraftingButtonState();
+
+      // Check if ready to flip
+      checkAndFlipConfigurator();
+      // Intention button state doesn't depend on format directly here
+      // updateStartCraftingButtonState(); 
     }
   });
 
-  // --- Intention Selection Logic (using event delegation) ---
+  // --- Intention Selection Logic ---
   intentionSections.forEach(section => {
     section.addEventListener('click', (event) => {
       const card = event.target.closest('.intention-card');
       if (card) {
-         // Remove selected class from all intention cards within all sections
+         // ... (logic to set selected card and update selectedConfig.intention) ...
          intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
-         // Add selected class to the clicked card
          card.classList.add('selected');
-         
          selectedConfig.intention = card.dataset.intention;
          console.log('Intention selected:', selectedConfig.intention);
-         updateStartCraftingButtonState();
+         updateStartCraftingButtonState(); // Update button now that intention is selected
       }
     });
   });
   
+  // --- Helper Functions ---
+  function resetFormatSelection() {
+    formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
+    selectedConfig.format = null;
+  }
+
   function resetIntentionSelection() {
     intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
     selectedConfig.intention = null;
   }
 
-  // --- Update Start Crafting Button State ---
+  function showCorrectIntentions() {
+    intentionSections.forEach(section => {
+      if (section.classList.contains(selectedConfig.category + '-intentions')) {
+        section.style.display = 'grid'; // Or 'flex'
+      } else {
+        section.style.display = 'none';
+      }
+    });
+  }
+
+  function checkAndFlipConfigurator() {
+    if (selectedConfig.category && selectedConfig.format && !configurator.classList.contains('flipped')) {
+      console.log('Flipping configurator to back');
+      configurator.classList.add('flipped');
+      showCorrectIntentions(); // Ensure correct intentions are shown after flip
+      // Button state updated when intention is picked
+    }
+  }
+
   function updateStartCraftingButtonState() {
-    if (selectedConfig.format && selectedConfig.intention) {
+     // Button state depends only on intention now (since it's on the back)
+     // Format selection happens before flip
+    if (selectedConfig.intention) { 
       startCraftingBtn.disabled = false;
       startCraftingBtn.textContent = 'Start Crafting Message →';
     } else {
       startCraftingBtn.disabled = true;
-      startCraftingBtn.textContent = 'Select Format & Starting Point';
+      startCraftingBtn.textContent = 'Pick Your Starting Point'; // Updated text
     }
   }
 
   // --- Start Crafting Button Action ---
   startCraftingBtn.addEventListener('click', () => {
+    // ... (Existing logic to save selections and navigate) ...
     if (!startCraftingBtn.disabled) {
       console.log('Starting message crafting with config:', selectedConfig);
-      
-      // Store selections in sessionStorage
       try {
         sessionStorage.setItem('messageCategory', selectedConfig.category);
         sessionStorage.setItem('messageFormat', selectedConfig.format);
         sessionStorage.setItem('messageIntention', selectedConfig.intention);
         console.log('Configuration saved to sessionStorage');
-        
-        // Navigate to the next step (recipient selection)
         window.location.href = 'recipient-selection-new.html';
-
       } catch (error) {
         console.error('Error saving configuration to sessionStorage:', error);
         showAlert('Could not save your selections. Please try again.', 'error');
       }
     }
   });
+
+  // Optional: Add logic for a back button if implemented
+  // if (backButton) {
+  //   backButton.addEventListener('click', () => {
+  //     configurator.classList.remove('flipped');
+  //     resetFormatSelection();
+  //     resetIntentionSelection();
+  //     updateStartCraftingButtonState();
+  //   });
+  // }
+
+  // Initial setup
+  showCorrectIntentions();
+  updateStartCraftingButtonState(); // Initial button state
 }
 // --- End of Configurator Additions ---
 
-// --- Existing helper functions (getInitials, showAlert, etc.) ---
 // ... rest of existing js/home.js code ...

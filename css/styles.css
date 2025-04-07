@@ -5694,7 +5694,8 @@ textarea.input-field:focus, #connection-notes:focus {
 
 /* Message Configurator Styles */
 .message-configurator {
-  background: rgba(33, 30, 46, 0.7); /* Use existing card background */
+  /* Existing styles */
+  background: rgba(33, 30, 46, 0.7);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border-radius: var(--border-radius-lg, 16px);
@@ -5702,9 +5703,54 @@ textarea.input-field:focus, #connection-notes:focus {
   margin-bottom: var(--spacing-xl, 2rem);
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
   border: 1px solid rgba(138, 87, 222, 0.15);
+  /* New styles for flip */
+  perspective: 1000px;
+  min-height: 400px; /* Adjust as needed based on content */
 }
 
-.configurator-title {
+.configurator-inner {
+  position: relative;
+  width: 100%;
+  height: 100%; /* Or set min-height */
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.message-configurator.flipped .configurator-inner {
+  transform: rotateY(180deg);
+}
+
+.configurator-front,
+.configurator-back {
+  position: absolute;
+  width: 100%;
+  height: 100%; /* Ensure faces cover the area */
+  -webkit-backface-visibility: hidden; /* Safari */
+  backface-visibility: hidden;
+  /* Add padding inside faces if needed, remove from .message-configurator */
+  padding: var(--spacing-lg, 1.5rem); 
+  box-sizing: border-box; /* Include padding in size */
+  display: flex;
+  flex-direction: column;
+}
+
+.configurator-back {
+  transform: rotateY(180deg);
+  /* Ensure back face background matches if needed, or is transparent */
+  background-color: rgba(33, 30, 46, 0.9); /* Slightly more opaque for back? */
+  border-radius: var(--border-radius-lg, 16px);
+}
+
+/* Remove padding from main container if added to faces */
+.message-configurator {
+  padding: 0; /* Remove padding here */
+  overflow: hidden; /* Hide anything sticking out during flip */
+}
+
+
+/* Adapt existing styles to be within front/back */
+.configurator-front .configurator-title, 
+.configurator-back .configurator-title {
   text-align: center;
   font-size: var(--font-size-xl, 1.5rem);
   font-weight: 600;
@@ -5712,11 +5758,13 @@ textarea.input-field:focus, #connection-notes:focus {
   color: var(--text-light, #fff);
 }
 
-.configurator-step {
+.configurator-front .configurator-step,
+.configurator-back .configurator-step {
   margin-bottom: var(--spacing-lg, 1.5rem);
 }
 
-.step-title {
+.configurator-front .step-title,
+.configurator-back .step-title {
   font-size: var(--font-size-md, 1rem);
   font-weight: 500;
   color: var(--text-muted, rgba(255,255,255,0.7));
@@ -5725,14 +5773,15 @@ textarea.input-field:focus, #connection-notes:focus {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Category Toggle */
-.category-toggle {
+.configurator-front .category-toggle {
+  /* Existing styles */
   display: flex;
   justify-content: center;
   gap: var(--spacing-md, 1rem);
 }
 
-.toggle-btn {
+.configurator-front .toggle-btn {
+  /* Existing styles */
   padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
   border-radius: var(--border-radius-full, 50px);
   font-weight: 600;
@@ -5744,22 +5793,24 @@ textarea.input-field:focus, #connection-notes:focus {
   font-size: var(--font-size-md, 1rem);
 }
 
-.toggle-btn.active {
+.configurator-front .toggle-btn.active {
+  /* Existing styles */
   background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
   color: white;
   border-color: transparent;
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
 }
 
-/* Format Options */
-.format-options {
+.configurator-front .format-options {
+  /* Existing styles */
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-md, 1rem);
   justify-content: center;
 }
 
-.format-btn {
+.configurator-front .format-btn {
+  /* Existing styles */
   padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
   border-radius: var(--border-radius-md, 12px);
   font-weight: 500;
@@ -5771,22 +5822,25 @@ textarea.input-field:focus, #connection-notes:focus {
   font-size: var(--font-size-sm, 0.875rem);
 }
 
-.format-btn:hover,
-.format-btn.selected {
+.configurator-front .format-btn:hover,
+.configurator-front .format-btn.selected {
+  /* Existing styles */
   background: rgba(138, 87, 222, 0.15);
   border-color: rgba(138, 87, 222, 0.3);
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
 }
 
-/* Intention Options */
-.intention-options {
+/* Styles for back face content */
+.configurator-back .intention-options {
+  /* Existing styles */
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: var(--spacing-md, 1rem);
 }
 
-.intention-card {
+.configurator-back .intention-card {
+  /* Existing styles */
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--border-radius-md, 12px);
@@ -5799,21 +5853,24 @@ textarea.input-field:focus, #connection-notes:focus {
   line-height: 1.5;
 }
 
-.intention-card:hover,
-.intention-card.selected {
+.configurator-back .intention-card:hover,
+.configurator-back .intention-card.selected {
+  /* Existing styles */
   transform: translateY(-3px);
   background: rgba(138, 87, 222, 0.1);
   border-color: rgba(138, 87, 222, 0.3);
   box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
 }
 
-/* Action Button */
-.configurator-action {
+.configurator-back .configurator-action {
+  /* Existing styles */
   text-align: center;
-  margin-top: var(--spacing-xl, 2rem);
+  margin-top: auto; /* Push action button to bottom */
+  padding-top: var(--spacing-lg); /* Add space above button */
 }
 
-.start-crafting-button {
+.configurator-back .start-crafting-button {
+  /* Existing styles */
   padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
   border-radius: var(--border-radius-full, 50px);
   font-weight: 600;
@@ -5826,26 +5883,31 @@ textarea.input-field:focus, #connection-notes:focus {
   box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
 }
 
-.start-crafting-button:hover:not(:disabled) {
+.configurator-back .start-crafting-button:hover:not(:disabled) {
+  /* Existing styles */
   background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.4);
 }
 
-.start-crafting-button:disabled {
+.configurator-back .start-crafting-button:disabled {
+  /* Existing styles */
   background: rgba(255, 255, 255, 0.1);
   color: var(--text-muted, rgba(255,255,255,0.7));
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* Responsive adjustments for configurator if needed */
+/* Responsive adjustments for flip */
 @media (max-width: 600px) {
-  .intention-options {
-    grid-template-columns: 1fr; /* Stack intentions on small screens */
+  .configurator-back .intention-options {
+    grid-template-columns: 1fr; 
   }
-  .format-options {
-     justify-content: flex-start; /* Align formats left */
+  .configurator-front .format-options {
+     justify-content: flex-start; 
+  }
+  .message-configurator {
+     min-height: 450px; /* Increase min height on mobile if needed */
   }
 }
 

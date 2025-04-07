@@ -567,19 +567,20 @@
       display: flex;
       flex-direction: column;
       gap: var(--spacing-lg);
-      margin: var(--spacing-xl) 0;
-      perspective: 1000px;
       max-width: 600px;
       width: 100%;
       margin: var(--spacing-xl) auto;
+      perspective: 1000px;
     }
     
     .message-card {
       position: relative;
-      height: 120px;
+      height: 100px;
       cursor: pointer;
       transform-style: preserve-3d;
-      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: var(--border-radius-lg);
+      overflow: hidden;
     }
     
     .message-card.flipped {
@@ -594,7 +595,6 @@
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       border-radius: var(--border-radius-lg);
-      padding: var(--spacing-lg);
       display: flex;
       align-items: center;
       background: rgba(45, 42, 59, 0.7);
@@ -606,19 +606,22 @@
     .message-card__front {
       display: flex;
       align-items: center;
+      padding: 0 var(--spacing-lg);
       gap: var(--spacing-md);
-      padding: var(--spacing-lg);
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.9), rgba(45, 42, 59, 0.7));
     }
     
     .message-card__front:hover {
       border-color: rgba(138, 87, 222, 0.3);
-      box-shadow: 0 0 20px rgba(138, 87, 222, 0.1);
+      box-shadow: 0 0 20px rgba(138, 87, 222, 0.15);
       transform: translateY(-2px);
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
     }
     
     .message-card__back {
       transform: rotateY(180deg);
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.9));
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
+      padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -626,15 +629,8 @@
     }
     
     .message-card__icon {
-      font-size: 2em;
       flex-shrink: 0;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(138, 87, 222, 0.1);
-      border-radius: var(--border-radius-md);
+      font-size: 1.5em;
     }
     
     .message-card__title {
@@ -778,18 +774,12 @@
       <h1 class="hero-title">What kind of message is on your heart today?</h1>
       
       <!-- Tabs -->
-      <div class="tabs">
-        <button class="tab active" data-type="romantic">
-          <span class="tab-icon">❤️</span>
-          <span>Romantic</span>
+      <div class="message-tabs">
+        <button class="message-tab active" data-type="professional">
+          <span>💼 Professional Messages</span>
         </button>
-        <button class="tab" data-type="professional">
-          <span class="tab-icon">💼</span>
-          <span>Professional</span>
-        </button>
-        <button class="tab" data-type="personal">
-          <span class="tab-icon">🤝</span>
-          <span>Personal</span>
+        <button class="message-tab" data-type="personal">
+          <span>💖 Personal Messages</span>
         </button>
       </div>
       
@@ -840,7 +830,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
           </div>
         </div>
@@ -852,7 +842,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
           </div>
         </div>
@@ -864,7 +854,7 @@
           </div>
           <div class="message-card__back">
             <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-            <button class="message-card__button">Use This Message</button>
+            <button class="message-card__button">Use This Message →</button>
             <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
           </div>
         </div>
@@ -917,13 +907,14 @@
         });
         
         // Prevent card from flipping back when clicking the button
-        button.addEventListener('click', (e) => {
+        button?.addEventListener('click', (e) => {
           e.stopPropagation();
           // Handle button click - redirect or show message editor
+          window.location.href = "message-editor.html";
         });
         
         // Allow clicking anywhere on the back to flip back
-        backSide.addEventListener('click', (e) => {
+        backSide?.addEventListener('click', (e) => {
           if (e.target === backSide || e.target.classList.contains('message-card__preview')) {
             card.classList.remove('flipped');
           }
@@ -931,13 +922,13 @@
       });
       
       // Tab switching functionality
-      const tabs = document.querySelectorAll('.tab');
+      const messageTabs = document.querySelectorAll('.message-tab');
       const professionalCards = document.getElementById('professional-cards');
       const personalCards = document.getElementById('personal-cards');
       
-      tabs.forEach(tab => {
+      messageTabs.forEach(tab => {
         tab.addEventListener('click', () => {
-          tabs.forEach(t => t.classList.remove('active'));
+          messageTabs.forEach(t => t.classList.remove('active'));
           tab.classList.add('active');
           
           const type = tab.getAttribute('data-type');

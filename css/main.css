@@ -31,6 +31,8 @@
 @import url('../css/components/toggle.css');
 @import url('../css/components/configurator.css');
 @import url('../css/components/message.css');
+@import url('../css/components/message-creator.css');
+@import url('../css/components/message-home.css');
 
 /* ===== Page-Specific Styles ===== */
 @import url('../css/pages/home.css');

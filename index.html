@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>HeartGlowAI - AI-Powered Heartfelt Messages</title>
   <base href="./">
   <meta name="description" content="Create meaningful, personalized messages for your loved ones with HeartGlowAI's emotional intelligence technology. Express your feelings authentically.">
@@ -11,9 +11,10 @@
   <link rel="icon" href="/favicon.ico" sizes="any">
   
   <!-- Resource Hints -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://us-central1-heartglowai.cloudfunctions.net" crossorigin>
   <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
   
@@ -32,9 +33,7 @@
   
   <!-- CSS -->
   <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/perplexity-citations.css">
-
+  
   <style>
     :root {
       --primary: #8a57de;
@@ -53,35 +52,8 @@
       --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
       --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
       --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.5rem;
-      --spacing-xl: 2rem;
-      --spacing-xxl: 3rem;
-      --font-size-sm: 0.875rem;
-      --font-size-md: 1rem;
-      --font-size-lg: 1.125rem;
-      --font-size-xl: 1.5rem;
-      --font-size-xxl: 2rem;
-      --font-size-display: 3.5rem;
     }
     
-    /* Fix for white rectangles appearing over cards */
-    .message-card:before,
-    .message-card:after,
-    .message-card > *:not(.message-card__inner),
-    .message-card__inner:before,
-    .message-card__inner:after,
-    .message-card__inner > *:not(.message-card__front):not(.message-card__back),
-    .message-card__front > *:not(.message-card__icon):not(.message-card__content),
-    .message-card__back > *:not(.message-card__preview):not(.message-card__button):not(.message-card__insights) {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-    
-    /* Base styles with improved gradients */
     body {
       background-color: var(--background-darker);
       background-image: 
@@ -94,1144 +66,206 @@
       margin: 0;
       padding: 0;
     }
-    
-    * {
-      box-sizing: border-box;
-    }
-    
-    .container {
-      max-width: 1200px;
-      width: 100%;
-      margin: 0 auto;
-      padding: 0 var(--spacing-lg);
-    }
-    
-    /* Header styles */
-    .header {
-      padding: var(--spacing-lg) 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-      color: var(--text-light);
-    }
-    
-    .logo-icon {
-      margin-right: var(--spacing-xs);
-      font-size: 1.25em;
-      filter: drop-shadow(0 0 8px rgba(138, 87, 222, 0.6));
-    }
-    
-    .logo-text span {
-      background: linear-gradient(90deg, var(--primary), var(--primary-light));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    /* Hero section */
-    .hero {
-      text-align: center;
-      padding: var(--spacing-xxl) 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .heart-container {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      margin-bottom: var(--spacing-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .heart-icon {
-      color: var(--primary);
-      font-size: 60px;
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 10px rgba(138, 87, 222, 0.5));
-      animation: pulse 3s ease-in-out infinite;
-      z-index: 2;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .heart-glow {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(138, 87, 222, 0.6) 0%, rgba(138, 87, 222, 0) 70%);
-      z-index: 1;
-      animation: glow 3s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-      0%, 100% { opacity: 0.4; transform: scale(0.9); }
-      50% { opacity: 0.7; transform: scale(1.1); }
-    }
-    
-    .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: var(--font-size-display);
-      font-weight: 700;
-      line-height: 1.2;
-      margin: 0 0 var(--spacing-md);
-      color: var(--text-light);
-      letter-spacing: -0.01em;
-    }
-    
-    /* Emotional guidance microcopy */
-    .hero-subtitle {
-      color: var(--text-muted);
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-xl);
-      max-width: 600px;
-      text-align: center;
-    }
-    
-    /* Tab section */
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-xl);
-      background: rgba(26, 22, 37, 0.5);
-      backdrop-filter: blur(10px);
-      padding: var(--spacing-xs);
-      border-radius: var(--border-radius-lg);
-    }
-    
-    .tab {
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    
-    .tab-icon {
-      font-size: 1.2em;
-    }
-    
-    .tab.active {
-      background: linear-gradient(45deg, rgba(138, 87, 222, 0.2), rgba(178, 150, 255, 0.2));
-      color: var(--text-light);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    /* Cards section */
-    .card-container {
-      margin-top: var(--spacing-xl);
-      width: 100%;
-      max-width: 800px;
-    }
-    
-    .card {
-      background: var(--card-bg);
-      background-image: linear-gradient(125deg, rgba(138, 87, 222, 0.05), rgba(45, 42, 59, 0.7), rgba(138, 87, 222, 0.05));
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      margin-bottom: var(--spacing-xl);
-      border: 1px solid rgba(138, 87, 222, 0.15);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      animation: fadeIn 0.8s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.2);
-      border-color: rgba(138, 87, 222, 0.3);
-    }
-    
-    .card-content {
-      padding: var(--spacing-xl);
-    }
-    
-    .premium-badge {
-      position: absolute;
-      top: var(--spacing-md);
-      right: var(--spacing-md);
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: 20px;
-      font-size: var(--font-size-sm);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      z-index: 2;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(138, 87, 222, 0.4);
-      animation: pulse-subtle 2s infinite ease-in-out;
-    }
-    
-    @keyframes pulse-subtle {
-      0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(138, 87, 222, 0.4); }
-      50% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 25px rgba(138, 87, 222, 0.6); }
-    }
-    
-    .card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: var(--font-size-xl);
-      font-weight: 700;
-      margin-top: 0;
-      margin-bottom: var(--spacing-sm);
-      background: linear-gradient(45deg, #ffffff, #e8e6f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .card-description {
-      color: var(--text-muted);
-      margin-bottom: var(--spacing-lg);
-      font-size: var(--font-size-md);
-      line-height: 1.6;
-    }
-    
-    .features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
-    }
-    
-    .feature {
-      background: rgba(138, 87, 222, 0.15);
-      border-radius: 30px;
-      padding: var(--spacing-xs) var(--spacing-md);
-      font-size: var(--font-size-sm);
-      font-weight: 500;
-      color: var(--text-light);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-      transition: all 0.2s ease;
-    }
-    
-    .feature:hover {
-      background: rgba(138, 87, 222, 0.25);
-      transform: translateY(-2px);
-    }
-    
-    .feature:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(26, 22, 37, 0.9);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      white-space: nowrap;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      pointer-events: none;
-      margin-bottom: 5px;
-      z-index: 10;
-    }
-    
-    .feature:hover::before {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 5px;
-      border-style: solid;
-      border-color: rgba(26, 22, 37, 0.9) transparent transparent transparent;
-      margin-bottom: -5px;
-      z-index: 10;
-      transform: translateX(-50%) rotate(180deg);
-    }
-    
-    .sample {
-      background: rgba(138, 87, 222, 0.1);
-      border-radius: var(--border-radius-md);
-      padding: var(--spacing-xl);
-      font-style: italic;
-      position: relative;
-      color: var(--text-light);
-      border-left: 3px solid var(--primary);
-      margin-top: var(--spacing-xl);
-      margin-bottom: var(--spacing-md);
-      box-shadow: inset 0 0 20px rgba(138, 87, 222, 0.05);
-      font-size: var(--font-size-lg);
-      line-height: 1.7;
-    }
-    
-    .sample::before {
-      content: '"';
-      position: absolute;
-      top: 10px;
-      left: 16px;
-      font-size: 60px;
-      color: rgba(138, 87, 222, 0.2);
-      font-family: Georgia, serif;
-      line-height: 1;
-    }
-    
-    /* CTA Button */
-    .cta {
-      text-align: center;
-      margin: var(--spacing-xxl) 0 var(--spacing-xl);
-      position: relative;
-    }
-    
-    .cta-button {
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      border: none;
-      padding: var(--spacing-md) var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-md), 0 0 20px rgba(138, 87, 222, 0.3);
-      position: relative;
-      overflow: hidden;
-      animation: pulse-cta 3s infinite;
-    }
-    
-    @keyframes pulse-cta {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
-    }
-    
-    .cta-button:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg), 0 0 30px rgba(138, 87, 222, 0.4);
-      animation: none;
-    }
-    
-    .cta-button::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: all 0.6s;
-    }
-    
-    .cta-button:hover::after {
-      left: 100%;
-    }
-    
-    .cta-icon {
-      margin-left: var(--spacing-sm);
-      transition: transform 0.3s;
-    }
-    
-    .cta-button:hover .cta-icon {
-      transform: translateX(4px);
-    }
-
-    .cta-subtext {
-      font-size: var(--font-size-sm);
-      color: var(--text-muted);
-      margin-top: var(--spacing-md);
-    }
-
-    .cta-urgency {
-      font-size: var(--font-size-sm);
-      color: rgba(255, 255, 255, 0.8);
-      margin-top: var(--spacing-sm);
-      background: rgba(138, 87, 222, 0.2);
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 4px;
-    }
-    
-    /* Benefits section */
-    .benefits-header {
-      text-align: center;
-      margin-bottom: var(--spacing-xl);
-      font-size: var(--font-size-xl);
-      font-family: 'Playfair Display', serif;
-      color: var(--text-light);
-    }
-    
-    .benefits {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-xl);
-    }
-    
-    .benefit {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius-lg);
-      padding: var(--spacing-lg);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 1px solid rgba(138, 87, 222, 0.1);
-      box-shadow: var(--shadow-md);
-    }
-    
-    .benefit:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-    
-    .benefit-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(45deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.2));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto var(--spacing-md);
-      font-size: 24px;
-    }
-    
-    .benefit-title {
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-sm);
-      color: var(--text-light);
-    }
-    
-    .benefit-text {
-      color: var(--text-muted);
-      font-size: var(--font-size-md);
-      line-height: 1.5;
-    }
-    
-    /* Responsive design */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      
-      .benefits {
-        grid-template-columns: 1fr;
-      }
-      
-      .tabs {
-        flex-wrap: wrap;
-      }
-    }
-
-    /* Message Type Tabs */
-    .message-tabs {
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: center;
-      margin-bottom: var(--spacing-xl);
-    }
-    
-    .message-tab {
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius-lg);
-      background: rgba(45, 42, 59, 0.7);
-      border: 1px solid rgba(138, 87, 222, 0.1);
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-    }
-    
-    .message-tab.active {
-      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
-      border-color: rgba(138, 87, 222, 0.3);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
-    }
-    
-    .message-tab:hover:not(.active) {
-      background: rgba(138, 87, 222, 0.05);
-      transform: translateY(-1px);
-    }
-    
-    /* Message Cards Grid with improved spacing and animations */
-    .message-cards {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-lg);
-      max-width: 800px;
-      width: 100%;
-      margin: var(--spacing-xl) auto;
-    }
-    
-    /* Handle all card structure to prevent white rectangles */
-    .message-card {
-      position: relative;
-      height: 90px;
-      width: 100%;
-      cursor: pointer;
-      perspective: 1000px;
-      margin-bottom: var(--spacing-md);
-      background: transparent !important;
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      box-shadow: none !important;
-    }
-    
-    .message-card__inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      text-align: left;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-      border-radius: var(--border-radius-lg);
-      box-shadow: none !important;
-    }
-    
-    .message-card.flipped .message-card__inner {
-      transform: rotateY(180deg);
-    }
-    
-    .message-card__front,
-    .message-card__back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-    }
-    
-    .message-card__front {
-      background-color: #2D2A3B;
-      border-left: 4px solid var(--primary);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-    }
-    
-    .message-card__back {
-      background-color: #2D2A3B;
-      padding: var(--spacing-lg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      transform: rotateY(180deg);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(138, 87, 222, 0.4);
-    }
-    
-    .message-card__icon {
-      flex-shrink: 0;
-      font-size: 1.8em;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-radius: 8px;
-      margin: 0 var(--spacing-md);
-    }
-    
-    .message-card__content {
-      flex: 1;
-      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
-      overflow: hidden;
-    }
-    
-    .message-card__title {
-      color: white;
-      font-weight: 600;
-      margin: 0;
-      font-size: var(--font-size-md);
-      line-height: 1.4;
-    }
-    
-    .message-card__subtitle {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: var(--font-size-sm);
-      margin-top: 4px;
-    }
-    
-    .message-card__preview {
-      color: var(--text-muted);
-      font-size: var(--font-size-md);
-      line-height: 1.5;
-      margin: 0 0 var(--spacing-lg);
-      font-style: italic;
-      overflow-wrap: break-word;
-      word-break: break-word;
-      hyphens: auto;
-      width: 100%;
-      padding: 0 var(--spacing-sm);
-    }
-    
-    .message-card__button {
-      width: 100%;
-      max-width: 90%;
-      margin-left: auto;
-      margin-right: auto;
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: var(--font-size-sm);
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      margin-top: auto;
-      flex-shrink: 0;
-    }
-    
-    .message-card__button:hover {
-      transform: translateY(-2px);
-    }
-    
-    .message-card__insights {
-      position: absolute;
-      top: var(--spacing-sm);
-      right: var(--spacing-sm);
-      color: white;
-      font-size: 1.2em;
-      background: rgba(138, 87, 222, 0.2);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      cursor: help;
-    }
-    
-    /* Desktop hover flip & scale */
-    @media (hover: hover) and (pointer: fine) {
-      .message-card:hover .message-card__inner {
-        transform: rotateY(180deg);
-      }
-      .message-card:hover {
-        z-index: 10;
-        box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.2) !important;
-      }
-    }
-    
-    /* CTA Section */
-    .cta-section {
-      text-align: center;
-      margin-top: var(--spacing-xxl);
-      padding: var(--spacing-xl);
-      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
-      border-radius: var(--border-radius-lg);
-    }
-    
-    .cta-section__title {
-      font-size: var(--font-size-xl);
-      font-weight: 600;
-      margin-bottom: var(--spacing-md);
-      background: linear-gradient(45deg, var(--text-light), #e8e6f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .cta-section__subtitle {
-      color: var(--text-muted);
-      margin-bottom: var(--spacing-lg);
-    }
-    
-    @media (max-width: 768px) {
-      .message-cards {
-        gap: var(--spacing-md);
-      }
-      
-      .message-card {
-        min-height: 100px;
-      }
-      
-      .message-card__back {
-        padding: var(--spacing-md);
-      }
-      
-      .message-card__preview {
-        font-size: var(--font-size-sm);
-        margin-bottom: var(--spacing-md);
-      }
-      
-      .message-card__button {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: calc(var(--font-size-sm) - 1px);
-      }
-      
-      body {
-        padding-bottom: 80px;
-      }
-    }
-    
-    @keyframes staggerFadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-    
-    .message-card {
-      animation: staggerFadeIn 0.5s ease forwards;
-      opacity: 0;
-    }
-    
-    .message-card:nth-child(1) { animation-delay: 0.1s; }
-    .message-card:nth-child(2) { animation-delay: 0.2s; }
-    .message-card:nth-child(3) { animation-delay: 0.3s; }
-    .message-card:nth-child(4) { animation-delay: 0.4s; }
-    .message-card:nth-child(5) { animation-delay: 0.5s; }
-    .message-card:nth-child(6) { animation-delay: 0.6s; }
-
-    /* Sticky CTA for Mobile */
-    .sticky-cta {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background: linear-gradient(180deg, rgba(19, 16, 27, 0.9) 0%, rgba(19, 16, 27, 0.95) 100%);
-      backdrop-filter: blur(10px);
-      padding: var(--spacing-md);
-      border-top: 1px solid rgba(138, 87, 222, 0.2);
-      z-index: 1000;
-      box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
-      display: none;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
-      animation: slideUp 0.5s ease forwards;
-      animation-delay: 2s;
-    }
-    
-    @keyframes slideUp {
-      to {
-        transform: translateY(0);
-      }
-    }
-    
-    .sticky-cta__content {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      max-width: 800px;
-      margin: 0 auto;
-      gap: var(--spacing-md);
-    }
-    
-    .sticky-cta__text {
-      font-size: var(--font-size-sm);
-      color: var(--text-light);
-      flex-grow: 1;
-    }
-    
-    .sticky-cta__button {
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: var(--font-size-sm);
-      border: none;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    
-    @media (max-width: 768px) {
-      .sticky-cta {
-        display: block;
-      }
-      
-      .hero-title {
-        font-size: 2.5rem;
-      }
-      
-      .benefits {
-        grid-template-columns: 1fr;
-      }
-      
-      .tabs {
-        flex-wrap: wrap;
-      }
-      
-      .message-cards {
-        grid-template-columns: repeat(2, 1fr);
-      }
-      
-      .message-card {
-        height: 180px;
-      }
-    }
-
-    .hero article.message-card,
-    .hero .message-card {
-      border: none !important;
-      box-shadow: none !important;
-      background: transparent !important;
-    }
-
-    .message-card a,
-    .message-card div[style*="background"],
-    .message-card div[class*="white"],
-    .message-card div[class*="overlay"],
-    .message-card div:not([class]) {
-      display: none !important;
-    }
   </style>
 </head>
+
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <a href="index.html" class="logo">
-        <span class="logo-icon">❤️</span>
-        <span class="logo-text">Heart<span>GlowAI</span></span>
-      </a>
-    </header>
-    
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="heart-container">
-        <div class="heart-glow"></div>
-        <i class="fas fa-heart heart-icon"></i>
-      </div>
-      <h1 class="hero-title">What kind of message is on your heart today?</h1>
-      <p class="hero-subtitle">Choose the moment you're in — we'll help you find the right words.</p>
-      
-      <!-- Tabs -->
-      <div class="message-tabs">
-        <button class="message-tab active" data-type="professional">
-          <span>💼 Professional Messages</span>
-        </button>
-        <button class="message-tab" data-type="personal">
-          <span>💖 Personal Messages</span>
-        </button>
-      </div>
-      
-      <!-- Message Cards Section: Professional -->
-      <div class="message-cards" id="professional-cards">
-        <!-- Card 1 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">💬</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to recognize someone's effort</h3>
-                <p class="message-card__subtitle">Show appreciation for hard work and dedication</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
-            </div>
-          </div>
-        </article>
-        
-        <!-- Card 2 -->  
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">🧠</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I need to give feedback — with care</h3>
-                <p class="message-card__subtitle">Constructive insights delivered with empathy</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
-            </div>
-          </div>
-        </article>
-        
-        <!-- Card 3 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">🙏</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to thank someone for their support</h3>
-                <p class="message-card__subtitle">Express genuine gratitude for their help</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
-            </div>
-          </div>
-        </article>
-      </div>
-      
-      <!-- Message Cards Section: Personal -->
-      <div class="message-cards" id="personal-cards" style="display: none;">
-        <!-- Card 1 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">❤️</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I've been thinking about someone...</h3>
-                <p class="message-card__subtitle">Reconnect with someone meaningful to you</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
-            </div>
-          </div>
-        </article>
-        
-        <!-- Card 2 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">✍️</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to say something I've been holding in</h3>
-                <p class="message-card__subtitle">Express emotions you've kept to yourself</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
-            </div>
-          </div>
-        </article>
-        
-        <!-- Card 3 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">💬</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I just want to make someone smile</h3>
-                <p class="message-card__subtitle">A quick note of warmth or joy</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
-            </div>
-          </div>
-        </article>
-      </div>
-      
-      <!-- CTA Section -->
-      <div class="cta">
-        <a href="login.html" class="cta-button">
-          Write Your First Message Now <span class="cta-icon">→</span>
-        </a>
-        <p class="cta-subtext">No signup required. First message is free.</p>
-        <p class="cta-urgency">Limited free messages daily — start now.</p>
-      </div>
-      
-      <!-- Benefits Section -->
-      <h2 class="benefits-header">Why HeartGlow Works</h2>
-      <div class="benefits">
-        <div class="benefit">
-          <div class="benefit-icon">✨</div>
-          <h3 class="benefit-title">AI With Heart</h3>
-          <p class="benefit-text">Understands what you want to say — and helps you say it beautifully.</p>
-        </div>
-        <div class="benefit">
-          <div class="benefit-icon">🔒</div>
-          <h3 class="benefit-title">Emotionally Private</h3>
-          <p class="benefit-text">Everything you say stays yours. Nothing is stored or shared.</p>
-        </div>
-        <div class="benefit">
-          <div class="benefit-icon">⚡</div>
-          <h3 class="benefit-title">Instant, Not Rushed</h3>
-          <p class="benefit-text">Say something real — in seconds, not hours of overthinking.</p>
-        </div>
-      </div>
+  <!-- Header -->
+  <header class="header">
+    <a href="./" class="logo">
+      <span class="logo-icon">❤️</span>
+      <span class="logo-text">Heart<span>GlowAI</span></span>
+    </a>
+    <div class="user-avatar">DK</div>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="message-home">
+    <section class="welcome-section">
+      <h1 class="welcome-title">Welcome to HeartGlowAI</h1>
+      <p class="welcome-subtitle">Create heartfelt messages for your loved ones with our AI-powered assistant.</p>
     </section>
-  </div>
-  
-  <!-- Sticky CTA for Mobile -->
-  <div class="sticky-cta">
-    <div class="sticky-cta__content">
-      <div class="sticky-cta__text">Ready to create your perfect message?</div>
-      <a href="login.html" class="sticky-cta__button">
-        Write Message Now <span>→</span>
-      </a>
+    
+    <div class="message-card">
+      <h2 class="message-card__title">Start Crafting Your Message</h2>
+      
+      <!-- Choose Context Section -->
+      <section class="step-section">
+        <h3 class="step-title">1. Choose Context</h3>
+        <div class="context-options">
+          <button class="context-btn active">
+            <span class="context-icon">💼</span>
+            <span class="context-text">Professional</span>
+          </button>
+          <button class="context-btn">
+            <span class="context-icon">💕</span>
+            <span class="context-text">Personal</span>
+          </button>
+        </div>
+      </section>
+      
+      <div class="step-divider"></div>
+      
+      <!-- Starting Point Section -->
+      <section class="step-section">
+        <h3 class="step-title">2. Pick Your Starting Point</h3>
+        <div class="starting-points">
+          <div class="starting-point-card">
+            <span class="card-emoji">💬</span>
+            <h4 class="card-title">"I want to recognize someone's effort."</h4>
+          </div>
+          
+          <div class="starting-point-card">
+            <span class="card-emoji">🧠</span>
+            <h4 class="card-title">"I need to give feedback — with care."</h4>
+          </div>
+          
+          <div class="starting-point-card">
+            <span class="card-emoji">🙏</span>
+            <h4 class="card-title">"I want to thank someone for their support."</h4>
+          </div>
+          
+          <div class="starting-point-card">
+            <span class="card-emoji">🎯</span>
+            <h4 class="card-title">"I need to express something clearly and respectfully."</h4>
+          </div>
+          
+          <div class="starting-point-card">
+            <span class="card-emoji">👋</span>
+            <h4 class="card-title">"Someone deserves to feel seen for their impact."</h4>
+          </div>
+        </div>
+      </section>
     </div>
-  </div>
+    
+    <!-- Bottom Content: Recent Messages & Connections -->
+    <div class="two-column-grid">
+      <!-- Recent Messages Section -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fas fa-history section-title-icon"></i>
+            <span>Recent Messages</span>
+          </div>
+          <a href="#" class="section-link">
+            <span>View All</span>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+        
+        <!-- Message Item -->
+        <div class="message-item">
+          <div class="message-meta">
+            <span class="message-type">Encourage</span>
+            <span class="message-time">1 hour ago</span>
+          </div>
+          <div class="message-content">
+            "Hey Kate, just wanted to take a moment to tell you how proud I am of the way you've been handling your projects lately. 🌟 Your dedication and creativity don't go unnoticed, and it's inspiring to see your passion in action. Keep pushing boundaries and know I'm always here cheering you on. Let's..."
+          </div>
+          <div class="message-actions">
+            <button class="message-action" aria-label="Copy message">
+              <i class="far fa-copy"></i>
+            </button>
+            <button class="message-action" aria-label="Edit message">
+              <i class="far fa-edit"></i>
+            </button>
+            <button class="message-action" aria-label="Share message">
+              <i class="fas fa-share-alt"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Connections Section -->
+      <div class="section-card">
+        <div class="section-header">
+          <div class="section-title">
+            <i class="fas fa-user-friends section-title-icon"></i>
+            <span>My Connections</span>
+          </div>
+          <a href="#" class="section-link">
+            <span>Manage</span>
+            <i class="fas fa-chevron-right"></i>
+          </a>
+        </div>
+        
+        <div class="connection-list">
+          <!-- Connection Item -->
+          <div class="connection-item">
+            <div class="connection-info">
+              <div class="connection-avatar">K</div>
+              <div class="connection-details">
+                <div class="connection-name">Kate</div>
+                <div class="connection-type">Partner</div>
+              </div>
+            </div>
+            <div class="connection-actions">
+              <button class="message-action" aria-label="Message Kate">
+                <i class="far fa-paper-plane"></i>
+              </button>
+              <button class="message-action" aria-label="Edit contact">
+                <i class="far fa-edit"></i>
+              </button>
+              <button class="message-action" aria-label="Delete contact">
+                <i class="far fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Connection Item -->
+          <div class="connection-item">
+            <div class="connection-info">
+              <div class="connection-avatar">D</div>
+              <div class="connection-details">
+                <div class="connection-name">Dad</div>
+                <div class="connection-type">Family</div>
+              </div>
+            </div>
+            <div class="connection-actions">
+              <button class="message-action" aria-label="Message Dad">
+                <i class="far fa-paper-plane"></i>
+              </button>
+              <button class="message-action" aria-label="Edit contact">
+                <i class="far fa-edit"></i>
+              </button>
+              <button class="message-action" aria-label="Delete contact">
+                <i class="far fa-trash-alt"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- Add New Connection -->
+          <button class="add-connection">
+            <span class="add-connection-icon">
+              <i class="fas fa-plus"></i>
+            </span>
+            <span class="add-connection-text">Add New Connection</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
   
-  <!-- JavaScript -->
   <script>
+    // Mobile-first interaction
     document.addEventListener('DOMContentLoaded', function() {
-      // CRITICAL FIX: Remove any extra elements that might be causing white rectangles
-      document.querySelectorAll('.message-card').forEach(card => {
-        // Keep only the card inner structure and remove everything else
-        const innerElement = card.querySelector('.message-card__inner');
-        if (innerElement) {
-          // Remove all direct children except the inner card element
-          Array.from(card.children).forEach(child => {
-            if (child !== innerElement) {
-              child.remove();
-            }
-          });
-          
-          // Remove any absolute positioned elements that might be overlays
-          card.querySelectorAll('div:not(.message-card__inner):not(.message-card__front):not(.message-card__back):not(.message-card__content):not(.message-card__icon):not(.message-card__insights)').forEach(el => {
-            el.remove();
-          });
-        }
-      });
-      
-      // Check if device supports hover
-      const supportsHover = window.matchMedia('(hover: hover)').matches;
-      
-      // Card flip functionality with analytics
-      const messageCards = document.querySelectorAll('.message-card');
-      let cardFlipCount = 0;
-      
-      messageCards.forEach((card, index) => {
-        const cardFront = card.querySelector('.message-card__front');
-        const cardBack = card.querySelector('.message-card__back');
-        const cardTitle = card.querySelector('.message-card__title').innerText;
-        
-        function trackCardFlip() {
-          cardFlipCount++;
-          console.log(`Card flip event: ${cardTitle}`);
-          // Analytics tracking would go here in production
-          // Example: analytics.track('card_flip', { card_id: index, title: cardTitle });
-          
-          // Show sticky CTA after user has flipped at least one card
-          if (cardFlipCount === 1 && window.innerWidth <= 768) {
-            document.querySelector('.sticky-cta').style.display = 'block';
-          }
-        }
-        
-        // Only add click event on mobile devices
-        if (!supportsHover) {
-          cardFront.addEventListener('click', function() {
-            card.classList.add('flipped');
-            trackCardFlip();
-          });
-          
-          // Make the back side clickable to flip back on mobile
-          cardBack.addEventListener('click', function(e) {
-            // Don't flip if clicking on button
-            if (!e.target.classList.contains('message-card__button')) {
-              card.classList.remove('flipped');
-            }
-          });
-        } else {
-          // For desktop, track when card is hovered (flipped)
-          card.addEventListener('mouseenter', function() {
-            setTimeout(() => {
-              if (card.matches(':hover')) {
-                trackCardFlip();
-              }
-            }, 600); // Wait for flip animation to complete
-          });
-        }
-        
-        // Prevent buttons from triggering flip and navigate to login
-        const button = card.querySelector('.message-card__button');
-        if (button) {
-          button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            console.log(`Button clicked on card: ${cardTitle}`);
-            // Example: analytics.track('message_used', { card_id: index, title: cardTitle });
-            window.location.href = "login.html";
-          });
-        }
-      });
-      
-      // Tab switching functionality
-      const messageTabs = document.querySelectorAll('.message-tab');
-      const professionalCards = document.getElementById('professional-cards');
-      const personalCards = document.getElementById('personal-cards');
-      
-      messageTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          messageTabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          
-          const type = tab.getAttribute('data-type');
-          if (type === 'professional') {
-            professionalCards.style.display = 'flex';
-            personalCards.style.display = 'none';
-          } else if (type === 'personal') {
-            professionalCards.style.display = 'none';
-            personalCards.style.display = 'flex';
-          }
+      // Context selection
+      const contextBtns = document.querySelectorAll('.context-btn');
+      contextBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+          contextBtns.forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
         });
       });
       
-      // Animation for the heart
-      const heartIcon = document.querySelector('.heart-icon');
-      const heartGlow = document.querySelector('.heart-glow');
-      
-      // Apply subtle animations
-      setInterval(() => {
-        heartGlow.style.animation = 'none';
-        setTimeout(() => {
-          heartGlow.style.animation = 'glow 3s ease-in-out infinite';
-        }, 10);
-      }, 3000);
+      // Starting point selection with redirect
+      const startingPoints = document.querySelectorAll('.starting-point-card');
+      startingPoints.forEach(card => {
+        card.addEventListener('click', function() {
+          // Navigate to the tone selection page
+          window.location.href = 'message-tone-new.html';
+        });
+      });
     });
   </script>
 </body>

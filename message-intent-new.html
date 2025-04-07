@@ -2,299 +2,290 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configure Your Message - HeartGlowAI</title>
-    <meta name="description" content="Create personalized messages for your loved ones with HeartGlowAI">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>HeartGlowAI - Create Your Message</title>
+    <base href="./">
+    <meta name="description" content="Create meaningful, personalized messages with HeartGlowAI's emotional intelligence technology.">
     
-    <!-- Preconnect to Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Firebase Scripts -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
-    
-    <!-- Firebase Config -->
-    <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
-            authDomain: "heartglowai.firebaseapp.com",
-            projectId: "heartglowai",
-            storageBucket: "heartglowai.firebasestorage.app",
-            messagingSenderId: "196565711798",
-            appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
-            measurementId: "G-KJMPL1DNPY"
-        };
-        
-        // Initialize Firebase if not already initialized
-        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-            console.log("Firebase initialized successfully");
-        } else {
-            console.log("Firebase already initialized");
-        }
-        
-        // Critical: Set persistence to LOCAL
-        if (firebase && firebase.auth) {
-            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                .catch(function(error) {
-                    console.error("Auth persistence error:", error);
-                });
-        }
-    </script>
+    <!-- Font Loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
-    <!-- Stylesheets -->
+    <!-- CSS -->
     <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/components/message.css">
     
     <style>
-        /* Page-specific styles */
+        :root {
+            --primary: #8a57de;
+            --primary-light: #b296ff;
+            --primary-dark: #6a3cb2;
+            --secondary: #ff7eb6;
+            --background-dark: #1a1625;
+            --background-darker: #13101b;
+            --text-light: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.7);
+            --card-bg: rgba(45, 42, 59, 0.7);
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 24px;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
         body {
+            background-color: var(--background-darker);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(138, 87, 222, 0.18) 0%, transparent 35%),
+                radial-gradient(circle at 80% 70%, rgba(255, 126, 182, 0.12) 0%, transparent 35%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-light);
+            line-height: 1.6;
             min-height: 100vh;
-            background-color: #1A1625;
-            background-image: linear-gradient(135deg, #0c0a18, #1a1628);
-            color: #E8E6F1;
-            font-family: 'Inter', sans-serif;
-            position: relative;
-            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
         }
         
-        /* Subtle background pattern */
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="%238a57de" opacity="0.03"/></svg>');
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .app-container {
-            min-height: 100vh;
-            padding: 2rem 0 4rem;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .app-header {
+        /* Header styles */
+        .header {
+            padding: 1rem;
             display: flex;
+            justify-content: center;
             align-items: center;
-            justify-content: space-between;
-            padding: 1.5rem 2rem;
-            margin-bottom: 2rem;
+            position: relative;
         }
         
-        .brand-logo {
+        .logo {
             display: flex;
             align-items: center;
             text-decoration: none;
-            transition: transform 0.2s ease;
-        }
-        
-        .logo-heart {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(45deg, #8a57de, #b296ff);
-            transform: rotate(45deg);
-            position: relative;
-            margin-right: 15px;
-            border-radius: 5px;
-        }
-        
-        .logo-heart:before, .logo-heart:after {
-            content: '';
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(45deg, #8a57de, #b296ff);
-            border-radius: 50%;
-            position: absolute;
-        }
-        
-        .logo-heart:before {
-            top: -15px;
-            left: 0;
-        }
-        
-        .logo-heart:after {
-            top: 0;
-            left: -15px;
-        }
-        
-        .brand-name {
-            font-size: 1.4rem;
             font-weight: 700;
-            color: #E8E6F1;
+            font-size: 1.25rem;
+            color: var(--text-light);
         }
         
-        .brand-ai {
-            background: linear-gradient(45deg, #8a57de, #b296ff);
+        .logo-icon {
+            margin-right: 0.5rem;
+            font-size: 1.25em;
+            filter: drop-shadow(0 0 8px rgba(138, 87, 222, 0.6));
+        }
+        
+        .logo-text span {
+            background: linear-gradient(90deg, var(--primary), var(--primary-light));
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-weight: 800;
-        }
-
-        /* Pulse animation for selection feedback */
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(138, 87, 222, 0.4);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(138, 87, 222, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(138, 87, 222, 0);
-            }
         }
         
-        .pulse {
-            animation: pulse 0.7s ease-out;
+        .back-button {
+            position: absolute;
+            left: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(45, 42, 59, 0.5);
+            border: 1px solid rgba(138, 87, 222, 0.2);
+            color: var(--text-light);
+            border-radius: 50%;
+            width: 2.5rem;
+            height: 2.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
         
-        /* Fade in animation */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+        .back-button:hover, .back-button:focus {
+            background: rgba(138, 87, 222, 0.1);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- App Header -->
-        <header class="app-header">
-            <a href="home.html" class="brand-logo">
-                <div class="logo-heart"></div>
-                <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
-            </a>
-            <nav class="header-nav">
-                <a href="profile.html" class="user-profile">
-                    <i class="fas fa-user-circle"></i>
-                </a>
-            </nav>
-        </header>
-        
-        <!-- Welcome section -->
+    <!-- Header -->
+    <header class="header">
+        <a href="#" class="back-button" aria-label="Go back to previous step">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        <a href="./" class="logo">
+            <span class="logo-icon">❤️</span>
+            <span class="logo-text">Heart<span>GlowAI</span></span>
+        </a>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="message-creator">
         <section class="welcome-section">
             <h1 class="welcome-title">Welcome to HeartGlowAI</h1>
             <p class="welcome-subtitle">Create heartfelt messages for your loved ones with our AI-powered assistant.</p>
         </section>
         
-        <!-- Message creation container -->
-        <div class="message-creation-container">
-            <!-- Configuration Card -->
-            <div class="config-card">
-                <h2 class="config-card__title">Start Crafting Your Message</h2>
-                
-                <!-- Progress indicator -->
-                <div class="progress-indicator">
-                    <div class="progress-step active"></div>
-                    <div class="progress-step"></div>
-                    <div class="progress-step"></div>
+        <div class="creation-card">
+            <h2 class="creation-card__title">Start Crafting Your Message</h2>
+            
+            <!-- Step Indicator -->
+            <div class="step-indicator">
+                <div class="step completed">
+                    <div class="step-circle">1</div>
+                    <div class="step-label">Choose Context</div>
                 </div>
-                
-                <!-- Context Selection Section -->
-                <section id="context-section" class="config-section">
-                    <h3 class="config-section__title">1. Choose Context</h3>
-                    
-                    <div class="context-options">
-                        <button class="context-btn" data-context="professional">
-                            <i class="fas fa-briefcase"></i> Professional
-                        </button>
-                        <button class="context-btn" data-context="personal">
-                            <i class="fas fa-heart"></i> Personal
-                        </button>
-                    </div>
-                    
-                    <!-- Navigation buttons -->
-                    <div class="nav-buttons">
-                        <button class="nav-btn" onclick="window.history.back()">
-                            <i class="fas fa-arrow-left"></i> Back
-                        </button>
-                        <button class="nav-btn primary" id="next-btn" disabled>
-                            Next <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                </section>
-                
-                <!-- Starting Points Section -->
-                <section id="starting-points-section" class="config-section" style="display: none;">
-                    <h3 class="config-section__title">2. Pick Your Starting Point</h3>
-                    
-                    <div class="starting-points">
-                        <!-- Recognize effort card -->
-                        <div class="starting-point-card" data-intention="recognize_effort" data-contexts="professional,personal">
-                            <span class="card-icon">💬</span>
+                <div class="step active">
+                    <div class="step-circle">2</div>
+                    <div class="step-label">Pick Starting Point</div>
+                </div>
+                <div class="step">
+                    <div class="step-circle">3</div>
+                    <div class="step-label">Refine</div>
+                </div>
+            </div>
+            
+            <!-- Context Selection -->
+            <section class="context-section">
+                <h3 class="visually-hidden">Choose Context</h3>
+                <div class="context-options">
+                    <button class="context-btn active">
+                        <span class="context-icon">💼</span>
+                        <span class="context-text">Professional</span>
+                    </button>
+                    <button class="context-btn">
+                        <span class="context-icon">💕</span>
+                        <span class="context-text">Personal</span>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Starting Points -->
+            <section class="starting-points-section">
+                <h3 class="visually-hidden">Pick Your Starting Point</h3>
+                <div class="starting-points">
+                    <div class="starting-point-card">
+                        <div class="card-icon">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div class="card-content">
                             <h4 class="card-title">"I want to recognize someone's effort."</h4>
-                            <p class="card-description">Acknowledge hard work, dedication, or a job well done.</p>
-                        </div>
-                        
-                        <!-- Give feedback card -->
-                        <div class="starting-point-card" data-intention="give_feedback" data-contexts="professional">
-                            <span class="card-icon">🧠</span>
-                            <h4 class="card-title">"I need to give feedback — with care."</h4>
-                            <p class="card-description">Provide constructive thoughts or suggestions professionally.</p>
-                        </div>
-                        
-                        <!-- Thank someone card -->
-                        <div class="starting-point-card" data-intention="express_gratitude" data-contexts="professional,personal">
-                            <span class="card-icon">🙏</span>
-                            <h4 class="card-title">"I want to thank someone for their support."</h4>
-                            <p class="card-description">Express appreciation for help, mentorship, or guidance.</p>
-                        </div>
-                        
-                        <!-- Express clearly card -->
-                        <div class="starting-point-card" data-intention="express_clearly" data-contexts="professional">
-                            <span class="card-icon">🎯</span>
-                            <h4 class="card-title">"I need to express something clearly and respectfully."</h4>
-                            <p class="card-description">Communicate professionally with clarity and respect.</p>
-                        </div>
-                        
-                        <!-- Make someone feel seen card -->
-                        <div class="starting-point-card" data-intention="make_seen" data-contexts="personal,professional">
-                            <span class="card-icon">👋</span>
-                            <h4 class="card-title">"Someone deserves to feel seen for their impact."</h4>
-                            <p class="card-description">Recognize someone's contribution or positive influence.</p>
+                            <p class="card-description">Acknowledge someone's hard work and dedication to a project or task.</p>
                         </div>
                     </div>
                     
-                    <!-- Navigation buttons -->
-                    <div class="nav-buttons">
-                        <button class="nav-btn" id="back-btn">
-                            <i class="fas fa-arrow-left"></i> Back
-                        </button>
-                        <button class="nav-btn primary" id="continue-btn" disabled>
-                            Continue <i class="fas fa-arrow-right"></i>
-                        </button>
+                    <div class="starting-point-card active">
+                        <div class="card-icon">
+                            <i class="fas fa-comment-dots"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">"I need to give feedback — with care."</h4>
+                            <p class="card-description">Provide constructive feedback while maintaining a supportive tone.</p>
+                        </div>
                     </div>
-                </section>
+                    
+                    <div class="starting-point-card">
+                        <div class="card-icon">
+                            <i class="fas fa-praying-hands"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">"I want to thank someone for their support."</h4>
+                            <p class="card-description">Express gratitude for someone's help, guidance, or mentorship.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="starting-point-card">
+                        <div class="card-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">"I need to express something clearly and respectfully."</h4>
+                            <p class="card-description">Communicate your thoughts or concerns in a direct yet respectful manner.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="starting-point-card">
+                        <div class="card-icon">
+                            <i class="fas fa-hands"></i>
+                        </div>
+                        <div class="card-content">
+                            <h4 class="card-title">"Someone deserves to feel seen for their impact."</h4>
+                            <p class="card-description">Highlight the positive impact someone has made on you, the team, or a project.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Navigation Buttons -->
+            <div class="nav-buttons">
+                <button class="nav-btn nav-btn--secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back</span>
+                </button>
+                <button class="nav-btn nav-btn--primary">
+                    <span>Continue</span>
+                    <i class="fas fa-arrow-right"></i>
+                </button>
             </div>
         </div>
-    </div>
-
-    <!-- JavaScript -->
-    <script src="js/message-configurator.js"></script>
+    </main>
+    
+    <script>
+        // Add interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Context button selection
+            const contextBtns = document.querySelectorAll('.context-btn');
+            contextBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remove active class from all buttons
+                    contextBtns.forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                });
+            });
+            
+            // Starting point card selection
+            const startingCards = document.querySelectorAll('.starting-point-card');
+            startingCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    // Remove active class from all cards
+                    startingCards.forEach(c => c.classList.remove('active'));
+                    // Add active class to clicked card
+                    this.classList.add('active');
+                });
+            });
+            
+            // Navigation functionality
+            const backBtn = document.querySelector('.nav-btn--secondary');
+            backBtn.addEventListener('click', function() {
+                // Navigate back
+                console.log('Navigating back');
+                // window.location.href = 'recipient-selection-new.html';
+            });
+            
+            const continueBtn = document.querySelector('.nav-btn--primary');
+            continueBtn.addEventListener('click', function() {
+                // Navigate forward
+                console.log('Navigating forward');
+                // window.location.href = 'message-tone-new.html';
+            });
+        });
+        
+        // For enhanced accessibility
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                if (document.activeElement.classList.contains('context-btn') || 
+                    document.activeElement.classList.contains('starting-point-card')) {
+                    e.preventDefault();
+                    document.activeElement.click();
+                }
+            }
+        });
+    </script>
 </body>
 </html> 

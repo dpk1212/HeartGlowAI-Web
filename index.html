@@ -527,6 +527,205 @@
         flex-wrap: wrap;
       }
     }
+
+    /* Message Type Tabs */
+    .message-tabs {
+      display: flex;
+      gap: var(--spacing-md);
+      justify-content: center;
+      margin-bottom: var(--spacing-xl);
+    }
+    
+    .message-tab {
+      padding: var(--spacing-md) var(--spacing-lg);
+      border-radius: var(--border-radius-lg);
+      background: rgba(45, 42, 59, 0.7);
+      border: 1px solid rgba(138, 87, 222, 0.1);
+      color: var(--text-light);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+    }
+    
+    .message-tab.active {
+      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
+      border-color: rgba(138, 87, 222, 0.3);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    
+    .message-tab:hover:not(.active) {
+      background: rgba(138, 87, 222, 0.05);
+      transform: translateY(-1px);
+    }
+    
+    /* Message Cards Grid */
+    .message-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--spacing-lg);
+      margin: var(--spacing-xl) 0;
+      perspective: 1000px;
+    }
+    
+    .message-card {
+      position: relative;
+      height: 200px;
+      cursor: pointer;
+      transform-style: preserve-3d;
+      transition: transform 0.6s;
+    }
+    
+    .message-card.flipped {
+      transform: rotateY(180deg);
+    }
+    
+    .message-card__front,
+    .message-card__back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-lg);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: rgba(45, 42, 59, 0.7);
+      border: 1px solid rgba(138, 87, 222, 0.1);
+      transition: all 0.3s ease;
+    }
+    
+    .message-card__front:hover {
+      border-color: rgba(138, 87, 222, 0.3);
+      box-shadow: 0 0 20px rgba(138, 87, 222, 0.1);
+      transform: translateY(-2px);
+    }
+    
+    .message-card__back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.9));
+    }
+    
+    .message-card__icon {
+      font-size: 2em;
+      margin-bottom: var(--spacing-md);
+    }
+    
+    .message-card__title {
+      font-weight: 500;
+      color: var(--text-light);
+      margin-bottom: var(--spacing-sm);
+    }
+    
+    .message-card__preview {
+      color: var(--text-muted);
+      font-size: var(--font-size-sm);
+      line-height: 1.6;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .message-card__button {
+      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      color: white;
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: var(--border-radius-md);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .message-card__button:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+    
+    .message-card__insights {
+      position: absolute;
+      top: var(--spacing-sm);
+      right: var(--spacing-sm);
+      color: var(--text-muted);
+      font-size: 1.2em;
+      cursor: help;
+    }
+    
+    .message-card__insights:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      right: 100%;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(26, 22, 37, 0.95);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border-radius: var(--border-radius-sm);
+      font-size: var(--font-size-sm);
+      white-space: nowrap;
+      margin-right: var(--spacing-sm);
+      z-index: 1;
+    }
+    
+    /* CTA Section */
+    .cta-section {
+      text-align: center;
+      margin-top: var(--spacing-xxl);
+      padding: var(--spacing-xl);
+      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
+      border-radius: var(--border-radius-lg);
+    }
+    
+    .cta-section__title {
+      font-size: var(--font-size-xl);
+      font-weight: 600;
+      margin-bottom: var(--spacing-md);
+      background: linear-gradient(45deg, var(--text-light), #e8e6f1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .cta-section__subtitle {
+      color: var(--text-muted);
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    @media (max-width: 768px) {
+      .message-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .message-card {
+        height: 180px;
+      }
+    }
+    
+    @keyframes staggerFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message-card {
+      animation: staggerFadeIn 0.5s ease forwards;
+      opacity: 0;
+    }
+    
+    .message-card:nth-child(1) { animation-delay: 0.1s; }
+    .message-card:nth-child(2) { animation-delay: 0.2s; }
+    .message-card:nth-child(3) { animation-delay: 0.3s; }
+    .message-card:nth-child(4) { animation-delay: 0.4s; }
+    .message-card:nth-child(5) { animation-delay: 0.5s; }
+    .message-card:nth-child(6) { animation-delay: 0.6s; }
   </style>
 </head>
 <body>
@@ -676,6 +875,99 @@
         </div>
       </div>
     </section>
+
+    <section class="message-section">
+      <div class="message-tabs">
+        <button class="message-tab active">
+          💼 Professional Messages
+        </button>
+        <button class="message-tab">
+          💖 Personal Messages
+        </button>
+      </div>
+      
+      <div class="message-cards" id="professional-cards">
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">💬</div>
+            <h3 class="message-card__title">I want to recognize someone's effort</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
+          </div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">🧠</div>
+            <h3 class="message-card__title">I need to give feedback — with care</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
+          </div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">🙏</div>
+            <h3 class="message-card__title">I want to thank someone for their support</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="message-cards" id="personal-cards" style="display: none;">
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">❤️</div>
+            <h3 class="message-card__title">I've been thinking about someone...</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
+          </div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">✍️</div>
+            <h3 class="message-card__title">I want to say something I've been holding in</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
+          </div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__front">
+            <div class="message-card__icon">💬</div>
+            <h3 class="message-card__title">I just want to make someone smile</h3>
+          </div>
+          <div class="message-card__back">
+            <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
+            <button class="message-card__button">Use This Message</button>
+            <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="cta-section">
+        <h2 class="cta-section__title">Start making moments like this — free.</h2>
+        <p class="cta-section__subtitle">No signup needed. First message is free.</p>
+        <button class="cta-button">Write Your First Message Now</button>
+      </div>
+    </section>
   </div>
   
   <!-- JavaScript -->
@@ -721,6 +1013,34 @@
           heartGlow.style.animation = 'glow 3s ease-in-out infinite';
         }, 10);
       }, 3000);
+    });
+
+    // Tab switching functionality
+    const messageTabs = document.querySelectorAll('.message-tab');
+    const professionalCards = document.getElementById('professional-cards');
+    const personalCards = document.getElementById('personal-cards');
+    
+    messageTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => {
+        messageTabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        if (index === 0) {
+          professionalCards.style.display = 'grid';
+          personalCards.style.display = 'none';
+        } else {
+          professionalCards.style.display = 'none';
+          personalCards.style.display = 'grid';
+        }
+      });
+    });
+    
+    // Card flip functionality
+    const messageCards = document.querySelectorAll('.message-card');
+    messageCards.forEach(card => {
+      card.addEventListener('click', () => {
+        card.classList.toggle('flipped');
+      });
     });
   </script>
 </body>

@@ -645,7 +645,7 @@
     
     .message-card__back {
       background-color: #2D2A3B;
-      padding: var(--spacing-md);
+      padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -672,7 +672,8 @@
     
     .message-card__content {
       flex: 1;
-      padding: 0 var(--spacing-md);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      overflow: hidden;
     }
     
     .message-card__title {
@@ -690,10 +691,14 @@
     }
     
     .message-card__preview {
+      color: var(--text-muted);
       font-size: var(--font-size-md);
       line-height: 1.5;
       margin: 0 0 var(--spacing-md);
       font-style: italic;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      hyphens: auto;
     }
     
     .message-card__button {

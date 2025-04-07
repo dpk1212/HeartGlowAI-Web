@@ -9,10 +9,6 @@
   background-image: linear-gradient(to bottom, #ffffff, #f9f9fc);
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-  padding: 2rem;
-  margin-bottom: 2rem;
-  transition: all 0.3s ease;
-  position: relative;
   overflow: hidden;
   width: 100%;
   display: block;
@@ -30,6 +26,43 @@
   border-radius: 4px 4px 0 0;
 }
 
+.message-body {
+  padding: 2.5rem 3rem 3rem;
+  background: #ffffff;
+  position: relative;
+}
+
+.message-card__text {
+  font-family: 'Inter', sans-serif;
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #2d2d3a;
+  white-space: pre-wrap;
+  letter-spacing: 0.01em;
+  margin: 0;
+  width: 100%;
+  display: block;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fix for message text display */
+#message-text {
+  width: 100%;
+  display: block;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  color: #2d2d3a;
+}
+
+.message-body p {
+  margin-bottom: 1.2rem;
+  width: 100%;
+  display: block;
+  color: #2d2d3a;
+}
+
 .message-content {
   font-size: 1.1rem;
   line-height: 1.6;
@@ -39,24 +72,6 @@
   white-space: pre-line;
   word-wrap: break-word;
   overflow-wrap: break-word;
-}
-
-/* Fix for message text display */
-#message-text,
-#generated-message {
-  width: 100%;
-  display: block;
-  white-space: pre-line;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  color: #2d2d3a;
-}
-
-.message-content p {
-  margin-bottom: 1.2rem;
-  width: 100%;
-  display: block;
-  color: #2d2d3a;
 }
 
 .message-content p:last-child {
@@ -100,15 +115,15 @@
   border: 1px solid #e2e5eb;
 }
 
-.text-format {
+.text-format, #message-text.text-format {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 1rem;
   line-height: 1.4;
 }
 
-.text-format p {
+.text-format p, #message-text.text-format p {
   background-color: #8a57de;
-  color: white;
+  color: white !important;
   padding: 0.8rem 1rem;
   border-radius: 18px;
   margin-bottom: 0.5rem;

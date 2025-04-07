@@ -356,7 +356,7 @@ function updateToneDisplay() {
  */
 function initMessageActions() {
     // Edit button
-    const editBtn = document.getElementById('editBtn');
+    const editBtn = document.getElementById('edit-btn');
     const editContainer = document.getElementById('editContainer');
     const editMessage = document.getElementById('editMessage');
     const cancelEditBtn = document.getElementById('cancelEditBtn');
@@ -414,7 +414,7 @@ function initMessageActions() {
     }
     
     // Copy button
-    const copyBtn = document.getElementById('copyBtn');
+    const copyBtn = document.getElementById('copy-btn');
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
             copyMessageToClipboard();
@@ -430,7 +430,7 @@ function initMessageActions() {
     }
     
     // Share button
-    const shareBtn = document.getElementById('shareBtn');
+    const shareBtn = document.getElementById('share-btn');
     const shareModal = document.getElementById('shareModal');
     const closeShareModal = document.getElementById('closeShareModal');
     const shareOptions = document.querySelectorAll('.share-option');
@@ -481,6 +481,18 @@ function initMessageActions() {
             });
         }
     }
+    
+    // Regenerate button
+    const regenerateBtn = document.getElementById('regenerate-btn');
+    if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', function() {
+            // Show loading state and hide message
+            showLoadingState();
+            
+            // Generate new message
+            generateMessage();
+        });
+    }
 }
 
 /**
@@ -508,7 +520,7 @@ function copyMessageToClipboard() {
     showAlert('Message copied to clipboard!', 'success');
     
     // Add animation to the copy button
-    const copyBtn = document.getElementById('copyBtn');
+    const copyBtn = document.getElementById('copy-btn');
     if (copyBtn) {
         copyBtn.classList.add('copied');
         copyBtn.innerHTML = '<i class="fas fa-check"></i> <span>Copied!</span>';
@@ -1024,7 +1036,7 @@ function setupNavigationButtons() {
  */
 function setupMessageActionButtons() {
     // Edit button
-    const editBtn = document.getElementById('editBtn');
+    const editBtn = document.getElementById('edit-btn');
     if (editBtn) {
         editBtn.addEventListener('click', function() {
             startEditing();
@@ -1032,7 +1044,7 @@ function setupMessageActionButtons() {
     }
     
     // Copy button
-    const copyBtn = document.getElementById('copyBtn');
+    const copyBtn = document.getElementById('copy-btn');
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
             copyMessageToClipboard();
@@ -1040,7 +1052,7 @@ function setupMessageActionButtons() {
     }
     
     // Share button
-    const shareBtn = document.getElementById('shareBtn');
+    const shareBtn = document.getElementById('share-btn');
     if (shareBtn) {
         shareBtn.addEventListener('click', function() {
             openShareModal();
@@ -1048,7 +1060,7 @@ function setupMessageActionButtons() {
     }
     
     // Regenerate button
-    const regenerateBtn = document.getElementById('regenerateBtn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', function() {
             showRegenerateOptions();
@@ -1859,13 +1871,14 @@ function displayMessageInsights(insights) {
 function displayGeneratedMessage(message, format = '') {
     logDebug("Displaying generated message...");
     
-    // Get the message container
-    const messageContainer = document.getElementById('message-container');
-    const messageElement = document.getElementById('generated-message');
+    // Get the message card and its components using the correct IDs from HTML
+    const messageCard = document.getElementById('message-card');
+    const messageContainer = document.querySelector('.message-container');
+    const messageElement = document.querySelector('.message-body');
     const messageTextElement = document.getElementById('message-text');
     
     // Use the correct element based on what's available in the DOM
-    const targetElement = messageTextElement || messageElement;
+    const targetElement = messageTextElement;
     
     if (!messageContainer || !targetElement) {
         console.error("Message container or message element not found");
@@ -1880,13 +1893,15 @@ function displayGeneratedMessage(message, format = '') {
         // Make sure loading state is hidden
         hideLoadingState();
         
-        // Apply styling based on format
-        messageContainer.className = 'message-container'; // Reset classes
-        targetElement.className = 'message-content'; // Reset classes
+        // Show the message card if it was hidden
+        if (messageCard) {
+            messageCard.style.display = 'block';
+        }
         
+        // Apply styling based on format
         if (format) {
             messageContainer.classList.add(`${format}-format-container`);
-            targetElement.classList.add(`${format}-format`);
+            messageTextElement.classList.add(`${format}-format`);
         }
 
         // Clear existing content
@@ -1963,7 +1978,7 @@ function displayGeneratedMessage(message, format = '') {
         }
         
         // Make the copy button visible now that we have a message
-        const copyButton = document.getElementById('copyBtn');
+        const copyButton = document.getElementById('copy-btn');
         if (copyButton) {
             copyButton.style.display = 'inline-flex';
         }
@@ -1984,11 +1999,8 @@ function displayGeneratedMessage(message, format = '') {
         // Add Premium Styling
         applyPremiumStyling();
         
-        // Show the message container if it was hidden
-        messageContainer.style.display = 'block';
-        
         // Enable regeneration options
-        const regenerateBtn = document.getElementById('regenerateBtn');
+        const regenerateBtn = document.getElementById('regenerate-btn');
         if (regenerateBtn) {
             regenerateBtn.disabled = false;
         }
@@ -1996,7 +2008,7 @@ function displayGeneratedMessage(message, format = '') {
         logDebug("Message displayed successfully");
         
         // Scroll the message into view if needed
-        messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        messageCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
         console.error('Error displaying message:', error);
         logDebug(`Error displaying message: ${error.message}`);
@@ -2036,7 +2048,7 @@ function formatMessageContent(content) {
  */
 function initializeRegenerateOptions() {
     // Get the regenerate button 
-    const regenerateBtn = document.getElementById('regenerateBtn');
+    const regenerateBtn = document.getElementById('regenerate-btn');
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', function() {
             // Hide message content and insights
@@ -2161,6 +2173,9 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(applyPremiumStyling, 300);
 });
 
+/**
+ * Hide the loading state and show message content
+ */
 function hideLoadingState() {
     const loadingState = document.getElementById('loading-state');
     if (loadingState) {

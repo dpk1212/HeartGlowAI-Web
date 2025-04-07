@@ -31,6 +31,10 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --selected-card-border: linear-gradient(to right, #5091F5, #903FEC);
   --animation-curve: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --border-radius-lg: 16px;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
 }
 
 /* Reset and base styles */
@@ -5687,4 +5691,163 @@ textarea.input-field:focus, #connection-notes:focus {
 .home-page__header .home-page__logo .auth-logo__text {
   /* font-size: var(--font-size-md); */ /* Example adjustment */
 }
+
+/* Message Configurator Styles */
+.message-configurator {
+  background: rgba(33, 30, 46, 0.7); /* Use existing card background */
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: var(--border-radius-lg, 16px);
+  padding: var(--spacing-lg, 1.5rem);
+  margin-bottom: var(--spacing-xl, 2rem);
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
+  border: 1px solid rgba(138, 87, 222, 0.15);
+}
+
+.configurator-title {
+  text-align: center;
+  font-size: var(--font-size-xl, 1.5rem);
+  font-weight: 600;
+  margin-bottom: var(--spacing-xl, 2rem);
+  color: var(--text-light, #fff);
+}
+
+.configurator-step {
+  margin-bottom: var(--spacing-lg, 1.5rem);
+}
+
+.step-title {
+  font-size: var(--font-size-md, 1rem);
+  font-weight: 500;
+  color: var(--text-muted, rgba(255,255,255,0.7));
+  margin-bottom: var(--spacing-md, 1rem);
+  padding-bottom: var(--spacing-sm, 0.5rem);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Category Toggle */
+.category-toggle {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md, 1rem);
+}
+
+.toggle-btn {
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-lg, 1.5rem);
+  border-radius: var(--border-radius-full, 50px);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--text-muted, rgba(255,255,255,0.7));
+  font-size: var(--font-size-md, 1rem);
+}
+
+.toggle-btn.active {
+  background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
+  color: white;
+  border-color: transparent;
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+}
+
+/* Format Options */
+.format-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-md, 1rem);
+  justify-content: center;
+}
+
+.format-btn {
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  border-radius: var(--border-radius-md, 12px);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-light, #fff);
+  font-size: var(--font-size-sm, 0.875rem);
+}
+
+.format-btn:hover,
+.format-btn.selected {
+  background: rgba(138, 87, 222, 0.15);
+  border-color: rgba(138, 87, 222, 0.3);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+}
+
+/* Intention Options */
+.intention-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-md, 1rem);
+}
+
+.intention-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--border-radius-md, 12px);
+  padding: var(--spacing-md, 1rem);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--text-light, #fff);
+  line-height: 1.5;
+}
+
+.intention-card:hover,
+.intention-card.selected {
+  transform: translateY(-3px);
+  background: rgba(138, 87, 222, 0.1);
+  border-color: rgba(138, 87, 222, 0.3);
+  box-shadow: var(--shadow-sm, 0 2px 8px rgba(0,0,0,0.15));
+}
+
+/* Action Button */
+.configurator-action {
+  text-align: center;
+  margin-top: var(--spacing-xl, 2rem);
+}
+
+.start-crafting-button {
+  padding: var(--spacing-md, 1rem) var(--spacing-xl, 2rem);
+  border-radius: var(--border-radius-full, 50px);
+  font-weight: 600;
+  font-size: var(--font-size-md, 1rem);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: linear-gradient(45deg, var(--primary-dark, #6a3cb2), var(--primary, #8a57de));
+  color: white;
+  border: none;
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
+}
+
+.start-crafting-button:hover:not(:disabled) {
+  background: linear-gradient(45deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.4);
+}
+
+.start-crafting-button:disabled {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted, rgba(255,255,255,0.7));
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Responsive adjustments for configurator if needed */
+@media (max-width: 600px) {
+  .intention-options {
+    grid-template-columns: 1fr; /* Stack intentions on small screens */
+  }
+  .format-options {
+     justify-content: flex-start; /* Align formats left */
+  }
+}
+
+/* ... rest of styles ... */
 

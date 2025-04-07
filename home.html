@@ -99,14 +99,59 @@
       <p class="home-page__welcome-subtitle">Create heartfelt messages for your loved ones with our AI-powered assistant.</p>
     </section>
 
-    <!-- Action Card -->
-    <div class="home-page__action-card">
-      <h2 class="home-page__action-title">Create a Heartfelt Message</h2>
-      <p class="home-page__action-text">Our AI will help you craft the perfect message for any occasion. Express your feelings with authenticity and warmth.</p>
-      <button id="create-message-btn" class="home-page__action-button">
-        Create New Message <span class="home-page__action-button-icon">→</span>
-      </button>
-    </div>
+    <!-- New Message Configurator Section -->
+    <section class="message-configurator">
+      <h2 class="configurator-title">Start Crafting Your Message</h2>
+
+      <!-- Step 1: Category Toggle -->
+      <div class="configurator-step">
+        <h3 class="step-title">1. Choose Context</h3>
+        <div class="category-toggle">
+          <button class="toggle-btn active" data-category="professional">💼 Professional</button>
+          <button class="toggle-btn" data-category="personal">💖 Personal</button>
+        </div>
+      </div>
+
+      <!-- Step 2: Format Selection -->
+      <div class="configurator-step">
+        <h3 class="step-title">2. Select Format</h3>
+        <div class="format-options">
+          <button class="format-btn" data-format="text">📱 Text Message</button>
+          <button class="format-btn" data-format="email">📧 Email</button>
+          <button class="format-btn" data-format="card">💌 Card</button>
+          <button class="format-btn" data-format="conversation">🗣️ Conversation Topics</button>
+          <!-- Add more format buttons as needed -->
+        </div>
+      </div>
+
+      <!-- Step 3: Intention Selection -->
+      <div class="configurator-step">
+        <h3 class="step-title">3. Pick Your Starting Point</h3>
+        <!-- Professional Intentions (Visible by default) -->
+        <div class="intention-options professional-intentions">
+          <button class="intention-card" data-intention="recognize_effort">💬 "I want to recognize someone's effort."</button>
+          <button class="intention-card" data-intention="give_feedback">🧠 "I need to give feedback — with care."</button>
+          <button class="intention-card" data-intention="thank_support">🙏 "I want to thank someone for their support."</button>
+          <button class="intention-card" data-intention="express_clearly">🎯 "I need to express something clearly and respectfully."</button>
+          <button class="intention-card" data-intention="acknowledge_impact">👏 "Someone deserves to feel seen for their impact."</button>
+        </div>
+        <!-- Personal Intentions (Hidden by default) -->
+        <div class="intention-options personal-intentions" style="display: none;">
+          <button class="intention-card" data-intention="thinking_of_you">❤️ "I've been thinking about someone..."</button>
+          <button class="intention-card" data-intention="say_thank_you">🙏 "I want to say thank you — properly."</button>
+          <button class="intention-card" data-intention="reconnect">🤝 "We haven't talked in a while."</button>
+          <button class="intention-card" data-intention="express_feelings">✍️ "I want to say something I've been holding in."</button>
+          <button class="intention-card" data-intention="make_smile">💬 "I just want to make someone smile."</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Action Button -->
+      <div class="configurator-action">
+        <button id="start-crafting-btn" class="start-crafting-button" disabled>
+          Select Format & Starting Point
+        </button>
+      </div>
+    </section>
 
     <!-- Dashboard layout -->
     <div class="home-page__dashboard">

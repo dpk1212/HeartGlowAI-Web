@@ -2,6 +2,13 @@
 let currentUser = null;
 let editingConnectionId = null; // Track if we're editing an existing connection
 
+// Selected message configuration
+let selectedConfig = {
+  category: 'professional', // Default category
+  format: null,
+  intention: null
+};
+
 // Initialize app on page load
 document.addEventListener('DOMContentLoaded', function() {
   console.log('Home page loaded, initializing...');
@@ -82,6 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('debug-console').style.display = 'block';
     }
   }
+
+  initializeMessageConfigurator(); // Initialize the new configurator
 });
 
 // --- Additions for Dropdown --- 
@@ -4417,3 +4426,115 @@ function copyMessage(id, content) {
     .then(() => showAlert('Message copied to clipboard!', 'success'))
     .catch(() => showAlert('Could not copy message', 'error'));
 }
+
+// --- Additions for Message Configurator ---
+function initializeMessageConfigurator() {
+  const categoryToggle = document.querySelector('.category-toggle');
+  const formatOptions = document.querySelector('.format-options');
+  const intentionSections = document.querySelectorAll('.intention-options');
+  const startCraftingBtn = document.getElementById('start-crafting-btn');
+
+  if (!categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn) {
+    console.error('Message Configurator elements not found!');
+    return;
+  }
+
+  // --- Category Toggle Logic ---
+  categoryToggle.addEventListener('click', (event) => {
+    if (event.target.classList.contains('toggle-btn') && !event.target.classList.contains('active')) {
+      // Remove active class from all toggle buttons
+      categoryToggle.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+      // Add active class to the clicked button
+      event.target.classList.add('active');
+      
+      selectedConfig.category = event.target.dataset.category;
+      console.log('Category selected:', selectedConfig.category);
+
+      // Show/Hide intention options based on category
+      intentionSections.forEach(section => {
+        if (section.classList.contains(selectedConfig.category + '-intentions')) {
+          section.style.display = 'grid'; // Or 'flex', depending on desired layout
+        } else {
+          section.style.display = 'none';
+        }
+      });
+
+      // Reset intention selection when category changes
+      resetIntentionSelection();
+      updateStartCraftingButtonState();
+    }
+  });
+
+  // --- Format Selection Logic ---
+  formatOptions.addEventListener('click', (event) => {
+    if (event.target.classList.contains('format-btn')) {
+      // Remove selected class from all format buttons
+      formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
+      // Add selected class to the clicked button
+      event.target.classList.add('selected');
+      
+      selectedConfig.format = event.target.dataset.format;
+      console.log('Format selected:', selectedConfig.format);
+      updateStartCraftingButtonState();
+    }
+  });
+
+  // --- Intention Selection Logic (using event delegation) ---
+  intentionSections.forEach(section => {
+    section.addEventListener('click', (event) => {
+      const card = event.target.closest('.intention-card');
+      if (card) {
+         // Remove selected class from all intention cards within all sections
+         intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
+         // Add selected class to the clicked card
+         card.classList.add('selected');
+         
+         selectedConfig.intention = card.dataset.intention;
+         console.log('Intention selected:', selectedConfig.intention);
+         updateStartCraftingButtonState();
+      }
+    });
+  });
+  
+  function resetIntentionSelection() {
+    intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
+    selectedConfig.intention = null;
+  }
+
+  // --- Update Start Crafting Button State ---
+  function updateStartCraftingButtonState() {
+    if (selectedConfig.format && selectedConfig.intention) {
+      startCraftingBtn.disabled = false;
+      startCraftingBtn.textContent = 'Start Crafting Message →';
+    } else {
+      startCraftingBtn.disabled = true;
+      startCraftingBtn.textContent = 'Select Format & Starting Point';
+    }
+  }
+
+  // --- Start Crafting Button Action ---
+  startCraftingBtn.addEventListener('click', () => {
+    if (!startCraftingBtn.disabled) {
+      console.log('Starting message crafting with config:', selectedConfig);
+      
+      // Store selections in sessionStorage
+      try {
+        sessionStorage.setItem('messageCategory', selectedConfig.category);
+        sessionStorage.setItem('messageFormat', selectedConfig.format);
+        sessionStorage.setItem('messageIntention', selectedConfig.intention);
+        console.log('Configuration saved to sessionStorage');
+        
+        // Navigate to the next step (recipient selection)
+        window.location.href = 'recipient-selection-new.html';
+
+      } catch (error) {
+        console.error('Error saving configuration to sessionStorage:', error);
+        showAlert('Could not save your selections. Please try again.', 'error');
+      }
+    }
+  });
+}
+// --- End of Configurator Additions ---
+
+// --- Existing helper functions (getInitials, showAlert, etc.) ---
+// ... rest of existing js/home.js code ...

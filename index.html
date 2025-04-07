@@ -609,6 +609,7 @@
       padding: 0 var(--spacing-lg);
       gap: var(--spacing-md);
       background: linear-gradient(135deg, rgba(45, 42, 59, 0.9), rgba(45, 42, 59, 0.7));
+      z-index: 1;
     }
     
     .message-card__front:hover {
@@ -626,6 +627,7 @@
       flex-direction: column;
       justify-content: space-between;
       gap: var(--spacing-md);
+      z-index: 0;
     }
     
     .message-card__icon {
@@ -898,26 +900,16 @@
       const messageCards = document.querySelectorAll('.message-card');
       
       messageCards.forEach(card => {
-        const frontSide = card.querySelector('.message-card__front');
-        const backSide = card.querySelector('.message-card__back');
-        const button = card.querySelector('.message-card__button');
-        
-        frontSide.addEventListener('click', () => {
-          card.classList.add('flipped');
+        card.addEventListener('click', function() {
+          card.classList.toggle('flipped');
         });
         
         // Prevent card from flipping back when clicking the button
+        const button = card.querySelector('.message-card__button');
         button?.addEventListener('click', (e) => {
           e.stopPropagation();
           // Handle button click - redirect or show message editor
           window.location.href = "message-editor.html";
-        });
-        
-        // Allow clicking anywhere on the back to flip back
-        backSide?.addEventListener('click', (e) => {
-          if (e.target === backSide || e.target.classList.contains('message-card__preview')) {
-            card.classList.remove('flipped');
-          }
         });
       });
       

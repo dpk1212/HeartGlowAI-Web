@@ -1862,10 +1862,14 @@ function displayGeneratedMessage(message, format = '') {
     // Get the message container
     const messageContainer = document.getElementById('message-container');
     const messageElement = document.getElementById('generated-message');
+    const messageTextElement = document.getElementById('message-text');
     
-    if (!messageContainer || !messageElement) {
+    // Use the correct element based on what's available in the DOM
+    const targetElement = messageTextElement || messageElement;
+    
+    if (!messageContainer || !targetElement) {
         console.error("Message container or message element not found");
-        logDebug(`Message elements lookup: container=${!!messageContainer}, message=${!!messageElement}`);
+        logDebug(`Message elements lookup: container=${!!messageContainer}, message=${!!targetElement}`);
         return;
     }
     
@@ -1873,15 +1877,21 @@ function displayGeneratedMessage(message, format = '') {
         // Store the message for later use
         generatedMessage = message;
         
+        // Make sure loading state is hidden
+        hideLoadingState();
+        
         // Apply styling based on format
         messageContainer.className = 'message-container'; // Reset classes
-        messageElement.className = 'message-content'; // Reset classes
+        targetElement.className = 'message-content'; // Reset classes
         
         if (format) {
             messageContainer.classList.add(`${format}-format-container`);
-            messageElement.classList.add(`${format}-format`);
+            targetElement.classList.add(`${format}-format`);
         }
 
+        // Clear existing content
+        targetElement.innerHTML = '';
+        
         // Handle different message formats
         if (format === 'email' && message.includes('Subject:')) {
             // Extract subject line for emails
@@ -1894,20 +1904,20 @@ function displayGeneratedMessage(message, format = '') {
                 body = message.replace(/Subject:\s*[^\n]+/, '').trim();
                 
                 // Add a properly styled subject line
-                messageElement.innerHTML = `
+                targetElement.innerHTML = `
                     <div class="email-subject">Subject: ${subject}</div>
                     <div class="email-body">${formatMessageContent(body)}</div>
                 `;
             } else {
-                messageElement.innerHTML = formatMessageContent(message);
+                targetElement.innerHTML = formatMessageContent(message);
             }
         } else if (format === 'conversation') {
             // For conversation topics, we'll render it as a list
             const formattedContent = message.replace(/(\d+\.\s+[^\n]+)/g, '<div class="conversation-topic">$1</div>');
-            messageElement.innerHTML = formattedContent;
+            targetElement.innerHTML = formattedContent;
         } else if (format === 'card') {
             // For greeting cards, add some decorative styling
-            messageElement.innerHTML = `
+            targetElement.innerHTML = `
                 <div class="card-decorative-header">
                     <div class="card-decorative-line"></div>
                     <div class="card-decorative-heart">❤</div>
@@ -1922,16 +1932,43 @@ function displayGeneratedMessage(message, format = '') {
             `;
         } else if (format === 'text') {
             // For text messages, keep it simple with text-like styling
-            messageElement.innerHTML = formatMessageContent(message);
+            targetElement.innerHTML = formatMessageContent(message);
         } else {
-            // Default formatting
-            messageElement.innerHTML = formatMessageContent(message);
+            // Default formatting - process the message string into paragraphs
+            const paragraphs = message.split(/\n\n+/);
+            
+            // Add each paragraph with proper styling
+            if (paragraphs.length > 1) {
+                paragraphs.forEach((paragraph, index) => {
+                    if (paragraph.trim()) {
+                        const p = document.createElement('p');
+                        p.textContent = paragraph;
+                        targetElement.appendChild(p);
+                    }
+                });
+            } else {
+                // Single paragraph or simple text
+                targetElement.innerHTML = formatMessageContent(message);
+            }
         }
         
         // Make the copy button visible now that we have a message
         const copyButton = document.getElementById('copy-message-btn');
         if (copyButton) {
             copyButton.style.display = 'block';
+        }
+        
+        // Update current date if present
+        const currentDateElement = document.getElementById('current-date');
+        if (currentDateElement) {
+            const now = new Date();
+            const formattedDate = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            currentDateElement.innerHTML = '<i class="far fa-calendar"></i> ' + formattedDate;
         }
         
         // Add Premium Styling
@@ -1949,15 +1986,15 @@ function displayGeneratedMessage(message, format = '') {
         logDebug("Message displayed successfully");
         
         // Scroll the message into view if needed
-        messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
         console.error('Error displaying message:', error);
         logDebug(`Error displaying message: ${error.message}`);
         
         // Fallback to plain text if there's an error
-        if (messageElement) {
-            messageElement.textContent = message;
-            messageElement.style.display = 'block';
+        if (targetElement) {
+            targetElement.textContent = message;
+            targetElement.style.display = 'block';
         }
     }
 }

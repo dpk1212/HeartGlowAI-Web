@@ -13,16 +13,35 @@
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  width: 100%;
+  display: block;
 }
 
 .message-content {
   font-size: 1.1rem;
   line-height: 1.6;
   color: #333;
+  width: 100%;
+  display: block;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Fix for message text display */
+#message-text,
+#generated-message {
+  width: 100%;
+  display: block;
+  white-space: pre-line;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .message-content p {
   margin-bottom: 1.2rem;
+  width: 100%;
+  display: block;
 }
 
 .message-content p:last-child {
@@ -159,6 +178,13 @@
 .conversation-topic:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Fix for text-format display in different contexts */
+.text-format p {
+  display: block;
+  width: auto;
+  max-width: 100%;
 }
 
 /* Responsive adjustments */

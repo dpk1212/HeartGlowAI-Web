@@ -211,6 +211,35 @@ function loadData() {
             logDebug('No tone data found in localStorage');
         }
         
+        // Load message configurator data from sessionStorage
+        const messageCategory = sessionStorage.getItem('messageCategory');
+        const messageFormat = sessionStorage.getItem('messageFormat');
+        const messageIntention = sessionStorage.getItem('messageIntention');
+        const messageConfigTimestamp = sessionStorage.getItem('messageConfigTimestamp');
+        
+        if (messageCategory || messageFormat || messageIntention) {
+            logDebug(`Found message configurator data in sessionStorage: category=${messageCategory}, format=${messageFormat}, intention=${messageIntention}`);
+            
+            // If intent data missing or incomplete, supplement with message configurator data
+            if (!intentData || Object.keys(intentData).length === 0) {
+                intentData = intentData || {};
+                intentData.type = messageIntention || intentData.type;
+                intentData.timestamp = messageConfigTimestamp || new Date().toISOString();
+                logDebug(`Supplemented intent data with messageIntention: ${JSON.stringify(intentData)}`);
+            }
+            
+            // Attach configurator data to recipientData for the message generation API
+            if (recipientData) {
+                recipientData.messageCategory = messageCategory;
+                recipientData.messageFormat = messageFormat;
+                recipientData.messageIntention = messageIntention;
+                recipientData.messageConfigTimestamp = messageConfigTimestamp;
+                logDebug(`Added message configuration data to recipientData: ${JSON.stringify(recipientData)}`);
+            }
+        } else {
+            logDebug('No message configurator data found in sessionStorage');
+        }
+        
         // If any data is missing, show error
         if (!recipientData || !intentData || !toneData) {
             showError('Some information is missing. Please go back and complete all steps.');
@@ -1127,6 +1156,11 @@ function saveMessageToFirebase(messageText, insights) {
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
+        // Get additional data from sessionStorage
+        const messageCategory = sessionStorage.getItem('messageCategory');
+        const messageFormat = sessionStorage.getItem('messageFormat');
+        const messageIntention = sessionStorage.getItem('messageIntention');
+        
         // Log the recipient data to verify connection ID
         logDebug(`Saving message to Firebase with recipient data: ${JSON.stringify(recipientData)}`);
         logDebug(`Connection ID from recipientData: ${recipientData.id}`);
@@ -1145,7 +1179,15 @@ function saveMessageToFirebase(messageText, insights) {
             type: intentData.type || 'general',
             tone: toneData.type || 'warm',
             toneIntensity: toneData.intensity || 'medium',
-            createdBy: userId
+            createdBy: userId,
+            // Add configurator data
+            messageCategory: messageCategory || '',
+            messageFormat: messageFormat || '',
+            messageIntention: messageIntention || '',
+            // Check which intention to use (preference order)
+            intention: messageIntention || intentData.type || 'general',
+            format: messageFormat || '',
+            context: messageCategory || ''
         };
         
         // Log the final message data with connection ID
@@ -1187,7 +1229,10 @@ function saveMessageToFirebase(messageText, insights) {
                     messageCount: newCount,
                     lastMessageDate: firebase.firestore.FieldValue.serverTimestamp(),
                     // Add the connection ID to the message data
-                    lastMessageType: intentData.type || 'general'
+                    lastMessageType: intentData.type || messageIntention || 'general',
+                    // Update with the latest format and category if available
+                    lastMessageFormat: messageFormat || connectionData.lastMessageFormat || '',
+                    lastMessageCategory: messageCategory || connectionData.lastMessageCategory || ''
                 });
                 
                 // Save the message with connection data
@@ -1286,7 +1331,11 @@ function saveMessageWithoutConnection(userId, messageData, savingIndicator) {
 }
 
 /**
- * Build the OpenAI prompt based on user inputs
+ * Build a prompt for the API based on all our input data
+ * @param {Object} intentData Intent type and details
+ * @param {Object} recipientData Recipient information
+ * @param {Object} toneData Tone type and intensity
+ * @param {string|null} variation Optional variation to request
  * @returns {Promise<Object>} Promise that resolves to the complete request data
  */
 function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null) {
@@ -1313,8 +1362,28 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
             type: toneData.type || 'Warm',
             intensity: toneData.intensity || 'Medium'
         },
-        variation: variation
+        variation: variation,
+        // Add configurator data if available
+        configurator: {
+            category: recipientData.messageCategory || sessionStorage.getItem('messageCategory') || '',
+            format: recipientData.messageFormat || sessionStorage.getItem('messageFormat') || '',
+            intention: recipientData.messageIntention || sessionStorage.getItem('messageIntention') || '',
+            timestamp: recipientData.messageConfigTimestamp || sessionStorage.getItem('messageConfigTimestamp') || ''
+        }
     };
+    
+    // If we have message format, add to main format property for easier access
+    if (requestData.configurator.format) {
+        requestData.format = requestData.configurator.format;
+    }
+    
+    // If we have a message category, add it to the main context for easier access
+    if (requestData.configurator.category) {
+        requestData.context = requestData.configurator.category;
+    }
+    
+    // Log the completed prompt data
+    logDebug('Built initial prompt data: ' + JSON.stringify(requestData));
     
     // Return a promise to allow proper async handling
     return new Promise((resolve) => {

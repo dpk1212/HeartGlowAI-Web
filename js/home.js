@@ -4451,11 +4451,27 @@ function initializeMessageConfigurator() {
 
   // --- Category Toggle Logic ---
   categoryToggle.addEventListener('click', (event) => {
-    if (event.target.classList.contains('message-configurator__toggle-btn') && !event.target.classList.contains('message-configurator__toggle-btn--active')) {
-      categoryToggle.querySelectorAll('.message-configurator__toggle-btn').forEach(btn => btn.classList.remove('message-configurator__toggle-btn--active'));
-      event.target.classList.add('message-configurator__toggle-btn--active');
-      selectedConfig.category = event.target.dataset.category;
+    const toggleBtn = event.target.closest('.message-configurator__toggle-btn');
+    
+    if (toggleBtn && !toggleBtn.classList.contains('message-configurator__toggle-btn--active')) {
+      // Remove active class from all buttons
+      categoryToggle.querySelectorAll('.message-configurator__toggle-btn').forEach(btn => {
+        btn.classList.remove('message-configurator__toggle-btn--active');
+      });
+      
+      // Add active class to clicked button
+      toggleBtn.classList.add('message-configurator__toggle-btn--active');
+      
+      // Update selected category
+      selectedConfig.category = toggleBtn.dataset.category;
       console.log('Category selected:', selectedConfig.category);
+      
+      // Update the toggle indicator position via class
+      if (selectedConfig.category === 'personal') {
+        categoryToggle.classList.add('personal-active');
+      } else {
+        categoryToggle.classList.remove('personal-active');
+      }
 
       // Show correct intention section based on category
       showCorrectIntentions();
@@ -4471,11 +4487,30 @@ function initializeMessageConfigurator() {
     section.addEventListener('click', (event) => {
       const card = event.target.closest('.message-configurator__intention-card');
       if (card) {
-         intentionSections.forEach(s => s.querySelectorAll('.message-configurator__intention-card').forEach(c => c.classList.remove('message-configurator__intention-card--selected')));
+         // Clear previous selections
+         intentionSections.forEach(s => {
+           s.querySelectorAll('.message-configurator__intention-card').forEach(c => {
+             c.classList.remove('message-configurator__intention-card--selected');
+           });
+         });
+         
+         // Mark selected card
          card.classList.add('message-configurator__intention-card--selected');
          selectedConfig.intention = card.dataset.intention;
          console.log('Intention selected:', selectedConfig.intention);
-         updateContinueButtonState(); // Enable continue button
+         
+         // Enable continue button
+         updateContinueButtonState();
+         
+         // Auto-flip to format selection after a short delay (optional)
+         // Uncomment if you want the configurator to automatically flip after selecting an intention
+         /*
+         if (selectedConfig.intention) {
+           setTimeout(() => {
+             configurator.classList.add('message-configurator--flipped');
+           }, 300);
+         }
+         */
       }
     });
   });
@@ -4572,6 +4607,9 @@ function initializeMessageConfigurator() {
   showCorrectIntentions();
   updateContinueButtonState();
   updateStartCraftingButtonState();
+  
+  // Set initial active state for category toggle (professional is default)
+  categoryToggle.classList.remove('personal-active');
 }
 // --- End of Configurator Additions ---
 

@@ -170,6 +170,13 @@ function updateUserInfo(user) {
  */
 function loadData() {
     try {
+        // Explicitly log all sessionStorage variables first
+        console.log('SessionStorage contents:');
+        for (let i = 0; i < sessionStorage.length; i++) {
+            const key = sessionStorage.key(i);
+            console.log(`${key}: ${sessionStorage.getItem(key)}`);
+        }
+        
         // Load recipient data
         const storedRecipientData = localStorage.getItem('recipientData') || localStorage.getItem('selectedRecipient');
         if (storedRecipientData) {
@@ -211,11 +218,17 @@ function loadData() {
             logDebug('No tone data found in localStorage');
         }
         
-        // Load message configurator data from sessionStorage
+        // Load message configurator data from sessionStorage with explicit logging
         const messageCategory = sessionStorage.getItem('messageCategory');
         const messageFormat = sessionStorage.getItem('messageFormat');
         const messageIntention = sessionStorage.getItem('messageIntention');
         const messageConfigTimestamp = sessionStorage.getItem('messageConfigTimestamp');
+        
+        console.log('Message configurator data from sessionStorage:');
+        console.log('- messageCategory:', messageCategory);
+        console.log('- messageFormat:', messageFormat);
+        console.log('- messageIntention:', messageIntention);
+        console.log('- messageConfigTimestamp:', messageConfigTimestamp);
         
         if (messageCategory || messageFormat || messageIntention) {
             logDebug(`Found message configurator data in sessionStorage: category=${messageCategory}, format=${messageFormat}, intention=${messageIntention}`);
@@ -237,7 +250,30 @@ function loadData() {
                 logDebug(`Added message configuration data to recipientData: ${JSON.stringify(recipientData)}`);
             }
         } else {
+            console.warn('No message configurator data found in sessionStorage');
             logDebug('No message configurator data found in sessionStorage');
+            
+            // Try fetching from localStorage as fallback (in case data was copied there)
+            const localStorageCategory = localStorage.getItem('messageCategory');
+            const localStorageFormat = localStorage.getItem('messageFormat');
+            const localStorageIntention = localStorage.getItem('messageIntention');
+            
+            console.log('Checking localStorage fallback for configurator data:');
+            console.log('- localStorage messageCategory:', localStorageCategory);
+            console.log('- localStorage messageFormat:', localStorageFormat);
+            console.log('- localStorage messageIntention:', localStorageIntention);
+            
+            if (localStorageCategory || localStorageFormat || localStorageIntention) {
+                console.log('Found configurator data in localStorage instead of sessionStorage');
+                logDebug('Found configurator data in localStorage instead of sessionStorage');
+                
+                if (recipientData) {
+                    recipientData.messageCategory = localStorageCategory;
+                    recipientData.messageFormat = localStorageFormat;
+                    recipientData.messageIntention = localStorageIntention;
+                    logDebug(`Added message configuration data from localStorage to recipientData: ${JSON.stringify(recipientData)}`);
+                }
+            }
         }
         
         // If any data is missing, show error
@@ -1156,10 +1192,20 @@ function saveMessageToFirebase(messageText, insights) {
         const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
         const toneData = JSON.parse(localStorage.getItem('toneData') || '{}');
         
-        // Get additional data from sessionStorage
-        const messageCategory = sessionStorage.getItem('messageCategory');
-        const messageFormat = sessionStorage.getItem('messageFormat');
-        const messageIntention = sessionStorage.getItem('messageIntention');
+        // Collect configurator data from all possible sources
+        const configData = {
+            category: recipientData?.messageCategory || sessionStorage.getItem('messageCategory') || localStorage.getItem('messageCategory') || '',
+            format: recipientData?.messageFormat || sessionStorage.getItem('messageFormat') || localStorage.getItem('messageFormat') || '',
+            intention: recipientData?.messageIntention || sessionStorage.getItem('messageIntention') || localStorage.getItem('messageIntention') || '',
+            timestamp: recipientData?.messageConfigTimestamp || sessionStorage.getItem('messageConfigTimestamp') || localStorage.getItem('messageConfigTimestamp') || new Date().toISOString()
+        };
+        
+        // Log configurator data explicitly
+        console.log('Configurator data for Firebase save:');
+        console.log('- category:', configData.category);
+        console.log('- format:', configData.format);
+        console.log('- intention:', configData.intention);
+        console.log('- timestamp:', configData.timestamp);
         
         // Log the recipient data to verify connection ID
         logDebug(`Saving message to Firebase with recipient data: ${JSON.stringify(recipientData)}`);
@@ -1181,16 +1227,18 @@ function saveMessageToFirebase(messageText, insights) {
             toneIntensity: toneData.intensity || 'medium',
             createdBy: userId,
             // Add configurator data
-            messageCategory: messageCategory || '',
-            messageFormat: messageFormat || '',
-            messageIntention: messageIntention || '',
+            messageCategory: configData.category,
+            messageFormat: configData.format,
+            messageIntention: configData.intention,
+            messageConfigTimestamp: configData.timestamp,
             // Check which intention to use (preference order)
-            intention: messageIntention || intentData.type || 'general',
-            format: messageFormat || '',
-            context: messageCategory || ''
+            intention: configData.intention || intentData.type || 'general',
+            format: configData.format || '',
+            context: configData.category || ''
         };
         
         // Log the final message data with connection ID
+        console.log('Message data being saved to Firebase:', messageData);
         logDebug(`Message data being saved to Firebase: ${JSON.stringify(messageData)}`);
         
         // Reference to Firestore
@@ -1229,10 +1277,10 @@ function saveMessageToFirebase(messageText, insights) {
                     messageCount: newCount,
                     lastMessageDate: firebase.firestore.FieldValue.serverTimestamp(),
                     // Add the connection ID to the message data
-                    lastMessageType: intentData.type || messageIntention || 'general',
+                    lastMessageType: intentData.type || configData.intention || 'general',
                     // Update with the latest format and category if available
-                    lastMessageFormat: messageFormat || connectionData.lastMessageFormat || '',
-                    lastMessageCategory: messageCategory || connectionData.lastMessageCategory || ''
+                    lastMessageFormat: configData.format || connectionData.lastMessageFormat || '',
+                    lastMessageCategory: configData.category || connectionData.lastMessageCategory || ''
                 });
                 
                 // Save the message with connection data
@@ -1343,10 +1391,25 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
     console.log('Building prompt with data:', { intentData, recipientData, toneData, variation });
     logDebug('Building prompt with recipient data: ' + JSON.stringify(recipientData));
     
+    // Get configurator data from all possible sources
+    const configData = {
+        category: recipientData?.messageCategory || sessionStorage.getItem('messageCategory') || localStorage.getItem('messageCategory') || '',
+        format: recipientData?.messageFormat || sessionStorage.getItem('messageFormat') || localStorage.getItem('messageFormat') || '',
+        intention: recipientData?.messageIntention || sessionStorage.getItem('messageIntention') || localStorage.getItem('messageIntention') || '',
+        timestamp: recipientData?.messageConfigTimestamp || sessionStorage.getItem('messageConfigTimestamp') || localStorage.getItem('messageConfigTimestamp') || new Date().toISOString()
+    };
+    
+    // Log all configurator data explicitly
+    console.log('Configurator data collected from all sources:');
+    console.log('- category:', configData.category);
+    console.log('- format:', configData.format);
+    console.log('- intention:', configData.intention);
+    console.log('- timestamp:', configData.timestamp);
+    
     // Create a structured request object that matches our cloud function expectations
     const requestData = {
         intent: {
-            type: intentData.type || 'Support',
+            type: intentData.type || configData.intention || 'Support',
             details: intentData.details || ''
         },
         recipient: {
@@ -1363,26 +1426,26 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
             intensity: toneData.intensity || 'Medium'
         },
         variation: variation,
-        // Add configurator data if available
-        configurator: {
-            category: recipientData.messageCategory || sessionStorage.getItem('messageCategory') || '',
-            format: recipientData.messageFormat || sessionStorage.getItem('messageFormat') || '',
-            intention: recipientData.messageIntention || sessionStorage.getItem('messageIntention') || '',
-            timestamp: recipientData.messageConfigTimestamp || sessionStorage.getItem('messageConfigTimestamp') || ''
-        }
+        // Add configurator data
+        configurator: configData
     };
     
-    // If we have message format, add to main format property for easier access
-    if (requestData.configurator.format) {
-        requestData.format = requestData.configurator.format;
+    // Add context and format at top level for easier access
+    if (configData.category) {
+        requestData.context = configData.category;
     }
     
-    // If we have a message category, add it to the main context for easier access
-    if (requestData.configurator.category) {
-        requestData.context = requestData.configurator.category;
+    if (configData.format) {
+        requestData.format = configData.format;
+    }
+    
+    // Add configured intention to intent if needed
+    if (configData.intention && !requestData.intent.details) {
+        requestData.intent.details = `Based on the configured intention: ${configData.intention}`;
     }
     
     // Log the completed prompt data
+    console.log('Complete request data for API:', requestData);
     logDebug('Built initial prompt data: ' + JSON.stringify(requestData));
     
     // Return a promise to allow proper async handling

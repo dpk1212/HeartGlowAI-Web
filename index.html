@@ -952,7 +952,7 @@
       <h1 class="hero-title">What kind of message is on your heart today?</h1>
       <p class="hero-subtitle">Choose the moment you're in — we'll help you find the right words.</p>
       
-      <!-- Tabs -->
+      <!-- Message Tabs -->
       <div class="message-tabs">
         <button class="message-tab active" data-type="professional">
           <span>💼 Professional Messages</span>
@@ -962,118 +962,64 @@
         </button>
       </div>
       
-      <!-- Message Cards Section: Professional -->
-      <div class="message-cards" id="professional-cards">
-        <!-- Card 1 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">💬</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to recognize someone's effort</h3>
-                <p class="message-card__subtitle">Show appreciation for hard work and dedication</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
-            </div>
+      <!-- Professional Intent Cards - Updated to new style -->
+      <div class="intent-cards" id="professional-cards">
+        <!-- Intent Card 1 -->
+        <div class="intent-card" data-card-id="recognize-effort">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">💬</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">Show appreciation for hard work and dedication</h3>
           </div>
-        </article>
+        </div>
         
-        <!-- Card 2 -->  
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">🧠</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I need to give feedback — with care</h3>
-                <p class="message-card__subtitle">Constructive insights delivered with empathy</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
-            </div>
+        <!-- Intent Card 2 -->
+        <div class="intent-card" data-card-id="give-feedback">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">🧠</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">Constructive insights delivered with empathy</h3>
           </div>
-        </article>
+        </div>
         
-        <!-- Card 3 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">🙏</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to thank someone for their support</h3>
-                <p class="message-card__subtitle">Express genuine gratitude for their help</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
-            </div>
+        <!-- Intent Card 3 -->
+        <div class="intent-card" data-card-id="express-gratitude">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">🙏</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">Express genuine gratitude for their help</h3>
           </div>
-        </article>
+        </div>
       </div>
       
-      <!-- Message Cards Section: Personal -->
-      <div class="message-cards" id="personal-cards" style="display: none;">
-        <!-- Card 1 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">❤️</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I've been thinking about someone...</h3>
-                <p class="message-card__subtitle">Reconnect with someone meaningful to you</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
-            </div>
+      <!-- Personal Intent Cards - Updated to new style but initially hidden -->
+      <div class="intent-cards" id="personal-cards" style="display: none;">
+        <!-- Intent Card 1 -->
+        <div class="intent-card" data-card-id="reconnect">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">❤️</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">Reconnect with someone meaningful to you</h3>
           </div>
-        </article>
+        </div>
         
-        <!-- Card 2 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">✍️</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I want to say something I've been holding in</h3>
-                <p class="message-card__subtitle">Express emotions you've kept to yourself</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
-            </div>
+        <!-- Intent Card 2 -->
+        <div class="intent-card" data-card-id="express-feelings">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">✍️</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">Express emotions you've kept to yourself</h3>
           </div>
-        </article>
+        </div>
         
-        <!-- Card 3 -->
-        <article class="message-card">
-          <div class="message-card__inner">
-            <div class="message-card__front">
-              <div class="message-card__icon">💬</div>
-              <div class="message-card__content">
-                <h3 class="message-card__title">I just want to make someone smile</h3>
-                <p class="message-card__subtitle">A quick note of warmth or joy</p>
-              </div>
-            </div>
-            <div class="message-card__back">
-              <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-              <button class="message-card__button">Use This Message →</button>
-              <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
-            </div>
+        <!-- Intent Card 3 -->
+        <div class="intent-card" data-card-id="spark-joy">
+          <div class="intent-card__progress"></div>
+          <div class="intent-card__icon">💬</div>
+          <div class="intent-card__content">
+            <h3 class="intent-card__title">A quick note of warmth or joy</h3>
           </div>
-        </article>
+        </div>
       </div>
       
       <!-- CTA Section -->
@@ -1121,83 +1067,47 @@
   <script>
     document.addEventListener('DOMContentLoaded', function() {
       // CRITICAL FIX: Remove any extra elements that might be causing white rectangles
-      document.querySelectorAll('.message-card').forEach(card => {
-        // Keep only the card inner structure and remove everything else
-        const innerElement = card.querySelector('.message-card__inner');
-        if (innerElement) {
-          // Remove all direct children except the inner card element
-          Array.from(card.children).forEach(child => {
-            if (child !== innerElement) {
-              child.remove();
-            }
-          });
-          
-          // Remove any absolute positioned elements that might be overlays
-          card.querySelectorAll('div:not(.message-card__inner):not(.message-card__front):not(.message-card__back):not(.message-card__content):not(.message-card__icon):not(.message-card__insights)').forEach(el => {
-            el.remove();
-          });
+      document.querySelectorAll('.intent-card').forEach(card => {
+        // Make sure progress bars have proper styling
+        const progressBar = card.querySelector('.intent-card__progress');
+        if (progressBar) {
+          // Add animated class to some cards for variety
+          if (Math.random() > 0.5) {
+            progressBar.classList.add('animated');
+          }
         }
       });
       
       // Check if device supports hover
       const supportsHover = window.matchMedia('(hover: hover)').matches;
       
-      // Card flip functionality with analytics
-      const messageCards = document.querySelectorAll('.message-card');
-      let cardFlipCount = 0;
+      // Card click functionality with analytics
+      const intentCards = document.querySelectorAll('.intent-card');
+      let cardClickCount = 0;
       
-      messageCards.forEach((card, index) => {
-        const cardFront = card.querySelector('.message-card__front');
-        const cardBack = card.querySelector('.message-card__back');
-        const cardTitle = card.querySelector('.message-card__title').innerText;
+      intentCards.forEach((card, index) => {
+        const cardId = card.getAttribute('data-card-id');
+        const cardTitle = card.querySelector('.intent-card__title').innerText;
         
-        function trackCardFlip() {
-          cardFlipCount++;
-          console.log(`Card flip event: ${cardTitle}`);
+        function trackCardClick() {
+          cardClickCount++;
+          console.log(`Card click event: ${cardTitle}`);
           // Analytics tracking would go here in production
-          // Example: analytics.track('card_flip', { card_id: index, title: cardTitle });
+          // Example: analytics.track('card_click', { card_id: cardId, title: cardTitle });
           
-          // Show sticky CTA after user has flipped at least one card
-          if (cardFlipCount === 1 && window.innerWidth <= 768) {
+          // Show sticky CTA after user has clicked at least one card
+          if (cardClickCount === 1 && window.innerWidth <= 768) {
             document.querySelector('.sticky-cta').style.display = 'block';
           }
-        }
-        
-        // Only add click event on mobile devices
-        if (!supportsHover) {
-          cardFront.addEventListener('click', function() {
-            card.classList.add('flipped');
-            trackCardFlip();
-          });
           
-          // Make the back side clickable to flip back on mobile
-          cardBack.addEventListener('click', function(e) {
-            // Don't flip if clicking on button
-            if (!e.target.classList.contains('message-card__button')) {
-              card.classList.remove('flipped');
-            }
-          });
-        } else {
-          // For desktop, track when card is hovered (flipped)
-          card.addEventListener('mouseenter', function() {
-            setTimeout(() => {
-              if (card.matches(':hover')) {
-                trackCardFlip();
-              }
-            }, 600); // Wait for flip animation to complete
-          });
+          // Navigate to login page on intent card click
+          window.location.href = "login.html";
         }
         
-        // Prevent buttons from triggering flip and navigate to login
-        const button = card.querySelector('.message-card__button');
-        if (button) {
-          button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            console.log(`Button clicked on card: ${cardTitle}`);
-            // Example: analytics.track('message_used', { card_id: index, title: cardTitle });
-            window.location.href = "login.html";
-          });
-        }
+        // Add click event for all devices
+        card.addEventListener('click', function() {
+          trackCardClick();
+        });
       });
       
       // Tab switching functionality
@@ -1234,5 +1144,5 @@
       }, 3000);
     });
   </script>
-</body>
+  </body>
 </html> 

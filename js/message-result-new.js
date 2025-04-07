@@ -1410,6 +1410,7 @@ function callGenerationAPI(prompt, authToken = null) {
         
         // Log the API call attempt
         logDebug('Calling message generation API...');
+        console.log('Starting API call process with prompt:', prompt);
         
         // First get auth token, then get API keys from Firestore, then make API call
         const getAuthToken = new Promise((resolveToken, rejectToken) => {
@@ -1438,10 +1439,12 @@ function callGenerationAPI(prompt, authToken = null) {
             .then(token => {
                 // Get the API key from Firestore's 'secrets' collection
                 logDebug('Getting API keys from Firestore...');
+                console.log('Fetching API key from Firebase...');
                 return firebase.firestore().collection('secrets').doc('secrets').get()
                     .then(doc => {
                         if (doc.exists && doc.data().openaikey) {
                             logDebug('API key retrieved successfully');
+                            console.log('API key retrieved from Firebase');
                             return { 
                                 token: token, 
                                 apiKey: doc.data().openaikey
@@ -1458,6 +1461,7 @@ function callGenerationAPI(prompt, authToken = null) {
                 const apiUrl = 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2';
                 
                 logDebug('Making API call with auth token and OpenAI API key');
+                console.log('Making API call to:', apiUrl);
                 
                 // Prepare request with API key included
                 const requestBody = {
@@ -1477,6 +1481,7 @@ function callGenerationAPI(prompt, authToken = null) {
             })
             .then(response => {
                 // Check if the request was successful
+                console.log('API response received, status:', response.status);
                 if (!response.ok) {
                     throw new Error(`API responded with status ${response.status}`);
                 }
@@ -1485,6 +1490,7 @@ function callGenerationAPI(prompt, authToken = null) {
             .then(data => {
                 // Log success
                 logDebug('API call successful');
+                console.log('API call successful, data received');
                 
                 // If there's an error in the response
                 if (data.error) {
@@ -1497,6 +1503,7 @@ function callGenerationAPI(prompt, authToken = null) {
             .catch(error => {
                 // Log error
                 console.error('API call failed:', error);
+                logDebug('API call failed: ' + error.message);
                 
                 // Show error in UI
                 const loadingState = document.getElementById('loadingState');

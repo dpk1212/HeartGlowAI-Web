@@ -43,6 +43,9 @@ function initPage() {
         // Fix the navigation buttons
         setupNavigationButtons();
         
+        // Ensure the recipient avatar is properly initialized
+        initializeRecipientAvatar();
+        
         // Firebase will try to load previous data
         // authStatePromise will resolve with user object or null
         authStatePromise.then(user => {
@@ -499,34 +502,29 @@ function copyInsightsToClipboard() {
  * Show loading state
  */
 function showLoadingState() {
-    // Hide message content
-    const messageContent = document.getElementById('messageContent');
-    if (messageContent) {
-        messageContent.style.display = 'none';
-    }
-    
-    // Hide insights
-    const messageInsights = document.getElementById('messageInsights');
-    if (messageInsights) {
-        messageInsights.style.display = 'none';
-    }
-    
-    // Hide error state
-    const errorState = document.getElementById('errorState');
-    if (errorState) {
-        errorState.style.display = 'none';
-    }
-    
-    // Show loading state
-    const loadingState = document.getElementById('loadingState');
-    if (loadingState) {
-        loadingState.style.display = 'flex';
-    }
-    
-    // Hide regenerate options
-    const regenerateOptions = document.getElementById('regenerateOptions');
-    if (regenerateOptions) {
-        regenerateOptions.style.display = 'none';
+    try {
+        const loadingState = document.getElementById('loadingState');
+        const messageContent = document.getElementById('messageContent');
+        const errorState = document.getElementById('errorState');
+        const regenerateOptions = document.getElementById('regenerateOptions');
+        
+        if (loadingState) {
+            loadingState.style.display = 'flex';
+        }
+        
+        if (messageContent) {
+            messageContent.style.display = 'none';
+        }
+        
+        if (errorState) {
+            errorState.style.display = 'none';
+        }
+        
+        if (regenerateOptions) {
+            regenerateOptions.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error showing loading state:', error);
     }
 }
 
@@ -936,7 +934,7 @@ function setupNavigationButtons() {
         console.log('Setting up back button');
         backButton.addEventListener('click', function() {
             console.log('Back button clicked');
-            window.location.href = 'tone-selection-new.html';
+            window.location.href = 'message-tone-new.html';
         });
     } else {
         console.warn('Back button not found');
@@ -977,6 +975,82 @@ function setupNavigationButtons() {
             console.log('Retry button clicked');
             generateMessage();
         });
+    }
+    
+    // Setup action buttons for message
+    setupMessageActionButtons();
+}
+
+/**
+ * Setup all message action buttons
+ */
+function setupMessageActionButtons() {
+    // Edit button
+    const editBtn = document.getElementById('editBtn');
+    if (editBtn) {
+        editBtn.addEventListener('click', function() {
+            startEditing();
+        });
+    }
+    
+    // Copy button
+    const copyBtn = document.getElementById('copyBtn');
+    if (copyBtn) {
+        copyBtn.addEventListener('click', function() {
+            copyMessageToClipboard();
+        });
+    }
+    
+    // Share button
+    const shareBtn = document.getElementById('shareBtn');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            openShareModal();
+        });
+    }
+    
+    // Regenerate button
+    const regenerateBtn = document.getElementById('regenerateBtn');
+    if (regenerateBtn) {
+        regenerateBtn.addEventListener('click', function() {
+            showRegenerateOptions();
+        });
+    }
+    
+    // Cancel regenerate button
+    const cancelRegenerateBtn = document.getElementById('cancelRegenerateBtn');
+    if (cancelRegenerateBtn) {
+        cancelRegenerateBtn.addEventListener('click', function() {
+            hideRegenerateOptions();
+        });
+    }
+}
+
+/**
+ * Initialize the recipient avatar with initials
+ */
+function initializeRecipientAvatar() {
+    try {
+        const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
+        const initialElement = document.getElementById('recipientInitial');
+        const nameElement = document.getElementById('recipientName');
+        const relationElement = document.getElementById('recipientRelation');
+        
+        if (initialElement && recipientData.name) {
+            // Get the first letter of the recipient's name
+            const initial = recipientData.name.charAt(0).toUpperCase();
+            initialElement.textContent = initial;
+        }
+        
+        if (nameElement && recipientData.name) {
+            nameElement.textContent = recipientData.name;
+        }
+        
+        if (relationElement && recipientData.relationship) {
+            relationElement.textContent = recipientData.relationship;
+        }
+    } catch (error) {
+        console.error('Error initializing recipient avatar:', error);
     }
 }
 
@@ -1577,173 +1651,48 @@ function displayMessageInsights(insights) {
  * Display the generated message in the UI with enhanced formatting
  */
 function displayGeneratedMessage(message) {
-    // Hide loading and error states
-    const loadingState = document.getElementById('loadingState');
-    const errorState = document.getElementById('errorState');
-    
-    if (loadingState) {
-        loadingState.style.display = 'none';
-    }
-    
-    if (errorState) {
-        errorState.style.display = 'none';
-    }
-    
-    // Set current date in the message header
-    const currentDateElement = document.getElementById('currentDate');
-    if (currentDateElement) {
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        currentDateElement.textContent = now.toLocaleDateString('en-US', options);
-    }
-    
-    // Store the message for copy functionality
-    generatedMessage = message;
-    
-    // Format and enhance the message with personalization and styling
-    let formattedMessage = message;
-    
-    // Replace placeholders with recipient name if needed
-    if (recipientData && recipientData.name) {
-        // Ensure recipient name is properly capitalized
-        const recipientName = recipientData.name.trim();
+    try {
+        // Hide loading state
+        const loadingState = document.getElementById('loadingState');
+        if (loadingState) {
+            loadingState.style.display = 'none';
+        }
         
-        // Format the message with personalization
-        formattedMessage = message
-            .replace(/\[Name\]/g, recipientName)
-            .replace(/\[YOUR NAME\]/g, '[Your Name]');
-    }
-    
-    // Extract and format closing/signature separately for better styling
-    let mainContent = formattedMessage;
-    let closingText = '';
-    let signatureText = '';
-    
-    // Look for common signature patterns like "Love," or "Sincerely," followed by name
-    const signaturePattern = /\n\s*(Love|Sincerely|Best|Regards|Yours|Warmly|Warmest regards|Best wishes|Cheers|Affectionately|Fondly|With all my respect|Respectfully|With all my love|Looking forward|Take care),?\s*\n\s*(.+?)$/i;
-    const signatureMatch = formattedMessage.match(signaturePattern);
-    
-    if (signatureMatch) {
-        // Split content into main body and signature parts
-        const splitIndex = formattedMessage.lastIndexOf(signatureMatch[0]);
-        mainContent = formattedMessage.substring(0, splitIndex);
-        closingText = signatureMatch[1];
-        signatureText = signatureMatch[2];
-    }
-    
-    // Create formatted HTML with appropriate styling elements
-    const contentElement = document.getElementById('content');
-    if (contentElement) {
-        // Clear previous content
-        contentElement.innerHTML = '';
+        // Show message content
+        const messageContent = document.getElementById('messageContent');
+        if (messageContent) {
+            messageContent.style.display = 'block';
+        }
         
-        // Apply special styling to the first letter (drop cap effect)
-        if (mainContent.length > 0) {
-            // Get the first letter for drop cap
-            const firstLetter = mainContent.charAt(0);
-            const restOfText = mainContent.substring(1);
+        // Update message content with drop cap on first letter
+        const contentElement = document.getElementById('content');
+        if (contentElement && message) {
+            // Store the message for later reference
+            generatedMessage = message;
             
-            // Create drop cap span
-            const dropCapSpan = document.createElement('span');
-            dropCapSpan.className = 'drop-cap';
-            dropCapSpan.textContent = firstLetter;
-            
-            // Create text content
-            const textSpan = document.createElement('span');
-            
-            // Split by paragraphs
-            const paragraphs = restOfText.split('\n\n');
-            if (paragraphs.length > 1) {
-                textSpan.textContent = paragraphs[0]; // First paragraph text
-                
-                // Create and append each paragraph separately
-                for (let i = 1; i < paragraphs.length; i++) {
-                    if (paragraphs[i].trim()) {
-                        const para = document.createElement('p');
-                        para.textContent = paragraphs[i];
-                        para.style.marginTop = '1rem';
-                        contentElement.appendChild(para);
-                    }
-                }
+            // Add drop cap to first letter
+            if (message.length > 0) {
+                const firstLetter = message.charAt(0);
+                const restOfMessage = message.substring(1);
+                contentElement.innerHTML = `<span class="drop-cap">${firstLetter}</span>${restOfMessage}`;
             } else {
-                textSpan.textContent = restOfText;
+                contentElement.textContent = message;
             }
-            
-            // Add main text content with drop cap
-            contentElement.appendChild(dropCapSpan);
-            contentElement.appendChild(textSpan);
-            
-            // Add closing text if available
-            if (closingText) {
-                const closingElement = document.createElement('div');
-                closingElement.className = 'message-closing';
-                closingElement.textContent = closingText + ',';
-                closingElement.style.cssText = 'display: block; margin-top: 2.5rem; font-style: italic; font-weight: 500; color: #666; position: relative;';
-                contentElement.appendChild(closingElement);
-                
-                // Add signature if available
-                if (signatureText) {
-                    const signatureElement = document.createElement('div');
-                    signatureElement.className = 'message-signature';
-                    signatureElement.textContent = signatureText;
-                    signatureElement.style.cssText = 'display: block; margin-top: 1rem; font-weight: 600; color: #333; position: relative;';
-                    contentElement.appendChild(signatureElement);
-                }
-            }
-        } else {
-            // Fallback if no content
-            contentElement.textContent = formattedMessage;
         }
         
-        // Make the content visible
-        contentElement.style.display = 'block';
-        contentElement.style.visibility = 'visible';
-    }
-    
-    // Add decorative quotes
-    const messageCard = document.querySelector('.message-card__content');
-    if (messageCard) {
-        // Create opening quote mark
-        const openingQuote = document.createElement('div');
-        openingQuote.className = 'decorative-quote opening-quote';
-        openingQuote.innerHTML = '"';
-        openingQuote.style.cssText = 'position: absolute; left: 0; top: -30px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
-        
-        // Create closing quote mark
-        const closingQuote = document.createElement('div');
-        closingQuote.className = 'decorative-quote closing-quote';
-        closingQuote.innerHTML = '"';
-        closingQuote.style.cssText = 'position: absolute; right: 10px; bottom: -25px; font-size: 6rem; color: rgba(138, 87, 222, 0.1); line-height: 1; font-family: Georgia, serif; z-index: 0;';
-        
-        // Check if quotes already exist to avoid duplicates
-        const existingQuotes = messageCard.querySelectorAll('.decorative-quote');
-        if (existingQuotes.length === 0) {
-            messageCard.appendChild(openingQuote);
-            messageCard.appendChild(closingQuote);
+        // Update current date
+        const currentDateElem = document.getElementById('currentDate');
+        if (currentDateElem) {
+            const now = new Date();
+            currentDateElem.textContent = now.toLocaleDateString('en-US', { 
+                month: 'long', 
+                day: 'numeric', 
+                year: 'numeric' 
+            });
         }
-    }
-    
-    // Make the message container visible with animation
-    const messageContent = document.getElementById('messageContent');
-    if (messageContent) {
-        messageContent.style.display = 'block';
-        messageContent.style.opacity = '0';
-        messageContent.style.visibility = 'visible';
-        
-        // Add fade-in animation
-        setTimeout(() => {
-            messageContent.style.opacity = '1';
-            messageContent.classList.add('fade-in');
-            
-            // Add premium animation class
-            messageContent.classList.add('premium-animation');
-            
-            // Add animation to the message container
-            const messageContainer = document.getElementById('messageState');
-            if (messageContainer) {
-                messageContainer.classList.add('premium-container');
-            }
-        }, 100);
+    } catch (error) {
+        console.error('Error displaying message:', error);
+        showError('Failed to display message. Please try again.');
     }
 }
 

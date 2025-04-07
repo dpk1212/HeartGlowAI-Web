@@ -82,38 +82,9 @@
       box-sizing: border-box;
     }
     
-    /* Header */
+    /* Header - hidden as per screenshot */
     .header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      padding: var(--spacing-lg);
-      display: flex;
-      justify-content: center;
-      z-index: 10;
-    }
-    
-    .logo {
-      display: flex;
-      align-items: center;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-      color: var(--text-light);
-    }
-    
-    .logo-icon {
-      margin-right: var(--spacing-xs);
-      font-size: 1.25em;
-      filter: drop-shadow(0 0 8px rgba(138, 87, 222, 0.6));
-    }
-    
-    .logo-text span {
-      background: linear-gradient(90deg, var(--primary), var(--primary-light));
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      display: none;
     }
     
     /* Auth Card */
@@ -121,7 +92,7 @@
       width: 100%;
       max-width: 440px;
       background: var(--card-bg);
-      background-image: linear-gradient(125deg, rgba(138, 87, 222, 0.05), rgba(45, 42, 59, 0.7), rgba(138, 87, 222, 0.05));
+      background-image: linear-gradient(125deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.85));
       backdrop-filter: blur(10px);
       border-radius: var(--border-radius-lg);
       box-shadow: var(--shadow-lg);
@@ -146,6 +117,7 @@
       height: 4px;
       background: linear-gradient(90deg, var(--primary), var(--primary-light));
       z-index: 1;
+      display: none; /* removed as per screenshot */
     }
     
     .auth-card__heart {
@@ -153,12 +125,33 @@
       top: var(--spacing-md);
       right: var(--spacing-md);
       font-size: 24px;
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      background-clip: text;
+      color: rgba(255, 255, 255, 0.2);
+      z-index: 1;
+    }
+    
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: var(--spacing-lg);
+    }
+    
+    .auth-logo__icon {
+      margin-right: var(--spacing-xs);
+      font-size: 1.5em;
+      color: #ff3b69;
+    }
+    
+    .auth-logo__text {
+      font-weight: 700;
+      font-size: var(--font-size-lg);
+    }
+    
+    .auth-logo__highlight {
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
       -webkit-background-clip: text;
+      background-clip: text;
       -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 10px rgba(138, 87, 222, 0.3));
-      opacity: 0.5;
     }
     
     .auth-card__title {
@@ -186,25 +179,26 @@
       display: block;
       margin-bottom: var(--spacing-xs);
       font-weight: 500;
-      font-size: var(--font-size-sm);
+      font-size: var(--font-size-md);
       color: var(--text-light);
     }
     
     .auth-form__input {
       width: 100%;
       padding: var(--spacing-md);
-      background: rgba(26, 22, 37, 0.4);
-      border: 1px solid rgba(138, 87, 222, 0.2);
+      background: rgba(26, 22, 37, 0.6);
+      border: 1px solid rgba(138, 87, 222, 0.1);
       border-radius: var(--border-radius-md);
       color: var(--text-light);
       font-size: var(--font-size-md);
       transition: all 0.3s ease;
       outline: none;
+      height: 50px;
     }
     
     .auth-form__input:focus {
-      border-color: rgba(138, 87, 222, 0.5);
-      box-shadow: 0 0 0 2px rgba(138, 87, 222, 0.2);
+      border-color: rgba(138, 87, 222, 0.3);
+      box-shadow: 0 0 0 1px rgba(138, 87, 222, 0.2);
     }
     
     .auth-form__input::placeholder {
@@ -226,13 +220,14 @@
       border: none;
       position: relative;
       overflow: hidden;
+      height: 50px;
     }
     
     .auth-btn--primary {
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
+      background: linear-gradient(45deg, #8a57de, #9e6df5);
       color: white;
       box-shadow: var(--shadow-md), 0 0 15px rgba(138, 87, 222, 0.3);
-      margin-bottom: var(--spacing-lg);
+      margin-bottom: var(--spacing-md);
     }
     
     .auth-btn--primary:hover {
@@ -240,36 +235,13 @@
       box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.4);
     }
     
-    .auth-btn--primary::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: all 0.6s;
-    }
-    
-    .auth-btn--primary:hover::after {
-      left: 100%;
-    }
-    
-    .auth-btn__icon {
-      margin-left: var(--spacing-sm);
-      transition: transform 0.3s;
-    }
-    
-    .auth-btn--primary:hover .auth-btn__icon {
-      transform: translateX(4px);
-    }
-    
     .auth-btn--social {
       background: transparent;
       border: 1px solid rgba(138, 87, 222, 0.2);
       color: var(--text-light);
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-xl);
+      background-color: rgba(26, 22, 37, 0.3);
     }
     
     .auth-btn--social:hover {
@@ -287,7 +259,7 @@
     .auth-divider {
       display: flex;
       align-items: center;
-      margin: var(--spacing-xl) 0;
+      margin: 0 0 var(--spacing-xl);
       color: var(--text-muted);
       font-size: var(--font-size-sm);
     }
@@ -297,7 +269,7 @@
       content: '';
       flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, rgba(138, 87, 222, 0.05), rgba(138, 87, 222, 0.2), rgba(138, 87, 222, 0.05));
+      background: rgba(255, 255, 255, 0.1);
     }
     
     .auth-divider__text {
@@ -307,7 +279,7 @@
     /* Footer */
     .auth-footer {
       text-align: center;
-      margin-top: var(--spacing-xl);
+      margin-top: var(--spacing-lg);
     }
     
     .auth-footer__text {
@@ -317,76 +289,46 @@
     }
     
     .auth-footer__link {
-      color: var(--primary-light);
+      color: #b296ff;
       text-decoration: none;
       position: relative;
       transition: color 0.3s;
       font-weight: 500;
     }
     
-    .auth-footer__link::after {
-      content: '';
-      position: absolute;
-      width: 100%;
-      height: 1px;
-      bottom: -2px;
-      left: 0;
-      background: linear-gradient(to right, var(--primary), var(--primary-light));
-      transform: scaleX(0);
-      transform-origin: bottom right;
-      transition: transform 0.3s ease;
-    }
-    
     .auth-footer__link:hover {
-      color: white;
-    }
-    
-    .auth-footer__link:hover::after {
-      transform: scaleX(1);
-      transform-origin: bottom left;
+      text-decoration: underline;
     }
     
     .auth-benefits {
-      margin-top: var(--spacing-xl);
-      border-top: 1px solid rgba(138, 87, 222, 0.1);
+      margin-top: var(--spacing-xxl);
       padding-top: var(--spacing-lg);
     }
     
     .auth-benefits__title {
       text-align: center;
-      margin-bottom: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
       font-size: var(--font-size-md);
       font-weight: 600;
-      background: linear-gradient(45deg, #ffffff, #e8e6f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
+      color: var(--text-light);
     }
     
     .auth-benefit {
       display: flex;
       align-items: center;
-      margin-bottom: var(--spacing-sm);
-      padding: var(--spacing-sm);
-      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-md);
+      padding: var(--spacing-xs) 0;
       transition: all 0.3s ease;
-    }
-    
-    .auth-benefit:hover {
-      background: rgba(138, 87, 222, 0.05);
-      transform: translateX(5px);
     }
     
     .auth-benefit__icon {
       margin-right: var(--spacing-sm);
-      font-size: 1.2em;
-      background: linear-gradient(45deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.2));
-      width: 32px;
-      height: 32px;
+      font-size: 1.3em;
+      width: 30px;
+      height: 30px;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 50%;
     }
     
     .auth-benefit__text {
@@ -397,24 +339,15 @@
     .back-link {
       display: inline-flex;
       align-items: center;
-      margin-top: var(--spacing-lg);
+      margin-top: var(--spacing-xl);
       color: var(--text-muted);
       text-decoration: none;
       transition: all 0.3s ease;
       font-size: var(--font-size-sm);
     }
     
-    .back-link:hover {
-      color: var(--text-light);
-    }
-    
     .back-link__icon {
       margin-right: var(--spacing-xs);
-      transition: transform 0.3s;
-    }
-    
-    .back-link:hover .back-link__icon {
-      transform: translateX(-4px);
     }
     
     /* Loading overlay */
@@ -561,10 +494,14 @@
         font-size: var(--font-size-lg);
       }
     }
+
+    .auth-btn__icon {
+      margin-left: var(--spacing-xs);
+    }
   </style>
 </head>
 <body>
-  <!-- Header with Logo -->
+  <!-- Header with Logo - hidden as per screenshot -->
   <header class="header">
     <a href="index.html" class="logo">
       <span class="logo-icon">❤️</span>
@@ -574,6 +511,12 @@
 
   <div class="auth-card">
     <i class="fas fa-heart auth-card__heart"></i>
+    
+    <!-- Logo at the top of the card -->
+    <div class="auth-logo">
+      <span class="auth-logo__icon">❤️</span>
+      <span class="auth-logo__text">Heart<span class="auth-logo__highlight">GlowAI</span></span>
+    </div>
     
     <h1 class="auth-card__title">Log in or sign up</h1>
     <p class="auth-card__subtitle">Join thousands creating meaningful messages that connect</p>

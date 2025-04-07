@@ -13,7 +13,7 @@
 /* Individual intent card */
 .intent-card {
   position: relative;
-  height: 120px;
+  height: 140px;
   width: 100%;
   perspective: 1000px;
   cursor: pointer;
@@ -46,6 +46,8 @@
   backface-visibility: hidden;
   border-radius: 12px;
   overflow: hidden;
+  /* Force hardware acceleration to improve backface-visibility */
+  transform: translateZ(0);
 }
 
 /* Front side styling */
@@ -54,17 +56,31 @@
   align-items: center;
   background: rgba(45, 42, 59, 0.7);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  z-index: 1;
 }
 
-/* Back side styling */
+/* Back side styling - adding more opaque background to prevent text showing through */
 .intent-card__back {
-  background: rgba(45, 42, 59, 0.8);
+  background: rgba(45, 42, 59, 0.98);
   transform: rotateY(180deg);
-  padding: 1rem;
+  padding: 1.25rem; /* Increased from 1rem */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   border: 1px solid rgba(138, 87, 222, 0.4);
+  z-index: 2;
+}
+
+/* Ensure no bleed-through on the back face */
+.intent-card__back::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(45, 42, 59, 1);
+  z-index: -1;
 }
 
 /* Left colored bar */
@@ -119,11 +135,11 @@
   overflow-wrap: break-word;
   word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin: 0 0 0.75rem;
+  margin: 0 0 1rem;
   flex: 1 1 auto;
 }
 
@@ -132,7 +148,7 @@
   position: relative;
   flex: 0 0 auto;
   width: 100%;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
 }
 
 /* Button for navigation */
@@ -220,7 +236,7 @@
   }
   
   .intent-card {
-    height: 140px;
+    height: 180px;
   }
   
   .intent-card__icon {
@@ -235,14 +251,14 @@
   }
   
   .intent-card__back {
-    padding: 1rem;
+    padding: 1.25rem;
     justify-content: space-between;
   }
   
   .intent-card__preview {
     font-size: 0.9375rem;
     line-height: 1.5;
-    margin-bottom: 0.75rem;
+    margin-bottom: 1.25rem;
     -webkit-line-clamp: 3;
     max-height: none;
   }
@@ -251,6 +267,9 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     max-width: 95%;
+    margin-top: auto;
+    position: relative;
+    bottom: 0;
   }
 
   .intent-card__insights {
@@ -265,18 +284,31 @@
 /* Extra small devices */
 @media (max-width: 480px) {
   .intent-card {
-    height: 160px;
+    height: 200px; /* Increased from 160px */
+  }
+  
+  /* Force fully opaque background on mobile */
+  .intent-card__back {
+    background: rgb(45, 42, 59);
   }
 
   .intent-card__preview {
     -webkit-line-clamp: 3;
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem; /* Increased from 1rem */
     font-size: 1rem;
+    /* Ensure text is readable */
+    color: rgba(255, 255, 255, 0.85);
   }
   
   .intent-card__button {
     font-size: 0.9375rem;
     padding: 0.625rem 1rem;
+    /* Ensure it stays at the bottom */
+    position: absolute;
+    bottom: 1.25rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
   }
 }
 

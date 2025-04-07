@@ -625,8 +625,8 @@
       align-items: center;
       padding: 0 var(--spacing-lg);
       gap: var(--spacing-lg);
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.8), rgba(45, 42, 59, 0.7));
-      border-left: 3px solid rgba(138, 87, 222, 0.2);
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.85));
+      border-left: 3px solid rgba(138, 87, 222, 0.4);
       position: relative;
       overflow: hidden;
     }
@@ -638,15 +638,15 @@
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, rgba(138, 87, 222, 0.05), transparent);
+      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), transparent);
       opacity: 0;
       transition: opacity 0.3s ease;
     }
     
     .message-card__front:hover {
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.85), rgba(45, 42, 59, 0.75));
+      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.9));
       border-left: 3px solid var(--primary);
-      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.15), 0 0 15px rgba(138, 87, 222, 0.2);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2), 0 0 15px rgba(138, 87, 222, 0.3);
     }
     
     .message-card__front:hover:after {
@@ -654,7 +654,7 @@
     }
     
     .message-card__back {
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.9), rgba(45, 42, 59, 0.85));
+      background: linear-gradient(135deg, rgba(35, 32, 49, 0.97), rgba(35, 32, 49, 0.95));
       padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
@@ -662,17 +662,18 @@
       justify-content: space-between;
       text-align: center;
       transform: rotateY(180deg);
-      box-shadow: 0 7px 25px rgba(0, 0, 0, 0.15), 0 0 15px rgba(138, 87, 222, 0.2);
-      border: 1px solid rgba(138, 87, 222, 0.2);
+      box-shadow: 0 7px 25px rgba(0, 0, 0, 0.2), 0 0 15px rgba(138, 87, 222, 0.3);
+      border: 1px solid rgba(138, 87, 222, 0.3);
     }
     
     .message-card__icon {
       flex-shrink: 0;
-      font-size: 1.5em;
-      width: 36px;
+      font-size: 1.8em;
+      width: 42px;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--primary-light);
     }
     
     .message-card__content {
@@ -693,10 +694,11 @@
       font-size: var(--font-size-sm);
       margin-top: 4px;
       text-align: left;
+      opacity: 0.85;
     }
     
     .message-card__preview {
-      color: var(--text-light);
+      color: white;
       font-size: var(--font-size-md);
       line-height: 1.6;
       margin: 0 0 var(--spacing-md);
@@ -711,13 +713,13 @@
       padding: var(--spacing-sm) var(--spacing-md);
       border-radius: var(--border-radius-md);
       text-decoration: none;
-      font-weight: 500;
+      font-weight: 600;
       font-size: var(--font-size-sm);
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
       width: 100%;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
     
     .message-card__button:hover {

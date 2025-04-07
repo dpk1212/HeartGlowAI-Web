@@ -3,16 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HeartGlowAI - What's your message intention?</title>
-    <meta name="description" content="Choose the intention behind your message to create a personalized heartfelt message with HeartGlowAI">
+    <title>Configure Your Message - HeartGlowAI</title>
+    <meta name="description" content="Create personalized messages for your loved ones with HeartGlowAI">
     
     <!-- Preconnect to Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    
-    <!-- Preload key assets -->
-    <link rel="preload" href="css/styles.css" as="style">
-    <link rel="preload" href="js/message-intent-new.js" as="script">
     
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -23,694 +19,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
-    
-    <!-- FontAwesome -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css">
-
-    <style>
-        /* Executive styling for intention page - with HeartGlowAI branding */
-        body.intention-page {
-            min-height: 100vh;
-            background-color: #1A1625;
-            background-image: linear-gradient(135deg, #0c0a18, #1a1628);
-            color: #E8E6F1;
-            font-family: 'Inter', sans-serif;
-            position: relative;
-            overflow-x: hidden;
-        }
-        
-        /* Subtle background pattern */
-        body.intention-page::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="%238a57de" opacity="0.03"/></svg>');
-            background-size: 50px 50px;
-            pointer-events: none;
-            z-index: 0;
-        }
-        
-        .main-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            animation: fadeInUp 0.8s ease-out;
-        }
-        
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        .page-title {
-            font-size: 2.8rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            letter-spacing: -0.5px;
-            background: linear-gradient(45deg, #ffffff, #e8e6f1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-        
-        .page-description {
-            font-size: 1.1rem;
-            color: #b8b5c7;
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.6;
-        }
-        
-        .progress-container {
-            margin-bottom: 2.5rem;
-        }
-        
-        .progress-steps {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 8%;
-            margin-bottom: 1rem;
-        }
-        
-        .progress-step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .progress-step .step-number {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            margin-bottom: 8px;
-            border: 2px solid transparent;
-            transition: all 0.3s ease;
-        }
-        
-        .progress-step.active .step-number {
-            background: linear-gradient(45deg, #8a57de, #b296ff);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.5);
-            box-shadow: 0 0 20px rgba(138, 87, 222, 0.4);
-        }
-        
-        .progress-step.completed .step-number {
-            background: linear-gradient(135deg, #66bb6a, #8bc34a);
-            color: white;
-        }
-        
-        .progress-step .step-label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-        }
-        
-        .progress-step.active .step-label,
-        .progress-step.completed .step-label {
-            color: #E8E6F1;
-        }
-        
-        .progress-bar {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            margin: 0 10%;
-            overflow: hidden;
-        }
-        
-        .progress-indicator {
-            height: 100%;
-            background: linear-gradient(90deg, #8a57de, #b296ff);
-            transition: width 0.3s ease;
-            border-radius: 8px;
-        }
-        
-        .recipient-summary-card {
-            background: rgba(33, 30, 46, 0.7);
-            backdrop-filter: blur(15px);
-            border-radius: 16px;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            margin-bottom: 3rem;
-            border: 1px solid rgba(138, 87, 222, 0.15);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            transition: all 0.3s ease;
-        }
-        
-        .recipient-summary-card:hover {
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
-            border-color: rgba(138, 87, 222, 0.25);
-            transform: translateY(-2px);
-        }
-        
-        .recipient-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #8a57de, #b296ff);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: white;
-            margin-right: 1.5rem;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 12px rgba(138, 87, 222, 0.2);
-        }
-        
-        .recipient-name {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem;
-            letter-spacing: -0.01em;
-            color: #E8E6F1;
-        }
-        
-        .recipient-relationship {
-            font-size: 0.95rem;
-            color: #b8b5c7;
-            font-weight: 500;
-        }
-        
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-        
-        .option-card {
-            background: rgba(33, 30, 46, 0.7);
-            backdrop-filter: blur(15px);
-            border-radius: 16px;
-            padding: 2rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(138, 87, 222, 0.15);
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-        }
-        
-        .option-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, transparent, transparent);
-            transition: all 0.5s ease;
-            opacity: 0;
-        }
-        
-        .option-card:hover {
-            background: rgba(45, 42, 59, 0.7);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            border-color: rgba(138, 87, 222, 0.25);
-        }
-        
-        .option-card:hover::before {
-            opacity: 1;
-            background: linear-gradient(90deg, #8a57de, #b296ff);
-        }
-        
-        .option-card.selected {
-            background: rgba(45, 42, 59, 0.9);
-            border-color: rgba(138, 87, 222, 0.4);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .option-card.selected::before {
-            opacity: 1;
-            background: linear-gradient(90deg, #8a57de, #b296ff);
-            height: 5px;
-        }
-        
-        .option-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: rgba(138, 87, 222, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-            font-size: 1.6rem;
-            color: #b296ff;
-            transition: all 0.3s ease;
-        }
-        
-        .option-card:hover .option-icon,
-        .option-card.selected .option-icon {
-            background: rgba(138, 87, 222, 0.2);
-            transform: scale(1.05);
-            color: #E8E6F1;
-        }
-        
-        .option-title {
-            font-size: 1.4rem;
-            font-weight: 700;
-            margin: 0 0 1rem;
-            color: #E8E6F1;
-            letter-spacing: -0.01em;
-        }
-        
-        .option-description {
-            font-size: 0.95rem;
-            color: #b8b5c7;
-            line-height: 1.6;
-            margin: 0;
-        }
-        
-        .navigation-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 3rem;
-        }
-        
-        .primary-button, .secondary-button {
-            padding: 1rem 2rem;
-            border-radius: 12px;
-            font-size: 1rem;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            min-width: 180px;
-        }
-        
-        .primary-button {
-            background: linear-gradient(45deg, #8a57de, #b296ff);
-            color: white;
-            border: none;
-            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .primary-button::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: all 0.6s;
-        }
-        
-        .primary-button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(138, 87, 222, 0.4);
-        }
-        
-        .primary-button:hover::after {
-            left: 100%;
-        }
-        
-        .primary-button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.5);
-            box-shadow: none;
-        }
-        
-        .secondary-button {
-            background: rgba(255, 255, 255, 0.05);
-            color: #E8E6F1;
-            border: 1px solid rgba(138, 87, 222, 0.2);
-            text-decoration: none;
-        }
-        
-        .secondary-button:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: rgba(138, 87, 222, 0.3);
-        }
-        
-        .primary-button i, .secondary-button i {
-            margin: 0 0.8rem;
-        }
-        
-        .secondary-button i {
-            margin-left: 0;
-        }
-        
-        .primary-button i {
-            margin-right: 0;
-        }
-        
-        /* Custom intent section styling */
-        #customIntentSection {
-            background: rgba(33, 30, 46, 0.7);
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            border: 1px solid rgba(138, 87, 222, 0.15);
-        }
-        
-        .form-group label {
-            color: #E8E6F1;
-            margin-bottom: 0.8rem;
-            display: block;
-            font-weight: 500;
-            font-size: 0.95rem;
-        }
-        
-        .input-field {
-            width: 100%;
-            background: rgba(33, 30, 46, 0.7);
-            border: 1px solid rgba(138, 87, 222, 0.2);
-            border-radius: 8px;
-            padding: 0.8rem 1rem;
-            color: #E8E6F1;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-        
-        .input-field:focus {
-            border-color: rgba(138, 87, 222, 0.4);
-            outline: none;
-            background: rgba(45, 42, 59, 0.7);
-            box-shadow: 0 0 0 3px rgba(138, 87, 222, 0.2);
-        }
-        
-        /* Loading overlay */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(26, 22, 37, 0.9);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .loading-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .loading-container {
-            text-align: center;
-        }
-        
-        .heart-animation {
-            width: 80px;
-            height: 80px;
-            position: relative;
-            margin: 0 auto 2rem;
-        }
-        
-        .heart-shape {
-            width: 100%;
-            height: 100%;
-            background: #8a57de;
-            transform: rotate(45deg);
-            animation: pulse 1.5s infinite;
-            position: relative;
-            border-radius: 12px;
-        }
-        
-        .heart-shape:before,
-        .heart-shape:after {
-            content: '';
-            width: 100%;
-            height: 100%;
-            background: #8a57de;
-            border-radius: 50%;
-            position: absolute;
-        }
-        
-        .heart-shape:before {
-            top: -50%;
-            left: 0;
-        }
-        
-        .heart-shape:after {
-            top: 0;
-            left: -50%;
-        }
-        
-        .heart-glow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            filter: blur(20px);
-            background: rgba(138, 87, 222, 0.6);
-            z-index: -1;
-            animation: glow 1.5s infinite alternate;
-        }
-        
-        .loading-context {
-            color: #E8E6F1;
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-top: 2rem;
-            animation: dotAnimation 1.5s infinite;
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: rotate(45deg) scale(0.8);
-            }
-            50% {
-                transform: rotate(45deg) scale(1);
-            }
-            100% {
-                transform: rotate(45deg) scale(0.8);
-            }
-        }
-        
-        @keyframes glow {
-            0% {
-                opacity: 0.5;
-                filter: blur(20px);
-            }
-            100% {
-                opacity: 0.8;
-                filter: blur(30px);
-            }
-        }
-        
-        @keyframes dotAnimation {
-            0%, 20% {
-                content: "Processing your selection.";
-            }
-            40% {
-                content: "Processing your selection..";
-            }
-            60%, 80% {
-                content: "Processing your selection...";
-            }
-        }
-    </style>
-</head>
-<body class="intention-page">
-    <div id="app">
-        <!-- App Header -->
-        <header class="app-header">
-            <div class="brand-logo">
-                <div class="logo-heart"></div>
-                <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
-            </div>
-            
-            <div class="user-menu">
-                <div class="user-profile">
-                    <button id="userMenuBtn" class="user-avatar">
-                        <img id="userAvatar" src="images/default-avatar.png" alt="Profile">
-                    </button>
-                    <div id="userDropdown" class="dropdown-menu">
-                        <div class="dropdown-header">
-                            <div id="userDisplayName" class="dropdown-name">User</div>
-                            <div id="userEmail" class="dropdown-email">user@example.com</div>
-                        </div>
-                        <div class="dropdown-divider"></div>
-                        <a href="home.html" class="dropdown-item">
-                            <i class="fas fa-home"></i>
-                            Dashboard
-                        </a>
-                        <a href="settings.html" class="dropdown-item">
-                            <i class="fas fa-cog"></i>
-                            Settings
-                        </a>
-                        <button id="logoutBtn" class="dropdown-item">
-                            <i class="fas fa-sign-out-alt"></i>
-                            Sign Out
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Progress Steps -->
-            <div class="progress-container">
-                <div class="progress-steps">
-                    <div class="progress-step completed">
-                        <div class="step-number"><i class="fas fa-check"></i></div>
-                        <div class="step-label">Recipient</div>
-                    </div>
-                    <div class="progress-step active">
-                        <div class="step-number">2</div>
-                        <div class="step-label">Intention</div>
-                    </div>
-                    <div class="progress-step">
-                        <div class="step-number">3</div>
-                        <div class="step-label">Tone</div>
-                    </div>
-                    <div class="progress-step">
-                        <div class="step-number">4</div>
-                        <div class="step-label">Message</div>
-                    </div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-indicator" style="width: 50%"></div>
-                </div>
-            </div>
-            
-            <!-- Add recipient summary card -->
-            <div class="recipient-summary-card">
-                <div class="recipient-avatar" id="recipientAvatar">
-                    <span id="recipientInitial">R</span>
-                </div>
-                <div class="recipient-details">
-                    <h4 class="recipient-name" id="recipientName">Loading recipient...</h4>
-                    <div class="recipient-relationship" id="recipientRelationship">Preparing...</div>
-                </div>
-            </div>
-            
-            <div class="page-header">
-                <h1 class="page-title">What's your message intention?</h1>
-                <p class="page-description">Select the purpose of your message. This helps us create content that's meaningful and appropriate.</p>
-            </div>
-            
-            <!-- Intent Options -->
-            <div class="options-grid">
-                <div class="option-card" data-intent="appreciate">
-                    <div class="option-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <h3 class="option-title">Appreciation</h3>
-                    <p class="option-description">Express gratitude and thank someone for their support, kindness, or actions.</p>
-                </div>
-                
-                <div class="option-card" data-intent="reconnect">
-                    <div class="option-icon">
-                        <i class="fas fa-handshake"></i>
-                    </div>
-                    <h3 class="option-title">Reconnect</h3>
-                    <p class="option-description">Reach out to someone you've lost touch with and rebuild your connection.</p>
-                </div>
-                
-                <div class="option-card" data-intent="apologize">
-                    <div class="option-icon">
-                        <i class="fas fa-dove"></i>
-                    </div>
-                    <h3 class="option-title">Apology</h3>
-                    <p class="option-description">Say sorry and express remorse for a mistake or misunderstanding.</p>
-                </div>
-                
-                <div class="option-card" data-intent="encourage">
-                    <div class="option-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h3 class="option-title">Encouragement</h3>
-                    <p class="option-description">Motivate and support someone facing challenges or pursuing goals.</p>
-                </div>
-                
-                <div class="option-card" data-intent="celebrate">
-                    <div class="option-icon">
-                        <i class="fas fa-trophy"></i>
-                    </div>
-                    <h3 class="option-title">Celebration</h3>
-                    <p class="option-description">Congratulate someone on their achievements or special occasions.</p>
-                </div>
-                
-                <div class="option-card" data-intent="custom">
-                    <div class="option-icon">
-                        <i class="fas fa-edit"></i>
-                    </div>
-                    <h3 class="option-title">Custom</h3>
-                    <p class="option-description">Craft a message with your own specific intention in mind.</p>
-                    <div id="customIntentSection" style="display: none;">
-                        <div class="form-group">
-                            <label for="customIntentInput">Describe your custom intention:</label>
-                            <input type="text" id="customIntentInput" class="input-field" placeholder="E.g., Request time off, Propose an idea...">
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Navigation Buttons -->
-            <div class="navigation-buttons">
-                <a href="recipient-selection-new.html" class="secondary-button">
-                    <i class="fas fa-arrow-left"></i>
-                    Back to Recipient
-                </a>
-                <button id="nextBtn" class="primary-button" disabled>
-                    Next Step
-                    <i class="fas fa-arrow-right"></i>
-                </button>
-            </div>
-        </main>
-    </div>
-    
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-container">
-            <div class="heart-animation">
-                <div class="heart-shape"></div>
-                <div class="heart-glow"></div>
-            </div>
-            <div id="loadingContext" class="loading-context">Processing your selection...</div>
-        </div>
-    </div>
-    
-    <!-- Alert Container -->
-    <div id="alertContainer" class="alert-container"></div>
     
     <!-- Firebase Config -->
     <script>
@@ -725,13 +33,268 @@
             measurementId: "G-KJMPL1DNPY"
         };
         
-        // Initialize Firebase
-        if (!firebase.apps.length) {
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
             firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } else {
+            console.log("Firebase already initialized");
+        }
+        
+        // Critical: Set persistence to LOCAL
+        if (firebase && firebase.auth) {
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .catch(function(error) {
+                    console.error("Auth persistence error:", error);
+                });
         }
     </script>
     
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/components/message.css">
+    
+    <style>
+        /* Page-specific styles */
+        body {
+            min-height: 100vh;
+            background-color: #1A1625;
+            background-image: linear-gradient(135deg, #0c0a18, #1a1628);
+            color: #E8E6F1;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1.5" fill="%238a57de" opacity="0.03"/></svg>');
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        .app-container {
+            min-height: 100vh;
+            padding: 2rem 0 4rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+        
+        .logo-heart {
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            transform: rotate(45deg);
+            position: relative;
+            margin-right: 15px;
+            border-radius: 5px;
+        }
+        
+        .logo-heart:before, .logo-heart:after {
+            content: '';
+            width: 30px;
+            height: 30px;
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            border-radius: 50%;
+            position: absolute;
+        }
+        
+        .logo-heart:before {
+            top: -15px;
+            left: 0;
+        }
+        
+        .logo-heart:after {
+            top: 0;
+            left: -15px;
+        }
+        
+        .brand-name {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #E8E6F1;
+        }
+        
+        .brand-ai {
+            background: linear-gradient(45deg, #8a57de, #b296ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+
+        /* Pulse animation for selection feedback */
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(138, 87, 222, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(138, 87, 222, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(138, 87, 222, 0);
+            }
+        }
+        
+        .pulse {
+            animation: pulse 0.7s ease-out;
+        }
+        
+        /* Fade in animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <a href="home.html" class="brand-logo">
+                <div class="logo-heart"></div>
+                <div class="brand-name">Heart<span class="brand-ai">GlowAI</span></div>
+            </a>
+            <nav class="header-nav">
+                <a href="profile.html" class="user-profile">
+                    <i class="fas fa-user-circle"></i>
+                </a>
+            </nav>
+        </header>
+        
+        <!-- Welcome section -->
+        <section class="welcome-section">
+            <h1 class="welcome-title">Welcome to HeartGlowAI</h1>
+            <p class="welcome-subtitle">Create heartfelt messages for your loved ones with our AI-powered assistant.</p>
+        </section>
+        
+        <!-- Message creation container -->
+        <div class="message-creation-container">
+            <!-- Configuration Card -->
+            <div class="config-card">
+                <h2 class="config-card__title">Start Crafting Your Message</h2>
+                
+                <!-- Progress indicator -->
+                <div class="progress-indicator">
+                    <div class="progress-step active"></div>
+                    <div class="progress-step"></div>
+                    <div class="progress-step"></div>
+                </div>
+                
+                <!-- Context Selection Section -->
+                <section id="context-section" class="config-section">
+                    <h3 class="config-section__title">1. Choose Context</h3>
+                    
+                    <div class="context-options">
+                        <button class="context-btn" data-context="professional">
+                            <i class="fas fa-briefcase"></i> Professional
+                        </button>
+                        <button class="context-btn" data-context="personal">
+                            <i class="fas fa-heart"></i> Personal
+                        </button>
+                    </div>
+                    
+                    <!-- Navigation buttons -->
+                    <div class="nav-buttons">
+                        <button class="nav-btn" onclick="window.history.back()">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="nav-btn primary" id="next-btn" disabled>
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+                
+                <!-- Starting Points Section -->
+                <section id="starting-points-section" class="config-section" style="display: none;">
+                    <h3 class="config-section__title">2. Pick Your Starting Point</h3>
+                    
+                    <div class="starting-points">
+                        <!-- Recognize effort card -->
+                        <div class="starting-point-card" data-intention="recognize_effort" data-contexts="professional,personal">
+                            <span class="card-icon">💬</span>
+                            <h4 class="card-title">"I want to recognize someone's effort."</h4>
+                            <p class="card-description">Acknowledge hard work, dedication, or a job well done.</p>
+                        </div>
+                        
+                        <!-- Give feedback card -->
+                        <div class="starting-point-card" data-intention="give_feedback" data-contexts="professional">
+                            <span class="card-icon">🧠</span>
+                            <h4 class="card-title">"I need to give feedback — with care."</h4>
+                            <p class="card-description">Provide constructive thoughts or suggestions professionally.</p>
+                        </div>
+                        
+                        <!-- Thank someone card -->
+                        <div class="starting-point-card" data-intention="express_gratitude" data-contexts="professional,personal">
+                            <span class="card-icon">🙏</span>
+                            <h4 class="card-title">"I want to thank someone for their support."</h4>
+                            <p class="card-description">Express appreciation for help, mentorship, or guidance.</p>
+                        </div>
+                        
+                        <!-- Express clearly card -->
+                        <div class="starting-point-card" data-intention="express_clearly" data-contexts="professional">
+                            <span class="card-icon">🎯</span>
+                            <h4 class="card-title">"I need to express something clearly and respectfully."</h4>
+                            <p class="card-description">Communicate professionally with clarity and respect.</p>
+                        </div>
+                        
+                        <!-- Make someone feel seen card -->
+                        <div class="starting-point-card" data-intention="make_seen" data-contexts="personal,professional">
+                            <span class="card-icon">👋</span>
+                            <h4 class="card-title">"Someone deserves to feel seen for their impact."</h4>
+                            <p class="card-description">Recognize someone's contribution or positive influence.</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation buttons -->
+                    <div class="nav-buttons">
+                        <button class="nav-btn" id="back-btn">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                        <button class="nav-btn primary" id="continue-btn" disabled>
+                            Continue <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
-    <script src="js/message-intent-new.js"></script>
+    <script src="js/message-configurator.js"></script>
 </body>
 </html> 

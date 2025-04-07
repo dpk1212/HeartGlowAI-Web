@@ -23,6 +23,36 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
     
+    <!-- Firebase Config -->
+    <script>
+        // Initialize Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+            authDomain: "heartglowai.firebaseapp.com",
+            projectId: "heartglowai",
+            storageBucket: "heartglowai.firebasestorage.app",
+            messagingSenderId: "196565711798",
+            appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+            measurementId: "G-KJMPL1DNPY"
+        };
+        
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+        } else {
+            console.log("Firebase already initialized");
+        }
+        
+        // Critical: Set persistence to LOCAL
+        if (firebase && firebase.auth) {
+            firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                .catch(function(error) {
+                    console.error("Auth persistence error:", error);
+                });
+        }
+    </script>
+    
     <!-- FontAwesome -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     

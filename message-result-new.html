@@ -121,7 +121,7 @@
             </div>
             
             <!-- Message Display -->
-            <div id="messageState" class="message-container message-container-premium">
+            <div id="messageState" class="message-container message-container-premium" style="position: relative; background: linear-gradient(135deg, rgba(20, 15, 35, 0.03) 0%, rgba(20, 15, 35, 0.01) 100%); border-radius: 18px; padding: 1rem; box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08); overflow: hidden;">
                 <div id="loadingState" class="loading-message">
                     <div class="heart-animation">
                         <div class="heart-shape"></div>
@@ -143,43 +143,43 @@
                     </div>
                 </div>
                 
-                <div id="messageContent" class="message-content">
-                    <div class="message-header">
-                        <div class="message-badge">
-                            <i class="fas fa-heart"></i> <span>Created with HeartGlowAI</span>
+                <div id="messageContent" class="message-content" style="background: linear-gradient(135deg, #f9f9ff 0%, #ffffff 50%, #f5f5ff 100%); border-radius: 16px; padding: 3rem; margin: 1.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 10px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(138, 87, 222, 0.1); position: relative; overflow: hidden; transform: translateY(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+                    <div class="message-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(138, 87, 222, 0.15); position: relative;">
+                        <div class="message-badge" style="display: flex; align-items: center; color: #8a57de; font-size: 0.95rem; font-weight: 600; background: rgba(138, 87, 222, 0.08); padding: 0.7rem 1.2rem; border-radius: 30px; border: 1px solid rgba(138, 87, 222, 0.15); transition: all 0.3s ease; position: relative; overflow: hidden;">
+                            <i class="fas fa-heart" style="margin-right: 0.7rem; font-size: 1rem; color: #9c6aff;"></i> <span>Created with HeartGlowAI</span>
                         </div>
-                        <div class="message-date" id="messageDate">
-                            <i class="fas fa-calendar-alt"></i> <span id="currentDate"></span>
+                        <div class="message-date" id="messageDate" style="color: #777; font-size: 0.95rem; display: flex; align-items: center; background: rgba(0, 0, 0, 0.03); padding: 0.7rem 1.2rem; border-radius: 30px; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);">
+                            <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; font-size: 0.95rem; color: #555;"></i> <span id="currentDate"></span>
                         </div>
                     </div>
                     
-                    <div class="message-body">
-                        <p id="content" class="message-text"></p>
+                    <div class="message-body" style="position: relative; padding: 0.5rem 0.5rem 2.5rem; z-index: 1;">
+                        <p id="content" class="message-text" style="color: #333; font-size: 1.25rem; line-height: 1.9; font-weight: 400; white-space: pre-wrap; position: relative; letter-spacing: 0.01rem; text-shadow: 0 1px 1px rgba(255, 255, 255, 1); padding: 0 0.5rem;"></p>
                     </div>
                     
-                    <div class="message-actions">
-                        <button id="editBtn" class="text-button">
-                            <i class="fas fa-edit"></i> <span>Edit</span>
+                    <div class="message-actions" style="display: flex; justify-content: flex-end; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(138, 87, 222, 0.15); gap: 1rem; position: relative; z-index: 2;">
+                        <button id="editBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
+                            <i class="fas fa-edit" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Edit</span>
                         </button>
-                        <button id="copyBtn" class="text-button">
-                            <i class="fas fa-copy"></i> <span>Copy</span>
+                        <button id="copyBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
+                            <i class="fas fa-copy" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Copy</span>
                         </button>
-                        <button id="shareBtn" class="text-button">
-                            <i class="fas fa-share-alt"></i> <span>Share</span>
+                        <button id="shareBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
+                            <i class="fas fa-share-alt" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Share</span>
                         </button>
-                        <button id="regenerateBtn" class="text-button">
-                            <i class="fas fa-sync"></i> <span>Regenerate</span>
+                        <button id="regenerateBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
+                            <i class="fas fa-sync" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Regenerate</span>
                         </button>
                     </div>
                 </div>
                 
                 <!-- Enhanced Message Insights Section -->
-                <div id="messageInsights" class="message-insights">
-                    <h3><i class="fas fa-lightbulb"></i> Why This Message Works</h3>
-                    <div id="insightsContent"></div>
-                    <div class="insights-actions">
-                        <button class="insights-action-button" id="copyInsightsBtn">
-                            <i class="fas fa-copy"></i> Copy Insights
+                <div id="messageInsights" class="message-insights" style="background: rgba(30, 25, 40, 0.9); border-radius: 16px; padding: 2rem; margin: 1.5rem; margin-top: 0; border: 1px solid rgba(138, 87, 222, 0.25); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; backdrop-filter: blur(10px);">
+                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; position: relative; z-index: 1; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"><i class="fas fa-lightbulb" style="color: #ffd54f; margin-right: 0.8rem; font-size: 1.4rem; text-shadow: 0 0 10px rgba(255, 213, 79, 0.4);"></i> Why This Message Works</h3>
+                    <div id="insightsContent" style="color: rgba(255, 255, 255, 0.95); font-size: 1rem; line-height: 1.7; position: relative; z-index: 1;"></div>
+                    <div class="insights-actions" style="display: flex; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                        <button class="insights-action-button" id="copyInsightsBtn" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center;">
+                            <i class="fas fa-copy" style="margin-right: 0.5rem; font-size: 1rem;"></i> Copy Insights
                         </button>
                     </div>
                 </div>

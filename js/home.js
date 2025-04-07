@@ -4502,15 +4502,12 @@ function initializeMessageConfigurator() {
          // Enable continue button
          updateContinueButtonState();
          
-         // Auto-flip to format selection after a short delay (optional)
-         // Uncomment if you want the configurator to automatically flip after selecting an intention
-         /*
+         // Auto-flip to format selection after a short delay
          if (selectedConfig.intention) {
            setTimeout(() => {
              configurator.classList.add('message-configurator--flipped');
            }, 300);
          }
-         */
       }
     });
   });

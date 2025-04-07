@@ -39,7 +39,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.4;
   z-index: -1;
 }
@@ -126,49 +126,58 @@
 .message-configurator__category-toggle {
   display: flex;
   justify-content: center;
-  gap: 1rem;
-  margin-bottom: 0.5rem;
+  max-width: 400px;
+  margin: 0 auto 1.5rem;
+  background: rgba(20, 18, 29, 0.5);
+  border-radius: 50px;
+  padding: 0.25rem;
+  position: relative;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .message-configurator__toggle-btn {
-  padding: 0.75rem 1.75rem;
+  flex: 1;
+  padding: 0.75rem 1.5rem;
   border-radius: 50px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.75);
-  font-size: 1.1rem;
-  letter-spacing: 0.2px;
+  transition: all 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+  letter-spacing: 0.3px;
   position: relative;
-  overflow: hidden;
   z-index: 1;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.message-configurator__toggle-btn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: all 0.5s;
-  z-index: -1;
-}
-
-.message-configurator__toggle-btn:hover::before {
-  left: 100%;
+  text-align: center;
 }
 
 .message-configurator__toggle-btn--active {
-  background: linear-gradient(45deg, #8a57de, #b296ff);
-  color: white;
-  border-color: transparent;
-  box-shadow: 0 5px 15px rgba(138, 87, 222, 0.3);
-  transform: translateY(-2px);
+  color: #fff;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+/* Create the active indicator pill that slides */
+.message-configurator__category-toggle::after {
+  content: '';
+  position: absolute;
+  top: 0.25rem;
+  left: 0.25rem;
+  bottom: 0.25rem;
+  width: calc(50% - 0.5rem);
+  background: linear-gradient(135deg, #8a57de, #b296ff);
+  border-radius: 50px;
+  box-shadow: 0 4px 15px rgba(138, 87, 222, 0.35);
+  transition: all 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+  z-index: 0;
+}
+
+.message-configurator__toggle-btn:last-child.message-configurator__toggle-btn--active ~ .message-configurator__category-toggle::after,
+.message-configurator__toggle-btn:last-child.message-configurator__toggle-btn--active + .message-configurator__category-toggle::after {
+  left: calc(50% + 0.25rem);
 }
 
 /* Format options styling */
@@ -241,22 +250,26 @@
 /* Intention options styling */
 .message-configurator__intention-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  margin-top: 0.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, transparent 100%);
 }
 
 .message-configurator__intention-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 1.25rem;
+  border-radius: 12px;
+  padding: 1rem;
   cursor: pointer;
-  transition: all 0.35s ease;
+  transition: all 0.25s ease;
   text-align: left;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #fff;
-  line-height: 1.5;
+  line-height: 1.4;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
@@ -264,30 +277,23 @@
   align-items: center;
 }
 
-.message-configurator__intention-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
+/* Scrollbar styling for intention options */
+.message-configurator__intention-options::-webkit-scrollbar {
+  width: 6px;
 }
 
-.message-configurator__intention-card:hover,
-.message-configurator__intention-card--selected {
-  transform: translateY(-4px);
-  background: rgba(138, 87, 222, 0.1);
-  border-color: rgba(138, 87, 222, 0.3);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+.message-configurator__intention-options::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 10px;
 }
 
-.message-configurator__intention-card--selected::before,
-.message-configurator__intention-card:hover::before {
-  opacity: 1;
-  background: linear-gradient(90deg, rgba(138, 87, 222, 0.7), rgba(138, 87, 222, 0.3));
+.message-configurator__intention-options::-webkit-scrollbar-thumb {
+  background: rgba(138, 87, 222, 0.3);
+  border-radius: 10px;
+}
+
+.message-configurator__intention-options::-webkit-scrollbar-thumb:hover {
+  background: rgba(138, 87, 222, 0.5);
 }
 
 /* Intention card icon and text styling */
@@ -443,4 +449,15 @@
   .message-configurator__start-button {
     width: 100%;
   }
+}
+
+/* Add styling for the continue button */
+#continue-to-format-btn {
+  margin: 0 auto;
+  display: block;
+}
+
+/* Remove the bottom margin from the last step to make room for action buttons */
+.message-configurator__step:last-of-type {
+  margin-bottom: 1rem;
 } 

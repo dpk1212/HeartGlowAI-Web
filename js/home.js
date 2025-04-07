@@ -4434,53 +4434,39 @@ function initializeMessageConfigurator() {
   const formatOptions = document.querySelector('.message-configurator__format-options');
   const intentionSections = document.querySelectorAll('.message-configurator__intention-options');
   const startCraftingBtn = document.getElementById('start-crafting-btn');
+  const continueToFormatBtn = document.getElementById('continue-to-format-btn');
   const backButton = document.getElementById('configurator-back-btn');
 
-  if (!configurator || !categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn) {
+  if (!configurator || !categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn || !continueToFormatBtn) {
     console.error('Message Configurator elements not found!');
     return;
   }
 
+  // Initialize configuration object
+  const selectedConfig = {
+    category: 'professional', // Default category
+    intention: null,
+    format: null
+  };
+
   // --- Category Toggle Logic ---
   categoryToggle.addEventListener('click', (event) => {
     if (event.target.classList.contains('message-configurator__toggle-btn') && !event.target.classList.contains('message-configurator__toggle-btn--active')) {
-      // ... (logic to set active button and update selectedConfig.category) ...
       categoryToggle.querySelectorAll('.message-configurator__toggle-btn').forEach(btn => btn.classList.remove('message-configurator__toggle-btn--active'));
       event.target.classList.add('message-configurator__toggle-btn--active');
       selectedConfig.category = event.target.dataset.category;
       console.log('Category selected:', selectedConfig.category);
 
-      // Show correct intention section (even if on back face)
+      // Show correct intention section based on category
       showCorrectIntentions();
-
-      // If already flipped, flip back and reset format/intention
-      if (configurator.classList.contains('message-configurator--flipped')) {
-        configurator.classList.remove('message-configurator--flipped');
-        resetFormatSelection();
-        resetIntentionSelection();
-        updateStartCraftingButtonState(); 
-      }
       
-      // Check if ready to flip (might flip immediately if format already chosen)
-      checkAndFlipConfigurator();
+      // Reset intention selection
+      resetIntentionSelection();
+      updateContinueButtonState();
     }
   });
 
-  // --- Format Selection Logic ---
-  formatOptions.addEventListener('click', (event) => {
-    const formatBtn = event.target.closest('.message-configurator__format-btn');
-    if (formatBtn) {
-      formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
-      formatBtn.classList.add('message-configurator__format-btn--selected');
-      selectedConfig.format = formatBtn.dataset.format;
-      console.log('Format selected:', selectedConfig.format);
-
-      // Check if ready to flip
-      checkAndFlipConfigurator();
-    }
-  });
-
-  // --- Intention Selection Logic ---
+  // --- Intention Selection Logic (now on front page) ---
   intentionSections.forEach(section => {
     section.addEventListener('click', (event) => {
       const card = event.target.closest('.message-configurator__intention-card');
@@ -4489,20 +4475,40 @@ function initializeMessageConfigurator() {
          card.classList.add('message-configurator__intention-card--selected');
          selectedConfig.intention = card.dataset.intention;
          console.log('Intention selected:', selectedConfig.intention);
-         updateStartCraftingButtonState(); // Update button now that intention is selected
+         updateContinueButtonState(); // Enable continue button
       }
     });
   });
   
+  // --- Format Selection Logic (now on back page) ---
+  formatOptions.addEventListener('click', (event) => {
+    const formatBtn = event.target.closest('.message-configurator__format-btn');
+    if (formatBtn) {
+      formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
+      formatBtn.classList.add('message-configurator__format-btn--selected');
+      selectedConfig.format = formatBtn.dataset.format;
+      console.log('Format selected:', selectedConfig.format);
+      updateStartCraftingButtonState(); // Update the start crafting button state
+    }
+  });
+  
+  // --- Continue Button Logic (to flip to format selection) ---
+  continueToFormatBtn.addEventListener('click', () => {
+    if (!continueToFormatBtn.disabled && selectedConfig.intention) {
+      console.log('Continuing to format selection with intention:', selectedConfig.intention);
+      configurator.classList.add('message-configurator--flipped');
+    }
+  });
+  
   // --- Helper Functions ---
-  function resetFormatSelection() {
-    formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
-    selectedConfig.format = null;
-  }
-
   function resetIntentionSelection() {
     intentionSections.forEach(s => s.querySelectorAll('.message-configurator__intention-card').forEach(c => c.classList.remove('message-configurator__intention-card--selected')));
     selectedConfig.intention = null;
+  }
+
+  function resetFormatSelection() {
+    formatOptions.querySelectorAll('.message-configurator__format-btn').forEach(btn => btn.classList.remove('message-configurator__format-btn--selected'));
+    selectedConfig.format = null;
   }
 
   function showCorrectIntentions() {
@@ -4515,30 +4521,29 @@ function initializeMessageConfigurator() {
     });
   }
 
-  function checkAndFlipConfigurator() {
-    if (selectedConfig.category && selectedConfig.format && !configurator.classList.contains('message-configurator--flipped')) {
-      console.log('Flipping configurator to back');
-      configurator.classList.add('message-configurator--flipped');
-      showCorrectIntentions(); // Ensure correct intentions are shown after flip
-      // Button state updated when intention is picked
+  function updateContinueButtonState() {
+    if (selectedConfig.intention) { 
+      continueToFormatBtn.disabled = false;
+      continueToFormatBtn.textContent = 'Continue to Format Selection →';
+    } else {
+      continueToFormatBtn.disabled = true;
+      continueToFormatBtn.textContent = 'Select a Starting Point';
     }
   }
 
   function updateStartCraftingButtonState() {
-     // Button state depends only on intention now (since it's on the back)
-     // Format selection happens before flip
-    if (selectedConfig.intention) { 
+    if (selectedConfig.format) { 
       startCraftingBtn.disabled = false;
       startCraftingBtn.textContent = 'Start Crafting Message →';
     } else {
       startCraftingBtn.disabled = true;
-      startCraftingBtn.textContent = 'Pick Your Starting Point'; // Updated text
+      startCraftingBtn.textContent = 'Select Format';
     }
   }
 
   // --- Start Crafting Button Action ---
   startCraftingBtn.addEventListener('click', () => {
-    if (!startCraftingBtn.disabled) {
+    if (!startCraftingBtn.disabled && selectedConfig.format) {
       console.log('Starting message crafting with config:', selectedConfig);
       try {
         sessionStorage.setItem('messageCategory', selectedConfig.category);
@@ -4558,11 +4563,6 @@ function initializeMessageConfigurator() {
     backButton.addEventListener('click', () => {
       console.log('Back button clicked, flipping to front');
       configurator.classList.remove('message-configurator--flipped');
-      // Don't reset format selection to preserve the user's choices
-      // resetFormatSelection();
-      // We can reset intention selection since it's not visible on front face
-      resetIntentionSelection();
-      updateStartCraftingButtonState();
     });
   } else {
     console.warn('Back button not found');
@@ -4570,7 +4570,8 @@ function initializeMessageConfigurator() {
 
   // Initial setup
   showCorrectIntentions();
-  updateStartCraftingButtonState(); // Initial button state
+  updateContinueButtonState();
+  updateStartCraftingButtonState();
 }
 // --- End of Configurator Additions ---
 

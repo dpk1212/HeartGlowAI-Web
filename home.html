@@ -101,7 +101,7 @@
     <!-- New Message Configurator Section -->
     <section class="message-configurator">
       <div class="message-configurator__inner">
-        <!-- Front Face: Category & Format -->
+        <!-- Front Face: Category & Starting Points -->
         <div class="message-configurator__front">
           <h2 class="message-configurator__title">Start Crafting Your Message</h2>
           
@@ -118,37 +118,10 @@
             </div>
           </div>
     
-          <!-- Step 2: Format Selection -->
+          <!-- Step 2: Starting Points Selection -->
           <div class="message-configurator__step">
-            <h3 class="message-configurator__step-title">2. Select Format</h3>
-            <div class="message-configurator__format-options">
-              <button class="message-configurator__format-btn" data-format="text">
-                <span class="message-configurator__format-icon">📱</span>
-                <span class="message-configurator__format-label">Text Message</span>
-              </button>
-              <button class="message-configurator__format-btn" data-format="email">
-                <span class="message-configurator__format-icon">📧</span>
-                <span class="message-configurator__format-label">Email</span>
-              </button>
-              <button class="message-configurator__format-btn" data-format="card">
-                <span class="message-configurator__format-icon">💌</span>
-                <span class="message-configurator__format-label">Card</span>
-              </button>
-              <button class="message-configurator__format-btn" data-format="conversation">
-                <span class="message-configurator__format-icon">🗣️</span>
-                <span class="message-configurator__format-label">Conversation Topics</span>
-              </button>
-            </div>
-          </div>
-        </div> 
-        
-        <!-- Back Face: Intention & Action -->
-        <div class="message-configurator__back">
-          <h2 class="message-configurator__title">Refine Your Message</h2> 
-          
-          <!-- Step 3: Intention Selection -->
-          <div class="message-configurator__step">
-            <h3 class="message-configurator__step-title">3. Pick Your Starting Point</h3>
+            <h3 class="message-configurator__step-title">2. Pick Your Starting Point</h3>
+            
             <!-- Professional Intentions (Visible by default) -->
             <div class="message-configurator__intention-options professional-intentions">
               <button class="message-configurator__intention-card" data-intention="recognize_effort">
@@ -172,6 +145,7 @@
                 <span class="message-configurator__intention-text">"Someone deserves to feel seen for their impact."</span>
               </button>
             </div>
+            
             <!-- Personal Intentions (Hidden by default) -->
             <div class="message-configurator__intention-options personal-intentions" style="display: none;">
               <button class="message-configurator__intention-card" data-intention="thinking_of_you">
@@ -196,6 +170,41 @@
               </button>
             </div>
           </div>
+          
+          <!-- Continue button (front) -->
+          <div class="message-configurator__action">
+            <button id="continue-to-format-btn" class="message-configurator__start-button" disabled>
+              Select a Starting Point
+            </button>
+          </div>
+        </div> 
+        
+        <!-- Back Face: Format & Action -->
+        <div class="message-configurator__back">
+          <h2 class="message-configurator__title">Choose Message Format</h2> 
+          
+          <!-- Step 3: Format Selection -->
+          <div class="message-configurator__step">
+            <h3 class="message-configurator__step-title">3. Select Format</h3>
+            <div class="message-configurator__format-options">
+              <button class="message-configurator__format-btn" data-format="text">
+                <span class="message-configurator__format-icon">📱</span>
+                <span class="message-configurator__format-label">Text Message</span>
+              </button>
+              <button class="message-configurator__format-btn" data-format="email">
+                <span class="message-configurator__format-icon">📧</span>
+                <span class="message-configurator__format-label">Email</span>
+              </button>
+              <button class="message-configurator__format-btn" data-format="card">
+                <span class="message-configurator__format-icon">💌</span>
+                <span class="message-configurator__format-label">Card</span>
+              </button>
+              <button class="message-configurator__format-btn" data-format="conversation">
+                <span class="message-configurator__format-icon">🗣️</span>
+                <span class="message-configurator__format-label">Conversation Topics</span>
+              </button>
+            </div>
+          </div>
     
           <!-- Step 4: Action Button -->
           <div class="message-configurator__action">
@@ -204,7 +213,7 @@
               <span class="message-configurator__back-text">Back</span>
             </button>
             <button id="start-crafting-btn" class="message-configurator__start-button" disabled>
-              Select Format & Starting Point
+              Select Format
             </button>
           </div>
         </div>

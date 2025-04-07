@@ -9,7 +9,7 @@
   position: relative;
   width: 100%;
   max-width: 800px;
-  min-height: 520px;
+  min-height: 550px;
   margin: 2rem auto;
   border-radius: 24px;
   overflow: hidden;
@@ -66,7 +66,7 @@
   height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  padding: 2.5rem;
+  padding: 2.5rem 3rem;
   display: flex;
   flex-direction: column;
 }
@@ -85,7 +85,7 @@
 .message-configurator__title {
   font-size: 1.75rem;
   font-weight: 700;
-  margin-bottom: 2.25rem;
+  margin-bottom: 2.5rem;
   text-align: center;
   color: #fff;
   letter-spacing: -0.5px;
@@ -98,7 +98,7 @@
 
 /* Step styling */
 .message-configurator__step {
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 .message-configurator__step-title {
@@ -185,9 +185,9 @@
 .message-configurator__format-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
+  gap: 1.25rem;
   justify-content: center;
-  margin: 0.5rem auto;
+  margin: 1rem auto;
   max-width: 650px;
 }
 
@@ -252,10 +252,11 @@
 .message-configurator__intention-options {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.75rem;
+  gap: 1rem;
   max-height: 350px;
   overflow-y: auto;
   padding-right: 0.5rem;
+  padding-bottom: 0.5rem;
   mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 90%, transparent 100%);
 }
@@ -264,7 +265,7 @@
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
-  padding: 1rem;
+  padding: 1.25rem;
   cursor: pointer;
   transition: all 0.25s ease;
   text-align: left;
@@ -362,7 +363,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  padding-top: 2rem;
+  padding-top: 2.5rem;
 }
 
 /* Start crafting button */
@@ -446,16 +447,17 @@
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .message-configurator {
-    min-height: 520px;
+    min-height: 550px;
   }
 
   .message-configurator__front,
   .message-configurator__back {
-    padding: 1.75rem;
+    padding: 2rem;
   }
 
   .message-configurator__format-options {
     grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
   }
 }
 
@@ -465,7 +467,12 @@
   }
   
   .message-configurator {
-    min-height: 570px;
+    min-height: 600px;
+  }
+  
+  .message-configurator__front,
+  .message-configurator__back {
+    padding: 1.5rem;
   }
   
   .message-configurator__title {

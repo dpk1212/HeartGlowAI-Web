@@ -4578,10 +4578,24 @@ function initializeMessageConfigurator() {
     if (!startCraftingBtn.disabled && selectedConfig.format) {
       console.log('Starting message crafting with config:', selectedConfig);
       try {
+        // Store all necessary data for the message generator API
         sessionStorage.setItem('messageCategory', selectedConfig.category);
         sessionStorage.setItem('messageFormat', selectedConfig.format);
         sessionStorage.setItem('messageIntention', selectedConfig.intention);
-        console.log('Configuration saved to sessionStorage');
+        
+        // Additional metadata that might be helpful for the API
+        sessionStorage.setItem('messageConfigTimestamp', new Date().toISOString());
+        sessionStorage.setItem('messageConfigComplete', 'true');
+        
+        // Log for debugging
+        console.log('Configuration saved to sessionStorage:', {
+          category: selectedConfig.category,
+          format: selectedConfig.format,
+          intention: selectedConfig.intention,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Navigate to the next page in the flow
         window.location.href = 'recipient-selection-new.html';
       } catch (error) {
         console.error('Error saving configuration to sessionStorage:', error);

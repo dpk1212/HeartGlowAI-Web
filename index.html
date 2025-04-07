@@ -581,18 +581,15 @@
       margin: var(--spacing-xl) auto;
     }
     
+    /* Complete card rebuild */
     .message-card {
       position: relative;
       height: 90px;
       width: 100%;
       cursor: pointer;
-      transition: all 0.3s ease;
-      margin-bottom: var(--spacing-md);
       perspective: 1000px;
-    }
-    
-    .message-card:hover {
-      transform: translateY(-3px);
+      margin-bottom: var(--spacing-md);
+      background: transparent;
     }
     
     .message-card__inner {
@@ -601,7 +598,6 @@
       height: 100%;
       transition: transform 0.6s;
       transform-style: preserve-3d;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.12);
       border-radius: var(--border-radius-lg);
     }
     
@@ -612,68 +608,60 @@
     .message-card__front,
     .message-card__back {
       position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       border-radius: var(--border-radius-lg);
-      display: flex;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       overflow: hidden;
     }
     
     .message-card__front {
-      background-color: #2D2A3B;
-      border-left: 4px solid var(--primary);
       display: flex;
       align-items: center;
-      padding: 0 var(--spacing-lg);
-      gap: var(--spacing-lg);
-      z-index: 1;
-      right: 0;
+      background-color: #2D2A3B;
+      border-left: 4px solid var(--primary);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     }
     
     .message-card__back {
       background-color: #2D2A3B;
-      padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       text-align: center;
       transform: rotateY(180deg);
-      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2);
+      padding: var(--spacing-md);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       border: 1px solid rgba(138, 87, 222, 0.4);
-      z-index: 0;
-      right: 0;
     }
     
     .message-card__icon {
       flex-shrink: 0;
       font-size: 1.8em;
-      width: 42px;
+      width: 48px;
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      height: 42px;
       border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-      margin-right: 0;
+      margin-left: var(--spacing-md);
     }
     
     .message-card__content {
-      flex-grow: 1;
-      max-width: calc(100% - 60px);
-      overflow: hidden;
+      flex: 1;
+      padding: 0 var(--spacing-md);
     }
     
     .message-card__title {
-      font-weight: 600;
       color: white;
+      font-weight: 600;
       margin: 0;
-      text-align: left;
       font-size: var(--font-size-md);
       line-height: 1.4;
     }
@@ -682,20 +670,18 @@
       color: rgba(255, 255, 255, 0.8);
       font-size: var(--font-size-sm);
       margin-top: 4px;
-      text-align: left;
     }
     
     .message-card__preview {
       color: white;
       font-size: var(--font-size-md);
-      line-height: 1.6;
+      line-height: 1.5;
       margin: 0 0 var(--spacing-md);
       font-style: italic;
-      text-align: center;
     }
     
     .message-card__button {
-      display: block;
+      width: 100%;
       background: linear-gradient(45deg, var(--primary), var(--primary-light));
       color: white;
       padding: var(--spacing-sm) var(--spacing-md);
@@ -705,14 +691,12 @@
       font-size: var(--font-size-sm);
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease;
+      margin-top: 8px;
     }
     
     .message-card__button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
     }
     
     .message-card__insights {
@@ -721,8 +705,6 @@
       right: var(--spacing-sm);
       color: white;
       font-size: 1.2em;
-      cursor: help;
-      z-index: 2;
       background: rgba(138, 87, 222, 0.2);
       width: 24px;
       height: 24px;
@@ -731,24 +713,6 @@
       align-items: center;
       justify-content: center;
       border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .message-card__insights:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      right: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(26, 22, 37, 0.95);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      font-size: var(--font-size-sm);
-      white-space: nowrap;
-      margin-right: var(--spacing-sm);
-      z-index: 1;
-      box-shadow: var(--shadow-md);
-      max-width: 250px;
-      text-align: left;
     }
     
     /* Desktop hover flip */

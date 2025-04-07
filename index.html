@@ -570,41 +570,38 @@
       max-width: 600px;
       width: 100%;
       margin: var(--spacing-xl) auto;
-      perspective: 1000px;
     }
     
     .message-card {
       position: relative;
       height: 100px;
+      width: 100%;
       cursor: pointer;
-      transform-style: preserve-3d;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      transform: perspective(1000px);
     }
     
-    .message-card.flipped {
-      transform: perspective(1000px) rotateY(180deg);
+    .message-card__inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+    
+    .message-card.flipped .message-card__inner {
+      transform: rotateY(180deg);
     }
     
     .message-card__front,
     .message-card__back {
       position: absolute;
-      top: 0;
-      left: 0;
       width: 100%;
       height: 100%;
       -webkit-backface-visibility: hidden;
       backface-visibility: hidden;
       border-radius: var(--border-radius-lg);
       display: flex;
-      align-items: center;
       background: rgba(45, 42, 59, 0.7);
       border: 1px solid rgba(138, 87, 222, 0.1);
-      transition: all 0.3s ease;
-      overflow: hidden;
-      transform: translateZ(0);
     }
     
     .message-card__front {
@@ -613,28 +610,22 @@
       padding: 0 var(--spacing-lg);
       gap: var(--spacing-md);
       background: linear-gradient(135deg, rgba(45, 42, 59, 0.9), rgba(45, 42, 59, 0.7));
-      z-index: 1;
-      -webkit-transform: translateZ(1px);
-      transform: translateZ(1px);
     }
     
     .message-card__front:hover {
       border-color: rgba(138, 87, 222, 0.3);
       box-shadow: 0 0 20px rgba(138, 87, 222, 0.15);
-      transform: translateY(-2px);
       background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
     }
     
     .message-card__back {
-      transform: rotateY(180deg) translateZ(1px);
-      -webkit-transform: rotateY(180deg) translateZ(1px);
       background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
       padding: var(--spacing-lg);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: var(--spacing-md);
-      z-index: 0;
+      transform: rotateY(180deg);
     }
     
     .message-card__icon {
@@ -795,76 +786,88 @@
       <!-- Message Cards Section -->
       <div class="message-cards" id="professional-cards">
         <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">💬</div>
-            <h3 class="message-card__title">I want to recognize someone's effort</h3>
-          </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
-          </div>
-        </div>
-        
-        <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">🧠</div>
-            <h3 class="message-card__title">I need to give feedback — with care</h3>
-          </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">💬</div>
+              <h3 class="message-card__title">I want to recognize someone's effort</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
+            </div>
           </div>
         </div>
         
         <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">🙏</div>
-            <h3 class="message-card__title">I want to thank someone for their support</h3>
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">🧠</div>
+              <h3 class="message-card__title">I need to give feedback — with care</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
+            </div>
           </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">🙏</div>
+              <h3 class="message-card__title">I want to thank someone for their support</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
+            </div>
           </div>
         </div>
       </div>
       
       <div class="message-cards" id="personal-cards" style="display: none;">
         <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">❤️</div>
-            <h3 class="message-card__title">I've been thinking about someone...</h3>
-          </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
-          </div>
-        </div>
-        
-        <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">✍️</div>
-            <h3 class="message-card__title">I want to say something I've been holding in</h3>
-          </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">❤️</div>
+              <h3 class="message-card__title">I've been thinking about someone...</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
+            </div>
           </div>
         </div>
         
         <div class="message-card">
-          <div class="message-card__front">
-            <div class="message-card__icon">💬</div>
-            <h3 class="message-card__title">I just want to make someone smile</h3>
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">✍️</div>
+              <h3 class="message-card__title">I want to say something I've been holding in</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
+            </div>
           </div>
-          <div class="message-card__back">
-            <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-            <button class="message-card__button">Use This Message →</button>
-            <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
+        </div>
+        
+        <div class="message-card">
+          <div class="message-card__inner">
+            <div class="message-card__front">
+              <div class="message-card__icon">💬</div>
+              <h3 class="message-card__title">I just want to make someone smile</h3>
+            </div>
+            <div class="message-card__back">
+              <p class="message-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
+              <button class="message-card__button">Use This Message →</button>
+              <div class="message-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
+            </div>
           </div>
         </div>
       </div>
@@ -907,36 +910,29 @@
       const messageCards = document.querySelectorAll('.message-card');
       
       messageCards.forEach(card => {
-        // Use mousedown instead of click for more reliable handling
-        card.addEventListener('mousedown', function(e) {
-          // Only flip if it's not a button click
+        const cardFront = card.querySelector('.message-card__front');
+        
+        cardFront.addEventListener('click', function() {
+          card.classList.add('flipped');
+        });
+        
+        // Make the back side clickable to flip back
+        const cardBack = card.querySelector('.message-card__back');
+        cardBack.addEventListener('click', function(e) {
+          // Don't flip if clicking on button
           if (!e.target.classList.contains('message-card__button')) {
-            card.classList.toggle('flipped');
+            card.classList.remove('flipped');
           }
         });
         
-        // Add touch support for mobile
-        card.addEventListener('touchstart', function(e) {
-          if (!e.target.classList.contains('message-card__button')) {
-            card.classList.toggle('flipped');
-            e.preventDefault(); // Prevent scrolling
-          }
-        }, {passive: false});
-        
-        // Prevent card from flipping back when clicking the button
+        // Prevent buttons from triggering flip
         const button = card.querySelector('.message-card__button');
         if (button) {
-          button.addEventListener('mousedown', (e) => {
+          button.addEventListener('click', function(e) {
             e.stopPropagation();
-            // Handle button click - redirect or show message editor
+            console.log('Button clicked, navigating to message editor');
             window.location.href = "message-editor.html";
           });
-          
-          button.addEventListener('touchstart', (e) => {
-            e.stopPropagation();
-            window.location.href = "message-editor.html";
-            e.preventDefault();
-          }, {passive: false});
         }
       });
       

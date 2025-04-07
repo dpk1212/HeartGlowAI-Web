@@ -228,9 +228,9 @@ function loadData() {
 function updateRecipientDisplay() {
     if (!recipientData) return;
     
-    const recipientName = document.getElementById('recipientName');
-    const recipientRelation = document.getElementById('recipientRelation');
-    const recipientInitial = document.getElementById('recipientInitial');
+    const recipientName = document.getElementById('recipient-name');
+    const recipientRelation = document.getElementById('recipient-relationship');
+    const recipientAvatar = document.getElementById('recipient-avatar');
     
     if (recipientName) {
         recipientName.textContent = recipientData.name || 'Unknown Recipient';
@@ -240,9 +240,16 @@ function updateRecipientDisplay() {
         recipientRelation.textContent = capitalizeFirstLetter(recipientData.relationship) || 'Contact';
     }
     
-    if (recipientInitial) {
-        recipientInitial.textContent = getInitials(recipientData.name);
+    if (recipientAvatar) {
+        // Add initial to the avatar
+        if (recipientData.name) {
+            recipientAvatar.textContent = getInitials(recipientData.name);
+        } else {
+            recipientAvatar.innerHTML = '<i class="fas fa-user"></i>';
+        }
     }
+    
+    logDebug(`Updated recipient display with name: ${recipientData.name}, relationship: ${recipientData.relationship}`);
 }
 
 /**
@@ -529,34 +536,54 @@ function showLoadingState() {
  * Show error state with better UI
  */
 function showError(message) {
-    try {
-        console.error("Showing error state:", message);
+    // Hide loading state first
+    hideLoadingState();
+    
+    // Get the error elements
+    const errorState = document.getElementById('error-state');
+    const errorMessage = document.getElementById('error-message');
+    
+    if (errorState && errorMessage) {
+        // Set the error message
+        errorMessage.textContent = message || 'Something went wrong. Please try again.';
         
-        // Get all the elements we need to control
-        const loadingState = document.getElementById('loadingState');
-        const messageContent = document.getElementById('messageContent');
-        const errorState = document.getElementById('errorState');
-        const errorText = document.getElementById('errorText');
-        const regenerateOptions = document.getElementById('regenerateOptions');
-        const messageInsights = document.getElementById('messageInsights');
+        // Show the error state
+        errorState.style.display = 'flex';
         
-        // Hide everything except error
-        if (loadingState) loadingState.style.display = 'none';
-        if (messageContent) messageContent.style.display = 'none';
-        if (regenerateOptions) regenerateOptions.style.display = 'none';
-        if (messageInsights) messageInsights.style.display = 'none';
-        
-        // Update error message
-        if (errorText) {
-            errorText.textContent = message || 'An error occurred while generating your message. Please try again.';
+        // Hide any message content that might be showing
+        const messageCard = document.getElementById('message-card');
+        if (messageCard) {
+            messageCard.style.display = 'none';
         }
         
-        // Show error state
-        if (errorState) {
-            errorState.style.display = 'block';
+        // Hide any insights that might be showing
+        const insights = document.getElementById('message-insights');
+        if (insights) {
+            insights.style.display = 'none';
         }
-    } catch (error) {
-        console.error('Error showing error state:', error);
+        
+        // Log the error
+        logDebug(`Error displayed: ${message}`);
+    } else {
+        // Fallback if elements not found
+        console.error('Error elements not found in DOM');
+        alert(message || 'Something went wrong. Please try again.');
+    }
+    
+    // Add retry functionality to the retry button
+    const retryBtn = document.getElementById('retry-btn');
+    if (retryBtn) {
+        // Remove any existing event listeners
+        const newRetryBtn = retryBtn.cloneNode(true);
+        retryBtn.parentNode.replaceChild(newRetryBtn, retryBtn);
+        
+        // Add new event listener
+        newRetryBtn.addEventListener('click', function() {
+            // Hide error state
+            errorState.style.display = 'none';
+            // Regenerate the message
+            generateMessage();
+        });
     }
 }
 
@@ -976,27 +1003,28 @@ function setupMessageActionButtons() {
  * Initialize the recipient avatar with initials
  */
 function initializeRecipientAvatar() {
+    const avatarElement = document.getElementById('recipient-avatar');
+    
+    if (!avatarElement) {
+        console.error('Recipient avatar element not found');
+        return;
+    }
+    
     try {
-        const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
-        const initialElement = document.getElementById('recipientInitial');
-        const nameElement = document.getElementById('recipientName');
-        const relationElement = document.getElementById('recipientRelation');
-        
-        if (initialElement && recipientData.name) {
-            // Get the first letter of the recipient's name
-            const initial = recipientData.name.charAt(0).toUpperCase();
-            initialElement.textContent = initial;
-        }
-        
-        if (nameElement && recipientData.name) {
-            nameElement.textContent = recipientData.name;
-        }
-        
-        if (relationElement && recipientData.relationship) {
-            relationElement.textContent = recipientData.relationship;
+        if (recipientData && recipientData.name) {
+            // Use initials from the recipient's name
+            const initials = getInitials(recipientData.name);
+            avatarElement.textContent = initials;
+            logDebug(`Set recipient avatar initials to: ${initials}`);
+        } else {
+            // Fallback to a user icon
+            avatarElement.innerHTML = '<i class="fas fa-user"></i>';
+            logDebug('Set recipient avatar to default user icon');
         }
     } catch (error) {
         console.error('Error initializing recipient avatar:', error);
+        avatarElement.innerHTML = '<i class="fas fa-user"></i>';
+        logDebug(`Error initializing recipient avatar: ${error.message}`);
     }
 }
 
@@ -1037,6 +1065,7 @@ function generateMessage(variation = null) {
             })
             .then(response => {
                 console.log("API response received");
+                hideLoadingState(); // Hide the loading state here
                 
                 // Parse the response to extract message and insights
                 const parsedResponse = parseOpenAIResponse(response);
@@ -1057,10 +1086,12 @@ function generateMessage(variation = null) {
             })
             .catch(error => {
                 console.error('Error in message generation flow:', error);
+                hideLoadingState(); // Make sure to hide loading on error
                 showError('Error generating message. Please try again.');
             });
     } catch (error) {
         console.error('Exception in generateMessage:', error);
+        hideLoadingState(); // Make sure to hide loading on error
         showError('Failed to generate message. Please check your inputs and try again.');
     }
 }
@@ -1549,43 +1580,36 @@ function callGenerationAPI(prompt, authToken = null) {
  * Display message insights in the UI with proper formatting
  */
 function displayMessageInsights(insights) {
+    logDebug("Displaying message insights...");
+    
+    if (!insights || !Array.isArray(insights) || insights.length === 0) {
+        console.log("No insights to display");
+        return;
+    }
+
+    // Get the insights container and content with the correct IDs from the HTML
+    const insightsContainer = document.getElementById('message-insights');
+    const insightsContent = document.getElementById('insights-content');
+    
+    if (!insightsContainer || !insightsContent) {
+        console.error("Insights container or content element not found");
+        logDebug(`Insights elements lookup: container=${!!insightsContainer}, content=${!!insightsContent}`);
+        return;
+    }
+    
     try {
-        console.log("Displaying message insights...");
-        if (!insights || !Array.isArray(insights) || insights.length === 0) {
-            console.log("No insights to display");
-            return;
-        }
-        
-        // Get the insights container and content
-        const insightsContainer = document.getElementById('messageInsights');
-        const insightsContent = document.getElementById('insightsContent');
-        
-        if (!insightsContainer || !insightsContent) {
-            console.error("Insights container or content element not found");
-            return;
-        }
-        
         // Clear any existing content
         insightsContent.innerHTML = '';
         
         // Add each insight as a separate item with proper styling
         insights.forEach((insight) => {
             // Clean up the insight text
-            let insightText = insight;
+            let insightText = insight.trim().replace(/^[-*•]/, '').trim();
             
-            // Check if insight already has strong/bold markup
-            if (!insightText.includes('<strong>') && !insightText.includes('<b>')) {
-                // Try to identify if there's a title pattern like "Personal Connection:" 
-                const titleMatch = insightText.match(/^([^:]+):(.*)/);
-                if (titleMatch) {
-                    const [, title, content] = titleMatch;
-                    insightText = `<strong>${title}:</strong>${content}`;
-                }
-            }
-            
+            // Create and add insight item
             const insightElement = document.createElement('div');
             insightElement.className = 'insight-item';
-            insightElement.innerHTML = insightText;
+            insightElement.textContent = insightText;
             insightsContent.appendChild(insightElement);
         });
         
@@ -1594,57 +1618,34 @@ function displayMessageInsights(insights) {
             insightsContainer.style.display = 'block';
             
             // Add a "Copy Insights" button if it doesn't exist
-            if (!document.querySelector('.insights-footer')) {
-                const footerDiv = document.createElement('div');
-                footerDiv.className = 'insights-footer';
-                footerDiv.style.padding = '1rem 2rem 1.5rem';
-                footerDiv.style.textAlign = 'right';
-                footerDiv.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
-                
+            if (!document.getElementById('copy-insights-btn')) {
                 const copyBtn = document.createElement('button');
-                copyBtn.id = 'copyInsightsBtn';
-                copyBtn.className = 'insights-copy-btn';
+                copyBtn.id = 'copy-insights-btn';
+                copyBtn.className = 'copy-insights-btn';
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Insights';
-                copyBtn.style.background = 'rgba(255, 255, 255, 0.1)';
-                copyBtn.style.color = '#e0e0e0';
-                copyBtn.style.border = 'none';
-                copyBtn.style.padding = '0.6rem 1.2rem';
-                copyBtn.style.borderRadius = '8px';
-                copyBtn.style.cursor = 'pointer';
-                copyBtn.style.transition = 'all 0.2s ease';
                 
+                // Add hover and click effects
                 copyBtn.addEventListener('mouseenter', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.2)';
                     this.style.transform = 'translateY(-2px)';
                 });
                 
                 copyBtn.addEventListener('mouseleave', function() {
-                    this.style.background = 'rgba(255, 255, 255, 0.1)';
                     this.style.transform = 'translateY(0)';
                 });
                 
                 // Add event listener for copying
                 copyBtn.addEventListener('click', function() {
-                    const insightText = Array.from(insightsContent.querySelectorAll('.insight-item'))
-                        .map(item => item.textContent.trim())
-                        .join('\n\n');
-                    
-                    navigator.clipboard.writeText(insightText)
-                        .then(() => showToast('Insights copied to clipboard!'))
-                        .catch(err => {
-                            console.error('Failed to copy insights:', err);
-                            showToast('Failed to copy insights', 'error');
-                        });
+                    copyInsightsToClipboard();
                 });
                 
-                footerDiv.appendChild(copyBtn);
-                insightsContainer.appendChild(footerDiv);
+                insightsContent.appendChild(copyBtn);
             }
         } else {
             insightsContainer.style.display = 'none';
         }
     } catch (error) {
         console.error('Error displaying insights:', error);
+        logDebug(`Error displaying insights: ${error.message}`);
     }
 }
 
@@ -1652,94 +1653,82 @@ function displayMessageInsights(insights) {
  * Display the generated message in the UI with proper formatting
  */
 function displayGeneratedMessage(message) {
+    logDebug("Displaying generated message...");
+    
+    if (!message) {
+        console.error("No message to display");
+        showError("Failed to generate a message. Please try again.");
+        return;
+    }
+    
     try {
-        console.log("Displaying generated message...");
+        // Make sure loading state is hidden
+        hideLoadingState();
         
-        // Hide loading state
-        const loadingState = document.getElementById('loadingState');
-        if (loadingState) {
-            loadingState.style.display = 'none';
+        // Get the message text element
+        const messageTextElement = document.getElementById('message-text');
+        if (!messageTextElement) {
+            console.error("Message text element not found");
+            logDebug("Message text element 'message-text' not found in the DOM");
+            return;
         }
         
-        // Store the message for later reference
-        generatedMessage = message;
+        // Process the message string into paragraphs
+        const paragraphs = message.split(/\n\n+/);
         
-        // Show message content container
-        const messageContent = document.getElementById('messageContent');
-        if (messageContent) {
-            messageContent.style.display = 'block';
-        }
+        // Clear existing content
+        messageTextElement.innerHTML = '';
         
-        // Format and display the message text with proper styling
-        const contentElement = document.getElementById('content');
-        if (contentElement && message) {
-            // Clean the message text
-            message = message.trim();
-            
-            if (message.length > 0) {
-                // Process paragraphs while preserving the drop cap on first letter
-                const paragraphs = message.split(/\n\s*\n/);
-                let formattedMessage = '';
+        // Add each paragraph with proper styling
+        paragraphs.forEach((paragraph, index) => {
+            if (paragraph.trim()) {
+                const p = document.createElement('p');
                 
-                if (paragraphs.length > 0) {
-                    // Handle first paragraph with drop cap
-                    const firstParagraph = paragraphs[0];
-                    const firstLetter = firstParagraph.charAt(0);
-                    const restOfFirstParagraph = firstParagraph.substring(1);
+                if (index === 0) {
+                    // Apply drop cap to first paragraph
+                    const firstLetter = paragraph.charAt(0);
+                    const restOfText = paragraph.substring(1);
                     
-                    formattedMessage = `<span class="drop-cap">${firstLetter}</span>${restOfFirstParagraph}`;
+                    const dropCap = document.createElement('span');
+                    dropCap.className = 'drop-cap';
+                    dropCap.textContent = firstLetter;
                     
-                    // Add remaining paragraphs with proper spacing
-                    if (paragraphs.length > 1) {
-                        for (let i = 1; i < paragraphs.length; i++) {
-                            if (paragraphs[i].trim()) {
-                                formattedMessage += `\n\n${paragraphs[i]}`;
-                            }
-                        }
-                    }
-                    
-                    // Set the content
-                    contentElement.innerHTML = formattedMessage;
-                    
-                    // Ensure paragraphs are properly displayed
-                    const text = contentElement.textContent;
-                    const formattedHtml = text
-                        .replace(/\n\n/g, '</p><p style="margin-top: 1.5rem;">')
-                        .replace(/\n/g, '<br>');
-                    
-                    // Insert the first letter as a drop cap
-                    const finalHtml = '<p>' + formattedHtml + '</p>';
-                    const withDropCap = finalHtml.replace('<p>', `<p><span class="drop-cap">${firstLetter}</span>${restOfFirstParagraph.substring(0, 1) === ' ' ? '' : ' '}`);
-                    
-                    contentElement.innerHTML = withDropCap;
+                    p.appendChild(dropCap);
+                    p.appendChild(document.createTextNode(restOfText));
                 } else {
-                    // Fallback for single line messages
-                    const firstLetter = message.charAt(0);
-                    const restOfMessage = message.substring(1);
-                    contentElement.innerHTML = `<p><span class="drop-cap">${firstLetter}</span>${restOfMessage}</p>`;
+                    p.textContent = paragraph;
                 }
-            } else {
-                contentElement.innerHTML = '<p>No message content available.</p>';
+                
+                // Add some bottom margin to all paragraphs except the last one
+                if (index < paragraphs.length - 1) {
+                    p.style.marginBottom = '1rem';
+                }
+                
+                messageTextElement.appendChild(p);
             }
-            
-            // Add spacing to ensure the text is readable
-            contentElement.style.whiteSpace = 'pre-wrap';
-            contentElement.style.wordBreak = 'break-word';
-        }
+        });
         
         // Update current date
-        const currentDateElem = document.getElementById('currentDate');
-        if (currentDateElem) {
+        const currentDateElement = document.getElementById('current-date');
+        if (currentDateElement) {
             const now = new Date();
-            currentDateElem.textContent = now.toLocaleDateString('en-US', { 
+            const formattedDate = now.toLocaleDateString('en-US', { 
+                year: 'numeric', 
                 month: 'long', 
-                day: 'numeric', 
-                year: 'numeric' 
+                day: 'numeric' 
             });
+            
+            currentDateElement.innerHTML = '<i class="far fa-calendar"></i> ' + formattedDate;
         }
+        
+        // Store the message for later use (copy, share, etc.)
+        generatedMessage = message;
+        
+        logDebug("Message displayed successfully");
     } catch (error) {
-        console.error('Error displaying message:', error);
-        showError('Failed to display message properly. Please try again.');
+        console.error("Error displaying message:", error);
+        logDebug(`Error displaying message: ${error.message}`);
+        showError("There was an error displaying your message. Please try again.");
     }
 }
 
@@ -1871,4 +1860,19 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Apply premium styling after a short delay to ensure elements are loaded
     setTimeout(applyPremiumStyling, 300);
-}); 
+});
+
+function hideLoadingState() {
+    const loadingState = document.getElementById('loading-state');
+    if (loadingState) {
+        loadingState.style.display = 'none';
+        logDebug('Loading state hidden');
+    }
+    
+    // Show the message card if it exists
+    const messageCard = document.getElementById('message-card');
+    if (messageCard) {
+        messageCard.style.display = 'block';
+        logDebug('Message card displayed');
+    }
+} 

@@ -8,23 +8,28 @@
   max-width: 800px;
   width: 100%;
   margin: 3rem auto;
+  transform-style: flat;
 }
 
-/* Individual intent card */
+/* Individual intent card - fixed 3D transforms */
 .intent-card {
   position: relative;
   height: 140px;
   width: 100%;
   perspective: 1000px;
+  -webkit-perspective: 1000px;
   cursor: pointer;
   transition: transform 0.3s ease;
+  /* Do NOT apply preserve-3d here */
+  transform-style: flat;
+  -webkit-transform-style: flat;
 }
 
 .intent-card:hover {
   transform: translateY(-4px);
 }
 
-/* Card inner container for 3D transform */
+/* Card inner container for 3D transform - this is where preserve-3d must be applied */
 .intent-card__inner {
   position: relative;
   width: 100%;
@@ -32,6 +37,7 @@
   text-align: left;
   transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   transform-style: preserve-3d;
+  -webkit-transform-style: preserve-3d;
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2);
   overflow: hidden;
@@ -65,14 +71,17 @@
 .intent-card__front,
 .intent-card__back {
   position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border-radius: 16px;
   overflow: hidden;
-  /* Force hardware acceleration to improve backface-visibility */
-  transform: translateZ(0);
+  /* Remove transform that could interfere with flipping */
+  transform-style: flat;
+  -webkit-transform-style: flat;
 }
 
 /* Front side styling with enhanced gradient */
@@ -84,6 +93,9 @@
   z-index: 1;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  /* Explicitly set to 0deg to ensure proper orientation */
+  transform: rotateY(0deg);
+  -webkit-transform: rotateY(0deg);
 }
 
 /* Subtle shine effect on front */
@@ -101,7 +113,9 @@
 /* Back side styling - adding more opaque background with glass effect */
 .intent-card__back {
   background: linear-gradient(135deg, rgba(45, 42, 59, 0.98) 0%, rgba(32, 29, 44, 1) 100%);
+  /* Explicitly set rotation to ensure it works across browsers */
   transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
   padding: 1.25rem; 
   display: flex;
   flex-direction: column;
@@ -429,5 +443,47 @@
 @media (hover: none) {
   .intent-card.flipped .intent-card__inner {
     transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+  }
+  
+  /* Ensure backface visibility works on touch devices too */
+  .intent-card.flipped .intent-card__front {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+}
+
+/* Manual flip class for JS-triggered flips */
+.intent-card.flipped .intent-card__inner {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg);
+}
+
+/* Safari and Chrome specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 0) {
+  .intent-card__front,
+  .intent-card__back {
+    /* Stronger backface visibility enforcement for WebKit */
+    -webkit-backface-visibility: hidden !important;
+    backface-visibility: hidden !important;
+  }
+  
+  .intent-card__back {
+    /* Add more solid background for Chrome/Safari */
+    background-color: rgb(32, 29, 44);
+  }
+}
+
+/* Mobile specific fixes */
+@media (hover: none) {
+  .intent-card.flipped .intent-card__inner {
+    transform: rotateY(180deg);
+    -webkit-transform: rotateY(180deg);
+  }
+  
+  /* Ensure backface visibility works on touch devices too */
+  .intent-card.flipped .intent-card__front {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 } 

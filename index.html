@@ -1082,6 +1082,7 @@
         const cardTitle = card.querySelector('.intent-card__title').innerText;
         const cardButton = card.querySelector('.intent-card__button');
         const cardIcon = card.querySelector('.intent-card__icon');
+        const cardInner = card.querySelector('.intent-card__inner');
         
         // Add subtle floating animation to icons
         if (cardIcon) {
@@ -1095,8 +1096,53 @@
           // Example: analytics.track('card_interaction', { card_id: cardId, title: cardTitle });
         }
         
-        // On touch devices, flip card on tap with better animation
-        if (!supportsHover) {
+        // For desktop, manage hover-based flips
+        if (supportsHover) {
+          // For devices with hover, add interactions
+          card.addEventListener('mouseenter', function() {
+            trackCardInteraction();
+            
+            // Explicitly trigger flip class for better control
+            card.classList.add('hovered');
+            
+            // Subtle glow effect on hover
+            const glow = document.createElement('div');
+            glow.className = 'card-glow-effect';
+            glow.style.position = 'absolute';
+            glow.style.top = '-20px';
+            glow.style.left = '-20px';
+            glow.style.right = '-20px';
+            glow.style.bottom = '-20px';
+            glow.style.background = 'radial-gradient(circle, rgba(138, 87, 222, 0.2) 0%, transparent 70%)';
+            glow.style.zIndex = '-1';
+            glow.style.opacity = '0';
+            glow.style.transition = 'opacity 0.5s ease';
+            
+            card.appendChild(glow);
+            
+            setTimeout(() => {
+              glow.style.opacity = '0.7';
+            }, 10);
+          });
+          
+          card.addEventListener('mouseleave', function() {
+            // Remove hover class
+            card.classList.remove('hovered');
+            
+            const glow = card.querySelector('.card-glow-effect');
+            if (glow) {
+              glow.style.opacity = '0';
+              setTimeout(() => {
+                if (glow.parentNode === card) {
+                  card.removeChild(glow);
+                }
+              }, 500);
+            }
+          });
+        } 
+        // For mobile, manage tap-based flips
+        else {
+          // On touch devices, flip card on tap with better animation
           card.addEventListener('click', function(e) {
             if (!card.classList.contains('flipped')) {
               e.preventDefault();
@@ -1124,42 +1170,6 @@
               setTimeout(() => {
                 card.style.transform = 'scale(1)';
               }, 200);
-            }
-          });
-        } else {
-          // For devices with hover, add interactions
-          card.addEventListener('mouseenter', function() {
-            trackCardInteraction();
-            
-            // Subtle glow effect on hover
-            const glow = document.createElement('div');
-            glow.className = 'card-glow-effect';
-            glow.style.position = 'absolute';
-            glow.style.top = '-20px';
-            glow.style.left = '-20px';
-            glow.style.right = '-20px';
-            glow.style.bottom = '-20px';
-            glow.style.background = 'radial-gradient(circle, rgba(138, 87, 222, 0.2) 0%, transparent 70%)';
-            glow.style.zIndex = '-1';
-            glow.style.opacity = '0';
-            glow.style.transition = 'opacity 0.5s ease';
-            
-            card.appendChild(glow);
-            
-            setTimeout(() => {
-              glow.style.opacity = '0.7';
-            }, 10);
-          });
-          
-          card.addEventListener('mouseleave', function() {
-            const glow = card.querySelector('.card-glow-effect');
-            if (glow) {
-              glow.style.opacity = '0';
-              setTimeout(() => {
-                if (glow.parentNode === card) {
-                  card.removeChild(glow);
-                }
-              }, 500);
             }
           });
         }
@@ -1190,6 +1200,19 @@
           });
         }
       });
+      
+      // Add CSS for hover-based flips (more reliable than CSS :hover)
+      const style = document.createElement('style');
+      style.textContent = `
+        .intent-card.hovered .intent-card__inner {
+          transform: rotateY(180deg);
+        }
+        @keyframes float {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-5px); }
+        }
+      `;
+      document.head.appendChild(style);
     
       // Handle the message tab switching with animation
       const messageTabs = document.querySelectorAll('.message-tab');
@@ -1277,16 +1300,6 @@
         });
       });
       
-      // Add floating animation for icons
-      const style = document.createElement('style');
-      style.textContent = `
-        @keyframes float {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-5px); }
-        }
-      `;
-      document.head.appendChild(style);
-      
       // Animation for the heart
       const heartIcon = document.querySelector('.heart-icon');
       const heartGlow = document.querySelector('.heart-glow');
@@ -1303,4 +1316,5 @@
     });
   </script>
   </body>
+</html> 
 </html> 

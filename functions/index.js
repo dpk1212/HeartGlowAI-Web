@@ -36,6 +36,9 @@ exports.generateMessageV2 = functions.https.onRequest(async (req, res) => {
         recipient = {},
         tone = {},
         variation = null,
+        configurator = {},
+        context = "",
+        format = "",
         apiKey = null // Check if API key is provided in request
       } = req.body;
       
@@ -80,23 +83,68 @@ exports.generateMessageV2 = functions.https.onRequest(async (req, res) => {
         return;
       }
 
+      // Extract configurator data for more specific formatting
+      const messageCategory = configurator.category || context || "";
+      const messageFormat = configurator.format || format || "";
+      const messageIntention = configurator.intention || intent.type || "";
+
       // Construct an enhanced system prompt based on user's requirements
-      const systemPrompt = `You are an expert in heartfelt communication and relationship dynamics. 
-Your task is to create an emotionally resonant, sincere message that reflects the specific relationship context provided. 
+      const systemPrompt = `You are an expert in interpersonal communication with deep understanding of human psychology, emotional intelligence, and relationship dynamics. Your expertise spans both personal and professional contexts.
 
-Follow these key principles:
-1. Be authentic and use natural language - write as one human to another
-2. Avoid sounding like AI, cliches, or corporate language
-3. Match the appropriate emotional tone for the relationship and intent
-4. Include specific, personalized details from the context provided
-5. Keep the message concise but emotionally impactful
+Your task is to craft a highly personalized, emotionally resonant message that feels genuinely human and specific to the relationship context provided. The message will reflect both the sender's intention and the unique aspects of their relationship with the recipient.
 
-You MUST structure your response exactly as follows:
-1. First, provide ONLY the message text with no introduction, labels or additional text
-2. Then, on a new line after your message, write "INSIGHTS:" (all caps)
-3. Provide 2-3 brief insights about why the message works, each on a new line prefixed with "-"
+CORE PRINCIPLES:
+- Write with authenticity as if one real person is communicating to another
+- Avoid all AI-like language patterns, clichés, corporate speak, and generic platitudes
+- Incorporate specific details from the relationship context to make it feel genuinely personalized
+- Match the emotional tone and language style to the relationship dynamic and intention
+- Capture the nuance of human communication with appropriate warmth, vulnerability, or formality
+- Structure messages with natural pacing and paragraph breaks appropriate to the format
 
-Do not add any additional commentary, explanations, or suggestions - strictly follow the format above.`;
+FORMAT GUIDELINES:
+${messageFormat === 'text' ? `For TEXT MESSAGES:
+- Keep it concise (1-3 paragraphs maximum)
+- Use casual language with natural punctuation, and occasional emoji if appropriate
+- Structure it like a real text message with appropriate brevity
+- Don't use subject lines or formal salutations` : ''}
+
+${messageFormat === 'email' ? `For EMAILS:
+- Include an appropriate subject line as the first line prefixed with "Subject: "
+- Use proper email structure with greeting, body paragraphs, and sign-off
+- Maintain appropriate professional tone while still being personable
+- Format with clear paragraph breaks and appropriate length (3-5 paragraphs)` : ''}
+
+${messageFormat === 'card' ? `For GREETING CARDS:
+- Create a message suitable for a handwritten card or note
+- Include a warm greeting and heartfelt closing
+- Make it personal, intimate, and visually imagine it written by hand
+- Ensure it has the appropriate emotional depth for a physical card` : ''}
+
+${messageFormat === 'conversation' ? `For CONVERSATION STARTERS:
+- Provide 3-5 specific conversation topics or questions
+- Make each topic genuine, thoughtful, and likely to spark meaningful dialogue
+- Format as a numbered list with brief context for why each topic would resonate
+- Avoid basic small talk in favor of topics that build genuine connection` : ''}
+
+CONTEXTUAL ADJUSTMENTS:
+${messageCategory === 'professional' ? `For PROFESSIONAL CONTEXT:
+- Balance warmth with appropriate professional boundaries
+- Use language suitable for workplace or business relationships
+- Acknowledge professional accomplishments or challenges specifically
+- Maintain clarity and purpose without sacrificing interpersonal connection` : ''}
+
+${messageCategory === 'personal' ? `For PERSONAL CONTEXT:
+- Emphasize emotional connection and shared experiences
+- Use warmer, more intimate language appropriate for close relationships
+- Include references to personal memories, inside jokes, or shared values
+- Allow for greater vulnerability and emotional expressiveness` : ''}
+
+RESPONSE FORMAT:
+1. Generate ONLY the message with no introduction, explanation, or meta-commentary
+2. After the message, on a new line, include "INSIGHTS:" followed by 3 brief insights (each on a new line starting with "-") that explain why the message is effective
+
+${messageIntention ? `SPECIFIC INTENTION GUIDANCE:
+The core intention is "${messageIntention}". Ensure the message authentically expresses this intention through both explicit statements and implicit tone.` : ''}`;
       
       // Build detailed user prompt
       let userPrompt = `Create a heartfelt message with the following parameters:
@@ -112,14 +160,47 @@ ${recipient.relationshipFocus ? `- Focus of Relationship: ${recipient.relationsh
 ${recipient.yearsKnown ? `- Known for: ${recipient.yearsKnown} years` : ''}
 ${recipient.communicationStyle ? `- Communication Style: ${recipient.communicationStyle}` : ''}
 ${recipient.personalNotes ? `- Personal Context: ${recipient.personalNotes}` : ''}
+${recipient.birthday ? `- Birthday: ${recipient.birthday}` : ''}
+${recipient.interests ? `- Interests: ${recipient.interests}` : ''}
 
 TONE: ${tone.type || 'Warm'} (Intensity: ${tone.intensity || 'Medium'})
 
+FORMAT: ${messageFormat || 'General message'}
+CONTEXT: ${messageCategory || 'General context'}
+
 ${variation ? `VARIATION: Please make this message ${variation} than a standard message.` : ''}`;
+
+      // Add contextual examples based on format and category to guide the model
+      if (messageFormat === 'text' && messageCategory === 'professional') {
+        userPrompt += `
+EXAMPLE TEXT IN PROFESSIONAL CONTEXT:
+Hi Sarah, I wanted to reach out and say how impressed I was with your presentation yesterday. The way you handled those tough questions showed real expertise. Looking forward to collaborating more on this project!`;
+      } else if (messageFormat === 'email' && messageCategory === 'professional') {
+        userPrompt += `
+EXAMPLE EMAIL IN PROFESSIONAL CONTEXT:
+Subject: Your Outstanding Leadership on the Wilson Project
+
+Hi Michael,
+
+I just wanted to take a moment to recognize the exceptional work you've been doing leading the Wilson account. Your strategic approach to their concerns last week not only resolved the immediate issues but strengthened our relationship with their team.
+
+What particularly stood out was how you prioritized understanding their underlying needs rather than just addressing surface-level requests. This kind of insight is exactly what makes you such a valuable part of our team.
+
+Looking forward to our continued collaboration.
+
+Best regards,
+[Name]`;
+      } else if (messageFormat === 'text' && messageCategory === 'personal') {
+        userPrompt += `
+EXAMPLE TEXT IN PERSONAL CONTEXT:
+Hey Chris, been thinking about our conversation last week. Your advice about taking more time for myself really hit home. I finally tried that hiking trail you mentioned and you were right - the view was exactly what I needed. Thank you for always knowing just what to say. Coffee soon?`;
+      }
 
       // Use GPT-4 for best quality
       const model = "gpt-4-turbo-preview";
       const maxTokens = 1000;
+      
+      console.log('Sending request with format:', messageFormat, 'and context:', messageCategory);
       
       // Call OpenAI API
       const response = await axios({
@@ -165,7 +246,10 @@ ${variation ? `VARIATION: Please make this message ${variation} than a standard 
       res.status(200).json({ 
         message: message,
         insights: insights,
-        usage: response.data.usage
+        usage: response.data.usage,
+        format: messageFormat,
+        context: messageCategory,
+        intention: messageIntention
       });
       
     } catch (error) {

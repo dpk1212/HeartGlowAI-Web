@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     
     <!-- Preload key assets -->
-    <link rel="preload" href="css/styles.css" as="style">
+    <link rel="preload" href="css/main.css" as="style">
     <link rel="preload" href="js/message-result-new.js" as="script">
     
     <!-- Google Fonts -->
@@ -27,9 +27,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/main.css">
 </head>
-<body>
+<body class="message-result-page">
     <div id="app">
         <!-- App Header -->
         <header class="app-header">
@@ -61,13 +61,13 @@
                             <i class="fas fa-sign-out-alt"></i>
                             Sign Out
                         </button>
-        </div>
-        </div>
+                    </div>
+                </div>
             </div>
         </header>
         
         <!-- Main Content -->
-        <main class="main-content message-result-page">
+        <main class="main-content">
             <!-- Progress Steps -->
             <div class="progress-container">
                 <div class="progress-steps">
@@ -121,20 +121,22 @@
             </div>
             
             <!-- Message Display -->
-            <div id="messageState" class="message-container message-container-premium" style="position: relative; background: linear-gradient(135deg, rgba(20, 15, 35, 0.03) 0%, rgba(20, 15, 35, 0.01) 100%); border-radius: 18px; padding: 1rem; box-shadow: 0 5px 30px rgba(0, 0, 0, 0.08); overflow: hidden;">
-                <div id="loadingState" class="loading-message">
-                    <div class="heart-animation">
-                        <div class="heart-shape"></div>
-                        <div class="heart-glow"></div>
+            <div id="messageState" class="message-card message-card--premium">
+                <div class="message-card__premium-background"></div>
+                
+                <div id="loadingState" class="message-card__loading">
+                    <div class="message-card__loading-heart">
+                        <div class="message-card__loading-heart-shape"></div>
+                        <div class="message-card__loading-heart-glow"></div>
                     </div>
-                    <p>Creating your message with heart<span class="typing-dots"><span></span><span></span><span></span></span></p>
+                    <p class="message-card__loading-text">Creating your message with heart<span class="message-card__loading-dots"><span></span><span></span><span></span></span></p>
                 </div>
                 
-                <div id="errorState" class="error-message" style="display: none;">
-                    <div class="error-icon">
+                <div id="errorState" class="message-card__error" style="display: none;">
+                    <div class="message-card__error-icon">
                         <i class="fas fa-exclamation-circle"></i>
                     </div>
-                    <div class="error-content">
+                    <div class="message-card__error-content">
                         <h3>Something went wrong</h3>
                         <p id="errorText">We couldn't create your message at this time.</p>
                         <button id="retryButton" class="secondary-button">
@@ -143,50 +145,60 @@
                     </div>
                 </div>
                 
-                <div id="messageContent" class="message-content" style="background: linear-gradient(135deg, #f9f9ff 0%, #ffffff 50%, #f5f5ff 100%); border-radius: 16px; padding: 3rem; margin: 1.5rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 10px 20px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(138, 87, 222, 0.1); position: relative; overflow: hidden; transform: translateY(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
-                    <div class="message-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid rgba(138, 87, 222, 0.15); position: relative;">
-                        <div class="message-badge" style="display: flex; align-items: center; color: #8a57de; font-size: 0.95rem; font-weight: 600; background: rgba(138, 87, 222, 0.08); padding: 0.7rem 1.2rem; border-radius: 30px; border: 1px solid rgba(138, 87, 222, 0.15); transition: all 0.3s ease; position: relative; overflow: hidden;">
-                            <i class="fas fa-heart" style="margin-right: 0.7rem; font-size: 1rem; color: #9c6aff;"></i> <span>Created with HeartGlowAI</span>
+                <div id="messageContent" class="message-card__content message-card__content--premium">
+                    <div class="message-card__header">
+                        <div class="message-card__badge">
+                            <i class="message-card__badge-icon fas fa-heart"></i>
+                            <span>Created with HeartGlowAI</span>
                         </div>
-                        <div class="message-date" id="messageDate" style="color: #777; font-size: 0.95rem; display: flex; align-items: center; background: rgba(0, 0, 0, 0.03); padding: 0.7rem 1.2rem; border-radius: 30px; border: 1px solid rgba(0, 0, 0, 0.05); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);">
-                            <i class="fas fa-calendar-alt" style="margin-right: 0.5rem; font-size: 0.95rem; color: #555;"></i> <span id="currentDate"></span>
+                        <div class="message-card__date">
+                            <i class="message-card__date-icon fas fa-calendar-alt"></i>
+                            <span id="currentDate"></span>
                         </div>
                     </div>
                     
-                    <div class="message-body" style="position: relative; padding: 0.5rem 0.5rem 2.5rem; z-index: 1;">
-                        <p id="content" class="message-text" style="color: #333; font-size: 1.25rem; line-height: 1.9; font-weight: 400; white-space: pre-wrap; position: relative; letter-spacing: 0.01rem; text-shadow: 0 1px 1px rgba(255, 255, 255, 1); padding: 0 0.5rem;"></p>
+                    <div class="message-card__body">
+                        <p id="content" class="message-card__text"></p>
                     </div>
                     
-                    <div class="message-actions" style="display: flex; justify-content: flex-end; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid rgba(138, 87, 222, 0.15); gap: 1rem; position: relative; z-index: 2;">
-                        <button id="editBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
-                            <i class="fas fa-edit" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Edit</span>
+                    <div class="message-card__actions">
+                        <button id="editBtn" class="message-card__action">
+                            <i class="message-card__action-icon fas fa-edit"></i>
+                            <span>Edit</span>
                         </button>
-                        <button id="copyBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
-                            <i class="fas fa-copy" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Copy</span>
+                        <button id="copyBtn" class="message-card__action">
+                            <i class="message-card__action-icon fas fa-copy"></i>
+                            <span>Copy</span>
                         </button>
-                        <button id="shareBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
-                            <i class="fas fa-share-alt" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Share</span>
+                        <button id="shareBtn" class="message-card__action">
+                            <i class="message-card__action-icon fas fa-share-alt"></i>
+                            <span>Share</span>
                         </button>
-                        <button id="regenerateBtn" class="text-button" style="background: rgba(255, 255, 255, 0.8); border: 1px solid rgba(138, 87, 222, 0.15); color: #555; font-size: 0.95rem; font-weight: 600; padding: 0.8rem 1.5rem; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; position: relative; overflow: hidden; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.04);">
-                            <i class="fas fa-sync" style="margin-right: 0.7rem; font-size: 1.1rem;"></i> <span>Regenerate</span>
+                        <button id="regenerateBtn" class="message-card__action">
+                            <i class="message-card__action-icon fas fa-sync"></i>
+                            <span>Regenerate</span>
                         </button>
                     </div>
                 </div>
                 
                 <!-- Enhanced Message Insights Section -->
-                <div id="messageInsights" class="message-insights" style="background: rgba(30, 25, 40, 0.9); border-radius: 16px; padding: 2rem; margin: 1.5rem; margin-top: 0; border: 1px solid rgba(138, 87, 222, 0.25); box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1); position: relative; overflow: hidden; backdrop-filter: blur(10px);">
-                    <h3 style="font-size: 1.3rem; font-weight: 700; color: #ffffff; margin-bottom: 1.5rem; display: flex; align-items: center; position: relative; z-index: 1; padding-bottom: 1rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1);"><i class="fas fa-lightbulb" style="color: #ffd54f; margin-right: 0.8rem; font-size: 1.4rem; text-shadow: 0 0 10px rgba(255, 213, 79, 0.4);"></i> Why This Message Works</h3>
-                    <div id="insightsContent" style="color: rgba(255, 255, 255, 0.95); font-size: 1rem; line-height: 1.7; position: relative; z-index: 1;"></div>
-                    <div class="insights-actions" style="display: flex; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-                        <button class="insights-action-button" id="copyInsightsBtn" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.9); font-size: 0.9rem; font-weight: 500; padding: 0.5rem 1rem; border-radius: 8px; cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center;">
-                            <i class="fas fa-copy" style="margin-right: 0.5rem; font-size: 1rem;"></i> Copy Insights
+                <div id="messageInsights" class="message-insights">
+                    <h3 class="message-insights__title">
+                        <i class="message-insights__icon fas fa-lightbulb"></i>
+                        Why This Message Works
+                    </h3>
+                    <div id="insightsContent" class="message-insights__content"></div>
+                    <div class="message-insights__actions">
+                        <button id="copyInsightsBtn" class="message-insights__action">
+                            <i class="message-insights__action-icon fas fa-copy"></i>
+                            Copy Insights
                         </button>
                     </div>
                 </div>
                 
-                <div id="editContainer" class="edit-container" style="display: none;">
-                    <textarea id="editMessage" class="edit-textarea"></textarea>
-                    <div class="edit-actions">
+                <div id="editContainer" class="message-card__edit">
+                    <textarea id="editMessage" class="message-card__edit-textarea"></textarea>
+                    <div class="message-card__edit-actions">
                         <button id="cancelEditBtn" class="secondary-button">Cancel</button>
                         <button id="saveEditBtn" class="primary-button">Save Changes</button>
                     </div>
@@ -248,109 +260,40 @@
                                 <i class="fas fa-envelope"></i>
                                 <span>Email</span>
                             </button>
-                            <button class="share-option" data-platform="whatsapp">
-                                <i class="fab fa-whatsapp"></i>
-                                <span>WhatsApp</span>
-                            </button>
-                            <button class="share-option" data-platform="messenger">
-                                <i class="fab fa-facebook-messenger"></i>
-                                <span>Messenger</span>
-                            </button>
                             <button class="share-option" data-platform="sms">
-                                <i class="fas fa-sms"></i>
-                                <span>SMS</span>
+                                <i class="fas fa-comment"></i>
+                                <span>Text Message</span>
                             </button>
                             <button class="share-option" data-platform="copy">
                                 <i class="fas fa-link"></i>
                                 <span>Copy Link</span>
                             </button>
+                            <button class="share-option" data-platform="whatsapp">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>WhatsApp</span>
+                            </button>
                         </div>
                         
                         <div class="share-link-container">
-                            <input id="shareLink" type="text" class="share-link-input" readonly>
-                            <button id="copyLinkBtn" class="copy-link-btn">
+                            <input type="text" id="shareLink" class="share-link" readonly>
+                            <button id="copyShareLink" class="copy-button">
                                 <i class="fas fa-copy"></i>
                             </button>
                         </div>
+                        
+                        <div id="shareSuccess" class="share-success" style="display: none;">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Link copied to clipboard!</span>
+                        </div>
                     </div>
                 </div>
-        </div>
-
-            <!-- Navigation Buttons -->
-            <div class="navigation-buttons">
-                <button id="backBtn" class="secondary-button">
-                    <i class="fas fa-arrow-left"></i> Back
-                </button>
-                <button id="dashboardBtn" class="primary-button">
-                    <i class="fas fa-home"></i> Back to Dashboard
-                </button>
             </div>
         </main>
     </div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-container">
-            <div class="heart-animation">
-                <div class="heart-shape"></div>
-                <div class="heart-glow"></div>
-            </div>
-            <div id="loadingContext" class="loading-context">Creating your message with heart...</div>
-        </div>
-    </div>
-
-    <!-- Alert Container -->
-    <div id="alertContainer" class="alert-container"></div>
     
-    <!-- Firebase Config -->
-    <script>
-        // Initialize Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
-            authDomain: "heartglowai.firebaseapp.com",
-            projectId: "heartglowai",
-            storageBucket: "heartglowai.firebasestorage.app",
-            messagingSenderId: "196565711798",
-            appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
-            measurementId: "G-KJMPL1DNPY"
-        };
-        
-        // Initialize Firebase
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-    </script>
-    
-    <!-- JavaScript -->
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/auth.js"></script>
     <script src="js/message-result-new.js"></script>
-
-    <!-- Add debug console before the closing body tag -->
-    <div id="debug-console" style="display: none; position: fixed; bottom: 0; left: 0; right: 0; max-height: 300px; overflow: auto; background: #000; color: #0f0; font-family: monospace; padding: 10px; font-size: 12px; z-index: 999999;">
-        <button onclick="document.getElementById('debug-console').style.display='none'" style="position: absolute; top: 5px; right: 5px; background: #333; color: #fff; border: none; padding: 3px 8px; cursor: pointer;">Close</button>
-        <h3>Debug Console</h3>
-        <div id="debug-output"></div>
-    </div>
-
-    <!-- Remove duplicate buttons -->
-    <script>
-        // Remove any existing Back/Dashboard buttons that might be hardcoded
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get all buttons with text containing "Back" or "Dashboard" that are not in navigation-buttons
-            const standaloneButtons = Array.from(document.querySelectorAll('button')).filter(button => {
-                const buttonText = button.textContent.toLowerCase();
-                const isInNavigationContainer = button.closest('.navigation-buttons') !== null;
-                return (buttonText.includes('back') || buttonText.includes('dashboard')) && !isInNavigationContainer;
-            });
-            
-            // Remove these standalone buttons
-            standaloneButtons.forEach(button => {
-                if (button.parentNode) {
-                    button.parentNode.removeChild(button);
-                }
-            });
-            
-            // We don't want to hide regenerate options here since it's managed by the message-result-new.js
-        });
-    </script>
 </body>
 </html> 

@@ -27,7 +27,7 @@
 @import url('pages/intention.css');
 @import url('pages/recipient.css');
 @import url('pages/tone.css');
-/* @import url('pages/message.css'); */
+@import url('pages/message.css');
 
 /*
  * Legacy styles - To be phased out as we migrate to the component-based architecture

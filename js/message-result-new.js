@@ -1,9 +1,8 @@
 /**
- * Message Result Page - Simplified Version
- * This handles displaying the generated message based on the user's selections
+ * HeartGlowAI - Message Result Page
+ * This file handles all the functionality for the message result page
  */
 
-// Global variables
 let recipientData = null;
 let intentData = null;
 let toneData = null;

@@ -566,15 +566,15 @@
     .message-cards {
       display: flex;
       flex-direction: column;
-      gap: var(--spacing-lg);
-      max-width: 600px;
+      gap: var(--spacing-xl);
+      max-width: 800px;
       width: 100%;
       margin: var(--spacing-xl) auto;
     }
     
     .message-card {
       position: relative;
-      height: 100px;
+      height: 90px;
       width: 100%;
       cursor: pointer;
     }
@@ -602,35 +602,40 @@
       display: flex;
       background: rgba(45, 42, 59, 0.7);
       border: 1px solid rgba(138, 87, 222, 0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     }
     
     .message-card__front {
       display: flex;
       align-items: center;
       padding: 0 var(--spacing-lg);
-      gap: var(--spacing-md);
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.9), rgba(45, 42, 59, 0.7));
+      gap: var(--spacing-lg);
+      background: rgba(45, 42, 59, 0.7);
+      border-left: 3px solid transparent;
     }
     
     .message-card__front:hover {
-      border-color: rgba(138, 87, 222, 0.3);
-      box-shadow: 0 0 20px rgba(138, 87, 222, 0.15);
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
+      background: rgba(45, 42, 59, 0.85);
+      border-left: 3px solid var(--primary);
     }
     
     .message-card__back {
-      background: linear-gradient(135deg, rgba(45, 42, 59, 0.95), rgba(45, 42, 59, 0.8));
-      padding: var(--spacing-lg);
+      background: rgba(45, 42, 59, 0.85);
+      padding: var(--spacing-xl);
       display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      gap: var(--spacing-md);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
       transform: rotateY(180deg);
     }
     
     .message-card__icon {
       flex-shrink: 0;
       font-size: 1.5em;
+      width: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .message-card__title {
@@ -640,52 +645,20 @@
       text-align: left;
       font-size: var(--font-size-md);
       line-height: 1.4;
+      flex-grow: 1;
     }
     
     .message-card__preview {
-      color: var(--text-muted);
-      font-size: var(--font-size-sm);
+      color: var(--text-light);
+      font-size: var(--font-size-md);
       line-height: 1.6;
       margin: 0;
-      flex-grow: 1;
-      background: rgba(26, 22, 37, 0.4);
-      padding: var(--spacing-md);
-      border-radius: var(--border-radius-md);
-      border-left: 3px solid rgba(138, 87, 222, 0.4);
       font-style: italic;
-      position: relative;
-    }
-    
-    .message-card__preview::before {
-      content: '"';
-      position: absolute;
-      top: 0;
-      left: 8px;
-      font-size: 1.5rem;
-      color: rgba(138, 87, 222, 0.4);
-      line-height: 1;
+      text-align: center;
     }
     
     .message-card__button {
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: var(--spacing-sm) var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      border: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-sm);
-    }
-    
-    .message-card__button:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--shadow-md);
+      display: none; /* Hide by default as per the screenshot */
     }
     
     .message-card__insights {
@@ -703,24 +676,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-    
-    .message-card__insights:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      right: 100%;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(26, 22, 37, 0.95);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border-radius: var(--border-radius-sm);
-      font-size: var(--font-size-sm);
-      white-space: nowrap;
-      margin-right: var(--spacing-sm);
-      z-index: 1;
-      box-shadow: var(--shadow-md);
-      max-width: 250px;
-      text-align: left;
     }
     
     /* Desktop hover flip */

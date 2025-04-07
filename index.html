@@ -648,6 +648,22 @@
       line-height: 1.6;
       margin: 0;
       flex-grow: 1;
+      background: rgba(26, 22, 37, 0.4);
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-md);
+      border-left: 3px solid rgba(138, 87, 222, 0.4);
+      font-style: italic;
+      position: relative;
+    }
+    
+    .message-card__preview::before {
+      content: '"';
+      position: absolute;
+      top: 0;
+      left: 8px;
+      font-size: 1.5rem;
+      color: rgba(138, 87, 222, 0.4);
+      line-height: 1;
     }
     
     .message-card__button {
@@ -664,6 +680,7 @@
       align-items: center;
       justify-content: center;
       gap: var(--spacing-sm);
+      margin-top: var(--spacing-sm);
     }
     
     .message-card__button:hover {
@@ -679,6 +696,13 @@
       font-size: 1.2em;
       cursor: help;
       z-index: 2;
+      background: rgba(26, 22, 37, 0.6);
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     .message-card__insights:hover::after {
@@ -695,6 +719,15 @@
       margin-right: var(--spacing-sm);
       z-index: 1;
       box-shadow: var(--shadow-md);
+      max-width: 250px;
+      text-align: left;
+    }
+    
+    /* Desktop hover flip */
+    @media (hover: hover) and (pointer: fine) {
+      .message-card:hover .message-card__inner {
+        transform: rotateY(180deg);
+      }
     }
     
     /* CTA Section */
@@ -906,32 +939,38 @@
   <!-- JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // Check if device supports hover
+      const supportsHover = window.matchMedia('(hover: hover)').matches;
+      
       // Card flip functionality
       const messageCards = document.querySelectorAll('.message-card');
       
       messageCards.forEach(card => {
         const cardFront = card.querySelector('.message-card__front');
-        
-        cardFront.addEventListener('click', function() {
-          card.classList.add('flipped');
-        });
-        
-        // Make the back side clickable to flip back
         const cardBack = card.querySelector('.message-card__back');
-        cardBack.addEventListener('click', function(e) {
-          // Don't flip if clicking on button
-          if (!e.target.classList.contains('message-card__button')) {
-            card.classList.remove('flipped');
-          }
-        });
         
-        // Prevent buttons from triggering flip
+        // Only add click event on mobile devices
+        if (!supportsHover) {
+          cardFront.addEventListener('click', function() {
+            card.classList.add('flipped');
+          });
+          
+          // Make the back side clickable to flip back on mobile
+          cardBack.addEventListener('click', function(e) {
+            // Don't flip if clicking on button
+            if (!e.target.classList.contains('message-card__button')) {
+              card.classList.remove('flipped');
+            }
+          });
+        }
+        
+        // Prevent buttons from triggering flip and navigate to login
         const button = card.querySelector('.message-card__button');
         if (button) {
           button.addEventListener('click', function(e) {
             e.stopPropagation();
-            console.log('Button clicked, navigating to message editor');
-            window.location.href = "message-editor.html";
+            console.log('Button clicked, navigating to login page');
+            window.location.href = "login.html";
           });
         }
       });

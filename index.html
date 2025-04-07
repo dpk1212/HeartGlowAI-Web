@@ -63,6 +63,20 @@
       --font-size-display: 3.5rem;
     }
     
+    /* Fix for white rectangles appearing over cards */
+    .message-card:before,
+    .message-card:after,
+    .message-card > *:not(.message-card__inner),
+    .message-card__inner:before,
+    .message-card__inner:after,
+    .message-card__inner > *:not(.message-card__front):not(.message-card__back),
+    .message-card__front > *:not(.message-card__icon):not(.message-card__content),
+    .message-card__back > *:not(.message-card__preview):not(.message-card__button):not(.message-card__insights) {
+      display: none !important;
+      opacity: 0 !important;
+      visibility: hidden !important;
+    }
+    
     /* Base styles with improved gradients */
     body {
       background-color: var(--background-darker);
@@ -589,9 +603,10 @@
       cursor: pointer;
       perspective: 1000px;
       margin-bottom: var(--spacing-md);
-      background: transparent;
+      background: transparent !important;
       border-radius: var(--border-radius-lg);
       overflow: hidden;
+      box-shadow: none !important;
     }
     
     .message-card__inner {
@@ -602,6 +617,7 @@
       transition: transform 0.6s;
       transform-style: preserve-3d;
       border-radius: var(--border-radius-lg);
+      box-shadow: none !important;
     }
     
     .message-card.flipped .message-card__inner {
@@ -863,6 +879,21 @@
         height: 180px;
       }
     }
+
+    .hero article.message-card,
+    .hero .message-card {
+      border: none !important;
+      box-shadow: none !important;
+      background: transparent !important;
+    }
+
+    .message-card a,
+    .message-card div[style*="background"],
+    .message-card div[class*="white"],
+    .message-card div[class*="overlay"],
+    .message-card div:not([class]) {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -1052,6 +1083,25 @@
   <!-- JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      // CRITICAL FIX: Remove any extra elements that might be causing white rectangles
+      document.querySelectorAll('.message-card').forEach(card => {
+        // Keep only the card inner structure and remove everything else
+        const innerElement = card.querySelector('.message-card__inner');
+        if (innerElement) {
+          // Remove all direct children except the inner card element
+          Array.from(card.children).forEach(child => {
+            if (child !== innerElement) {
+              child.remove();
+            }
+          });
+          
+          // Remove any absolute positioned elements that might be overlays
+          card.querySelectorAll('div:not(.message-card__inner):not(.message-card__front):not(.message-card__back):not(.message-card__content):not(.message-card__icon):not(.message-card__insights)').forEach(el => {
+            el.remove();
+          });
+        }
+      });
+      
       // Check if device supports hover
       const supportsHover = window.matchMedia('(hover: hover)').matches;
       

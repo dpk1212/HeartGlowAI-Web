@@ -5591,3 +5591,100 @@ textarea.input-field:focus, #connection-notes:focus {
   display: block;
 }
 
+/* Profile Menu Dropdown */
+.profile-menu-container {
+  position: relative;
+  display: inline-block; 
+}
+
+.home-page__user-avatar {
+  /* Ensure existing avatar styles are sufficient */
+  cursor: pointer;
+}
+
+.profile-dropdown {
+  display: none; /* Hidden by default */
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px); 
+  background-color: var(--card-bg, #2d2a3b); 
+  min-width: 160px;
+  box-shadow: var(--shadow-md, 0 4px 16px rgba(0,0,0,0.2));
+  border-radius: var(--border-radius-md, 12px);
+  padding: var(--spacing-sm, 0.5rem) 0;
+  z-index: 100;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.profile-dropdown.active {
+  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex; /* Use flex for better icon alignment */
+  align-items: center;
+  width: 100%;
+  padding: var(--spacing-sm, 0.5rem) var(--spacing-md, 1rem);
+  background: none;
+  border: none;
+  color: var(--text-light, #fff);
+  text-align: left;
+  font-size: var(--font-size-sm, 0.875rem);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item i {
+  margin-right: var(--spacing-md, 1rem); /* Increased space */
+  width: 1.2em; 
+  text-align: center;
+  color: var(--text-muted, rgba(255,255,255,0.7));
+}
+
+.dropdown-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.logout-button:hover {
+  color: var(--secondary, #ff7eb6); /* Use secondary color */
+}
+
+.logout-button:hover i {
+  color: var(--secondary, #ff7eb6);
+}
+
+/* Ensure auth-logo styles are globally available */
+.auth-logo__icon {
+  margin-right: var(--spacing-xs, 0.25rem);
+  font-size: 1.5em; 
+  color: #ff3b69;
+}
+
+.auth-logo__text {
+  font-weight: 700;
+  font-size: var(--font-size-lg, 1.125rem); 
+  color: var(--text-light);
+}
+
+.auth-logo__highlight {
+  background: linear-gradient(90deg, var(--primary, #8a57de), var(--primary-light, #b296ff));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Adjustments if home-page logo needs slightly different size/spacing */
+.home-page__header .home-page__logo .auth-logo__icon {
+  /* font-size: 1.3em; */ /* Example adjustment */
+}
+.home-page__header .home-page__logo .auth-logo__text {
+  /* font-size: var(--font-size-md); */ /* Example adjustment */
+}
+

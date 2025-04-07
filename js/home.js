@@ -42,13 +42,30 @@ document.addEventListener('DOMContentLoaded', function() {
           const displayName = user.displayName || user.email || 'User';
           userInitialsElement.textContent = getInitials(displayName);
           
-          // Add click handler for user menu
-          userInitialsElement.addEventListener('click', function() {
-            // You could show a dropdown menu here
-            console.log('User avatar clicked');
-            // Temporary alert
-            showAlert(`Logged in as ${displayName}`, 'info');
+          // Add click handler for user menu - REPLACE EXISTING HANDLER
+          userInitialsElement.addEventListener('click', function(event) {
+            event.stopPropagation(); // Prevent click from closing immediately
+            const profileDropdown = document.getElementById('profileDropdown');
+            if (profileDropdown) {
+              profileDropdown.classList.toggle('active');
+            }
           });
+          
+          // Add logout button handler
+          const logoutButton = document.getElementById('logout-button');
+          if (logoutButton) {
+            logoutButton.addEventListener('click', function() {
+              showLoading('Logging out...'); // Assuming showLoading exists
+              firebase.auth().signOut().then(() => {
+                console.log('User signed out successfully.');
+                window.location.href = 'login.html'; 
+              }).catch((error) => {
+                console.error('Sign out error:', error);
+                hideLoading(); // Assuming hideLoading exists
+                showAlert('Error signing out. Please try again.', 'error'); // Assuming showAlert exists
+              });
+            });
+          }
         }
         
         initializeHomePage();
@@ -66,6 +83,21 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 });
+
+// --- Additions for Dropdown --- 
+// Close dropdown if clicking outside (add near other event listeners or at end of file)
+document.addEventListener('click', function(event) {
+  const userAvatar = document.getElementById('userInitials');
+  const profileDropdown = document.getElementById('profileDropdown');
+  
+  if (profileDropdown && profileDropdown.classList.contains('active')) {
+    if (!userAvatar.contains(event.target) && !profileDropdown.contains(event.target)) {
+      profileDropdown.classList.remove('active');
+    }
+  }
+});
+
+// --- End of Dropdown Additions ---
 
 // Initialize the home page functionality
 function initializeHomePage() {

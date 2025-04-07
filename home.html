@@ -6,6 +6,9 @@
   <title>HeartGlowAI - Dashboard</title>
   <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
   
+  <!-- Favicon -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  
   <!-- Resource Hints -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
@@ -73,11 +76,19 @@
     <!-- Header -->
     <header class="home-page__header">
       <a href="#" class="home-page__logo">
-        <div class="home-page__logo-text">HeartGlow<span class="home-page__logo-highlight">AI</span></div>
+        <span class="auth-logo__icon">❤️</span>
+        <span class="auth-logo__text">Heart<span class="auth-logo__highlight">GlowAI</span></span>
       </a>
       <div class="home-page__user-menu">
-        <div class="home-page__user-avatar" id="userInitials">
-          <!-- Will be populated with user initials via JS -->
+        <div class="profile-menu-container">
+          <div class="home-page__user-avatar" id="userInitials" tabindex="0">
+            <!-- Will be populated with user initials via JS -->
+          </div>
+          <div class="profile-dropdown" id="profileDropdown">
+            <button id="logout-button" class="dropdown-item logout-button">
+              <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
+          </div>
         </div>
       </div>
     </header>

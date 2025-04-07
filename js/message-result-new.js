@@ -1594,7 +1594,7 @@ function displayGeneratedMessage(message) {
     // Store the message for copy functionality
     generatedMessage = message;
     
-    // Format and enhance the message with personalization
+    // Format and enhance the message with personalization and styling
     let formattedMessage = message;
     
     // Replace placeholders with recipient name if needed
@@ -1608,10 +1608,51 @@ function displayGeneratedMessage(message) {
             .replace(/\[YOUR NAME\]/g, '[Your Name]');
     }
     
-    // Display the message content with proper inline styles for better visibility
+    // Extract and format closing/signature separately for better styling
+    let mainContent = formattedMessage;
+    let closingText = '';
+    let signatureText = '';
+    
+    // Look for common signature patterns like "Love," or "Sincerely," followed by name
+    const signaturePattern = /\n\s*(Love|Sincerely|Best|Regards|Yours|Warmly|Warmest regards|Best wishes|Cheers|Affectionately|Fondly),?\s*\n\s*(.+?)$/i;
+    const signatureMatch = formattedMessage.match(signaturePattern);
+    
+    if (signatureMatch) {
+        // Split content into main body and signature parts
+        const splitIndex = formattedMessage.lastIndexOf(signatureMatch[0]);
+        mainContent = formattedMessage.substring(0, splitIndex);
+        closingText = signatureMatch[1];
+        signatureText = signatureMatch[2];
+    }
+    
+    // Create formatted HTML with appropriate styling elements
     const contentElement = document.getElementById('content');
     if (contentElement) {
-        contentElement.textContent = formattedMessage;
+        // Clear previous content
+        contentElement.innerHTML = '';
+        
+        // Add main message content
+        const mainTextElement = document.createElement('div');
+        mainTextElement.textContent = mainContent;
+        contentElement.appendChild(mainTextElement);
+        
+        // Add closing text if available
+        if (closingText) {
+            const closingElement = document.createElement('div');
+            closingElement.className = 'message-closing';
+            closingElement.textContent = closingText + ',';
+            contentElement.appendChild(closingElement);
+            
+            // Add signature if available
+            if (signatureText) {
+                const signatureElement = document.createElement('div');
+                signatureElement.className = 'message-signature';
+                signatureElement.textContent = signatureText;
+                contentElement.appendChild(signatureElement);
+            }
+        }
+        
+        // Make the content visible
         contentElement.style.display = 'block';
         contentElement.style.visibility = 'visible';
         contentElement.style.whiteSpace = 'pre-wrap';

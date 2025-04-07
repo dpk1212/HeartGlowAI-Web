@@ -1,9 +1,23 @@
+# HeartGlowAI-Web .gitignore
+
+# Deployment directories
+deploy-direct/
+gh-pages-deploy/
+original-site/
+tmp/
+tmp-deploy/
+web-clone/
+
 # Node modules
 node_modules/
 
-# Build files
-dist/
-build/
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache files
+.cache/
+.parcel-cache/
 
 # Environment variables
 .env
@@ -11,6 +25,16 @@ build/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build files
+dist/
+build/
 
 # Logs
 logs
@@ -20,8 +44,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Editor directories and files
-.idea/
-.vscode/
 *.suo
 *.ntvs*
 *.njsproj
@@ -29,13 +51,10 @@ yarn-error.log*
 *.sw?
 
 # OS generated files
-.DS_Store
-.DS_Store?
 ._*
 .Spotlight-V100
 .Trashes
 ehthumbs.db
-Thumbs.db
 
 # Firebase
 .firebase/

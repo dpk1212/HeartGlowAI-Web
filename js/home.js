@@ -4434,7 +4434,7 @@ function initializeMessageConfigurator() {
   const formatOptions = document.querySelector('.format-options');
   const intentionSections = document.querySelectorAll('.intention-options');
   const startCraftingBtn = document.getElementById('start-crafting-btn');
-  // const backButton = document.getElementById('configurator-back-btn'); // Optional back button
+  const backButton = document.getElementById('configurator-back-btn');
 
   if (!configurator || !categoryToggle || !formatOptions || intentionSections.length === 0 || !startCraftingBtn) {
     console.error('Message Configurator elements not found!');
@@ -4468,17 +4468,15 @@ function initializeMessageConfigurator() {
 
   // --- Format Selection Logic ---
   formatOptions.addEventListener('click', (event) => {
-    if (event.target.classList.contains('format-btn')) {
-      // ... (logic to set selected button and update selectedConfig.format) ...
+    const formatBtn = event.target.closest('.format-btn');
+    if (formatBtn) {
       formatOptions.querySelectorAll('.format-btn').forEach(btn => btn.classList.remove('selected'));
-      event.target.classList.add('selected');
-      selectedConfig.format = event.target.dataset.format;
+      formatBtn.classList.add('selected');
+      selectedConfig.format = formatBtn.dataset.format;
       console.log('Format selected:', selectedConfig.format);
 
       // Check if ready to flip
       checkAndFlipConfigurator();
-      // Intention button state doesn't depend on format directly here
-      // updateStartCraftingButtonState(); 
     }
   });
 
@@ -4487,7 +4485,6 @@ function initializeMessageConfigurator() {
     section.addEventListener('click', (event) => {
       const card = event.target.closest('.intention-card');
       if (card) {
-         // ... (logic to set selected card and update selectedConfig.intention) ...
          intentionSections.forEach(s => s.querySelectorAll('.intention-card').forEach(c => c.classList.remove('selected')));
          card.classList.add('selected');
          selectedConfig.intention = card.dataset.intention;
@@ -4541,7 +4538,6 @@ function initializeMessageConfigurator() {
 
   // --- Start Crafting Button Action ---
   startCraftingBtn.addEventListener('click', () => {
-    // ... (Existing logic to save selections and navigate) ...
     if (!startCraftingBtn.disabled) {
       console.log('Starting message crafting with config:', selectedConfig);
       try {
@@ -4557,15 +4553,20 @@ function initializeMessageConfigurator() {
     }
   });
 
-  // Optional: Add logic for a back button if implemented
-  // if (backButton) {
-  //   backButton.addEventListener('click', () => {
-  //     configurator.classList.remove('flipped');
-  //     resetFormatSelection();
-  //     resetIntentionSelection();
-  //     updateStartCraftingButtonState();
-  //   });
-  // }
+  // Back button functionality
+  if (backButton) {
+    backButton.addEventListener('click', () => {
+      console.log('Back button clicked, flipping to front');
+      configurator.classList.remove('flipped');
+      // Don't reset format selection to preserve the user's choices
+      // resetFormatSelection();
+      // We can reset intention selection since it's not visible on front face
+      resetIntentionSelection();
+      updateStartCraftingButtonState();
+    });
+  } else {
+    console.warn('Back button not found');
+  }
 
   // Initial setup
   showCorrectIntentions();

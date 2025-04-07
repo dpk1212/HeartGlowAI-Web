@@ -1765,4 +1765,46 @@ function initializeRegenerateOptions() {
 document.addEventListener('DOMContentLoaded', function() {
     // This will be called after initPage() runs
     setTimeout(initializeRegenerateOptions, 1000);
+});
+
+/**
+ * Apply premium styling to message content
+ */
+function applyPremiumStyling() {
+    // Add premium class to message container if not already present
+    const messageContainer = document.getElementById('messageState');
+    if (messageContainer && !messageContainer.classList.contains('message-container-premium')) {
+        messageContainer.classList.add('message-container-premium');
+    }
+    
+    // Add premium background styling to the page
+    const resultPage = document.querySelector('.message-result-page');
+    if (resultPage && !resultPage.classList.contains('premium-background')) {
+        resultPage.classList.add('premium-background');
+    }
+    
+    // Add animations to message content when it appears
+    const messageContent = document.getElementById('messageContent');
+    if (messageContent) {
+        // Add delayed entrance animation class
+        setTimeout(() => {
+            messageContent.classList.add('premium-animation');
+        }, 100);
+    }
+    
+    // Add animation to insights content
+    const insightsContent = document.getElementById('insightsContent');
+    if (insightsContent) {
+        insightsContent.classList.add('animated-insights');
+    }
+    
+    console.log('Premium styling applied to message');
+}
+
+// Initialize the page - main entry point
+document.addEventListener('DOMContentLoaded', function() {
+    initPage();
+    
+    // Apply premium styling after a short delay to ensure elements are loaded
+    setTimeout(applyPremiumStyling, 300);
 }); 

@@ -44,43 +44,47 @@
     
     .hero-heart-container {
       position: relative;
-      width: 100px;
-      height: 100px;
-      margin: 0 auto 20px;
+      width: 120px;
+      height: 120px;
+      margin: 0 auto 30px;
       display: flex;
       align-items: center;
       justify-content: center;
+      border-radius: 50%;
+      background: rgba(138, 87, 222, 0.05);
+      box-shadow: 0 0 40px rgba(138, 87, 222, 0.15);
     }
     
     .hero-heart-icon {
-      font-size: 45px;
+      font-size: 50px;
       color: #8a57de;
-      filter: drop-shadow(0 0 15px rgba(138, 87, 222, 0.6));
-      animation: heartbeat 1.5s ease infinite;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 8px rgba(138, 87, 222, 0.4));
+      animation: gentlePulse 3s ease-in-out infinite;
     }
     
-    @keyframes heartbeat {
+    @keyframes gentlePulse {
       0% { transform: scale(1); }
-      15% { transform: scale(1.1); }
-      30% { transform: scale(1); }
-      45% { transform: scale(1.1); }
-      60% { transform: scale(1); }
+      50% { transform: scale(1.08); }
       100% { transform: scale(1); }
     }
     
     .hero-glow {
       position: absolute;
-      width: 80px;
-      height: 80px;
+      width: 100px;
+      height: 100px;
       border-radius: 50%;
-      background: radial-gradient(circle, rgba(138, 87, 222, 0.4) 0%, rgba(138, 87, 222, 0) 70%);
+      background: radial-gradient(circle, rgba(138, 87, 222, 0.3) 0%, rgba(138, 87, 222, 0) 70%);
       animation: pulse 3s infinite;
       z-index: -1;
     }
     
     @keyframes pulse {
-      0%, 100% { transform: scale(1); opacity: 0.4; }
-      50% { transform: scale(1.2); opacity: 0.7; }
+      0%, 100% { transform: scale(1); opacity: 0.3; }
+      50% { transform: scale(1.25); opacity: 0.6; }
     }
     
     .landing-page__title-main {
@@ -103,6 +107,7 @@
       overflow: hidden;
       border-radius: 10px 10px 0 0;
       margin-bottom: 1.5rem;
+      background: rgba(26, 22, 37, 0.8); /* Fallback background instead of SVG */
     }
     
     .type-image {
@@ -144,45 +149,11 @@
     }
     
     .cta-particles {
-      position: absolute;
-      width: 150%;
-      height: 150%;
-      top: -25%;
-      left: -25%;
-      pointer-events: none;
+      display: none; /* Hide this completely */
     }
     
     .cta-particle {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background: linear-gradient(45deg, #8a57de, #b296ff);
-      border-radius: 50%;
-      opacity: 0.6;
-    }
-    
-    .cta-particle:nth-child(1) {
-      top: 20%;
-      left: 10%;
-      animation: float 4s infinite;
-    }
-    
-    .cta-particle:nth-child(2) {
-      top: 30%;
-      right: 15%;
-      animation: float 6s infinite 1s;
-    }
-    
-    .cta-particle:nth-child(3) {
-      bottom: 20%;
-      left: 20%;
-      animation: float 5s infinite 0.5s;
-    }
-    
-    .cta-particle:nth-child(4) {
-      bottom: 30%;
-      right: 30%;
-      animation: float 7s infinite 2s;
+      display: none; /* Hide this completely */
     }
     
     @keyframes float {
@@ -308,7 +279,7 @@
             <div class="landing-page__type-card">
               <div class="type-image-container">
                 <div class="type-image-overlay"></div>
-                <img src="images/romantic-background.jpg" alt="Romantic connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M30 30 Q 50 15, 70 30 Q 50 45, 30 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <img src="images/romantic-background.jpg" alt="Romantic connection" class="type-image">
                 <div class="premium-badge">
                   <i class="fas fa-sparkles"></i> Premium
                 </div>
@@ -339,7 +310,7 @@
             <div class="landing-page__type-card">
               <div class="type-image-container">
                 <div class="type-image-overlay"></div>
-                <img src="images/professional-background.jpg" alt="Professional connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M20 30 L 30 20 L 70 20 L 80 30 L 70 40 L 30 40 L 20 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <img src="images/professional-background.jpg" alt="Professional connection" class="type-image">
                 <div class="premium-badge">
                   <i class="fas fa-sparkles"></i> Premium
                 </div>
@@ -370,7 +341,7 @@
             <div class="landing-page__type-card">
               <div class="type-image-container">
                 <div class="type-image-overlay"></div>
-                <img src="images/personal-background.jpg" alt="Personal connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M25 30 C 35 20, 65 20, 75 30 C 65 40, 35 40, 25 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <img src="images/personal-background.jpg" alt="Personal connection" class="type-image">
                 <div class="premium-badge">
                   <i class="fas fa-sparkles"></i> Premium
                 </div>
@@ -400,12 +371,6 @@
         
         <!-- CTA section - enhanced -->
         <div class="landing-page__cta">
-          <div class="cta-particles">
-            <div class="cta-particle"></div>
-            <div class="cta-particle"></div>
-            <div class="cta-particle"></div>
-            <div class="cta-particle"></div>
-          </div>
           <button id="login-register-btn" class="landing-page__button" onclick="window.location.href='login.html'">
             Start Creating <span class="landing-page__button-icon">→</span>
           </button>

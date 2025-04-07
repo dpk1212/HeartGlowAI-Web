@@ -1546,8 +1546,7 @@ function callGenerationAPI(prompt, authToken = null) {
 }
 
 /**
- * Display message insights in the UI
- * Only called after insights are actually generated
+ * Display message insights in the UI with proper formatting
  */
 function displayMessageInsights(insights) {
     try {
@@ -1569,11 +1568,24 @@ function displayMessageInsights(insights) {
         // Clear any existing content
         insightsContent.innerHTML = '';
         
-        // Add each insight as a separate item
+        // Add each insight as a separate item with proper styling
         insights.forEach((insight) => {
+            // Clean up the insight text
+            let insightText = insight;
+            
+            // Check if insight already has strong/bold markup
+            if (!insightText.includes('<strong>') && !insightText.includes('<b>')) {
+                // Try to identify if there's a title pattern like "Personal Connection:" 
+                const titleMatch = insightText.match(/^([^:]+):(.*)/);
+                if (titleMatch) {
+                    const [, title, content] = titleMatch;
+                    insightText = `<strong>${title}:</strong>${content}`;
+                }
+            }
+            
             const insightElement = document.createElement('div');
             insightElement.className = 'insight-item';
-            insightElement.innerHTML = insight;
+            insightElement.innerHTML = insightText;
             insightsContent.appendChild(insightElement);
         });
         
@@ -1582,18 +1594,34 @@ function displayMessageInsights(insights) {
             insightsContainer.style.display = 'block';
             
             // Add a "Copy Insights" button if it doesn't exist
-            if (!document.getElementById('copyInsightsBtn')) {
-                const actionsDiv = document.createElement('div');
-                actionsDiv.className = 'message-insights__actions';
-                actionsDiv.style.marginTop = '1.5rem';
-                actionsDiv.style.textAlign = 'right';
+            if (!document.querySelector('.insights-footer')) {
+                const footerDiv = document.createElement('div');
+                footerDiv.className = 'insights-footer';
+                footerDiv.style.padding = '1rem 2rem 1.5rem';
+                footerDiv.style.textAlign = 'right';
+                footerDiv.style.borderTop = '1px solid rgba(255, 255, 255, 0.1)';
                 
                 const copyBtn = document.createElement('button');
                 copyBtn.id = 'copyInsightsBtn';
-                copyBtn.className = 'secondary-button';
+                copyBtn.className = 'insights-copy-btn';
                 copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy Insights';
-                copyBtn.style.padding = '0.5rem 1rem';
-                copyBtn.style.fontSize = '0.9rem';
+                copyBtn.style.background = 'rgba(255, 255, 255, 0.1)';
+                copyBtn.style.color = '#e0e0e0';
+                copyBtn.style.border = 'none';
+                copyBtn.style.padding = '0.6rem 1.2rem';
+                copyBtn.style.borderRadius = '8px';
+                copyBtn.style.cursor = 'pointer';
+                copyBtn.style.transition = 'all 0.2s ease';
+                
+                copyBtn.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.2)';
+                    this.style.transform = 'translateY(-2px)';
+                });
+                
+                copyBtn.addEventListener('mouseleave', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.1)';
+                    this.style.transform = 'translateY(0)';
+                });
                 
                 // Add event listener for copying
                 copyBtn.addEventListener('click', function() {
@@ -1609,8 +1637,8 @@ function displayMessageInsights(insights) {
                         });
                 });
                 
-                actionsDiv.appendChild(copyBtn);
-                insightsContainer.appendChild(actionsDiv);
+                footerDiv.appendChild(copyBtn);
+                insightsContainer.appendChild(footerDiv);
             }
         } else {
             insightsContainer.style.display = 'none';
@@ -1636,25 +1664,67 @@ function displayGeneratedMessage(message) {
         // Store the message for later reference
         generatedMessage = message;
         
-        // Show message content
+        // Show message content container
         const messageContent = document.getElementById('messageContent');
         if (messageContent) {
             messageContent.style.display = 'block';
         }
         
-        // Update message content with drop cap on first letter
+        // Format and display the message text with proper styling
         const contentElement = document.getElementById('content');
         if (contentElement && message) {
-            // Format message with proper styling
+            // Clean the message text
+            message = message.trim();
+            
             if (message.length > 0) {
-                const firstLetter = message.charAt(0);
-                const restOfMessage = message.substring(1);
+                // Process paragraphs while preserving the drop cap on first letter
+                const paragraphs = message.split(/\n\s*\n/);
+                let formattedMessage = '';
                 
-                // Apply drop cap to first letter
-                contentElement.innerHTML = `<span class="drop-cap">${firstLetter}</span>${restOfMessage}`;
+                if (paragraphs.length > 0) {
+                    // Handle first paragraph with drop cap
+                    const firstParagraph = paragraphs[0];
+                    const firstLetter = firstParagraph.charAt(0);
+                    const restOfFirstParagraph = firstParagraph.substring(1);
+                    
+                    formattedMessage = `<span class="drop-cap">${firstLetter}</span>${restOfFirstParagraph}`;
+                    
+                    // Add remaining paragraphs with proper spacing
+                    if (paragraphs.length > 1) {
+                        for (let i = 1; i < paragraphs.length; i++) {
+                            if (paragraphs[i].trim()) {
+                                formattedMessage += `\n\n${paragraphs[i]}`;
+                            }
+                        }
+                    }
+                    
+                    // Set the content
+                    contentElement.innerHTML = formattedMessage;
+                    
+                    // Ensure paragraphs are properly displayed
+                    const text = contentElement.textContent;
+                    const formattedHtml = text
+                        .replace(/\n\n/g, '</p><p style="margin-top: 1.5rem;">')
+                        .replace(/\n/g, '<br>');
+                    
+                    // Insert the first letter as a drop cap
+                    const finalHtml = '<p>' + formattedHtml + '</p>';
+                    const withDropCap = finalHtml.replace('<p>', `<p><span class="drop-cap">${firstLetter}</span>${restOfFirstParagraph.substring(0, 1) === ' ' ? '' : ' '}`);
+                    
+                    contentElement.innerHTML = withDropCap;
+                } else {
+                    // Fallback for single line messages
+                    const firstLetter = message.charAt(0);
+                    const restOfMessage = message.substring(1);
+                    contentElement.innerHTML = `<p><span class="drop-cap">${firstLetter}</span>${restOfMessage}</p>`;
+                }
             } else {
-                contentElement.textContent = message;
+                contentElement.innerHTML = '<p>No message content available.</p>';
             }
+            
+            // Add spacing to ensure the text is readable
+            contentElement.style.whiteSpace = 'pre-wrap';
+            contentElement.style.wordBreak = 'break-word';
         }
         
         // Update current date
@@ -1669,7 +1739,7 @@ function displayGeneratedMessage(message) {
         }
     } catch (error) {
         console.error('Error displaying message:', error);
-        showError('Failed to display message. Please try again.');
+        showError('Failed to display message properly. Please try again.');
     }
 }
 

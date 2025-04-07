@@ -59,43 +59,215 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/main.css">
     <style>
-        /* Core styles for message display - professional and polished */
+        /* Professional Premium Message Display */
+        body {
+            background: linear-gradient(135deg, #0a0824 0%, #1a1942 100%);
+            min-height: 100vh;
+            overflow-y: auto;
+        }
+        
+        .premium-background {
+            background-attachment: fixed;
+            min-height: 100vh;
+            overflow-y: auto;
+            padding-bottom: 5rem;
+        }
+        
+        /* Executive-level message card */
         .message-card--premium {
-            background: linear-gradient(145deg, #ffffff 0%, #f9faff 100%);
-            border-radius: 24px;
-            box-shadow: 0 15px 40px rgba(72, 45, 130, 0.15);
-            transition: all 0.3s ease;
+            background: transparent;
+            border-radius: 20px;
             overflow: hidden;
             position: relative;
             z-index: 1;
             max-width: 800px;
             margin: 0 auto;
-            transform: none;
-            animation: none;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
         }
         
+        /* Professional white message container */
         .message-card__content--premium {
-            padding: 3rem;
+            padding: 0;
             position: relative;
-            background: #ffffff;
-            border-radius: 18px;
-            box-shadow: 0 5px 20px rgba(138, 87, 222, 0.1);
+            overflow: hidden;
+            border-radius: 16px;
         }
         
-        /* Professional loading animation */
+        /* Premium message container with visual hierarchy */
+        .message-container {
+            background: #ffffff;
+            padding: 0;
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        /* Premium header with branding */
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 2rem;
+            background: rgba(250, 250, 255, 0.9);
+            border-bottom: 1px solid rgba(138, 87, 222, 0.15);
+        }
+        
+        .message-header__badge {
+            display: flex;
+            align-items: center;
+            color: #8a57de;
+            font-size: 0.9rem;
+            font-weight: 600;
+            gap: 8px;
+        }
+        
+        .message-header__date {
+            color: #777;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Sophisticated message body */
+        .message-body {
+            padding: 2.5rem 3rem 3rem;
+            background: #ffffff;
+            position: relative;
+        }
+        
+        /* Professional message text styling */
+        .message-card__text {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #333;
+            white-space: pre-wrap;
+            letter-spacing: 0.01em;
+            margin: 0;
+        }
+        
+        /* Premium drop cap */
+        .drop-cap {
+            float: left;
+            font-size: 3.8em;
+            line-height: 0.8;
+            font-weight: 600;
+            color: #8a57de;
+            margin-right: 0.15em;
+            margin-top: 0.05em;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* Professional message footer with actions */
+        .message-footer {
+            display: flex;
+            justify-content: center;
+            gap: 1.2rem;
+            padding: 1.8rem 2rem;
+            background: #f8f8ff;
+            border-top: 1px solid rgba(138, 87, 222, 0.1);
+        }
+        
+        .message-action {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 12px;
+            background: transparent;
+            border: none;
+            color: #555;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .message-action:hover {
+            background: rgba(138, 87, 222, 0.08);
+            color: #8a57de;
+            transform: translateY(-2px);
+        }
+        
+        .message-action-icon {
+            font-size: 1.1rem;
+            color: #8a57de;
+        }
+        
+        /* Elegant insights card */
+        .message-insights {
+            margin-top: 2rem;
+            background: #2a2a40;
+            border-radius: 16px;
+            padding: 0;
+            overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .insights-header {
+            background: #23233a;
+            padding: 1.5rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+        
+        .insights-header__title {
+            color: #ffffff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .insights-header__icon {
+            color: #ffd54f;
+            font-size: 1.3rem;
+        }
+        
+        .insights-content {
+            padding: 1.5rem 2rem 2rem;
+        }
+        
+        .insight-item {
+            padding: 1.2rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            padding-left: 1.5rem;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+        
+        .insight-item:last-child {
+            border-bottom: none;
+        }
+        
+        .insight-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 1.6rem;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #a57dff;
+        }
+        
+        /* Executive-level loading state */
         .loading-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 4rem 2rem;
+            padding: 5rem 2rem;
             text-align: center;
             min-height: 400px;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 16px;
         }
         
         .pulse-heart {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             position: relative;
             margin-bottom: 2rem;
         }
@@ -138,7 +310,7 @@
         .loading-text {
             font-size: 1.1rem;
             font-weight: 500;
-            color: #555;
+            color: #333;
             margin-top: 1rem;
         }
         
@@ -171,138 +343,126 @@
             }
         }
         
-        /* Professional message display */
-        .message-card__body {
-            position: relative;
-            z-index: 1;
-            padding: 0.5rem 0;
-        }
-        
-        .message-card__text {
-            font-size: 1.2rem;
-            line-height: 1.8;
-            color: #333;
-            font-weight: 400;
-            white-space: pre-wrap;
-            letter-spacing: 0.01em;
-        }
-        
-        .drop-cap {
-            font-size: 3.5em;
-            font-weight: 600;
-            color: #8a57de;
-            float: left;
-            line-height: 0.8;
-            margin-right: 0.15em;
-            margin-top: 0.1em;
-        }
-        
-        /* Refined message header */
-        .message-card__header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1.2rem;
-            border-bottom: 1px solid rgba(138, 87, 222, 0.15);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .message-card__badge {
-            display: flex;
-            align-items: center;
-            color: #8a57de;
-            font-size: 0.9rem;
-            font-weight: 600;
-            background: rgba(138, 87, 222, 0.05);
-            padding: 0.6rem 1rem;
-            border-radius: 30px;
-            border: 1px solid rgba(138, 87, 222, 0.15);
-        }
-        
-        .message-card__date {
-            color: #777;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.03);
-            padding: 0.6rem 1rem;
-            border-radius: 30px;
-        }
-        
-        /* Professional action buttons */
-        .message-card__actions {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 2.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(138, 87, 222, 0.1);
-        }
-        
-        .message-card__action {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 12px;
-            background: transparent;
-            border: none;
-            color: #555;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-        
-        .message-card__action:hover {
-            background: rgba(138, 87, 222, 0.05);
-            color: #8a57de;
-            transform: translateY(-2px);
-        }
-        
-        .message-card__action-icon {
-            font-size: 1.2rem;
-            color: #8a57de;
-        }
-        
-        /* Professionally styled insights section - initially hidden */
-        .message-insights {
-            margin-top: 2rem;
-            background: #fafafe;
+        /* Recipient info styling */
+        .recipient-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
-            padding: 1.8rem;
-            border-left: 4px solid #8a57de;
-            box-shadow: 0 10px 25px rgba(138, 87, 222, 0.08);
-            display: none; /* Initially hidden until generated */
-        }
-        
-        .message-insights__title {
-            color: #8a57de;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
+            gap: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            max-width: 800px;
+            margin: 1.5rem auto;
+            backdrop-filter: blur(10px);
         }
         
-        .insight-item {
-            padding: 1rem 0;
-            border-bottom: 1px solid rgba(138, 87, 222, 0.1);
-            position: relative;
-            padding-left: 1.5rem;
-        }
-        
-        .insight-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 1.6rem;
-            width: 6px;
-            height: 6px;
+        .recipient-avatar {
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
+            background: linear-gradient(135deg, #7645c5 0%, #a57dff 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.4);
+        }
+        
+        .recipient-info {
+            flex: 1;
+        }
+        
+        .recipient-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.3rem;
+        }
+        
+        .recipient-relation {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        /* Page header styling */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #a57dff 0%, #7645c5 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        .page-description {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Professional error state */
+        .error-state {
+            display: none;
+            padding: 3rem 2rem;
+            text-align: center;
+            background: #ffffff;
+            border-radius: 16px;
+        }
+        
+        .error-icon {
+            font-size: 3rem;
+            color: #f44336;
+            margin-bottom: 1.5rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 0.8rem;
+            color: #333;
+        }
+        
+        .error-message {
+            color: #777;
+            margin-bottom: 2rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .retry-button {
             background: #8a57de;
+            color: white;
+            border: none;
+            padding: 0.9rem 1.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25);
+        }
+        
+        .retry-button:hover {
+            background: #7645c5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(138, 87, 222, 0.35);
         }
         
         /* Toast notifications */
@@ -319,7 +479,7 @@
         .toast {
             padding: 12px 20px;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             animation: toastIn 0.3s ease forwards;
             display: flex;
             align-items: center;
@@ -341,56 +501,72 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Error state styling */
-        .error-state {
-            display: none;
-            padding: 2rem;
-            text-align: center;
+        /* Navigation buttons */
+        .page-navigation {
+            display: flex;
+            justify-content: space-between;
+            margin: 2rem auto;
+            max-width: 800px;
         }
         
-        .error-icon {
-            font-size: 3rem;
-            color: #f44336;
-            margin-bottom: 1rem;
-        }
-        
-        .error-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            color: #333;
-        }
-        
-        .error-message {
-            color: #777;
-            margin-bottom: 1.5rem;
-        }
-        
-        .retry-button {
-            background: #8a57de;
-            color: white;
-            border: none;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
+        .secondary-button, .primary-button {
+            padding: 0.8rem 1.8rem;
+            border-radius: 12px;
             font-weight: 600;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             gap: 0.5rem;
             transition: all 0.2s ease;
         }
         
-        .retry-button:hover {
-            background: #7645c5;
-            transform: translateY(-2px);
+        .primary-button {
+            background: #8a57de;
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(138, 87, 222, 0.25);
         }
         
-        /* Premium background */
-        .premium-background {
-            background: linear-gradient(135deg, #0c0a30 0%, #1e1c3b 100%);
-            min-height: 100vh;
-            overflow-y: auto;
-            padding-bottom: 5rem;
+        .secondary-button {
+            background: rgba(138, 87, 222, 0.08);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .primary-button:hover {
+            background: #7645c5;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(138, 87, 222, 0.35);
+        }
+        
+        .secondary-button:hover {
+            background: rgba(138, 87, 222, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(138, 87, 222, 0.1);
+        }
+        
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .message-body {
+                padding: 2rem;
+            }
+            
+            .message-header {
+                padding: 1.2rem 1.5rem;
+            }
+            
+            .message-footer {
+                padding: 1.5rem;
+                flex-wrap: wrap;
+            }
+            
+            .message-action {
+                padding: 0.6rem 1rem;
+            }
+            
+            .page-title {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
@@ -528,49 +704,51 @@
                 
                 <!-- Message Content - Empty until generated -->
                 <div id="messageContent" class="message-card__content message-card__content--premium" style="display: none;">
-                    <div class="message-card__header">
-                        <div class="message-card__badge">
-                            <i class="message-card__badge-icon fas fa-heart"></i>
-                            <span>Created with HeartGlowAI</span>
+                    <div class="message-container">
+                        <div class="message-header">
+                            <div class="message-header__badge">
+                                <i class="fas fa-heart"></i>
+                                <span>Created with HeartGlowAI</span>
+                            </div>
+                            <div class="message-header__date">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span id="currentDate"></span>
+                            </div>
                         </div>
-                        <div class="message-card__date">
-                            <i class="message-card__date-icon fas fa-calendar-alt"></i>
-                            <span id="currentDate"></span>
+                        
+                        <div class="message-body">
+                            <!-- Content will be inserted here dynamically -->
+                            <p id="content" class="message-card__text"></p>
                         </div>
-                    </div>
-                    
-                    <div class="message-card__body">
-                        <!-- Content will be inserted here dynamically -->
-                        <p id="content" class="message-card__text"></p>
-                    </div>
-                    
-                    <div class="message-card__actions">
-                        <button id="editBtn" class="message-card__action">
-                            <i class="message-card__action-icon fas fa-edit"></i>
-                            <span>Edit</span>
-                        </button>
-                        <button id="copyBtn" class="message-card__action">
-                            <i class="message-card__action-icon fas fa-copy"></i>
-                            <span>Copy</span>
-                        </button>
-                        <button id="shareBtn" class="message-card__action">
-                            <i class="message-card__action-icon fas fa-share-alt"></i>
-                            <span>Share</span>
-                        </button>
-                        <button id="regenerateBtn" class="message-card__action">
-                            <i class="message-card__action-icon fas fa-sync"></i>
-                            <span>Regenerate</span>
-                        </button>
+                        
+                        <div class="message-footer">
+                            <button id="editBtn" class="message-action">
+                                <i class="message-action-icon fas fa-edit"></i>
+                                <span>Edit</span>
+                            </button>
+                            <button id="copyBtn" class="message-action">
+                                <i class="message-action-icon fas fa-copy"></i>
+                                <span>Copy</span>
+                            </button>
+                            <button id="shareBtn" class="message-action">
+                                <i class="message-action-icon fas fa-share-alt"></i>
+                                <span>Share</span>
+                            </button>
+                            <button id="regenerateBtn" class="message-action">
+                                <i class="message-action-icon fas fa-sync"></i>
+                                <span>Regenerate</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- Message Insights - Initially hidden until generated -->
                 <div id="messageInsights" class="message-insights" style="display: none;">
-                    <h3 class="message-insights__title">
-                        <i class="fas fa-lightbulb"></i>
-                        Why This Message Works
-                    </h3>
-                    <div id="insightsContent" class="message-insights__content">
+                    <div class="insights-header">
+                        <i class="insights-header__icon fas fa-lightbulb"></i>
+                        <h3 class="insights-header__title">Why This Message Works</h3>
+                    </div>
+                    <div class="insights-content" id="insightsContent">
                         <!-- Insights will be dynamically generated -->
                     </div>
                 </div>

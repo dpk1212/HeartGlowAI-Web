@@ -8,27 +8,41 @@
   display: block;
   position: relative;
   width: 100%;
-  max-width: 800px;
-  min-height: 550px;
-  margin: 2rem auto;
+  max-width: 950px;
+  min-height: 600px;
+  margin: 3rem auto 4rem;
   border-radius: 24px;
-  overflow: hidden;
+  overflow: visible;
   perspective: 2000px;
   z-index: 2;
-  background: linear-gradient(to bottom, rgba(33, 30, 46, 0.8), rgba(25, 22, 36, 0.9));
+  background: linear-gradient(to bottom, rgba(33, 30, 46, 0.8), rgba(25, 22, 36, 0.95));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   box-shadow: 
     0 15px 35px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(138, 87, 222, 0.1);
-  border: 1px solid rgba(138, 87, 222, 0.15);
+    0 0 0 1px rgba(138, 87, 222, 0.15);
+  border: 1px solid rgba(138, 87, 222, 0.2);
   animation: gentleGlow 4s infinite alternate;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 @keyframes gentleGlow {
-  0% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(138, 87, 222, 0.1); }
-  100% { box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), 0 0 15px rgba(138, 87, 222, 0.2); }
+  0% { box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(138, 87, 222, 0.15); }
+  100% { box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35), 0 0 25px rgba(138, 87, 222, 0.3); }
+}
+
+/* Add decorative corner elements */
+.message-configurator::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(138, 87, 222, 0.2) 0%, transparent 70%);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0.8;
 }
 
 /* Add a subtle background pattern/texture */
@@ -39,9 +53,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
   opacity: 0.4;
   z-index: -1;
+  border-radius: 24px;
 }
 
 /* Inner container for 3D flip animation */
@@ -66,7 +81,7 @@
   height: 100%;
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
-  padding: 2.5rem 3rem;
+  padding: 3rem 3.5rem;
   display: flex;
   flex-direction: column;
 }
@@ -83,7 +98,7 @@
 
 /* Title styling */
 .message-configurator__title {
-  font-size: 1.75rem;
+  font-size: 2rem;
   font-weight: 700;
   margin-bottom: 2.5rem;
   text-align: center;
@@ -94,6 +109,7 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: 'Playfair Display', serif;
 }
 
 /* Step styling */
@@ -102,13 +118,14 @@
 }
 
 .message-configurator__step-title {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
   padding-bottom: 0.75rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   position: relative;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
+  text-align: left;
 }
 
 .message-configurator__step-title::before {
@@ -116,7 +133,7 @@
   position: absolute;
   bottom: -1px;
   left: 0;
-  width: 50px;
+  width: 60px;
   height: 3px;
   background: linear-gradient(90deg, rgba(138, 87, 222, 0.8), rgba(138, 87, 222, 0.2));
   border-radius: 3px;
@@ -126,8 +143,8 @@
 .message-configurator__category-toggle {
   display: flex;
   justify-content: center;
-  max-width: 400px;
-  margin: 0 auto 1.5rem;
+  max-width: 450px;
+  margin: 0 auto 2rem;
   background: rgba(20, 18, 29, 0.5);
   border-radius: 50px;
   padding: 0.25rem;
@@ -138,7 +155,7 @@
 
 .message-configurator__toggle-btn {
   flex: 1;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.75rem;
   border-radius: 50px;
   font-weight: 600;
   cursor: pointer;
@@ -146,11 +163,12 @@
   background: transparent;
   border: none;
   color: rgba(255, 255, 255, 0.6);
-  font-size: 1rem;
+  font-size: 1.05rem;
   letter-spacing: 0.3px;
   position: relative;
   z-index: 1;
   text-align: center;
+  white-space: nowrap;
 }
 
 .message-configurator__toggle-btn--active {
@@ -175,7 +193,6 @@
   z-index: 0;
 }
 
-/* Remove the problematic selectors and use a simpler, more direct approach */
 /* The JS will add this class to the category toggle when the personal button is active */
 .message-configurator__category-toggle.personal-active::after {
   left: calc(50% + 0.25rem);
@@ -184,10 +201,10 @@
 /* Format options styling */
 .message-configurator__format-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
   justify-content: center;
-  margin: 1rem auto;
+  margin: 1.5rem auto;
   max-width: 650px;
 }
 
@@ -198,13 +215,13 @@
   justify-content: center;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
   cursor: pointer;
   transition: all 0.3s ease;
   color: #fff;
-  font-size: 0.95rem;
-  height: 130px;
+  font-size: 1rem;
+  height: 140px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -213,19 +230,19 @@
   background: rgba(138, 87, 222, 0.15);
   border-color: rgba(138, 87, 222, 0.3);
   transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .message-configurator__format-btn--selected {
   background: rgba(138, 87, 222, 0.25);
   border-color: rgba(138, 87, 222, 0.5);
-  box-shadow: 0 6px 18px rgba(138, 87, 222, 0.2);
+  box-shadow: 0 8px 25px rgba(138, 87, 222, 0.2);
 }
 
 /* Format button icon and label styling */
 .message-configurator__format-icon {
-  font-size: 1.7rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.9rem;
+  margin-bottom: 0.75rem;
   transition: transform 0.3s ease;
 }
 
@@ -251,9 +268,9 @@
 /* Intention options styling */
 .message-configurator__intention-options {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  max-height: 350px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.25rem;
+  max-height: 370px;
   overflow-y: auto;
   padding-right: 0.5rem;
   padding-bottom: 0.5rem;
@@ -264,33 +281,34 @@
 .message-configurator__intention-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1.25rem;
+  border-radius: 14px;
+  padding: 1.25rem 1.5rem;
   cursor: pointer;
   transition: all 0.25s ease;
   text-align: left;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: #fff;
-  line-height: 1.4;
+  line-height: 1.5;
   position: relative;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   display: flex;
   align-items: center;
+  min-height: 75px;
 }
 
 .message-configurator__intention-card:hover {
   background: rgba(138, 87, 222, 0.15);
   border-color: rgba(138, 87, 222, 0.3);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Improve the selected state for intention cards */
 .message-configurator__intention-card--selected {
   background: rgba(138, 87, 222, 0.25) !important;
   border-color: rgba(138, 87, 222, 0.6) !important;
-  box-shadow: 0 6px 20px rgba(138, 87, 222, 0.3) !important;
+  box-shadow: 0 8px 25px rgba(138, 87, 222, 0.3) !important;
   transform: translateY(-3px);
   position: relative;
 }
@@ -335,11 +353,12 @@
 
 /* Intention card icon and text styling */
 .message-configurator__intention-icon {
-  font-size: 1.3rem;
-  margin-right: 0.75rem;
+  font-size: 1.4rem;
+  margin-right: 0.9rem;
   display: inline-block;
   vertical-align: middle;
   transition: transform 0.3s ease;
+  flex-shrink: 0;
 }
 
 .message-configurator__intention-text {
@@ -347,6 +366,7 @@
   line-height: 1.5;
   display: inline-block;
   vertical-align: middle;
+  flex: 1;
 }
 
 .message-configurator__intention-card:hover .message-configurator__intention-icon {
@@ -368,7 +388,7 @@
 
 /* Start crafting button */
 .message-configurator__start-button {
-  padding: 1rem 2.5rem;
+  padding: 1rem 2.75rem;
   border-radius: 50px;
   font-weight: 600;
   font-size: 1.1rem;
@@ -447,37 +467,65 @@
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .message-configurator {
-    min-height: 550px;
+    min-height: 600px;
+    margin: 2rem auto 3rem;
+    max-width: 90%;
   }
 
   .message-configurator__front,
   .message-configurator__back {
-    padding: 2rem;
+    padding: 2.5rem 2rem;
+  }
+
+  .message-configurator__title {
+    font-size: 1.75rem;
+    margin-bottom: 2rem;
   }
 
   .message-configurator__format-options {
     grid-template-columns: repeat(2, 1fr);
-    gap: 1rem;
+    gap: 1.25rem;
+  }
+
+  .message-configurator__step-title {
+    font-size: 1.15rem;
   }
 }
 
 @media (max-width: 600px) {
-  .message-configurator__intention-options {
-    grid-template-columns: 1fr; 
-  }
-  
   .message-configurator {
-    min-height: 600px;
+    min-height: 650px;
+    margin: 1.5rem auto 2.5rem;
+    max-width: 95%;
   }
   
   .message-configurator__front,
   .message-configurator__back {
-    padding: 1.5rem;
+    padding: 1.75rem 1.5rem;
   }
   
   .message-configurator__title {
     font-size: 1.5rem;
     margin-bottom: 1.75rem;
+  }
+
+  .message-configurator__step-title {
+    font-size: 1.1rem;
+    margin-bottom: 1.25rem;
+  }
+  
+  .message-configurator__intention-options {
+    grid-template-columns: 1fr;
+    max-height: 350px;
+  }
+
+  .message-configurator__intention-card {
+    padding: 1.1rem;
+  }
+  
+  .message-configurator__toggle-btn {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
   }
   
   .message-configurator__action {
@@ -487,10 +535,57 @@
   
   .message-configurator__back-button {
     width: 100%;
+    justify-content: center;
   }
   
   .message-configurator__start-button {
     width: 100%;
+    padding: 0.9rem 1rem;
+  }
+
+  /* Improve format buttons on mobile */
+  .message-configurator__format-options {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .message-configurator__format-btn {
+    height: auto;
+    padding: 1rem;
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    align-items: center;
+  }
+
+  .message-configurator__format-icon {
+    margin-right: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* Fix scrolling issues on mobile */
+  .message-configurator__intention-options {
+    -webkit-overflow-scrolling: touch;
+    padding-right: 1px;
+  }
+}
+
+@media (max-width: 400px) {
+  .message-configurator {
+    min-height: 680px;
+  }
+
+  .message-configurator__front,
+  .message-configurator__back {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .message-configurator__step {
+    margin-bottom: 1.75rem;
+  }
+
+  .message-configurator__step-title {
+    font-size: 1rem;
   }
 }
 

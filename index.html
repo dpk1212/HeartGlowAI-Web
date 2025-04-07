@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeartGlowAI</title>
-  <meta name="description" content="AI-powered heartfelt message generator for all your relationships. Create authentic messages for loved ones.">
+  <title>HeartGlowAI - AI-Powered Heartfelt Messages</title>
+  <meta name="description" content="Create meaningful, personalized messages for your loved ones with HeartGlowAI's emotional intelligence technology. Express your feelings authentically.">
   
   <!-- Resource Hints -->
   <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -16,7 +16,11 @@
   <link rel="preload" href="js/main.js" as="script">
   
   <!-- Font Loading -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
   
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -28,6 +32,223 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/perplexity-citations.css">
+
+  <style>
+    /* Enhanced inline styles for the landing page */
+    .hero-heart {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 30px;
+    }
+    
+    .hero-heart-shape {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      transform: rotate(45deg);
+      border-radius: 5px;
+      filter: drop-shadow(0 5px 15px rgba(138, 87, 222, 0.4));
+      animation: pulse 2s infinite;
+    }
+    
+    .hero-heart-shape:before, .hero-heart-shape:after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      border-radius: 50%;
+    }
+    
+    .hero-heart-shape:before {
+      top: -50%;
+      left: 0;
+    }
+    
+    .hero-heart-shape:after {
+      top: 0;
+      left: -50%;
+    }
+    
+    .hero-heart-glow {
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      top: -25%;
+      left: -25%;
+      background: radial-gradient(circle, rgba(138, 87, 222, 0.6) 0%, rgba(138, 87, 222, 0) 70%);
+      border-radius: 50%;
+      animation: glow 3s infinite;
+    }
+    
+    @keyframes glow {
+      0%, 100% { opacity: 0.6; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.2); }
+    }
+    
+    .landing-page__title-main {
+      font-family: 'Playfair Display', serif;
+      font-size: 3.5rem;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin-top: 0.5rem;
+    }
+    
+    .type-image-container {
+      position: relative;
+      width: 100%;
+      height: 180px;
+      overflow: hidden;
+      border-radius: 10px 10px 0 0;
+      margin-bottom: 1.5rem;
+    }
+    
+    .type-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 1s ease;
+    }
+    
+    .landing-page__type-card:hover .type-image {
+      transform: scale(1.05);
+    }
+    
+    .type-image-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(to bottom, rgba(26, 22, 37, 0.3), rgba(26, 22, 37, 0.8));
+      z-index: 1;
+    }
+    
+    .premium-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      color: white;
+      padding: 0.4rem 0.8rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      box-shadow: 0 3px 10px rgba(138, 87, 222, 0.4);
+    }
+    
+    .cta-particles {
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      top: -25%;
+      left: -25%;
+      pointer-events: none;
+    }
+    
+    .cta-particle {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      border-radius: 50%;
+      opacity: 0.6;
+    }
+    
+    .cta-particle:nth-child(1) {
+      top: 20%;
+      left: 10%;
+      animation: float 4s infinite;
+    }
+    
+    .cta-particle:nth-child(2) {
+      top: 30%;
+      right: 15%;
+      animation: float 6s infinite 1s;
+    }
+    
+    .cta-particle:nth-child(3) {
+      bottom: 20%;
+      left: 20%;
+      animation: float 5s infinite 0.5s;
+    }
+    
+    .cta-particle:nth-child(4) {
+      bottom: 30%;
+      right: 30%;
+      animation: float 7s infinite 2s;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0) translateX(0); }
+      25% { transform: translateY(-10px) translateX(5px); }
+      50% { transform: translateY(0) translateX(10px); }
+      75% { transform: translateY(10px) translateX(5px); }
+    }
+    
+    .testimonial-card {
+      background: rgba(45, 42, 59, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: all 0.3s ease;
+    }
+    
+    .testimonial-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      border-color: rgba(138, 87, 222, 0.3);
+    }
+    
+    .testimonial-stars {
+      color: #ffd700;
+      font-size: 16px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .testimonial-text {
+      font-style: italic;
+      line-height: 1.6;
+      margin-bottom: 1rem;
+      color: #e8e6f1;
+    }
+    
+    .testimonial-author {
+      display: flex;
+      align-items: center;
+    }
+    
+    .testimonial-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(45deg, #8a57de, #b296ff);
+      margin-right: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+    
+    .testimonial-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+    
+    .testimonial-role {
+      font-size: 0.8rem;
+      color: #b8b4cb;
+    }
+  </style>
 </head>
 <body>
   <div id="app">
@@ -42,9 +263,15 @@
           </a>
         </header>
         
-        <!-- Hero section -->
+        <!-- Hero section - enhanced -->
         <div class="landing-page__hero">
-          <h1 class="landing-page__title">What kind of message is on your heart today?</h1>
+          <div class="hero-heart">
+            <div class="hero-heart-shape"></div>
+            <div class="hero-heart-glow"></div>
+          </div>
+          <h1 class="landing-page__title">
+            <span class="landing-page__title-main">What kind of message is on your heart today?</span>
+          </h1>
         </div>
         
         <!-- Message types -->
@@ -65,9 +292,16 @@
             </button>
           </div>
           
-          <!-- Type content sections -->
+          <!-- Type content sections - enhanced with images -->
           <div class="landing-page__type landing-page__type--active" id="romantic-content">
             <div class="landing-page__type-card">
+              <div class="type-image-container">
+                <div class="type-image-overlay"></div>
+                <img src="images/romantic-background.jpg" alt="Romantic connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M30 30 Q 50 15, 70 30 Q 50 45, 30 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <div class="premium-badge">
+                  <i class="fas fa-sparkles"></i> Premium
+                </div>
+              </div>
               <h2 class="landing-page__type-title">Romantic Messages</h2>
               <p class="landing-page__type-description">Express your deepest feelings to someone special in your life with authenticity and emotional intelligence. Create heartfelt messages that truly connect.</p>
               <div class="landing-page__features">
@@ -92,6 +326,13 @@
           
           <div class="landing-page__type" id="professional-content">
             <div class="landing-page__type-card">
+              <div class="type-image-container">
+                <div class="type-image-overlay"></div>
+                <img src="images/professional-background.jpg" alt="Professional connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M20 30 L 30 20 L 70 20 L 80 30 L 70 40 L 30 40 L 20 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <div class="premium-badge">
+                  <i class="fas fa-sparkles"></i> Premium
+                </div>
+              </div>
               <h2 class="landing-page__type-title">Professional Messages</h2>
               <p class="landing-page__type-description">Communicate with clarity and impact in your workplace relationships, whether with colleagues, clients, or leadership. Craft messages that resonate professionally.</p>
               <div class="landing-page__features">
@@ -116,6 +357,13 @@
           
           <div class="landing-page__type" id="personal-content">
             <div class="landing-page__type-card">
+              <div class="type-image-container">
+                <div class="type-image-overlay"></div>
+                <img src="images/personal-background.jpg" alt="Personal connection" class="type-image" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100%\' height=\'100%\' viewBox=\'0 0 100 60\'><rect fill=\'%232d2a3b\' width=\'100\' height=\'60\'/><path d=\'M25 30 C 35 20, 65 20, 75 30 C 65 40, 35 40, 25 30\' stroke=\'%23a379ff\' fill=\'%238a57de\' stroke-width=\'1\'/></svg>';">
+                <div class="premium-badge">
+                  <i class="fas fa-sparkles"></i> Premium
+                </div>
+              </div>
               <h2 class="landing-page__type-title">Personal Messages</h2>
               <p class="landing-page__type-description">Reconnect with friends or family through meaningful, heartfelt communication that strengthens your relationship. Create messages that bridge any distance.</p>
               <div class="landing-page__features">
@@ -139,14 +387,50 @@
           </div>
         </div>
         
-        <!-- CTA section -->
+        <!-- CTA section - enhanced -->
         <div class="landing-page__cta">
+          <div class="cta-particles">
+            <div class="cta-particle"></div>
+            <div class="cta-particle"></div>
+            <div class="cta-particle"></div>
+            <div class="cta-particle"></div>
+          </div>
           <button id="login-register-btn" class="landing-page__button" onclick="window.location.href='login.html'">
             Start Creating <span class="landing-page__button-icon">→</span>
           </button>
         </div>
         
-        <!-- Benefits section -->
+        <!-- Testimonials section - new -->
+        <div class="landing-page__testimonials">
+          <h2 class="landing-page__section-title">What People Are Saying</h2>
+          <div class="testimonial-grid">
+            <div class="testimonial-card">
+              <div class="testimonial-stars">★★★★★</div>
+              <p class="testimonial-text">"HeartGlowAI helped me express feelings I've struggled to put into words for years. The message I created for my partner brought tears to her eyes. This is more than AI—it's emotional intelligence."</p>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">M</div>
+                <div>
+                  <div class="testimonial-name">Michael T.</div>
+                  <div class="testimonial-role">In a relationship for 5 years</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="testimonial-card">
+              <div class="testimonial-stars">★★★★★</div>
+              <p class="testimonial-text">"As someone who's always struggled with finding the right words, this tool has been game-changing for my professional communications. My colleagues have noticed the difference!"</p>
+              <div class="testimonial-author">
+                <div class="testimonial-avatar">J</div>
+                <div>
+                  <div class="testimonial-name">Jessica L.</div>
+                  <div class="testimonial-role">Marketing Director</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Benefits section - enhanced -->
         <div class="landing-page__benefits">
           <div class="landing-page__benefit">
             <div class="landing-page__benefit-icon">✨</div>
@@ -259,10 +543,28 @@
     </div>
   </div>
   
-  <!-- Add alert component -->
-  <div id="alertContainer" class="alert-container"></div>
-  
   <!-- JavaScript -->
   <script src="js/main.js"></script>
+  <script>
+    // Initialize the application when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Call the initialization function if it exists
+      if (typeof initializeApp === 'function') {
+        initializeApp();
+      }
+      
+      // Store the screen elements
+      welcomeScreen = document.getElementById('welcome-screen');
+      messageFlowScreen = document.getElementById('message-flow-screen');
+      
+      // Ensure the welcome screen is shown initially
+      if (welcomeScreen) {
+        welcomeScreen.style.display = 'flex';
+        welcomeScreen.classList.add('active');
+      }
+      
+      console.log('DOM fully loaded and parsed');
+    });
+  </script>
 </body>
 </html> 

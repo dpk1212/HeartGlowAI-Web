@@ -895,7 +895,7 @@
         <div class="intent-card" data-card-id="recognize-effort">
           <div class="intent-card__inner">
             <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
+              <div class="intent-card__progress animated"></div>
               <div class="intent-card__icon">💬</div>
               <div class="intent-card__content">
                 <h3 class="intent-card__title">Show appreciation for hard work and dedication</h3>
@@ -903,7 +903,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
             </div>
           </div>
@@ -921,7 +921,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
             </div>
           </div>
@@ -931,7 +931,7 @@
         <div class="intent-card" data-card-id="express-gratitude">
           <div class="intent-card__inner">
             <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
+              <div class="intent-card__progress animated"></div>
               <div class="intent-card__icon">🙏</div>
               <div class="intent-card__content">
                 <h3 class="intent-card__title">Express genuine gratitude for their help</h3>
@@ -939,7 +939,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
             </div>
           </div>
@@ -952,7 +952,7 @@
         <div class="intent-card" data-card-id="reconnect">
           <div class="intent-card__inner">
             <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
+              <div class="intent-card__progress animated"></div>
               <div class="intent-card__icon">❤️</div>
               <div class="intent-card__content">
                 <h3 class="intent-card__title">Reconnect with someone meaningful to you</h3>
@@ -960,7 +960,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
             </div>
           </div>
@@ -978,7 +978,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
             </div>
           </div>
@@ -988,7 +988,7 @@
         <div class="intent-card" data-card-id="spark-joy">
           <div class="intent-card__inner">
             <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
+              <div class="intent-card__progress animated"></div>
               <div class="intent-card__icon">💬</div>
               <div class="intent-card__content">
                 <h3 class="intent-card__title">A quick note of warmth or joy</h3>
@@ -996,7 +996,7 @@
             </div>
             <div class="intent-card__back">
               <p class="intent-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-              <button class="intent-card__button">Use This Message →</button>
+              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
               <div class="intent-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
             </div>
           </div>
@@ -1047,10 +1047,25 @@
   <!-- JavaScript -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Add animated class to some progress bars for visual interest
+      // Add staggered entrance animations
+      const intentCards = document.querySelectorAll('.intent-card');
+      intentCards.forEach((card, index) => {
+        // Add staggered entrance animation
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, 100 + (index * 150));
+      });
+      
+      // Add animated class to progress bars for visual interest
       document.querySelectorAll('.intent-card__progress').forEach(progressBar => {
-        if (Math.random() > 0.5) {
-          progressBar.classList.add('animated');
+        if (!progressBar.classList.contains('animated')) {
+          if (Math.random() > 0.3) {
+            progressBar.classList.add('animated');
+          }
         }
       });
       
@@ -1058,7 +1073,6 @@
       const supportsHover = window.matchMedia('(hover: hover)').matches;
       
       // Card handling for analytics and navigation
-      const intentCards = document.querySelectorAll('.intent-card');
       let cardClickCount = 0;
       
       intentCards.forEach((card, index) => {
@@ -1067,6 +1081,12 @@
         const cardBack = card.querySelector('.intent-card__back');
         const cardTitle = card.querySelector('.intent-card__title').innerText;
         const cardButton = card.querySelector('.intent-card__button');
+        const cardIcon = card.querySelector('.intent-card__icon');
+        
+        // Add subtle floating animation to icons
+        if (cardIcon) {
+          cardIcon.style.animation = `float ${2 + Math.random() * 1}s ease-in-out infinite alternate`;
+        }
         
         function trackCardInteraction() {
           cardClickCount++;
@@ -1075,12 +1095,20 @@
           // Example: analytics.track('card_interaction', { card_id: cardId, title: cardTitle });
         }
         
-        // On touch devices, flip card on tap
+        // On touch devices, flip card on tap with better animation
         if (!supportsHover) {
           card.addEventListener('click', function(e) {
             if (!card.classList.contains('flipped')) {
               e.preventDefault();
               card.classList.add('flipped');
+              
+              // Add subtle scale effect
+              card.style.transition = 'transform 0.3s ease';
+              card.style.transform = 'scale(1.02)';
+              setTimeout(() => {
+                card.style.transform = 'scale(1)';
+              }, 300);
+              
               trackCardInteraction();
             }
           });
@@ -1089,43 +1117,175 @@
           document.addEventListener('click', function(e) {
             if (!card.contains(e.target) && card.classList.contains('flipped')) {
               card.classList.remove('flipped');
+              
+              // Add subtle effect when closing
+              card.style.transition = 'transform 0.2s ease';
+              card.style.transform = 'scale(0.98)';
+              setTimeout(() => {
+                card.style.transform = 'scale(1)';
+              }, 200);
             }
           });
         } else {
-          // For devices with hover, track interactions
+          // For devices with hover, add interactions
           card.addEventListener('mouseenter', function() {
             trackCardInteraction();
+            
+            // Subtle glow effect on hover
+            const glow = document.createElement('div');
+            glow.className = 'card-glow-effect';
+            glow.style.position = 'absolute';
+            glow.style.top = '-20px';
+            glow.style.left = '-20px';
+            glow.style.right = '-20px';
+            glow.style.bottom = '-20px';
+            glow.style.background = 'radial-gradient(circle, rgba(138, 87, 222, 0.2) 0%, transparent 70%)';
+            glow.style.zIndex = '-1';
+            glow.style.opacity = '0';
+            glow.style.transition = 'opacity 0.5s ease';
+            
+            card.appendChild(glow);
+            
+            setTimeout(() => {
+              glow.style.opacity = '0.7';
+            }, 10);
+          });
+          
+          card.addEventListener('mouseleave', function() {
+            const glow = card.querySelector('.card-glow-effect');
+            if (glow) {
+              glow.style.opacity = '0';
+              setTimeout(() => {
+                if (glow.parentNode === card) {
+                  card.removeChild(glow);
+                }
+              }, 500);
+            }
           });
         }
         
-        // Button should always navigate to the next step regardless of device
-        cardButton.addEventListener('click', function(e) {
-          e.stopPropagation(); // Prevent card flip on button click
-          // Change to login.html to match the rest of the site
-          window.location.href = `login.html?intent=${cardId}`;
-        });
+        // Add button hover effect
+        if (cardButton) {
+          cardButton.addEventListener('mouseenter', function() {
+            this.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            this.style.transform = 'translateY(-2px) scale(1.02)';
+          });
+          
+          cardButton.addEventListener('mouseleave', function() {
+            this.style.transition = 'transform 0.2s ease';
+            this.style.transform = 'translateY(0) scale(1)';
+          });
+          
+          // Button should always navigate to the next step regardless of device
+          cardButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card flip on button click
+            
+            // Add click animation
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+              this.style.transform = 'scale(1)';
+              // Change to login.html to match the rest of the site
+              window.location.href = `login.html?intent=${cardId}`;
+            }, 150);
+          });
+        }
       });
     
-      // Handle the message tab switching
+      // Handle the message tab switching with animation
       const messageTabs = document.querySelectorAll('.message-tab');
       const professionalCards = document.getElementById('professional-cards');
       const personalCards = document.getElementById('personal-cards');
       
       messageTabs.forEach(tab => {
         tab.addEventListener('click', function() {
+          if (this.classList.contains('active')) return;
+          
           messageTabs.forEach(t => t.classList.remove('active'));
           this.classList.add('active');
           
+          // Add subtle scale effect on click
+          this.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            this.style.transform = 'translateY(-1px)';
+          }, 150);
+          
           const type = this.getAttribute('data-type');
+          
           if (type === 'professional') {
-            professionalCards.style.display = 'flex';
-            personalCards.style.display = 'none';
+            // Animate out personal cards
+            if (personalCards.style.display !== 'none') {
+              personalCards.style.opacity = '1';
+              personalCards.style.transition = 'opacity 0.3s ease';
+              personalCards.style.opacity = '0';
+              
+              setTimeout(() => {
+                personalCards.style.display = 'none';
+                
+                // Animate in professional cards
+                professionalCards.style.display = 'flex';
+                professionalCards.style.opacity = '0';
+                
+                // Reset card positions for animation
+                const cards = professionalCards.querySelectorAll('.intent-card');
+                cards.forEach((card, i) => {
+                  card.style.opacity = '0';
+                  card.style.transform = 'translateY(20px)';
+                  
+                  setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                  }, 50 + (i * 100));
+                });
+                
+                professionalCards.style.transition = 'opacity 0.5s ease';
+                professionalCards.style.opacity = '1';
+              }, 300);
+            }
           } else {
-            professionalCards.style.display = 'none';
-            personalCards.style.display = 'flex';
+            // Animate out professional cards
+            if (professionalCards.style.display !== 'none') {
+              professionalCards.style.opacity = '1';
+              professionalCards.style.transition = 'opacity 0.3s ease';
+              professionalCards.style.opacity = '0';
+              
+              setTimeout(() => {
+                professionalCards.style.display = 'none';
+                
+                // Animate in personal cards
+                personalCards.style.display = 'flex';
+                personalCards.style.opacity = '0';
+                
+                // Reset card positions for animation
+                const cards = personalCards.querySelectorAll('.intent-card');
+                cards.forEach((card, i) => {
+                  card.style.opacity = '0';
+                  card.style.transform = 'translateY(20px)';
+                  
+                  setTimeout(() => {
+                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                  }, 50 + (i * 100));
+                });
+                
+                personalCards.style.transition = 'opacity 0.5s ease';
+                personalCards.style.opacity = '1';
+              }, 300);
+            }
           }
         });
       });
+      
+      // Add floating animation for icons
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes float {
+          0% { transform: translateY(0); }
+          100% { transform: translateY(-5px); }
+        }
+      `;
+      document.head.appendChild(style);
       
       // Animation for the heart
       const heartIcon = document.querySelector('.heart-icon');

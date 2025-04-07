@@ -1136,7 +1136,7 @@ function generateMessage(variation = null) {
                 const parsedResponse = parseOpenAIResponse(response);
                 
                 // Display the message
-                displayGeneratedMessage(parsedResponse.message);
+                displayGeneratedMessage(parsedResponse.message, parsedResponse.format);
                 
                 // Only display insights if we actually have them from the API
                 if (parsedResponse.insights && parsedResponse.insights.length > 0) {
@@ -1514,11 +1514,14 @@ function buildOpenAIPrompt(intentData, recipientData, toneData, variation = null
  */
 function parseOpenAIResponse(response) {
     try {
-        console.log("Parsing API response...");
+        console.log("Parsing API response:", response);
         
         // Initialize with default values
         let message = '';
         let insights = [];
+        let format = '';
+        let context = '';
+        let intention = '';
         
         // Handle different response formats
         if (typeof response === 'string') {
@@ -1526,7 +1529,27 @@ function parseOpenAIResponse(response) {
             message = response;
         } else if (response && typeof response === 'object') {
             // Complex object response
-            if (response.choices && response.choices.length > 0) {
+            if (response.message) {
+                // Our cloud function response format
+                message = response.message;
+                
+                if (response.insights && Array.isArray(response.insights)) {
+                    insights = response.insights;
+                }
+                
+                // Extract additional metadata from the response
+                if (response.format) format = response.format;
+                if (response.context) context = response.context;
+                if (response.intention) intention = response.intention;
+                
+                console.log("Extracted from API response:", {
+                    messageLength: message.length,
+                    insightsCount: insights.length,
+                    format,
+                    context,
+                    intention
+                });
+            } else if (response.choices && response.choices.length > 0) {
                 // Standard OpenAI API response format
                 const choice = response.choices[0];
                 
@@ -1542,27 +1565,25 @@ function parseOpenAIResponse(response) {
                 if (response.insights && Array.isArray(response.insights)) {
                     insights = response.insights;
                 }
-            } else if (response.message) {
-                // Another possible format
-                message = response.message;
-                
-                if (response.insights && Array.isArray(response.insights)) {
-                    insights = response.insights;
-                }
             }
         }
         
         // If we don't have explicit insights but have a message,
         // try to extract insights by detecting a specific pattern in the message
         if (insights.length === 0 && message) {
-            const insightsMatch = message.match(/###\s*INSIGHTS\s*###([\s\S]*?)(?=###|$)/i);
+            // Try different formats for extracting insights from the message
+            let insightsMatch = message.match(/###\s*INSIGHTS\s*###([\s\S]*?)(?=###|$)/i);
+            
+            if (!insightsMatch) {
+                insightsMatch = message.match(/INSIGHTS:([\s\S]*?)$/i);
+            }
             
             if (insightsMatch && insightsMatch[1]) {
                 // Extract insights section and clean the original message
                 const insightsText = insightsMatch[1].trim();
                 
                 // Remove the insights section from the message
-                message = message.replace(/###\s*INSIGHTS\s*###[\s\S]*?(###|$)/i, '$1').trim();
+                message = message.replace(/(?:###\s*INSIGHTS\s*###|INSIGHTS:)[\s\S]*?$/i, '').trim();
                 
                 // Split insights by lines or bullet points
                 insights = insightsText
@@ -1572,14 +1593,65 @@ function parseOpenAIResponse(response) {
             }
         }
         
+        // Apply formatting based on the format type
+        if (format === 'email' && message.includes('Subject:')) {
+            console.log("Detected email format with subject line");
+            
+            // Keep the subject line for emails, but style it appropriately
+            const messageElement = document.getElementById('generated-message');
+            if (messageElement) {
+                // Add a class to the message container for email styling
+                messageElement.classList.add('email-format');
+            }
+        } else if (format === 'text') {
+            console.log("Detected text message format");
+            
+            // For text messages, apply text-message styling
+            const messageElement = document.getElementById('generated-message');
+            if (messageElement) {
+                // Add a class for text message styling
+                messageElement.classList.add('text-format');
+            }
+        } else if (format === 'card') {
+            console.log("Detected greeting card format");
+            
+            // For greeting cards, apply card styling
+            const messageElement = document.getElementById('generated-message');
+            if (messageElement) {
+                // Add a class for card styling
+                messageElement.classList.add('card-format');
+            }
+        } else if (format === 'conversation') {
+            console.log("Detected conversation starters format");
+            
+            // For conversation starters, check if formatted as a list
+            if (!message.includes('1.') && !message.includes('- ')) {
+                // Try to format as a numbered list if it's not already
+                const lines = message.split(/\n+/).filter(line => line.trim().length > 0);
+                if (lines.length >= 3) {
+                    message = lines.map((line, index) => `${index + 1}. ${line}`).join('\n\n');
+                }
+            }
+            
+            const messageElement = document.getElementById('generated-message');
+            if (messageElement) {
+                // Add a class for conversation styling
+                messageElement.classList.add('conversation-format');
+            }
+        }
+        
         return {
             message: message,
-            insights: insights
+            insights: insights,
+            format: format,
+            context: context,
+            intention: intention
         };
     } catch (error) {
         console.error('Error parsing API response:', error);
+        // Return a basic structure with just the original response
         return {
-            message: response.toString(),
+            message: typeof response === 'string' ? response : JSON.stringify(response),
             insights: []
         };
     }
@@ -1784,84 +1856,132 @@ function displayMessageInsights(insights) {
 /**
  * Display the generated message in the UI with proper formatting
  */
-function displayGeneratedMessage(message) {
+function displayGeneratedMessage(message, format = '') {
     logDebug("Displaying generated message...");
     
-    if (!message) {
-        console.error("No message to display");
-        showError("Failed to generate a message. Please try again.");
+    // Get the message container
+    const messageContainer = document.getElementById('message-container');
+    const messageElement = document.getElementById('generated-message');
+    
+    if (!messageContainer || !messageElement) {
+        console.error("Message container or message element not found");
+        logDebug(`Message elements lookup: container=${!!messageContainer}, message=${!!messageElement}`);
         return;
     }
     
     try {
-        // Make sure loading state is hidden
-        hideLoadingState();
-        
-        // Get the message text element
-        const messageTextElement = document.getElementById('message-text');
-        if (!messageTextElement) {
-            console.error("Message text element not found");
-            logDebug("Message text element 'message-text' not found in the DOM");
-            return;
-        }
-        
-        // Process the message string into paragraphs
-        const paragraphs = message.split(/\n\n+/);
-        
-        // Clear existing content
-        messageTextElement.innerHTML = '';
-        
-        // Add each paragraph with proper styling
-        paragraphs.forEach((paragraph, index) => {
-            if (paragraph.trim()) {
-                const p = document.createElement('p');
-                
-                if (index === 0) {
-                    // Apply drop cap to first paragraph
-                    const firstLetter = paragraph.charAt(0);
-                    const restOfText = paragraph.substring(1);
-                    
-                    const dropCap = document.createElement('span');
-                    dropCap.className = 'drop-cap';
-                    dropCap.textContent = firstLetter;
-                    
-                    p.appendChild(dropCap);
-                    p.appendChild(document.createTextNode(restOfText));
-                } else {
-                    p.textContent = paragraph;
-                }
-                
-                // Add some bottom margin to all paragraphs except the last one
-                if (index < paragraphs.length - 1) {
-                    p.style.marginBottom = '1rem';
-                }
-                
-                messageTextElement.appendChild(p);
-            }
-        });
-        
-        // Update current date
-        const currentDateElement = document.getElementById('current-date');
-        if (currentDateElement) {
-            const now = new Date();
-            const formattedDate = now.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
-            });
-            
-            currentDateElement.innerHTML = '<i class="far fa-calendar"></i> ' + formattedDate;
-        }
-        
-        // Store the message for later use (copy, share, etc.)
+        // Store the message for later use
         generatedMessage = message;
         
+        // Apply styling based on format
+        messageContainer.className = 'message-container'; // Reset classes
+        messageElement.className = 'message-content'; // Reset classes
+        
+        if (format) {
+            messageContainer.classList.add(`${format}-format-container`);
+            messageElement.classList.add(`${format}-format`);
+        }
+
+        // Handle different message formats
+        if (format === 'email' && message.includes('Subject:')) {
+            // Extract subject line for emails
+            const subjectMatch = message.match(/Subject:\s*([^\n]+)/);
+            let subject = '';
+            let body = message;
+            
+            if (subjectMatch) {
+                subject = subjectMatch[1].trim();
+                body = message.replace(/Subject:\s*[^\n]+/, '').trim();
+                
+                // Add a properly styled subject line
+                messageElement.innerHTML = `
+                    <div class="email-subject">Subject: ${subject}</div>
+                    <div class="email-body">${formatMessageContent(body)}</div>
+                `;
+            } else {
+                messageElement.innerHTML = formatMessageContent(message);
+            }
+        } else if (format === 'conversation') {
+            // For conversation topics, we'll render it as a list
+            const formattedContent = message.replace(/(\d+\.\s+[^\n]+)/g, '<div class="conversation-topic">$1</div>');
+            messageElement.innerHTML = formattedContent;
+        } else if (format === 'card') {
+            // For greeting cards, add some decorative styling
+            messageElement.innerHTML = `
+                <div class="card-decorative-header">
+                    <div class="card-decorative-line"></div>
+                    <div class="card-decorative-heart">❤</div>
+                    <div class="card-decorative-line"></div>
+                </div>
+                <div class="card-content">
+                    ${formatMessageContent(message)}
+                </div>
+                <div class="card-decorative-footer">
+                    <div class="card-decorative-line"></div>
+                </div>
+            `;
+        } else if (format === 'text') {
+            // For text messages, keep it simple with text-like styling
+            messageElement.innerHTML = formatMessageContent(message);
+        } else {
+            // Default formatting
+            messageElement.innerHTML = formatMessageContent(message);
+        }
+        
+        // Make the copy button visible now that we have a message
+        const copyButton = document.getElementById('copy-message-btn');
+        if (copyButton) {
+            copyButton.style.display = 'block';
+        }
+        
+        // Add Premium Styling
+        applyPremiumStyling();
+        
+        // Show the message container if it was hidden
+        messageContainer.style.display = 'block';
+        
+        // Enable regeneration options
+        const regenerateBtn = document.getElementById('regenerate-btn');
+        if (regenerateBtn) {
+            regenerateBtn.disabled = false;
+        }
+        
         logDebug("Message displayed successfully");
+        
+        // Scroll the message into view if needed
+        messageElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
-        console.error("Error displaying message:", error);
+        console.error('Error displaying message:', error);
         logDebug(`Error displaying message: ${error.message}`);
-        showError("There was an error displaying your message. Please try again.");
+        
+        // Fallback to plain text if there's an error
+        if (messageElement) {
+            messageElement.textContent = message;
+            messageElement.style.display = 'block';
+        }
     }
+}
+
+/**
+ * Format message content with proper line breaks and styling
+ */
+function formatMessageContent(content) {
+    if (!content) return '';
+    
+    // Replace line breaks with paragraph breaks
+    let formatted = content
+        .replace(/\n\s*\n/g, '</p><p>') // Double line breaks become new paragraphs
+        .replace(/\n/g, '<br>'); // Single line breaks become <br>
+    
+    // Wrap in paragraphs if not already
+    if (!formatted.startsWith('<p>')) {
+        formatted = '<p>' + formatted;
+    }
+    if (!formatted.endsWith('</p>')) {
+        formatted = formatted + '</p>';
+    }
+    
+    return formatted;
 }
 
 /**

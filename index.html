@@ -602,7 +602,7 @@
     /* Handle all card structure to prevent white rectangles */
     .message-card {
       position: relative;
-      height: 90px;
+      height: 120px;
       width: 100%;
       cursor: pointer;
       perspective: 1000px;
@@ -649,7 +649,7 @@
     
     .message-card__back {
       background-color: #2D2A3B;
-      padding: var(--spacing-lg);
+      padding: 1rem;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -696,9 +696,9 @@
     
     .message-card__preview {
       color: var(--text-muted);
-      font-size: var(--font-size-md);
+      font-size: 0.9375rem;
       line-height: 1.5;
-      margin: 0 0 var(--spacing-lg);
+      margin: 0 0 0.75rem;
       font-style: italic;
       overflow-wrap: break-word;
       word-break: break-word;
@@ -709,16 +709,16 @@
     
     .message-card__button {
       width: 100%;
-      max-width: 90%;
+      max-width: 95%;
       margin-left: auto;
       margin-right: auto;
       background: linear-gradient(45deg, var(--primary), var(--primary-light));
       color: white;
-      padding: var(--spacing-sm) var(--spacing-md);
+      padding: 0.5rem 0.75rem;
       border-radius: var(--border-radius-md);
       text-decoration: none;
       font-weight: 600;
-      font-size: var(--font-size-sm);
+      font-size: 0.875rem;
       border: none;
       cursor: pointer;
       transition: transform 0.3s ease;
@@ -788,21 +788,21 @@
       }
       
       .message-card {
-        min-height: 100px;
+        min-height: 140px;
       }
       
       .message-card__back {
-        padding: var(--spacing-md);
+        padding: 1rem;
       }
       
       .message-card__preview {
-        font-size: var(--font-size-sm);
-        margin-bottom: var(--spacing-md);
+        font-size: 0.9375rem;
+        margin-bottom: 0.75rem;
       }
       
       .message-card__button {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: calc(var(--font-size-sm) - 1px);
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
       }
       
       body {
@@ -930,6 +930,41 @@
     .message-card div[class*="overlay"],
     .message-card div:not([class]) {
       display: none !important;
+    }
+
+    @media (max-width: 480px) {
+      .saved-recipients-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .saved-recipient-card {
+        padding: 0.75rem;
+      }
+      
+      .saved-recipient-card .recipient-avatar {
+        width: 42px;
+        height: 42px;
+      }
+      
+      .relationship-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      /* Add these styles for smaller devices to match intent-card styling */
+      .message-card {
+        height: 160px;
+      }
+      
+      .message-card__preview {
+        -webkit-line-clamp: 3;
+        margin-bottom: 1rem;
+        font-size: 1rem;
+      }
+      
+      .message-card__button {
+        font-size: 0.9375rem;
+        padding: 0.625rem 1rem;
+      }
     }
   </style>
 </head>
@@ -1146,61 +1181,54 @@
           console.log(`Card interaction: ${cardTitle}`);
           // Analytics tracking would go here in production
           // Example: analytics.track('card_interaction', { card_id: cardId, title: cardTitle });
-          
-          // Show sticky CTA after user has interacted with at least one card
-          if (cardClickCount === 1 && window.innerWidth <= 768) {
-            const stickyCta = document.querySelector('.sticky-cta');
-            if (stickyCta) stickyCta.style.display = 'block';
-          }
         }
         
-        // For non-hover devices (mobile/touch)
+        // On touch devices, flip card on tap
         if (!supportsHover) {
-          // Toggle flip on card click for mobile
-          cardFront.addEventListener('click', function() {
-            card.classList.add('flipped');
-            trackCardInteraction();
+          card.addEventListener('click', function(e) {
+            if (!card.classList.contains('flipped')) {
+              e.preventDefault();
+              card.classList.add('flipped');
+              trackCardInteraction();
+            }
           });
           
-          // Allow clicking the back to flip back, but not if clicking the button
-          cardBack.addEventListener('click', function(e) {
-            if (e.target !== cardButton && !cardButton.contains(e.target)) {
+          // Add close functionality for flipped cards on touch devices
+          document.addEventListener('click', function(e) {
+            if (!card.contains(e.target) && card.classList.contains('flipped')) {
               card.classList.remove('flipped');
             }
           });
         } else {
-          // For desktop, track when hover happens
+          // For devices with hover, track interactions
           card.addEventListener('mouseenter', function() {
             trackCardInteraction();
           });
         }
         
-        // Navigate on button click
-        if (cardButton) {
-          cardButton.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent card click from triggering
-            console.log(`Button clicked on card: ${cardTitle}`);
-            // Example: analytics.track('message_selection', { card_id: cardId, title: cardTitle });
-            window.location.href = "login.html";
-          });
-        }
+        // Button should always navigate to the next step regardless of device
+        cardButton.addEventListener('click', function(e) {
+          e.stopPropagation(); // Prevent card flip on button click
+          // Change to login.html to match the rest of the site
+          window.location.href = `login.html?intent=${cardId}`;
+        });
       });
-      
-      // Tab switching functionality
+    
+      // Handle the message tab switching
       const messageTabs = document.querySelectorAll('.message-tab');
       const professionalCards = document.getElementById('professional-cards');
       const personalCards = document.getElementById('personal-cards');
       
       messageTabs.forEach(tab => {
-        tab.addEventListener('click', () => {
+        tab.addEventListener('click', function() {
           messageTabs.forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
+          this.classList.add('active');
           
-          const type = tab.getAttribute('data-type');
+          const type = this.getAttribute('data-type');
           if (type === 'professional') {
             professionalCards.style.display = 'flex';
             personalCards.style.display = 'none';
-          } else if (type === 'personal') {
+          } else {
             professionalCards.style.display = 'none';
             personalCards.style.display = 'flex';
           }

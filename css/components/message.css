@@ -5,9 +5,10 @@
 
 /* Base message container */
 .message-container {
-  background-color: #fff;
+  background-color: #f9f9fc;
+  background-image: linear-gradient(to bottom, #ffffff, #f9f9fc);
   border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   padding: 2rem;
   margin-bottom: 2rem;
   transition: all 0.3s ease;
@@ -15,12 +16,24 @@
   overflow: hidden;
   width: 100%;
   display: block;
+  border: 1px solid #eaeaf0;
+}
+
+.message-container:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(to right, #8a57de, #d162e0);
+  border-radius: 4px 4px 0 0;
 }
 
 .message-content {
   font-size: 1.1rem;
   line-height: 1.6;
-  color: #333;
+  color: #2d2d3a;
   width: 100%;
   display: block;
   white-space: pre-line;
@@ -36,12 +49,14 @@
   white-space: pre-line;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  color: #2d2d3a;
 }
 
 .message-content p {
   margin-bottom: 1.2rem;
   width: 100%;
   display: block;
+  color: #2d2d3a;
 }
 
 .message-content p:last-child {
@@ -79,8 +94,10 @@
   margin-left: auto;
   margin-right: auto;
   background-color: #f0f2f5;
+  background-image: linear-gradient(to bottom, #f8f9fa, #f0f2f5);
   border-radius: 20px;
   padding: 1.5rem;
+  border: 1px solid #e2e5eb;
 }
 
 .text-format {
@@ -99,6 +116,7 @@
   max-width: 90%;
   word-wrap: break-word;
   position: relative;
+  box-shadow: 0 2px 8px rgba(138, 87, 222, 0.2);
 }
 
 /* Card format styling */

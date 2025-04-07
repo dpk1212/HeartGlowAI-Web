@@ -1932,7 +1932,17 @@ function displayGeneratedMessage(message, format = '') {
             `;
         } else if (format === 'text') {
             // For text messages, keep it simple with text-like styling
-            targetElement.innerHTML = formatMessageContent(message);
+            // Split text into paragraphs and wrap each in message bubble
+            const paragraphs = message.split(/\n\n+/);
+            let formattedText = '';
+            
+            paragraphs.forEach(paragraph => {
+                if (paragraph.trim()) {
+                    formattedText += `<p>${paragraph.trim()}</p>`;
+                }
+            });
+            
+            targetElement.innerHTML = formattedText;
         } else {
             // Default formatting - process the message string into paragraphs
             const paragraphs = message.split(/\n\n+/);
@@ -1953,9 +1963,9 @@ function displayGeneratedMessage(message, format = '') {
         }
         
         // Make the copy button visible now that we have a message
-        const copyButton = document.getElementById('copy-message-btn');
+        const copyButton = document.getElementById('copyBtn');
         if (copyButton) {
-            copyButton.style.display = 'block';
+            copyButton.style.display = 'inline-flex';
         }
         
         // Update current date if present
@@ -1978,7 +1988,7 @@ function displayGeneratedMessage(message, format = '') {
         messageContainer.style.display = 'block';
         
         // Enable regeneration options
-        const regenerateBtn = document.getElementById('regenerate-btn');
+        const regenerateBtn = document.getElementById('regenerateBtn');
         if (regenerateBtn) {
             regenerateBtn.disabled = false;
         }
@@ -1986,7 +1996,7 @@ function displayGeneratedMessage(message, format = '') {
         logDebug("Message displayed successfully");
         
         // Scroll the message into view if needed
-        targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        messageContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } catch (error) {
         console.error('Error displaying message:', error);
         logDebug(`Error displaying message: ${error.message}`);

@@ -596,11 +596,28 @@ async function saveDataAndNavigate() {
             ? document.getElementById('otherRelationship').value.trim()
             : '';
         
+        // Retrieve message configurator data from sessionStorage
+        const messageCategory = sessionStorage.getItem('messageCategory');
+        const messageFormat = sessionStorage.getItem('messageFormat');
+        const messageIntention = sessionStorage.getItem('messageIntention');
+        const messageConfigTimestamp = sessionStorage.getItem('messageConfigTimestamp');
+        
+        console.log('Message configurator data from sessionStorage:');
+        console.log('- messageCategory:', messageCategory);
+        console.log('- messageFormat:', messageFormat);
+        console.log('- messageIntention:', messageIntention);
+        console.log('- messageConfigTimestamp:', messageConfigTimestamp);
+        
         // Create recipient data object
         const recipientData = {
             name: name,
             relationship: selectedRelationship,
-            otherRelationship: otherRelationship
+            otherRelationship: otherRelationship,
+            // Add message configurator data from sessionStorage
+            messageCategory: messageCategory,
+            messageFormat: messageFormat,
+            messageIntention: messageIntention,
+            messageConfigTimestamp: messageConfigTimestamp
         };
         
         // For displaying in the UI
@@ -618,6 +635,13 @@ async function saveDataAndNavigate() {
         // Save both objects to localStorage for persistence
         localStorage.setItem('recipientData', JSON.stringify(recipientData));
         localStorage.setItem('selectedRecipient', JSON.stringify(selectedRecipient));
+        
+        // Preserve message configurator data in localStorage as well to ensure it's available across all pages
+        if (messageCategory) localStorage.setItem('messageCategory', messageCategory);
+        if (messageFormat) localStorage.setItem('messageFormat', messageFormat);
+        if (messageIntention) localStorage.setItem('messageIntention', messageIntention);
+        if (messageConfigTimestamp) localStorage.setItem('messageConfigTimestamp', messageConfigTimestamp);
+        localStorage.setItem('messageConfigComplete', sessionStorage.getItem('messageConfigComplete') || 'true');
         
         // If save checkbox is checked, save to Firestore
         const saveCheckbox = document.getElementById('saveRecipient');

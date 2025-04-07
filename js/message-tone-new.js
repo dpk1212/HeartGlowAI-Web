@@ -402,6 +402,69 @@ async function saveToneAndNavigate() {
         
         console.log('Tone data saved:', toneData);
         
+        // Preserve message configurator data from all possible sources
+        // Get recipientData and collect configurator data with fallbacks
+        const recipientData = JSON.parse(localStorage.getItem('recipientData') || '{}');
+        const messageCategory = 
+            sessionStorage.getItem('messageCategory') || 
+            localStorage.getItem('messageCategory') || 
+            recipientData.messageCategory || 
+            '';
+            
+        const messageFormat = 
+            sessionStorage.getItem('messageFormat') || 
+            localStorage.getItem('messageFormat') || 
+            recipientData.messageFormat || 
+            '';
+            
+        const messageIntention = 
+            sessionStorage.getItem('messageIntention') || 
+            localStorage.getItem('messageIntention') || 
+            recipientData.messageIntention || 
+            '';
+        
+        const messageConfigTimestamp = 
+            sessionStorage.getItem('messageConfigTimestamp') || 
+            localStorage.getItem('messageConfigTimestamp') || 
+            recipientData.messageConfigTimestamp || 
+            new Date().toISOString();
+        
+        console.log('Message configurator data being passed to results page:');
+        console.log('- messageCategory:', messageCategory);
+        console.log('- messageFormat:', messageFormat);
+        console.log('- messageIntention:', messageIntention);
+        console.log('- messageConfigTimestamp:', messageConfigTimestamp);
+        
+        // Ensure the data is in both sessionStorage and localStorage
+        if (messageCategory) {
+            sessionStorage.setItem('messageCategory', messageCategory);
+            localStorage.setItem('messageCategory', messageCategory);
+        }
+        
+        if (messageFormat) {
+            sessionStorage.setItem('messageFormat', messageFormat);
+            localStorage.setItem('messageFormat', messageFormat);
+        }
+        
+        if (messageIntention) {
+            sessionStorage.setItem('messageIntention', messageIntention);
+            localStorage.setItem('messageIntention', messageIntention);
+        }
+        
+        sessionStorage.setItem('messageConfigTimestamp', messageConfigTimestamp);
+        localStorage.setItem('messageConfigTimestamp', messageConfigTimestamp);
+        sessionStorage.setItem('messageConfigComplete', 'true');
+        localStorage.setItem('messageConfigComplete', 'true');
+        
+        // Also update recipientData with the configurator information
+        if (Object.keys(recipientData).length > 0) {
+            recipientData.messageCategory = messageCategory;
+            recipientData.messageFormat = messageFormat;
+            recipientData.messageIntention = messageIntention;
+            recipientData.messageConfigTimestamp = messageConfigTimestamp;
+            localStorage.setItem('recipientData', JSON.stringify(recipientData));
+        }
+        
         // Navigate to the next page after a short delay
         setTimeout(() => {
             window.location.href = 'message-result-new.html';

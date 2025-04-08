@@ -960,3 +960,62 @@ Intent option cards were extending beyond the right edge of the content area, ca
 - Further optimize mobile experience with touch-friendly targets
 - Consider adding transitions when cards reflow during window resizing
 - Monitor for any additional layout edge cases
+
+### Connection Modal Save Function Analysis
+*Updated on: May 18, 2024*
+
+**Issue Analyzed:**
+Detailed review of the `saveConnection` function across different files to understand its interaction with modal closing behavior.
+
+**Key Findings:**
+
+1. **Modal Closing Flow**
+   - Both `home.js` and `message-builder.js` implement their own versions of `saveConnection` function
+   - Modal closing is properly handled in the success callback of Firestore operations
+   - The modal is only closed after data is successfully saved to Firestore
+   - If validation fails or Firestore operations encounter errors, the modal remains open
+
+2. **Implementation Pattern**
+   - Consistent pattern across implementations:
+     - User fills connection form
+     - Form is validated on submit
+     - Data is saved to Firestore
+     - On success: modal is closed via `closeConnectionModal()` and connections list is refreshed
+     - On error: modal stays open with error message displayed
+
+3. **Function Flow Analysis**
+   - Both implementations follow similar patterns:
+     - Check for user authentication
+     - Validate form inputs (name, relationship type)
+     - Prepare connection data with additional fields
+     - Use Firestore to add/update connection
+     - Handle success/failure cases with appropriate user feedback
+
+4. **Modal Closing Mechanisms**
+   - In `home.js`: `closeConnectionModal()` sets `style.display = 'none'` and removes `modal-visible` class
+   - In `message-builder.js`: `closeConnectionModal()` calls a generic `closeModal()` function that removes the `show` class and sets `aria-hidden` to 'true'
+
+**Technical Details:**
+- Firestore operations use promises with success/error callbacks:
+  ```javascript
+  savePromise
+    .then(() => {
+      // Success handling
+      showAlert('Connection created successfully', 'success');
+      closeConnectionModal(); // Modal is closed here after successful save
+      loadUserConnections(); // Connections list is refreshed
+    })
+    .catch(error => {
+      // Error handling - modal remains open
+      showAlert('Error saving connection: ' + error.message, 'error');
+    });
+  ```
+
+**Conclusion:**
+The connection modal closing functionality is properly implemented and follows best practices. The modal is only closed after successful data persistence, maintaining data integrity and providing clear user feedback.
+
+**Future Enhancements:**
+- Consider adding a confirmation dialog when closing unsaved forms
+- Implement auto-save functionality for form drafts
+- Add visual feedback during the saving process
+- Further standardize modal handling across different parts of the application

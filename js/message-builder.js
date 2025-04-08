@@ -191,83 +191,124 @@ function getInitials(name) {
  * Initialize all DOM elements
  */
 function initializeElements() {
-    // User menu elements
-    elements.userMenu = {
-        button: document.getElementById('userMenuBtn'),
-        dropdown: document.getElementById('userDropdown'),
-        initials: document.getElementById('userInitials'),
-        displayName: document.getElementById('userDisplayName'),
-        email: document.getElementById('userEmail'),
-        logoutBtn: document.getElementById('logoutBtn')
-    };
+    console.log('Initializing DOM elements...');
     
-    // Step elements
-    elements.steps = {
-        recipient: document.getElementById('step-recipient'),
-        intent: document.getElementById('step-intent'),
-        tone: document.getElementById('step-tone'),
-        result: document.getElementById('step-result')
-    };
-    
-    // Sidebar elements
-    elements.sidebar = {
-        container: document.querySelector('.message-builder__sidebar'),
-        steps: document.querySelectorAll('.progress-step'),
-        startOverBtn: document.getElementById('startOverBtn')
-    };
-    
-    // Navigation buttons
-    elements.buttons = {
-        recipientNext: document.getElementById('recipientNextBtn'),
-        intentPrev: document.getElementById('intentPrevBtn'),
-        intentNext: document.getElementById('intentNextBtn'),
-        tonePrev: document.getElementById('tonePrevBtn'),
-        toneNext: document.getElementById('toneNextBtn'),
-        resultPrev: document.getElementById('resultPrevBtn'),
-        createNew: document.getElementById('createNewBtn')
-    };
-    
-    // Preview panel elements
-    elements.preview = {
-        container: document.querySelector('.message-builder__preview'),
-        recipientName: document.getElementById('preview-recipient-name'),
-        recipientRelationship: document.getElementById('preview-recipient-relationship'),
-        recipientInitial: document.getElementById('preview-recipient-initial'),
-        intent: document.getElementById('preview-intent'),
-        tone: document.getElementById('preview-tone'),
-        messageText: document.getElementById('preview-message-text'),
-        messagePlaceholder: document.getElementById('preview-message-placeholder')
-    };
-    
-    // Connection modal elements
-    elements.modals = {
-        connectionModal: document.getElementById('connection-modal'),
-        connectionForm: document.getElementById('connection-form'),
-        connectionName: document.getElementById('connection-name'),
-        connectionRelationship: document.getElementById('connection-relationship'),
-        otherRelationship: document.getElementById('other-relationship'),
-        otherRelationshipGroup: document.getElementById('other-relationship-group'),
-        connectionSave: document.getElementById('connection-save'),
-        connectionCancel: document.getElementById('connection-cancel'),
-        connectionTitle: document.getElementById('connection-modal-title'),
-        closeButtons: document.querySelectorAll('.close-modal')
-    };
-    
-    // Loading and alerts
-    elements.loading = {
-        overlay: document.getElementById('loadingOverlay'),
-        context: document.getElementById('loadingContext')
-    };
-    
-    elements.alerts = {
-        container: document.getElementById('alertContainer')
-    };
-    
-    // Recipient step specific elements
-    elements.recipientStep = {
-        connectionsList: document.getElementById('connections-list'),
-        addNewConnection: document.getElementById('add-new-connection')
-    };
+    try {
+        // User menu elements
+        elements.userMenu = {
+            button: document.getElementById('userMenuBtn'),
+            dropdown: document.getElementById('userDropdown'),
+            initials: document.getElementById('userInitials'),
+            displayName: document.getElementById('userDisplayName'),
+            email: document.getElementById('userEmail'),
+            logoutBtn: document.getElementById('logoutBtn')
+        };
+        
+        // Step elements
+        elements.steps = {
+            recipient: document.getElementById('step-recipient'),
+            intent: document.getElementById('step-intent'),
+            tone: document.getElementById('step-tone'),
+            result: document.getElementById('step-result')
+        };
+        
+        // Sidebar elements
+        elements.sidebar = {
+            container: document.querySelector('.message-builder__sidebar'),
+            steps: document.querySelectorAll('.progress-step'),
+            startOverBtn: document.getElementById('startOverBtn')
+        };
+        
+        // Navigation buttons
+        elements.buttons = {
+            recipientNext: document.getElementById('recipientNextBtn'),
+            intentPrev: document.getElementById('intentPrevBtn'),
+            intentNext: document.getElementById('intentNextBtn'),
+            tonePrev: document.getElementById('tonePrevBtn'),
+            toneNext: document.getElementById('toneNextBtn'),
+            resultPrev: document.getElementById('resultPrevBtn'),
+            createNew: document.getElementById('createNewBtn')
+        };
+        
+        // Preview panel elements
+        elements.preview = {
+            container: document.querySelector('.message-builder__preview'),
+            recipientName: document.getElementById('preview-recipient-name'),
+            recipientRelationship: document.getElementById('preview-recipient-relationship'),
+            recipientInitial: document.getElementById('preview-recipient-initial'),
+            intent: document.getElementById('preview-intent'),
+            tone: document.getElementById('preview-tone'),
+            messageText: document.getElementById('preview-message-text'),
+            messagePlaceholder: document.getElementById('preview-message-placeholder')
+        };
+        
+        // Connection modal elements
+        elements.modals = {
+            connectionModal: document.getElementById('connection-modal'),
+            connectionForm: document.getElementById('connection-form'),
+            connectionName: document.getElementById('connection-name'),
+            connectionRelationship: document.getElementById('connection-relationship'),
+            otherRelationship: document.getElementById('other-relationship'),
+            otherRelationshipGroup: document.getElementById('other-relationship-group'),
+            connectionSave: document.getElementById('connection-save'),
+            connectionCancel: document.getElementById('connection-cancel'),
+            connectionTitle: document.getElementById('connection-modal-title'),
+            closeButtons: document.querySelectorAll('.close-modal')
+        };
+        
+        // Loading and alerts
+        elements.loading = {
+            overlay: document.getElementById('loadingOverlay'),
+            context: document.getElementById('loadingContext')
+        };
+        
+        elements.alerts = {
+            container: document.getElementById('alertContainer')
+        };
+        
+        // Recipient step specific elements
+        elements.recipientStep = {
+            connectionsList: document.getElementById('connections-list'),
+            addNewConnection: document.getElementById('add-new-connection')
+        };
+        
+        // Log elements that are critical for functionality
+        console.log('Critical elements initialization:');
+        console.log('- Recipient step element:', elements.steps.recipient ? 'Found' : 'MISSING');
+        console.log('- Connections list element:', elements.recipientStep.connectionsList ? 'Found' : 'MISSING');
+        console.log('- Add connection button:', elements.recipientStep.addNewConnection ? 'Found' : 'MISSING');
+        console.log('- Next button:', elements.buttons.recipientNext ? 'Found' : 'MISSING');
+        
+        // If connections list is not found, try alternative selectors
+        if (!elements.recipientStep.connectionsList) {
+            console.warn('Connections list element not found by ID, trying alternatives...');
+            
+            // Try by class name
+            const byClass = document.querySelector('.connections-list');
+            if (byClass) {
+                console.log('Found connections list by class');
+                elements.recipientStep.connectionsList = byClass;
+            } else {
+                // Try by attribute
+                const byAttribute = document.querySelector('[data-element="connections-list"]');
+                if (byAttribute) {
+                    console.log('Found connections list by attribute');
+                    elements.recipientStep.connectionsList = byAttribute;
+                } else {
+                    console.error('Could not find connections list element by any method');
+                }
+            }
+        }
+        
+        // Log stylesheets for debugging styling issues
+        console.log('Stylesheets loaded:', document.styleSheets.length);
+        Array.from(document.styleSheets).slice(0, 5).forEach((sheet, i) => {
+            console.log(`Sheet ${i}:`, sheet.href || 'inline');
+        });
+        
+    } catch (error) {
+        console.error('Error initializing DOM elements:', error);
+    }
 }
 
 /**
@@ -725,90 +766,117 @@ function initializeRecipientStep() {
  * @param {Object} connection - Connection data
  */
 function addConnectionCard(connection) {
+    console.log('Adding connection card for:', connection.name);
+    
     const connectionsList = elements.recipientStep.connectionsList;
-    if (!connectionsList) return;
-    
-    const card = document.createElement('div');
-    card.className = 'connection-card';
-    card.setAttribute('data-id', connection.id);
-    
-    // Get relationship icon
-    let relationshipIcon = 'user-friends';
-    switch (connection.relationship) {
-        case 'family': relationshipIcon = 'home'; break;
-        case 'partner': relationshipIcon = 'heart'; break;
-        case 'coworker': relationshipIcon = 'briefcase'; break;
-        case 'friend': relationshipIcon = 'user-friends'; break;
-        default: relationshipIcon = 'user'; break;
+    if (!connectionsList) {
+        console.error('Cannot add connection card: Connection list element not found');
+        return;
     }
     
-    // Build card content
-    card.innerHTML = `
-        <div class="connection-avatar">
-            <span>${getInitials(connection.name)}</span>
-            <div class="connection-icon">
-                <i class="fas fa-${relationshipIcon}"></i>
-            </div>
-        </div>
-        <div class="connection-info">
-            <div class="connection-name">${connection.name}</div>
-            <div class="connection-relationship">${formatRelationship(connection)}</div>
-        </div>
-        <div class="connection-actions">
-            <button class="connection-edit" aria-label="Edit connection">
-                <i class="fas fa-pencil-alt"></i>
-            </button>
-        </div>
-    `;
-    
-    // Add card to list
-    connectionsList.appendChild(card);
-    
-    // Add animation class after a short delay (for animation)
-    setTimeout(() => {
-        card.classList.add('fade-in');
-    }, 10);
-    
-    // Add click handler
-    card.addEventListener('click', function(e) {
-        // Ignore clicks on the edit button
-        if (e.target.closest('.connection-edit')) {
-            e.stopPropagation();
-            editConnection(connection);
-            return;
+    try {
+        // Create the card element
+        const card = document.createElement('div');
+        card.className = 'connection-card';
+        card.setAttribute('data-id', connection.id);
+        
+        // Get relationship icon
+        let relationshipIcon = 'user-friends';
+        switch (connection.relationship) {
+            case 'family': relationshipIcon = 'home'; break;
+            case 'partner': relationshipIcon = 'heart'; break;
+            case 'coworker': relationshipIcon = 'briefcase'; break;
+            case 'friend': relationshipIcon = 'user-friends'; break;
+            default: relationshipIcon = 'user'; break;
         }
         
-        // Remove selected class from all cards
-        document.querySelectorAll('.connection-card').forEach(c => c.classList.remove('selected'));
+        // Build card content
+        card.innerHTML = `
+            <div class="connection-avatar">
+                <span>${getInitials(connection.name)}</span>
+                <div class="connection-icon">
+                    <i class="fas fa-${relationshipIcon}"></i>
+                </div>
+            </div>
+            <div class="connection-info">
+                <div class="connection-name">${connection.name}</div>
+                <div class="connection-relationship">${formatRelationship(connection)}</div>
+            </div>
+            <div class="connection-actions">
+                <button class="connection-edit" aria-label="Edit connection">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+        `;
         
-        // Add selected class to this card
-        this.classList.add('selected');
+        // Add temporary debug styling
+        card.style.border = '1px solid #8a57de';
+        card.style.padding = '12px';
+        card.style.borderRadius = '12px';
+        card.style.margin = '8px 0';
+        card.style.display = 'flex';
+        card.style.alignItems = 'center';
+        card.style.background = '#211E2E';
+        card.style.cursor = 'pointer';
         
-        // Save the selected recipient
-        messageData.recipient = {
-            id: connection.id,
-            name: connection.name,
-            relationship: connection.relationship,
-            otherRelationship: connection.otherRelationship || ''
-        };
+        // Add card to list
+        connectionsList.appendChild(card);
+        console.log('Card added to DOM:', card);
         
-        // Save to localStorage
-        localStorage.setItem('recipientData', JSON.stringify(messageData.recipient));
+        // Add animation class after a short delay (for animation)
+        setTimeout(() => {
+            card.classList.add('fade-in');
+        }, 10);
         
-        // Enable next button
-        elements.buttons.recipientNext.classList.remove('disabled');
-        
-        // Update preview
-        updatePreview();
-    });
-    
-    // Add edit button handler
-    const editButton = card.querySelector('.connection-edit');
-    if (editButton) {
-        editButton.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent card selection
-            editConnection(connection);
+        // Add click handler
+        card.addEventListener('click', function(e) {
+            console.log('Connection card clicked:', connection.name);
+            
+            // Ignore clicks on the edit button
+            if (e.target.closest('.connection-edit')) {
+                e.stopPropagation();
+                console.log('Edit button clicked for:', connection.name);
+                editConnection(connection);
+                return;
+            }
+            
+            // Remove selected class from all cards
+            document.querySelectorAll('.connection-card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            
+            // Add selected class to this card
+            this.classList.add('selected');
+            
+            // Save the selected recipient
+            messageData.recipient = {
+                id: connection.id,
+                name: connection.name,
+                relationship: connection.relationship,
+                otherRelationship: connection.otherRelationship || ''
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('recipientData', JSON.stringify(messageData.recipient));
+            
+            // Enable next button
+            elements.buttons.recipientNext.classList.remove('disabled');
+            
+            // Update preview
+            updatePreview();
         });
+        
+        // Add edit button handler
+        const editButton = card.querySelector('.connection-edit');
+        if (editButton) {
+            editButton.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card selection
+                console.log('Edit button clicked via dedicated handler for:', connection.name);
+                editConnection(connection);
+            });
+        }
+    } catch (error) {
+        console.error('Error creating connection card:', error);
     }
 }
 
@@ -1193,7 +1261,7 @@ function updateSidebar(previousStep, newStep) {
 }
 
 /**
- * Initialize step content based on step ID
+ * Initialize step-specific content and functionality
  * @param {string} stepId - The step ID to initialize
  */
 function initializeStepContent(stepId) {
@@ -1207,6 +1275,11 @@ function initializeStepContent(stepId) {
                 if (connectionsList) {
                     connectionsList.innerHTML = '<div class="loading-state"><div class="loading-spinner-small"></div><p>Loading connections...</p></div>';
                 }
+                
+                // Add a test card after a delay to ensure the container is ready
+                setTimeout(() => {
+                    testConnectionCard();
+                }, 2000);
                 
                 // Load recipient step content
                 refreshConnectionsList()
@@ -1240,7 +1313,11 @@ function initializeStepContent(stepId) {
             // Initialize the intent selection step
             try {
                 console.log('Initializing intent step');
-                initializeIntentStep();
+                if (typeof initializeIntentStep === 'function') {
+                    initializeIntentStep();
+                } else {
+                    console.warn('initializeIntentStep function not found');
+                }
             } catch (error) {
                 console.error('Error initializing intent step:', error);
                 showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
@@ -1251,7 +1328,11 @@ function initializeStepContent(stepId) {
             // Initialize the tone selection step
             try {
                 console.log('Initializing tone step');
-                initializeToneStep();
+                if (typeof initializeToneStep === 'function') {
+                    initializeToneStep();
+                } else {
+                    console.warn('initializeToneStep function not found');
+                }
             } catch (error) {
                 console.error('Error initializing tone step:', error);
                 showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
@@ -1262,7 +1343,11 @@ function initializeStepContent(stepId) {
             // Initialize the result step
             try {
                 console.log('Initializing result step');
-                initializeResultStep();
+                if (typeof initializeResultStep === 'function') {
+                    initializeResultStep();
+                } else {
+                    console.warn('initializeResultStep function not found');
+                }
             } catch (error) {
                 console.error('Error initializing result step:', error);
                 showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
@@ -3263,39 +3348,74 @@ function loadUserConnections(forceReload = false) {
  * @param {Array} connections - Array of connection objects
  */
 function displayConnections(connections) {
+    console.log('displayConnections called with:', connections);
+    
     const connectionsList = elements.recipientStep.connectionsList;
+    console.log('Connection list element:', connectionsList);
+    console.log('Element exists:', !!connectionsList);
+    
     if (!connectionsList) {
         console.error('Cannot display connections: Connection list element not found');
+        // Try to locate connections-list element by ID
+        const altConnectionsList = document.getElementById('connections-list');
+        console.log('Alternative connections-list by ID:', altConnectionsList);
+        
+        // If we found it by ID, use that instead
+        if (altConnectionsList) {
+            elements.recipientStep.connectionsList = altConnectionsList;
+            console.log('Updated connection list reference');
+            // Continue with this element
+            displayConnectionsImpl(connections, altConnectionsList);
+            return;
+        }
         return;
     }
+    
+    // Call the implementation function
+    displayConnectionsImpl(connections, connectionsList);
+}
 
+/**
+ * Implementation of displaying connections
+ * @param {Array} connections - Array of connection objects 
+ * @param {Element} connectionsList - DOM element to display connections in
+ */
+function displayConnectionsImpl(connections, connectionsList) {
     // Clear existing connections
     connectionsList.innerHTML = '';
-
+    console.log('Cleared existing connections');
+    
     // Handle empty state
     if (!connections || connections.length === 0) {
-        console.log('No connections found');
+        console.log('No connections found, showing empty state');
         connectionsList.innerHTML = '<div class="empty-state"><p>You don\'t have any connections yet. Create one to get started!</p></div>';
         return;
     }
-
+    
+    console.log(`Displaying ${connections.length} connections`);
+    
     // Sort connections by name
     connections.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-
+    
     // Add each connection as a card with staggered animation
     connections.forEach((connection, index) => {
+        console.log(`Creating card for connection ${index}:`, connection.name);
         setTimeout(() => {
             addConnectionCard(connection);
         }, index * 50); // Stagger animation by 50ms per card
     });
-
+    
     // Check if we have a selected connection
     if (messageData.recipient && messageData.recipient.id) {
+        console.log('We have a selected recipient:', messageData.recipient);
         setTimeout(() => {
             const selectedCard = connectionsList.querySelector(`.connection-card[data-id="${messageData.recipient.id}"]`);
+            console.log('Selected card element:', selectedCard);
             if (selectedCard) {
                 selectedCard.classList.add('selected');
                 elements.buttons.recipientNext.classList.remove('disabled');
+            } else {
+                console.warn('Selected card not found in DOM');
             }
         }, connections.length * 50 + 100); // After all cards are added
     }
@@ -3630,4 +3750,91 @@ function updateSelectedRecipient(recipient) {
     
     // Update preview panel
     updatePreview();
+}
+
+/**
+ * Create a test connection card for debugging rendering issues
+ */
+function testConnectionCard() {
+    console.log('Creating test connection card...');
+    
+    // Find connections list container
+    const container = elements.recipientStep.connectionsList;
+    if (!container) {
+        console.error('Cannot create test card: Container not found');
+        
+        // Try to find by alternative methods
+        const altContainer = document.querySelector('.connections-list') || 
+                            document.getElementById('connections-list');
+        
+        if (!altContainer) {
+            console.error('Cannot create test card: No suitable container found by any method');
+            return;
+        }
+        
+        console.log('Found alternative container for test card');
+        
+        // Update our reference
+        elements.recipientStep.connectionsList = altContainer;
+        
+        // Use this container instead
+        return createTestCard(altContainer);
+    }
+    
+    return createTestCard(container);
+}
+
+/**
+ * Helper function to create a test card in a container
+ * @param {Element} container - Container element to add the card to
+ */
+function createTestCard(container) {
+    // Create test card
+    const testCard = document.createElement('div');
+    testCard.className = 'connection-card test-card';
+    testCard.innerHTML = `
+        <div style="display: flex; align-items: center;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #8a57de; display: flex; align-items: center; justify-content: center; color: white; margin-right: 12px;">
+                <span>TC</span>
+            </div>
+            <div>
+                <div style="font-weight: bold; color: white;">Test Connection</div>
+                <div style="color: #b8b5c7;">Test Relationship</div>
+            </div>
+        </div>
+    `;
+    
+    // Apply inline styles for visibility
+    testCard.style.border = '2px dashed #ff7eb6';
+    testCard.style.padding = '12px';
+    testCard.style.borderRadius = '12px';
+    testCard.style.margin = '8px 0';
+    testCard.style.background = '#211E2E';
+    testCard.style.cursor = 'pointer';
+    
+    // Add to container
+    container.appendChild(testCard);
+    console.log('Test card added:', testCard);
+    
+    // Add click handler
+    testCard.addEventListener('click', function() {
+        console.log('Test card clicked');
+        
+        // Remove selected class from all cards
+        document.querySelectorAll('.connection-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selected class to this card
+        this.classList.add('selected');
+        this.style.borderColor = '#8a57de';
+        this.style.borderStyle = 'solid';
+        
+        // Enable next button
+        if (elements.buttons.recipientNext) {
+            elements.buttons.recipientNext.classList.remove('disabled');
+        }
+    });
+    
+    return testCard;
 }

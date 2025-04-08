@@ -409,19 +409,177 @@ function setupEventListeners() {
 }
 
 /**
- * Initialize preview panel
+ * Initialize preview panel with enhanced features
  */
 function initializePreviewPanel() {
-    // On mobile, add toggle button for preview panel
-    if (window.innerWidth <= 768) {
-        const previewToggle = document.createElement('button');
-        previewToggle.className = 'preview-toggle';
-        previewToggle.innerHTML = '<i class="fas fa-eye"></i> Preview';
-        document.body.appendChild(previewToggle);
+    console.log('Initializing enhanced preview panel...');
+    
+    // Add preview toggle button for mobile view
+    const previewPanel = document.querySelector('.message-builder__preview');
+    const contentArea = document.querySelector('.message-builder__content');
+    
+    // Create mobile toggle button if it doesn't exist
+    if (!document.getElementById('preview-toggle-btn') && previewPanel && contentArea) {
+        const toggleBtn = document.createElement('button');
+        toggleBtn.id = 'preview-toggle-btn';
+        toggleBtn.className = 'preview-toggle-btn';
+        toggleBtn.innerHTML = `
+            <i class="fas fa-eye"></i>
+            <span>Preview</span>
+        `;
         
-        previewToggle.addEventListener('click', function() {
-            document.body.classList.toggle('preview-open');
+        // Add to DOM
+        document.body.appendChild(toggleBtn);
+        
+        // Add toggle functionality
+        toggleBtn.addEventListener('click', function() {
+            previewPanel.classList.toggle('show-mobile');
+            
+            // Update button text
+            if (previewPanel.classList.contains('show-mobile')) {
+                toggleBtn.innerHTML = `
+                    <i class="fas fa-times"></i>
+                    <span>Close</span>
+                `;
+            } else {
+                toggleBtn.innerHTML = `
+                    <i class="fas fa-eye"></i>
+                    <span>Preview</span>
+                `;
+            }
         });
+    }
+    
+    // Add animation hooks for preview updates
+    const previewElements = [
+        elements.preview.recipientName,
+        elements.preview.recipientRelationship,
+        elements.preview.intent,
+        elements.preview.tone,
+        elements.preview.messageText
+    ];
+    
+    // Add animation classes to elements
+    previewElements.forEach(element => {
+        if (element) {
+            element.classList.add('preview-animated');
+        }
+    });
+    
+    // Initialize preview with any existing data
+    updatePreview(true);
+}
+
+/**
+ * Update preview panel with current message data
+ * @param {boolean} initialLoad - Whether this is the initial load
+ */
+function updatePreview(initialLoad = false) {
+    console.log('Updating preview panel...');
+    
+    // Update container class if there's a message
+    const previewContainer = elements.preview.container;
+    if (previewContainer) {
+        if (messageData.result && messageData.result.message) {
+            previewContainer.classList.add('preview-has-message');
+        } else {
+            previewContainer.classList.remove('preview-has-message');
+        }
+    }
+    
+    // Recipient info
+    updatePreviewElement(elements.preview.recipientName, 
+        messageData.recipient ? messageData.recipient.name : 'Select a recipient',
+        initialLoad);
+    
+    updatePreviewElement(elements.preview.recipientRelationship, 
+        messageData.recipient ? formatRelationship(messageData.recipient) : '',
+        initialLoad);
+    
+    updatePreviewElement(elements.preview.recipientInitial, 
+        messageData.recipient ? getInitials(messageData.recipient.name) : '?',
+        initialLoad);
+    
+    // Intent info
+    updatePreviewElement(elements.preview.intent, 
+        messageData.intent ? messageData.intent.title : '-',
+        initialLoad);
+    
+    // Tone info
+    updatePreviewElement(elements.preview.tone, 
+        messageData.tone ? messageData.tone.name : '-',
+        initialLoad);
+    
+    // Message text
+    if (messageData.result && messageData.result.message) {
+        // Show actual message text
+        elements.preview.messagePlaceholder.style.display = 'none';
+        updatePreviewElement(elements.preview.messageText, 
+            messageData.result.message,
+            initialLoad,
+            true); // text element - preserve formatting
+    } else if (messageData.recipient && messageData.intent && messageData.tone) {
+        // Show placeholder for what we know so far
+        elements.preview.messagePlaceholder.style.display = 'block';
+        elements.preview.messagePlaceholder.textContent = `
+            Creating a ${messageData.tone.name.toLowerCase()} message for ${messageData.recipient.name} 
+            to ${messageData.intent.title.toLowerCase()}...
+        `;
+        elements.preview.messageText.style.display = 'none';
+    } else {
+        // Default placeholder
+        elements.preview.messagePlaceholder.style.display = 'block';
+        elements.preview.messagePlaceholder.textContent = 'Your message will appear here as you make selections...';
+        elements.preview.messageText.style.display = 'none';
+    }
+}
+
+/**
+ * Helper function to update preview elements with animation
+ * @param {HTMLElement} element - The element to update
+ * @param {string} value - The new value
+ * @param {boolean} skipAnimation - Whether to skip the animation
+ * @param {boolean} isTextElement - Whether this is a text element that should preserve formatting
+ */
+function updatePreviewElement(element, value, skipAnimation = false, isTextElement = false) {
+    if (!element) return;
+    
+    // Don't animate if content hasn't changed
+    if (isTextElement ? element.innerHTML === value : element.textContent === value) {
+        return;
+    }
+    
+    // Function to update the content
+    const updateContent = () => {
+        if (isTextElement) {
+            // For message text, preserve line breaks by replacing \n with <br>
+            element.innerHTML = value.replace(/\n/g, '<br>');
+        } else {
+            element.textContent = value;
+        }
+        
+        element.dataset.value = value;
+        element.style.display = value ? 'block' : 'none';
+    };
+    
+    if (skipAnimation) {
+        // Update immediately without animation
+        updateContent();
+    } else {
+        // Add transition out class
+        element.classList.add('preview-update-out');
+        
+        // After transition out, update content and transition back in
+        setTimeout(() => {
+            updateContent();
+            element.classList.remove('preview-update-out');
+            element.classList.add('preview-update-in');
+            
+            // Remove the transition in class after animation completes
+            setTimeout(() => {
+                element.classList.remove('preview-update-in');
+            }, 300);
+        }, 300);
     }
 }
 
@@ -818,120 +976,255 @@ function closeModal(modal) {
 }
 
 /**
- * Navigate to the next step
+ * Show a specific step with enhanced validation and animations
+ * @param {string} stepId - The ID of the step to show
+ * @param {boolean} skipAnimation - Whether to skip the animation
+ * @returns {boolean} - Whether the step change was successful
  */
-function goToNextStep(currentStepId) {
-    const step = STEPS[currentStepId];
+function showStep(stepId, skipAnimation = false) {
+    console.log(`Showing step: ${stepId}`);
     
-    // Validate current step if needed
-    if (step.validate && !step.validate()) {
-        return false;
-    }
-    
-    // Save current step data
-    saveStepData(currentStepId);
-    
-    // Go to next step if there is one
-    if (step.next) {
-        showStep(step.next);
-        
-        // Track step completion
-        trackStepCompletion(currentStepId);
-        
-        return true;
-    }
-    
-    return false;
-}
-
-/**
- * Navigate to the previous step
- */
-function goToPreviousStep(currentStepId) {
-    const step = STEPS[currentStepId];
-    
-    // Save current step data
-    saveStepData(currentStepId);
-    
-    // Go to previous step if there is one
-    if (step.previous) {
-        showStep(step.previous);
-        return true;
-    }
-    
-    return false;
-}
-
-/**
- * Show a specific step
- */
-function showStep(stepId) {
-    // Validate step ID
+    // Ensure the step exists
     if (!STEPS[stepId]) {
-        console.error('Invalid step ID:', stepId);
+        console.error(`Invalid step ID: ${stepId}`);
         return false;
     }
     
-    // Check if we're already on this step
-    if (currentStep === stepId) {
-        return true;
-    }
-    
-    // If going to a new step that's not the first, validate previous steps have data
+    // Validate that all previous steps have data
     if (stepId !== 'recipient' && !validatePreviousSteps(stepId)) {
-        showAlert('Please complete the previous steps first.', 'error');
+        console.warn(`Cannot show step ${stepId} because previous steps are incomplete`);
+        
+        // Find the earliest incomplete step
+        const stepKeys = Object.keys(STEPS);
+        for (let i = 0; i < stepKeys.length; i++) {
+            const checkStepId = stepKeys[i];
+            
+            // Check if we've already passed this step
+            if (checkStepId === stepId) {
+                break;
+            }
+            
+            // If this step is missing data, show it instead
+            if (!messageData[checkStepId]) {
+                showStep(checkStepId);
+                showAlert(`Please complete step ${i + 1} first.`, 'warning');
+                return false;
+            }
+        }
+        
         return false;
     }
     
-    // Hide all steps
-    Object.keys(elements.steps).forEach(step => {
-        elements.steps[step].classList.remove('active');
-    });
+    // Validate the current step's data if moving forward
+    const currentStepIndex = Object.keys(STEPS).indexOf(currentStep);
+    const targetStepIndex = Object.keys(STEPS).indexOf(stepId);
     
-    // Show the requested step
-    elements.steps[stepId].classList.add('active');
+    if (targetStepIndex > currentStepIndex && STEPS[currentStep].validate) {
+        const isValid = STEPS[currentStep].validate();
+        if (!isValid) {
+            console.warn(`Validation failed for step: ${currentStep}`);
+            return false;
+        }
+    }
+    
+    // Save current step data
+    saveStepData(currentStep);
     
     // Update current step
+    const previousStep = currentStep;
     currentStep = stepId;
     
-    // Update step progress in sidebar
-    updateStepProgress();
+    // Save to localStorage
+    localStorage.setItem('currentStep', currentStep);
     
-    // Initialize the specific step content if needed
-    initializeSteps();
+    // Get DOM elements
+    const stepElements = document.querySelectorAll('.message-builder__step');
     
-    // Scroll to top of step
-    elements.steps[stepId].scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Determine animation direction (forward or backward)
+    const isForward = targetStepIndex > currentStepIndex;
+    
+    // Hide all steps with appropriate animation
+    stepElements.forEach(element => {
+        if (!skipAnimation) {
+            // Remove existing animation classes
+            element.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-right', 'slide-out-left');
+            
+            // Add appropriate exit animation class if this is the active step
+            if (element.classList.contains('active')) {
+                element.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
+            }
+        }
+        
+        // After exit animation, remove active class
+        setTimeout(() => {
+            element.classList.remove('active');
+        }, skipAnimation ? 0 : 300);
+    });
+    
+    // Show target step with animation
+    const targetElement = document.getElementById(STEPS[stepId].id);
+    if (targetElement) {
+        setTimeout(() => {
+            if (!skipAnimation) {
+                // Add appropriate entrance animation class
+                targetElement.classList.add(isForward ? 'slide-in-right' : 'slide-in-left');
+            }
+            
+            // Add active class
+            targetElement.classList.add('active');
+            
+            // Scroll to top
+            targetElement.scrollTop = 0;
+        }, skipAnimation ? 0 : 300);
+    }
+    
+    // Update sidebar
+    updateSidebar(previousStep, stepId);
+    
+    // Update preview
+    updatePreview();
+    
+    // Initialize step-specific functionality
+    initializeStepContent(stepId);
+    
+    // Track step view in analytics
+    if (firebase.analytics) {
+        firebase.analytics().logEvent('view_step', {
+            step_id: stepId,
+            step_number: Object.keys(STEPS).indexOf(stepId) + 1,
+            timestamp: new Date().toISOString()
+        });
+    }
     
     return true;
 }
 
 /**
- * Initialize individual steps based on current step
+ * Update sidebar with enhanced animations
+ * @param {string} previousStep - The previous step ID
+ * @param {string} newStep - The new step ID
  */
-function initializeSteps() {
-    console.log('Initializing steps based on current step:', currentStep);
+function updateSidebar(previousStep, newStep) {
+    // First update all steps
+    updateStepProgress();
     
-    switch (currentStep) {
+    // Then add animation to the current step indicator
+    const previousStepElement = previousStep ? 
+        document.querySelector(`.progress-step[data-step="${previousStep}"]`) : null;
+    
+    const newStepElement = document.querySelector(`.progress-step[data-step="${newStep}"]`);
+    
+    if (previousStepElement && newStepElement && previousStep !== newStep) {
+        // Add pulse animation to current step
+        newStepElement.classList.add('pulse-animation');
+        
+        // Remove pulse after animation completes
+        setTimeout(() => {
+            newStepElement.classList.remove('pulse-animation');
+        }, 1000);
+    }
+}
+
+/**
+ * Initialize step-specific content and functionality
+ * @param {string} stepId - The step ID to initialize
+ */
+function initializeStepContent(stepId) {
+    switch (stepId) {
         case 'recipient':
-            initializeRecipientStep();
+            // Recipient step content might already be loaded
+            refreshConnectionsList();
             break;
             
         case 'intent':
-            initializeIntentStep();
+            // Load intent options if not already loaded
+            if (!document.querySelector('.intent-options-container')) {
+                loadIntentOptions();
+            }
             break;
             
         case 'tone':
-            initializeToneStep();
+            // Load tone options if not already loaded
+            if (!document.querySelector('.tone-options-container')) {
+                loadToneOptions();
+            }
+            
+            // Update context section with recipient and intent
+            updateToneContext();
             break;
             
         case 'result':
+            // Initialize or refresh result display
             initializeResultStep();
             break;
-            
-        default:
-            console.error('Unknown step:', currentStep);
     }
+}
+
+/**
+ * Smoothly navigate to the next step with validation
+ * @param {string} currentStepId - The current step ID
+ * @returns {boolean} - Whether the navigation was successful
+ */
+function goToNextStep(currentStepId) {
+    // Get the next step
+    const nextStep = STEPS[currentStepId].next;
+    
+    if (!nextStep) {
+        console.warn(`No next step defined for ${currentStepId}`);
+        return false;
+    }
+    
+    // Validate current step if validation function exists
+    if (STEPS[currentStepId].validate) {
+        const isValid = STEPS[currentStepId].validate();
+        
+        if (!isValid) {
+            console.warn(`Validation failed for step: ${currentStepId}`);
+            return false;
+        }
+    }
+    
+    // Save data from current step
+    saveStepData(currentStepId);
+    
+    // If going to result step, check if we need to generate a message
+    if (nextStep === 'result' && (!messageData.result || !messageData.result.message)) {
+        const genFunctions = {
+            showStep: () => {
+                showStep(nextStep);
+                return generateMessage();
+            }
+        };
+        
+        // Slight delay to allow animation to start
+        setTimeout(genFunctions.showStep, 100);
+    } else {
+        // Show the next step
+        return showStep(nextStep);
+    }
+    
+    return true;
+}
+
+/**
+ * Smoothly navigate to the previous step
+ * @param {string} currentStepId - The current step ID
+ * @returns {boolean} - Whether the navigation was successful
+ */
+function goToPreviousStep(currentStepId) {
+    // Get the previous step
+    const prevStep = STEPS[currentStepId].previous;
+    
+    if (!prevStep) {
+        console.warn(`No previous step defined for ${currentStepId}`);
+        return false;
+    }
+    
+    // Save data from current step even if incomplete
+    saveStepData(currentStepId);
+    
+    // Show the previous step
+    return showStep(prevStep);
 }
 
 /**
@@ -1681,9 +1974,10 @@ function initializeResultStep() {
 }
 
 /**
- * Generate a message based on the selected data
+ * Generate message using Cloud Function API
+ * @returns {Promise<void>}
  */
-function generateMessage() {
+async function generateMessage() {
     // Show loading state
     const messageLoading = document.getElementById('message-loading');
     const messageText = document.getElementById('message-text');
@@ -1695,35 +1989,107 @@ function generateMessage() {
     if (messageError) messageError.style.display = 'none';
     if (insightsCard) insightsCard.style.display = 'none';
     
-    // In this implementation, we'll simulate the message generation
-    // In a real implementation, you would call your API here
-    
-    setTimeout(() => {
-        // Simulate message generation
-        const message = `Dear ${messageData.recipient.name},\n\nI wanted to take a moment to express my heartfelt appreciation for all that you do. Your kindness, support, and presence in my life mean more to me than words can express.\n\nWith sincere gratitude,\n[Your Name]`;
+    try {
+        // Prepare data for API
+        const apiData = {
+            recipient: {
+                name: messageData.recipient.name,
+                relationship: messageData.recipient.relationship,
+                otherRelationship: messageData.recipient.otherRelationship || ''
+            },
+            intent: {
+                type: messageData.intent.type,
+                title: messageData.intent.title,
+                customText: messageData.intent.customText || ''
+            },
+            tone: {
+                type: messageData.tone.type,
+                name: messageData.tone.name,
+                customText: messageData.tone.customText || ''
+            },
+            userId: currentUser.uid
+        };
         
-        const insights = [
-            "This message emphasizes genuine appreciation and gratitude",
-            "The tone is warm and sincere, creating a connection",
-            "Using 'heartfelt' adds emotional depth to your appreciation"
-        ];
+        // Track the start of message generation in analytics
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('message_generation_started', {
+                intent_type: messageData.intent.type,
+                tone_type: messageData.tone.type,
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        // Call the API with authentication
+        const result = await callGenerateMessageAPI(apiData);
+        
+        // Validate the response
+        if (!result || !result.message) {
+            throw new Error('Invalid response from API');
+        }
         
         // Store the results
         messageData.result = {
-            message: message,
-            insights: insights,
+            message: result.message,
+            insights: result.insights || [],
             timestamp: new Date().toISOString()
         };
         
         // Save to localStorage
         localStorage.setItem('messageData', JSON.stringify(messageData));
+        localStorage.setItem('resultData', JSON.stringify(messageData.result));
         
         // Display the message
-        showGeneratedMessage(message, insights);
+        showGeneratedMessage(result.message, result.insights);
         
         // Update preview
         updatePreview();
-    }, 2000);
+        
+        // Track successful generation in analytics
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('message_generation_success', {
+                intent_type: messageData.intent.type,
+                tone_type: messageData.tone.type,
+                has_insights: (result.insights && result.insights.length > 0),
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+    } catch (error) {
+        console.error('Error generating message:', error);
+        
+        // Show error message
+        if (messageLoading) messageLoading.style.display = 'none';
+        if (messageText) messageText.style.display = 'none';
+        if (messageError) {
+            messageError.style.display = 'block';
+            messageError.innerHTML = `
+                <div class="error-message">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <p>We couldn't generate your message. Please try again.</p>
+                </div>
+                <button id="retry-generation" class="primary-button">
+                    <i class="fas fa-redo"></i> Try Again
+                </button>
+            `;
+            
+            // Add retry button functionality
+            const retryButton = document.getElementById('retry-generation');
+            if (retryButton) {
+                retryButton.addEventListener('click', generateMessage);
+            }
+        }
+        
+        // Track error in analytics
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('message_generation_error', {
+                error_type: error.message.includes('NetworkError') ? 'network' : 
+                            error.message.includes('401') ? 'authentication' : 'api',
+                intent_type: messageData.intent.type,
+                tone_type: messageData.tone.type,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
 }
 
 /**
@@ -2112,52 +2478,157 @@ function hideLoading() {
 }
 
 /**
- * Show an alert message
+ * Show an alert message with enhanced options
+ * @param {string} message - The message to display
+ * @param {string} type - The alert type (success, error, warning, info)
+ * @param {string} action - The action button type (close, retry, etc.)
+ * @param {Function} retryFn - Function to call when retry button is clicked
  */
-function showAlert(message, type = 'info') {
+function showAlert(message, type = 'info', action = 'close', retryFn = null) {
     const alert = document.createElement('div');
     alert.className = `alert alert-${type}`;
     
+    // Create content container
     const alertContent = document.createElement('div');
     alertContent.className = 'alert-content';
     
+    // Add icon based on type
+    let icon = 'info-circle';
+    if (type === 'success') icon = 'check-circle';
+    if (type === 'error') icon = 'exclamation-circle';
+    if (type === 'warning') icon = 'exclamation-triangle';
+    
+    // Add icon and message
     const alertMessage = document.createElement('div');
     alertMessage.className = 'alert-message';
-    alertMessage.textContent = message;
+    alertMessage.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
     
+    // Add close button
     const alertClose = document.createElement('button');
     alertClose.className = 'alert-close';
-    alertClose.innerHTML = '&times;';
+    alertClose.innerHTML = '<i class="fas fa-times"></i>';
     alertClose.addEventListener('click', () => {
         alert.classList.remove('show');
-        setTimeout(() => alert.remove(), 300);
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 300);
     });
     
-    alertContent.appendChild(alertMessage);
-    alertContent.appendChild(alertClose);
-    alert.appendChild(alertContent);
+    // Add retry button if action is retry and retry function provided
+    if (action === 'retry' && retryFn) {
+        const retryButton = document.createElement('button');
+        retryButton.className = 'alert-action';
+        retryButton.innerHTML = '<i class="fas fa-redo"></i> Retry';
+        retryButton.addEventListener('click', () => {
+            alert.classList.remove('show');
+            setTimeout(() => {
+                if (alert.parentNode) {
+                    alert.remove();
+                }
+                // Call the retry function
+                retryFn();
+            }, 300);
+        });
+        alertContent.appendChild(retryButton);
+    }
     
+    // Assemble alert
+    alertContent.appendChild(alertMessage);
+    alert.appendChild(alertContent);
+    alert.appendChild(alertClose);
+    
+    // Add to container
     elements.alerts.container.appendChild(alert);
     
     // Force reflow to trigger transition
     alert.offsetHeight;
     alert.classList.add('show');
     
-    // Auto-close after 5 seconds
-    setTimeout(() => {
-        if (alert.parentNode) {
-            alert.classList.remove('show');
-            setTimeout(() => alert.remove(), 300);
-        }
-    }, 5000);
+    // Auto-close after 5 seconds for non-error alerts
+    if (type !== 'error') {
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    if (alert.parentNode) {
+                        alert.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+    
+    // Track in analytics
+    if (firebase.analytics) {
+        firebase.analytics().logEvent('alert_shown', {
+            type: type,
+            action: action,
+            has_retry: !!retryFn,
+            timestamp: new Date().toISOString()
+        });
+    }
 }
 
 /**
- * Capitalize the first letter of a string
+ * Enhanced error handler with consistent reporting and retry options
+ * @param {Error} error - The error object
+ * @param {string} context - The context in which the error occurred
+ * @param {Function} retryFn - Optional function to retry the operation
  */
-function capitalizeFirstLetter(string) {
-    if (!string) return '';
-    return string.charAt(0).toUpperCase() + string.slice(1);
+function handleError(error, context, retryFn = null) {
+    console.error(`Error in ${context}:`, error);
+    
+    // Categorize the error
+    let errorType = 'generic';
+    let message = 'Something went wrong. Please try again.';
+    
+    // Network errors
+    if (error.message.includes('NetworkError') || 
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Network request failed')) {
+        errorType = 'network';
+        message = 'Network connection issue. Please check your internet connection and try again.';
+    } 
+    // Authentication errors
+    else if (error.message.includes('401') || 
+             error.message.includes('403') || 
+             error.message.includes('auth') || 
+             error.message.includes('Authentication')) {
+        errorType = 'auth';
+        message = 'Authentication error. Please refresh the page and sign in again.';
+    }
+    // API errors
+    else if (error.message.includes('API error') || 
+             error.message.includes('500') || 
+             error.message.includes('502') ||
+             error.message.includes('504')) {
+        errorType = 'api';
+        message = 'Our service is experiencing issues. Please try again in a few moments.';
+    }
+    // Validation errors
+    else if (error.message.includes('validation') || 
+             error.message.includes('invalid')) {
+        errorType = 'validation';
+        message = error.message;
+    }
+    
+    // Show error with retry option if provided
+    showAlert(message, 'error', retryFn ? 'retry' : 'close', retryFn);
+    
+    // Track error in analytics
+    if (firebase.analytics) {
+        firebase.analytics().logEvent('error_occurred', {
+            error_type: errorType,
+            error_message: error.message,
+            error_context: context,
+            has_retry: !!retryFn,
+            timestamp: new Date().toISOString()
+        });
+    }
+    
+    return { errorType, message };
 }
 
 // Step validation functions
@@ -2194,57 +2665,71 @@ function validateToneStep() {
 }
 
 /**
- * Update preview panel with current data
+ * Get Firebase ID Token for authenticated API calls
+ * @returns {Promise<string>} The ID token
  */
-function updatePreview() {
-    // Recipient preview update
-    if (messageData.recipient) {
-        elements.preview.recipientName.textContent = messageData.recipient.name;
+async function getIdToken() {
+    try {
+        if (!firebase.auth().currentUser) {
+            throw new Error('No authenticated user found');
+        }
+        // Force token refresh to ensure it's not expired
+        return await firebase.auth().currentUser.getIdToken(true);
+    } catch (error) {
+        console.error('Error getting ID token:', error);
+        showAlert('Authentication error. Please refresh and try again.', 'error');
+        throw error;
+    }
+}
+
+/**
+ * Call the message generation API with authentication
+ * @param {Object} data - The data to send to the API
+ * @returns {Promise<Object>} - The API response
+ */
+async function callGenerateMessageAPI(data) {
+    try {
+        // Get authentication token
+        const idToken = await getIdToken();
         
-        // Format relationship
-        let relationshipText = messageData.recipient.relationship;
-        if (messageData.recipient.relationship === 'other' && messageData.recipient.otherRelationship) {
-            relationshipText = messageData.recipient.otherRelationship;
-        } else {
-            relationshipText = capitalizeFirstLetter(messageData.recipient.relationship);
+        // Call the API with proper authentication
+        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${idToken}`
+            },
+            body: JSON.stringify(data)
+        });
+        
+        // Check for HTTP errors
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`API error (${response.status}): ${errorText}`);
         }
         
-        elements.preview.recipientRelationship.textContent = relationshipText;
-        elements.preview.recipientInitial.textContent = getInitials(messageData.recipient.name);
+        // Parse and return the response
+        return await response.json();
+    } catch (error) {
+        console.error('Message generation API call failed:', error);
         
-        // Show the actual content, hide placeholder
-        elements.preview.messagePlaceholder.style.display = 'none';
-    } else {
-        elements.preview.recipientName.textContent = 'Select a recipient';
-        elements.preview.recipientRelationship.textContent = '';
-        elements.preview.recipientInitial.textContent = '?';
+        // Provide user-friendly error message based on error type
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            showAlert('Network error. Please check your connection and try again.', 'error');
+        } else if (error.message.includes('401') || error.message.includes('403')) {
+            showAlert('Authentication error. Please refresh and try again.', 'error');
+        } else {
+            showAlert('Failed to generate message. Please try again.', 'error');
+        }
         
-        // Show placeholder if we don't have data
-        elements.preview.messagePlaceholder.style.display = 'block';
+        throw error;
     }
-    
-    // Intent preview update
-    if (messageData.intent) {
-        elements.preview.intent.textContent = messageData.intent.title || messageData.intent.category;
-    } else {
-        elements.preview.intent.textContent = '-';
-    }
-    
-    // Tone preview update
-    if (messageData.tone) {
-        elements.preview.tone.textContent = messageData.tone.name;
-    } else {
-        elements.preview.tone.textContent = '-';
-    }
-    
-    // Message text preview
-    if (messageData.result && messageData.result.message) {
-        elements.preview.messageText.textContent = messageData.result.message;
-        elements.preview.messageText.style.display = 'block';
-    } else {
-        elements.preview.messageText.style.display = 'none';
-    }
-    
-    // Update sidebar progress indicators
-    updateStepProgress();
-} 
+}
+
+/**
+ * Capitalize the first letter of a string
+ */
+function capitalizeFirstLetter(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}

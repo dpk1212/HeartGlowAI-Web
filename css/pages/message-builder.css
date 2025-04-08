@@ -806,6 +806,9 @@
   align-items: center;
   text-align: center;
   height: 140px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
 }
 
 .connection-card:hover, .add-connection-card:hover {
@@ -818,6 +821,11 @@
   border-color: var(--primary);
   background: rgba(138, 87, 222, 0.1);
   box-shadow: 0 0 0 2px rgba(138, 87, 222, 0.3);
+}
+
+.connection-card.fade-in {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .connection-avatar {
@@ -1321,5 +1329,28 @@
     
     .context-section {
         flex-direction: column;
+    }
+}
+
+/* Connection card animation */
+.connection-card {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.connection-card.fade-in {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+@keyframes staggeredFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 } 

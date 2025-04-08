@@ -76,6 +76,9 @@ function initializeMessageBuilder() {
     
     // Try to load existing data (if the user is resuming)
     loadExistingData();
+    
+    // Show the current step (determined by loadExistingData)
+    showStep(currentStep);
 }
 
 /**
@@ -1157,29 +1160,23 @@ function initializeIntentStep() {
                 // Only enable next if custom text is entered
                 elements.buttons.intentNext.classList.add('disabled');
                 
-                customIntentInput.addEventListener('input', function() {
-                    const customText = this.value.trim();
+                // Check if custom input already has a value (from previous selection)
+                if (customIntentInput.value.trim()) {
+                    elements.buttons.intentNext.classList.remove('disabled');
                     
-                    if (customText) {
-                        elements.buttons.intentNext.classList.remove('disabled');
-                        
-                        // Update message data
-                        messageData.intent = {
-                            type: 'custom',
-                            title: customText,
-                            description: 'Custom intent',
-                            category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
-                            icon: iconClass,
-                            customText: customText
-                        };
-                        
-                        // Update preview
-                        updatePreview();
-                    } else {
-                        elements.buttons.intentNext.classList.add('disabled');
-                        messageData.intent = null;
-                    }
-                });
+                    // Update message data
+                    messageData.intent = {
+                        type: 'custom',
+                        title: customIntentInput.value.trim(),
+                        description: 'Custom intent',
+                        category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
+                        icon: iconClass,
+                        customText: customIntentInput.value.trim()
+                    };
+                    
+                    // Update preview
+                    updatePreview();
+                }
             } else {
                 // Hide custom intent section
                 customIntentSection.style.display = 'none';
@@ -1201,6 +1198,34 @@ function initializeIntentStep() {
             }
         });
     });
+    
+    // Add a SINGLE event listener for the custom intent input
+    // This prevents the issue of adding multiple listeners when clicking the custom intent card repeatedly
+    if (customIntentInput) {
+        customIntentInput.addEventListener('input', function() {
+            const customText = this.value.trim();
+            
+            if (customText) {
+                elements.buttons.intentNext.classList.remove('disabled');
+                
+                // Update message data
+                messageData.intent = {
+                    type: 'custom',
+                    title: customText,
+                    description: 'Custom intent',
+                    category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
+                    icon: document.querySelector('.option-card[data-intent="custom"] .option-icon i')?.className || 'fas fa-pen',
+                    customText: customText
+                };
+                
+                // Update preview
+                updatePreview();
+            } else {
+                elements.buttons.intentNext.classList.add('disabled');
+                messageData.intent = null;
+            }
+        });
+    }
     
     // Load previous intent data if available
     if (messageData.intent) {
@@ -1371,28 +1396,22 @@ function initializeToneStep() {
                 // Only enable next if custom text is entered
                 elements.buttons.toneNext.classList.add('disabled');
                 
-                customToneInput.addEventListener('input', function() {
-                    const customText = this.value.trim();
+                // Check if custom input already has a value (from previous selection)
+                if (customToneInput.value.trim()) {
+                    elements.buttons.toneNext.classList.remove('disabled');
                     
-                    if (customText) {
-                        elements.buttons.toneNext.classList.remove('disabled');
-                        
-                        // Update message data
-                        messageData.tone = {
-                            type: 'custom',
-                            name: customText,
-                            description: 'Custom tone',
-                            icon: iconClass,
-                            customText: customText
-                        };
-                        
-                        // Update preview
-                        updatePreview();
-                    } else {
-                        elements.buttons.toneNext.classList.add('disabled');
-                        messageData.tone = null;
-                    }
-                });
+                    // Update message data
+                    messageData.tone = {
+                        type: 'custom',
+                        name: customToneInput.value.trim(),
+                        description: 'Custom tone',
+                        icon: iconClass,
+                        customText: customToneInput.value.trim()
+                    };
+                    
+                    // Update preview
+                    updatePreview();
+                }
             } else {
                 // Hide custom tone section
                 customToneSection.style.display = 'none';
@@ -1413,6 +1432,33 @@ function initializeToneStep() {
             }
         });
     });
+    
+    // Add a SINGLE event listener for the custom tone input
+    // This prevents the issue of adding multiple listeners when clicking the custom tone card repeatedly
+    if (customToneInput) {
+        customToneInput.addEventListener('input', function() {
+            const customText = this.value.trim();
+            
+            if (customText) {
+                elements.buttons.toneNext.classList.remove('disabled');
+                
+                // Update message data
+                messageData.tone = {
+                    type: 'custom',
+                    name: customText,
+                    description: 'Custom tone',
+                    icon: document.querySelector('.option-card[data-tone="custom"] .option-icon i')?.className || 'fas fa-edit',
+                    customText: customText
+                };
+                
+                // Update preview
+                updatePreview();
+            } else {
+                elements.buttons.toneNext.classList.add('disabled');
+                messageData.tone = null;
+            }
+        });
+    }
     
     // Load previous tone data if available
     if (messageData.tone) {
@@ -1855,50 +1901,134 @@ function saveAllData() {
  */
 function loadExistingData() {
     try {
-        // Try to load data from localStorage
-        const recipientData = localStorage.getItem('recipientData');
-        const intentData = localStorage.getItem('intentData');
-        const toneData = localStorage.getItem('toneData');
-        const resultData = localStorage.getItem('resultData');
-        const savedStep = localStorage.getItem('currentStep');
+        console.log('Loading existing data from localStorage...');
         
-        if (recipientData) {
-            messageData.recipient = JSON.parse(recipientData);
+        // Load recipient data - try both storage keys for compatibility
+        const recipientDataString = localStorage.getItem('recipientData');
+        const selectedRecipientString = localStorage.getItem('selectedRecipient');
+        
+        if (recipientDataString) {
+            messageData.recipient = JSON.parse(recipientDataString);
+            console.log('Loaded recipient data:', messageData.recipient);
+        } else if (selectedRecipientString) {
+            // Handle legacy format
+            const selectedRecipient = JSON.parse(selectedRecipientString);
+            messageData.recipient = {
+                id: selectedRecipient.id,
+                name: selectedRecipient.name,
+                relationship: selectedRecipient.relationship || 'friend',
+                otherRelationship: selectedRecipient.otherRelationship || ''
+            };
+            console.log('Loaded recipient data from legacy format:', messageData.recipient);
         }
         
-        if (intentData) {
-            messageData.intent = JSON.parse(intentData);
-        }
+        // Load intent data - try both storage keys for compatibility
+        const intentDataString = localStorage.getItem('intentData');
+        const selectedIntentString = localStorage.getItem('selectedIntent');
         
-        if (toneData) {
-            messageData.tone = JSON.parse(toneData);
-        }
-        
-        if (resultData) {
-            messageData.result = JSON.parse(resultData);
-        }
-        
-        // Determine which step to show
-        if (savedStep && Object.keys(STEPS).includes(savedStep)) {
-            if (validatePreviousSteps(savedStep)) {
-                currentStep = savedStep;
+        if (intentDataString) {
+            const intentData = JSON.parse(intentDataString);
+            
+            // First try to use the full intent object if it exists
+            if (selectedIntentString) {
+                const selectedIntent = JSON.parse(selectedIntentString);
+                messageData.intent = {
+                    type: intentData.type,
+                    title: selectedIntent.title || intentData.type,
+                    description: selectedIntent.description || '',
+                    category: selectedIntent.category || 'personal',
+                    icon: selectedIntent.icon || 'fa-heart',
+                    customText: intentData.customText || ''
+                };
+            } else {
+                // Fallback to simple intent data
+                messageData.intent = {
+                    type: intentData.type,
+                    title: intentData.type.charAt(0).toUpperCase() + intentData.type.slice(1).replace('_', ' '),
+                    description: '',
+                    category: 'personal',
+                    customText: intentData.customText || ''
+                };
             }
+            console.log('Loaded intent data:', messageData.intent);
         }
         
-        // Update UI with loaded data
+        // Load tone data - try both storage keys for compatibility
+        const toneDataString = localStorage.getItem('toneData');
+        const selectedToneString = localStorage.getItem('selectedTone');
+        
+        if (toneDataString) {
+            const toneData = JSON.parse(toneDataString);
+            
+            messageData.tone = {
+                type: toneData.type,
+                name: toneData.type.charAt(0).toUpperCase() + toneData.type.slice(1),
+                description: '',
+                customText: toneData.customText || ''
+            };
+            console.log('Loaded tone data:', messageData.tone);
+        } else if (selectedToneString) {
+            // Handle legacy format
+            const selectedTone = JSON.parse(selectedToneString);
+            messageData.tone = {
+                type: selectedTone.type || selectedTone.name.toLowerCase(),
+                name: selectedTone.name,
+                description: selectedTone.description || '',
+                customText: selectedTone.customText || ''
+            };
+            console.log('Loaded tone data from legacy format:', messageData.tone);
+        }
+        
+        // Load result data if it exists
+        const resultDataString = localStorage.getItem('resultData');
+        if (resultDataString) {
+            messageData.result = JSON.parse(resultDataString);
+            console.log('Loaded result data:', messageData.result);
+        }
+        
+        // Determine current step based on available data
+        determineCurrentStep();
+        
+        // Update preview panel with loaded data
         updatePreview();
-        showStep(currentStep);
         
-        console.log('Loaded data from localStorage:', messageData);
+        return true;
     } catch (error) {
-        console.error('Error loading data from localStorage:', error);
-        
-        // Offer reset option to user
-        if (confirm('There was an error loading your previous progress. Would you like to start over?')) {
-            resetAll();
-            showStep('recipient');
+        console.error('Error loading existing data:', error);
+        showAlert('There was an error loading your previous data. Starting fresh.', 'error');
+        return false;
+    }
+}
+
+/**
+ * Determine the appropriate step based on loaded data
+ */
+function determineCurrentStep() {
+    const savedStep = localStorage.getItem('currentStep');
+    
+    // If we have a saved step and all required data for that step is available, use it
+    if (savedStep && STEPS[savedStep]) {
+        if (validatePreviousSteps(savedStep)) {
+            currentStep = savedStep;
+            console.log('Resuming at saved step:', currentStep);
+            return;
         }
     }
+    
+    // Otherwise determine step based on available data
+    if (messageData.result && messageData.result.message) {
+        currentStep = 'result';
+    } else if (messageData.tone) {
+        currentStep = 'result';  // Go to result to generate message
+    } else if (messageData.intent) {
+        currentStep = 'tone';
+    } else if (messageData.recipient) {
+        currentStep = 'intent';
+    } else {
+        currentStep = 'recipient';
+    }
+    
+    console.log('Determined current step based on data:', currentStep);
 }
 
 /**

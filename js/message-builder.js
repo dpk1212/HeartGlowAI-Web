@@ -547,115 +547,103 @@ function initializePreviewPanel() {
 
 /**
  * Update preview panel with current message data
- * @param {boolean} initialLoad - Whether this is the initial load
+ * @param {boolean} skipAnimation - Whether to skip animations
  */
-function updatePreview(initialLoad = false) {
+function updatePreview(skipAnimation = false) {
     console.log('Updating preview panel...');
     
-    // Update container class if there's a message
-    const previewContainer = elements.preview.container;
-    if (previewContainer) {
-        if (messageData.result && messageData.result.message) {
-            previewContainer.classList.add('preview-has-message');
-        } else {
-            previewContainer.classList.remove('preview-has-message');
+    try {
+        // Recipient preview
+        if (messageData.recipient) {
+            const name = messageData.recipient.name || '';
+            const relationship = formatRelationship(messageData.recipient) || '';
+            const initial = getInitials(name);
+            
+            // Update recipient information
+            updatePreviewElement(elements.preview.recipientName, name, skipAnimation);
+            updatePreviewElement(elements.preview.recipientRelationship, relationship, skipAnimation);
+            updatePreviewElement(elements.preview.recipientInitial, initial, skipAnimation);
+            
+            // Update avatar background
+            if (elements.preview.recipientInitial?.parentElement) {
+                elements.preview.recipientInitial.parentElement.style.background = '#8a57de';
+            }
         }
-    }
-    
-    // Recipient info
-    updatePreviewElement(elements.preview.recipientName, 
-        messageData.recipient ? messageData.recipient.name : 'Select a recipient',
-        initialLoad);
-    
-    updatePreviewElement(elements.preview.recipientRelationship, 
-        messageData.recipient ? formatRelationship(messageData.recipient) : '',
-        initialLoad);
-    
-    updatePreviewElement(elements.preview.recipientInitial, 
-        messageData.recipient ? getInitials(messageData.recipient.name) : '?',
-        initialLoad);
-    
-    // Intent info
-    updatePreviewElement(elements.preview.intent, 
-        messageData.intent ? messageData.intent.title : '-',
-        initialLoad);
-    
-    // Tone info
-    updatePreviewElement(elements.preview.tone, 
-        messageData.tone ? messageData.tone.name : '-',
-        initialLoad);
-    
-    // Message text
-    if (messageData.result && messageData.result.message) {
-        // Show actual message text
-        elements.preview.messagePlaceholder.style.display = 'none';
-        updatePreviewElement(elements.preview.messageText, 
-            messageData.result.message,
-            initialLoad,
-            true); // text element - preserve formatting
-    } else if (messageData.recipient && messageData.intent && messageData.tone) {
-        // Show placeholder for what we know so far
-        elements.preview.messagePlaceholder.style.display = 'block';
-        elements.preview.messagePlaceholder.textContent = `
-            Creating a ${messageData.tone.name.toLowerCase()} message for ${messageData.recipient.name} 
-            to ${messageData.intent.title.toLowerCase()}...
-        `;
-        elements.preview.messageText.style.display = 'none';
-    } else {
-        // Default placeholder
-        elements.preview.messagePlaceholder.style.display = 'block';
-        elements.preview.messagePlaceholder.textContent = 'Your message will appear here as you make selections...';
-        elements.preview.messageText.style.display = 'none';
+        
+        // Intent preview
+        if (messageData.intent) {
+            updatePreviewElement(elements.preview.intent, messageData.intent.title || '', skipAnimation);
+        } else {
+            updatePreviewElement(elements.preview.intent, '-', skipAnimation);
+        }
+        
+        // Tone preview
+        if (messageData.tone) {
+            updatePreviewElement(elements.preview.tone, messageData.tone.name || '', skipAnimation);
+        } else {
+            updatePreviewElement(elements.preview.tone, '-', skipAnimation);
+        }
+        
+        // Message preview placeholder/text logic
+        if (messageData.result && messageData.result.message) {
+            // We have a generated message
+            if (elements.preview.messagePlaceholder) elements.preview.messagePlaceholder.style.display = 'none';
+            if (elements.preview.messageText) {
+                elements.preview.messageText.style.display = 'block';
+                updatePreviewElement(elements.preview.messageText, messageData.result.message, skipAnimation);
+            }
+        } else {
+            // Still in progress, show placeholder
+            if (elements.preview.messagePlaceholder) elements.preview.messagePlaceholder.style.display = 'block';
+            if (elements.preview.messageText) elements.preview.messageText.style.display = 'none';
+            
+            // Customize placeholder based on progress
+            let placeholderText = 'Your message will appear here as you make selections...';
+            if (messageData.recipient && messageData.intent && messageData.tone) {
+                placeholderText = 'Ready to generate your message! Complete all steps to see the result.';
+            } else if (messageData.recipient && messageData.intent) {
+                placeholderText = 'Now select a tone to refine your message...';
+            } else if (messageData.recipient) {
+                placeholderText = 'Next, choose your message intent...';
+            }
+            
+            if (elements.preview.messagePlaceholder) {
+                updatePreviewElement(elements.preview.messagePlaceholder, placeholderText, skipAnimation);
+            }
+        }
+    } catch (error) {
+        console.error('Error updating preview:', error);
     }
 }
 
 /**
- * Helper function to update preview elements with animation
- * @param {HTMLElement} element - The element to update
- * @param {string} value - The new value
- * @param {boolean} skipAnimation - Whether to skip the animation
- * @param {boolean} isTextElement - Whether this is a text element that should preserve formatting
+ * Update a preview element with animation
+ * @param {Element} element - Element to update
+ * @param {string} value - New text value
+ * @param {boolean} skipAnimation - Whether to skip animation
  */
-function updatePreviewElement(element, value, skipAnimation = false, isTextElement = false) {
+function updatePreviewElement(element, value, skipAnimation) {
     if (!element) return;
     
-    // Don't animate if content hasn't changed
-    if (isTextElement ? element.innerHTML === value : element.textContent === value) {
+    if (element.textContent === value) return; // No change
+    
+    if (skipAnimation) {
+        element.textContent = value;
         return;
     }
     
-    // Function to update the content
-    const updateContent = () => {
-        if (isTextElement) {
-            // For message text, preserve line breaks by replacing \n with <br>
-            element.innerHTML = value.replace(/\n/g, '<br>');
-        } else {
-            element.textContent = value;
-        }
-        
-        element.dataset.value = value;
-        element.style.display = value ? 'block' : 'none';
-    };
+    // Add animation class
+    element.classList.add('updating');
     
-    if (skipAnimation) {
-        // Update immediately without animation
-        updateContent();
-    } else {
-        // Add transition out class
-        element.classList.add('preview-update-out');
+    // Set new value after short delay
+    setTimeout(() => {
+        element.textContent = value;
         
-        // After transition out, update content and transition back in
+        // Remove animation class
         setTimeout(() => {
-            updateContent();
-            element.classList.remove('preview-update-out');
-            element.classList.add('preview-update-in');
-            
-            // Remove the transition in class after animation completes
-            setTimeout(() => {
-                element.classList.remove('preview-update-in');
-            }, 300);
+            element.classList.remove('updating');
         }, 300);
-    }
+    }, 300);
 }
 
 /**
@@ -1559,315 +1547,649 @@ function goToPreviousStep(currentStepId) {
  * Initialize intent step
  */
 function initializeIntentStep() {
-    console.log('Initializing intent step...');
+    console.log('Initializing intent step');
     
-    // Get the intent step content container
-    const stepContent = elements.steps.intent.querySelector('.step-body');
-    if (!stepContent) {
-        console.error('Intent step content container not found');
-        return;
+    try {
+        // Get intent step content container
+        const stepBody = document.querySelector('#step-intent .step-body');
+        if (!stepBody) {
+            console.error('Intent step body not found');
+            return;
+        }
+        
+        // Check if content is already initialized
+        if (stepBody.querySelector('.intent-options-container')) {
+            console.log('Intent step already initialized, enhancing UI');
+            enhanceIntentUI();
+            return;
+        }
+        
+        // Create intent selection UI
+        createIntentUI(stepBody);
+        
+        // Enhance the UI with better styling and interactions
+        enhanceIntentUI();
+        
+    } catch (error) {
+        console.error('Error initializing intent step:', error);
     }
+}
+
+/**
+ * Create intent selection UI
+ * @param {Element} container - Container to add UI to
+ */
+function createIntentUI(container) {
+    console.log('Creating intent selection UI');
     
-    // Create intent selection HTML
-    const intentHTML = `
-        <div class="intent-categories">
-            <div class="intent-toggle">
-                <button class="intent-toggle__btn intent-toggle__btn--professional active" data-category="professional">
-                    <i class="fas fa-briefcase"></i>
-                    <span>Professional</span>
-                </button>
-                <button class="intent-toggle__btn intent-toggle__btn--personal" data-category="personal">
-                    <i class="fas fa-heart"></i>
-                    <span>Personal</span>
-                </button>
-            </div>
-        </div>
-        
-        <div class="intent-options-container">
-            <!-- Professional Intents -->
-            <div class="intent-options professional-intents active">
-                <div class="option-card" data-intent="recognize_effort">
-                    <div class="option-icon">
-                        <i class="fas fa-award"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Recognize Effort</h4>
-                        <p class="option-description">Acknowledge someone's hard work and dedication to a project or task.</p>
-                    </div>
+    // Create intent categories toggle
+    const toggleContainer = document.createElement('div');
+    toggleContainer.className = 'intent-toggle';
+    toggleContainer.innerHTML = `
+        <button class="intent-toggle__btn active" data-category="professional">
+            <i class="fas fa-briefcase"></i> Professional
+        </button>
+        <button class="intent-toggle__btn" data-category="personal">
+            <i class="fas fa-heart"></i> Personal
+        </button>
+    `;
+    
+    // Create intent options container
+    const optionsContainer = document.createElement('div');
+    optionsContainer.className = 'intent-options-container';
+    
+    // Create professional intents
+    const professionalOptions = document.createElement('div');
+    professionalOptions.className = 'intent-options professional active';
+    professionalOptions.innerHTML = createIntentOptionsHTML('professional');
+    
+    // Create personal intents
+    const personalOptions = document.createElement('div');
+    personalOptions.className = 'intent-options personal';
+    personalOptions.style.display = 'none';
+    personalOptions.innerHTML = createIntentOptionsHTML('personal');
+    
+    // Assemble the UI
+    optionsContainer.appendChild(professionalOptions);
+    optionsContainer.appendChild(personalOptions);
+    
+    container.appendChild(toggleContainer);
+    container.appendChild(optionsContainer);
+    
+    // Add event listeners for category toggle
+    const toggleButtons = toggleContainer.querySelectorAll('.intent-toggle__btn');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const category = this.getAttribute('data-category');
+            toggleIntentCategory(category);
+        });
+    });
+    
+    // Add event listeners for intent selection
+    const intentCards = optionsContainer.querySelectorAll('.option-card');
+    intentCards.forEach(card => {
+        card.addEventListener('click', function() {
+            selectIntent(this);
+        });
+    });
+}
+
+/**
+ * Create HTML for intent options
+ * @param {string} category - Category of intents (professional or personal)
+ * @returns {string} HTML for intent options
+ */
+function createIntentOptionsHTML(category) {
+    const professionalIntents = [
+        {
+            id: 'say_thank_you',
+            title: 'Say Thank You',
+            description: 'Express sincere gratitude for something someone has done for you.',
+            icon: 'fa-gift'
+        },
+        {
+            id: 'reconnect',
+            title: 'Reconnect',
+            description: 'Reach out to someone you haven\'t spoken to in a while.',
+            icon: 'fa-users'
+        },
+        {
+            id: 'give_feedback',
+            title: 'Give Feedback',
+            description: 'Provide constructive feedback in a supportive way.',
+            icon: 'fa-comment'
+        },
+        {
+            id: 'introduce_yourself',
+            title: 'Introduce Yourself',
+            description: 'Make a professional introduction that stands out.',
+            icon: 'fa-handshake'
+        }
+    ];
+    
+    const personalIntents = [
+        {
+            id: 'thinking_of_you',
+            title: 'Thinking of You',
+            description: 'Let someone know they\'ve been on your mind and you care about them.',
+            icon: 'fa-heart'
+        },
+        {
+            id: 'express_feelings',
+            title: 'Express Feelings',
+            description: 'Share your emotions or how someone makes you feel.',
+            icon: 'fa-smile'
+        },
+        {
+            id: 'celebrate_milestone',
+            title: 'Celebrate a Milestone',
+            description: 'Brighten someone\'s special day or achievement.',
+            icon: 'fa-birthday-cake'
+        },
+        {
+            id: 'apologize',
+            title: 'Apologize',
+            description: 'Say sorry in a sincere and heartfelt way.',
+            icon: 'fa-hands'
+        }
+    ];
+    
+    const intents = category === 'professional' ? professionalIntents : personalIntents;
+    
+    let html = '';
+    intents.forEach(intent => {
+        html += `
+            <div class="option-card" data-intent-id="${intent.id}" data-category="${category}">
+                <div class="option-card__icon">
+                    <i class="fas ${intent.icon}"></i>
                 </div>
-                
-                <div class="option-card" data-intent="give_feedback">
-                    <div class="option-icon">
-                        <i class="fas fa-comment-dots"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Give Feedback</h4>
-                        <p class="option-description">Provide constructive feedback while maintaining a supportive tone.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="thank_support">
-                    <div class="option-icon">
-                        <i class="fas fa-hands-helping"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Thank for Support</h4>
-                        <p class="option-description">Express gratitude for someone's help, guidance, or mentorship.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="express_clearly">
-                    <div class="option-icon">
-                        <i class="fas fa-bullseye"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Express Clearly</h4>
-                        <p class="option-description">Communicate your thoughts or concerns in a direct yet respectful manner.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="acknowledge_impact">
-                    <div class="option-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Acknowledge Impact</h4>
-                        <p class="option-description">Highlight the positive impact someone has made on you, the team, or a project.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Personal Intents -->
-            <div class="intent-options personal-intents">
-                <div class="option-card" data-intent="thinking_of_you">
-                    <div class="option-icon">
-                        <i class="fas fa-heart"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Thinking of You</h4>
-                        <p class="option-description">Let someone know they've been on your mind and you care about them.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="say_thank_you">
-                    <div class="option-icon">
-                        <i class="fas fa-gift"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Say Thank You</h4>
-                        <p class="option-description">Express sincere gratitude for something someone has done for you.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="reconnect">
-                    <div class="option-icon">
-                        <i class="fas fa-user-friends"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Reconnect</h4>
-                        <p class="option-description">Reach out to someone you haven't spoken to in a while.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="express_feelings">
-                    <div class="option-icon">
-                        <i class="fas fa-comment-heart"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Express Feelings</h4>
-                        <p class="option-description">Share your emotions or how someone makes you feel.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="make_smile">
-                    <div class="option-icon">
-                        <i class="fas fa-smile"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Make Someone Smile</h4>
-                        <p class="option-description">Brighten someone's day with a light-hearted message.</p>
-                    </div>
-                </div>
-                
-                <div class="option-card" data-intent="custom">
-                    <div class="option-icon">
-                        <i class="fas fa-pen"></i>
-                    </div>
-                    <div class="option-content">
-                        <h4 class="option-title">Custom Intent</h4>
-                        <p class="option-description">Specify your own messaging intent.</p>
-                    </div>
+                <div class="option-card__content">
+                    <h3 class="option-card__title">${intent.title}</h3>
+                    <p class="option-card__description">${intent.description}</p>
                 </div>
             </div>
-        </div>
-        
-        <div id="customIntentSection" class="custom-intent-section" style="display: none;">
-            <label for="customIntentInput" class="input-label">Describe your intent:</label>
-            <div class="custom-intent-input-container">
-                <input type="text" id="customIntentInput" class="custom-intent-input" placeholder="E.g., Celebrate a milestone, Apologize for a mistake...">
+        `;
+    });
+    
+    // Add custom intent option
+    html += `
+        <div class="option-card custom-intent" data-intent-id="custom" data-category="${category}">
+            <div class="option-card__icon">
+                <i class="fas fa-pencil-alt"></i>
+            </div>
+            <div class="option-card__content">
+                <h3 class="option-card__title">Custom Intent</h3>
+                <p class="option-card__description">Specify your own messaging intent.</p>
             </div>
         </div>
     `;
     
-    // Add intent HTML to the step content
-    stepContent.innerHTML = intentHTML;
+    return html;
+}
+
+/**
+ * Toggle between professional and personal intent categories
+ * @param {string} category - Category to show (professional or personal)
+ */
+function toggleIntentCategory(category) {
+    console.log(`Toggling intent category to: ${category}`);
     
-    // Initialize intent event listeners
-    const intentToggleBtns = stepContent.querySelectorAll('.intent-toggle__btn');
-    const optionCards = stepContent.querySelectorAll('.option-card');
-    const customIntentSection = stepContent.querySelector('#customIntentSection');
-    const customIntentInput = stepContent.querySelector('#customIntentInput');
-    
-    // Intent category toggle
-    intentToggleBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active class from all toggle buttons
-            intentToggleBtns.forEach(b => b.classList.remove('active'));
-            
-            // Add active class to clicked button
-            this.classList.add('active');
-            
-            // Get selected category
-            const category = this.getAttribute('data-category');
-            
-            // Toggle visible intent options
-            const professionalIntents = stepContent.querySelector('.professional-intents');
-            const personalIntents = stepContent.querySelector('.personal-intents');
-            
-            if (category === 'professional') {
-                professionalIntents.classList.add('active');
-                personalIntents.classList.remove('active');
-            } else {
-                professionalIntents.classList.remove('active');
-                personalIntents.classList.add('active');
-            }
-            
-            // Reset selection
-            optionCards.forEach(card => card.classList.remove('selected'));
-            customIntentSection.style.display = 'none';
-            
-            // Disable next button
-            elements.buttons.intentNext.classList.add('disabled');
-            
-            // Reset message data
-            messageData.intent = null;
-        });
+    // Update toggle buttons
+    const toggleButtons = document.querySelectorAll('.intent-toggle__btn');
+    toggleButtons.forEach(button => {
+        if (button.getAttribute('data-category') === category) {
+            button.classList.add('active');
+        } else {
+            button.classList.remove('active');
+        }
     });
     
-    // Intent option selection
-    optionCards.forEach(card => {
-        card.addEventListener('click', function() {
-            // Remove selected class from all cards
-            optionCards.forEach(c => c.classList.remove('selected'));
-            
-            // Add selected class to clicked card
-            this.classList.add('selected');
-            
-            // Get intent data
-            const intentType = this.getAttribute('data-intent');
-            const titleElement = this.querySelector('.option-title');
-            const descriptionElement = this.querySelector('.option-description');
-            const iconElement = this.querySelector('.option-icon i');
-            
-            const title = titleElement ? titleElement.textContent : '';
-            const description = descriptionElement ? descriptionElement.textContent : '';
-            const iconClass = iconElement ? iconElement.className : '';
-            
-            // Handle custom intent
-            if (intentType === 'custom') {
-                customIntentSection.style.display = 'block';
-                customIntentInput.focus();
-                
-                // Only enable next if custom text is entered
-                elements.buttons.intentNext.classList.add('disabled');
-                
-                // Check if custom input already has a value (from previous selection)
-                if (customIntentInput.value.trim()) {
-                    elements.buttons.intentNext.classList.remove('disabled');
-                    
-                    // Update message data
-                    messageData.intent = {
-                        type: 'custom',
-                        title: customIntentInput.value.trim(),
-                        description: 'Custom intent',
-                        category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
-                        icon: iconClass,
-                        customText: customIntentInput.value.trim()
-                    };
-                    
-                    // Update preview
-                    updatePreview();
-                }
-            } else {
-                // Hide custom intent section
-                customIntentSection.style.display = 'none';
-                
-                // Enable next button
-                elements.buttons.intentNext.classList.remove('disabled');
-                
-                // Update message data
-                messageData.intent = {
-                    type: intentType,
-                    title: title,
-                    description: description,
-                    category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
-                    icon: iconClass
-                };
-                
-                // Update preview
-                updatePreview();
-            }
-        });
+    // Update options containers
+    const optionsContainers = document.querySelectorAll('.intent-options');
+    optionsContainers.forEach(container => {
+        if (container.classList.contains(category)) {
+            container.classList.add('active');
+            container.style.display = 'grid';
+        } else {
+            container.classList.remove('active');
+            container.style.display = 'none';
+        }
     });
     
-    // Add a SINGLE event listener for the custom intent input
-    // This prevents the issue of adding multiple listeners when clicking the custom intent card repeatedly
-    if (customIntentInput) {
-        customIntentInput.addEventListener('input', function() {
-            const customText = this.value.trim();
-            
+    // Save the selected category
+    messageData.intentCategory = category;
+    localStorage.setItem('messageCategory', category);
+    
+    // Apply enhanced styling to the toggle buttons
+    styleIntentCategories();
+}
+
+/**
+ * Select an intent option
+ * @param {Element} intentCard - Selected intent card element
+ */
+function selectIntent(intentCard) {
+    console.log('Intent selected:', intentCard.getAttribute('data-intent-id'));
+    
+    // Remove selected class from all cards
+    const allCards = document.querySelectorAll('.option-card');
+    allCards.forEach(card => {
+        card.classList.remove('selected');
+        // Reset styling
+        card.style.border = '1px solid #8a57de';
+        card.style.transform = 'none';
+        card.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    });
+    
+    // Add selected class and styling to clicked card
+    intentCard.classList.add('selected');
+    intentCard.style.border = '2px solid #ff7eb6';
+    intentCard.style.transform = 'translateY(-3px)';
+    intentCard.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+    
+    // Get intent data
+    const intentId = intentCard.getAttribute('data-intent-id');
+    const category = intentCard.getAttribute('data-category');
+    const title = intentCard.querySelector('.option-card__title').textContent;
+    const description = intentCard.querySelector('.option-card__description').textContent;
+    
+    // Handle custom intent
+    if (intentId === 'custom') {
+        showCustomIntentInput();
+    } else {
+        // Save intent data
+        messageData.intent = {
+            id: intentId,
+            category: category,
+            title: title,
+            description: description
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('messageIntention', intentId);
+        localStorage.setItem('messageCategory', category);
+        
+        // Enable next button
+        const nextButton = document.getElementById('intentNextBtn');
+        if (nextButton) {
+            nextButton.classList.remove('disabled');
+            nextButton.style.opacity = '1';
+            nextButton.style.pointerEvents = 'auto';
+        }
+        
+        // Update preview
+        updatePreview();
+    }
+}
+
+/**
+ * Show custom intent input
+ */
+function showCustomIntentInput() {
+    console.log('Showing custom intent input');
+    
+    // Create custom intent modal
+    const modalHTML = `
+        <div id="custom-intent-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Custom Intent</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="custom-intent-text">Describe your messaging intent</label>
+                        <textarea id="custom-intent-text" rows="4" placeholder="e.g., I want to express my appreciation for their mentorship"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="custom-intent-cancel" class="secondary-button">Cancel</button>
+                    <button id="custom-intent-save" class="primary-button">Save</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body if it doesn't exist
+    if (!document.getElementById('custom-intent-modal')) {
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer.firstChild);
+        
+        // Add event listeners
+        const modal = document.getElementById('custom-intent-modal');
+        const closeButton = modal.querySelector('.close-modal');
+        const cancelButton = document.getElementById('custom-intent-cancel');
+        const saveButton = document.getElementById('custom-intent-save');
+        
+        closeButton.addEventListener('click', () => closeModal(modal));
+        cancelButton.addEventListener('click', () => closeModal(modal));
+        
+        saveButton.addEventListener('click', () => {
+            const customText = document.getElementById('custom-intent-text').value.trim();
             if (customText) {
-                elements.buttons.intentNext.classList.remove('disabled');
-                
-                // Update message data
+                // Save custom intent
                 messageData.intent = {
-                    type: 'custom',
-                    title: customText,
-                    description: 'Custom intent',
-                    category: document.querySelector('.intent-toggle__btn.active').getAttribute('data-category'),
-                    icon: document.querySelector('.option-card[data-intent="custom"] .option-icon i')?.className || 'fas fa-pen',
+                    id: 'custom',
+                    category: messageData.intentCategory || 'personal',
+                    title: 'Custom Intent',
+                    description: customText,
                     customText: customText
                 };
                 
+                // Save to localStorage
+                localStorage.setItem('messageIntention', 'custom');
+                localStorage.setItem('customIntentText', customText);
+                
+                // Enable next button
+                const nextButton = document.getElementById('intentNextBtn');
+                if (nextButton) {
+                    nextButton.classList.remove('disabled');
+                    nextButton.style.opacity = '1';
+                    nextButton.style.pointerEvents = 'auto';
+                }
+                
                 // Update preview
                 updatePreview();
+                
+                // Close modal
+                closeModal(modal);
             } else {
-                elements.buttons.intentNext.classList.add('disabled');
-                messageData.intent = null;
+                // Show error if no text entered
+                alert('Please enter a description of your intent');
             }
         });
     }
     
-    // Load previous intent data if available
-    if (messageData.intent) {
-        const category = messageData.intent.category || 'professional';
-        const intentType = messageData.intent.type;
+    // Open the modal
+    const modal = document.getElementById('custom-intent-modal');
+    openModal(modal);
+    
+    // Focus on the textarea
+    setTimeout(() => {
+        const textarea = document.getElementById('custom-intent-text');
+        if (textarea) textarea.focus();
+    }, 300);
+}
+
+/**
+ * Enhance the intent UI with better styling and interactions
+ */
+function enhanceIntentUI() {
+    console.log('Enhancing intent UI');
+    
+    // Style category toggle buttons
+    styleIntentCategories();
+    
+    // Enhance intent cards
+    enhanceIntentCards();
+    
+    // Ensure next button is visible and properly styled
+    enhanceNavigationButtons();
+    
+    // Pre-select any saved intent
+    restoreSavedIntent();
+}
+
+/**
+ * Style intent category toggle buttons
+ */
+function styleIntentCategories() {
+    console.log('Styling intent categories');
+    
+    const categoryButtons = document.querySelectorAll('.intent-toggle__btn');
+    categoryButtons.forEach(btn => {
+        // Base styles
+        btn.style.padding = '12px 20px';
+        btn.style.borderRadius = '6px';
+        btn.style.fontSize = '15px';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s ease';
+        btn.style.margin = '0 8px';
+        btn.style.minWidth = '140px';
         
-        // Set correct category
-        const categoryBtn = stepContent.querySelector(`.intent-toggle__btn--${category}`);
-        if (categoryBtn) {
-            categoryBtn.click();
+        // Active vs inactive styles
+        if (btn.classList.contains('active')) {
+            btn.style.background = 'linear-gradient(135deg, #8a57de 0%, #ff7eb6 100%)';
+            btn.style.color = 'white';
+            btn.style.boxShadow = '0 4px 12px rgba(138, 87, 222, 0.25)';
+            btn.style.border = 'none';
+        } else {
+            btn.style.background = 'transparent';
+            btn.style.color = '#b8b5c7';
+            btn.style.border = '1px solid #8a57de';
+        }
+    });
+    
+    // Style container
+    const toggleContainer = document.querySelector('.intent-toggle');
+    if (toggleContainer) {
+        toggleContainer.style.display = 'flex';
+        toggleContainer.style.justifyContent = 'center';
+        toggleContainer.style.margin = '0 0 24px 0';
+    }
+}
+
+/**
+ * Enhance intent option cards
+ */
+function enhanceIntentCards() {
+    console.log('Enhancing intent cards');
+    
+    const intentCards = document.querySelectorAll('.option-card');
+    intentCards.forEach(card => {
+        // Card base styling
+        card.style.background = 'linear-gradient(135deg, #2D2A3B 0%, #211E2E 100%)';
+        card.style.borderRadius = '12px';
+        card.style.padding = '20px';
+        card.style.border = '1px solid #8a57de';
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.3s ease';
+        card.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.position = 'relative';
+        card.style.overflow = 'hidden';
+        
+        // Icon styling
+        const icon = card.querySelector('.option-card__icon');
+        if (icon) {
+            icon.style.width = '40px';
+            icon.style.height = '40px';
+            icon.style.borderRadius = '50%';
+            icon.style.backgroundColor = '#8a57de';
+            icon.style.color = 'white';
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
+            icon.style.marginBottom = '16px';
         }
         
-        // Select correct intent card
-        const intentCard = stepContent.querySelector(`.option-card[data-intent="${intentType}"]`);
-        if (intentCard) {
-            intentCard.click();
+        // Title styling
+        const title = card.querySelector('.option-card__title');
+        if (title) {
+            title.style.fontSize = '18px';
+            title.style.fontWeight = 'bold';
+            title.style.color = 'white';
+            title.style.marginBottom = '8px';
+        }
+        
+        // Description styling
+        const description = card.querySelector('.option-card__description');
+        if (description) {
+            description.style.fontSize = '14px';
+            description.style.color = '#b8b5c7';
+            description.style.lineHeight = '1.4';
+        }
+        
+        // Add hover effects
+        card.addEventListener('mouseover', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                this.style.border = '1px solid #b296ff';
+            }
+        });
+        
+        card.addEventListener('mouseout', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = 'none';
+                this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+                this.style.border = '1px solid #8a57de';
+            }
+        });
+    });
+    
+    // Style container for options
+    const optionsContainers = document.querySelectorAll('.intent-options');
+    optionsContainers.forEach(container => {
+        container.style.display = container.classList.contains('active') ? 'grid' : 'none';
+        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+        container.style.gap = '16px';
+        container.style.marginTop = '24px';
+    });
+}
+
+/**
+ * Enhance navigation buttons styling
+ */
+function enhanceNavigationButtons() {
+    console.log('Enhancing navigation buttons');
+    
+    // Style all navigation buttons
+    const allButtons = [
+        document.getElementById('intentPrevBtn'),
+        document.getElementById('intentNextBtn')
+    ];
+    
+    // Base styles for all buttons
+    allButtons.forEach(button => {
+        if (!button) return;
+        
+        // Common styles
+        button.style.padding = '12px 24px';
+        button.style.borderRadius = '8px';
+        button.style.fontWeight = 'bold';
+        button.style.transition = 'all 0.2s ease';
+        button.style.cursor = 'pointer';
+        button.style.display = 'inline-flex';
+        button.style.alignItems = 'center';
+        button.style.justifyContent = 'center';
+        
+        // Specific styles based on button type
+        if (button.classList.contains('primary-button')) {
+            // Primary button styles
+            button.style.background = 'linear-gradient(135deg, #8a57de 0%, #ff7eb6 100%)';
+            button.style.color = 'white';
+            button.style.border = 'none';
+            button.style.boxShadow = '0 4px 12px rgba(138, 87, 222, 0.25)';
+        } else if (button.classList.contains('secondary-button')) {
+            // Secondary button styles
+            button.style.background = 'transparent';
+            button.style.color = 'white';
+            button.style.border = '1px solid #8a57de';
+        }
+        
+        // Disabled state
+        if (button.classList.contains('disabled')) {
+            button.style.opacity = '0.5';
+            button.style.pointerEvents = 'none';
+        } else {
+            button.style.opacity = '1';
+            button.style.pointerEvents = 'auto';
+        }
+    });
+    
+    // Special handling for next button
+    const nextButton = document.getElementById('intentNextBtn');
+    if (nextButton) {
+        nextButton.style.padding = '14px 28px';
+        nextButton.style.fontSize = '16px';
+        
+        // Add pulse animation if not disabled
+        if (!nextButton.classList.contains('disabled')) {
+            nextButton.style.animation = 'pulse 2s infinite';
             
+            // Add keyframes for pulse animation if they don't exist
+            if (!document.getElementById('pulse-animation')) {
+                const style = document.createElement('style');
+                style.id = 'pulse-animation';
+                style.innerHTML = `
+                    @keyframes pulse {
+                        0% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
+                        50% { box-shadow: 0 8px 24px rgba(138, 87, 222, 0.5); }
+                        100% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    }
+    
+    // Style the step footer to ensure buttons are positioned correctly
+    const stepFooter = document.querySelector('#step-intent .step-footer');
+    if (stepFooter) {
+        stepFooter.style.display = 'flex';
+        stepFooter.style.justifyContent = 'space-between';
+        stepFooter.style.marginTop = '24px';
+        stepFooter.style.padding = '16px 0';
+    }
+}
+
+/**
+ * Restore any previously saved intent
+ */
+function restoreSavedIntent() {
+    console.log('Restoring saved intent');
+    
+    // Check if we have intent data
+    const savedCategory = localStorage.getItem('messageCategory') || 'professional';
+    const savedIntentId = localStorage.getItem('messageIntention');
+    
+    console.log('Saved intent:', savedIntentId, 'Category:', savedCategory);
+    
+    if (savedCategory) {
+        // Switch to the saved category
+        toggleIntentCategory(savedCategory);
+    }
+    
+    if (savedIntentId) {
+        // Find and select the saved intent card
+        const intentCard = document.querySelector(`.option-card[data-intent-id="${savedIntentId}"][data-category="${savedCategory}"]`);
+        
+        if (intentCard) {
+            console.log('Found saved intent card, selecting it');
+            selectIntent(intentCard);
+        } else if (savedIntentId === 'custom') {
             // Handle custom intent
-            if (intentType === 'custom' && messageData.intent.customText) {
-                customIntentInput.value = messageData.intent.customText;
-                elements.buttons.intentNext.classList.remove('disabled');
+            const customText = localStorage.getItem('customIntentText');
+            if (customText) {
+                // Select the custom intent card
+                const customCard = document.querySelector(`.option-card[data-intent-id="custom"][data-category="${savedCategory}"]`);
+                if (customCard) {
+                    selectIntent(customCard);
+                    
+                    // Manually set the intent data
+                    messageData.intent = {
+                        id: 'custom',
+                        category: savedCategory,
+                        title: 'Custom Intent',
+                        description: customText,
+                        customText: customText
+                    };
+                    
+                    // Enable next button
+                    const nextButton = document.getElementById('intentNextBtn');
+                    if (nextButton) {
+                        nextButton.classList.remove('disabled');
+                        nextButton.style.opacity = '1';
+                        nextButton.style.pointerEvents = 'auto';
+                    }
+                    
+                    // Update preview
+                    updatePreview();
+                }
             }
         }
     }
@@ -1877,283 +2199,595 @@ function initializeIntentStep() {
  * Initialize tone step
  */
 function initializeToneStep() {
-    console.log('Initializing tone step...');
+    console.log('Initializing tone step');
     
-    // Get the tone step content container
-    const stepContent = elements.steps.tone.querySelector('.step-body');
-    if (!stepContent) {
-        console.error('Tone step content container not found');
-        return;
-    }
-    
-    // Create context section HTML to show recipient and intent info
-    const contextHTML = `
-        <div class="context-section">
-            <div class="recipient-info">
-                <div class="recipient-avatar" id="context-recipient-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="recipient-details">
-                    <h4 class="recipient-name" id="context-recipient-name">Loading recipient...</h4>
-                    <div class="recipient-relationship" id="context-recipient-relationship">Preparing...</div>
-                </div>
-            </div>
-
-            <div class="intent-info">
-                <div class="intent-icon" id="context-intent-icon">
-                    <i class="fas fa-question"></i>
-                </div>
-                <div class="intent-details">
-                    <h4 class="intent-title" id="context-intent-title">Loading intention...</h4>
-                    <div class="intent-description" id="context-intent-description">Preparing...</div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Create tone options HTML
-    const toneOptionsHTML = `
-        <div class="options-grid">
-            <div class="option-card" data-tone="warm">
-                <div class="option-icon">
-                    <i class="fas fa-sun"></i>
-                </div>
-                <h3 class="option-title">Warm</h3>
-                <p class="option-description">Friendly, gentle, and affectionate words that convey closeness.</p>
-            </div>
-            
-            <div class="option-card" data-tone="professional">
-                <div class="option-icon">
-                    <i class="fas fa-briefcase"></i>
-                </div>
-                <h3 class="option-title">Professional</h3>
-                <p class="option-description">Polished, respectful language suitable for work relationships.</p>
-            </div>
-            
-            <div class="option-card" data-tone="casual">
-                <div class="option-icon">
-                    <i class="fas fa-coffee"></i>
-                </div>
-                <h3 class="option-title">Casual</h3>
-                <p class="option-description">Relaxed, conversational language as if chatting in person.</p>
-            </div>
-            
-            <div class="option-card" data-tone="formal">
-                <div class="option-icon">
-                    <i class="fas fa-pen-fancy"></i>
-                </div>
-                <h3 class="option-title">Formal</h3>
-                <p class="option-description">Proper, structured language for important or ceremonial occasions.</p>
-            </div>
-            
-            <div class="option-card" data-tone="humorous">
-                <div class="option-icon">
-                    <i class="fas fa-laugh"></i>
-                </div>
-                <h3 class="option-title">Humorous</h3>
-                <p class="option-description">Light-hearted and playful with elements of gentle humor.</p>
-            </div>
-            
-            <div class="option-card" data-tone="sincere">
-                <div class="option-icon">
-                    <i class="fas fa-heart"></i>
-                </div>
-                <h3 class="option-title">Sincere</h3>
-                <p class="option-description">Earnest, heartfelt language that expresses genuine emotion.</p>
-            </div>
-            
-            <div class="option-card" data-tone="custom">
-                <div class="option-icon">
-                    <i class="fas fa-edit"></i>
-                </div>
-                <h3 class="option-title">Custom</h3>
-                <p class="option-description">Create your own specific tone for this message.</p>
-            </div>
-        </div>
+    try {
+        // Get tone step content container
+        const stepBody = document.querySelector('#step-tone .step-body');
+        if (!stepBody) {
+            console.error('Tone step body not found');
+            return;
+        }
         
-        <div id="customToneSection" class="custom-tone-section" style="display: none;">
-            <div class="form-group">
-                <label for="customToneInput">Describe your custom tone:</label>
-                <input type="text" id="customToneInput" class="input-field" placeholder="E.g., Optimistic, Contemplative...">
+        // Check if content is already initialized
+        if (stepBody.querySelector('.tone-options-container')) {
+            console.log('Tone step already initialized, enhancing UI');
+            enhanceToneUI();
+            return;
+        }
+        
+        // Create tone selection UI
+        createToneUI(stepBody);
+        
+        // Enhance the UI with better styling and interactions
+        enhanceToneUI();
+        
+    } catch (error) {
+        console.error('Error initializing tone step:', error);
+    }
+}
+
+/**
+ * Create tone selection UI
+ * @param {Element} container - Container to add UI to
+ */
+function createToneUI(container) {
+    console.log('Creating tone selection UI');
+    
+    // Create context section to show recipient and intent
+    const contextSection = document.createElement('div');
+    contextSection.className = 'tone-context';
+    contextSection.innerHTML = `
+        <div class="tone-context__title">Creating a message for:</div>
+        <div class="tone-context__card">
+            <div class="tone-context__recipient">
+                <div class="tone-context__avatar">
+                    <span id="context-recipient-initial"></span>
+                </div>
+                <div class="tone-context__info">
+                    <div id="context-recipient-name" class="tone-context__name"></div>
+                    <div id="context-recipient-relationship" class="tone-context__relationship"></div>
+                </div>
+            </div>
+            <div class="tone-context__divider"></div>
+            <div class="tone-context__intent">
+                <div class="tone-context__intent-icon">
+                    <i class="fas fa-comment"></i>
+                </div>
+                <div id="context-intent" class="tone-context__intent-text"></div>
             </div>
         </div>
     `;
     
-    // Combine context and tone options
-    stepContent.innerHTML = contextHTML + toneOptionsHTML;
+    // Create tone options container
+    const toneOptionsContainer = document.createElement('div');
+    toneOptionsContainer.className = 'tone-options-container';
+    toneOptionsContainer.innerHTML = createToneOptionsHTML();
     
-    // Update context with recipient and intent info
-    updateToneContext();
+    // Assemble the UI
+    container.appendChild(contextSection);
+    container.appendChild(toneOptionsContainer);
     
-    // Initialize tone selection
-    const toneCards = stepContent.querySelectorAll('.option-card');
-    const customToneSection = stepContent.querySelector('#customToneSection');
-    const customToneInput = stepContent.querySelector('#customToneInput');
-    
-    // Handle tone card selection
+    // Add event listeners for tone selection
+    const toneCards = toneOptionsContainer.querySelectorAll('.tone-card');
     toneCards.forEach(card => {
         card.addEventListener('click', function() {
-            // Deselect all cards
-            toneCards.forEach(c => c.classList.remove('selected'));
-            
-            // Select clicked card
-            this.classList.add('selected');
-            
-            // Get tone data
-            const toneType = this.getAttribute('data-tone');
-            const titleElement = this.querySelector('.option-title');
-            const descriptionElement = this.querySelector('.option-description');
-            const iconElement = this.querySelector('.option-icon i');
-            
-            const name = titleElement ? titleElement.textContent : '';
-            const description = descriptionElement ? descriptionElement.textContent : '';
-            const iconClass = iconElement ? iconElement.className : '';
-            
-            // Handle custom tone
-            if (toneType === 'custom') {
-                customToneSection.style.display = 'block';
-                customToneInput.focus();
-                
-                // Only enable next if custom text is entered
-                elements.buttons.toneNext.classList.add('disabled');
-                
-                // Check if custom input already has a value (from previous selection)
-                if (customToneInput.value.trim()) {
-                    elements.buttons.toneNext.classList.remove('disabled');
-                    
-                    // Update message data
-                    messageData.tone = {
-                        type: 'custom',
-                        name: customToneInput.value.trim(),
-                        description: 'Custom tone',
-                        icon: iconClass,
-                        customText: customToneInput.value.trim()
-                    };
-                    
-                    // Update preview
-                    updatePreview();
-                }
-            } else {
-                // Hide custom tone section
-                customToneSection.style.display = 'none';
-                
-                // Enable next button
-                elements.buttons.toneNext.classList.remove('disabled');
-                
-                // Update message data
-                messageData.tone = {
-                    type: toneType,
-                    name: name,
-                    description: description,
-                    icon: iconClass
-                };
-                
-                // Update preview
-                updatePreview();
-            }
+            selectTone(this);
         });
     });
     
-    // Add a SINGLE event listener for the custom tone input
-    // This prevents the issue of adding multiple listeners when clicking the custom tone card repeatedly
-    if (customToneInput) {
-        customToneInput.addEventListener('input', function() {
-            const customText = this.value.trim();
-            
+    // Update context with recipient and intent data
+    updateToneContext();
+}
+
+/**
+ * Create HTML for tone options
+ * @returns {string} HTML for tone options
+ */
+function createToneOptionsHTML() {
+    const tones = [
+        {
+            id: 'warm',
+            name: 'Warm',
+            description: 'Friendly and approachable with genuine warmth.',
+            icon: 'fa-smile'
+        },
+        {
+            id: 'professional',
+            name: 'Professional',
+            description: 'Polished and appropriate for work contexts.',
+            icon: 'fa-briefcase'
+        },
+        {
+            id: 'enthusiastic',
+            name: 'Enthusiastic',
+            description: 'Energetic and excited with a positive outlook.',
+            icon: 'fa-star'
+        },
+        {
+            id: 'sincere',
+            name: 'Sincere',
+            description: 'Heartfelt and honest with genuine emotion.',
+            icon: 'fa-heart'
+        },
+        {
+            id: 'grateful',
+            name: 'Grateful',
+            description: 'Expressing genuine appreciation and thanks.',
+            icon: 'fa-hands'
+        },
+        {
+            id: 'humorous',
+            name: 'Humorous',
+            description: 'Light-hearted with appropriate humor.',
+            icon: 'fa-laugh'
+        },
+        {
+            id: 'respectful',
+            name: 'Respectful',
+            description: 'Showing clear respect and consideration.',
+            icon: 'fa-user-tie'
+        },
+        {
+            id: 'supportive',
+            name: 'Supportive',
+            description: 'Encouraging and uplifting in tone.',
+            icon: 'fa-hands-helping'
+        }
+    ];
+    
+    let html = '<div class="tone-grid">';
+    
+    tones.forEach(tone => {
+        html += `
+            <div class="tone-card" data-tone-id="${tone.id}">
+                <div class="tone-card__icon">
+                    <i class="fas ${tone.icon}"></i>
+                </div>
+                <div class="tone-card__content">
+                    <h3 class="tone-card__name">${tone.name}</h3>
+                    <p class="tone-card__description">${tone.description}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    // Add custom tone option
+    html += `
+        <div class="tone-card custom-tone" data-tone-id="custom">
+            <div class="tone-card__icon">
+                <i class="fas fa-pencil-alt"></i>
+            </div>
+            <div class="tone-card__content">
+                <h3 class="tone-card__name">Custom Tone</h3>
+                <p class="tone-card__description">Specify your own preferred tone or style.</p>
+            </div>
+        </div>
+    `;
+    
+    html += '</div>';
+    
+    return html;
+}
+
+/**
+ * Select a tone option
+ * @param {Element} toneCard - Selected tone card element
+ */
+function selectTone(toneCard) {
+    console.log('Tone selected:', toneCard.getAttribute('data-tone-id'));
+    
+    // Remove selected class from all cards
+    const allCards = document.querySelectorAll('.tone-card');
+    allCards.forEach(card => {
+        card.classList.remove('selected');
+        // Reset styling
+        card.style.border = '1px solid #8a57de';
+        card.style.transform = 'none';
+        card.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+    });
+    
+    // Add selected class and styling to clicked card
+    toneCard.classList.add('selected');
+    toneCard.style.border = '2px solid #ff7eb6';
+    toneCard.style.transform = 'translateY(-3px)';
+    toneCard.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+    
+    // Get tone data
+    const toneId = toneCard.getAttribute('data-tone-id');
+    const name = toneCard.querySelector('.tone-card__name').textContent;
+    const description = toneCard.querySelector('.tone-card__description').textContent;
+    
+    // Handle custom tone
+    if (toneId === 'custom') {
+        showCustomToneInput();
+    } else {
+        // Save tone data
+        messageData.tone = {
+            type: toneId,
+            name: name,
+            description: description
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('toneData', JSON.stringify(messageData.tone));
+        
+        // Enable next button
+        const nextButton = document.getElementById('toneNextBtn');
+        if (nextButton) {
+            nextButton.classList.remove('disabled');
+            nextButton.style.opacity = '1';
+            nextButton.style.pointerEvents = 'auto';
+        }
+        
+        // Update preview
+        updatePreview();
+    }
+}
+
+/**
+ * Show custom tone input
+ */
+function showCustomToneInput() {
+    console.log('Showing custom tone input');
+    
+    // Create custom tone modal
+    const modalHTML = `
+        <div id="custom-tone-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Custom Tone</h2>
+                    <button class="close-modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="custom-tone-text">Describe your preferred tone</label>
+                        <textarea id="custom-tone-text" rows="4" placeholder="e.g., Gentle but firm, with a touch of humor"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="custom-tone-cancel" class="secondary-button">Cancel</button>
+                    <button id="custom-tone-save" class="primary-button">Save</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add modal to body if it doesn't exist
+    if (!document.getElementById('custom-tone-modal')) {
+        const modalContainer = document.createElement('div');
+        modalContainer.innerHTML = modalHTML;
+        document.body.appendChild(modalContainer.firstChild);
+        
+        // Add event listeners
+        const modal = document.getElementById('custom-tone-modal');
+        const closeButton = modal.querySelector('.close-modal');
+        const cancelButton = document.getElementById('custom-tone-cancel');
+        const saveButton = document.getElementById('custom-tone-save');
+        
+        closeButton.addEventListener('click', () => closeModal(modal));
+        cancelButton.addEventListener('click', () => closeModal(modal));
+        
+        saveButton.addEventListener('click', () => {
+            const customText = document.getElementById('custom-tone-text').value.trim();
             if (customText) {
-                elements.buttons.toneNext.classList.remove('disabled');
-                
-                // Update message data
+                // Save custom tone
                 messageData.tone = {
                     type: 'custom',
-                    name: customText,
-                    description: 'Custom tone',
-                    icon: document.querySelector('.option-card[data-tone="custom"] .option-icon i')?.className || 'fas fa-edit',
+                    name: 'Custom',
+                    description: customText,
                     customText: customText
                 };
                 
+                // Save to localStorage
+                localStorage.setItem('toneData', JSON.stringify(messageData.tone));
+                
+                // Enable next button
+                const nextButton = document.getElementById('toneNextBtn');
+                if (nextButton) {
+                    nextButton.classList.remove('disabled');
+                    nextButton.style.opacity = '1';
+                    nextButton.style.pointerEvents = 'auto';
+                }
+                
                 // Update preview
                 updatePreview();
+                
+                // Close modal
+                closeModal(modal);
             } else {
-                elements.buttons.toneNext.classList.add('disabled');
-                messageData.tone = null;
+                // Show error if no text entered
+                alert('Please enter a description of your preferred tone');
             }
         });
     }
     
-    // Load previous tone data if available
-    if (messageData.tone) {
-        const toneType = messageData.tone.type;
+    // Open the modal
+    const modal = document.getElementById('custom-tone-modal');
+    openModal(modal);
+    
+    // Focus on the textarea
+    setTimeout(() => {
+        const textarea = document.getElementById('custom-tone-text');
+        if (textarea) textarea.focus();
+    }, 300);
+}
+
+/**
+ * Update the context section with recipient and intent data
+ */
+function updateToneContext() {
+    console.log('Updating tone context');
+    
+    // Update recipient information
+    if (messageData.recipient) {
+        const nameElement = document.getElementById('context-recipient-name');
+        const relationshipElement = document.getElementById('context-recipient-relationship');
+        const initialElement = document.getElementById('context-recipient-initial');
         
-        // Select correct tone card
-        const toneCard = stepContent.querySelector(`.option-card[data-tone="${toneType}"]`);
-        if (toneCard) {
-            toneCard.click();
-            
-            // Handle custom tone
-            if (toneType === 'custom' && messageData.tone.customText) {
-                customToneInput.value = messageData.tone.customText;
-                elements.buttons.toneNext.classList.remove('disabled');
-            }
+        if (nameElement) nameElement.textContent = messageData.recipient.name || '';
+        if (relationshipElement) relationshipElement.textContent = formatRelationship(messageData.recipient) || '';
+        if (initialElement) initialElement.textContent = getInitials(messageData.recipient.name || '');
+    }
+    
+    // Update intent information
+    if (messageData.intent) {
+        const intentElement = document.getElementById('context-intent');
+        if (intentElement) intentElement.textContent = messageData.intent.title || '';
+    }
+}
+
+/**
+ * Enhance the tone UI with better styling and interactions
+ */
+function enhanceToneUI() {
+    console.log('Enhancing tone UI');
+    
+    // Style tone context section
+    styleToneContext();
+    
+    // Enhance tone cards
+    enhanceToneCards();
+    
+    // Ensure next button is visible and properly styled
+    enhanceNavigationButtons();
+    
+    // Pre-select any saved tone
+    restoreSavedTone();
+}
+
+/**
+ * Style the tone context section
+ */
+function styleToneContext() {
+    console.log('Styling tone context');
+    
+    const contextSection = document.querySelector('.tone-context');
+    if (contextSection) {
+        contextSection.style.marginBottom = '24px';
+        
+        // Style the title
+        const title = contextSection.querySelector('.tone-context__title');
+        if (title) {
+            title.style.fontSize = '16px';
+            title.style.color = '#b8b5c7';
+            title.style.marginBottom = '12px';
+        }
+        
+        // Style the context card
+        const card = contextSection.querySelector('.tone-context__card');
+        if (card) {
+            card.style.background = 'linear-gradient(135deg, #2D2A3B 0%, #211E2E 100%)';
+            card.style.borderRadius = '12px';
+            card.style.padding = '16px';
+            card.style.border = '1px solid #8a57de';
+            card.style.display = 'flex';
+            card.style.flexDirection = 'column';
+            card.style.gap = '12px';
+        }
+        
+        // Style recipient row
+        const recipient = contextSection.querySelector('.tone-context__recipient');
+        if (recipient) {
+            recipient.style.display = 'flex';
+            recipient.style.alignItems = 'center';
+        }
+        
+        // Style avatar
+        const avatar = contextSection.querySelector('.tone-context__avatar');
+        if (avatar) {
+            avatar.style.width = '40px';
+            avatar.style.height = '40px';
+            avatar.style.borderRadius = '50%';
+            avatar.style.background = '#8a57de';
+            avatar.style.color = 'white';
+            avatar.style.display = 'flex';
+            avatar.style.alignItems = 'center';
+            avatar.style.justifyContent = 'center';
+            avatar.style.marginRight = '12px';
+            avatar.style.fontSize = '16px';
+            avatar.style.fontWeight = 'bold';
+        }
+        
+        // Style recipient info
+        const info = contextSection.querySelector('.tone-context__info');
+        if (info) {
+            info.style.flex = '1';
+        }
+        
+        // Style name
+        const name = contextSection.querySelector('.tone-context__name');
+        if (name) {
+            name.style.fontWeight = 'bold';
+            name.style.color = 'white';
+            name.style.fontSize = '16px';
+        }
+        
+        // Style relationship
+        const relationship = contextSection.querySelector('.tone-context__relationship');
+        if (relationship) {
+            relationship.style.color = '#b8b5c7';
+            relationship.style.fontSize = '14px';
+        }
+        
+        // Style divider
+        const divider = contextSection.querySelector('.tone-context__divider');
+        if (divider) {
+            divider.style.height = '1px';
+            divider.style.background = '#3D3A4B';
+            divider.style.margin = '8px 0';
+        }
+        
+        // Style intent row
+        const intent = contextSection.querySelector('.tone-context__intent');
+        if (intent) {
+            intent.style.display = 'flex';
+            intent.style.alignItems = 'center';
+        }
+        
+        // Style intent icon
+        const intentIcon = contextSection.querySelector('.tone-context__intent-icon');
+        if (intentIcon) {
+            intentIcon.style.width = '28px';
+            intentIcon.style.height = '28px';
+            intentIcon.style.borderRadius = '50%';
+            intentIcon.style.background = '#ff7eb6';
+            intentIcon.style.color = 'white';
+            intentIcon.style.display = 'flex';
+            intentIcon.style.alignItems = 'center';
+            intentIcon.style.justifyContent = 'center';
+            intentIcon.style.marginRight = '12px';
+            intentIcon.style.fontSize = '14px';
+        }
+        
+        // Style intent text
+        const intentText = contextSection.querySelector('.tone-context__intent-text');
+        if (intentText) {
+            intentText.style.color = 'white';
+            intentText.style.fontSize = '15px';
         }
     }
 }
 
 /**
- * Update context section in tone step with recipient and intent info
+ * Enhance tone cards with styling and animations
  */
-function updateToneContext() {
-    // Get context elements
-    const recipientName = document.getElementById('context-recipient-name');
-    const recipientRelationship = document.getElementById('context-recipient-relationship');
-    const recipientAvatar = document.getElementById('context-recipient-avatar');
-    const intentTitle = document.getElementById('context-intent-title');
-    const intentDescription = document.getElementById('context-intent-description');
-    const intentIcon = document.getElementById('context-intent-icon');
+function enhanceToneCards() {
+    console.log('Enhancing tone cards');
     
-    if (!recipientName || !intentTitle) {
-        return;
-    }
-    
-    // Update recipient info
-    if (messageData.recipient) {
-        recipientName.textContent = messageData.recipient.name;
+    const toneCards = document.querySelectorAll('.tone-card');
+    toneCards.forEach(card => {
+        // Card base styling
+        card.style.background = 'linear-gradient(135deg, #2D2A3B 0%, #211E2E 100%)';
+        card.style.borderRadius = '12px';
+        card.style.padding = '16px';
+        card.style.border = '1px solid #8a57de';
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.3s ease';
+        card.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        card.style.display = 'flex';
+        card.style.flexDirection = 'column';
+        card.style.position = 'relative';
+        card.style.overflow = 'hidden';
         
-        // Format relationship
-        let relationshipText = messageData.recipient.relationship;
-        if (messageData.recipient.relationship === 'other' && messageData.recipient.otherRelationship) {
-            relationshipText = messageData.recipient.otherRelationship;
-        } else {
-            relationshipText = capitalizeFirstLetter(messageData.recipient.relationship);
+        // Icon styling
+        const icon = card.querySelector('.tone-card__icon');
+        if (icon) {
+            icon.style.width = '36px';
+            icon.style.height = '36px';
+            icon.style.borderRadius = '50%';
+            icon.style.backgroundColor = '#8a57de';
+            icon.style.color = 'white';
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
+            icon.style.marginBottom = '12px';
         }
         
-        recipientRelationship.textContent = relationshipText;
+        // Name styling
+        const name = card.querySelector('.tone-card__name');
+        if (name) {
+            name.style.fontSize = '17px';
+            name.style.fontWeight = 'bold';
+            name.style.color = 'white';
+            name.style.marginBottom = '6px';
+        }
         
-        // Update avatar
-        recipientAvatar.innerHTML = `<i class="fas ${getRelationshipIcon(messageData.recipient.relationship)}"></i>`;
+        // Description styling
+        const description = card.querySelector('.tone-card__description');
+        if (description) {
+            description.style.fontSize = '14px';
+            description.style.color = '#b8b5c7';
+            description.style.lineHeight = '1.4';
+        }
         
-        // Remove loading class
-        recipientName.parentElement.parentElement.classList.remove('loading');
-    }
+        // Add hover effects
+        card.addEventListener('mouseover', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = 'translateY(-3px)';
+                this.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.3)';
+                this.style.border = '1px solid #b296ff';
+            }
+        });
+        
+        card.addEventListener('mouseout', function() {
+            if (!this.classList.contains('selected')) {
+                this.style.transform = 'none';
+                this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+                this.style.border = '1px solid #8a57de';
+            }
+        });
+    });
     
-    // Update intent info
-    if (messageData.intent) {
-        intentTitle.textContent = messageData.intent.title;
-        intentDescription.textContent = messageData.intent.description;
-        
-        // Extract icon class from the full class string
-        let iconClass = 'fa-question';
-        if (messageData.intent.icon) {
-            const iconMatch = messageData.intent.icon.match(/fa-\w+/);
-            if (iconMatch) {
-                iconClass = iconMatch[0];
+    // Style container for tone grid
+    const toneGrid = document.querySelector('.tone-grid');
+    if (toneGrid) {
+        toneGrid.style.display = 'grid';
+        toneGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(200px, 1fr))';
+        toneGrid.style.gap = '16px';
+        toneGrid.style.marginTop = '16px';
+    }
+}
+
+/**
+ * Restore any previously saved tone
+ */
+function restoreSavedTone() {
+    console.log('Restoring saved tone');
+    
+    try {
+        // Check if we have tone data in messageData
+        if (messageData.tone && messageData.tone.type) {
+            const toneId = messageData.tone.type;
+            
+            // Find and select the saved tone card
+            const toneCard = document.querySelector(`.tone-card[data-tone-id="${toneId}"]`);
+            
+            if (toneCard) {
+                console.log('Found saved tone card, selecting it');
+                selectTone(toneCard);
+            } else if (toneId === 'custom' && messageData.tone.customText) {
+                // Handle custom tone
+                const customCard = document.querySelector(`.tone-card[data-tone-id="custom"]`);
+                if (customCard) {
+                    selectTone(customCard);
+                    
+                    // Update the message data directly
+                    // Update preview
+                    updatePreview();
+                    
+                    // Enable next button
+                    const nextButton = document.getElementById('toneNextBtn');
+                    if (nextButton) {
+                        nextButton.classList.remove('disabled');
+                        nextButton.style.opacity = '1';
+                        nextButton.style.pointerEvents = 'auto';
+                    }
+                }
             }
         }
-        
-        intentIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
-        
-        // Remove loading class
-        intentTitle.parentElement.parentElement.classList.remove('loading');
+    } catch (error) {
+        console.error('Error restoring saved tone:', error);
     }
 }
 

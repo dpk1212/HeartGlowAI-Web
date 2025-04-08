@@ -1193,7 +1193,7 @@ function updateSidebar(previousStep, newStep) {
 }
 
 /**
- * Initialize step-specific content and functionality
+ * Initialize step content based on step ID
  * @param {string} stepId - The step ID to initialize
  */
 function initializeStepContent(stepId) {
@@ -1201,39 +1201,72 @@ function initializeStepContent(stepId) {
     
     switch (stepId) {
         case 'recipient':
-            // Load recipient step content
-            refreshConnectionsList()
-                .then(() => {
-                    console.log('Connections loaded for recipient step');
-                    // Check if we have a selected recipient already
-                    if (messageData.recipient && messageData.recipient.id) {
-                        console.log('Found selected recipient:', messageData.recipient.name);
-                        // Update the UI
-                        updateSelectedRecipient(messageData.recipient);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error initializing recipient step:', error);
-                    showAlert('Failed to load connections. Please try refreshing the page.', 'error');
-                });
+            try {
+                // Show temporary loading state
+                const connectionsList = elements.recipientStep.connectionsList;
+                if (connectionsList) {
+                    connectionsList.innerHTML = '<div class="loading-state"><div class="loading-spinner-small"></div><p>Loading connections...</p></div>';
+                }
+                
+                // Load recipient step content
+                refreshConnectionsList()
+                    .then(connections => {
+                        console.log('Connections loaded for recipient step:', connections.length);
+                        
+                        // Check if we have a selected recipient already
+                        if (messageData.recipient && messageData.recipient.id) {
+                            console.log('Found selected recipient:', messageData.recipient.name);
+                            // Update the UI with a delay to ensure DOM is ready
+                            setTimeout(() => {
+                                updateSelectedRecipient(messageData.recipient);
+                            }, 100);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading connections:', error);
+                        // Show user-friendly error
+                        if (connectionsList) {
+                            connectionsList.innerHTML = '<div class="error-state"><p>Failed to load connections. Please try refreshing the page.</p></div>';
+                        }
+                        showAlert('Failed to load connections. Please try refreshing the page.', 'error');
+                    });
+            } catch (error) {
+                console.error('Error initializing recipient step:', error);
+                showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
+            }
             break;
             
         case 'intent':
             // Initialize the intent selection step
-            // Load intent options if needed
-            console.log('Initializing intent step');
+            try {
+                console.log('Initializing intent step');
+                initializeIntentStep();
+            } catch (error) {
+                console.error('Error initializing intent step:', error);
+                showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
+            }
             break;
             
         case 'tone':
             // Initialize the tone selection step
-            // Load tone options if needed
-            console.log('Initializing tone step');
+            try {
+                console.log('Initializing tone step');
+                initializeToneStep();
+            } catch (error) {
+                console.error('Error initializing tone step:', error);
+                showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
+            }
             break;
             
         case 'result':
             // Initialize the result step
-            // Load existing result or prepare for generation
-            console.log('Initializing result step');
+            try {
+                console.log('Initializing result step');
+                initializeResultStep();
+            } catch (error) {
+                console.error('Error initializing result step:', error);
+                showAlert('There was a problem setting up this step. Please try refreshing the page.', 'error');
+            }
             break;
             
         default:
@@ -3130,13 +3163,28 @@ function refreshConnectionsList(forceReload = false) {
     // Check if user is authenticated
     if (!currentUser || !currentUser.uid) {
         console.log('Waiting for authentication before loading connections...');
+        
+        // Show a temporary loading message in the connections list
+        const connectionsList = elements.recipientStep.connectionsList;
+        if (connectionsList) {
+            connectionsList.innerHTML = '<div class="loading-state"><div class="loading-spinner-small"></div><p>Waiting for authentication...</p></div>';
+        }
+        
         // Return a promise that resolves when authentication is complete
         return new Promise((resolve) => {
             const authCheck = setInterval(() => {
                 if (currentUser && currentUser.uid) {
                     clearInterval(authCheck);
                     console.log('Authentication complete, loading connections...');
-                    resolve(loadUserConnections(forceReload));
+                    
+                    // Once authenticated, load connections and pass through the result
+                    loadUserConnections(forceReload)
+                        .then(connections => resolve(connections))
+                        .catch(error => {
+                            console.error('Failed to load connections after authentication:', error);
+                            // Return empty array rather than rejecting to prevent uncaught errors
+                            resolve([]);
+                        });
                 }
             }, 500);
             
@@ -3144,13 +3192,26 @@ function refreshConnectionsList(forceReload = false) {
             setTimeout(() => {
                 clearInterval(authCheck);
                 console.warn('Authentication timeout when waiting for connections');
+                
+                // Display authentication timeout in the UI
+                if (connectionsList) {
+                    connectionsList.innerHTML = '<div class="error-state"><p>Authentication timed out. Please refresh the page.</p></div>';
+                }
+                
+                // Resolve with empty array instead of rejecting
                 resolve([]);
             }, 10000);
         });
     }
     
     // User is already authenticated, load connections
-    return loadUserConnections(forceReload);
+    try {
+        return loadUserConnections(forceReload);
+    } catch (error) {
+        console.error('Error in refreshConnectionsList:', error);
+        // Return a resolved promise with empty array instead of propagating the error
+        return Promise.resolve([]);
+    }
 }
 
 /**

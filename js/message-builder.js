@@ -6715,3 +6715,651 @@ function createFloatingNavigationButtons() {
         console.error('Error creating floating navigation buttons:', error);
     }
 }
+
+/**
+ * Fix Connection Modal Functionality
+ * Ensures the connection modal opens, saves, and closes properly
+ */
+function fixConnectionModalFunctionality() {
+    console.log('Applying comprehensive connection modal fixes...');
+    
+    try {
+        // 1. Fix modal button event handlers
+        fixModalButtons();
+        
+        // 2. Enhance connection form validation
+        enhanceConnectionFormValidation();
+        
+        // 3. Ensure modal shows and closes properly
+        fixModalVisibility();
+        
+        console.log('Connection modal fixes applied successfully');
+    } catch (error) {
+        console.error('Error fixing connection modal:', error);
+        showAlert('There was an error fixing the connection modal. Please refresh the page.', 'error');
+    }
+}
+
+/**
+ * Fix modal buttons functionality
+ */
+function fixModalButtons() {
+    console.log('Fixing modal buttons...');
+    
+    // Cancel button
+    const cancelButton = document.getElementById('connection-cancel');
+    if (cancelButton) {
+        // Clone to remove existing handlers
+        const newCancelButton = cancelButton.cloneNode(true);
+        if (cancelButton.parentNode) {
+            cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+        }
+        
+        // Add multiple event binding for maximum reliability
+        newCancelButton.onclick = function(e) {
+            e.preventDefault();
+            closeConnectionModal();
+            return false;
+        };
+        
+        newCancelButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            closeConnectionModal();
+        }, true);
+        
+        // Ensure button is visible
+        newCancelButton.style.visibility = 'visible';
+        newCancelButton.style.opacity = '1';
+        newCancelButton.style.display = 'inline-flex';
+        newCancelButton.style.pointerEvents = 'auto';
+    } else {
+        console.error('Cancel button not found');
+    }
+    
+    // Save button
+    const saveButton = document.getElementById('connection-save');
+    if (saveButton) {
+        // Clone to remove existing handlers
+        const newSaveButton = saveButton.cloneNode(true);
+        if (saveButton.parentNode) {
+            saveButton.parentNode.replaceChild(newSaveButton, saveButton);
+        }
+        
+        // Add multiple event binding for maximum reliability
+        newSaveButton.onclick = function(e) {
+            e.preventDefault();
+            saveConnection();
+            return false;
+        };
+        
+        newSaveButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            saveConnection();
+        }, true);
+        
+        // Ensure button is visible
+        newSaveButton.style.visibility = 'visible';
+        newSaveButton.style.opacity = '1';
+        newSaveButton.style.display = 'inline-flex';
+        newSaveButton.style.pointerEvents = 'auto';
+    } else {
+        console.error('Save button not found');
+    }
+    
+    // Close button (x)
+    const closeButtons = document.querySelectorAll('.close-modal');
+    closeButtons.forEach(button => {
+        // Clone to remove existing handlers
+        const newCloseButton = button.cloneNode(true);
+        if (button.parentNode) {
+            button.parentNode.replaceChild(newCloseButton, button);
+        }
+        
+        // Add multiple event binding
+        newCloseButton.onclick = function(e) {
+            e.preventDefault();
+            const modal = this.closest('.modal');
+            if (modal) {
+                closeModal(modal);
+            }
+            return false;
+        };
+        
+        newCloseButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modal = this.closest('.modal');
+            if (modal) {
+                closeModal(modal);
+            }
+        }, true);
+    });
+    
+    // Relationship type change
+    const relationshipSelect = document.getElementById('connection-relationship');
+    if (relationshipSelect) {
+        relationshipSelect.addEventListener('change', function() {
+            const otherGroup = document.getElementById('other-relationship-group');
+            if (this.value === 'other' && otherGroup) {
+                otherGroup.style.display = 'block';
+            } else if (otherGroup) {
+                otherGroup.style.display = 'none';
+            }
+        });
+    }
+}
+
+/**
+ * Enhance form validation for connections
+ */
+function enhanceConnectionFormValidation() {
+    console.log('Enhancing connection form validation...');
+    
+    const connectionForm = document.getElementById('connection-form');
+    if (!connectionForm) {
+        console.error('Connection form not found');
+        return;
+    }
+    
+    // Add form validations with more detailed feedback
+    connectionForm.addEventListener('submit', function(e) {
+        e.preventDefault(); // Always prevent default form submission
+        
+        if (validateConnectionForm()) {
+            saveConnection();
+        }
+    });
+}
+
+/**
+ * Validate the connection form
+ * @returns {boolean} Whether the form is valid
+ */
+function validateConnectionForm() {
+    const nameInput = document.getElementById('connection-name');
+    const relationshipSelect = document.getElementById('connection-relationship');
+    const otherRelationshipInput = document.getElementById('other-relationship');
+    
+    let isValid = true;
+    
+    // Reset previous error messages
+    document.querySelectorAll('.form-error').forEach(el => el.remove());
+    
+    // Validate name
+    if (!nameInput || !nameInput.value.trim()) {
+        isValid = false;
+        showFormError(nameInput, 'Please enter a name for your connection');
+    }
+    
+    // Validate relationship
+    if (!relationshipSelect || !relationshipSelect.value) {
+        isValid = false;
+        showFormError(relationshipSelect, 'Please select a relationship type');
+    }
+    
+    // Validate other relationship if selected
+    if (relationshipSelect && relationshipSelect.value === 'other') {
+        if (!otherRelationshipInput || !otherRelationshipInput.value.trim()) {
+            isValid = false;
+            showFormError(otherRelationshipInput, 'Please specify the relationship type');
+        }
+    }
+    
+    return isValid;
+}
+
+/**
+ * Show form error message
+ * @param {HTMLElement} element - The input element with the error
+ * @param {string} message - The error message
+ */
+function showFormError(element, message) {
+    if (!element) return;
+    
+    // Add error class to input
+    element.classList.add('input-error');
+    
+    // Create error message
+    const errorElement = document.createElement('div');
+    errorElement.className = 'form-error';
+    errorElement.textContent = message;
+    errorElement.style.color = '#ff7eb6';
+    errorElement.style.fontSize = '0.85rem';
+    errorElement.style.marginTop = '0.25rem';
+    
+    // Add error message after the input
+    if (element.parentNode) {
+        element.parentNode.appendChild(errorElement);
+    }
+    
+    // Focus the first invalid element
+    element.focus();
+}
+
+/**
+ * Fix modal visibility issues
+ */
+function fixModalVisibility() {
+    console.log('Fixing modal visibility...');
+    
+    // Ensure modal opens properly
+    const addNewConnectionButton = document.getElementById('add-new-connection');
+    if (addNewConnectionButton) {
+        // Clone to remove existing handlers
+        const newAddButton = addNewConnectionButton.cloneNode(true);
+        if (addNewConnectionButton.parentNode) {
+            addNewConnectionButton.parentNode.replaceChild(newAddButton, addNewConnectionButton);
+        }
+        
+        // Add multiple event binding
+        newAddButton.onclick = function(e) {
+            e.preventDefault();
+            openConnectionModal();
+            return false;
+        };
+        
+        newAddButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            openConnectionModal();
+        }, true);
+    }
+    
+    // Ensure modal has proper visibility styles
+    const connectionModal = document.getElementById('connection-modal');
+    if (connectionModal) {
+        // Ensure modal has proper z-index
+        connectionModal.style.zIndex = '2000';
+        
+        // Ensure modal background covers everything
+        const modalBackdrop = document.createElement('div');
+        modalBackdrop.className = 'modal-backdrop';
+        modalBackdrop.style.position = 'fixed';
+        modalBackdrop.style.top = '0';
+        modalBackdrop.style.left = '0';
+        modalBackdrop.style.width = '100%';
+        modalBackdrop.style.height = '100%';
+        modalBackdrop.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        modalBackdrop.style.zIndex = '1999';
+        modalBackdrop.style.display = 'none';
+        
+        document.body.appendChild(modalBackdrop);
+        
+        // Store original openModal function if it exists
+        const originalOpenModal = window.openModal;
+        
+        // Override openModal function
+        window.openModal = function(modal) {
+            if (typeof originalOpenModal === 'function') {
+                originalOpenModal(modal);
+            }
+            
+            if (!modal) return;
+            
+            modal.classList.add('show');
+            modal.style.visibility = 'visible';
+            modal.style.opacity = '1';
+            modal.style.display = 'flex';
+            
+            // Show backdrop
+            modalBackdrop.style.display = 'block';
+            
+            // Close on backdrop click
+            modalBackdrop.onclick = function() {
+                closeModal(modal);
+            };
+        };
+        
+        // Store original closeModal function if it exists
+        const originalCloseModal = window.closeModal;
+        
+        // Override closeModal function
+        window.closeModal = function(modal) {
+            if (typeof originalCloseModal === 'function') {
+                originalCloseModal(modal);
+            }
+            
+            if (!modal) return;
+            
+            modal.classList.remove('show');
+            modal.style.visibility = 'hidden';
+            modal.style.opacity = '0';
+            
+            // Hide backdrop
+            modalBackdrop.style.display = 'none';
+            
+            // Reset form after closing
+            const form = modal.querySelector('form');
+            if (form) {
+                form.reset();
+            }
+            
+            // Hide "other relationship" field
+            const otherGroup = document.getElementById('other-relationship-group');
+            if (otherGroup) {
+                otherGroup.style.display = 'none';
+            }
+            
+            // Remove error messages
+            modal.querySelectorAll('.form-error').forEach(el => el.remove());
+            modal.querySelectorAll('.input-error').forEach(el => el.classList.remove('input-error'));
+        };
+    }
+}
+
+/**
+ * Open connection modal
+ * For creating a new connection
+ */
+function openConnectionModal() {
+    console.log('Opening connection modal...');
+    
+    // Clear form data for new connection
+    const form = document.getElementById('connection-form');
+    if (form) {
+        form.reset();
+    }
+    
+    // Update modal title
+    const modalTitle = document.getElementById('connection-modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = 'New Connection';
+    }
+    
+    // Hide other relationship field
+    const otherGroup = document.getElementById('other-relationship-group');
+    if (otherGroup) {
+        otherGroup.style.display = 'none';
+    }
+    
+    // Open the modal
+    const modal = document.getElementById('connection-modal');
+    if (modal) {
+        openModal(modal);
+    } else {
+        console.error('Connection modal not found');
+    }
+}
+
+/**
+ * Close connection modal
+ */
+function closeConnectionModal() {
+    console.log('Closing connection modal...');
+    
+    const modal = document.getElementById('connection-modal');
+    if (modal) {
+        closeModal(modal);
+    } else {
+        console.error('Connection modal not found');
+    }
+}
+
+/**
+ * Save the connection data
+ */
+function saveConnection() {
+    console.log('Saving connection...');
+    
+    // Validate form
+    if (!validateConnectionForm()) {
+        console.log('Connection form validation failed');
+        return;
+    }
+    
+    // Get form data
+    const nameInput = document.getElementById('connection-name');
+    const relationshipSelect = document.getElementById('connection-relationship');
+    const otherRelationshipInput = document.getElementById('other-relationship');
+    
+    if (!nameInput || !relationshipSelect) {
+        console.error('Form inputs not found');
+        return;
+    }
+    
+    const name = nameInput.value.trim();
+    let relationship = relationshipSelect.value;
+    
+    // Handle "other" relationship type
+    if (relationship === 'other' && otherRelationshipInput) {
+        const customRelationship = otherRelationshipInput.value.trim();
+        if (customRelationship) {
+            relationship = customRelationship;
+        }
+    }
+    
+    // Show loading while saving
+    showLoading('Saving connection...');
+    
+    try {
+        // Create connection data
+        const connectionData = {
+            name: name,
+            relationship: relationship,
+            createdAt: new Date().toISOString()
+        };
+        
+        // Save to Firestore if user is authenticated
+        if (currentUser) {
+            const connectionsRef = firebase.firestore()
+                .collection('users')
+                .doc(currentUser.uid)
+                .collection('connections');
+            
+            connectionsRef.add(connectionData)
+                .then(docRef => {
+                    console.log('Connection saved with ID:', docRef.id);
+                    
+                    // Add ID to the data
+                    connectionData.id = docRef.id;
+                    
+                    // Close modal
+                    closeConnectionModal();
+                    
+                    // Refresh connections list
+                    loadUserConnections();
+                    
+                    // Show success message
+                    hideLoading();
+                    showAlert('Connection added successfully!', 'success');
+                })
+                .catch(error => {
+                    console.error('Error saving connection:', error);
+                    hideLoading();
+                    showAlert('Error saving connection. Please try again.', 'error');
+                });
+        } else {
+            console.error('No user authenticated');
+            hideLoading();
+            showAlert('You must be logged in to save connections.', 'error');
+        }
+    } catch (error) {
+        console.error('Error in saveConnection:', error);
+        hideLoading();
+        showAlert('An unexpected error occurred. Please try again.', 'error');
+    }
+}
+
+// Call fixConnectionModalFunctionality during initialization
+document.addEventListener('DOMContentLoaded', function() {
+    // Add a small delay to ensure the DOM is fully loaded
+    setTimeout(fixConnectionModalFunctionality, 1000);
+});
+
+/**
+ * Fix connection modal buttons
+ * Ensures both the Save and Cancel buttons work properly
+ */
+function fixConnectionModalButtons() {
+    console.log('Fixing connection modal buttons...');
+    
+    // Get the buttons
+    const saveButton = document.querySelector('#connection-modal .primary-button, #connection-modal .modal-footer .save-btn, #connection-modal button[type="submit"], #connection-save, #connection-modal .btn-primary');
+    const cancelButton = document.querySelector('#connection-modal .secondary-button, #connection-modal .modal-footer .cancel-btn, #connection-cancel, #connection-modal .btn-secondary, #connection-modal button[id="cancel-connection"]');
+    const closeButton = document.querySelector('#connection-modal .close-modal, #connection-modal .modal-header button, #connection-modal .modal-header span');
+    
+    console.log('Connection modal buttons found:', { 
+        saveButton: !!saveButton, 
+        cancelButton: !!cancelButton,
+        closeButton: !!closeButton
+    });
+    
+    // Fix Save button
+    if (saveButton) {
+        // Clone to remove existing handlers
+        const newSaveButton = saveButton.cloneNode(true);
+        saveButton.parentNode.replaceChild(newSaveButton, saveButton);
+        
+        // Ensure button is visible and clickable
+        newSaveButton.style.visibility = 'visible';
+        newSaveButton.style.opacity = '1';
+        newSaveButton.style.display = 'inline-flex';
+        newSaveButton.style.pointerEvents = 'auto';
+        newSaveButton.style.cursor = 'pointer';
+        newSaveButton.style.zIndex = '9999';
+        
+        // Add multiple event bindings
+        newSaveButton.onclick = function(e) {
+            console.log('Save button clicked via onclick property');
+            e.preventDefault();
+            saveConnection();
+            return false;
+        };
+        
+        newSaveButton.addEventListener('click', function(e) {
+            console.log('Save button clicked via addEventListener');
+            e.preventDefault();
+            saveConnection();
+        }, true);
+        
+        newSaveButton.setAttribute('onclick', "console.log('Save button clicked via attribute'); saveConnection(); return false;");
+    } else {
+        console.error('Save button not found in connection modal');
+    }
+    
+    // Fix Cancel button
+    if (cancelButton) {
+        // Clone to remove existing handlers
+        const newCancelButton = cancelButton.cloneNode(true);
+        cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
+        
+        // Ensure button is visible and clickable
+        newCancelButton.style.visibility = 'visible';
+        newCancelButton.style.opacity = '1';
+        newCancelButton.style.display = 'inline-flex';
+        newCancelButton.style.pointerEvents = 'auto';
+        newCancelButton.style.cursor = 'pointer';
+        newCancelButton.style.zIndex = '9999';
+        
+        // Add multiple event bindings
+        newCancelButton.onclick = function(e) {
+            console.log('Cancel button clicked via onclick property');
+            e.preventDefault();
+            closeConnectionModal();
+            return false;
+        };
+        
+        newCancelButton.addEventListener('click', function(e) {
+            console.log('Cancel button clicked via addEventListener');
+            e.preventDefault();
+            closeConnectionModal();
+        }, true);
+        
+        newCancelButton.setAttribute('onclick', "console.log('Cancel button clicked via attribute'); closeConnectionModal(); return false;");
+    } else {
+        console.error('Cancel button not found in connection modal');
+    }
+    
+    // Fix Close button (X)
+    if (closeButton) {
+        // Clone to remove existing handlers
+        const newCloseButton = closeButton.cloneNode(true);
+        closeButton.parentNode.replaceChild(newCloseButton, closeButton);
+        
+        // Ensure button is visible and clickable
+        newCloseButton.style.visibility = 'visible';
+        newCloseButton.style.opacity = '1';
+        newCloseButton.style.display = 'inline-flex';
+        newCloseButton.style.pointerEvents = 'auto';
+        newCloseButton.style.cursor = 'pointer';
+        newCloseButton.style.zIndex = '9999';
+        
+        // Add multiple event bindings
+        newCloseButton.onclick = function(e) {
+            console.log('Close button clicked via onclick property');
+            e.preventDefault();
+            closeConnectionModal();
+            return false;
+        };
+        
+        newCloseButton.addEventListener('click', function(e) {
+            console.log('Close button clicked via addEventListener');
+            e.preventDefault();
+            closeConnectionModal();
+        }, true);
+        
+        newCloseButton.setAttribute('onclick', "console.log('Close button clicked via attribute'); closeConnectionModal(); return false;");
+    } else {
+        console.error('Close button not found in connection modal');
+    }
+    
+    // Also fix the form submission
+    const form = document.querySelector('#connection-modal form, #connection-form');
+    if (form) {
+        console.log('Connection form found, fixing submission');
+        
+        // Remove existing listeners by cloning
+        const newForm = form.cloneNode(true);
+        form.parentNode.replaceChild(newForm, form);
+        
+        // Re-fix the buttons since we replaced the form
+        setTimeout(fixConnectionModalButtons, 50);
+        
+        // Add event listener to the form
+        newForm.onsubmit = function(e) {
+            console.log('Form submitted via onsubmit property');
+            e.preventDefault();
+            saveConnection();
+            return false;
+        };
+        
+        newForm.addEventListener('submit', function(e) {
+            console.log('Form submitted via addEventListener');
+            e.preventDefault();
+            saveConnection();
+        }, true);
+    } else {
+        console.error('Connection form not found');
+    }
+    
+    console.log('Connection modal buttons fixed');
+}
+
+// Add the button fixing to initialization
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOMContentLoaded - fixing connection modal buttons');
+    
+    // Fix connection modal buttons on page load
+    setTimeout(fixConnectionModalButtons, 500);
+    
+    // Also fix buttons when the modal is opened
+    const originalOpenConnectionModal = openConnectionModal;
+    openConnectionModal = function() {
+        console.log('openConnectionModal called - applying original function');
+        originalOpenConnectionModal.apply(this, arguments);
+        
+        // Fix buttons after modal is opened
+        setTimeout(fixConnectionModalButtons, 200);
+    };
+    
+    // Also fix buttons when saveConnection is called
+    const originalSaveConnection = saveConnection;
+    saveConnection = function() {
+        console.log('saveConnection called with fixed implementation');
+        
+        try {
+            return originalSaveConnection.apply(this, arguments);
+        } catch (error) {
+            console.error('Error in saveConnection:', error);
+            showAlert('Error saving connection. Check console for details.', 'error');
+        }
+    };
+});

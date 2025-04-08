@@ -141,7 +141,8 @@ function checkAuthentication() {
             updateUserInterface(user);
             hideLoading();
             
-            // Try to load user's connections
+            // Only try to load user's connections after we confirm authentication
+            console.log('User authenticated:', user.uid);
             loadUserConnections();
         } else {
             // No user is signed in, redirect to login
@@ -617,51 +618,43 @@ function updatePreviewElement(element, value, skipAnimation = false, isTextEleme
  * Load user's connections from Firestore
  */
 function loadUserConnections() {
-    if (!currentUser) return;
+    if (!currentUser || !currentUser.uid) {
+        console.error('Cannot load connections: No user is logged in');
+        showAlert('Authentication issue detected. Please refresh the page.', 'error');
+        return Promise.reject(new Error('No authenticated user'));
+    }
     
     showLoading('Loading your connections...');
+    console.log('Loading connections for user:', currentUser.uid);
     
-    firebase.firestore()
+    return firebase.firestore()
         .collection('users')
         .doc(currentUser.uid)
         .collection('connections')
-        .orderBy('name')
         .get()
         .then(snapshot => {
             hideLoading();
+            console.log('Connections loaded successfully');
             
-            const connectionsList = elements.recipientStep.connectionsList;
-            if (!connectionsList) return;
-            
-            // Clear existing connections
-            connectionsList.innerHTML = '';
-            
-            if (snapshot.empty) {
-                console.log('No connections found');
-                return;
-            }
-            
-            // Add each connection as a card
+            // Process connections
+            const connections = [];
             snapshot.forEach(doc => {
-                const connection = doc.data();
-                connection.id = doc.id;
-                
-                addConnectionCard(connection);
+                const connection = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                connections.push(connection);
             });
             
-            // Check if we have a selected connection
-            if (messageData.recipient && messageData.recipient.id) {
-                const selectedCard = connectionsList.querySelector(`.connection-card[data-id="${messageData.recipient.id}"]`);
-                if (selectedCard) {
-                    selectedCard.classList.add('selected');
-                    elements.buttons.recipientNext.classList.remove('disabled');
-                }
-            }
+            // Display connections in the UI
+            displayConnections(connections);
+            return connections;
         })
         .catch(error => {
-            console.error('Error loading connections:', error);
             hideLoading();
-            showAlert('Failed to load your connections. Please try again.', 'error');
+            console.error('Error loading connections:', error);
+            showAlert('Failed to load your connections. Please try refreshing the page.', 'error');
+            return [];
         });
 }
 
@@ -715,7 +708,8 @@ function initializeRecipientStep() {
 }
 
 /**
- * Add connection card to the list
+ * Add a connection card to the connections list
+ * @param {Object} connection - Connection data
  */
 function addConnectionCard(connection) {
     const connectionsList = elements.recipientStep.connectionsList;
@@ -725,39 +719,64 @@ function addConnectionCard(connection) {
     card.className = 'connection-card';
     card.setAttribute('data-id', connection.id);
     
-    // Get relationship display text
-    const relationship = connection.relationship === 'other' && connection.otherRelationship 
-        ? connection.otherRelationship 
-        : connection.relationship;
-    
     // Get relationship icon
-    const relationshipIcon = getRelationshipIcon(connection.relationship);
+    let relationshipIcon = 'user-friends';
+    switch (connection.relationship) {
+        case 'family': relationshipIcon = 'home'; break;
+        case 'partner': relationshipIcon = 'heart'; break;
+        case 'coworker': relationshipIcon = 'briefcase'; break;
+        case 'friend': relationshipIcon = 'user-friends'; break;
+        default: relationshipIcon = 'user'; break;
+    }
     
+    // Build card content
     card.innerHTML = `
         <div class="connection-avatar">
-            <i class="fas ${relationshipIcon}"></i>
+            <span>${getInitials(connection.name)}</span>
+            <div class="connection-icon">
+                <i class="fas fa-${relationshipIcon}"></i>
+            </div>
         </div>
         <div class="connection-info">
             <div class="connection-name">${connection.name}</div>
-            <div class="connection-relationship">${capitalizeFirstLetter(relationship)}</div>
+            <div class="connection-relationship">${formatRelationship(connection)}</div>
+        </div>
+        <div class="connection-actions">
+            <button class="connection-edit" aria-label="Edit connection">
+                <i class="fas fa-pencil-alt"></i>
+            </button>
         </div>
     `;
     
-    // Add click event to select this connection
-    card.addEventListener('click', function() {
+    // Add card to list
+    connectionsList.appendChild(card);
+    
+    // Add animation class after a short delay (for animation)
+    setTimeout(() => {
+        card.classList.add('fade-in');
+    }, 10);
+    
+    // Add click handler
+    card.addEventListener('click', function(e) {
+        // Ignore clicks on the edit button
+        if (e.target.closest('.connection-edit')) {
+            e.stopPropagation();
+            editConnection(connection);
+            return;
+        }
+        
         // Remove selected class from all cards
-        const cards = connectionsList.querySelectorAll('.connection-card');
-        cards.forEach(c => c.classList.remove('selected'));
+        document.querySelectorAll('.connection-card').forEach(c => c.classList.remove('selected'));
         
         // Add selected class to this card
         this.classList.add('selected');
         
-        // Update messageData
+        // Save the selected recipient
         messageData.recipient = {
             id: connection.id,
             name: connection.name,
             relationship: connection.relationship,
-            otherRelationship: connection.otherRelationship
+            otherRelationship: connection.otherRelationship || ''
         };
         
         // Save to localStorage
@@ -766,31 +785,35 @@ function addConnectionCard(connection) {
         // Enable next button
         elements.buttons.recipientNext.classList.remove('disabled');
         
-        // Update preview panel
+        // Update preview
         updatePreview();
     });
     
-    // Add fade-in animation
-    setTimeout(() => {
-        card.classList.add('fade-in');
-    }, 50);
-    
-    connectionsList.appendChild(card);
+    // Add edit button handler
+    const editButton = card.querySelector('.connection-edit');
+    if (editButton) {
+        editButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card selection
+            editConnection(connection);
+        });
+    }
 }
 
 /**
- * Get icon for relationship type
+ * Format relationship text for display
+ * @param {Object} connection - Connection data
+ * @returns {string} Formatted relationship text
  */
-function getRelationshipIcon(relationship) {
-    const icons = {
-        'friend': 'fa-user-friends',
-        'family': 'fa-home',
-        'partner': 'fa-heart',
-        'colleague': 'fa-briefcase',
-        'acquaintance': 'fa-handshake'
-    };
+function formatRelationship(connection) {
+    if (!connection || !connection.relationship) return '';
     
-    return icons[relationship] || 'fa-user';
+    // If other relationship is specified, return that
+    if (connection.relationship === 'other' && connection.otherRelationship) {
+        return connection.otherRelationship.charAt(0).toUpperCase() + connection.otherRelationship.slice(1);
+    }
+    
+    // Otherwise capitalize the relationship type
+    return connection.relationship.charAt(0).toUpperCase() + connection.relationship.slice(1);
 }
 
 /**
@@ -2677,116 +2700,100 @@ function trackStepCompletion(step) {
 }
 
 /**
- * Show the loading overlay
+ * Show loading overlay with optional context message
+ * @param {string} message - Optional context message to display
  */
 function showLoading(message = 'Loading...') {
-    if (elements.loading.overlay) {
-        elements.loading.context.textContent = message;
-        elements.loading.overlay.classList.add('active');
+    const overlay = elements.loading.overlay;
+    const context = elements.loading.context;
+    
+    if (overlay && context) {
+        context.textContent = message;
+        overlay.classList.add('show');
+        document.body.classList.add('loading');
     }
 }
 
 /**
- * Hide the loading overlay
+ * Hide loading overlay
  */
 function hideLoading() {
-    if (elements.loading.overlay) {
-        elements.loading.overlay.classList.remove('active');
+    const overlay = elements.loading.overlay;
+    
+    if (overlay) {
+        overlay.classList.remove('show');
+        document.body.classList.remove('loading');
     }
 }
 
 /**
- * Show an alert message with enhanced options
- * @param {string} message - The message to display
- * @param {string} type - The alert type (success, error, warning, info)
- * @param {string} action - The action button type (close, retry, etc.)
- * @param {Function} retryFn - Function to call when retry button is clicked
+ * Show alert message
+ * @param {string} message - Alert message to display
+ * @param {string} type - Alert type (success, error, warning, info)
+ * @param {number} duration - Duration to show alert in ms
  */
-function showAlert(message, type = 'info', action = 'close', retryFn = null) {
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
+function showAlert(message, type = 'info', duration = 5000) {
+    const alertContainer = elements.alerts.container;
+    if (!alertContainer) return;
     
-    // Create content container
-    const alertContent = document.createElement('div');
-    alertContent.className = 'alert-content';
+    // Create alert element
+    const alertElement = document.createElement('div');
+    alertElement.className = `alert alert-${type}`;
     
-    // Add icon based on type
+    // Get icon based on type
     let icon = 'info-circle';
-    if (type === 'success') icon = 'check-circle';
-    if (type === 'error') icon = 'exclamation-circle';
-    if (type === 'warning') icon = 'exclamation-triangle';
-    
-    // Add icon and message
-    const alertMessage = document.createElement('div');
-    alertMessage.className = 'alert-message';
-    alertMessage.innerHTML = `<i class="fas fa-${icon}"></i> ${message}`;
-    
-    // Add close button
-    const alertClose = document.createElement('button');
-    alertClose.className = 'alert-close';
-    alertClose.innerHTML = '<i class="fas fa-times"></i>';
-    alertClose.addEventListener('click', () => {
-        alert.classList.remove('show');
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.remove();
-            }
-        }, 300);
-    });
-    
-    // Add retry button if action is retry and retry function provided
-    if (action === 'retry' && retryFn) {
-        const retryButton = document.createElement('button');
-        retryButton.className = 'alert-action';
-        retryButton.innerHTML = '<i class="fas fa-redo"></i> Retry';
-        retryButton.addEventListener('click', () => {
-            alert.classList.remove('show');
-            setTimeout(() => {
-                if (alert.parentNode) {
-                    alert.remove();
-                }
-                // Call the retry function
-                retryFn();
-            }, 300);
-        });
-        alertContent.appendChild(retryButton);
+    switch (type) {
+        case 'success': icon = 'check-circle'; break;
+        case 'error': icon = 'exclamation-circle'; break;
+        case 'warning': icon = 'exclamation-triangle'; break;
     }
     
-    // Assemble alert
-    alertContent.appendChild(alertMessage);
-    alert.appendChild(alertContent);
-    alert.appendChild(alertClose);
+    // Add content
+    alertElement.innerHTML = `
+        <i class="fas fa-${icon}"></i>
+        <span class="alert-message">${message}</span>
+        <button class="alert-close" aria-label="Close">&times;</button>
+    `;
     
-    // Add to container
-    elements.alerts.container.appendChild(alert);
+    // Add to DOM
+    alertContainer.appendChild(alertElement);
     
-    // Force reflow to trigger transition
-    alert.offsetHeight;
-    alert.classList.add('show');
+    // Add animation class after a small delay
+    setTimeout(() => {
+        alertElement.classList.add('show');
+    }, 10);
     
-    // Auto-close after 5 seconds for non-error alerts
-    if (type !== 'error') {
-        setTimeout(() => {
-            if (alert.parentNode) {
-                alert.classList.remove('show');
-                setTimeout(() => {
-                    if (alert.parentNode) {
-                        alert.remove();
-                    }
-                }, 300);
-            }
-        }, 5000);
-    }
-    
-    // Track in analytics
-    if (firebase.analytics) {
-        firebase.analytics().logEvent('alert_shown', {
-            type: type,
-            action: action,
-            has_retry: !!retryFn,
-            timestamp: new Date().toISOString()
+    // Add close button handler
+    const closeButton = alertElement.querySelector('.alert-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            removeAlert(alertElement);
         });
     }
+    
+    // Auto-remove after duration
+    if (duration > 0) {
+        setTimeout(() => {
+            removeAlert(alertElement);
+        }, duration);
+    }
+}
+
+/**
+ * Remove alert element with animation
+ * @param {HTMLElement} alertElement - Alert element to remove
+ */
+function removeAlert(alertElement) {
+    if (!alertElement) return;
+    
+    alertElement.classList.remove('show');
+    alertElement.classList.add('hiding');
+    
+    setTimeout(() => {
+        if (alertElement.parentNode) {
+            alertElement.parentNode.removeChild(alertElement);
+        }
+    }, 300);
 }
 
 /**
@@ -3106,30 +3113,27 @@ function refreshConnectionsList(forceReload = false) {
  * Load user connections from Firebase
  */
 function loadUserConnections() {
-    if (!currentUser) {
+    if (!currentUser || !currentUser.uid) {
         console.error('Cannot load connections: No user is logged in');
-        return;
+        showAlert('Authentication issue detected. Please refresh the page.', 'error');
+        return Promise.reject(new Error('No authenticated user'));
     }
     
-    const connectionsList = elements.recipientStep.connectionsList;
-    if (!connectionsList) {
-        console.error('Cannot load connections: Connection list element not found');
-        return;
-    }
+    showLoading('Loading your connections...');
+    console.log('Loading connections for user:', currentUser.uid);
     
-    // Show loading state
-    connectionsList.innerHTML = '<div class="loading-state"><div class="loading-spinner-small"></div><p>Loading your connections...</p></div>';
-    
-    // Get user connections from Firestore
-    firebase.firestore()
+    return firebase.firestore()
         .collection('users')
         .doc(currentUser.uid)
         .collection('connections')
         .get()
-        .then((querySnapshot) => {
-            const connections = [];
+        .then(snapshot => {
+            hideLoading();
+            console.log('Connections loaded successfully');
             
-            querySnapshot.forEach((doc) => {
+            // Process connections
+            const connections = [];
+            snapshot.forEach(doc => {
                 const connection = {
                     id: doc.id,
                     ...doc.data()
@@ -3137,18 +3141,15 @@ function loadUserConnections() {
                 connections.push(connection);
             });
             
-            // Cache connections
-            window.cachedConnections = connections;
-            
-            // Display connections
+            // Display connections in the UI
             displayConnections(connections);
+            return connections;
         })
-        .catch((error) => {
+        .catch(error => {
+            hideLoading();
             console.error('Error loading connections:', error);
-            connectionsList.innerHTML = '<div class="error-state"><p>Could not load your connections. Please try refreshing the page.</p></div>';
-            
-            // Show error with retry option
-            handleError(error, 'loading connections', () => loadUserConnections());
+            showAlert('Failed to load your connections. Please try refreshing the page.', 'error');
+            return [];
         });
 }
 
@@ -3158,116 +3159,41 @@ function loadUserConnections() {
  */
 function displayConnections(connections) {
     const connectionsList = elements.recipientStep.connectionsList;
-    if (!connectionsList) return;
-    
-    // Clear loading state
-    connectionsList.innerHTML = '';
-    
-    // If no connections, show empty state
-    if (connections.length === 0) {
-        connectionsList.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon"><i class="fas fa-users"></i></div>
-                <p class="empty-state-text">No connections yet</p>
-                <p class="empty-state-subtext">Add a connection to get started</p>
-            </div>
-        `;
+    if (!connectionsList) {
+        console.error('Cannot display connections: Connection list element not found');
         return;
     }
-    
+
+    // Clear existing connections
+    connectionsList.innerHTML = '';
+
+    // Handle empty state
+    if (!connections || connections.length === 0) {
+        console.log('No connections found');
+        connectionsList.innerHTML = '<div class="empty-state"><p>You don\'t have any connections yet. Create one to get started!</p></div>';
+        return;
+    }
+
     // Sort connections by name
     connections.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
-    
-    // Add each connection
+
+    // Add each connection as a card with staggered animation
     connections.forEach((connection, index) => {
-        const card = document.createElement('div');
-        card.className = 'connection-card';
-        card.setAttribute('data-connection-id', connection.id);
-        
-        // If this connection is already selected, add selected class
-        if (messageData.recipient && messageData.recipient.id === connection.id) {
-            card.classList.add('selected');
-        }
-        
-        // Get relationship icon
-        let relationshipIcon = 'user-friends';
-        switch (connection.relationship) {
-            case 'family': relationshipIcon = 'home'; break;
-            case 'partner': relationshipIcon = 'heart'; break;
-            case 'coworker': relationshipIcon = 'briefcase'; break;
-            case 'friend': relationshipIcon = 'user-friends'; break;
-            default: relationshipIcon = 'user'; break;
-        }
-        
-        // Build card content
-        card.innerHTML = `
-            <div class="connection-avatar">
-                ${getInitials(connection.name)}
-                <div class="connection-icon">
-                    <i class="fas fa-${relationshipIcon}"></i>
-                </div>
-            </div>
-            <div class="connection-info">
-                <div class="connection-name">${connection.name}</div>
-                <div class="connection-relationship">${formatRelationship(connection)}</div>
-            </div>
-            <div class="connection-actions">
-                <button class="connection-edit" aria-label="Edit connection">
-                    <i class="fas fa-pencil-alt"></i>
-                </button>
-            </div>
-        `;
-        
-        // Add card to list
-        connectionsList.appendChild(card);
-        
-        // Add delayed animation for staggered appearance
         setTimeout(() => {
-            card.classList.add('fade-in');
-        }, index * 50); // Stagger by 50ms per card
-        
-        // Add click handler
-        card.addEventListener('click', function(e) {
-            // Ignore clicks on the edit button
-            if (e.target.closest('.connection-edit')) {
-                e.stopPropagation();
-                editConnection(connection);
-                return;
-            }
-            
-            // Remove selected class from all cards
-            document.querySelectorAll('.connection-card').forEach(c => c.classList.remove('selected'));
-            
-            // Add selected class to this card
-            this.classList.add('selected');
-            
-            // Save the selected recipient
-            messageData.recipient = {
-                id: connection.id,
-                name: connection.name,
-                relationship: connection.relationship,
-                otherRelationship: connection.otherRelationship || ''
-            };
-            
-            // Save to localStorage
-            localStorage.setItem('recipientData', JSON.stringify(messageData.recipient));
-            
-            // Enable next button
-            elements.buttons.recipientNext.classList.remove('disabled');
-            
-            // Update preview
-            updatePreview();
-        });
-        
-        // Add edit button handler
-        const editButton = card.querySelector('.connection-edit');
-        if (editButton) {
-            editButton.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent card selection
-                editConnection(connection);
-            });
-        }
+            addConnectionCard(connection);
+        }, index * 50); // Stagger animation by 50ms per card
     });
+
+    // Check if we have a selected connection
+    if (messageData.recipient && messageData.recipient.id) {
+        setTimeout(() => {
+            const selectedCard = connectionsList.querySelector(`.connection-card[data-id="${messageData.recipient.id}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+                elements.buttons.recipientNext.classList.remove('disabled');
+            }
+        }, connections.length * 50 + 100); // After all cards are added
+    }
 }
 
 /**
@@ -3282,143 +3208,163 @@ function editConnection(connection) {
     
     // Set form values
     elements.modals.connectionName.value = connection.name || '';
-    elements.modals.connectionRelationship.value = connection.relationship || 'friend';
+    elements.modals.connectionRelationship.value = connection.relationship || '';
     
-    // If relationship is 'other', show the other relationship field
+    // Handle other relationship
     if (connection.relationship === 'other') {
         elements.modals.otherRelationshipGroup.style.display = 'block';
         elements.modals.otherRelationship.value = connection.otherRelationship || '';
     } else {
         elements.modals.otherRelationshipGroup.style.display = 'none';
+        elements.modals.otherRelationship.value = '';
     }
     
-    // Add connection ID to the form for reference
+    // Store the connection ID for update
     elements.modals.connectionForm.setAttribute('data-connection-id', connection.id);
     
     // Open the modal
     openModal(elements.modals.connectionModal);
-    
-    // Focus the name field
-    setTimeout(() => {
-        elements.modals.connectionName.focus();
-    }, 100);
 }
 
 /**
- * Open a modal
- * @param {HTMLElement} modal - The modal element to open
+ * Open a modal dialog
+ * @param {HTMLElement} modal - Modal element to open
  */
 function openModal(modal) {
     if (!modal) return;
     
-    // Add show class
-    modal.classList.add('show');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
     
-    // Set aria-hidden and role
-    modal.setAttribute('aria-hidden', 'false');
-    modal.setAttribute('role', 'dialog');
-    modal.setAttribute('aria-modal', 'true');
-    
-    // Add body class to prevent scrolling
-    document.body.classList.add('modal-open');
-    
-    // Save the previously focused element to restore focus when closing
-    modal.previouslyFocused = document.activeElement;
-    
-    // Find the first focusable element and focus it
-    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    if (focusableElements.length > 0) {
+    // Focus the first input
+    const firstInput = modal.querySelector('input, select, textarea');
+    if (firstInput) {
         setTimeout(() => {
-            focusableElements[0].focus();
-        }, 100);
+            firstInput.focus();
+        }, 200);
     }
-    
-    // Add click outside listener
-    document.addEventListener('mousedown', closeModalOnClickOutside);
-    
-    // Add escape key listener
-    document.addEventListener('keydown', closeModalOnEscape);
-    
-    // Add focus trap for accessibility
-    modal.addEventListener('keydown', trapFocusInModal);
 }
 
 /**
- * Close a modal
+ * Close a modal dialog
+ * @param {HTMLElement} modal - Modal element to close
  */
 function closeModal(modal) {
     if (!modal) return;
     
-    // Remove animation class
     modal.classList.remove('show');
-    
-    // Update aria attributes
-    modal.setAttribute('aria-hidden', 'true');
-    
-    // Hide after animation
     setTimeout(() => {
         modal.style.display = 'none';
-        
-        // Remove body class
-        document.body.classList.remove('modal-open');
-        
-        // Restore focus to the element that was focused before opening
-        if (modal.previouslyFocused && modal.previouslyFocused.focus) {
-            modal.previouslyFocused.focus();
-        }
     }, 300);
+}
+
+/**
+ * Open the connection modal for a new connection
+ */
+function openConnectionModal() {
+    // Set modal title
+    elements.modals.connectionTitle.textContent = 'New Connection';
     
-    // Remove event listeners
-    document.removeEventListener('mousedown', closeModalOnClickOutside);
-    document.removeEventListener('keydown', closeModalOnEscape);
-    modal.removeEventListener('keydown', trapFocusInModal);
+    // Reset form
+    elements.modals.connectionForm.reset();
+    elements.modals.connectionForm.removeAttribute('data-connection-id');
+    elements.modals.otherRelationshipGroup.style.display = 'none';
+    
+    // Open the modal
+    openModal(elements.modals.connectionModal);
 }
 
 /**
- * Close modal when clicking outside
+ * Close the connection modal
  */
-function closeModalOnClickOutside(e) {
-    const openModal = document.querySelector('.modal.show');
-    if (openModal && !openModal.querySelector('.modal-content').contains(e.target)) {
-        closeModal(openModal);
+function closeConnectionModal() {
+    closeModal(elements.modals.connectionModal);
+}
+
+/**
+ * Save connection (create or update)
+ */
+function saveConnection() {
+    if (!currentUser) {
+        showAlert('You must be logged in to save connections', 'error');
+        return;
     }
-}
-
-/**
- * Close modal when pressing Escape
- */
-function closeModalOnEscape(e) {
-    if (e.key === 'Escape') {
-        const openModal = document.querySelector('.modal.show');
-        if (openModal) {
-            closeModal(openModal);
+    
+    // Get form values
+    const name = elements.modals.connectionName.value.trim();
+    const relationship = elements.modals.connectionRelationship.value;
+    let otherRelationship = '';
+    
+    // Validate
+    if (!name) {
+        showAlert('Please enter a name', 'error');
+        return;
+    }
+    
+    if (!relationship) {
+        showAlert('Please select a relationship', 'error');
+        return;
+    }
+    
+    // Get other relationship if selected
+    if (relationship === 'other') {
+        otherRelationship = elements.modals.otherRelationship.value.trim();
+        if (!otherRelationship) {
+            showAlert('Please specify the relationship', 'error');
+            return;
         }
     }
-}
-
-/**
- * Trap focus within modal for accessibility
- */
-function trapFocusInModal(e) {
-    if (e.key !== 'Tab') return;
     
-    const focusableElements = this.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-    const firstElement = focusableElements[0];
-    const lastElement = focusableElements[focusableElements.length - 1];
+    // Prepare connection data
+    const connectionData = {
+        name,
+        relationship,
+        otherRelationship,
+        updatedAt: new Date().toISOString()
+    };
     
-    if (e.shiftKey) {
-        // Shift + Tab: going backwards
-        if (document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-        }
+    // Check if updating or creating
+    const connectionId = elements.modals.connectionForm.getAttribute('data-connection-id');
+    
+    showLoading('Saving connection...');
+    
+    // Get a reference to the connections collection
+    const connectionsRef = firebase.firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('connections');
+    
+    let savePromise;
+    
+    if (connectionId) {
+        // Update existing connection
+        savePromise = connectionsRef.doc(connectionId).update(connectionData);
     } else {
-        // Tab: going forwards
-        if (document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-        }
+        // Add created timestamp for new connections
+        connectionData.createdAt = new Date().toISOString();
+        
+        // Create new connection
+        savePromise = connectionsRef.add(connectionData);
     }
+    
+    savePromise.then(() => {
+        hideLoading();
+        closeConnectionModal();
+        
+        // Refresh connections list
+        loadUserConnections();
+        
+        showAlert(
+            connectionId ? 'Connection updated successfully' : 'Connection created successfully',
+            'success'
+        );
+    }).catch(error => {
+        hideLoading();
+        console.error('Error saving connection:', error);
+        showAlert('Error saving connection: ' + error.message, 'error');
+    });
 }
 
 /**

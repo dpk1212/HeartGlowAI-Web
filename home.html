@@ -109,11 +109,51 @@
           <h3 class="new-experience-banner__title">Try Our New Unified Message Experience!</h3>
           <p class="new-experience-banner__description">Create messages faster with our streamlined, all-in-one message builder.</p>
         </div>
-        <a href="message-builder.html" class="new-experience-banner__button">
-          Try Now
+        <a href="message-builder.html" class="new-experience-banner__button pulse-animation">
+          <span>Try Now</span>
+          <i class="fas fa-arrow-right"></i>
         </a>
       </div>
     </div>
+
+    <style>
+      /* Enhanced banner button styling */
+      .new-experience-banner__button {
+        padding: 0.8rem 1.5rem;
+        background: linear-gradient(45deg, #ff7eb6, #ff5994);
+        color: white;
+        font-weight: 600;
+        border-radius: 12px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 5px 15px rgba(255, 126, 182, 0.4);
+      }
+      
+      .new-experience-banner__button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(255, 126, 182, 0.5);
+      }
+      
+      /* Pulse animation */
+      .pulse-animation {
+        animation: pulse 2s infinite;
+      }
+      
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 126, 182, 0.7);
+        }
+        70% {
+          box-shadow: 0 0 0 10px rgba(255, 126, 182, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 126, 182, 0);
+        }
+      }
+    </style>
 
     <!-- New Message Configurator Section - Improved for mobile -->
     <section class="message-configurator">

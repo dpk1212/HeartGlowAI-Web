@@ -428,11 +428,106 @@
 @media (prefers-reduced-motion: reduce) {
   .config-card,
   .welcome-section,
-  .context-btn,
   .starting-point-card,
+  .context-btn,
   .nav-btn {
     animation: none !important;
-    transition: none !important;
-    transform: none !important;
+    transition: opacity 0.1s ease-in-out !important;
+  }
+}
+
+/* New Experience Banner */
+.new-experience-banner {
+  background: rgba(138, 87, 222, 0.15);
+  border-radius: 16px;
+  margin: 0 auto 2rem;
+  max-width: 1000px;
+  border: 1px solid rgba(138, 87, 222, 0.3);
+  overflow: hidden;
+  position: relative;
+}
+
+.new-experience-banner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  z-index: 1;
+}
+
+.new-experience-banner__content {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+}
+
+.new-experience-banner__icon {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: white;
+  margin-right: 1.25rem;
+  flex-shrink: 0;
+}
+
+.new-experience-banner__text {
+  flex: 1;
+}
+
+.new-experience-banner__title {
+  font-weight: 700;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.new-experience-banner__description {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
+.new-experience-banner__button {
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-left: 1.5rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 15px rgba(138, 87, 222, 0.3);
+}
+
+.new-experience-banner__button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(138, 87, 222, 0.4);
+}
+
+@media (max-width: 768px) {
+  .new-experience-banner__content {
+    flex-direction: column;
+    text-align: center;
+    padding: 1.5rem;
+  }
+  
+  .new-experience-banner__icon {
+    margin-right: 0;
+    margin-bottom: 1rem;
+  }
+  
+  .new-experience-banner__button {
+    margin-left: 0;
+    margin-top: 1.25rem;
+    width: 100%;
+    text-align: center;
   }
 } 

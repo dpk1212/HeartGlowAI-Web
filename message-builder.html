@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Your Message - HeartGlowAI</title>
+    <base href="./">
+    <meta name="description" content="Create personalized, heartfelt messages for your loved ones with HeartGlowAI's emotional intelligence technology." />
+    
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" sizes="any">
+    
+    <!-- Resource Hints -->
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Font Loading -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/pages/message-builder.css">
+</head>
+<body class="message-builder-page">
+    <!-- User Menu -->
+    <div class="user-menu">
+        <div id="userMenuBtn" class="user-menu__button">
+            <div id="userAvatar" class="user-avatar">
+                <span id="userInitials">U</span>
+            </div>
+        </div>
+        <div id="userDropdown" class="user-dropdown">
+            <div class="user-dropdown__header">
+                <div id="userDisplayName" class="user-display-name">User</div>
+                <div id="userEmail" class="user-email">user@example.com</div>
+            </div>
+            <div class="user-dropdown__actions">
+                <a href="home.html" class="user-dropdown__action">
+                    <i class="fas fa-home"></i> Home
+                </a>
+                <button id="logoutBtn" class="user-dropdown__action">
+                    <i class="fas fa-sign-out-alt"></i> Sign Out
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
+        <div id="loadingContext" class="loading-context">Loading...</div>
+    </div>
+    
+    <!-- Alert Container -->
+    <div id="alertContainer" class="alert-container"></div>
+    
+    <!-- Main Container -->
+    <main class="message-builder">
+        <!-- Progress Sidebar -->
+        <aside class="message-builder__sidebar">
+            <div class="sidebar__logo">
+                <a href="home.html" class="logo-link">
+                    <i class="fas fa-heart logo-icon"></i>
+                    <span class="logo-text">Heart<span>Glow</span>AI</span>
+                </a>
+            </div>
+            
+            <div class="sidebar__progress">
+                <div class="progress-title">Your Message</div>
+                <ul class="progress-steps">
+                    <li class="progress-step active" data-step="recipient">
+                        <div class="step-indicator">
+                            <div class="step-number">1</div>
+                            <div class="step-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="step-label">Recipient</div>
+                    </li>
+                    <li class="progress-step" data-step="intent">
+                        <div class="step-indicator">
+                            <div class="step-number">2</div>
+                            <div class="step-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="step-label">Intent</div>
+                    </li>
+                    <li class="progress-step" data-step="tone">
+                        <div class="step-indicator">
+                            <div class="step-number">3</div>
+                            <div class="step-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="step-label">Tone</div>
+                    </li>
+                    <li class="progress-step" data-step="result">
+                        <div class="step-indicator">
+                            <div class="step-number">4</div>
+                            <div class="step-check"><i class="fas fa-check"></i></div>
+                        </div>
+                        <div class="step-label">Message</div>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="sidebar__actions">
+                <button id="startOverBtn" class="secondary-button">
+                    <i class="fas fa-redo"></i> Start Over
+                </button>
+            </div>
+        </aside>
+        
+        <!-- Content Area -->
+        <div class="message-builder__content">
+            <!-- Step 1: Recipient Selection -->
+            <section class="message-builder__step active" id="step-recipient">
+                <div class="step-header">
+                    <h1 class="step-title">Who's your message for?</h1>
+                    <p class="step-description">Select an existing connection or create a new one.</p>
+                </div>
+                
+                <div class="step-body">
+                    <!-- Content will be dynamically loaded from recipient-selection-new.html -->
+                    <div class="connections-container">
+                        <div id="connections-list" class="connections-list">
+                            <!-- Connections will be loaded here -->
+                        </div>
+                        
+                        <div class="add-connection-card" id="add-new-connection">
+                            <div class="add-connection-icon">
+                                <i class="fas fa-plus"></i>
+                            </div>
+                            <div class="add-connection-label">Create New</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="step-footer">
+                    <button id="recipientNextBtn" class="primary-button disabled">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Step 2: Intent Selection -->
+            <section class="message-builder__step" id="step-intent">
+                <div class="step-header">
+                    <h1 class="step-title">What's your intention?</h1>
+                    <p class="step-description">Select the purpose of your message.</p>
+                </div>
+                
+                <div class="step-body">
+                    <!-- Content will be dynamically loaded from message-intent-new.html -->
+                </div>
+                
+                <div class="step-footer">
+                    <button id="intentPrevBtn" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button id="intentNextBtn" class="primary-button disabled">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Step 3: Tone Selection -->
+            <section class="message-builder__step" id="step-tone">
+                <div class="step-header">
+                    <h1 class="step-title">What tone would you like?</h1>
+                    <p class="step-description">Choose how you want your message to feel.</p>
+                </div>
+                
+                <div class="step-body">
+                    <!-- Content will be dynamically loaded from message-tone-new.html -->
+                </div>
+                
+                <div class="step-footer">
+                    <button id="tonePrevBtn" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button id="toneNextBtn" class="primary-button disabled">
+                        Next <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </section>
+            
+            <!-- Step 4: Message Generation -->
+            <section class="message-builder__step" id="step-result">
+                <div class="step-header">
+                    <h1 class="step-title">Your Message</h1>
+                    <p class="step-description">Here's your personalized message.</p>
+                </div>
+                
+                <div class="step-body">
+                    <!-- Content will be dynamically loaded from message-result-new.html -->
+                </div>
+                
+                <div class="step-footer">
+                    <button id="resultPrevBtn" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                    <button id="createNewBtn" class="primary-button">
+                        Create New Message <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </section>
+        </div>
+        
+        <!-- Preview Panel -->
+        <aside class="message-builder__preview">
+            <div class="preview-header">
+                <h3 class="preview-title">Message Preview</h3>
+                <p class="preview-subtitle">Watch your message take shape</p>
+            </div>
+            
+            <div class="preview-body">
+                <div class="preview-recipient-card">
+                    <div class="preview-recipient-avatar">
+                        <span id="preview-recipient-initial">?</span>
+                    </div>
+                    <div class="preview-recipient-info">
+                        <div id="preview-recipient-name" class="preview-recipient-name">Select a recipient</div>
+                        <div id="preview-recipient-relationship" class="preview-recipient-relationship"></div>
+                    </div>
+                </div>
+                
+                <div class="preview-message-summary">
+                    <div class="preview-message-row">
+                        <div class="preview-label">Intent:</div>
+                        <div id="preview-intent" class="preview-value">-</div>
+                    </div>
+                    <div class="preview-message-row">
+                        <div class="preview-label">Tone:</div>
+                        <div id="preview-tone" class="preview-value">-</div>
+                    </div>
+                </div>
+                
+                <div class="preview-message-content">
+                    <div id="preview-message-placeholder" class="preview-message-placeholder">
+                        Your message will appear here as you make selections...
+                    </div>
+                    <div id="preview-message-text" class="preview-message-text"></div>
+                </div>
+            </div>
+        </aside>
+    </main>
+    
+    <!-- Connection Modal -->
+    <div id="connection-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="connection-modal-title">New Connection</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="connection-form">
+                    <div class="form-group">
+                        <label for="connection-name">Name</label>
+                        <input type="text" id="connection-name" name="name" placeholder="Enter name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="connection-relationship">Relationship</label>
+                        <select id="connection-relationship" name="relationship" required>
+                            <option value="" disabled selected>Select relationship</option>
+                            <option value="friend">Friend</option>
+                            <option value="partner">Partner</option>
+                            <option value="family">Family</option>
+                            <option value="coworker">Coworker</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="other-relationship-group" style="display: none;">
+                        <label for="other-relationship">Specify Relationship</label>
+                        <input type="text" id="other-relationship" name="otherRelationship" placeholder="Describe relationship">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button id="connection-cancel" class="secondary-button">Cancel</button>
+                <button id="connection-save" class="primary-button">Save</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JavaScript -->
+    <script src="js/animation.js"></script>
+    <script src="js/message-configurator.js"></script>
+    <script src="js/message-builder.js"></script>
+</body>
+</html> 

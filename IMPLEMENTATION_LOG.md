@@ -1111,3 +1111,129 @@ Connection modal buttons (Save, Cancel, and Close X) were visible but completely
 - Consider adding keyboard shortcuts for modal actions (Esc to close, Enter to save)
 - Further standardize modal handling across the application
 - Add automated tests for modal functionality
+
+### Message Builder Layout Enhancements
+*Updated on: May 18, 2024*
+
+**Issue Identified:**
+The message builder pages (recipient selection, intent selection, and tone selection) had significant layout issues where option cards were overflowing beyond their container boundaries and extending behind the preview panel. This created usability issues and poor visual appearance across different screen sizes.
+
+**Comprehensive Solution Implemented:**
+
+1. **Content Area Layout Fixes**
+   - Adjusted content area width calculation with proper padding
+   - Prevented horizontal overflow with explicit `overflow-x: hidden` properties
+   - Modified container constraints to respect available space
+   - Added proper box-sizing to all elements to ensure accurate dimensions
+   - Increased preview panel width to provide better readability
+
+2. **Card Grid Enhancements**
+   - Replaced `auto-fit` with `auto-fill` for better card distribution
+   - Implemented responsive grid with appropriate minimum card widths
+   - Added proper spacing between cards at different screen sizes
+   - Applied consistent card sizing across all selection screens
+   - Ensured all cards are fully contained within the viewport
+
+3. **Mobile Responsiveness**
+   - Created mobile-specific layout with bottom-positioned preview panel
+   - Added a toggle button to show/hide preview on mobile devices
+   - Adjusted card sizes and layouts for smaller screens
+   - Implemented progressive disclosure (hiding descriptions on mobile)
+   - Created cascading responsive breakpoints for smooth transitions
+
+4. **JavaScript Enhancements**
+   - Added dynamic layout adjustment based on screen size
+   - Implemented runtime card grid fixes
+   - Created functions to maintain proper sizing during interactions
+   - Added event listeners for window resize to maintain layout
+   - Modified step navigation to reapply layout fixes on every step change
+
+**Technical Details:**
+- Improved grid layout with responsive sizing:
+  ```css
+  .intent-cards-grid, .tone-cards-grid, .connections-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  ```
+
+- Created proper cascading breakpoints:
+  ```css
+  @media (max-width: 1400px) {
+    .intent-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .intent-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+  }
+
+  @media (max-width: 992px) {
+    .intent-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .intent-cards-grid {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
+    }
+  }
+  ```
+
+- Applied runtime DOM adjustments to ensure layout integrity:
+  ```javascript
+  function enhanceCardGrids() {
+    const gridContainers = [
+      document.querySelector('.intent-cards-grid'),
+      document.querySelector('.tone-cards-grid'),
+      document.querySelector('.connections-list')
+    ];
+    
+    gridContainers.forEach(grid => {
+      if (!grid) return;
+      
+      // Ensure proper sizing
+      grid.style.maxWidth = '100%';
+      grid.style.width = '100%';
+      grid.style.boxSizing = 'border-box';
+      
+      // Make all direct children properly sized
+      Array.from(grid.children).forEach(card => {
+        card.style.maxWidth = '100%';
+        card.style.width = '100%';
+        card.style.boxSizing = 'border-box';
+        card.style.overflow = 'hidden';
+      });
+    });
+  }
+  ```
+
+**Impact:**
+- Options now display properly within the content area boundaries
+- Grid layout adapts responsively to different screen sizes
+- Consistent card spacing and alignment across all steps
+- Improved visual appearance and professional look
+- Enhanced usability across desktop and mobile devices
+- Preview panel is properly positioned and sized
+- No more overflow or content truncation issues
+
+**Next Steps:**
+- Add animation transitions to preview panel show/hide
+- Implement swipe gestures for mobile navigation
+- Consider adding a minimized view of the preview panel
+- Explore adding drag-and-drop capability on larger screens
+- Consider adding keyboard navigation between cards

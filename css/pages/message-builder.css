@@ -136,7 +136,7 @@
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  padding-right: 300px; /* Increased padding to avoid preview overlap */
+  padding-right: 320px; /* Increased padding to prevent overlap with preview panel */
   width: calc(100% - 240px); /* Ensure proper width calculation */
   box-sizing: border-box;
 }
@@ -187,7 +187,11 @@
 .step-body {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden; /* Prevent horizontal overflow */
   padding: 0 1rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .step-footer {
@@ -202,12 +206,13 @@
   z-index: 50; /* Ensure it's above other elements */
   margin-bottom: 40px; /* Add space at bottom to ensure visibility */
   width: 100%;
-  max-width: calc(100% - 300px); /* Ensure it doesn't extend under preview panel */
+  max-width: calc(100% - 40px); /* Ensure it doesn't extend under preview panel */
+  box-sizing: border-box;
 }
 
 /* Preview Panel */
 .message-builder__preview {
-  width: 280px;
+  width: 320px; /* Increased width for better display */
   background-color: rgba(45, 42, 59, 0.8);
   border-left: 1px solid rgba(255, 255, 255, 0.1);
   position: fixed;
@@ -221,6 +226,7 @@
   -webkit-backdrop-filter: blur(10px);
   z-index: 10;
   transition: transform 0.3s ease;
+  box-shadow: -5px 0 15px rgba(0, 0, 0, 0.2); /* Add shadow for depth */
 }
 
 .preview-header {
@@ -800,17 +806,31 @@
 
 /* Connections Container */
 .connections-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .connections-list {
-  display: contents;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .connection-card, .add-connection-card {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.connection-card {
   background: rgba(45, 42, 59, 0.7);
   border-radius: 12px;
   padding: 1.25rem;
@@ -827,7 +847,7 @@
   transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
 }
 
-.connection-card:hover, .add-connection-card:hover {
+.connection-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border-color: rgba(138, 87, 222, 0.3);
@@ -1127,11 +1147,13 @@
 
 .intent-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid with min size */
-    gap: 16px; /* Reduced gap slightly */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Use auto-fill for better spacing */
+    gap: 20px;
     width: 100%;
     box-sizing: border-box;
-    padding: 0 5px; /* Add slight padding to prevent edge collision */
+    padding: 0;
+    max-width: 100%;
+    margin: 0 auto;
 }
 
 /* Make sure intent step body has proper constraints */
@@ -1140,7 +1162,7 @@
     max-width: 100%;
     padding: 15px;
     box-sizing: border-box;
-    overflow: hidden; /* Prevent horizontal scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 .intent-card {
@@ -1157,6 +1179,7 @@
     box-sizing: border-box;
     width: 100%; /* Ensure card takes full width of its grid cell */
     max-width: 100%; /* Prevent overflow */
+    overflow: hidden; /* Ensure content doesn't overflow */
 }
 
 .intent-card:hover {
@@ -1202,21 +1225,71 @@
 }
 
 /* Enhance responsive behavior */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
     .intent-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly smaller on medium screens */
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .message-builder__content {
+        padding-right: 330px;
+    }
+    
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 16px;
+    }
+    
+    .intent-card {
+        padding: 16px;
+        min-height: 90px;
+    }
+}
+
+@media (max-width: 992px) {
+    .message-builder__content {
+        padding-right: 0; /* Remove padding on tablet for bottom preview */
+    }
+    
+    .message-builder__preview {
+        width: 100%;
+        height: 60%;
+        top: auto;
+        bottom: 0;
+        transform: translateY(100%);
+    }
+    
+    .message-builder__preview.show {
+        transform: translateY(0);
+    }
+    
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+    }
+    
+    .step-footer {
+        max-width: 100%;
     }
 }
 
 @media (max-width: 768px) {
     .intent-cards-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Even smaller on mobile */
-        gap: 12px; /* Reduce gap further on small screens */
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 10px;
     }
     
     .intent-card {
-        padding: 15px; /* Smaller padding on mobile */
-        min-height: 80px; /* Reduce min height on mobile */
+        padding: 12px;
+        min-height: 80px;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .intent-card-description {
+        display: none; /* Hide descriptions on mobile to save space */
     }
 }
 
@@ -1233,7 +1306,8 @@
     z-index: 50; /* Ensure it's above other elements */
     margin-bottom: 40px; /* Add space at bottom to ensure visibility */
     width: 100%;
-    max-width: calc(100% - 300px); /* Ensure it doesn't extend under preview panel */
+    max-width: calc(100% - 40px); /* Ensure it doesn't extend under preview panel */
+    box-sizing: border-box;
 }
 
 #step-intent .step-footer button,
@@ -1425,4 +1499,305 @@
         padding: 15px; /* Smaller padding on mobile */
         min-height: 80px; /* Reduce min height on mobile */
     }
+}
+
+/* Connection Modal Enhancements */
+.modal.show .modal-content {
+    transform: scale(1) !important;
+    opacity: 1 !important;
+}
+
+.modal-content {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+    border: 1px solid rgba(138, 87, 222, 0.3) !important;
+}
+
+#connection-modal.show {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+/* Form field visual enhancements */
+.form-group input,
+.form-group select {
+    transition: all 0.2s ease !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(138, 87, 222, 0.25) !important;
+    outline: none !important;
+}
+
+.form-group input.input-error,
+.form-group select.input-error {
+    border-color: #ff7eb6 !important;
+    background-color: rgba(255, 126, 182, 0.1) !important;
+}
+
+/* Modal Button Enhancements */
+#connection-save,
+#connection-cancel {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 0.75rem 1.5rem !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+}
+
+#connection-save {
+    background: linear-gradient(135deg, rgb(138, 87, 222), rgb(255, 126, 182)) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: rgba(138, 87, 222, 0.25) 0px 4px 10px !important;
+}
+
+#connection-save:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: rgba(138, 87, 222, 0.4) 0px 6px 14px !important;
+}
+
+#connection-cancel {
+    background: transparent !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+}
+
+#connection-cancel:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Modal Backdrop */
+.modal-backdrop {
+    backdrop-filter: blur(5px) !important;
+    -webkit-backdrop-filter: blur(5px) !important;
+}
+
+/* Ensure other relationship field shows properly */
+#other-relationship-group {
+    margin-top: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+/* Make close button more visible */
+.close-modal {
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: all 0.2s ease !important;
+    opacity: 0.8 !important;
+    font-size: 1.25rem !important;
+    padding: 0.5rem !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.close-modal:hover {
+    color: white !important;
+    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    transform: rotate(90deg) !important;
+}
+
+/* Preview Toggle Button for Mobile */
+.preview-toggle {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  color: white;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+
+@media (max-width: 992px) {
+  .preview-toggle {
+    display: flex;
+  }
+}
+
+/* Tone Cards Container and Grid - Prevent overflow */
+.tone-cards-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden; /* Prevent horizontal overflow */
+}
+
+.tone-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Use auto-fill for better spacing */
+  gap: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+/* Tone Card - Similar styling to intent cards for consistency */
+.tone-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(40, 30, 55, 0.8), rgba(30, 25, 45, 0.8));
+  border-radius: 16px;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 2px solid transparent;
+  min-height: 100px;
+  box-sizing: border-box;
+  width: 100%; /* Ensure card takes full width of its grid cell */
+  max-width: 100%; /* Prevent overflow */
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.tone-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: rgba(138, 87, 222, 0.3);
+}
+
+.tone-card.active {
+  background: linear-gradient(135deg, rgba(138, 87, 222, 0.2), rgba(255, 126, 182, 0.2));
+  border: 2px solid #8a57de;
+  box-shadow: 0 0 15px rgba(138, 87, 222, 0.5);
+}
+
+.tone-card-icon {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #8a57de, #ff7eb6);
+  border-radius: 50%;
+  font-size: 20px;
+  color: white;
+  flex-shrink: 0;
+}
+
+.tone-card-content {
+  flex: 1;
+}
+
+.tone-card-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: white;
+}
+
+.tone-card-description {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0;
+}
+
+/* Tone step context area */
+.tone-context {
+  background: rgba(45, 42, 59, 0.5);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(138, 87, 222, 0.2);
+}
+
+.tone-context-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 15px 0;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tone-context-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background: rgba(26, 22, 37, 0.5);
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
+
+/* Make tone step responsive */
+@media (max-width: 1400px) {
+  .tone-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .tone-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  
+  .tone-card {
+    padding: 16px;
+    min-height: 90px;
+  }
+}
+
+@media (max-width: 992px) {
+  .tone-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .tone-cards-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  
+  .tone-card {
+    padding: 12px;
+    min-height: 80px;
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .tone-card-description {
+    display: none; /* Hide descriptions on mobile to save space */
+  }
+  
+  .tone-context {
+    padding: 15px;
+  }
+}
+
+/* Fix recipient step */
+#step-recipient .step-body {
+  width: 100%;
+  max-width: 100%;
+  padding: 15px;
+  box-sizing: border-box;
+  overflow-x: hidden; /* Prevent horizontal scrolling */
 } 

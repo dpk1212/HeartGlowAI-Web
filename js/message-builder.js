@@ -7183,3 +7183,125 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add a small delay to ensure the DOM is fully loaded
     setTimeout(fixConnectionModalFunctionality, 1000);
 });
+
+/**
+ * Create preview toggle button for mobile devices
+ * This will show/hide the preview panel on smaller screens
+ */
+function createPreviewToggleButton() {
+    // Only create for mobile devices
+    if (window.innerWidth > 992) return;
+    
+    // Check if button already exists
+    if (document.querySelector('.preview-toggle')) return;
+    
+    // Create the button
+    const toggleButton = document.createElement('div');
+    toggleButton.className = 'preview-toggle';
+    toggleButton.innerHTML = '<i class="fas fa-eye"></i>';
+    
+    // Add click handler
+    toggleButton.addEventListener('click', function() {
+        const previewPanel = document.querySelector('.message-builder__preview');
+        
+        if (previewPanel) {
+            previewPanel.classList.toggle('show');
+            
+            // Update icon based on state
+            if (previewPanel.classList.contains('show')) {
+                toggleButton.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else {
+                toggleButton.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        }
+    });
+    
+    // Add to body
+    document.body.appendChild(toggleButton);
+}
+
+/**
+ * Enhance layout for different screen sizes
+ * Applies fixes for various responsive issues
+ */
+function enhanceResponsiveLayout() {
+    // Adjust content width based on preview panel
+    const content = document.querySelector('.message-builder__content');
+    const preview = document.querySelector('.message-builder__preview');
+    
+    if (!content || !preview) return;
+    
+    // Update layout based on screen size
+    const updateLayout = () => {
+        if (window.innerWidth <= 992) {
+            // Mobile mode - preview at bottom
+            content.style.paddingRight = '0';
+            preview.classList.remove('show');
+            
+            // Create toggle button if needed
+            createPreviewToggleButton();
+        } else {
+            // Desktop mode - preview on right
+            content.style.paddingRight = '320px';
+            
+            // Remove toggle button if it exists
+            const toggleButton = document.querySelector('.preview-toggle');
+            if (toggleButton) {
+                toggleButton.remove();
+            }
+        }
+    };
+    
+    // Call on load
+    updateLayout();
+    
+    // Also call on window resize
+    window.addEventListener('resize', updateLayout);
+}
+
+// Enhance all card grids to prevent overflow issues
+function enhanceCardGrids() {
+    const gridContainers = [
+        document.querySelector('.intent-cards-grid'),
+        document.querySelector('.tone-cards-grid'),
+        document.querySelector('.connections-list')
+    ];
+    
+    gridContainers.forEach(grid => {
+        if (!grid) return;
+        
+        // Ensure proper sizing
+        grid.style.maxWidth = '100%';
+        grid.style.width = '100%';
+        grid.style.boxSizing = 'border-box';
+        
+        // Make all direct children properly sized
+        Array.from(grid.children).forEach(card => {
+            card.style.maxWidth = '100%';
+            card.style.width = '100%';
+            card.style.boxSizing = 'border-box';
+            card.style.overflow = 'hidden';
+        });
+    });
+}
+
+// Call layout enhancements on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize responsive enhancements
+    enhanceResponsiveLayout();
+    
+    // Fix card grids
+    enhanceCardGrids();
+    
+    // Reapply on each step change
+    const originalShowStep = window.showStep || showStep;
+    window.showStep = function(stepId, skipAnimation) {
+        // Call original
+        originalShowStep(stepId, skipAnimation);
+        
+        // Apply enhancements after step change
+        setTimeout(() => {
+            enhanceCardGrids();
+        }, 100);
+    };
+});

@@ -2763,3 +2763,313 @@ function capitalizeFirstLetter(string) {
     if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+/**
+ * Format relationship text for display
+ * @param {Object} recipient - The recipient object
+ * @returns {string} - Formatted relationship text
+ */
+function formatRelationship(recipient) {
+    if (!recipient || !recipient.relationship) {
+        return '';
+    }
+    
+    // If it's a custom "other" relationship type
+    if (recipient.relationship === 'other' && recipient.otherRelationship) {
+        return recipient.otherRelationship;
+    }
+    
+    // Otherwise capitalize the standard relationship type
+    return capitalizeFirstLetter(recipient.relationship);
+}
+
+/**
+ * Refresh connections list from Firebase
+ * @param {boolean} forceReload - Whether to force reload from Firebase (true) or use cache if available (false)
+ */
+function refreshConnectionsList(forceReload = false) {
+    // If we already have cached connections and not forcing a reload, display them
+    if (!forceReload && window.cachedConnections && window.cachedConnections.length > 0) {
+        displayConnections(window.cachedConnections);
+        return;
+    }
+    
+    // Otherwise load from Firebase
+    loadUserConnections();
+}
+
+/**
+ * Load user connections from Firebase
+ */
+function loadUserConnections() {
+    if (!currentUser) {
+        console.error('Cannot load connections: No user is logged in');
+        return;
+    }
+    
+    const connectionsList = elements.recipientStep.connectionsList;
+    if (!connectionsList) {
+        console.error('Cannot load connections: Connection list element not found');
+        return;
+    }
+    
+    // Show loading state
+    connectionsList.innerHTML = '<div class="loading-state"><div class="loading-spinner-small"></div><p>Loading your connections...</p></div>';
+    
+    // Get user connections from Firestore
+    firebase.firestore()
+        .collection('users')
+        .doc(currentUser.uid)
+        .collection('connections')
+        .get()
+        .then((querySnapshot) => {
+            const connections = [];
+            
+            querySnapshot.forEach((doc) => {
+                const connection = {
+                    id: doc.id,
+                    ...doc.data()
+                };
+                connections.push(connection);
+            });
+            
+            // Cache connections
+            window.cachedConnections = connections;
+            
+            // Display connections
+            displayConnections(connections);
+        })
+        .catch((error) => {
+            console.error('Error loading connections:', error);
+            connectionsList.innerHTML = '<div class="error-state"><p>Could not load your connections. Please try refreshing the page.</p></div>';
+            
+            // Show error with retry option
+            handleError(error, 'loading connections', () => loadUserConnections());
+        });
+}
+
+/**
+ * Display connections in the UI
+ * @param {Array} connections - Array of connection objects
+ */
+function displayConnections(connections) {
+    const connectionsList = elements.recipientStep.connectionsList;
+    if (!connectionsList) return;
+    
+    // Clear loading state
+    connectionsList.innerHTML = '';
+    
+    // If no connections, show empty state
+    if (connections.length === 0) {
+        connectionsList.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon"><i class="fas fa-users"></i></div>
+                <p class="empty-state-text">No connections yet</p>
+                <p class="empty-state-subtext">Add a connection to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Sort connections by name
+    connections.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    
+    // Add each connection
+    connections.forEach((connection, index) => {
+        const card = document.createElement('div');
+        card.className = 'connection-card';
+        card.setAttribute('data-connection-id', connection.id);
+        
+        // If this connection is already selected, add selected class
+        if (messageData.recipient && messageData.recipient.id === connection.id) {
+            card.classList.add('selected');
+        }
+        
+        // Get relationship icon
+        let relationshipIcon = 'user-friends';
+        switch (connection.relationship) {
+            case 'family': relationshipIcon = 'home'; break;
+            case 'partner': relationshipIcon = 'heart'; break;
+            case 'coworker': relationshipIcon = 'briefcase'; break;
+            case 'friend': relationshipIcon = 'user-friends'; break;
+            default: relationshipIcon = 'user'; break;
+        }
+        
+        // Build card content
+        card.innerHTML = `
+            <div class="connection-avatar">
+                ${getInitials(connection.name)}
+                <div class="connection-icon">
+                    <i class="fas fa-${relationshipIcon}"></i>
+                </div>
+            </div>
+            <div class="connection-info">
+                <div class="connection-name">${connection.name}</div>
+                <div class="connection-relationship">${formatRelationship(connection)}</div>
+            </div>
+            <div class="connection-actions">
+                <button class="connection-edit" aria-label="Edit connection">
+                    <i class="fas fa-pencil-alt"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add card to list
+        connectionsList.appendChild(card);
+        
+        // Add delayed animation for staggered appearance
+        setTimeout(() => {
+            card.classList.add('fade-in');
+        }, index * 50); // Stagger by 50ms per card
+        
+        // Add click handler
+        card.addEventListener('click', function(e) {
+            // Ignore clicks on the edit button
+            if (e.target.closest('.connection-edit')) {
+                e.stopPropagation();
+                editConnection(connection);
+                return;
+            }
+            
+            // Remove selected class from all cards
+            document.querySelectorAll('.connection-card').forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to this card
+            this.classList.add('selected');
+            
+            // Save the selected recipient
+            messageData.recipient = {
+                id: connection.id,
+                name: connection.name,
+                relationship: connection.relationship,
+                otherRelationship: connection.otherRelationship || ''
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('recipientData', JSON.stringify(messageData.recipient));
+            
+            // Enable next button
+            elements.buttons.recipientNext.classList.remove('disabled');
+            
+            // Update preview
+            updatePreview();
+        });
+        
+        // Add edit button handler
+        const editButton = card.querySelector('.connection-edit');
+        if (editButton) {
+            editButton.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card selection
+                editConnection(connection);
+            });
+        }
+    });
+}
+
+/**
+ * Open the connection modal to edit an existing connection
+ * @param {Object} connection - The connection to edit
+ */
+function editConnection(connection) {
+    if (!connection) return;
+    
+    // Set modal title
+    elements.modals.connectionTitle.textContent = 'Edit Connection';
+    
+    // Set form values
+    elements.modals.connectionName.value = connection.name || '';
+    elements.modals.connectionRelationship.value = connection.relationship || 'friend';
+    
+    // If relationship is 'other', show the other relationship field
+    if (connection.relationship === 'other') {
+        elements.modals.otherRelationshipGroup.style.display = 'block';
+        elements.modals.otherRelationship.value = connection.otherRelationship || '';
+    } else {
+        elements.modals.otherRelationshipGroup.style.display = 'none';
+    }
+    
+    // Add connection ID to the form for reference
+    elements.modals.connectionForm.setAttribute('data-connection-id', connection.id);
+    
+    // Open the modal
+    openModal(elements.modals.connectionModal);
+    
+    // Focus the name field
+    setTimeout(() => {
+        elements.modals.connectionName.focus();
+    }, 100);
+}
+
+/**
+ * Open a modal
+ * @param {HTMLElement} modal - The modal element to open
+ */
+function openModal(modal) {
+    if (!modal) return;
+    modal.style.display = 'flex';
+    
+    // Add animation class
+    setTimeout(() => {
+        modal.classList.add('show');
+    }, 10);
+    
+    // Add click outside to close
+    modal.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal(this);
+        }
+    });
+    
+    // Add escape key to close
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeModal(modal);
+        }
+    });
+}
+
+/**
+ * Open the new connection modal
+ */
+function openConnectionModal() {
+    // Reset the form
+    elements.modals.connectionForm.reset();
+    elements.modals.connectionForm.removeAttribute('data-connection-id');
+    
+    // Set modal title
+    elements.modals.connectionTitle.textContent = 'New Connection';
+    
+    // Hide the other relationship field
+    elements.modals.otherRelationshipGroup.style.display = 'none';
+    
+    // Open the modal
+    openModal(elements.modals.connectionModal);
+    
+    // Focus the name field
+    setTimeout(() => {
+        elements.modals.connectionName.focus();
+    }, 100);
+}
+
+/**
+ * Close a modal
+ * @param {HTMLElement} modal - The modal element to close
+ */
+function closeModal(modal) {
+    if (!modal) return;
+    
+    // Remove animation class
+    modal.classList.remove('show');
+    
+    // Hide after animation
+    setTimeout(() => {
+        modal.style.display = 'none';
+    }, 300);
+}
+
+/**
+ * Close the connection modal
+ */
+function closeConnectionModal() {
+    closeModal(elements.modals.connectionModal);
+}

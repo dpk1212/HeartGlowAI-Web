@@ -1090,584 +1090,15 @@
 }
 
 /* Intent Selection Step Styles */
-.intent-categories {
-    margin-bottom: 1.5rem;
-}
-
-.intent-toggle {
-    display: flex;
-    background: rgba(33, 30, 46, 0.6);
-    border-radius: 12px;
-    padding: 0.5rem;
-    width: fit-content;
-    margin: 0 auto;
-}
-
-.intent-toggle__btn {
-    padding: 0.7rem 1.5rem;
-    border-radius: 8px;
-    background: transparent;
-    border: none;
-    color: #b8b5c7;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    transition: all 0.3s ease;
-}
-
-.intent-toggle__btn.active {
-    background: rgba(138, 87, 222, 0.2);
-    color: #E8E6F1;
-}
-
-.intent-toggle__btn--professional.active {
-    box-shadow: 0 0 15px rgba(138, 87, 222, 0.3);
-}
-
-.intent-toggle__btn--personal.active {
-    box-shadow: 0 0 15px rgba(255, 126, 182, 0.3);
-}
-
-.intent-options-container {
-    position: relative;
-    min-height: 400px;
-}
-
-.intent-options {
-    display: none;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 1.25rem;
-    position: absolute;
-    width: 100%;
-    animation: fadeIn 0.3s ease forwards;
-}
-
-.intent-options.active {
-    display: grid;
-}
-
-.option-card {
-    background: rgba(33, 30, 46, 0.6);
-    border: 1px solid rgba(138, 87, 222, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-}
-
-.option-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(138, 87, 222, 0.4);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.option-card.selected {
-    background: rgba(138, 87, 222, 0.1);
-    border-color: rgba(138, 87, 222, 0.6);
-    box-shadow: 0 8px 20px rgba(138, 87, 222, 0.1);
-}
-
-.option-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(138, 87, 222, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 1rem;
-    font-size: 1.2rem;
-    color: #b296ff;
-    transition: all 0.3s ease;
-}
-
-.option-card.selected .option-icon {
-    background: rgba(138, 87, 222, 0.2);
-    transform: scale(1.1);
-}
-
-.option-content {
-    flex: 1;
-}
-
-.option-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin-bottom: 0.75rem;
-    color: #E8E6F1;
-}
-
-.option-description {
-    font-size: 0.9rem;
-    color: #b8b5c7;
-    line-height: 1.5;
-}
-
-.custom-intent-section, .custom-tone-section {
-    background: rgba(33, 30, 46, 0.6);
-    border: 1px solid rgba(138, 87, 222, 0.2);
-    border-radius: 12px;
-    padding: 1.5rem;
-    margin-top: 1.5rem;
-    animation: fadeIn 0.3s ease forwards;
-}
-
-.input-label {
-    display: block;
-    margin-bottom: 0.75rem;
-    font-weight: 500;
-    color: #E8E6F1;
-}
-
-.custom-intent-input, .input-field {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    background: rgba(45, 42, 59, 0.8);
-    border: 1px solid rgba(138, 87, 222, 0.3);
-    border-radius: 8px;
-    color: #E8E6F1;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.custom-intent-input:focus, .input-field:focus {
-    outline: none;
-    border-color: rgba(138, 87, 222, 0.6);
-    box-shadow: 0 0 0 3px rgba(138, 87, 222, 0.1);
-}
-
-/* Tone Selection Step Styles */
-.context-section {
-    display: flex;
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-    flex-wrap: wrap;
-}
-
-.recipient-info, .intent-info {
-    background: rgba(33, 30, 46, 0.6);
-    border: 1px solid rgba(138, 87, 222, 0.2);
-    border-radius: 12px;
-    padding: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    flex: 1;
-    min-width: 250px;
-}
-
-.recipient-info.loading, .intent-info.loading {
-    position: relative;
-    overflow: hidden;
-}
-
-.recipient-info.loading::after, .intent-info.loading::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(138, 87, 222, 0.1), transparent);
-    animation: loading 1.5s infinite;
-}
-
-@keyframes loading {
-    0% {
-        left: -100%;
-    }
-    100% {
-        left: 100%;
-    }
-}
-
-.recipient-avatar, .intent-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(138, 87, 222, 0.1);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    color: #b296ff;
-    flex-shrink: 0;
-}
-
-.recipient-details, .intent-details {
-    flex: 1;
-}
-
-.recipient-name, .intent-title {
-    font-weight: 600;
-    font-size: 1.1rem;
-    margin: 0 0 0.25rem;
-    color: #E8E6F1;
-}
-
-.recipient-relationship, .intent-description {
-    font-size: 0.9rem;
-    color: #b8b5c7;
-}
-
-.options-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 1.5rem;
-}
-
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Mobile responsiveness for intent and tone steps */
-@media (max-width: 768px) {
-    .intent-options {
-        grid-template-columns: 1fr;
-    }
-    
-    .options-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .context-section {
-        flex-direction: column;
-    }
-}
-
-/* Connection card animation */
-.connection-card {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.3s ease, transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
-}
-
-.connection-card.fade-in {
-    opacity: 1;
-    transform: translateY(0);
-}
-
-@keyframes staggeredFadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Preview Panel Enhancements */
-.preview-animated {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.preview-update-out {
-    opacity: 0;
-    transform: translateY(-10px);
-}
-
-.preview-update-in {
-    opacity: 1;
-    transform: translateY(0);
-    animation: fadeInUp 0.3s ease forwards;
-}
-
-.preview-toggle-btn {
-    display: none;
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    background: linear-gradient(45deg, var(--primary), var(--primary-light));
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    z-index: 100;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-}
-
-.preview-toggle-btn span {
-    display: none;
-}
-
-.preview-toggle-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-}
-
-.preview-toggle-btn:active {
-    transform: translateY(0);
-}
-
-/* Enhanced mobile styles for preview panel */
-@media (max-width: 1024px) {
-    .message-builder__preview {
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-    }
-    
-    .message-builder__preview.show-mobile {
-        transform: translateX(0);
-    }
-    
-    .preview-toggle-btn {
-        display: flex;
-    }
-    
-    .message-builder__content {
-        padding-right: 0;
-    }
-}
-
-/* Enhanced animations for preview content */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-/* Enhanced preview placeholder with shimmer effect */
-.preview-message-placeholder {
-    position: relative;
-    overflow: hidden;
-}
-
-.preview-message-placeholder::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background: linear-gradient(
-        90deg,
-        rgba(255, 255, 255, 0) 0%,
-        rgba(255, 255, 255, 0.05) 50%,
-        rgba(255, 255, 255, 0) 100%
-    );
-    animation: shimmer 2s infinite;
-}
-
-@keyframes shimmer {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
-}
-
-/* Enhanced loading states */
-.loading-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 2rem;
-    min-height: 200px;
-}
-
-.loading-spinner-small {
-    width: 30px;
-    height: 30px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-top-color: var(--primary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* Reduced motion preference support */
-@media (prefers-reduced-motion: reduce) {
-    .preview-animated,
-    .preview-update-out,
-    .preview-update-in,
-    .message-builder__step,
-    .message-builder__preview,
-    .preview-message-placeholder::after {
-        transition: opacity 0.1s linear !important;
-        animation: none !important;
-    }
-    
-    .preview-toggle-btn:hover {
-        transform: none !important;
-    }
-    
-    .loading-spinner, .loading-spinner-small {
-        animation-duration: 2s !important;
-    }
-}
-
-/* Enhanced Step Transitions */
-.message-builder__step {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.slide-in-right {
-    animation: slideInRight 0.3s ease forwards;
-}
-
-.slide-in-left {
-    animation: slideInLeft 0.3s ease forwards;
-}
-
-.slide-out-right {
-    animation: slideOutRight 0.3s ease forwards;
-}
-
-.slide-out-left {
-    animation: slideOutLeft 0.3s ease forwards;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideInLeft {
-    from {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-@keyframes slideOutRight {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(30px);
-    }
-}
-
-@keyframes slideOutLeft {
-    from {
-        opacity: 1;
-        transform: translateX(0);
-    }
-    to {
-        opacity: 0;
-        transform: translateX(-30px);
-    }
-}
-
-/* Sidebar pulse animation */
-.pulse-animation .step-indicator {
-    animation: pulse 1s ease;
-}
-
-@keyframes pulse {
-    0% {
-        box-shadow: 0 0 0 0 rgba(138, 87, 222, 0.6);
-    }
-    70% {
-        box-shadow: 0 0 0 10px rgba(138, 87, 222, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(138, 87, 222, 0);
-    }
-}
-
-/* Message Variations */
-.variations-section {
-  margin-top: 1.5rem;
-}
-
-.variations-section h3 {
-  font-size: 1.25rem;
-  margin-bottom: 1rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.message-variations {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 0.75rem;
-}
-
-.variation-button {
-  padding: 0.75rem 0.5rem;
-  border-radius: var(--border-radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(138, 87, 222, 0.1);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.variation-button:hover {
-  background: rgba(138, 87, 222, 0.2);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.variation-button:active {
-  transform: translateY(0);
-}
-
-.variation-button i {
-  font-size: 1.1rem;
-  margin-bottom: 0.5rem;
-}
-
-/* Responsive styling for smaller screens */
-@media (max-width: 768px) {
-  .message-variations {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Intent Step Styles */
 .intent-cards-container {
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 20px;
     padding: 10px 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden; /* Prevent horizontal overflow */
 }
 
 .intent-category-toggle {
@@ -1696,9 +1127,20 @@
 
 .intent-cards-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid with min size */
+    gap: 16px; /* Reduced gap slightly */
     width: 100%;
+    box-sizing: border-box;
+    padding: 0 5px; /* Add slight padding to prevent edge collision */
+}
+
+/* Make sure intent step body has proper constraints */
+#step-intent .step-body {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent horizontal scrolling */
 }
 
 .intent-card {
@@ -1712,6 +1154,9 @@
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     border: 2px solid transparent;
     min-height: 100px;
+    box-sizing: border-box;
+    width: 100%; /* Ensure card takes full width of its grid cell */
+    max-width: 100%; /* Prevent overflow */
 }
 
 .intent-card:hover {
@@ -1754,6 +1199,25 @@
     font-size: 14px;
     color: rgba(255, 255, 255, 0.7);
     margin: 0;
+}
+
+/* Enhance responsive behavior */
+@media (max-width: 1200px) {
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly smaller on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Even smaller on mobile */
+        gap: 12px; /* Reduce gap further on small screens */
+    }
+    
+    .intent-card {
+        padding: 15px; /* Smaller padding on mobile */
+        min-height: 80px; /* Reduce min height on mobile */
+    }
 }
 
 /* Explicitly ensure step footer and buttons are visible */
@@ -1895,4 +1359,70 @@
     box-shadow: rgba(138, 87, 222, 0.25) 0px 4px 10px !important;
     position: relative;
     z-index: 60; /* Higher than regular z-index */
+}
+
+/* Adjust intent cards container and grid to prevent overflow */
+.intent-cards-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px 0;
+    box-sizing: border-box;
+    max-width: 100%;
+    overflow: hidden; /* Prevent horizontal overflow */
+}
+
+.intent-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Responsive grid with min size */
+    gap: 16px; /* Reduced gap slightly */
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 5px; /* Add slight padding to prevent edge collision */
+}
+
+/* Make sure intent step body has proper constraints */
+#step-intent .step-body {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent horizontal scrolling */
+}
+
+/* Adjust intent card sizing for better fit */
+.intent-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(40, 30, 55, 0.8), rgba(30, 25, 45, 0.8));
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    min-height: 100px;
+    box-sizing: border-box;
+    width: 100%; /* Ensure card takes full width of its grid cell */
+    max-width: 100%; /* Prevent overflow */
+}
+
+/* Enhance responsive behavior */
+@media (max-width: 1200px) {
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); /* Slightly smaller on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .intent-cards-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Even smaller on mobile */
+        gap: 12px; /* Reduce gap further on small screens */
+    }
+    
+    .intent-card {
+        padding: 15px; /* Smaller padding on mobile */
+        min-height: 80px; /* Reduce min height on mobile */
+    }
 } 

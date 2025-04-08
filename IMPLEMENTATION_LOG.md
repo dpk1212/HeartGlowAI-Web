@@ -874,3 +874,89 @@ After implementing the intent cards fix, a new issue was discovered where the "N
 - Implement animation transitions for the floating buttons
 - Add keyboard shortcuts for navigation
 - Test comprehensively across different screen sizes and browsers
+
+### Intent Cards Layout Overflow Fix
+*Updated on: May 10, 2024*
+
+**Issue Identified:**
+Intent option cards were extending beyond the right edge of the content area, causing visual issues and potential usability problems.
+
+**Comprehensive Solution Implemented:**
+
+1. **Enhanced Grid Layout**
+   - Modified the intent cards grid layout to use responsive sizing
+   - Implemented `auto-fit` with appropriate `minmax` constraints instead of `auto-fill`
+   - Reduced the minimum card width from 280px to 250px for better spacing
+   - Added proper `box-sizing: border-box` to all container elements
+   - Applied `overflow: hidden` to prevent horizontal scrolling
+
+2. **Container Constraints**
+   - Added explicit width constraints to the intent step body
+   - Applied padding to provide space between the cards and container edges
+   - Ensured all elements respect their parent container boundaries
+   - Fixed content area width calculations to prevent overflow
+
+3. **Responsive Breakpoints**
+   - Added media queries for different screen sizes
+   - Implemented progressive card size reduction on smaller screens
+   - Reduced padding and gaps on mobile devices
+   - Ensured consistent layout across all device sizes
+
+4. **Card Sizing**
+   - Added explicit width and max-width properties to intent cards
+   - Implemented proper box-sizing to maintain dimensions including padding
+   - Reduced minimum height on mobile devices
+   - Ensured cards scale properly within their grid cells
+
+**Technical Details:**
+- Updated grid template columns for responsive behavior:
+  ```css
+  .intent-cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0 5px;
+  }
+  ```
+
+- Added container constraints to prevent overflow:
+  ```css
+  #step-intent .step-body {
+      width: 100%;
+      max-width: 100%;
+      padding: 15px;
+      box-sizing: border-box;
+      overflow: hidden;
+  }
+  ```
+
+- Implemented responsive scaling for different screen sizes:
+  ```css
+  @media (max-width: 1200px) {
+      .intent-cards-grid {
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+  }
+
+  @media (max-width: 768px) {
+      .intent-cards-grid {
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 12px;
+      }
+  }
+  ```
+
+**Impact:**
+- Intent cards now display properly within the content area boundaries
+- Grid layout adapts responsively to different screen sizes
+- Consistent card spacing and alignment across the layout
+- Improved visual appearance and usability
+- No horizontal scrolling or clipping of content
+
+**Next Steps:**
+- Apply similar layout improvements to the tone selection step
+- Further optimize mobile experience with touch-friendly targets
+- Consider adding transitions when cards reflow during window resizing
+- Monitor for any additional layout edge cases

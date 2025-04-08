@@ -80,6 +80,9 @@ function initializeMessageBuilder() {
     // Try to load existing data (if the user is resuming)
     loadExistingData();
     
+    // Create floating navigation buttons
+    setTimeout(createFloatingNavigationButtons, 800);
+    
     // Show the current step (determined by loadExistingData)
     showStep(currentStep);
 }
@@ -1324,6 +1327,9 @@ function showStep(stepId, skipAnimation = false) {
         // Update preview panel
         updatePreviewPanel();
         
+        // Create floating navigation buttons for better accessibility
+        setTimeout(createFloatingNavigationButtons, 300);
+        
         // Scroll to top of the step
         if (currentStepElement) {
             currentStepElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1359,6 +1365,9 @@ function showStep(stepId, skipAnimation = false) {
                 if (stepId === 'intent') {
                     setTimeout(fixIntentStepIssues, 300);
                 }
+                
+                // Create floating navigation buttons even in emergency mode
+                setTimeout(createFloatingNavigationButtons, 400);
             }
         } catch (emergencyError) {
             console.error('Emergency recovery failed:', emergencyError);
@@ -6506,5 +6515,203 @@ function initializeIntentStep() {
                 intentNextBtn.disabled = false;
             }
         }, 300);
+    }
+}
+
+/**
+ * Create floating navigation buttons to ensure users can always navigate
+ * regardless of button visibility issues
+ */
+function createFloatingNavigationButtons() {
+    console.log('Creating floating navigation buttons...');
+    
+    try {
+        // Remove any existing floating navigation
+        const existingNav = document.querySelector('.floating-navigation');
+        if (existingNav) {
+            existingNav.remove();
+        }
+        
+        // Create container for floating buttons
+        const floatingNav = document.createElement('div');
+        floatingNav.className = 'floating-navigation';
+        document.body.appendChild(floatingNav);
+        
+        // Create buttons based on current step
+        if (currentStep === 'recipient') {
+            // Only Next button for first step
+            const nextButton = document.createElement('button');
+            nextButton.className = 'primary-button';
+            nextButton.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+            nextButton.style.display = 'flex';
+            nextButton.style.alignItems = 'center';
+            nextButton.style.gap = '5px';
+            
+            // Multiple event binding for reliability
+            nextButton.onclick = function() {
+                if (validateRecipientStep()) {
+                    showStep('intent');
+                }
+                return false;
+            };
+            
+            nextButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateRecipientStep()) {
+                    showStep('intent');
+                }
+            }, true);
+            
+            floatingNav.appendChild(nextButton);
+        } 
+        else if (currentStep === 'intent') {
+            // Back button
+            const backButton = document.createElement('button');
+            backButton.className = 'secondary-button';
+            backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+            backButton.style.display = 'flex';
+            backButton.style.alignItems = 'center';
+            backButton.style.gap = '5px';
+            
+            backButton.onclick = function() {
+                showStep('recipient');
+                return false;
+            };
+            
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('recipient');
+            }, true);
+            
+            floatingNav.appendChild(backButton);
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.className = 'primary-button';
+            nextButton.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+            nextButton.style.display = 'flex';
+            nextButton.style.alignItems = 'center';
+            nextButton.style.gap = '5px';
+            
+            // Default to disabled
+            nextButton.disabled = !messageData.intent;
+            if (!messageData.intent) {
+                nextButton.classList.add('disabled');
+            }
+            
+            nextButton.onclick = function() {
+                if (validateIntentStep()) {
+                    showStep('tone');
+                }
+                return false;
+            };
+            
+            nextButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateIntentStep()) {
+                    showStep('tone');
+                }
+            }, true);
+            
+            floatingNav.appendChild(nextButton);
+        } 
+        else if (currentStep === 'tone') {
+            // Back button
+            const backButton = document.createElement('button');
+            backButton.className = 'secondary-button';
+            backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+            backButton.style.display = 'flex';
+            backButton.style.alignItems = 'center';
+            backButton.style.gap = '5px';
+            
+            backButton.onclick = function() {
+                showStep('intent');
+                return false;
+            };
+            
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('intent');
+            }, true);
+            
+            floatingNav.appendChild(backButton);
+            
+            // Next button
+            const nextButton = document.createElement('button');
+            nextButton.className = 'primary-button';
+            nextButton.innerHTML = 'Next <i class="fas fa-arrow-right"></i>';
+            nextButton.style.display = 'flex';
+            nextButton.style.alignItems = 'center';
+            nextButton.style.gap = '5px';
+            
+            // Default to disabled
+            nextButton.disabled = !messageData.tone;
+            if (!messageData.tone) {
+                nextButton.classList.add('disabled');
+            }
+            
+            nextButton.onclick = function() {
+                if (validateToneStep()) {
+                    showStep('result');
+                }
+                return false;
+            };
+            
+            nextButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateToneStep()) {
+                    showStep('result');
+                }
+            }, true);
+            
+            floatingNav.appendChild(nextButton);
+        } 
+        else if (currentStep === 'result') {
+            // Back button
+            const backButton = document.createElement('button');
+            backButton.className = 'secondary-button';
+            backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back';
+            backButton.style.display = 'flex';
+            backButton.style.alignItems = 'center';
+            backButton.style.gap = '5px';
+            
+            backButton.onclick = function() {
+                showStep('tone');
+                return false;
+            };
+            
+            backButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('tone');
+            }, true);
+            
+            floatingNav.appendChild(backButton);
+            
+            // New message button
+            const newButton = document.createElement('button');
+            newButton.className = 'primary-button';
+            newButton.innerHTML = 'New Message <i class="fas fa-plus"></i>';
+            newButton.style.display = 'flex';
+            newButton.style.alignItems = 'center';
+            newButton.style.gap = '5px';
+            
+            newButton.onclick = function() {
+                resetMessageData();
+                showStep('recipient');
+                return false;
+            };
+            
+            newButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetMessageData();
+                showStep('recipient');
+            }, true);
+            
+            floatingNav.appendChild(newButton);
+        }
+        
+        console.log('Floating navigation buttons created successfully');
+    } catch (error) {
+        console.error('Error creating floating navigation buttons:', error);
     }
 }

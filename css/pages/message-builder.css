@@ -136,7 +136,9 @@
   min-height: 100vh;
   position: relative;
   overflow: hidden;
-  padding-right: 280px; /* Match preview panel width */
+  padding-right: 300px; /* Increased padding to avoid preview overlap */
+  width: calc(100% - 240px); /* Ensure proper width calculation */
+  box-sizing: border-box;
 }
 
 .message-builder__step {
@@ -189,11 +191,18 @@
 }
 
 .step-footer {
-  display: flex;
-  justify-content: space-between;
-  padding: 1.5rem 0;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  padding: 20px 0;
+  margin-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 1.5rem;
+  justify-content: space-between;
+  position: relative;
+  z-index: 50; /* Ensure it's above other elements */
+  margin-bottom: 40px; /* Add space at bottom to ensure visibility */
+  width: 100%;
+  max-width: calc(100% - 300px); /* Ensure it doesn't extend under preview panel */
 }
 
 /* Preview Panel */
@@ -1756,6 +1765,11 @@
     margin-top: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     justify-content: space-between;
+    position: relative;
+    z-index: 50; /* Ensure it's above other elements */
+    margin-bottom: 40px; /* Add space at bottom to ensure visibility */
+    width: 100%;
+    max-width: calc(100% - 300px); /* Ensure it doesn't extend under preview panel */
 }
 
 #step-intent .step-footer button,
@@ -1837,4 +1851,48 @@
 .secondary-button:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* On mobile, use full width since preview is at bottom */
+@media (max-width: 1024px) {
+    .step-footer {
+        max-width: 100%;
+    }
+}
+
+/* Add floating Next/Back buttons for better mobile experience */
+.floating-navigation {
+    position: fixed;
+    bottom: 20px;
+    right: 300px; /* Position to left of preview panel */
+    z-index: 100;
+    display: flex;
+    gap: 10px;
+    padding: 10px;
+    background: rgba(26, 22, 37, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 1024px) {
+    .floating-navigation {
+        right: 20px;
+        bottom: 80px; /* Position above preview toggle button */
+    }
+}
+
+/* Additional specific fixes for the intent step buttons */
+#step-intent .step-footer {
+    max-width: calc(100% - 300px);
+    padding-right: 20px; /* Add some padding to avoid edge collision */
+}
+
+#intentNextBtn {
+    background: linear-gradient(135deg, rgb(138, 87, 222), rgb(255, 126, 182)) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: rgba(138, 87, 222, 0.25) 0px 4px 10px !important;
+    position: relative;
+    z-index: 60; /* Higher than regular z-index */
 } 

@@ -785,3 +785,92 @@ By addressing these challenges systematically and standardizing our approach, we
 - Refactor common patterns into reusable utility functions
 - Complete the implementation of the API integration for message generation
 - Conduct comprehensive testing of the full end-to-end flow 
+
+### Navigation Button Visibility & Accessibility Fix
+*Updated on: May 9, 2024*
+
+**Issue Identified:**
+After implementing the intent cards fix, a new issue was discovered where the "Next" button was partially hidden behind the preview panel, making it difficult to access and click.
+
+**Comprehensive Solution Implemented:**
+
+1. **Enhanced Step Footer Positioning**
+   - Adjusted the `step-footer` container with proper z-index to ensure it appears above other elements
+   - Added margin-bottom to create additional space at the bottom of the step
+   - Implemented width constraints to prevent overlap with the preview panel
+   - Applied responsive adjustments for mobile layouts
+
+2. **Floating Navigation Buttons**
+   - Created a robust `createFloatingNavigationButtons()` function that provides persistent navigation
+   - Positioned the floating buttons outside the normal flow to avoid conflicts
+   - Implemented step-specific button sets that update based on current step
+   - Applied multiple event binding techniques for maximum reliability
+   - Added proper disabled states based on validation status
+
+3. **Layout Structure Improvements**
+   - Increased padding in the content area to prevent preview panel overlap
+   - Applied proper width calculations to ensure responsive behavior
+   - Added specific CSS targeting for the intent step to address its unique layout needs
+   - Enhanced z-index management throughout the application
+
+4. **Integration with Navigation System**
+   - Updated the `showStep()` function to create floating navigation buttons
+   - Added fallback creation in the emergency recovery mode
+   - Implemented initialization on page load for immediate accessibility
+   - Ensured buttons are recreated when steps change
+
+**Technical Details:**
+- Applied comprehensive CSS fixes for button positioning:
+  ```css
+  .step-footer {
+      position: relative;
+      z-index: 50;
+      margin-bottom: 40px;
+      width: 100%;
+      max-width: calc(100% - 300px);
+  }
+  ```
+
+- Created a dedicated floating navigation container:
+  ```css
+  .floating-navigation {
+      position: fixed;
+      bottom: 20px;
+      right: 300px;
+      z-index: 100;
+      display: flex;
+      gap: 10px;
+      padding: 10px;
+      background: rgba(26, 22, 37, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  ```
+
+- Implemented responsive adjustments for mobile layouts:
+  ```css
+  @media (max-width: 1024px) {
+      .floating-navigation {
+          right: 20px;
+          bottom: 80px;
+      }
+      
+      .step-footer {
+          max-width: 100%;
+      }
+  }
+  ```
+
+**Impact:**
+- Navigation buttons are now consistently visible and accessible across all steps
+- Users have multiple ways to navigate (regular buttons and floating buttons)
+- Improved usability on both desktop and mobile devices
+- Enhanced reliability of step transitions
+- More intuitive and professional user experience
+
+**Next Steps:**
+- Apply similar patterns to other steps for consistent navigation
+- Implement animation transitions for the floating buttons
+- Add keyboard shortcuts for navigation
+- Test comprehensively across different screen sizes and browsers

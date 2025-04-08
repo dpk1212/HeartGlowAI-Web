@@ -65,6 +65,9 @@ function initializeMessageBuilder() {
     // Initialize DOM elements
     initializeElements();
     
+    // Apply visibility fixes to connections list elements
+    setTimeout(fixConnectionsVisibility, 500);
+    
     // Set up event listeners
     setupEventListeners();
     
@@ -809,19 +812,103 @@ function addConnectionCard(connection) {
             </div>
         `;
         
-        // Add temporary debug styling
+        // Apply enhanced styling directly to the card for consistent visibility
         card.style.border = '1px solid #8a57de';
-        card.style.padding = '12px';
+        card.style.padding = '16px';
         card.style.borderRadius = '12px';
-        card.style.margin = '8px 0';
+        card.style.margin = '12px 0';
         card.style.display = 'flex';
         card.style.alignItems = 'center';
+        card.style.justifyContent = 'space-between';
         card.style.background = '#211E2E';
         card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.2s ease';
+        card.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        
+        // Style avatar
+        const avatar = card.querySelector('.connection-avatar');
+        if (avatar) {
+            avatar.style.width = '40px';
+            avatar.style.height = '40px';
+            avatar.style.borderRadius = '50%';
+            avatar.style.background = '#8a57de';
+            avatar.style.color = 'white';
+            avatar.style.display = 'flex';
+            avatar.style.alignItems = 'center';
+            avatar.style.justifyContent = 'center';
+            avatar.style.position = 'relative';
+            avatar.style.marginRight = '12px';
+        }
+        
+        // Style icon
+        const icon = card.querySelector('.connection-icon');
+        if (icon) {
+            icon.style.position = 'absolute';
+            icon.style.bottom = '-4px';
+            icon.style.right = '-4px';
+            icon.style.background = '#ff7eb6';
+            icon.style.borderRadius = '50%';
+            icon.style.width = '16px';
+            icon.style.height = '16px';
+            icon.style.display = 'flex';
+            icon.style.alignItems = 'center';
+            icon.style.justifyContent = 'center';
+            icon.style.fontSize = '8px';
+        }
+        
+        // Style info
+        const info = card.querySelector('.connection-info');
+        if (info) {
+            info.style.flex = '1';
+        }
+        
+        // Style name
+        const name = card.querySelector('.connection-name');
+        if (name) {
+            name.style.fontWeight = 'bold';
+            name.style.color = 'white';
+            name.style.fontSize = '16px';
+        }
+        
+        // Style relationship
+        const relationship = card.querySelector('.connection-relationship');
+        if (relationship) {
+            relationship.style.color = '#b8b5c7';
+            relationship.style.fontSize = '14px';
+        }
+        
+        // Find and style edit button
+        const editBtn = card.querySelector('.connection-edit');
+        if (editBtn) {
+            // Style the button
+            editBtn.style.background = 'transparent';
+            editBtn.style.border = 'none';
+            editBtn.style.color = '#8a57de';
+            editBtn.style.cursor = 'pointer';
+            editBtn.style.padding = '8px';
+            
+            // Add click handler for edit button
+            editBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent card selection
+                console.log('Edit button clicked for:', connection.name);
+                editConnection(connection);
+            });
+        }
         
         // Add card to list
         connectionsList.appendChild(card);
         console.log('Card added to DOM:', card);
+        
+        // Add hover effect
+        card.addEventListener('mouseover', function() {
+            this.style.background = '#2D2A3B';
+            this.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+        });
+        
+        card.addEventListener('mouseout', function() {
+            this.style.background = '#211E2E';
+            this.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
+        });
         
         // Add animation class after a short delay (for animation)
         setTimeout(() => {
@@ -835,18 +922,20 @@ function addConnectionCard(connection) {
             // Ignore clicks on the edit button
             if (e.target.closest('.connection-edit')) {
                 e.stopPropagation();
-                console.log('Edit button clicked for:', connection.name);
-                editConnection(connection);
-                return;
+                return; // Edit button has its own handler
             }
             
             // Remove selected class from all cards
             document.querySelectorAll('.connection-card').forEach(c => {
                 c.classList.remove('selected');
+                c.style.border = '1px solid #8a57de';
+                c.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
             });
             
             // Add selected class to this card
             this.classList.add('selected');
+            this.style.border = '2px solid #ff7eb6';
+            this.style.boxShadow = '0 0 0 2px rgba(255, 126, 182, 0.2)';
             
             // Save the selected recipient
             messageData.recipient = {
@@ -861,20 +950,12 @@ function addConnectionCard(connection) {
             
             // Enable next button
             elements.buttons.recipientNext.classList.remove('disabled');
+            elements.buttons.recipientNext.style.opacity = '1';
+            elements.buttons.recipientNext.style.pointerEvents = 'auto';
             
             // Update preview
             updatePreview();
         });
-        
-        // Add edit button handler
-        const editButton = card.querySelector('.connection-edit');
-        if (editButton) {
-            editButton.addEventListener('click', function(e) {
-                e.stopPropagation(); // Prevent card selection
-                console.log('Edit button clicked via dedicated handler for:', connection.name);
-                editConnection(connection);
-            });
-        }
     } catch (error) {
         console.error('Error creating connection card:', error);
     }
@@ -1119,119 +1200,167 @@ function closeModal(modal) {
 function showStep(stepId, skipAnimation = false) {
     console.log(`Showing step: ${stepId}`);
     
-    // Ensure the step exists
+    // Validate step ID
     if (!STEPS[stepId]) {
         console.error(`Invalid step ID: ${stepId}`);
-        return false;
+        return;
     }
     
-    // Validate that all previous steps have data
-    if (stepId !== 'recipient' && !validatePreviousSteps(stepId)) {
-        console.warn(`Cannot show step ${stepId} because previous steps are incomplete`);
-        
-        // Find the earliest incomplete step
-        const stepKeys = Object.keys(STEPS);
-        for (let i = 0; i < stepKeys.length; i++) {
-            const checkStepId = stepKeys[i];
-            
-            // Check if we've already passed this step
-            if (checkStepId === stepId) {
-                break;
-            }
-            
-            // If this step is missing data, show it instead
-            if (!messageData[checkStepId]) {
-                showStep(checkStepId);
-                showAlert(`Please complete step ${i + 1} first.`, 'warning');
-                return false;
-            }
-        }
-        
-        return false;
-    }
-    
-    // Validate the current step's data if moving forward
-    const currentStepIndex = Object.keys(STEPS).indexOf(currentStep);
-    const targetStepIndex = Object.keys(STEPS).indexOf(stepId);
-    
-    if (targetStepIndex > currentStepIndex && STEPS[currentStep].validate) {
-        const isValid = STEPS[currentStep].validate();
-        if (!isValid) {
-            console.warn(`Validation failed for step: ${currentStep}`);
-            return false;
-        }
-    }
-    
-    // Save current step data
-    saveStepData(currentStep);
-    
-    // Update current step
-    const previousStep = currentStep;
     currentStep = stepId;
     
-    // Save to localStorage
-    localStorage.setItem('currentStep', currentStep);
-    
-    // Get DOM elements
-    const stepElements = document.querySelectorAll('.message-builder__step');
-    
-    // Determine animation direction (forward or backward)
-    const isForward = targetStepIndex > currentStepIndex;
-    
-    // Hide all steps with appropriate animation
-    stepElements.forEach(element => {
-        if (!skipAnimation) {
-            // Remove existing animation classes
-            element.classList.remove('slide-in-right', 'slide-in-left', 'slide-out-right', 'slide-out-left');
-            
-            // Add appropriate exit animation class if this is the active step
-            if (element.classList.contains('active')) {
-                element.classList.add(isForward ? 'slide-out-left' : 'slide-out-right');
+    try {
+        // Update steps visibility
+        Object.keys(elements.steps).forEach(step => {
+            if (elements.steps[step]) {
+                elements.steps[step].classList.remove('active');
             }
+        });
+        
+        if (elements.steps[stepId]) {
+            elements.steps[stepId].classList.add('active');
+            // Scroll to top
+            elements.steps[stepId].scrollTop = 0;
         }
         
-        // After exit animation, remove active class
-        setTimeout(() => {
-            element.classList.remove('active');
-        }, skipAnimation ? 0 : 300);
-    });
-    
-    // Show target step with animation
-    const targetElement = document.getElementById(STEPS[stepId].id);
-    if (targetElement) {
-        setTimeout(() => {
-            if (!skipAnimation) {
-                // Add appropriate entrance animation class
-                targetElement.classList.add(isForward ? 'slide-in-right' : 'slide-in-left');
+        // Update sidebar
+        elements.sidebar.steps.forEach(step => {
+            step.classList.remove('active');
+            step.classList.remove('completed');
+            
+            // Get step ID from data attribute
+            const sidebarStepId = step.getAttribute('data-step');
+            
+            // Mark completed steps
+            const stepIndex = Object.keys(STEPS).indexOf(sidebarStepId);
+            const currentIndex = Object.keys(STEPS).indexOf(currentStep);
+            
+            if (stepIndex < currentIndex) {
+                step.classList.add('completed');
             }
             
-            // Add active class
-            targetElement.classList.add('active');
-            
-            // Scroll to top
-            targetElement.scrollTop = 0;
-        }, skipAnimation ? 0 : 300);
-    }
-    
-    // Update sidebar
-    updateSidebar(previousStep, stepId);
-    
-    // Update preview
-    updatePreview();
-    
-    // Initialize step-specific functionality
-    initializeStepContent(stepId);
-    
-    // Track step view in analytics
-    if (firebase.analytics) {
-        firebase.analytics().logEvent('view_step', {
-            step_id: stepId,
-            step_number: Object.keys(STEPS).indexOf(stepId) + 1,
-            timestamp: new Date().toISOString()
+            // Mark active step
+            if (sidebarStepId === currentStep) {
+                step.classList.add('active');
+            }
         });
+        
+        // Apply enhanced styling to navigation buttons
+        enhanceNavigationButtonsStyle();
+        
+        // Initialize step-specific content
+        initializeStepContent(stepId);
+        
+        // Update preview panel
+        updatePreview();
+    } catch (error) {
+        console.error('Error showing step:', error);
+    }
+}
+
+/**
+ * Apply enhanced styling to navigation buttons for better visibility
+ */
+function enhanceNavigationButtonsStyle() {
+    console.log('Enhancing navigation buttons style');
+    
+    // Style all navigation buttons
+    const allButtons = [
+        elements.buttons.recipientNext,
+        elements.buttons.intentPrev,
+        elements.buttons.intentNext,
+        elements.buttons.tonePrev,
+        elements.buttons.toneNext,
+        elements.buttons.resultPrev,
+        elements.buttons.createNew
+    ];
+    
+    // Base styles for all buttons
+    allButtons.forEach(button => {
+        if (!button) return;
+        
+        // Common styles
+        button.style.padding = '12px 24px';
+        button.style.borderRadius = '8px';
+        button.style.fontWeight = 'bold';
+        button.style.transition = 'all 0.2s ease';
+        button.style.cursor = 'pointer';
+        
+        // Specific styles based on button type
+        if (button.classList.contains('primary-button')) {
+            // Primary button styles
+            button.style.background = 'linear-gradient(135deg, #8a57de 0%, #ff7eb6 100%)';
+            button.style.color = 'white';
+            button.style.border = 'none';
+            button.style.boxShadow = '0 4px 12px rgba(138, 87, 222, 0.25)';
+        } else if (button.classList.contains('secondary-button')) {
+            // Secondary button styles
+            button.style.background = 'transparent';
+            button.style.color = 'white';
+            button.style.border = '1px solid #8a57de';
+        }
+        
+        // Disabled state
+        if (button.classList.contains('disabled')) {
+            button.style.opacity = '0.5';
+            button.style.pointerEvents = 'none';
+        } else {
+            button.style.opacity = '1';
+            button.style.pointerEvents = 'auto';
+        }
+        
+        // Hover effects
+        button.addEventListener('mouseover', function() {
+            if (this.classList.contains('primary-button') && !this.classList.contains('disabled')) {
+                this.style.boxShadow = '0 6px 16px rgba(138, 87, 222, 0.4)';
+                this.style.transform = 'translateY(-2px)';
+            } else if (this.classList.contains('secondary-button') && !this.classList.contains('disabled')) {
+                this.style.background = 'rgba(138, 87, 222, 0.1)';
+            }
+        });
+        
+        button.addEventListener('mouseout', function() {
+            if (this.classList.contains('primary-button') && !this.classList.contains('disabled')) {
+                this.style.boxShadow = '0 4px 12px rgba(138, 87, 222, 0.25)';
+                this.style.transform = 'translateY(0)';
+            } else if (this.classList.contains('secondary-button') && !this.classList.contains('disabled')) {
+                this.style.background = 'transparent';
+            }
+        });
+    });
+    
+    // Special enhancement for the next button in current step
+    let currentNextButton = null;
+    switch (currentStep) {
+        case 'recipient': currentNextButton = elements.buttons.recipientNext; break;
+        case 'intent': currentNextButton = elements.buttons.intentNext; break;
+        case 'tone': currentNextButton = elements.buttons.toneNext; break;
+        case 'result': currentNextButton = elements.buttons.createNew; break;
     }
     
-    return true;
+    if (currentNextButton) {
+        // Make it more prominent
+        currentNextButton.style.padding = '14px 28px';
+        currentNextButton.style.fontSize = '16px';
+        
+        // Add a subtle animation pulse if not disabled
+        if (!currentNextButton.classList.contains('disabled')) {
+            currentNextButton.style.animation = 'pulse 2s infinite';
+            
+            // Add keyframes for pulse animation if they don't exist
+            if (!document.getElementById('pulse-animation')) {
+                const style = document.createElement('style');
+                style.id = 'pulse-animation';
+                style.innerHTML = `
+                    @keyframes pulse {
+                        0% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
+                        50% { box-shadow: 0 8px 24px rgba(138, 87, 222, 0.5); }
+                        100% { box-shadow: 0 4px 12px rgba(138, 87, 222, 0.25); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    }
 }
 
 /**
@@ -3239,15 +3368,28 @@ function formatRelationship(recipient) {
     return capitalizeFirstLetter(recipient.relationship);
 }
 
+// Add a global authentication check flag to prevent multiple concurrent checks
+let authCheckInProgress = false;
+let authCheckTimeoutId = null;
+
 /**
  * Refresh connections list from Firestore
  * @param {boolean} forceReload - Whether to bypass cache and force reload
  * @returns {Promise} Promise that resolves when connections are loaded
  */
 function refreshConnectionsList(forceReload = false) {
+    // If auth check is already in progress, return a resolved promise
+    if (authCheckInProgress) {
+        console.log('Auth check already in progress, skipping duplicate call');
+        return Promise.resolve([]);
+    }
+    
     // Check if user is authenticated
     if (!currentUser || !currentUser.uid) {
         console.log('Waiting for authentication before loading connections...');
+        
+        // Set flag to prevent multiple auth checks
+        authCheckInProgress = true;
         
         // Show a temporary loading message in the connections list
         const connectionsList = elements.recipientStep.connectionsList;
@@ -3260,6 +3402,8 @@ function refreshConnectionsList(forceReload = false) {
             const authCheck = setInterval(() => {
                 if (currentUser && currentUser.uid) {
                     clearInterval(authCheck);
+                    clearTimeout(authCheckTimeoutId);
+                    authCheckInProgress = false;
                     console.log('Authentication complete, loading connections...');
                     
                     // Once authenticated, load connections and pass through the result
@@ -3274,13 +3418,31 @@ function refreshConnectionsList(forceReload = false) {
             }, 500);
             
             // Timeout after 10 seconds
-            setTimeout(() => {
+            authCheckTimeoutId = setTimeout(() => {
                 clearInterval(authCheck);
+                authCheckInProgress = false;
                 console.warn('Authentication timeout when waiting for connections');
                 
                 // Display authentication timeout in the UI
                 if (connectionsList) {
                     connectionsList.innerHTML = '<div class="error-state"><p>Authentication timed out. Please refresh the page.</p></div>';
+                }
+                
+                // Add a 'try again' button for better UX
+                if (connectionsList) {
+                    const tryAgainBtn = document.createElement('button');
+                    tryAgainBtn.className = 'primary-button';
+                    tryAgainBtn.innerHTML = 'Try Again';
+                    tryAgainBtn.style.marginTop = '15px';
+                    tryAgainBtn.addEventListener('click', () => {
+                        console.log('Retrying connection loading...');
+                        refreshConnectionsList(true);
+                    });
+                    
+                    const errorDiv = connectionsList.querySelector('.error-state');
+                    if (errorDiv) {
+                        errorDiv.appendChild(tryAgainBtn);
+                    }
                 }
                 
                 // Resolve with empty array instead of rejecting
@@ -3291,9 +3453,14 @@ function refreshConnectionsList(forceReload = false) {
     
     // User is already authenticated, load connections
     try {
-        return loadUserConnections(forceReload);
+        return loadUserConnections(forceReload)
+            .finally(() => {
+                // Ensure the flag is reset even if there's an error
+                authCheckInProgress = false;
+            });
     } catch (error) {
         console.error('Error in refreshConnectionsList:', error);
+        authCheckInProgress = false;
         // Return a resolved promise with empty array instead of propagating the error
         return Promise.resolve([]);
     }
@@ -3837,4 +4004,118 @@ function createTestCard(container) {
     });
     
     return testCard;
+}
+
+/**
+ * Fix visibility issues with connections container and list
+ * This function resolves rendering issues where cards are created but not visible
+ */
+function fixConnectionsVisibility() {
+    console.log('Applying visibility fixes to connections elements...');
+    
+    // Fix recipient step container
+    const recipientStep = document.getElementById('step-recipient');
+    if (recipientStep) {
+        const stepBody = recipientStep.querySelector('.step-body');
+        if (stepBody) {
+            // Ensure the step body is visible
+            stepBody.style.display = 'block';
+            stepBody.style.width = '100%';
+            stepBody.style.position = 'relative';
+            
+            console.log('Fixed step body visibility');
+        }
+    }
+    
+    // Fix connections container
+    const connectionsContainer = document.querySelector('.connections-container');
+    if (connectionsContainer) {
+        // Ensure the connections container is visible
+        connectionsContainer.style.display = 'block';
+        connectionsContainer.style.width = '100%';
+        connectionsContainer.style.margin = '20px 0';
+        connectionsContainer.style.position = 'relative';
+        connectionsContainer.style.zIndex = '5';
+        
+        console.log('Fixed connections container visibility');
+    } else {
+        console.warn('Connections container not found, may need to create it');
+        createConnectionsContainer();
+    }
+    
+    // Fix connections list
+    const connectionsList = document.getElementById('connections-list');
+    if (connectionsList) {
+        // Ensure list is visible
+        connectionsList.style.display = 'block';
+        connectionsList.style.width = '100%';
+        connectionsList.style.maxHeight = '400px';
+        connectionsList.style.overflowY = 'auto';
+        connectionsList.style.position = 'relative';
+        connectionsList.style.zIndex = '10';
+        
+        // Add debug border temporarily to see boundaries
+        connectionsList.style.padding = '8px';
+        
+        console.log('Fixed connections list visibility');
+    }
+}
+
+/**
+ * Create connections container if missing
+ */
+function createConnectionsContainer() {
+    console.log('Creating missing connections container...');
+    
+    const stepBody = document.querySelector('#step-recipient .step-body');
+    if (!stepBody) {
+        console.error('Cannot create connections container: Step body not found');
+        return;
+    }
+    
+    // Clear step body content first
+    stepBody.innerHTML = '';
+    
+    // Create connections container
+    const connectionsContainer = document.createElement('div');
+    connectionsContainer.className = 'connections-container';
+    connectionsContainer.style.display = 'block';
+    connectionsContainer.style.width = '100%';
+    connectionsContainer.style.margin = '20px 0';
+    
+    // Create connections list
+    const connectionsList = document.createElement('div');
+    connectionsList.id = 'connections-list';
+    connectionsList.className = 'connections-list';
+    connectionsList.style.display = 'block';
+    connectionsList.style.width = '100%';
+    
+    // Create add connection button
+    const addButton = document.createElement('div');
+    addButton.id = 'add-new-connection';
+    addButton.className = 'add-connection-card';
+    addButton.innerHTML = `
+        <div class="add-connection-icon">
+            <i class="fas fa-plus"></i>
+        </div>
+        <div class="add-connection-label">Create New</div>
+    `;
+    
+    // Add event listener to the add button
+    addButton.addEventListener('click', function() {
+        openConnectionModal();
+    });
+    
+    // Assemble the structure
+    connectionsContainer.appendChild(connectionsList);
+    connectionsContainer.appendChild(addButton);
+    stepBody.appendChild(connectionsContainer);
+    
+    // Update our elements reference
+    elements.recipientStep.connectionsList = connectionsList;
+    elements.recipientStep.addNewConnection = addButton;
+    
+    console.log('Created connections container structure');
+    
+    return connectionsContainer;
 }

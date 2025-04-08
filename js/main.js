@@ -456,10 +456,15 @@
       const analytics = firebase.analytics();
       
       // Track page view
-      logAnalyticsEvent('page_view', {
-        page_title: document.title,
-        page_location: window.location.href
-      });
+      try {
+        analytics.logEvent('page_view', {
+          page_title: document.title,
+          page_location: window.location.href
+        });
+        console.log('Analytics page_view event logged');
+      } catch (error) {
+        console.error('Error logging analytics event:', error);
+      }
       
       // Get elements
       const loginRegisterBtn = document.getElementById('login-register-btn');

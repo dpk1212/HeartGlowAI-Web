@@ -321,179 +321,250 @@ function initializeElements() {
  * Set up event listeners for all interactive elements
  */
 function setupEventListeners() {
-    // User menu toggle
-    if (elements.userMenu.button && elements.userMenu.dropdown) {
-        elements.userMenu.button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            elements.userMenu.dropdown.classList.toggle('show');
-        });
-        
-        // Close dropdown when clicking elsewhere
-        document.addEventListener('click', function() {
-            if (elements.userMenu.dropdown.classList.contains('show')) {
-                elements.userMenu.dropdown.classList.remove('show');
-            }
-        });
-    }
+    console.log('Setting up event listeners...');
     
-    // Logout button
-    if (elements.userMenu.logoutBtn) {
-        elements.userMenu.logoutBtn.addEventListener('click', function() {
-            showLoading('Signing out...');
-            firebase.auth().signOut()
-                .then(() => {
+    try {
+        // User menu toggle
+        const userMenuBtn = elements.userMenu.button;
+        const userDropdown = elements.userMenu.dropdown;
+        
+        if (userMenuBtn && userDropdown) {
+            userMenuBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                userDropdown.classList.toggle('visible');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (userDropdown.classList.contains('visible') && !userDropdown.contains(e.target)) {
+                    userDropdown.classList.remove('visible');
+                }
+            });
+        }
+        
+        // Logout button
+        const logoutBtn = elements.userMenu.logoutBtn;
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', function() {
+                firebase.auth().signOut().then(() => {
                     window.location.href = 'login.html';
-                })
-                .catch(error => {
-                    hideLoading();
-                    showAlert('Error signing out: ' + error.message, 'error');
+                }).catch((error) => {
+                    console.error('Logout error:', error);
+                    showAlert('Error signing out. Please try again.', 'error');
                 });
-        });
-    }
-    
-    // Navigation buttons
-    // Recipient step
-    if (elements.buttons.recipientNext) {
-        elements.buttons.recipientNext.addEventListener('click', function() {
-            goToNextStep('recipient');
-        });
-    }
-    
-    // Intent step
-    if (elements.buttons.intentPrev) {
-        console.log('Back button found:', elements.buttons.intentPrev);
-        elements.buttons.intentPrev.addEventListener('click', function() {
-            console.log('Back button clicked');
-            goToPreviousStep('intent');
-        });
+            });
+        }
         
-        // Add direct onclick attribute as backup
-        elements.buttons.intentPrev.setAttribute('onclick', "goToPreviousStep('intent')");
-    }
-    
-    if (elements.buttons.intentNext) {
-        console.log('Next button found:', elements.buttons.intentNext);
-        elements.buttons.intentNext.addEventListener('click', function() {
-            console.log('Next button clicked');
-            goToNextStep('intent');
-        });
+        // Start over button
+        const startOverBtn = elements.sidebar.startOverBtn;
+        if (startOverBtn) {
+            startOverBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to start over? All your selections will be cleared.')) {
+                    resetMessageData();
+                    showStep('recipient');
+                }
+            });
+        }
         
-        // Add direct onclick attribute as backup
-        elements.buttons.intentNext.setAttribute('onclick', "goToNextStep('intent')");
+        // Navigation buttons setup with multiple binding approaches
+        setupNavigationButtons();
+        
+        // Sidebar step links
+        const sidebarSteps = elements.sidebar.steps;
+        if (sidebarSteps && sidebarSteps.length) {
+            sidebarSteps.forEach(step => {
+                step.addEventListener('click', function() {
+                    const stepId = this.getAttribute('data-step');
+                    // Only allow navigation to completed steps or current step
+                    if (isStepAccessible(stepId)) {
+                        showStep(stepId);
+                    }
+                });
+            });
+        }
+        
+        console.log('Event listeners set up successfully');
+    } catch (error) {
+        console.error('Error setting up event listeners:', error);
     }
+}
+
+/**
+ * Setup navigation buttons with multiple binding approaches for reliability
+ */
+function setupNavigationButtons() {
+    console.log('Setting up navigation buttons...');
     
-    // Tone step
-    if (elements.buttons.tonePrev) {
-        elements.buttons.tonePrev.addEventListener('click', function() {
-            goToPreviousStep('tone');
-        });
-    }
-    
-    if (elements.buttons.toneNext) {
-        elements.buttons.toneNext.addEventListener('click', function() {
-            goToNextStep('tone');
-        });
-    }
-    
-    // Result step
-    if (elements.buttons.resultPrev) {
-        elements.buttons.resultPrev.addEventListener('click', function() {
-            goToPreviousStep('result');
-        });
-    }
-    
-    if (elements.buttons.createNew) {
-        elements.buttons.createNew.addEventListener('click', function() {
-            // Confirm with user before starting over
-            if (confirm('Start a new message? Your current message will be saved to your history.')) {
-                resetAll();
-                showStep('recipient');
-            }
-        });
-    }
-    
-    // Sidebar progress steps
-    elements.sidebar.steps.forEach(step => {
-        step.addEventListener('click', function() {
-            const stepId = this.getAttribute('data-step');
+    try {
+        // Recipient step - Next button
+        const recipientNextBtn = elements.buttons.recipientNext;
+        if (recipientNextBtn) {
+            // Method 1: onclick property
+            recipientNextBtn.onclick = function() {
+                if (validateRecipientStep()) {
+                    showStep('intent');
+                }
+                return false;
+            };
             
-            // Only allow clicking on completed steps or the current step
-            if (this.classList.contains('completed') || this.classList.contains('active')) {
-                showStep(stepId);
-            }
-        });
-    });
-    
-    // Start over button
-    if (elements.sidebar.startOverBtn) {
-        elements.sidebar.startOverBtn.addEventListener('click', function() {
-            // Confirm with user before starting over
-            if (confirm('Are you sure you want to start over? This will clear your current progress.')) {
-                resetAll();
-                showStep('recipient');
-            }
-        });
-    }
-    
-    // Add new connection button
-    if (elements.recipientStep.addNewConnection) {
-        elements.recipientStep.addNewConnection.addEventListener('click', function() {
-            openConnectionModal();
-        });
-    }
-    
-    // Connection relationship selection
-    if (elements.modals.connectionRelationship) {
-        elements.modals.connectionRelationship.addEventListener('change', function() {
-            const value = this.value;
+            // Method 2: addEventListener
+            recipientNextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateRecipientStep()) {
+                    showStep('intent');
+                }
+            }, true); // Use capturing
             
-            // Show "other relationship" field if "other" is selected
-            if (value === 'other') {
-                elements.modals.otherRelationshipGroup.style.display = 'block';
-            } else {
-                elements.modals.otherRelationshipGroup.style.display = 'none';
-            }
-        });
+            // Method 3: direct attribute
+            recipientNextBtn.setAttribute('onclick', 'if(validateRecipientStep()) showStep("intent"); return false;');
+        }
+        
+        // Intent step - Back button
+        const intentPrevBtn = elements.buttons.intentPrev;
+        if (intentPrevBtn) {
+            // Method 1: onclick property
+            intentPrevBtn.onclick = function() {
+                showStep('recipient');
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            intentPrevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('recipient');
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            intentPrevBtn.setAttribute('onclick', 'showStep("recipient"); return false;');
+        }
+        
+        // Intent step - Next button
+        const intentNextBtn = elements.buttons.intentNext;
+        if (intentNextBtn) {
+            // Method 1: onclick property
+            intentNextBtn.onclick = function() {
+                if (validateIntentStep()) {
+                    showStep('tone');
+                }
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            intentNextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateIntentStep()) {
+                    showStep('tone');
+                }
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            intentNextBtn.setAttribute('onclick', 'if(validateIntentStep()) showStep("tone"); return false;');
+        }
+        
+        // Tone step - Back button
+        const tonePrevBtn = elements.buttons.tonePrev;
+        if (tonePrevBtn) {
+            // Method 1: onclick property
+            tonePrevBtn.onclick = function() {
+                showStep('intent');
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            tonePrevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('intent');
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            tonePrevBtn.setAttribute('onclick', 'showStep("intent"); return false;');
+        }
+        
+        // Tone step - Next button
+        const toneNextBtn = elements.buttons.toneNext;
+        if (toneNextBtn) {
+            // Method 1: onclick property
+            toneNextBtn.onclick = function() {
+                if (validateToneStep()) {
+                    showStep('result');
+                }
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            toneNextBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (validateToneStep()) {
+                    showStep('result');
+                }
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            toneNextBtn.setAttribute('onclick', 'if(validateToneStep()) showStep("result"); return false;');
+        }
+        
+        // Result step - Back button
+        const resultPrevBtn = elements.buttons.resultPrev;
+        if (resultPrevBtn) {
+            // Method 1: onclick property
+            resultPrevBtn.onclick = function() {
+                showStep('tone');
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            resultPrevBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                showStep('tone');
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            resultPrevBtn.setAttribute('onclick', 'showStep("tone"); return false;');
+        }
+        
+        // Result step - Create New button
+        const createNewBtn = elements.buttons.createNew;
+        if (createNewBtn) {
+            // Method 1: onclick property
+            createNewBtn.onclick = function() {
+                resetMessageData();
+                showStep('recipient');
+                return false;
+            };
+            
+            // Method 2: addEventListener
+            createNewBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                resetMessageData();
+                showStep('recipient');
+            }, true); // Use capturing
+            
+            // Method 3: direct attribute
+            createNewBtn.setAttribute('onclick', 'resetMessageData(); showStep("recipient"); return false;');
+        }
+        
+        console.log('Navigation buttons setup complete');
+    } catch (error) {
+        console.error('Error setting up navigation buttons:', error);
+    }
+}
+
+/**
+ * Check if a step is accessible for navigation
+ * (i.e., it's the current step or a previous completed step)
+ */
+function isStepAccessible(stepId) {
+    if (stepId === currentStep) {
+        return true;
     }
     
-    // Connection save button
-    if (elements.modals.connectionSave) {
-        elements.modals.connectionSave.addEventListener('click', function() {
-            saveConnection();
-        });
-    }
+    // Get the index of steps
+    const steps = Object.keys(STEPS);
+    const currentIndex = steps.indexOf(currentStep);
+    const targetIndex = steps.indexOf(stepId);
     
-    // Connection cancel button
-    if (elements.modals.connectionCancel) {
-        elements.modals.connectionCancel.addEventListener('click', function() {
-            closeConnectionModal();
-        });
-    }
-    
-    // Modal close buttons
-    elements.modals.closeButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const modal = this.closest('.modal');
-            if (modal) {
-                closeModal(modal);
-            }
-        });
-    });
-    
-    // Close modals when clicking outside content
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(modal => {
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal(this);
-            }
-        });
-    });
-    
-    // Save data before user leaves page
-    window.addEventListener('beforeunload', function() {
-        saveAllData();
-    });
+    // Only allow backward navigation to completed steps
+    return targetIndex < currentIndex;
 }
 
 /**
@@ -1199,113 +1270,100 @@ function closeModal(modal) {
  * @returns {boolean} - Whether the step change was successful
  */
 function showStep(stepId, skipAnimation = false) {
-    console.log('NAVIGATION: Attempting to show step:', stepId);
+    console.log(`Showing step: ${stepId}`);
     
     try {
         // Validate step ID
-        if (!stepId || !STEPS[stepId]) {
+        if (!STEPS[stepId]) {
             console.error(`Invalid step ID: ${stepId}`);
-            return false;
+            return;
         }
         
-        // Find the step element
-        const stepElement = document.getElementById(`step-${stepId}`);
-        if (!stepElement) {
-            console.error(`Step element not found for step: ${stepId}`);
-            return false;
-        }
-        
-        // Hide all steps
-        const allSteps = document.querySelectorAll('.message-builder__step');
-        allSteps.forEach(step => {
-            step.classList.remove('active');
-            step.style.display = 'none';
-            step.style.opacity = '0';
-        });
-        
-        // Show the requested step with animation
-        console.log(`Showing step: ${stepId}`);
-        stepElement.style.display = 'block';
-        setTimeout(() => {
-            stepElement.classList.add('active');
-            stepElement.style.opacity = '1';
-        }, 50);
-        
-        // Update the current step
+        // Update current step
         currentStep = stepId;
         
-        // Save current step to storage
-        sessionStorage.setItem('currentMessageStep', stepId);
-        sessionStorage.setItem('messageSessionState', JSON.stringify({
-            currentStep: stepId,
-            timestamp: Date.now()
-        }));
-        
-        // Update sidebar active state
-        const allSidebarSteps = document.querySelectorAll('.progress-step');
-        allSidebarSteps.forEach(step => {
-            step.classList.remove('active');
-            const stepDataId = step.getAttribute('data-step');
-            if (stepDataId === stepId) {
-                step.classList.add('active');
+        // Hide all steps
+        for (const step in STEPS) {
+            const stepElement = document.getElementById(STEPS[step].id);
+            if (stepElement) {
+                stepElement.classList.remove('active');
             }
-        });
+        }
         
-        // Initialize content for the step
-        console.log(`Initializing content for step: ${stepId}`);
-        initializeStepContent(stepId);
-        
-        // Update the preview panel
-        updatePreview();
-        
-        // Log success
-        console.log(`Step change: ${currentStep} -> ${stepId}`);
-        
-        // Apply enhanced navigation styles
-        enhanceNavigationButtons();
-        
-        // Force enable all buttons for testing
-        forceEnableAllButtons();
-        
-        // Create floating navigation buttons
-        createFloatingNavigationButtons();
-        
-        // Verify and fix the step footer after a short delay to ensure DOM is updated
-        setTimeout(() => {
-            try {
-                verifyAndFixStepFooter(stepId);
-            } catch (err) {
-                console.error('Error in verifyAndFixStepFooter:', err);
-                // Continue execution even if this fails
+        // Show current step
+        const currentStepElement = document.getElementById(STEPS[stepId].id);
+        if (currentStepElement) {
+            currentStepElement.classList.add('active');
+            
+            // Initialize the step if needed
+            if (stepId === 'recipient') {
+                // Ensure connections are loaded
+                if (currentUser) {
+                    loadUserConnections();
+                }
+            } else if (stepId === 'intent') {
+                // Initialize intent step
+                initializeIntentStep();
+                
+                // Apply specific fixes for intent step 
+                setTimeout(fixIntentStepIssues, 200);
+            } else if (stepId === 'tone') {
+                // Initialize tone step
+                initializeToneStep();
+            } else if (stepId === 'result') {
+                // Initialize result step
+                initializeResultStep();
             }
-        }, 300);
+        } else {
+            console.error(`Step element not found: ${STEPS[stepId].id}`);
+        }
         
-        // Call our comprehensive navigation fix
-        setTimeout(fixAllNavigationButtons, 500);
+        // Update sidebar
+        updateSidebar(stepId);
         
-        return true;
+        // Update preview panel
+        updatePreviewPanel();
+        
+        // Scroll to top of the step
+        if (currentStepElement) {
+            currentStepElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // Log step transition for analytics
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('step_view', {
+                step: stepId,
+                timestamp: new Date().toISOString()
+            });
+        }
     } catch (error) {
         console.error('Error showing step:', error);
         
-        // Emergency recovery - try to show the step anyway
+        // Emergency recovery - direct DOM manipulation as fallback
         try {
-            const stepElement = document.getElementById(`step-${stepId}`);
-            if (stepElement) {
-                // Hide all steps first
-                document.querySelectorAll('.message-builder__step').forEach(s => {
-                    s.style.display = 'none';
-                });
+            console.log('Attempting emergency step display...');
+            
+            // Hide all steps directly
+            document.querySelectorAll('.message-builder__step').forEach(step => {
+                step.classList.remove('active');
+                step.style.display = 'none';
+            });
+            
+            // Show target step directly
+            const targetStep = document.getElementById(STEPS[stepId].id);
+            if (targetStep) {
+                targetStep.classList.add('active');
+                targetStep.style.display = 'block';
                 
-                // Force show this step
-                stepElement.style.display = 'block';
-                currentStep = stepId;
-                console.log('Emergency recovery: Forced step display');
+                // Special handling for intent step in emergency mode
+                if (stepId === 'intent') {
+                    setTimeout(fixIntentStepIssues, 300);
+                }
             }
-        } catch (recoveryError) {
-            console.error('Recovery also failed:', recoveryError);
+        } catch (emergencyError) {
+            console.error('Emergency recovery failed:', emergencyError);
+            showAlert('Navigation error occurred. Please refresh the page.', 'error');
         }
-        
-        return false;
     }
 }
 
@@ -6096,5 +6154,357 @@ function createFloatingNavigationButtons() {
         }
     } catch (error) {
         console.error('Error in createFloatingNavigationButtons:', error);
+    }
+}
+
+/**
+ * Fix Intent Step Rendering Issues
+ * Ensures intent cards are visible, back button works, and next button is visible
+ */
+function fixIntentStepIssues() {
+    console.log('Applying comprehensive intent step fixes...');
+    
+    // 1. Fix intent cards visibility
+    fixIntentCardsVisibility();
+    
+    // 2. Fix back button navigation
+    fixBackButtonNavigation();
+    
+    // 3. Fix next button visibility
+    fixNextButtonVisibility();
+}
+
+/**
+ * Fix Intent Cards Visibility
+ * Ensures intent option cards are properly displayed
+ */
+function fixIntentCardsVisibility() {
+    console.log('Fixing intent cards visibility...');
+    
+    const intentStep = document.getElementById('step-intent');
+    if (!intentStep) {
+        console.error('Intent step not found in DOM');
+        return;
+    }
+    
+    const stepBody = intentStep.querySelector('.step-body');
+    if (!stepBody) {
+        console.error('Intent step body not found');
+        return;
+    }
+    
+    // Check if intent cards container exists
+    let intentCardsContainer = stepBody.querySelector('.intent-cards-container');
+    let intentCards = stepBody.querySelectorAll('.intent-card');
+    
+    // If no intent cards or container found, create them
+    if (!intentCardsContainer || intentCards.length === 0) {
+        console.log('Intent cards not found, creating them...');
+        
+        // Create intent options container if not exists
+        if (!intentCardsContainer) {
+            intentCardsContainer = document.createElement('div');
+            intentCardsContainer.className = 'intent-cards-container';
+            stepBody.appendChild(intentCardsContainer);
+        }
+        
+        // Clear existing content to avoid duplication
+        intentCardsContainer.innerHTML = '';
+        
+        // Add intent category toggles
+        const categoryToggle = document.createElement('div');
+        categoryToggle.className = 'intent-category-toggle';
+        categoryToggle.innerHTML = `
+            <button class="category-button active" data-category="personal">Personal</button>
+            <button class="category-button" data-category="professional">Professional</button>
+        `;
+        intentCardsContainer.appendChild(categoryToggle);
+        
+        // Set up category toggle functionality
+        const categoryButtons = categoryToggle.querySelectorAll('.category-button');
+        categoryButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                categoryButtons.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                const category = this.getAttribute('data-category');
+                filterIntentCardsByCategory(category);
+            });
+        });
+        
+        // Create intent cards grid
+        const intentGrid = document.createElement('div');
+        intentGrid.className = 'intent-cards-grid';
+        intentCardsContainer.appendChild(intentGrid);
+        
+        // Define intent options
+        const intentOptions = [
+            { id: 'appreciation', title: 'Appreciation', description: 'Express gratitude and thanks', icon: 'fa-heart', category: 'personal' },
+            { id: 'celebration', title: 'Celebration', description: 'Celebrate a special occasion', icon: 'fa-gift', category: 'personal' },
+            { id: 'encouragement', title: 'Encouragement', description: 'Motivate and inspire', icon: 'fa-fire', category: 'personal' },
+            { id: 'apology', title: 'Apology', description: 'Say sorry and make amends', icon: 'fa-hand-peace', category: 'personal' },
+            { id: 'congratulations', title: 'Congratulations', description: 'Recognize an achievement', icon: 'fa-trophy', category: 'both' },
+            { id: 'support', title: 'Support', description: 'Show empathy and care', icon: 'fa-hands-holding', category: 'both' },
+            { id: 'feedback', title: 'Feedback', description: 'Provide constructive input', icon: 'fa-comment', category: 'professional' },
+            { id: 'introduction', title: 'Introduction', description: 'Introduce yourself professionally', icon: 'fa-handshake', category: 'professional' },
+            { id: 'request', title: 'Request', description: 'Ask for something professionally', icon: 'fa-file-invoice', category: 'professional' },
+            { id: 'custom', title: 'Custom Intent', description: 'Create your own intent', icon: 'fa-pen-to-square', category: 'both' }
+        ];
+        
+        // Create and append the intent cards
+        intentOptions.forEach(option => {
+            const card = document.createElement('div');
+            card.className = 'intent-card';
+            card.setAttribute('data-intent-id', option.id);
+            card.setAttribute('data-category', option.category);
+            
+            // Force visibility
+            card.style.visibility = 'visible';
+            card.style.display = 'block';
+            card.style.opacity = '1';
+            
+            card.innerHTML = `
+                <div class="intent-card-icon">
+                    <i class="fas ${option.icon}"></i>
+                </div>
+                <div class="intent-card-content">
+                    <h3 class="intent-card-title">${option.title}</h3>
+                    <p class="intent-card-description">${option.description}</p>
+                </div>
+            `;
+            
+            // Add click event for intent selection
+            card.addEventListener('click', function() {
+                handleIntentSelection(option);
+            });
+            
+            intentGrid.appendChild(card);
+        });
+        
+        // Show personal intents by default
+        filterIntentCardsByCategory('personal');
+    } else {
+        console.log('Intent cards found, ensuring visibility...');
+        
+        // If cards exist but aren't visible, make them visible
+        intentCards.forEach(card => {
+            card.style.visibility = 'visible';
+            card.style.display = 'block';
+            card.style.opacity = '1';
+        });
+    }
+}
+
+/**
+ * Filter intent cards by category
+ */
+function filterIntentCardsByCategory(category) {
+    console.log(`Filtering intent cards by category: ${category}`);
+    
+    const intentCards = document.querySelectorAll('.intent-card');
+    
+    intentCards.forEach(card => {
+        const cardCategory = card.getAttribute('data-category');
+        
+        if (cardCategory === 'both' || cardCategory === category) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+/**
+ * Handle intent selection
+ */
+function handleIntentSelection(intentOption) {
+    console.log('Intent selected:', intentOption);
+    
+    // Remove active class from all cards
+    const intentCards = document.querySelectorAll('.intent-card');
+    intentCards.forEach(card => card.classList.remove('active'));
+    
+    // Add active class to selected card
+    const selectedCard = document.querySelector(`.intent-card[data-intent-id="${intentOption.id}"]`);
+    if (selectedCard) {
+        selectedCard.classList.add('active');
+    }
+    
+    // Save selected intent data
+    messageData.intent = {
+        id: intentOption.id,
+        title: intentOption.title,
+        description: intentOption.description,
+        icon: intentOption.icon,
+        category: intentOption.category
+    };
+    
+    // Save to localStorage
+    localStorage.setItem('intentData', JSON.stringify(messageData.intent));
+    
+    // Update preview panel
+    updatePreviewPanel();
+    
+    // Enable next button
+    const intentNextBtn = document.getElementById('intentNextBtn');
+    if (intentNextBtn) {
+        intentNextBtn.classList.remove('disabled');
+        intentNextBtn.disabled = false;
+    }
+    
+    // Fix next button visibility
+    fixNextButtonVisibility();
+}
+
+/**
+ * Fix Back Button Navigation
+ * Ensures the back button properly returns to the recipient step
+ */
+function fixBackButtonNavigation() {
+    console.log('Fixing back button navigation...');
+    
+    const backButton = document.getElementById('intentPrevBtn');
+    if (!backButton) {
+        console.error('Back button not found');
+        return;
+    }
+    
+    // Clear existing event listeners by cloning and replacing the button
+    const newBackButton = backButton.cloneNode(true);
+    backButton.parentNode.replaceChild(newBackButton, backButton);
+    
+    // Add multiple event binding approaches for maximum reliability
+    // 1. Direct onclick property
+    newBackButton.onclick = function(e) {
+        console.log('Back button clicked (via onclick property)');
+        e.preventDefault();
+        showStep('recipient');
+        return false;
+    };
+    
+    // 2. addEventListener
+    newBackButton.addEventListener('click', function(e) {
+        console.log('Back button clicked (via addEventListener)');
+        e.preventDefault();
+        showStep('recipient');
+        return false;
+    }, true); // Use capturing for higher priority
+    
+    // 3. Direct attribute
+    newBackButton.setAttribute('onclick', "showStep('recipient'); return false;");
+    
+    // Make button visually distinctive
+    newBackButton.style.opacity = '1';
+    newBackButton.style.visibility = 'visible';
+    newBackButton.style.display = 'flex';
+    newBackButton.style.pointerEvents = 'auto';
+    
+    console.log('Back button fixed and enabled');
+}
+
+/**
+ * Fix Next Button Visibility
+ * Ensures the next button is visible and functional
+ */
+function fixNextButtonVisibility() {
+    console.log('Fixing next button visibility...');
+    
+    const nextButton = document.getElementById('intentNextBtn');
+    if (!nextButton) {
+        console.error('Next button not found');
+        return;
+    }
+    
+    // Make the button visible with direct inline styles
+    nextButton.style.display = 'flex';
+    nextButton.style.visibility = 'visible';
+    nextButton.style.opacity = '1';
+    nextButton.style.pointerEvents = 'auto';
+    
+    // Clear existing event listeners by cloning and replacing
+    const newNextButton = nextButton.cloneNode(true);
+    nextButton.parentNode.replaceChild(newNextButton, nextButton);
+    
+    // Re-add event handlers with multiple approaches
+    newNextButton.onclick = function(e) {
+        console.log('Next button clicked (via onclick property)');
+        e.preventDefault();
+        goToNextStep('intent');
+        return false;
+    };
+    
+    newNextButton.addEventListener('click', function(e) {
+        console.log('Next button clicked (via addEventListener)');
+        e.preventDefault();
+        goToNextStep('intent');
+        return false;
+    }, true);
+    
+    newNextButton.setAttribute('onclick', "goToNextStep('intent'); return false;");
+    
+    // Check if intent is selected to determine if button should be enabled
+    if (messageData.intent) {
+        newNextButton.classList.remove('disabled');
+        newNextButton.disabled = false;
+    } else {
+        newNextButton.classList.add('disabled');
+        newNextButton.disabled = true;
+    }
+    
+    console.log('Next button fixed and visible');
+}
+
+/**
+ * Helper function for next step navigation
+ */
+function goToNextStep(currentStepId) {
+    console.log(`Navigating from ${currentStepId} to next step`);
+    
+    const currentStepConfig = STEPS[currentStepId];
+    if (!currentStepConfig || !currentStepConfig.next) {
+        console.error(`Invalid step config for ${currentStepId}`);
+        return;
+    }
+    
+    // Validate current step if validation function exists
+    if (currentStepConfig.validate && typeof currentStepConfig.validate === 'function') {
+        if (!currentStepConfig.validate()) {
+            console.log(`Validation failed for ${currentStepId}`);
+            return;
+        }
+    }
+    
+    // Navigate to next step
+    showStep(currentStepConfig.next);
+}
+
+/**
+ * Called when intent step is initialized
+ */
+function initializeIntentStep() {
+    console.log('Initializing intent step...');
+    
+    // Apply comprehensive fixes for the intent step
+    setTimeout(fixIntentStepIssues, 100);
+    
+    // Restore previously selected intent if available
+    if (messageData.intent) {
+        console.log('Restoring previous intent selection:', messageData.intent);
+        
+        setTimeout(() => {
+            const selectedCard = document.querySelector(`.intent-card[data-intent-id="${messageData.intent.id}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('active');
+            }
+            
+            // Update preview
+            updatePreviewPanel();
+            
+            // Enable next button
+            const intentNextBtn = document.getElementById('intentNextBtn');
+            if (intentNextBtn) {
+                intentNextBtn.classList.remove('disabled');
+                intentNextBtn.disabled = false;
+            }
+        }, 300);
     }
 }

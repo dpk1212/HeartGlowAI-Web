@@ -699,61 +699,89 @@ By addressing these challenges systematically and standardizing our approach, we
 - Enhance transition animations for smoother experience
 - Implement proper API integration for message generation 
 
-### Intent Step and Back Button Fixes
-*Updated on: May 3, 2024*
+### Intent Step Navigation and Display Fix
+*Updated on: May 8, 2024*
 
 **Issues Identified:**
-1. **Intent Cards Not Loading**: Users were unable to see the intent options in the Intent step.
-2. **Back Button Not Working**: The Back button in the Intent step wasn't returning to the Recipient step.
-3. **Emergency Navigation Button**: An inappropriate emergency button was visible to users.
+1. **Intent Cards Not Loading/Displaying**: The intent selection cards were not appearing in the intent step.
+2. **Back Button Not Working**: The Back button in the Intent step was not properly returning to the Recipient step.
+3. **Next Button Hidden**: The Next button in the Intent step was not visible/accessible to users.
 
-**Solution Implemented:**
+**Comprehensive Solution Implemented:**
 
-1. **Fixed Intent Card Display**
-   - Added `fixIntentCardsVisibility()` function that ensures intent cards are visible
-   - Implemented direct card creation with proper styling if intent cards weren't found
-   - Added simple, focused intent cards with clear click handlers
-   - Ensured intent data is properly saved when cards are selected
+1. **Fixed Intent Cards Display & Creation**
+   - Created `fixIntentCardsVisibility()` function that ensures intent cards are properly displayed
+   - Implemented dynamic creation of intent cards if none are found in the DOM
+   - Created category toggles (Personal/Professional) with filtering functionality
+   - Applied direct inline styles to force visibility of elements
+   - Added robust click handlers for card selection
 
 2. **Fixed Back Button Navigation**
-   - Implemented focused `fixBackButtonNavigation()` function to repair back button functionality
-   - Applied multiple handler types (onclick property and onclick attribute)
-   - Added specific error handling and detailed logging
-   - Enhanced button visibility with explicit styling
+   - Implemented `fixBackButtonNavigation()` function with multiple event binding approaches
+   - Used button cloning to replace potentially conflicting event listeners
+   - Applied triple-redundant event handling (onclick property, addEventListener, onclick attribute)
+   - Added explicit styling to ensure button visibility
+   - Enhanced logging for debugging purposes
 
-3. **Removed Emergency Navigation**
-   - Removed the emergency button from the UI
-   - Added a proper createFloatingNavigationButtons function that cleans up any emergency buttons
-   - Focused on production-quality navigation rather than temporary solutions
+3. **Fixed Next Button Visibility**
+   - Created `fixNextButtonVisibility()` function to ensure next button is visible and functional
+   - Applied direct inline styles to override any CSS that might be hiding the button
+   - Implemented proper enable/disable logic based on intent selection
+   - Added multiple event binding approaches for maximum reliability
+   - Ensured clear visual indication of button state
 
-4. **Enhanced Intent Step Initialization**
-   - Modified `initializeIntentStep()` to be more robust
-   - Added handling for existing intent data
-   - Ensured proper button state management
-   - Improved error handling and logging
+4. **Enhanced Step Navigation System**
+   - Modified `showStep()` function to ensure step transitions are reliable
+   - Added specific handling for the intent step in both normal and emergency modes
+   - Implemented better error recovery in case of navigation failures
+   - Added improved validation for step transitions
+
+5. **Improved Event Binding**
+   - Created comprehensive `setupNavigationButtons()` function with multiple binding approaches
+   - Implemented consistent navigation patterns across all steps
+   - Added proper event delegation for dynamically created elements
+   - Enhanced error handling throughout the navigation system
 
 **Technical Details:**
-- Intent cards are now created with explicit visibility styling: 
+- Added multiple escape paths for button event handling:
   ```javascript
-  card.style.visibility = 'visible';
-  card.style.display = 'block';
+  // Method 1: Direct property assignment
+  button.onclick = function() { showStep('target'); return false; };
+  
+  // Method 2: Event listener with capturing
+  button.addEventListener('click', function(e) {
+      e.preventDefault(); showStep('target');
+  }, true);
+  
+  // Method 3: Attribute assignment
+  button.setAttribute('onclick', "showStep('target'); return false;");
   ```
-- Back button given multiple navigation triggers to ensure it works:
+
+- Ensured element visibility with comprehensive inline styles:
   ```javascript
-  backButton.onclick = function(e) { showStep('recipient'); return false; };
-  backButton.setAttribute('onclick', "showStep('recipient'); return false;");
+  element.style.visibility = 'visible';
+  element.style.display = 'block';
+  element.style.opacity = '1';
+  element.style.pointerEvents = 'auto';
   ```
-- Consolidated step initialization to make it more maintainable
-- Improved error handling to prevent cascade failures
+
+- Enhanced intent cards generation with proper data model:
+  ```javascript
+  const intentOptions = [
+      { id: 'appreciation', title: 'Appreciation', description: 'Express gratitude and thanks', icon: 'fa-heart', category: 'personal' },
+      // Other intent options...
+  ];
+  ```
 
 **Impact:**
-- Users can now see and select from intent options
-- Back button works reliably to return from Intent to Recipient step
-- Navigation is more intuitive and professional looking
-- UI is cleaner without debugging/emergency elements
+- Users can now see and interact with intent cards in the Intent step
+- Back button reliably returns to the Recipient step
+- Next button is visible and properly enabled/disabled based on selection state
+- Complete flow from Recipient → Intent → Tone steps now works correctly
+- Enhanced UX with proper visual feedback and transitions
 
 **Next Steps:**
-- Complete Tone step initialization with similar patterns
-- Ensure proper advancement from Intent to Tone step
-- Implement Message Generation with proper API integration
-- Test full end-to-end flow with error handling 
+- Apply similar patterns to the Tone step to ensure consistent user experience
+- Refactor common patterns into reusable utility functions
+- Complete the implementation of the API integration for message generation
+- Conduct comprehensive testing of the full end-to-end flow 

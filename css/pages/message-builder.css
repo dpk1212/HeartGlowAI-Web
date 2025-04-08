@@ -1650,4 +1650,191 @@
   .message-variations {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Intent Step Styles */
+.intent-cards-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.intent-category-toggle {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.intent-category-toggle .category-button {
+    padding: 10px 20px;
+    border-radius: 20px;
+    border: 1px solid rgba(138, 87, 222, 0.5);
+    background: transparent;
+    color: #fff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.intent-category-toggle .category-button.active {
+    background: linear-gradient(135deg, rgba(138, 87, 222, 0.8), rgba(255, 126, 182, 0.8));
+    border-color: transparent;
+    box-shadow: 0 4px 10px rgba(138, 87, 222, 0.3);
+}
+
+.intent-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.intent-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: linear-gradient(135deg, rgba(40, 30, 55, 0.8), rgba(30, 25, 45, 0.8));
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 2px solid transparent;
+    min-height: 100px;
+}
+
+.intent-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    border-color: rgba(138, 87, 222, 0.3);
+}
+
+.intent-card.active {
+    background: linear-gradient(135deg, rgba(138, 87, 222, 0.2), rgba(255, 126, 182, 0.2));
+    border: 2px solid #8a57de;
+    box-shadow: 0 0 15px rgba(138, 87, 222, 0.5);
+}
+
+.intent-card-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #8a57de, #ff7eb6);
+    border-radius: 50%;
+    font-size: 20px;
+    color: white;
+    flex-shrink: 0;
+}
+
+.intent-card-content {
+    flex: 1;
+}
+
+.intent-card-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 5px 0;
+    color: white;
+}
+
+.intent-card-description {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+/* Explicitly ensure step footer and buttons are visible */
+.step-footer {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    padding: 20px 0;
+    margin-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    justify-content: space-between;
+}
+
+#step-intent .step-footer button,
+#step-tone .step-footer button,
+#step-recipient .step-footer button {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.25s ease;
+    pointer-events: auto !important;
+}
+
+#intentNextBtn,
+#intentPrevBtn,
+#toneNextBtn,
+#tonePrevBtn,
+#recipientNextBtn {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+/* Make primary button more noticeable */
+.primary-button {
+    background: linear-gradient(135deg, rgb(138, 87, 222), rgb(255, 126, 182)) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: rgba(138, 87, 222, 0.25) 0px 4px 10px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    font-weight: bold !important;
+    padding: 14px 28px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+}
+
+.primary-button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: rgba(138, 87, 222, 0.4) 0px 6px 14px !important;
+}
+
+.primary-button:active {
+    transform: translateY(0) !important;
+}
+
+.primary-button.disabled {
+    background: linear-gradient(135deg, rgba(138, 87, 222, 0.5), rgba(255, 126, 182, 0.5)) !important;
+    cursor: not-allowed !important;
+    pointer-events: none !important;
+}
+
+/* Enhance secondary button styling */
+.secondary-button {
+    background: transparent !important;
+    color: white !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    padding: 14px 28px !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    transition: all 0.25s ease !important;
+}
+
+.secondary-button:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
 } 

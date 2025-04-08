@@ -11,6 +11,10 @@ This document outlines the step-by-step implementation plan for transforming Hea
 6. [UI/UX Design Guidelines](#uiux-design-guidelines)
 7. [Testing Plan](#testing-plan)
 8. [Deployment Strategy](#deployment-strategy)
+9. [Development Environment Setup](#development-environment-setup)
+10. [Version Control Strategy](#version-control-strategy)
+11. [Accessibility Considerations](#accessibility-considerations)
+12. [Error Handling Guidelines](#error-handling-guidelines)
 
 ## Overview & Strategy
 
@@ -600,6 +604,233 @@ While a complete test suite would be ideal, at minimum implement:
    - API failures
    - Authentication issues
    - UI/rendering problems
+
+## Development Environment Setup
+
+### Required Tools & Dependencies
+
+1. **Basic Development Tools**
+   - Text editor/IDE (VS Code recommended)
+   - Node.js (v14+) and npm (v7+)
+   - Git for version control
+   - Browser with good developer tools (Chrome/Firefox)
+
+2. **Firebase Setup**
+   - Firebase CLI (`npm install -g firebase-tools`)
+   - Firebase project access
+   - Local firebase configuration
+   ```
+   firebase login
+   firebase use --add
+   firebase serve
+   ```
+
+3. **Testing Tools**
+   - Browser stack or similar for cross-browser testing
+   - Chrome DevTools for mobile emulation
+   - Lighthouse for performance auditing
+
+### Local Development Environment
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd HeartGlowAI
+   ```
+
+2. **Setup local server**
+   - For quick development, use Firebase's local hosting:
+   ```bash
+   firebase serve --only hosting
+   ```
+   - Alternatively, use any local HTTP server:
+   ```bash
+   npm install -g http-server
+   http-server
+   ```
+
+3. **Firebase Emulators (optional but recommended)**
+   - For testing without hitting production Firebase services:
+   ```bash
+   firebase emulators:start
+   ```
+   - Update code to use emulators when detected
+
+## Version Control Strategy
+
+### Branch Structure
+
+1. **Main Branches**
+   - `gh-pages`: Production branch, deployed to GitHub Pages
+   - `development`: Integration branch for feature testing
+   - `feature/*`: Individual feature branches
+
+2. **Feature Branch Workflow**
+   - Create a new branch for each feature/component:
+   ```bash
+   git checkout -b feature/unified-message-builder
+   ```
+   - Commit regularly with descriptive messages
+   - Push to remote and create a pull request to `development`
+   - After testing, merge `development` into `gh-pages`
+
+3. **Commit Guidelines**
+   - Use descriptive commit messages
+   - Begin with a verb in present tense (e.g., "Add", "Fix", "Update")
+   - Reference issue numbers if applicable
+   - Example: "Add progress sidebar to unified message builder (#123)"
+
+4. **Code Reviews**
+   - All PRs should be reviewed before merging
+   - Check for adherence to stylistic guidelines
+   - Verify functionality works across browsers/devices
+   - Ensure backward compatibility with existing data
+
+## Accessibility Considerations
+
+### Requirements
+
+1. **Keyboard Navigation**
+   - All interactive elements must be keyboard accessible
+   - Implement proper focus management between steps
+   - Use proper tabindex attributes
+   - Test entire flow with keyboard only
+
+2. **Screen Reader Support**
+   - Add appropriate ARIA attributes to dynamic content
+   - Ensure proper heading structure for navigation
+   - Add descriptive alt text for all images
+   - Use aria-live regions for dynamic content updates
+
+3. **Visual Considerations**
+   - Maintain color contrast ratio of at least 4.5:1 for text
+   - Don't rely solely on color to convey information
+   - Support text scaling up to 200%
+   - Test with screen magnification
+
+### Implementation Details
+
+1. **Progress Indicators**
+   - Add aria-current for current step
+   - Use aria-label to describe progress (e.g., "Step 2 of 4: Select Intent")
+
+2. **Form Controls**
+   - Associate labels with inputs
+   - Provide error messages that are announced to screen readers
+   - Group related form controls with fieldset and legend
+
+3. **Animations**
+   - Honor user's prefers-reduced-motion setting
+   ```css
+   @media (prefers-reduced-motion: reduce) {
+     .message-builder__step {
+       transition: opacity 0.1s linear;
+       /* Remove other animations */
+     }
+   }
+   ```
+
+## Error Handling Guidelines
+
+### Client-Side Errors
+
+1. **Form Validation**
+   - Validate all inputs before proceeding to next step
+   - Show inline validation errors
+   - Provide clear error messages that explain how to fix the issue
+   ```javascript
+   function validateRecipientForm() {
+     const name = document.getElementById('recipient-name').value.trim();
+     const errorElement = document.getElementById('name-error');
+     
+     if (!name) {
+       errorElement.textContent = 'Please enter a recipient name';
+       errorElement.classList.add('visible');
+       return false;
+     }
+     
+     errorElement.classList.remove('visible');
+     return true;
+   }
+   ```
+
+2. **API Error Handling**
+   - Implement retry logic for transient errors
+   - Show user-friendly error messages
+   - Log detailed errors for debugging
+   ```javascript
+   async function generateMessage() {
+     try {
+       showLoading('Generating your message...');
+       const response = await fetch(API_URL, {
+         /* ... */
+       });
+       
+       if (!response.ok) {
+         const errorData = await response.json();
+         throw new Error(errorData.message || 'Error generating message');
+       }
+       
+       const data = await response.json();
+       return data;
+       
+     } catch (error) {
+       console.error('Message generation error:', error);
+       
+       // Show user-friendly message
+       if (error.message.includes('network')) {
+         showError('Network error. Please check your connection and try again.');
+       } else if (error.message.includes('auth')) {
+         showError('Authentication error. Please sign in again.');
+       } else {
+         showError('Something went wrong. Please try again later.');
+       }
+       
+       // Log to analytics
+       analytics.logEvent('message_generation_error', {
+         error_message: error.message,
+         timestamp: new Date().toISOString()
+       });
+       
+       return null;
+     } finally {
+       hideLoading();
+     }
+   }
+   ```
+
+3. **State Management Errors**
+   - Implement safeguards against invalid state
+   - Provide recovery options for corrupt state
+   ```javascript
+   function loadExistingData() {
+     try {
+       // Normal loading logic
+     } catch (error) {
+       console.error('Error loading data:', error);
+       // Offer reset option to user
+       if (confirm('There was an error loading your previous progress. Would you like to start over?')) {
+         resetAllData();
+         currentStep = 'recipient';
+       } else {
+         // Try to recover with partial data
+         attemptStateRecovery();
+       }
+     }
+   }
+   ```
+
+### Server-Side Error Handling
+
+1. **Cloud Function Errors**
+   - Implement proper error codes
+   - Log detailed errors on server side
+   - Return user-friendly error messages
+
+2. **Firebase Security Rules**
+   - Test security rules thoroughly
+   - Handle permission denied errors gracefully
+   - Provide clear guidance when authentication is required
 
 ---
 

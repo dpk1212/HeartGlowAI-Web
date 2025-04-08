@@ -616,12 +616,21 @@ function updatePreviewElement(element, value, skipAnimation = false, isTextEleme
 
 /**
  * Load user's connections from Firestore
+ * @param {boolean} forceReload - Whether to bypass cache and force reload
+ * @returns {Promise} Promise that resolves with connections array
  */
-function loadUserConnections() {
+function loadUserConnections(forceReload = false) {
     if (!currentUser || !currentUser.uid) {
         console.error('Cannot load connections: No user is logged in');
         showAlert('Authentication issue detected. Please refresh the page.', 'error');
         return Promise.reject(new Error('No authenticated user'));
+    }
+    
+    // Use cached connections if available and not forcing reload
+    if (!forceReload && window.cachedConnections && window.cachedConnections.length > 0) {
+        console.log('Using cached connections');
+        displayConnections(window.cachedConnections);
+        return Promise.resolve(window.cachedConnections);
     }
     
     showLoading('Loading your connections...');
@@ -631,6 +640,7 @@ function loadUserConnections() {
         .collection('users')
         .doc(currentUser.uid)
         .collection('connections')
+        .orderBy('name')
         .get()
         .then(snapshot => {
             hideLoading();
@@ -645,6 +655,9 @@ function loadUserConnections() {
                 };
                 connections.push(connection);
             });
+            
+            // Cache connections for future use
+            window.cachedConnections = connections;
             
             // Display connections in the UI
             displayConnections(connections);
@@ -1184,33 +1197,47 @@ function updateSidebar(previousStep, newStep) {
  * @param {string} stepId - The step ID to initialize
  */
 function initializeStepContent(stepId) {
+    console.log(`Initializing content for step: ${stepId}`);
+    
     switch (stepId) {
         case 'recipient':
-            // Recipient step content might already be loaded
-            refreshConnectionsList();
+            // Load recipient step content
+            refreshConnectionsList()
+                .then(() => {
+                    console.log('Connections loaded for recipient step');
+                    // Check if we have a selected recipient already
+                    if (messageData.recipient && messageData.recipient.id) {
+                        console.log('Found selected recipient:', messageData.recipient.name);
+                        // Update the UI
+                        updateSelectedRecipient(messageData.recipient);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error initializing recipient step:', error);
+                    showAlert('Failed to load connections. Please try refreshing the page.', 'error');
+                });
             break;
             
         case 'intent':
-            // Load intent options if not already loaded
-            if (!document.querySelector('.intent-options-container')) {
-                loadIntentOptions();
-            }
+            // Initialize the intent selection step
+            // Load intent options if needed
+            console.log('Initializing intent step');
             break;
             
         case 'tone':
-            // Load tone options if not already loaded
-            if (!document.querySelector('.tone-options-container')) {
-                loadToneOptions();
-            }
-            
-            // Update context section with recipient and intent
-            updateToneContext();
+            // Initialize the tone selection step
+            // Load tone options if needed
+            console.log('Initializing tone step');
             break;
             
         case 'result':
-            // Initialize or refresh result display
-            initializeResultStep();
+            // Initialize the result step
+            // Load existing result or prepare for generation
+            console.log('Initializing result step');
             break;
+            
+        default:
+            console.log(`No specific initialization for step: ${stepId}`);
     }
 }
 
@@ -3095,24 +3122,41 @@ function formatRelationship(recipient) {
 }
 
 /**
- * Refresh connections list from Firebase
- * @param {boolean} forceReload - Whether to force reload from Firebase (true) or use cache if available (false)
+ * Refresh connections list from Firestore
+ * @param {boolean} forceReload - Whether to bypass cache and force reload
+ * @returns {Promise} Promise that resolves when connections are loaded
  */
 function refreshConnectionsList(forceReload = false) {
-    // If we already have cached connections and not forcing a reload, display them
-    if (!forceReload && window.cachedConnections && window.cachedConnections.length > 0) {
-        displayConnections(window.cachedConnections);
-        return;
+    // Check if user is authenticated
+    if (!currentUser || !currentUser.uid) {
+        console.log('Waiting for authentication before loading connections...');
+        // Return a promise that resolves when authentication is complete
+        return new Promise((resolve) => {
+            const authCheck = setInterval(() => {
+                if (currentUser && currentUser.uid) {
+                    clearInterval(authCheck);
+                    console.log('Authentication complete, loading connections...');
+                    resolve(loadUserConnections(forceReload));
+                }
+            }, 500);
+            
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                clearInterval(authCheck);
+                console.warn('Authentication timeout when waiting for connections');
+                resolve([]);
+            }, 10000);
+        });
     }
     
-    // Otherwise load from Firebase
-    loadUserConnections();
+    // User is already authenticated, load connections
+    return loadUserConnections(forceReload);
 }
 
 /**
  * Load user connections from Firebase
  */
-function loadUserConnections() {
+function loadUserConnections(forceReload = false) {
     if (!currentUser || !currentUser.uid) {
         console.error('Cannot load connections: No user is logged in');
         showAlert('Authentication issue detected. Please refresh the page.', 'error');
@@ -3495,4 +3539,34 @@ function saveEditedMessage() {
         
         showAlert('Message updated successfully', 'success');
     }
+}
+
+/**
+ * Update UI for selected recipient
+ * @param {Object} recipient - Selected recipient data
+ */
+function updateSelectedRecipient(recipient) {
+    if (!recipient) return;
+    
+    // Find the card for this recipient and select it
+    const recipientCard = document.querySelector(`.connection-card[data-id="${recipient.id}"]`);
+    if (recipientCard) {
+        // Remove selected class from all cards
+        document.querySelectorAll('.connection-card').forEach(card => {
+            card.classList.remove('selected');
+        });
+        
+        // Add selected class to this card
+        recipientCard.classList.add('selected');
+        
+        // Enable next button
+        if (elements.buttons.recipientNext) {
+            elements.buttons.recipientNext.classList.remove('disabled');
+        }
+    } else {
+        console.warn('Selected recipient card not found in the DOM:', recipient.id);
+    }
+    
+    // Update preview panel
+    updatePreview();
 }

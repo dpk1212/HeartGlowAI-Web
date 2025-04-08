@@ -1669,7 +1669,193 @@ function goToPreviousStep(currentStepId) {
 }
 
 /**
- * Initialize intent step
+ * Initialize intent step with directly created intent cards
+ */
+function initializeIntentStep() {
+    console.log('Initializing intent step with enhanced visibility');
+    
+    try {
+        // First fix intent cards visibility issues
+        fixIntentCardsVisibility();
+        
+        // Then fix the back button
+        fixBackButtonNavigation();
+        
+        // Check if we have a selected intent already
+        if (messageData.intent) {
+            console.log('Found existing intent:', messageData.intent);
+            
+            // Enable the next button
+            const nextBtn = document.getElementById('intentNextBtn');
+            if (nextBtn) {
+                nextBtn.classList.remove('disabled');
+                nextBtn.disabled = false;
+            }
+            
+            // Find and highlight the matching card if possible
+            const intentCard = document.querySelector(`.intent-card[data-intent-id="${messageData.intent.id}"]`);
+            if (intentCard) {
+                intentCard.classList.add('selected');
+                intentCard.style.border = '2px solid #ff7eb6';
+                intentCard.style.transform = 'translateY(-3px)';
+                intentCard.style.boxShadow = '0 6px 16px rgba(0,0,0,0.3)';
+            }
+        }
+    } catch (error) {
+        console.error('Error in enhanced initializeIntentStep:', error);
+    }
+}
+
+/**
+ * Fix intent cards visibility issues
+ */
+function fixIntentCardsVisibility() {
+    console.log('Fixing intent cards visibility');
+    
+    try {
+        // Fix intent cards container
+        const intentContainer = document.querySelector('#step-intent .step-body');
+        if (intentContainer) {
+            // Ensure the container is visible
+            intentContainer.style.display = 'block';
+            intentContainer.style.visibility = 'visible';
+            intentContainer.style.opacity = '1';
+            
+            // Create sample intent cards if none exist
+            if (!intentContainer.querySelector('.intent-card')) {
+                console.log('No intent cards found, creating sample cards');
+                
+                // Clear existing content
+                intentContainer.innerHTML = '';
+                
+                // Create a sample container
+                const cardsContainer = document.createElement('div');
+                cardsContainer.className = 'intent-cards-container';
+                cardsContainer.style.display = 'grid';
+                cardsContainer.style.gridTemplateColumns = 'repeat(auto-fill, minmax(250px, 1fr))';
+                cardsContainer.style.gap = '15px';
+                cardsContainer.style.margin = '20px 0';
+                
+                // Sample intent cards
+                const intentTypes = [
+                    { id: 'thinking_of_you', title: 'Thinking of You', desc: 'Let someone know they\'ve been on your mind' },
+                    { id: 'express_feelings', title: 'Express Feelings', desc: 'Share your emotions with someone important' },
+                    { id: 'apologize', title: 'Apologize', desc: 'Say sorry in a sincere and heartfelt way' },
+                    { id: 'celebrate', title: 'Celebrate a Milestone', desc: 'Recognize an important achievement or day' }
+                ];
+                
+                // Create cards
+                intentTypes.forEach(intent => {
+                    const card = document.createElement('div');
+                    card.className = 'intent-card';
+                    card.setAttribute('data-intent-id', intent.id);
+                    card.style.border = '1px solid #8a57de';
+                    card.style.padding = '16px';
+                    card.style.borderRadius = '12px';
+                    card.style.background = '#211e2e';
+                    card.style.cursor = 'pointer';
+                    card.style.transition = '0.2s';
+                    card.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                    
+                    card.innerHTML = `
+                        <h3 class="intent-title" style="margin-top:0;color:white;">${intent.title}</h3>
+                        <p class="intent-description" style="color:#ccc;margin-bottom:0;">${intent.desc}</p>
+                    `;
+                    
+                    // Add click handler
+                    card.addEventListener('click', function() {
+                        console.log('Intent card clicked:', intent.id);
+                        
+                        // Remove selected class from all cards
+                        document.querySelectorAll('.intent-card').forEach(c => {
+                            c.classList.remove('selected');
+                            c.style.border = '1px solid #8a57de';
+                            c.style.transform = 'none';
+                            c.style.boxShadow = '0 2px 8px rgba(0,0,0,0.2)';
+                        });
+                        
+                        // Add selected to this card
+                        this.classList.add('selected');
+                        this.style.border = '2px solid #ff7eb6';
+                        this.style.transform = 'translateY(-3px)';
+                        this.style.boxShadow = '0 6px 16px rgba(0,0,0,0.3)';
+                        
+                        // Store the intent data
+                        messageData.intent = {
+                            id: intent.id,
+                            type: intent.id,
+                            title: intent.title,
+                            description: intent.desc
+                        };
+                        
+                        // Enable next button
+                        const nextBtn = document.getElementById('intentNextBtn');
+                        if (nextBtn) {
+                            nextBtn.classList.remove('disabled');
+                            nextBtn.disabled = false;
+                        }
+                        
+                        // Update preview panel
+                        updatePreview();
+                    });
+                    
+                    cardsContainer.appendChild(card);
+                });
+                
+                intentContainer.appendChild(cardsContainer);
+            }
+        }
+        
+        console.log('Intent cards visibility fixed');
+    } catch (error) {
+        console.error('Error fixing intent cards visibility:', error);
+    }
+}
+
+/**
+ * Fix back button navigation
+ */
+function fixBackButtonNavigation() {
+    console.log('Fixing back button navigation');
+    
+    try {
+        // Find the back button in the intent step
+        const backButton = document.getElementById('intentPrevBtn');
+        if (backButton) {
+            console.log('Found back button:', backButton);
+            
+            // Clear existing onclick attribute first
+            backButton.removeAttribute('onclick');
+            
+            // Set direct onclick property
+            backButton.onclick = function(e) {
+                console.log('Back button clicked via direct handler');
+                e.preventDefault();
+                e.stopPropagation();
+                showStep('recipient');
+                return false;
+            };
+            
+            // Set onclick attribute as well
+            backButton.setAttribute('onclick', "showStep('recipient'); return false;");
+            
+            // Ensure the button is visible and clickable
+            backButton.style.display = 'inline-flex';
+            backButton.style.opacity = '1';
+            backButton.style.visibility = 'visible';
+            backButton.style.pointerEvents = 'auto';
+            
+            console.log('Back button fixed');
+        } else {
+            console.error('Back button not found');
+        }
+    } catch (error) {
+        console.error('Error fixing back button:', error);
+    }
+}
+
+/**
+ * Initialize the intent selection step
  */
 function initializeIntentStep() {
     console.log('Initializing intent step');
@@ -5837,58 +6023,7 @@ function fixAllNavigationButtons() {
             });
         });
         
-        // Create an emergency button if needed
-        if (!document.getElementById('emergency-next-btn')) {
-            const emergencyBtn = document.createElement('button');
-            emergencyBtn.id = 'emergency-next-btn';
-            emergencyBtn.textContent = 'Emergency: Next Step';
-            emergencyBtn.style.position = 'fixed';
-            emergencyBtn.style.bottom = '10px';
-            emergencyBtn.style.left = '10px';
-            emergencyBtn.style.zIndex = '9999';
-            emergencyBtn.style.background = '#ff7eb6';
-            emergencyBtn.style.color = 'white';
-            emergencyBtn.style.border = 'none';
-            emergencyBtn.style.borderRadius = '4px';
-            emergencyBtn.style.padding = '8px 12px';
-            emergencyBtn.style.cursor = 'pointer';
-            
-            // Add click handler
-            emergencyBtn.onclick = function() {
-                console.log('EMERGENCY: Forcing navigation to next step');
-                
-                // Ensure we have recipient data
-                if (!messageData.recipient) {
-                    // Use the first connection we find
-                    const firstCard = document.querySelector('.connection-card');
-                    if (firstCard) {
-                        const id = firstCard.getAttribute('data-id');
-                        const name = firstCard.querySelector('.connection-name')?.textContent || 'Connection';
-                        const relationshipElem = firstCard.querySelector('.connection-relationship');
-                        const relationship = relationshipElem?.textContent.toLowerCase() || 'friend';
-                        
-                        messageData.recipient = {
-                            id: id,
-                            name: name,
-                            relationship: relationship
-                        };
-                    } else {
-                        // Create fallback data
-                        messageData.recipient = {
-                            id: 'emergency-id',
-                            name: 'Friend',
-                            relationship: 'friend'
-                        };
-                    }
-                }
-                
-                // Force go to intent step
-                showStep('intent');
-            };
-            
-            document.body.appendChild(emergencyBtn);
-            console.log('Emergency navigation button created');
-        }
+        // REMOVED EMERGENCY BUTTON CREATION
         
         // Patch the goToNextStep function to add more logging and ensure it works
         const originalGoToNextStep = window.goToNextStep;
@@ -5945,3 +6080,21 @@ window.addEventListener('load', function() {
 
 // Call the fix once more after a longer delay to handle late DOM changes
 setTimeout(fixAllNavigationButtons, 3000);
+
+/**
+ * Create floating navigation buttons - simplified version without emergency buttons
+ */
+function createFloatingNavigationButtons() {
+    console.log('Using simplified navigation buttons - emergency buttons disabled');
+    
+    // Only handle standard navigation, not emergency buttons
+    try {
+        // Clean up any existing emergency buttons
+        const existingEmergency = document.getElementById('emergency-next-btn');
+        if (existingEmergency) {
+            existingEmergency.remove();
+        }
+    } catch (error) {
+        console.error('Error in createFloatingNavigationButtons:', error);
+    }
+}

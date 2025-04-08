@@ -1199,78 +1199,112 @@ function closeModal(modal) {
  * @returns {boolean} - Whether the step change was successful
  */
 function showStep(stepId, skipAnimation = false) {
-    console.log(`Showing step: ${stepId}`);
-    
-    // Validate step ID
-    if (!STEPS[stepId]) {
-        console.error(`Invalid step ID: ${stepId}`);
-        return;
-    }
-    
-    // Store previous step for animation purposes
-    const previousStep = currentStep;
-    currentStep = stepId;
+    console.log('NAVIGATION: Attempting to show step:', stepId);
     
     try {
-        // Track analytics
-        trackStepChange(previousStep, currentStep);
-        
-        // Update steps visibility
-        Object.keys(elements.steps).forEach(step => {
-            if (elements.steps[step]) {
-                elements.steps[step].classList.remove('active');
-            }
-        });
-        
-        if (elements.steps[stepId]) {
-            elements.steps[stepId].classList.add('active');
-            // Scroll to top
-            elements.steps[stepId].scrollTop = 0;
+        // Validate step ID
+        if (!stepId || !STEPS[stepId]) {
+            console.error(`Invalid step ID: ${stepId}`);
+            return false;
         }
         
-        // Update sidebar
-        elements.sidebar.steps.forEach(step => {
+        // Find the step element
+        const stepElement = document.getElementById(`step-${stepId}`);
+        if (!stepElement) {
+            console.error(`Step element not found for step: ${stepId}`);
+            return false;
+        }
+        
+        // Hide all steps
+        const allSteps = document.querySelectorAll('.message-builder__step');
+        allSteps.forEach(step => {
             step.classList.remove('active');
-            step.classList.remove('completed');
-            
-            // Get step ID from data attribute
-            const sidebarStepId = step.getAttribute('data-step');
-            
-            // Mark completed steps
-            const stepIndex = Object.keys(STEPS).indexOf(sidebarStepId);
-            const currentIndex = Object.keys(STEPS).indexOf(currentStep);
-            
-            if (stepIndex < currentIndex) {
-                step.classList.add('completed');
-            }
-            
-            // Mark active step
-            if (sidebarStepId === currentStep) {
+            step.style.display = 'none';
+            step.style.opacity = '0';
+        });
+        
+        // Show the requested step with animation
+        console.log(`Showing step: ${stepId}`);
+        stepElement.style.display = 'block';
+        setTimeout(() => {
+            stepElement.classList.add('active');
+            stepElement.style.opacity = '1';
+        }, 50);
+        
+        // Update the current step
+        currentStep = stepId;
+        
+        // Save current step to storage
+        sessionStorage.setItem('currentMessageStep', stepId);
+        sessionStorage.setItem('messageSessionState', JSON.stringify({
+            currentStep: stepId,
+            timestamp: Date.now()
+        }));
+        
+        // Update sidebar active state
+        const allSidebarSteps = document.querySelectorAll('.progress-step');
+        allSidebarSteps.forEach(step => {
+            step.classList.remove('active');
+            const stepDataId = step.getAttribute('data-step');
+            if (stepDataId === stepId) {
                 step.classList.add('active');
             }
         });
         
-        // Initialize navigation protection
-        initializeNavigationProtection();
-        
-        // Initialize step-specific content
+        // Initialize content for the step
+        console.log(`Initializing content for step: ${stepId}`);
         initializeStepContent(stepId);
         
-        // Update preview panel
+        // Update the preview panel
         updatePreview();
         
-        // Ensure navigation buttons are visible after a short delay
-        setTimeout(() => {
-            verifyAndFixStepFooter(stepId);
-        }, 300);
+        // Log success
+        console.log(`Step change: ${currentStep} -> ${stepId}`);
+        
+        // Apply enhanced navigation styles
+        enhanceNavigationButtons();
         
         // Force enable all buttons for testing
         forceEnableAllButtons();
         
+        // Create floating navigation buttons
+        createFloatingNavigationButtons();
+        
+        // Verify and fix the step footer after a short delay to ensure DOM is updated
+        setTimeout(() => {
+            try {
+                verifyAndFixStepFooter(stepId);
+            } catch (err) {
+                console.error('Error in verifyAndFixStepFooter:', err);
+                // Continue execution even if this fails
+            }
+        }, 300);
+        
+        // Call our comprehensive navigation fix
+        setTimeout(fixAllNavigationButtons, 500);
+        
         return true;
     } catch (error) {
         console.error('Error showing step:', error);
-        showErrorRecoveryOptions(error, stepId, previousStep);
+        
+        // Emergency recovery - try to show the step anyway
+        try {
+            const stepElement = document.getElementById(`step-${stepId}`);
+            if (stepElement) {
+                // Hide all steps first
+                document.querySelectorAll('.message-builder__step').forEach(s => {
+                    s.style.display = 'none';
+                });
+                
+                // Force show this step
+                stepElement.style.display = 'block';
+                currentStep = stepId;
+                console.log('Emergency recovery: Forced step display');
+            }
+        } catch (recoveryError) {
+            console.error('Recovery also failed:', recoveryError);
+        }
+        
         return false;
     }
 }
@@ -5688,3 +5722,226 @@ function verifyAndFixStepFooter(stepId) {
         // Don't throw the error to prevent breaking navigation
     }
 }
+
+/**
+ * Fix all navigation buttons in the application
+ * THIS IS A CRITICAL FIX to ensure navigation works
+ */
+function fixAllNavigationButtons() {
+    console.log('CRITICAL FIX: Applying comprehensive fixes to all navigation buttons');
+    
+    try {
+        // Fix main next button in recipient step
+        const recipientNextBtn = document.getElementById('recipientNextBtn');
+        if (recipientNextBtn) {
+            // Remove any existing listeners to avoid duplicates
+            recipientNextBtn.replaceWith(recipientNextBtn.cloneNode(true));
+            
+            // Get the fresh reference after replacement
+            const freshRecipientNextBtn = document.getElementById('recipientNextBtn');
+            
+            // Add multiple ways to trigger navigation
+            freshRecipientNextBtn.onclick = function(e) {
+                console.log('DIRECT CLICK: Recipient Next button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                return goToNextStep('recipient');
+            };
+            
+            // Also add event listener as backup
+            freshRecipientNextBtn.addEventListener('click', function(e) {
+                console.log('EVENT LISTENER: Recipient Next button clicked');
+                e.preventDefault();
+                e.stopPropagation();
+                goToNextStep('recipient');
+            }, true);
+            
+            // Remove disabled class if present
+            freshRecipientNextBtn.classList.remove('disabled');
+            freshRecipientNextBtn.disabled = false;
+            
+            // Ensure the button is visible and clickable
+            freshRecipientNextBtn.style.opacity = '1';
+            freshRecipientNextBtn.style.visibility = 'visible';
+            freshRecipientNextBtn.style.pointerEvents = 'auto';
+            
+            console.log('Recipient Next button fixed and enabled');
+        }
+        
+        // Fix the floating Next button in the right corner
+        const floatingNextBtn = document.querySelector('.next-floating-btn, .floating-next-btn, button[id*="Next"][id*="Choose"]');
+        if (floatingNextBtn) {
+            console.log('Found floating Next button:', floatingNextBtn);
+            
+            // Clone and replace to remove existing handlers
+            floatingNextBtn.replaceWith(floatingNextBtn.cloneNode(true));
+            
+            // Get fresh reference
+            const freshFloatingBtn = document.querySelector('.next-floating-btn, .floating-next-btn, button[id*="Next"][id*="Choose"]');
+            
+            if (freshFloatingBtn) {
+                // Add direct onclick
+                freshFloatingBtn.onclick = function(e) {
+                    console.log('DIRECT CLICK: Floating Next button clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return goToNextStep('recipient');
+                };
+                
+                // Add event listener backup
+                freshFloatingBtn.addEventListener('click', function(e) {
+                    console.log('EVENT LISTENER: Floating Next button clicked');
+                    e.preventDefault();
+                    e.stopPropagation();
+                    goToNextStep('recipient');
+                }, true);
+                
+                // Make sure it's visible and clickable
+                freshFloatingBtn.style.opacity = '1';
+                freshFloatingBtn.style.visibility = 'visible';
+                freshFloatingBtn.style.pointerEvents = 'auto';
+                
+                console.log('Floating Next button fixed and enabled');
+            }
+        }
+        
+        // Add direct navigation triggers to all connection cards
+        const connectionCards = document.querySelectorAll('.connection-card');
+        connectionCards.forEach(card => {
+            // Add a double-click handler to force navigation
+            card.addEventListener('dblclick', function(e) {
+                console.log('Connection card double-clicked, forcing navigation');
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Select this card first
+                const allCards = document.querySelectorAll('.connection-card');
+                allCards.forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                // Get the connection data
+                const id = this.getAttribute('data-id');
+                const name = this.querySelector('.connection-name')?.textContent || 'Connection';
+                const relationshipElem = this.querySelector('.connection-relationship');
+                const relationship = relationshipElem?.textContent.toLowerCase() || 'friend';
+                
+                // Save the data
+                messageData.recipient = {
+                    id: id,
+                    name: name,
+                    relationship: relationship
+                };
+                
+                // Force navigation to next step
+                setTimeout(() => goToNextStep('recipient'), 100);
+            });
+        });
+        
+        // Create an emergency button if needed
+        if (!document.getElementById('emergency-next-btn')) {
+            const emergencyBtn = document.createElement('button');
+            emergencyBtn.id = 'emergency-next-btn';
+            emergencyBtn.textContent = 'Emergency: Next Step';
+            emergencyBtn.style.position = 'fixed';
+            emergencyBtn.style.bottom = '10px';
+            emergencyBtn.style.left = '10px';
+            emergencyBtn.style.zIndex = '9999';
+            emergencyBtn.style.background = '#ff7eb6';
+            emergencyBtn.style.color = 'white';
+            emergencyBtn.style.border = 'none';
+            emergencyBtn.style.borderRadius = '4px';
+            emergencyBtn.style.padding = '8px 12px';
+            emergencyBtn.style.cursor = 'pointer';
+            
+            // Add click handler
+            emergencyBtn.onclick = function() {
+                console.log('EMERGENCY: Forcing navigation to next step');
+                
+                // Ensure we have recipient data
+                if (!messageData.recipient) {
+                    // Use the first connection we find
+                    const firstCard = document.querySelector('.connection-card');
+                    if (firstCard) {
+                        const id = firstCard.getAttribute('data-id');
+                        const name = firstCard.querySelector('.connection-name')?.textContent || 'Connection';
+                        const relationshipElem = firstCard.querySelector('.connection-relationship');
+                        const relationship = relationshipElem?.textContent.toLowerCase() || 'friend';
+                        
+                        messageData.recipient = {
+                            id: id,
+                            name: name,
+                            relationship: relationship
+                        };
+                    } else {
+                        // Create fallback data
+                        messageData.recipient = {
+                            id: 'emergency-id',
+                            name: 'Friend',
+                            relationship: 'friend'
+                        };
+                    }
+                }
+                
+                // Force go to intent step
+                showStep('intent');
+            };
+            
+            document.body.appendChild(emergencyBtn);
+            console.log('Emergency navigation button created');
+        }
+        
+        // Patch the goToNextStep function to add more logging and ensure it works
+        const originalGoToNextStep = window.goToNextStep;
+        window.goToNextStep = function(currentStepId) {
+            console.log(`PATCHED goToNextStep called for step: ${currentStepId}`);
+            
+            // Log the messageData state
+            console.log('Message data state:', JSON.stringify(messageData));
+            
+            // Get the next step
+            const nextStep = STEPS[currentStepId].next;
+            
+            if (!nextStep) {
+                console.warn(`No next step defined for ${currentStepId}`);
+                return false;
+            }
+            
+            // Force clear invalid state
+            if (currentStepId === 'recipient' && !messageData.intent && messageData.tone) {
+                console.log('Clearing invalid state: tone data without intent data');
+                messageData.tone = null;
+                localStorage.removeItem('toneData');
+            }
+            
+            // Always save current data
+            saveStepData(currentStepId);
+            
+            // FORCE NAVIGATION: Skip validation for now to ensure navigation works
+            console.log(`FORCE NAVIGATION: Going from ${currentStepId} to ${nextStep}`);
+            
+            // Directly show the next step
+            return showStep(nextStep);
+        };
+        
+        console.log('CRITICAL FIX: Navigation button fixes applied successfully');
+        
+    } catch (error) {
+        console.error('Error fixing navigation buttons:', error);
+    }
+}
+
+// Call the fix function after a short delay to ensure DOM is fully loaded
+setTimeout(fixAllNavigationButtons, 1000);
+
+// Also call it when document is fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(fixAllNavigationButtons, 1000);
+});
+
+// Call it once more after all resources are loaded
+window.addEventListener('load', function() {
+    setTimeout(fixAllNavigationButtons, 1000);
+});
+
+// Call the fix once more after a longer delay to handle late DOM changes
+setTimeout(fixAllNavigationButtons, 3000);

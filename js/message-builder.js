@@ -795,6 +795,7 @@ function getRelationshipIcon(relationship) {
 
 /**
  * Open connection modal to create/edit a connection
+ * @param {string} connectionId - Optional ID of connection to edit
  */
 function openConnectionModal(connectionId = null) {
     const modal = elements.modals.connectionModal;
@@ -852,6 +853,13 @@ function openConnectionModal(connectionId = null) {
     
     // Show modal
     openModal(modal);
+}
+
+/**
+ * Close the connection modal
+ */
+function closeConnectionModal() {
+    closeModal(elements.modals.connectionModal);
 }
 
 /**
@@ -964,13 +972,6 @@ function saveConnection() {
             hideLoading();
             showAlert('Failed to save connection. Please try again.', 'error');
         });
-}
-
-/**
- * Close connection modal
- */
-function closeConnectionModal() {
-    closeModal(elements.modals.connectionModal);
 }
 
 /**
@@ -1901,7 +1902,9 @@ function initializeResultStep() {
                 <div class="message-content" id="message-content">
                     <div class="message-loading" id="message-loading">
                         <div class="spinner"></div>
-                        <p>Generating your heartfelt message...</p>
+                        <div class="loading-message">
+                            <p>Creating your heartfelt message...</p>
+                        </div>
                     </div>
                     
                     <div class="message-text" id="message-text" style="display: none;">
@@ -1909,9 +1912,13 @@ function initializeResultStep() {
                     </div>
                     
                     <div class="message-error" id="message-error" style="display: none;">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>There was an error generating your message. Please try again.</p>
-                        <button id="retry-generation" class="secondary-button">Retry</button>
+                        <div class="error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <p id="error-message">There was an error generating your message. Please try again.</p>
+                        </div>
+                        <button id="retry-generation" class="secondary-button">
+                            <i class="fas fa-redo"></i> Try Again
+                        </button>
                     </div>
                 </div>
                 
@@ -1931,6 +1938,14 @@ function initializeResultStep() {
                 </div>
             </div>
             
+            <!-- Message Variations -->
+            <div class="variations-section">
+                <h3>Try Message Variations</h3>
+                <div id="message-variations" class="message-variations">
+                    <!-- Variation buttons will be dynamically added -->
+                </div>
+            </div>
+            
             <!-- Message Insights -->
             <div class="insights-card" id="insights-card" style="display: none;">
                 <div class="insights-header">
@@ -1940,59 +1955,172 @@ function initializeResultStep() {
                     <!-- Will be populated with insights -->
                 </div>
             </div>
+            
+            <!-- Message Edit Modal -->
+            <div id="edit-message-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Edit Your Message</h2>
+                        <button class="close-modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="message-edit-textarea">Make your changes:</label>
+                            <textarea id="message-edit-textarea" rows="10"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="edit-cancel" class="secondary-button">Cancel</button>
+                        <button id="edit-save" class="primary-button">Save Changes</button>
+                    </div>
+                </div>
+            </div>
         </div>
     `;
     
-    // Set up event listeners for buttons
+    // Set up action buttons
     const copyBtn = document.getElementById('copy-message');
     const regenerateBtn = document.getElementById('regenerate-message');
     const editBtn = document.getElementById('edit-message');
     const saveBtn = document.getElementById('save-message');
     const retryBtn = document.getElementById('retry-generation');
     
+    // Copy button
     if (copyBtn) {
         copyBtn.addEventListener('click', function() {
-            const messageText = document.getElementById('message-text');
-            if (messageText && messageText.textContent) {
-                navigator.clipboard.writeText(messageText.textContent)
-                    .then(() => {
-                        showAlert('Message copied to clipboard!', 'success');
-                    })
-                    .catch(err => {
-                        console.error('Failed to copy message:', err);
-                        showAlert('Failed to copy message. Please try again.', 'error');
-                    });
+            if (!messageData.result || !messageData.result.message) {
+                showAlert('No message to copy', 'warning');
+                return;
+            }
+            
+            // Copy to clipboard
+            const textArea = document.createElement('textarea');
+            textArea.value = messageData.result.message;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            
+            showAlert('Message copied to clipboard', 'success');
+            
+            // Track copy in analytics
+            if (firebase.analytics) {
+                firebase.analytics().logEvent('message_copied', {
+                    timestamp: new Date().toISOString()
+                });
             }
         });
     }
     
+    // Regenerate button
     if (regenerateBtn) {
         regenerateBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to regenerate your message?')) {
+            if (confirm('Generate a new message? This will replace your current message.')) {
                 generateMessage();
             }
         });
     }
     
+    // Edit button - Modal functionality
     if (editBtn) {
         editBtn.addEventListener('click', function() {
-            // Editing functionality will be implemented later
-            showAlert('Message editing will be implemented in the next phase.', 'info');
+            if (!messageData.result || !messageData.result.message) {
+                showAlert('No message to edit', 'warning');
+                return;
+            }
+            
+            const modal = document.getElementById('edit-message-modal');
+            const textarea = document.getElementById('message-edit-textarea');
+            
+            // Set up the textarea with the current message
+            if (textarea) {
+                textarea.value = messageData.result.message;
+            }
+            
+            // Show the modal
+            if (modal) {
+                modal.style.display = 'block';
+                // Add show class for animation
+                setTimeout(() => modal.classList.add('show'), 10);
+                
+                // Focus the textarea after a short delay to allow modal animation
+                setTimeout(() => {
+                    if (textarea) textarea.focus();
+                }, 300);
+            }
         });
     }
     
+    // Modal close button
+    const closeModalBtns = document.querySelectorAll('.close-modal');
+    closeModalBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                closeModal(modal);
+            }
+        });
+    });
+    
+    // Cancel button in edit modal
+    const editCancelBtn = document.getElementById('edit-cancel');
+    if (editCancelBtn) {
+        editCancelBtn.addEventListener('click', function() {
+            const modal = document.getElementById('edit-message-modal');
+            if (modal) {
+                closeModal(modal);
+            }
+        });
+    }
+    
+    // Save changes button in edit modal
+    const editSaveBtn = document.getElementById('edit-save');
+    if (editSaveBtn) {
+        editSaveBtn.addEventListener('click', saveEditedMessage);
+    }
+    
+    // Add keyboard accessibility to the textarea
+    const textarea = document.getElementById('message-edit-textarea');
+    if (textarea) {
+        textarea.addEventListener('keydown', function(e) {
+            // Save on Ctrl+Enter or Cmd+Enter
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                saveEditedMessage();
+            }
+            // Close on Escape
+            else if (e.key === 'Escape') {
+                e.preventDefault();
+                const modal = document.getElementById('edit-message-modal');
+                if (modal) {
+                    closeModal(modal);
+                }
+            }
+        });
+    }
+    
+    // Save button - Save to history
     if (saveBtn) {
         saveBtn.addEventListener('click', function() {
+            if (!messageData.result || !messageData.result.message) {
+                showAlert('No message to save', 'warning');
+                return;
+            }
+            
             saveMessageToHistory();
-            showAlert('Message saved to your history!', 'success');
+            showAlert('Message saved to your history', 'success');
         });
     }
     
+    // Retry button
     if (retryBtn) {
         retryBtn.addEventListener('click', function() {
             generateMessage();
         });
     }
+    
+    // Initialize message variation buttons
+    initializeVariationButtons();
     
     // Check if we already have a generated message
     if (messageData.result && messageData.result.message) {
@@ -2005,21 +2133,54 @@ function initializeResultStep() {
 
 /**
  * Generate message using Cloud Function API
- * @returns {Promise<void>}
+ * @param {Object} options - Optional parameters for generation
+ * @param {string} options.variationType - Type of variation (more_formal, more_casual, more_emotional, more_direct)
+ * @param {boolean} options.showLoading - Whether to show loading indicators
+ * @returns {Promise<Object>} - The generated message result
  */
-async function generateMessage() {
-    // Show loading state
-    const messageLoading = document.getElementById('message-loading');
-    const messageText = document.getElementById('message-text');
-    const messageError = document.getElementById('message-error');
-    const insightsCard = document.getElementById('insights-card');
+async function generateMessage(options = {}) {
+    const { 
+        variationType = null, 
+        showLoading = true 
+    } = options;
     
-    if (messageLoading) messageLoading.style.display = 'flex';
-    if (messageText) messageText.style.display = 'none';
-    if (messageError) messageError.style.display = 'none';
-    if (insightsCard) insightsCard.style.display = 'none';
+    // Show loading state if requested
+    if (showLoading) {
+        const messageLoading = document.getElementById('message-loading');
+        const messageText = document.getElementById('message-text');
+        const messageError = document.getElementById('message-error');
+        const insightsCard = document.getElementById('insights-card');
+        
+        if (messageLoading) messageLoading.style.display = 'flex';
+        if (messageText) messageText.style.display = 'none';
+        if (messageError) messageError.style.display = 'none';
+        if (insightsCard) insightsCard.style.display = 'none';
+        
+        // Update loading message if variation
+        const loadingMessage = document.querySelector('.loading-message p');
+        if (loadingMessage) {
+            if (variationType) {
+                loadingMessage.textContent = 'Creating message variation...';
+            } else {
+                loadingMessage.textContent = 'Creating your heartfelt message...';
+            }
+        }
+    }
     
     try {
+        // Ensure we have the required data
+        if (!messageData.recipient || !messageData.recipient.name) {
+            throw new Error('Missing recipient information');
+        }
+        
+        if (!messageData.intent || !messageData.intent.type) {
+            throw new Error('Missing intent information');
+        }
+        
+        if (!messageData.tone || !messageData.tone.type) {
+            throw new Error('Missing tone information');
+        }
+        
         // Prepare data for API
         const apiData = {
             recipient: {
@@ -2040,11 +2201,23 @@ async function generateMessage() {
             userId: currentUser.uid
         };
         
+        // Add variation info if specified
+        if (variationType) {
+            apiData.variation = variationType;
+            
+            // If we already have a message, send it as context for the variation
+            if (messageData.result && messageData.result.message) {
+                apiData.currentMessage = messageData.result.message;
+            }
+        }
+        
         // Track the start of message generation in analytics
         if (firebase.analytics) {
             firebase.analytics().logEvent('message_generation_started', {
                 intent_type: messageData.intent.type,
                 tone_type: messageData.tone.type,
+                is_variation: !!variationType,
+                variation_type: variationType || 'none',
                 timestamp: new Date().toISOString()
             });
         }
@@ -2079,46 +2252,61 @@ async function generateMessage() {
             firebase.analytics().logEvent('message_generation_success', {
                 intent_type: messageData.intent.type,
                 tone_type: messageData.tone.type,
+                is_variation: !!variationType,
+                variation_type: variationType || 'none',
                 has_insights: (result.insights && result.insights.length > 0),
                 timestamp: new Date().toISOString()
             });
         }
         
+        return result;
     } catch (error) {
-        console.error('Error generating message:', error);
+        console.error('Failed to generate message:', error);
         
-        // Show error message
+        // Show error state in UI
+        const messageLoading = document.getElementById('message-loading');
+        const messageError = document.getElementById('message-error');
+        
         if (messageLoading) messageLoading.style.display = 'none';
-        if (messageText) messageText.style.display = 'none';
         if (messageError) {
             messageError.style.display = 'block';
-            messageError.innerHTML = `
-                <div class="error-message">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <p>We couldn't generate your message. Please try again.</p>
-                </div>
-                <button id="retry-generation" class="primary-button">
-                    <i class="fas fa-redo"></i> Try Again
-                </button>
-            `;
             
-            // Add retry button functionality
+            // Customize error message based on error type
+            const errorMessage = document.getElementById('error-message');
+            if (errorMessage) {
+                if (error.message.includes('Network') || error.message.includes('Failed to fetch')) {
+                    errorMessage.textContent = 'Network error. Please check your connection and try again.';
+                } else if (error.message.includes('auth') || error.message.includes('401') || error.message.includes('403')) {
+                    errorMessage.textContent = 'Authentication error. Please refresh and try again.';
+                } else if (error.message.includes('Missing')) {
+                    errorMessage.textContent = error.message + '. Please go back and complete all steps.';
+                } else {
+                    errorMessage.textContent = 'Sorry, we couldn\'t generate your message. Please try again.';
+                }
+            }
+            
+            // Show retry button
             const retryButton = document.getElementById('retry-generation');
             if (retryButton) {
-                retryButton.addEventListener('click', generateMessage);
+                retryButton.style.display = 'block';
+                retryButton.onclick = function() {
+                    generateMessage(options);
+                };
             }
         }
         
         // Track error in analytics
         if (firebase.analytics) {
             firebase.analytics().logEvent('message_generation_error', {
-                error_type: error.message.includes('NetworkError') ? 'network' : 
-                            error.message.includes('401') ? 'authentication' : 'api',
-                intent_type: messageData.intent.type,
-                tone_type: messageData.tone.type,
+                error_message: error.message,
+                is_variation: !!variationType,
+                variation_type: variationType || 'none',
                 timestamp: new Date().toISOString()
             });
         }
+        
+        // Propagate error for handling by caller
+        throw error;
     }
 }
 
@@ -2696,15 +2884,16 @@ function validateToneStep() {
 
 /**
  * Get Firebase ID Token for authenticated API calls
+ * @param {boolean} forceRefresh - Whether to force refresh the token
  * @returns {Promise<string>} The ID token
  */
-async function getIdToken() {
+async function getIdToken(forceRefresh = true) {
     try {
         if (!firebase.auth().currentUser) {
             throw new Error('No authenticated user found');
         }
         // Force token refresh to ensure it's not expired
-        return await firebase.auth().currentUser.getIdToken(true);
+        return await firebase.auth().currentUser.getIdToken(forceRefresh);
     } catch (error) {
         console.error('Error getting ID token:', error);
         showAlert('Authentication error. Please refresh and try again.', 'error');
@@ -2715,15 +2904,48 @@ async function getIdToken() {
 /**
  * Call the message generation API with authentication
  * @param {Object} data - The data to send to the API
+ * @param {number} retryCount - Number of retry attempts (internal use)
  * @returns {Promise<Object>} - The API response
  */
-async function callGenerateMessageAPI(data) {
+async function callGenerateMessageAPI(data, retryCount = 0) {
+    const MAX_RETRIES = 2;
+    const CACHE_DURATION = 30 * 60 * 1000; // 30 minutes in milliseconds
+    
     try {
-        // Get authentication token
-        const idToken = await getIdToken();
+        // Check if we have a cached response for exactly the same request
+        const cacheKey = `msgCache_${JSON.stringify(data)}`;
+        const cachedResponse = localStorage.getItem(cacheKey);
         
+        if (cachedResponse) {
+            const parsed = JSON.parse(cachedResponse);
+            const cacheTime = new Date(parsed.timestamp);
+            const now = new Date();
+            
+            // If cache is still valid (within CACHE_DURATION), return it
+            if (now - cacheTime < CACHE_DURATION) {
+                console.log('Using cached message response');
+                return parsed.data;
+            } else {
+                // Cache expired, remove it
+                localStorage.removeItem(cacheKey);
+            }
+        }
+        
+        // Get authentication token (force refresh on retry)
+        const idToken = await getIdToken(retryCount > 0);
+        
+        // Log the API call attempt
+        console.log(`Calling message generation API (attempt ${retryCount + 1})...`);
+        
+        // Decide which API endpoint to use based on configuration
+        // Default to V1, with option to use V2 if needed
+        const useV2API = false; // Toggle this based on A/B testing or configuration
+        const apiEndpoint = useV2API 
+            ? 'https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2'
+            : 'https://us-central1-heartglowai.cloudfunctions.net/generateMessage';
+            
         // Call the API with proper authentication
-        const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessage', {
+        const response = await fetch(apiEndpoint, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -2735,21 +2957,103 @@ async function callGenerateMessageAPI(data) {
         // Check for HTTP errors
         if (!response.ok) {
             const errorText = await response.text();
-            throw new Error(`API error (${response.status}): ${errorText}`);
+            const errorStatus = response.status;
+            
+            // Handle specific status codes
+            if (errorStatus === 401 || errorStatus === 403) {
+                // Auth error - if we haven't retried too many times, try again with a fresh token
+                if (retryCount < MAX_RETRIES) {
+                    console.log('Authentication error, retrying with fresh token...');
+                    return callGenerateMessageAPI(data, retryCount + 1);
+                }
+                throw new Error(`Authentication error (${errorStatus}): ${errorText}`);
+            } else if (errorStatus === 429) {
+                // Rate limiting
+                throw new Error('Too many requests. Please wait a moment and try again.');
+            } else if (errorStatus >= 500) {
+                // Server error - retry if we haven't retried too many times
+                if (retryCount < MAX_RETRIES) {
+                    // Exponential backoff for retries
+                    const backoffTime = Math.pow(2, retryCount) * 1000;
+                    console.log(`Server error, retrying in ${backoffTime}ms...`);
+                    
+                    return new Promise(resolve => {
+                        setTimeout(() => {
+                            resolve(callGenerateMessageAPI(data, retryCount + 1));
+                        }, backoffTime);
+                    });
+                }
+                throw new Error(`Server error (${errorStatus}): ${errorText}`);
+            }
+            
+            throw new Error(`API error (${errorStatus}): ${errorText}`);
         }
         
-        // Parse and return the response
-        return await response.json();
+        // Parse the response
+        const result = await response.json();
+        
+        // Validate result format
+        if (!result || !result.message) {
+            throw new Error('Invalid response format from API');
+        }
+        
+        // Cache the successful response
+        try {
+            localStorage.setItem(cacheKey, JSON.stringify({
+                timestamp: new Date().toISOString(),
+                data: result
+            }));
+        } catch (cacheError) {
+            // If caching fails (e.g., localStorage is full), just log and continue
+            console.warn('Failed to cache API response:', cacheError);
+        }
+        
+        // Return the parsed response
+        return result;
     } catch (error) {
         console.error('Message generation API call failed:', error);
+        
+        // Check for network errors and retry if appropriate
+        if ((error.message.includes('Failed to fetch') || 
+             error.message.includes('NetworkError') || 
+             error.message.includes('network error')) && 
+            retryCount < MAX_RETRIES) {
+            
+            // Exponential backoff for retries
+            const backoffTime = Math.pow(2, retryCount) * 1000;
+            console.log(`Network error, retrying in ${backoffTime}ms...`);
+            
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    resolve(callGenerateMessageAPI(data, retryCount + 1));
+                }, backoffTime);
+            });
+        }
         
         // Provide user-friendly error message based on error type
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             showAlert('Network error. Please check your connection and try again.', 'error');
         } else if (error.message.includes('401') || error.message.includes('403')) {
             showAlert('Authentication error. Please refresh and try again.', 'error');
+        } else if (error.message.includes('429')) {
+            showAlert('Too many requests. Please wait a moment and try again.', 'error');
+        } else if (error.message.includes('500')) {
+            showAlert('Server error. Our team has been notified. Please try again later.', 'error');
         } else {
             showAlert('Failed to generate message. Please try again.', 'error');
+        }
+        
+        // For analytics - track the error
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('message_generation_error', {
+                error_type: error.message.includes('401') || error.message.includes('403') ? 'auth_error' :
+                           error.message.includes('Failed to fetch') ? 'network_error' :
+                           error.message.includes('429') ? 'rate_limit' :
+                           error.message.includes('500') ? 'server_error' : 'other_error',
+                error_message: error.message.substring(0, 100), // Truncate for analytics
+                retry_count: retryCount,
+                timestamp: new Date().toISOString()
+            });
         }
         
         throw error;
@@ -3006,54 +3310,41 @@ function editConnection(connection) {
  */
 function openModal(modal) {
     if (!modal) return;
-    modal.style.display = 'flex';
     
-    // Add animation class
-    setTimeout(() => {
-        modal.classList.add('show');
-    }, 10);
+    // Add show class
+    modal.classList.add('show');
     
-    // Add click outside to close
-    modal.addEventListener('click', function(e) {
-        if (e.target === this) {
-            closeModal(this);
-        }
-    });
+    // Set aria-hidden and role
+    modal.setAttribute('aria-hidden', 'false');
+    modal.setAttribute('role', 'dialog');
+    modal.setAttribute('aria-modal', 'true');
     
-    // Add escape key to close
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeModal(modal);
-        }
-    });
-}
-
-/**
- * Open the new connection modal
- */
-function openConnectionModal() {
-    // Reset the form
-    elements.modals.connectionForm.reset();
-    elements.modals.connectionForm.removeAttribute('data-connection-id');
+    // Add body class to prevent scrolling
+    document.body.classList.add('modal-open');
     
-    // Set modal title
-    elements.modals.connectionTitle.textContent = 'New Connection';
+    // Save the previously focused element to restore focus when closing
+    modal.previouslyFocused = document.activeElement;
     
-    // Hide the other relationship field
-    elements.modals.otherRelationshipGroup.style.display = 'none';
+    // Find the first focusable element and focus it
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    if (focusableElements.length > 0) {
+        setTimeout(() => {
+            focusableElements[0].focus();
+        }, 100);
+    }
     
-    // Open the modal
-    openModal(elements.modals.connectionModal);
+    // Add click outside listener
+    document.addEventListener('mousedown', closeModalOnClickOutside);
     
-    // Focus the name field
-    setTimeout(() => {
-        elements.modals.connectionName.focus();
-    }, 100);
+    // Add escape key listener
+    document.addEventListener('keydown', closeModalOnEscape);
+    
+    // Add focus trap for accessibility
+    modal.addEventListener('keydown', trapFocusInModal);
 }
 
 /**
  * Close a modal
- * @param {HTMLElement} modal - The modal element to close
  */
 function closeModal(modal) {
     if (!modal) return;
@@ -3061,15 +3352,201 @@ function closeModal(modal) {
     // Remove animation class
     modal.classList.remove('show');
     
+    // Update aria attributes
+    modal.setAttribute('aria-hidden', 'true');
+    
     // Hide after animation
     setTimeout(() => {
         modal.style.display = 'none';
+        
+        // Remove body class
+        document.body.classList.remove('modal-open');
+        
+        // Restore focus to the element that was focused before opening
+        if (modal.previouslyFocused && modal.previouslyFocused.focus) {
+            modal.previouslyFocused.focus();
+        }
     }, 300);
+    
+    // Remove event listeners
+    document.removeEventListener('mousedown', closeModalOnClickOutside);
+    document.removeEventListener('keydown', closeModalOnEscape);
+    modal.removeEventListener('keydown', trapFocusInModal);
 }
 
 /**
- * Close the connection modal
+ * Close modal when clicking outside
  */
-function closeConnectionModal() {
-    closeModal(elements.modals.connectionModal);
+function closeModalOnClickOutside(e) {
+    const openModal = document.querySelector('.modal.show');
+    if (openModal && !openModal.querySelector('.modal-content').contains(e.target)) {
+        closeModal(openModal);
+    }
+}
+
+/**
+ * Close modal when pressing Escape
+ */
+function closeModalOnEscape(e) {
+    if (e.key === 'Escape') {
+        const openModal = document.querySelector('.modal.show');
+        if (openModal) {
+            closeModal(openModal);
+        }
+    }
+}
+
+/**
+ * Trap focus within modal for accessibility
+ */
+function trapFocusInModal(e) {
+    if (e.key !== 'Tab') return;
+    
+    const focusableElements = this.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    if (e.shiftKey) {
+        // Shift + Tab: going backwards
+        if (document.activeElement === firstElement) {
+            e.preventDefault();
+            lastElement.focus();
+        }
+    } else {
+        // Tab: going forwards
+        if (document.activeElement === lastElement) {
+            e.preventDefault();
+            firstElement.focus();
+        }
+    }
+}
+
+/**
+ * Generate a variation of the current message
+ * @param {string} variationType - The type of variation to generate
+ * @returns {Promise<Object>} - The generated message variation
+ */
+async function generateMessageVariation(variationType) {
+    if (!messageData.result || !messageData.result.message) {
+        showAlert('You need to generate a message first before creating variations.', 'warning');
+        return null;
+    }
+    
+    try {
+        // Show loading state for the variation
+        showLoading(`Creating ${variationType.replace('_', ' ')} variation...`);
+        
+        // Generate the variation
+        const result = await generateMessage({
+            variationType: variationType,
+            showLoading: false // We're managing loading state here
+        });
+        
+        hideLoading();
+        
+        // Show success message
+        showAlert(`${capitalizeFirstLetter(variationType.replace('_', ' '))} variation created!`, 'success');
+        
+        return result;
+    } catch (error) {
+        console.error('Error generating message variation:', error);
+        hideLoading();
+        showAlert('Failed to create variation. Please try again.', 'error');
+        return null;
+    }
+}
+
+/**
+ * Initialize message variation buttons
+ */
+function initializeVariationButtons() {
+    const variationTypes = [
+        { id: 'more_formal', label: 'More Formal', icon: 'fa-user-tie' },
+        { id: 'more_casual', label: 'More Casual', icon: 'fa-coffee' },
+        { id: 'more_emotional', label: 'More Emotional', icon: 'fa-heart' },
+        { id: 'more_direct', label: 'More Direct', icon: 'fa-bullseye' }
+    ];
+    
+    const variationContainer = document.getElementById('message-variations');
+    
+    if (!variationContainer) return;
+    
+    // Ensure proper aria attributes for the container
+    variationContainer.setAttribute('role', 'group');
+    variationContainer.setAttribute('aria-label', 'Message variation options');
+    
+    // Clear existing buttons
+    variationContainer.innerHTML = '';
+    
+    // Create a button for each variation type
+    variationTypes.forEach(variation => {
+        const button = document.createElement('button');
+        button.className = 'variation-button';
+        button.dataset.variation = variation.id;
+        button.setAttribute('aria-label', `Generate ${variation.label} variation`);
+        button.innerHTML = `<i class="fas ${variation.icon}"></i> ${variation.label}`;
+        
+        button.addEventListener('click', function() {
+            generateMessageVariation(variation.id);
+        });
+        
+        variationContainer.appendChild(button);
+    });
+}
+
+/**
+ * Capitalize the first letter of a string
+ * @param {string} string - The string to capitalize
+ * @returns {string} - The capitalized string
+ */
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/**
+ * Save edited message from the modal
+ */
+function saveEditedMessage() {
+    const textarea = document.getElementById('message-edit-textarea');
+    if (!textarea || !textarea.value.trim()) {
+        showAlert('Please enter a message', 'warning');
+        return;
+    }
+    
+    // Update the message in state
+    if (messageData.result) {
+        messageData.result.message = textarea.value.trim();
+        
+        // Add a note that the message was manually edited
+        messageData.result.edited = true;
+        messageData.result.editTimestamp = new Date().toISOString();
+        
+        // Update the UI
+        const messageText = document.getElementById('message-text');
+        if (messageText) {
+            messageText.textContent = messageData.result.message;
+        }
+        
+        // Update localStorage
+        localStorage.setItem('messageData', JSON.stringify(messageData));
+        localStorage.setItem('resultData', JSON.stringify(messageData.result));
+        
+        // Update preview
+        updatePreview();
+        
+        // Track edit in analytics
+        if (firebase.analytics) {
+            firebase.analytics().logEvent('message_edited', {
+                timestamp: new Date().toISOString()
+            });
+        }
+        
+        // Close the modal
+        const modal = document.getElementById('edit-message-modal');
+        if (modal) {
+            closeModal(modal);
+        }
+        
+        showAlert('Message updated successfully', 'success');
+    }
 }

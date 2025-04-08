@@ -5593,3 +5593,98 @@ function goToPreviousStep(currentStepId) {
     
     // Rest of the existing function...
 }
+
+/**
+ * Verify and fix the step footer to ensure navigation buttons work properly
+ * @param {string} stepId - The ID of the step to verify
+ */
+function verifyAndFixStepFooter(stepId) {
+    console.log('Verifying and fixing step footer for step:', stepId);
+    
+    try {
+        // Get the step element
+        const stepElement = document.getElementById(`step-${stepId}`);
+        if (!stepElement) {
+            console.warn(`Step element not found for step: ${stepId}`);
+            return;
+        }
+        
+        // Get the footer element
+        const footer = stepElement.querySelector('.step-footer');
+        if (!footer) {
+            console.warn(`Footer element not found for step: ${stepId}`);
+            return;
+        }
+        
+        // Ensure the footer is visible
+        footer.style.display = 'flex';
+        footer.style.justifyContent = 'space-between';
+        footer.style.alignItems = 'center';
+        footer.style.marginTop = '20px';
+        
+        // Process buttons based on step ID
+        switch (stepId) {
+            case 'recipient':
+                const recipientNextBtn = footer.querySelector('#recipientNextBtn');
+                if (recipientNextBtn) {
+                    // Enable the next button if we have a recipient selected
+                    if (messageData.recipient && messageData.recipient.id) {
+                        recipientNextBtn.classList.remove('disabled');
+                    }
+                }
+                break;
+                
+            case 'intent':
+                const intentPrevBtn = footer.querySelector('#intentPrevBtn');
+                const intentNextBtn = footer.querySelector('#intentNextBtn');
+                
+                // Ensure buttons have proper handlers
+                if (intentPrevBtn) {
+                    intentPrevBtn.onclick = function() { goToPreviousStep('intent'); };
+                }
+                
+                if (intentNextBtn) {
+                    intentNextBtn.onclick = function() { goToNextStep('intent'); };
+                    
+                    // Enable the next button if we have an intent selected
+                    if (messageData.intent) {
+                        intentNextBtn.classList.remove('disabled');
+                    }
+                }
+                break;
+                
+            case 'tone':
+                const tonePrevBtn = footer.querySelector('#tonePrevBtn');
+                const toneNextBtn = footer.querySelector('#toneNextBtn');
+                
+                // Ensure buttons have proper handlers
+                if (tonePrevBtn) {
+                    tonePrevBtn.onclick = function() { goToPreviousStep('tone'); };
+                }
+                
+                if (toneNextBtn) {
+                    toneNextBtn.onclick = function() { goToNextStep('tone'); };
+                    
+                    // Enable the next button if we have a tone selected
+                    if (messageData.tone) {
+                        toneNextBtn.classList.remove('disabled');
+                    }
+                }
+                break;
+                
+            case 'result':
+                const resultPrevBtn = footer.querySelector('#resultPrevBtn');
+                
+                // Ensure button has proper handler
+                if (resultPrevBtn) {
+                    resultPrevBtn.onclick = function() { goToPreviousStep('result'); };
+                }
+                break;
+        }
+        
+        console.log(`Step footer for ${stepId} verified and fixed`);
+    } catch (error) {
+        console.error('Error in verifyAndFixStepFooter:', error);
+        // Don't throw the error to prevent breaking navigation
+    }
+}

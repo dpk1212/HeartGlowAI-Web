@@ -5174,3 +5174,32 @@ function showErrorRecoveryOptions(error, failedStep, previousStep) {
         });
     }
 }
+
+/**
+ * Track step changes for analytics
+ * @param {string} from - Previous step
+ * @param {string} to - New step
+ */
+function trackStepChange(from, to) {
+    try {
+        console.log(`Step change: ${from || 'initial'} -> ${to}`);
+        
+        // Record time spent on steps
+        if (from) {
+            const stepStartTime = window.stepTimers ? window.stepTimers[from] : null;
+            if (stepStartTime) {
+                const timeSpent = new Date().getTime() - stepStartTime;
+                console.log(`Time spent on ${from} step: ${timeSpent/1000} seconds`);
+                
+                // Could send to analytics service
+            }
+        }
+        
+        // Start timer for new step
+        if (!window.stepTimers) window.stepTimers = {};
+        window.stepTimers[to] = new Date().getTime();
+        
+    } catch (e) {
+        console.error('Error tracking step change:', e);
+    }
+}

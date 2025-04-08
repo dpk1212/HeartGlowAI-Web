@@ -34,6 +34,76 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/perplexity-citations.css">
+  <link rel="stylesheet" href="css/essential-styles.css">
+  
+  <!-- CSS Fallback Script -->
+  <script>
+    // Check if main stylesheets failed to load and ensure essential styles are applied
+    window.addEventListener('load', function() {
+      // Function to check if a stylesheet was loaded
+      function isStylesheetLoaded(href) {
+        // Loop through all loaded stylesheets
+        for (let i = 0; i < document.styleSheets.length; i++) {
+          try {
+            const sheet = document.styleSheets[i];
+            // If the sheet has an href and it matches our target, it's loaded
+            if (sheet.href && sheet.href.includes(href)) {
+              // Try to access rules to check if it's properly loaded
+              const rules = sheet.cssRules || sheet.rules;
+              if (rules && rules.length > 0) {
+                return true;
+              }
+            }
+          } catch (e) {
+            // Security error when trying to access cross-origin stylesheets
+            // This means the stylesheet loaded but we can't check its contents
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      // Apply essential styles with higher specificity if main stylesheets failed
+      if (!isStylesheetLoaded('main.css') || !isStylesheetLoaded('styles.css')) {
+        console.log("Main stylesheets failed to load. Using essential styles as fallback.");
+        
+        // Create a style tag with higher specificity selectors
+        const style = document.createElement('style');
+        style.innerHTML = `
+          /* Force essential styles to have higher specificity */
+          body .connection-card,
+          html body .connection-card {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            border: 1px solid #8a57de !important;
+          }
+          
+          body .primary-button,
+          html body .primary-button {
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          body .step-footer,
+          html body .step-footer {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+          
+          body #floating-nav-buttons,
+          html body #floating-nav-buttons {
+            display: flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+    });
+  </script>
 
   <style>
     :root {
@@ -1316,5 +1386,4 @@
     });
   </script>
   </body>
-</html> 
 </html> 

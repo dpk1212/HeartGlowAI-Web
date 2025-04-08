@@ -1194,9 +1194,14 @@ function showStep(stepId, skipAnimation = false) {
         return;
     }
     
+    // Store previous step for animation purposes
+    const previousStep = currentStep;
     currentStep = stepId;
     
     try {
+        // Track analytics
+        trackStepChange(previousStep, currentStep);
+        
         // Update steps visibility
         Object.keys(elements.steps).forEach(step => {
             if (elements.steps[step]) {
@@ -1232,16 +1237,25 @@ function showStep(stepId, skipAnimation = false) {
             }
         });
         
-        // Apply enhanced styling to navigation buttons
-        enhanceNavigationButtonsStyle();
+        // Initialize navigation protection
+        initializeNavigationProtection();
         
         // Initialize step-specific content
         initializeStepContent(stepId);
         
         // Update preview panel
         updatePreview();
+        
+        // Ensure navigation buttons are visible after a short delay
+        setTimeout(() => {
+            verifyAndFixStepFooter(stepId);
+        }, 300);
+        
+        return true;
     } catch (error) {
         console.error('Error showing step:', error);
+        showErrorRecoveryOptions(error, stepId, previousStep);
+        return false;
     }
 }
 
@@ -4752,4 +4766,411 @@ function createConnectionsContainer() {
     console.log('Created connections container structure');
     
     return connectionsContainer;
+}
+
+/**
+ * Initialize the navigation protection system
+ * This ensures buttons are always accessible through multiple fallback mechanisms
+ */
+function initializeNavigationProtection() {
+    console.log('Initializing navigation protection system');
+    
+    // Apply enhanced button styling
+    enhanceNavigationButtonsStyle();
+    
+    // Create floating navigation buttons
+    ensureFloatingNavigationButtons();
+    
+    // Initialize keyboard shortcuts
+    initializeKeyboardShortcuts();
+    
+    // Start monitoring button visibility
+    startButtonVisibilityObserver();
+    
+    // Initialize session recovery
+    initializeSessionRecovery();
+    
+    console.log('Navigation protection system initialized');
+}
+
+/**
+ * Initialize keyboard shortcuts for navigation
+ */
+function initializeKeyboardShortcuts() {
+    console.log('Setting up keyboard shortcuts');
+    
+    // Remove any existing event listeners
+    document.removeEventListener('keydown', handleKeyboardNavigation);
+    
+    // Add keyboard navigation event
+    document.addEventListener('keydown', handleKeyboardNavigation);
+    
+    // Add keyboard shortcut info to UI
+    addKeyboardShortcutInfo();
+}
+
+/**
+ * Handle keyboard navigation events
+ * @param {KeyboardEvent} event - The keyboard event
+ */
+function handleKeyboardNavigation(event) {
+    // Only handle if not in input, textarea, etc.
+    if (event.target.tagName === 'INPUT' || 
+        event.target.tagName === 'TEXTAREA' || 
+        event.target.isContentEditable) {
+        return;
+    }
+    
+    // Handle arrow keys with Alt modifier
+    if (event.altKey) {
+        switch (event.key) {
+            case 'ArrowRight':
+                // Next step
+                event.preventDefault();
+                console.log('Keyboard shortcut: Next step');
+                switch (currentStep) {
+                    case 'recipient': 
+                        if (messageData.recipient) goToNextStep('recipient');
+                        break;
+                    case 'intent': 
+                        if (messageData.intent) goToNextStep('intent');
+                        break;
+                    case 'tone': 
+                        if (messageData.tone) goToNextStep('tone');
+                        break;
+                    default: break;
+                }
+                break;
+                
+            case 'ArrowLeft':
+                // Previous step
+                event.preventDefault();
+                console.log('Keyboard shortcut: Previous step');
+                if (currentStep !== 'recipient') {
+                    goToPreviousStep(currentStep);
+                }
+                break;
+                
+            case '1':
+                // Go to step 1
+                event.preventDefault();
+                showStep('recipient');
+                break;
+                
+            case '2':
+                // Go to step 2
+                event.preventDefault();
+                if (messageData.recipient) showStep('intent');
+                break;
+                
+            case '3':
+                // Go to step 3
+                event.preventDefault();
+                if (messageData.recipient && messageData.intent) showStep('tone');
+                break;
+                
+            case '4':
+                // Go to step 4
+                event.preventDefault();
+                if (messageData.recipient && messageData.intent && messageData.tone) showStep('result');
+                break;
+                
+            case 'n':
+                // New message (if on result step)
+                event.preventDefault();
+                if (currentStep === 'result') {
+                    if (confirm('Start a new message? Your current message will be saved to your history.')) {
+                        resetAll();
+                        showStep('recipient');
+                    }
+                }
+                break;
+        }
+    }
+}
+
+/**
+ * Add keyboard shortcut info to the UI
+ */
+function addKeyboardShortcutInfo() {
+    // Remove existing helper if any
+    const existingHelper = document.getElementById('keyboard-shortcut-helper');
+    if (existingHelper) {
+        existingHelper.remove();
+    }
+    
+    // Create helper element
+    const helper = document.createElement('div');
+    helper.id = 'keyboard-shortcut-helper';
+    helper.className = 'keyboard-shortcuts-info';
+    
+    // Style the helper
+    Object.assign(helper.style, {
+        position: 'fixed',
+        bottom: '20px',
+        left: '20px',
+        background: 'rgba(33, 30, 46, 0.8)',
+        color: 'white',
+        padding: '10px',
+        borderRadius: '8px',
+        fontSize: '12px',
+        zIndex: '9999',
+        backdropFilter: 'blur(5px)',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+        transition: 'opacity 0.3s ease',
+        opacity: '0',
+        pointerEvents: 'none'
+    });
+    
+    // Set helper content
+    helper.innerHTML = `
+        <p style="margin: 0 0 5px; font-weight: bold;">Keyboard Shortcuts</p>
+        <div style="display: grid; grid-template-columns: auto auto; gap: 5px; text-align: left;">
+            <div><kbd>Alt</kbd> + <kbd>→</kbd></div><div>Next step</div>
+            <div><kbd>Alt</kbd> + <kbd>←</kbd></div><div>Previous step</div>
+            <div><kbd>Alt</kbd> + <kbd>1-4</kbd></div><div>Jump to step</div>
+            <div><kbd>Alt</kbd> + <kbd>N</kbd></div><div>New message</div>
+            <div><kbd>?</kbd></div><div>Show/hide shortcuts</div>
+        </div>
+    `;
+    
+    // Add to body
+    document.body.appendChild(helper);
+    
+    // Add global listener for ? key to show/hide shortcuts
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '?' && !e.repeat) {
+            const helper = document.getElementById('keyboard-shortcut-helper');
+            if (helper) {
+                if (helper.style.opacity === '0' || helper.style.opacity === '') {
+                    helper.style.opacity = '1';
+                    helper.style.pointerEvents = 'auto';
+                    
+                    // Auto-hide after 5 seconds
+                    setTimeout(() => {
+                        helper.style.opacity = '0';
+                        helper.style.pointerEvents = 'none';
+                    }, 5000);
+                } else {
+                    helper.style.opacity = '0';
+                    helper.style.pointerEvents = 'none';
+                }
+            }
+        }
+    });
+    
+    // Show briefly on initialization
+    setTimeout(() => {
+        helper.style.opacity = '1';
+        setTimeout(() => {
+            helper.style.opacity = '0';
+        }, 3000);
+    }, 1000);
+}
+
+/**
+ * Start observing button visibility to detect and fix hidden buttons
+ */
+function startButtonVisibilityObserver() {
+    console.log('Starting button visibility observer');
+    
+    // List of buttons to observe
+    const buttonSelectors = [
+        '#recipientNextBtn', 
+        '#intentPrevBtn', 
+        '#intentNextBtn', 
+        '#tonePrevBtn', 
+        '#toneNextBtn', 
+        '#resultPrevBtn', 
+        '#createNewBtn'
+    ];
+    
+    // Setup IntersectionObserver
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            const buttonId = entry.target.id;
+            
+            // If button is not visible, try to fix it
+            if (!entry.isIntersecting) {
+                console.warn(`Button ${buttonId} is not visible, attempting repair`);
+                
+                // Force critical styles directly on the button
+                const button = entry.target;
+                Object.assign(button.style, {
+                    visibility: 'visible',
+                    display: 'inline-flex',
+                    opacity: '1',
+                    position: 'relative',
+                    zIndex: '9999'
+                });
+                
+                // Check if we're in the button's step
+                if ((currentStep === 'recipient' && buttonId === 'recipientNextBtn') ||
+                    (currentStep === 'intent' && (buttonId === 'intentPrevBtn' || buttonId === 'intentNextBtn')) ||
+                    (currentStep === 'tone' && (buttonId === 'tonePrevBtn' || buttonId === 'toneNextBtn')) ||
+                    (currentStep === 'result' && (buttonId === 'resultPrevBtn' || buttonId === 'createNewBtn'))) {
+                    
+                    // This button should be visible in the current step
+                    // Force the container to be visible too
+                    const stepId = currentStep;
+                    verifyAndFixStepFooter(stepId);
+                }
+            }
+        });
+    }, {
+        threshold: 0.1, // Trigger if less than 10% visible
+        rootMargin: '0px' // No margin
+    });
+    
+    // Start observing each button
+    buttonSelectors.forEach(selector => {
+        const button = document.querySelector(selector);
+        if (button) {
+            observer.observe(button);
+        }
+    });
+    
+    // Re-check buttons periodically
+    setInterval(() => {
+        buttonSelectors.forEach(selector => {
+            const button = document.querySelector(selector);
+            if (button) {
+                // Re-apply critical styles
+                Object.assign(button.style, {
+                    visibility: 'visible',
+                    display: 'inline-flex',
+                    position: 'relative',
+                    zIndex: '9999'
+                });
+                
+                // Make sure it's observed
+                observer.observe(button);
+            }
+        });
+    }, 5000);
+}
+
+/**
+ * Initialize recovery for session navigation
+ * Stores navigation state to help recover from errors
+ */
+function initializeSessionRecovery() {
+    // Check for stored navigation state
+    try {
+        const storedState = sessionStorage.getItem('messageBuilderState');
+        if (storedState) {
+            const state = JSON.parse(storedState);
+            console.log('Recovered session state:', state);
+            
+            // If we have a stored currentStep that doesn't match, see if we should use it
+            if (state.currentStep && state.currentStep !== currentStep) {
+                // Only recover if we have appropriate data
+                if (state.currentStep === 'intent' && messageData.recipient) {
+                    showStep(state.currentStep);
+                } else if (state.currentStep === 'tone' && messageData.recipient && messageData.intent) {
+                    showStep(state.currentStep);
+                } else if (state.currentStep === 'result' && messageData.recipient && messageData.intent && messageData.tone) {
+                    showStep(state.currentStep);
+                }
+            }
+        }
+    } catch (e) {
+        console.error('Error recovering session state:', e);
+    }
+    
+    // Setup storage of current state
+    window.addEventListener('beforeunload', saveNavigationState);
+    
+    // Also save periodically
+    setInterval(saveNavigationState, 10000);
+}
+
+/**
+ * Save current navigation state to session storage
+ */
+function saveNavigationState() {
+    try {
+        const state = {
+            currentStep: currentStep,
+            timestamp: new Date().getTime()
+        };
+        sessionStorage.setItem('messageBuilderState', JSON.stringify(state));
+    } catch (e) {
+        console.error('Error saving navigation state:', e);
+    }
+}
+
+/**
+ * Show error recovery options when a step fails to load
+ * @param {Error} error - The error that occurred
+ * @param {string} failedStep - The step that failed
+ * @param {string} previousStep - The previous step
+ */
+function showErrorRecoveryOptions(error, failedStep, previousStep) {
+    console.error(`Error in step ${failedStep}:`, error);
+    
+    // Create recovery dialog
+    const recoveryDialog = document.createElement('div');
+    recoveryDialog.className = 'error-recovery-dialog';
+    
+    // Style dialog
+    Object.assign(recoveryDialog.style, {
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        background: 'rgba(40, 36, 61, 0.95)',
+        border: '1px solid #ff5b75',
+        borderRadius: '12px',
+        padding: '20px',
+        zIndex: '10000',
+        maxWidth: '400px',
+        width: '90%',
+        boxShadow: '0 0 30px rgba(255, 91, 117, 0.3)',
+        backdropFilter: 'blur(10px)',
+        color: 'white',
+        textAlign: 'center'
+    });
+    
+    // Set dialog content
+    recoveryDialog.innerHTML = `
+        <h3 style="margin-top: 0; color: #ff5b75;">Oops! Something went wrong</h3>
+        <p>We encountered a problem while loading the ${failedStep} step.</p>
+        <p style="margin-bottom: 20px;">What would you like to do?</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <button id="retry-step" style="padding: 10px; background: linear-gradient(135deg, #8a57de 0%, #ff7eb6 100%); border: none; color: white; border-radius: 8px; cursor: pointer;">Retry This Step</button>
+            ${previousStep ? `<button id="go-back" style="padding: 10px; background: transparent; border: 1px solid #8a57de; color: white; border-radius: 8px; cursor: pointer;">Go Back to Previous Step</button>` : ''}
+            <button id="reset-app" style="padding: 10px; background: transparent; border: 1px solid #ff5b75; color: #ff5b75; border-radius: 8px; cursor: pointer;">Reset Application</button>
+        </div>
+    `;
+    
+    // Add dialog to body
+    document.body.appendChild(recoveryDialog);
+    
+    // Add event listeners
+    const retryButton = recoveryDialog.querySelector('#retry-step');
+    const backButton = recoveryDialog.querySelector('#go-back');
+    const resetButton = recoveryDialog.querySelector('#reset-app');
+    
+    if (retryButton) {
+        retryButton.addEventListener('click', () => {
+            recoveryDialog.remove();
+            setTimeout(() => showStep(failedStep), 100);
+        });
+    }
+    
+    if (backButton) {
+        backButton.addEventListener('click', () => {
+            recoveryDialog.remove();
+            setTimeout(() => showStep(previousStep), 100);
+        });
+    }
+    
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            recoveryDialog.remove();
+            resetAll();
+            setTimeout(() => showStep('recipient'), 100);
+        });
+    }
 }

@@ -85,16 +85,46 @@ function initializeMessageBuilder() {
  * Initialize Firebase
  */
 function initializeFirebase() {
-    // Firebase is already initialized in HTML, just configure analytics
     try {
+        // Firebase config - copied from existing pages
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZiJPTs7dMccVgFV-YoTejnhy1bZNFEQY",
+            authDomain: "heartglowai.firebaseapp.com",
+            projectId: "heartglowai",
+            storageBucket: "heartglowai.firebasestorage.app",
+            messagingSenderId: "196565711798",
+            appId: "1:196565711798:web:79e2b0320fd8e74ab0df17",
+            measurementId: "G-KJMPL1DNPY"
+        };
+        
+        console.log("Starting Firebase initialization...");
+        
+        // Initialize Firebase if not already initialized
+        if (!window.firebase || !firebase.apps || !firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log("Firebase initialized successfully");
+            
+            // Set persistence to LOCAL for auth (copied from home.html)
+            if (firebase && firebase.auth) {
+                firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .catch(function(error) {
+                        console.error("Auth persistence error:", error);
+                        // Continue anyway, not critical
+                    });
+            }
+        } else {
+            console.log("Firebase already initialized");
+        }
+        
+        // Configure analytics
         if (firebase.analytics) {
-            // Log page load event with unified prefix
             firebase.analytics().logEvent('unified_flow_start', {
                 timestamp: new Date().toISOString()
             });
         }
     } catch (error) {
-        console.error('Analytics error:', error);
+        console.error('Firebase initialization error:', error);
+        showAlert('An error occurred during initialization. Please refresh the page.', 'error');
     }
 }
 

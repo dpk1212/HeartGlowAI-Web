@@ -1276,6 +1276,12 @@ function enhanceNavigationButtonsStyle() {
         elements.buttons.createNew
     ];
     
+    // Debug button existence
+    allButtons.forEach((button, index) => {
+        const buttonNames = ['recipientNext', 'intentPrev', 'intentNext', 'tonePrev', 'toneNext', 'resultPrev', 'createNew'];
+        console.log(`Button ${buttonNames[index]} exists:`, !!button);
+    });
+    
     // Base styles for all buttons
     allButtons.forEach(button => {
         if (!button) return;
@@ -1286,6 +1292,14 @@ function enhanceNavigationButtonsStyle() {
         button.style.fontWeight = 'bold';
         button.style.transition = 'all 0.2s ease';
         button.style.cursor = 'pointer';
+        
+        // CRITICAL: Force visibility properties
+        button.style.opacity = button.classList.contains('disabled') ? '0.5' : '1';
+        button.style.visibility = 'visible';
+        button.style.display = 'inline-flex';
+        button.style.position = 'relative';
+        button.style.zIndex = '100';
+        button.style.overflow = 'visible';
         
         // Specific styles based on button type
         if (button.classList.contains('primary-button')) {
@@ -1363,6 +1377,9 @@ function enhanceNavigationButtonsStyle() {
             }
         }
     }
+
+    // Create a floating button container as backup
+    ensureFloatingNavigationButtons();
 }
 
 /**
@@ -5201,5 +5218,225 @@ function trackStepChange(from, to) {
         
     } catch (e) {
         console.error('Error tracking step change:', e);
+    }
+}
+
+/**
+ * Create a floating navigation container that's always visible
+ * This serves as a fallback in case the regular buttons are hidden
+ */
+function ensureFloatingNavigationButtons() {
+    // Remove any existing container to avoid duplicates
+    const existingContainer = document.getElementById('floating-nav-buttons');
+    if (existingContainer) {
+        existingContainer.remove();
+    }
+    
+    // Create floating container
+    const floatingContainer = document.createElement('div');
+    floatingContainer.id = 'floating-nav-buttons';
+    
+    // Position at the bottom of the screen
+    Object.assign(floatingContainer.style, {
+        position: 'fixed',
+        bottom: '20px',
+        right: '20px',
+        zIndex: '9999',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px',
+        padding: '10px',
+        background: 'rgba(33, 30, 46, 0.8)',
+        borderRadius: '12px',
+        boxShadow: '0 4px 20px rgba(0, 0, 0, 0.5)',
+        backdropFilter: 'blur(5px)'
+    });
+    
+    // Create navigation buttons for all steps
+    const buttons = [];
+    
+    // Next button for current step
+    let currentNextButton = null;
+    let buttonLabel = '';
+    
+    switch (currentStep) {
+        case 'recipient': 
+            currentNextButton = elements.buttons.recipientNext;
+            buttonLabel = 'Next: Choose Intent';
+            break;
+        case 'intent': 
+            currentNextButton = elements.buttons.intentNext;
+            buttonLabel = 'Next: Select Tone';
+            break;
+        case 'tone': 
+            currentNextButton = elements.buttons.toneNext;
+            buttonLabel = 'Next: See Result';
+            break;
+        case 'result': 
+            currentNextButton = elements.buttons.createNew;
+            buttonLabel = 'Create New Message';
+            break;
+    }
+    
+    // Create primary button (Next or Create New)
+    const primaryButton = document.createElement('button');
+    primaryButton.textContent = buttonLabel;
+    primaryButton.className = 'floating-next-button';
+    
+    // Style primary button
+    Object.assign(primaryButton.style, {
+        padding: '12px 20px',
+        background: 'linear-gradient(135deg, #8a57de 0%, #ff7eb6 100%)',
+        color: 'white',
+        border: 'none',
+        borderRadius: '8px',
+        fontWeight: 'bold',
+        cursor: 'pointer',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        boxShadow: '0 4px 12px rgba(138, 87, 222, 0.25)',
+        transition: 'all 0.2s ease'
+    });
+    
+    // Add arrow icon
+    if (currentStep !== 'result') {
+        primaryButton.innerHTML += ' <i class="fas fa-arrow-right" style="margin-left: 8px;"></i>';
+    }
+    
+    // Add click handler mirroring the original button
+    primaryButton.addEventListener('click', function() {
+        console.log('Floating button clicked for step:', currentStep);
+        
+        // Check if we should copy existing button functionality
+        if (currentNextButton && !currentNextButton.classList.contains('disabled')) {
+            // Simply click the original button
+            currentNextButton.click();
+        } else {
+            // Implement direct step navigation
+            if (currentStep === 'recipient' && messageData.recipient) {
+                goToNextStep('recipient');
+            } else if (currentStep === 'intent' && messageData.intent) {
+                goToNextStep('intent');
+            } else if (currentStep === 'tone' && messageData.tone) {
+                goToNextStep('tone');
+            } else if (currentStep === 'result') {
+                resetAll();
+                showStep('recipient');
+            } else {
+                // Show alert about selecting required data first
+                showAlert(`Please complete this step before proceeding.`, 'warning');
+            }
+        }
+    });
+    
+    // Add previous button for all steps except recipient
+    if (currentStep !== 'recipient') {
+        const prevButton = document.createElement('button');
+        prevButton.textContent = 'Previous';
+        prevButton.className = 'floating-prev-button';
+        
+        // Style previous button
+        Object.assign(prevButton.style, {
+            padding: '10px 16px',
+            background: 'transparent',
+            color: 'white',
+            border: '1px solid #8a57de',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'all 0.2s ease'
+        });
+        
+        // Add arrow icon
+        prevButton.innerHTML = '<i class="fas fa-arrow-left" style="margin-right: 8px;"></i> Previous';
+        
+        // Add click handler
+        prevButton.addEventListener('click', function() {
+            goToPreviousStep(currentStep);
+        });
+        
+        buttons.push(prevButton);
+    }
+    
+    // Add buttons to container
+    buttons.push(primaryButton);
+    buttons.forEach(button => floatingContainer.appendChild(button));
+    
+    // Add to body
+    document.body.appendChild(floatingContainer);
+    
+    // Make container draggable
+    makeDraggable(floatingContainer);
+    
+    // Initially hide the container and show after a delay
+    floatingContainer.style.opacity = '0';
+    floatingContainer.style.transform = 'translateY(20px)';
+    
+    // Show after 2 seconds (gives time for main UI to load first)
+    setTimeout(() => {
+        floatingContainer.style.transition = 'all 0.3s ease';
+        floatingContainer.style.opacity = '1';
+        floatingContainer.style.transform = 'translateY(0)';
+    }, 2000);
+    
+    console.log('Floating navigation buttons created');
+}
+
+/**
+ * Make an element draggable
+ * @param {HTMLElement} element - The element to make draggable
+ */
+function makeDraggable(element) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    
+    // Create a drag handle
+    const dragHandle = document.createElement('div');
+    dragHandle.innerHTML = '<i class="fas fa-grip-lines"></i>';
+    dragHandle.style.cursor = 'move';
+    dragHandle.style.padding = '5px';
+    dragHandle.style.marginBottom = '5px';
+    dragHandle.style.textAlign = 'center';
+    dragHandle.style.color = '#b8b5c7';
+    
+    // Insert at the beginning
+    element.insertBefore(dragHandle, element.firstChild);
+    
+    // Mouse down handler
+    dragHandle.onmousedown = dragMouseDown;
+    
+    function dragMouseDown(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Get the mouse cursor position at startup
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        document.onmouseup = closeDragElement;
+        // Call a function whenever the cursor moves
+        document.onmousemove = elementDrag;
+    }
+    
+    function elementDrag(e) {
+        e = e || window.event;
+        e.preventDefault();
+        // Calculate the new cursor position
+        pos1 = pos3 - e.clientX;
+        pos2 = pos4 - e.clientY;
+        pos3 = e.clientX;
+        pos4 = e.clientY;
+        // Set the element's new position
+        element.style.top = (element.offsetTop - pos2) + "px";
+        element.style.left = (element.offsetLeft - pos1) + "px";
+        element.style.right = 'auto';
+        element.style.bottom = 'auto';
+    }
+    
+    function closeDragElement() {
+        // Stop moving when mouse button is released
+        document.onmouseup = null;
+        document.onmousemove = null;
     }
 }

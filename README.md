@@ -1,275 +1,107 @@
-# HeartGlowAI - AI-Powered Message Generation Platform
+# HeartGlow AI
 
-HeartGlowAI is a web application that helps users craft thoughtful, personalized messages for their relationships using advanced AI technology. Whether you're reaching out to family, friends, or loved ones, HeartGlowAI helps you express yourself authentically and meaningfully.
+> Say what matters. Gently.
 
-## 🌟 Features
+HeartGlow AI is a platform that helps users craft emotionally intelligent messages for difficult conversations using AI. It provides personalized message templates, emotional sentiment analysis, and a user-friendly interface to manage connections and messages.
 
-- **AI-Powered Message Generation**: Uses GPT-4 to create personalized messages
-- **Relationship Context**: Tailors messages based on relationship type and duration
-- **Customizable Tone**: Adjust the emotional intensity and tone of messages
-- **Message Insights**: Provides analysis of why each message is effective
-- **User Authentication**: Secure Firebase-based authentication
-- **Rate Limiting**: Prevents abuse with smart request limiting
-- **Mobile-Friendly**: Responsive design works on all devices
+## Features
 
-## 🏗 Technical Architecture
+- 🔄 **Connection Management**: Easily add and manage your personal and professional connections
+- 💬 **Message Crafting**: Create heartfelt, emotionally intelligent messages
+- 📊 **Sentiment Analysis**: Understand the emotional tone of your messages
+- 🎨 **Beautiful UI**: Intuitive, responsive interface with elegant animations
 
-### Frontend
-- **Web Application**: Built with HTML, CSS, and JavaScript
-- **Authentication**: Firebase Authentication for user management
-- **Real-time Updates**: Firebase Realtime Database for message history
-- **Responsive Design**: Modern, mobile-first UI approach
+## Getting Started
 
-### Backend
-- **Cloud Functions**: Firebase Cloud Functions (Node.js)
-- **AI Integration**: OpenAI GPT-4 API
-- **Database**: Firebase Firestore
-- **Security**: Firebase Security Rules
+### Prerequisites
 
-## 🔧 Core Components
+- Node.js (v16+)
+- npm or yarn
+- Firebase account
 
-### 1. Message Generation Service
-Located in `functions/index.js`, this is the heart of HeartGlowAI. It:
-- Validates user authentication
-- Enforces rate limiting
-- Processes message requests
-- Communicates with OpenAI's API
-- Returns formatted messages with insights
+### Installation
 
-### 2. User Interface
-The main interface allows users to specify:
-- Communication scenario
-- Relationship type (family, friend, etc.)
-- Message tone (casual, formal, etc.)
-- Tone intensity (1-5 scale)
-- Relationship duration
-- Special circumstances
-
-### 3. Security Features
-- Firebase Authentication
-- Request rate limiting (10 requests per minute)
-- Secure API key storage
-- CORS protection
-- Input validation
-
-## 🚀 How It Works
-
-1. **User Input**:
-   - User enters their communication scenario
-   - Selects relationship type and tone preferences
-   - Can add special circumstances or context
-
-2. **Processing**:
-   - Frontend sends request to Cloud Function
-   - Cloud Function authenticates user
-   - Checks rate limiting
-   - Formats prompt for OpenAI
-   - Makes API call to GPT-4
-
-3. **Response**:
-   - AI generates personalized message
-   - Provides 2-3 insights about the message
-   - Returns to user interface
-   - Saves to message history (if enabled)
-
-## 🔐 Security Considerations
-
-- OpenAI API keys stored in Firebase Secrets
-- User authentication required for all requests
-- Rate limiting prevents abuse
-- CORS configured for specific domains:
-  - heartglowai.com
-  - localhost:3000 (development)
-  - localhost:5000 (Firebase emulator)
-
-## 💻 Development Setup
-
-1. **Prerequisites**:
-   - Node.js v20 or later
-   - Firebase CLI
-   - Firebase project with Blaze plan (for OpenAI API calls)
-
-2. **Installation**:
+1. Clone the repository:
    ```bash
-   # Clone the repository
-   git clone [repository-url]
-   
-   # Install dependencies
-   cd functions
-   npm install
-   
-   # Install frontend dependencies
-   cd ..
+   git clone https://github.com/yourusername/ConnectlyAI.git
+   cd ConnectlyAI
+   ```
+
+2. Install dependencies:
+   ```bash
+   cd heartglow-dashboard
    npm install
    ```
 
-3. **Environment Setup**:
-   ```bash
-   # Set up Firebase configuration
-   firebase login
-   firebase init
+3. Create a Firebase project and enable:
+   - Authentication with Email/Password and Google providers
+   - Firestore Database
    
-   # Configure OpenAI API key
-   firebase functions:secrets:set OPENAI_KEY
+4. Set up environment variables:
+   Create a `.env.local` file in the `heartglow-dashboard` directory:
+   ```
+   NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
+   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
+   NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+   NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
+   NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
+   NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
    ```
 
-## 🛠 Configuration
+5. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-### Firebase Configuration
-Required services:
-- Authentication
-- Cloud Functions
-- Firestore
-- Hosting
+### Firestore Database Structure
 
-### OpenAI Configuration
-- Model: gpt-4-0125-preview
-- Temperature: 0.8
-- Max tokens: 500
+The application uses the following Firestore collections:
 
-## 📝 API Documentation
+- `users`: User accounts and profile information
+  - `{userId}/connections`: User's personal connections
+    - `{connectionId}/messages`: Messages associated with each connection
 
-### Generate Message Endpoint
-`POST https://us-central1-heartglowai.cloudfunctions.net/generateMessage`
+## Deployment to GitHub Pages
 
-**Headers**:
-- Authorization: Bearer [Firebase ID Token]
-- Content-Type: application/json
+You can easily deploy the HeartGlow Dashboard to GitHub Pages using the provided script:
 
-**Request Body**:
-```json
-{
-  "scenario": "string",
-  "relationshipType": "string",
-  "tone": "string",
-  "toneIntensity": "string",
-  "relationshipDuration": "string",
-  "specialCircumstances": "string"
-}
+1. Make sure all changes are committed to your repository
+2. Run the deployment script:
+   ```bash
+   chmod +x deploy-to-github.sh
+   ./deploy-to-github.sh
+   ```
+3. The script will build and deploy the application to the `gh-pages` branch
+4. Your site will be available at `https://yourusername.github.io/ConnectlyAI`
+
+## Project Structure
+
+```
+heartglow-dashboard/
+├── public/           # Static assets
+├── src/
+│   ├── components/   # React components
+│   ├── lib/          # Utility functions and hooks
+│   ├── pages/        # Next.js pages
+│   └── styles/       # CSS and styling
+└── ...               # Configuration files
 ```
 
-**Response**:
-```json
-{
-  "message": "string",
-  "insights": ["string"]
-}
-```
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork the repository
-2. Create your feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📈 Future Enhancements
+## License
 
-- Message history and favorites
-- Multiple language support
-- Custom relationship categories
-- Message templates
-- Feedback-based improvements
-- Advanced tone analysis
-- Message scheduling
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🆘 Troubleshooting
+## Acknowledgements
 
-Common issues and solutions:
-1. **CORS Errors**: Check domain configuration in Cloud Function
-2. **Authentication Errors**: Verify Firebase setup
-3. **Rate Limit Errors**: Wait one minute between requests
-4. **API Errors**: Check OpenAI API key configuration
-
-## 📞 Support
-
-For issues or questions:
-1. Check the troubleshooting guide
-2. Review Firebase logs
-3. Contact support team
-
-## 📄 License
-
-[Your License Information]
-
-## 🔄 Version Control & Restoration
-
-### Stable Versions
-- `v1.0.0-stable`: Initial stable release with working message generation
-  - Full documentation
-  - Working message generation
-  - Proper CORS configuration
-  - Rate limiting implemented
-  - Firebase integration complete
-
-### Restoring Previous Versions
-
-If you need to restore the stable version, you have several options:
-
-1. **Using the Tag** (Recommended):
-```bash
-# View all tags
-git tag -l
-
-# Restore to stable version
-git checkout v1.0.0-stable
-```
-
-2. **Using Commit Hash**:
-```bash
-# View commit history
-git log --oneline
-
-# Restore to specific commit
-git checkout 6109b79
-```
-
-3. **Complete Reset**:
-```bash
-# Hard reset to stable version
-git reset --hard v1.0.0-stable
-
-# Force push if needed (use with caution)
-git push -f origin main
-```
-
-### Branch Management
-```bash
-# Create new feature branch
-git checkout -b feature/your-feature-name
-
-# Switch back to main branch
-git checkout main
-
-# Update main branch
-git pull origin main
-```
-
-### Emergency Restoration
-If something goes wrong and you need to quickly restore the stable version:
-
-1. Save any uncommitted changes:
-```bash
-git stash
-```
-
-2. Reset to stable version:
-```bash
-git checkout v1.0.0-stable
-```
-
-3. Create new branch from stable (optional):
-```bash
-git checkout -b recovery/$(date +%Y%m%d)
-```
-
-⚠️ **Important Notes**:
-- Always create a backup branch before major changes
-- Use `git stash` to save uncommitted changes
-- Test after restoration to ensure everything works
-- Check Firebase deployment status after restoration
-
----
-
-Made with ❤️ by HeartGlowAI Team 
+- [Next.js](https://nextjs.org/)
+- [Firebase](https://firebase.google.com/)
+- [Framer Motion](https://www.framer.com/motion/)
+- [Tailwind CSS](https://tailwindcss.com/) 

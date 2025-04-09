@@ -1,0 +1,102 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --max-width: 1100px;
+  --border-radius: 12px;
+  --font-mono: ui-monospace, Menlo, Monaco, 'Cascadia Mono', 'Segoe UI Mono',
+    'Roboto Mono', 'Oxygen Mono', 'Ubuntu Monospace', 'Source Code Pro',
+    'Fira Mono', 'Droid Sans Mono', 'Courier New', monospace;
+  --pink-glow: #FF4F81;
+  --violet-glow: #8C30F5;
+}
+
+@layer base {
+  body {
+    @apply bg-heartglow-offwhite dark:bg-heartglow-charcoal text-heartglow-charcoal dark:text-heartglow-offwhite font-inter;
+  }
+}
+
+@layer components {
+  .heartglow-gradient {
+    background: linear-gradient(90deg, var(--pink-glow), var(--violet-glow));
+  }
+  
+  .heartglow-button {
+    @apply px-6 py-3 bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white rounded-full font-medium shadow-md hover:shadow-lg transition-all duration-200;
+  }
+  
+  .heartglow-button-outline {
+    @apply px-5 py-2 border border-heartglow-indigo text-heartglow-indigo rounded-full font-medium hover:bg-heartglow-indigo/5 transition-colors duration-200;
+  }
+  
+  .heartglow-button-secondary {
+    @apply px-4 py-2 bg-heartglow-softgray/20 dark:bg-heartglow-deepgray text-heartglow-charcoal dark:text-heartglow-offwhite rounded-full font-medium hover:bg-heartglow-softgray/30 dark:hover:bg-heartglow-deepgray/80 transition-colors duration-200;
+  }
+  
+  .card {
+    @apply bg-heartglow-offwhite dark:bg-heartglow-charcoal rounded-lg shadow-sm p-6;
+  }
+  
+  .page-container {
+    @apply max-w-6xl mx-auto px-4 py-6 md:py-8 lg:py-12;
+  }
+}
+
+@layer utilities {
+  .shadow-glow {
+    box-shadow: 0 0 15px rgba(140, 48, 245, 0.15);
+  }
+  
+  .animate-pulse-subtle {
+    animation: pulse-subtle 3s infinite;
+  }
+  
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .hide-scrollbar::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
+  }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 0.9;
+  }
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, 
+    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  line-height: 1.5;
+  background-color: #F9F9F9;
+  color: #1C1C1E;
+}
+
+.dark {
+  background-color: #1C1C1E;
+  color: #F9F9F9;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+* {
+  box-sizing: border-box;
+} 

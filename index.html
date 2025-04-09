@@ -2030,6 +2030,23 @@
         background-color: rgba(17, 24, 39, 0.95);
       }
       
+      /* Dark mode for message comparison section */
+      .message-comparison {
+        background: linear-gradient(180deg, #0B0F19 0%, #111827 100%);
+      }
+      
+      .message-comparison .section-header h2 {
+        background: linear-gradient(90deg, #F3F4F6, #FFFFFF);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+      
+      .message-comparison .section-header p {
+        color: #D1D5DB;
+      }
+      
       .feature {
         background-color: #1F2937;
         border: 1px solid #374151;
@@ -2384,6 +2401,28 @@
       to {
         transform: rotate(360deg);
       }
+    }
+    
+    /* Message comparison section styling - light mode specific */
+    .message-comparison {
+      padding: 7rem 0;
+      background: linear-gradient(180deg, #F8FAFF 0%, #F0F3FF 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .message-comparison .section-header h2 {
+      background: linear-gradient(90deg, #111827, #1F2937);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.01em;
+      font-weight: 800;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .message-comparison .section-header p {
+      color: #4B5563;
     }
   </style>
 </head>

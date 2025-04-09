@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeartGlow AI | Beta Signup</title>
+  <meta name="description" content="HeartGlow AI - Building meaningful connections through AI-powered communication assistance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366F1;
+      --primary-light: #818CF8;
+      --primary-dark: #4F46E5;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--gray-800);
+      background-color: var(--gray-50);
+      line-height: 1.5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+    
+    header {
+      padding: 1.5rem 0;
+    }
+    
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .logo span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .logo svg {
+      height: 1.75rem;
+      width: auto;
+    }
+    
+    .hero {
+      padding: 5rem 0;
+      text-align: center;
+    }
+    
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.025em;
+      color: var(--gray-900);
+      line-height: 1.1;
+    }
+    
+    h1 span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--gray-600);
+      max-width: 800px;
+      margin: 0 auto 3rem;
+    }
+    
+    .features {
+      padding: 5rem 0;
+      background-color: white;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .feature {
+      padding: 2rem;
+      border-radius: 0.75rem;
+      background-color: var(--gray-50);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 3rem;
+      width: 3rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      background-color: var(--primary-light);
+      color: white;
+    }
+    
+    .feature h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+    }
+    
+    .feature p {
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+    
+    .signup {
+      padding: 5rem 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.1) 100%);
+    }
+    
+    .signup-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    
+    .signup-content h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+      line-height: 1.2;
+    }
+    
+    .signup-content p {
+      font-size: 1.125rem;
+      color: var(--gray-700);
+      margin-bottom: 2rem;
+    }
+    
+    .signup-list {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+    
+    .signup-list li {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+      color: var(--gray-700);
+    }
+    
+    .signup-list li::before {
+      content: "✓";
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      background-color: var(--success);
+      color: white;
+      font-size: 0.875rem;
+    }
+    
+    .signup-form {
+      background-color: white;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .signup-form h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 0.875rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      border: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+    
+    .success-message {
+      display: none;
+      padding: 1rem;
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      color: var(--success);
+      font-weight: 500;
+    }
+    
+    footer {
+      padding: 2.5rem 0;
+      background-color: var(--gray-800);
+      color: var(--gray-200);
+    }
+    
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .footer-logo {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: white;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .footer-links a {
+      color: var(--gray-300);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: white;
+    }
+    
+    .copyright {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--gray-300);
+      font-size: 0.875rem;
+    }
+    
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      
+      .signup-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .hero {
+        padding: 3rem 0;
+      }
+      
+      .features, .signup {
+        padding: 3rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+        </svg>
+        <span>HeartGlow AI</span>
+      </div>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Craft <span>Meaningful</span> Messages with AI</h1>
+      <p>
+        HeartGlow AI helps you craft personalized messages for the important people in your life. 
+        Our AI-powered platform understands relationships and helps you communicate more authentically.
+      </p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>Personalized Messages</h3>
+          <p>Craft messages tailored to each relationship in your life, whether they're family, friends, or colleagues.</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h3>Emotional Intelligence</h3>
+          <p>Our AI understands the nuances of human relationships and helps you express your feelings appropriately.</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <h3>Save Special Messages</h3>
+          <p>Build a library of your most meaningful messages and revisit them whenever you want.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="signup">
+    <div class="container signup-container">
+      <div class="signup-content">
+        <h2>Join Our Beta Program</h2>
+        <p>Be among the first to experience HeartGlow AI. Our beta users get:</p>
+        <ul class="signup-list">
+          <li>Early access to all features</li>
+          <li>Opportunity to shape the product</li>
+          <li>Personalized onboarding session</li>
+          <li>Extended free trial when we launch</li>
+        </ul>
+      </div>
+      
+      <div class="signup-form">
+        <h3>Sign Up for Beta Access</h3>
+        <form id="beta-form" action="https://formspree.io/f/mjkyvdal" method="POST">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="role">What best describes you?</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Select an option</option>
+              <option value="personal">Personal User</option>
+              <option value="business">Business User</option>
+              <option value="developer">Developer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="message">How do you hope to use HeartGlow AI?</label>
+            <textarea id="message" name="message"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block">Request Beta Access</button>
+          <div id="success-message" class="success-message">
+            Thank you for your interest! We'll be in touch soon.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">HeartGlow AI</div>
+        <div class="footer-links">
+          <a href="#">About</a>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2023 HeartGlow AI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('beta-form').addEventListener('submit', function(event) {
+      const form = this;
+      const successMessage = document.getElementById('success-message');
+      
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          form.reset();
+          form.style.display = 'none';
+          successMessage.style.display = 'block';
+        } else {
+          response.json().then(data => {
+            if (Object.hasOwn(data, 'errors')) {
+              alert(data.errors.map(error => error.message).join(', '));
+            } else {
+              alert('Something went wrong. Please try again.');
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
+      });
+      
+      event.preventDefault();
+    });
+  </script>
+</body>
+</html> 

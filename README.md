@@ -33,14 +33,21 @@ This repository contains the landing page for HeartGlow AI beta signups. The app
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/heartglow-ai.git
+git clone https://github.com/dpk1212/HeartGlowAI-Web.git
 
 # Navigate to the directory
-cd heartglow-ai
+cd HeartGlowAI-Web
 
 # Open the landing page in your browser
 open index.html
 ```
+
+## Deployment
+
+The site is deployed using GitHub Pages with a custom domain:
+
+- Primary domain: [heartglowai.com](https://heartglowai.com)
+- Repository URL: [github.com/dpk1212/HeartGlowAI-Web](https://github.com/dpk1212/HeartGlowAI-Web)
 
 ## License
 

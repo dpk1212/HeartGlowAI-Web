@@ -850,7 +850,7 @@
       padding: 2.5rem;
       border-radius: 1.25rem;
       transition: all 0.3s ease;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
       background-color: #FFFFFF;
       border: 1px solid #E5E7EB;
       position: relative;
@@ -860,14 +860,14 @@
     
     .feature:hover {
       transform: translateY(-10px);
-      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 20px 30px rgba(0, 0, 0, 0.15);
       border-color: #D1D5DB;
     }
     
     .feature-icon {
-      width: 65px;
-      height: 65px;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.3));
+      width: 70px;
+      height: 70px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.25), rgba(139, 92, 246, 0.45));
       border-radius: 16px;
       display: flex;
       align-items: center;
@@ -878,23 +878,24 @@
     }
     
     .feature-icon svg {
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       stroke-width: 2px;
+      color: #4F46E5;
     }
     
     .feature h3 {
-      font-size: 1.5rem;
-      margin-bottom: 1rem;
+      font-size: 1.625rem;
+      margin-bottom: 1.25rem;
       color: #111827;
       font-weight: 700;
       letter-spacing: -0.01em;
     }
     
     .feature p {
-      color: #374151;
+      color: #1F2937;
       line-height: 1.8;
-      font-size: 1.0625rem;
+      font-size: 1.125rem;
       font-weight: 500;
     }
     
@@ -920,21 +921,26 @@
       }
       
       .feature {
-        background-color: rgba(31, 41, 55, 0.9);
-        border: 1px solid var(--gray-700);
+        background-color: #1F2937;
+        border: 1px solid #374151;
       }
       
       .feature h3 {
-        color: var(--gray-100);
+        color: #F3F4F6;
       }
       
       .feature p {
-        color: var(--gray-300);
+        color: #E5E7EB;
+        font-weight: 400;
       }
       
       .feature-icon {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0.4));
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.6));
         box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+      }
+      
+      .feature-icon svg {
+        color: #A5B4FC;
       }
     }
     
@@ -944,7 +950,7 @@
       top: 0;
       left: 0;
       right: 0;
-      height: 4px;
+      height: 5px;
       background: var(--primary-gradient);
       opacity: 0;
       transition: opacity 0.3s ease;
@@ -2050,21 +2056,26 @@
       }
       
       .feature {
-        background-color: rgba(31, 41, 55, 0.9);
-        border: 1px solid var(--gray-700);
+        background-color: #1F2937;
+        border: 1px solid #374151;
       }
       
       .feature h3 {
-        color: var(--gray-100);
+        color: #F3F4F6;
       }
       
       .feature p {
-        color: var(--gray-300);
+        color: #E5E7EB;
+        font-weight: 400;
       }
       
       .feature-icon {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.3), rgba(99, 102, 241, 0.4));
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.4), rgba(139, 92, 246, 0.6));
         box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+      }
+      
+      .feature-icon svg {
+        color: #A5B4FC;
       }
       
       .message-comparison {
@@ -2073,7 +2084,7 @@
       
       .before-message {
         background-color: rgba(26, 32, 44, 0.95);
-        border-right: 1px solid var(--gray-700);
+        border-right: 1px solid #374151;
       }
       
       .after-message {
@@ -2081,30 +2092,30 @@
       }
       
       .comparison-label {
-        color: var(--gray-300);
+        color: #E5E7EB;
       }
       
       .after-message .comparison-label {
-        color: var(--primary-light);
+        color: #A5B4FC;
       }
       
       .comparison-type {
-        color: var(--gray-300);
-        background-color: var(--gray-700);
+        color: #E5E7EB;
+        background-color: #374151;
       }
       
       .after-message .comparison-type {
         background-color: rgba(99, 102, 241, 0.3);
-        color: var(--gray-100);
+        color: #F3F4F6;
       }
       
       .message-content {
-        color: var(--gray-200);
+        color: #E5E7EB;
       }
       
       .message-bubble {
         background-color: rgba(55, 65, 81, 0.9);
-        color: var(--gray-100);
+        color: #E5E7EB;
       }
       
       .message-bubble.enhanced {
@@ -2115,15 +2126,15 @@
       
       .message-example {
         background-color: rgba(31, 41, 55, 0.9);
-        border: 1px solid var(--gray-700);
+        border: 1px solid #374151;
       }
       
       .message-example-title {
-        color: var(--gray-100);
+        color: #F3F4F6;
       }
       
       .message-example-content {
-        color: var(--gray-300);
+        color: #E5E7EB;
       }
     }
   </style>

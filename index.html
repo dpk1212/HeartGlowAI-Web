@@ -70,30 +70,162 @@
     }
     
     .hero {
-      padding: 5rem 0;
-      text-align: center;
+      padding: 6rem 0;
+      text-align: left;
+      position: relative;
+      overflow: hidden;
     }
     
-    h1 {
-      font-size: 3.5rem;
-      font-weight: 700;
+    .hero-background-pattern {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%236366f1' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+      z-index: -1;
+    }
+    
+    .hero-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+    
+    .hero-content {
+      max-width: 600px;
+    }
+    
+    .hero h1 {
+      text-align: left;
+      font-size: 3.75rem;
       margin-bottom: 1.5rem;
-      letter-spacing: -0.025em;
-      color: var(--gray-900);
-      line-height: 1.1;
-    }
-    
-    h1 span {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
     }
     
     .hero p {
-      font-size: 1.25rem;
-      color: var(--gray-600);
-      max-width: 800px;
-      margin: 0 auto 3rem;
+      text-align: left;
+      margin-left: 0;
+    }
+    
+    .btn-hero {
+      margin-top: 2rem;
+      padding: 1rem 2rem;
+      font-size: 1.125rem;
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3);
+      transition: all 0.3s ease;
+    }
+    
+    .btn-hero:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
+    }
+    
+    .hero-illustration {
+      position: relative;
+      height: 400px;
+    }
+    
+    .hero-illustration-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    
+    .hero-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80px;
+      height: 80px;
+      background-color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      z-index: 10;
+    }
+    
+    .hero-heart {
+      width: 48px;
+      height: 48px;
+      color: var(--primary);
+      animation: pulse 2s infinite;
+    }
+    
+    .hero-glow {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.2) 0%, rgba(99, 102, 241, 0) 70%);
+      border-radius: 50%;
+      z-index: 1;
+      animation: glow 4s infinite ease-in-out;
+    }
+    
+    .floating-message {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      z-index: 5;
+    }
+    
+    .message-1 {
+      top: 30%;
+      left: 5%;
+      animation: float 6s infinite ease-in-out;
+    }
+    
+    .message-2 {
+      top: 60%;
+      right: 5%;
+      animation: float 7s infinite ease-in-out 1s;
+    }
+    
+    .message-3 {
+      top: 20%;
+      right: 15%;
+      animation: float 5s infinite ease-in-out 0.5s;
+    }
+    
+    .message-dot {
+      width: 12px;
+      height: 12px;
+      background-color: var(--primary-light);
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    
+    .message-bubble {
+      background-color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 18px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      font-size: 0.875rem;
+      max-width: 200px;
+    }
+    
+    @keyframes float {
+      0% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-15px) rotate(1deg); }
+      100% { transform: translateY(0) rotate(0deg); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes glow {
+      0% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
+      100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
     }
     
     .features {
@@ -518,92 +650,21 @@
       line-height: 1.6;
     }
     
-    /* Message Examples Section */
-    .examples {
+    /* Message Comparison Section */
+    .message-comparison {
       padding: 5rem 0;
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.1) 100%);
-    }
-    
-    .examples h2 {
-      text-align: center;
-      font-size: 2.25rem;
-      font-weight: 700;
-      margin-bottom: 3rem;
-      color: var(--gray-900);
-    }
-    
-    .examples-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-    }
-    
-    .example-card {
-      background-color: white;
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    .example-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-    
-    .example-header {
-      padding: 1rem 1.5rem;
       background-color: var(--gray-50);
-      border-bottom: 1px solid var(--gray-200);
     }
     
-    .example-tag {
-      display: inline-block;
-      padding: 0.25rem 0.75rem;
-      background-color: var(--primary-light);
-      color: white;
-      border-radius: 9999px;
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    
-    .example-content {
-      padding: 1.5rem;
-      flex-grow: 1;
-    }
-    
-    .example-content p {
-      color: var(--gray-700);
-      line-height: 1.6;
-      font-style: italic;
-    }
-    
-    .example-footer {
-      padding: 1rem 1.5rem;
-      background-color: var(--gray-50);
-      border-top: 1px solid var(--gray-200);
-      color: var(--gray-600);
-      font-size: 0.875rem;
-      font-weight: 500;
-    }
-    
-    /* Demo Section */
-    .demo {
-      padding: 5rem 0;
-      background-color: white;
-    }
-    
-    .demo h2 {
+    .message-comparison h2 {
       text-align: center;
-      font-size: 2.25rem;
-      font-weight: 700;
       margin-bottom: 1rem;
-      color: var(--gray-900);
+      color: var(--gray-800);
+      font-size: 2.25rem;
+      font-weight: 700;
     }
     
-    .demo-intro {
+    .comparison-intro {
       text-align: center;
       max-width: 600px;
       margin: 0 auto 3rem;
@@ -611,74 +672,136 @@
       font-size: 1.125rem;
     }
     
-    .demo-container {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 3rem;
-      align-items: center;
-      max-width: 1000px;
+    .comparison-wrapper {
+      position: relative;
+      max-width: 800px;
       margin: 0 auto;
     }
     
-    .demo-controls {
-      background-color: var(--gray-50);
-      padding: 2rem;
+    .comparison-slider {
+      overflow: hidden;
       border-radius: 0.75rem;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      background-color: white;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
     
-    .demo-form .form-group {
-      margin-bottom: 1.5rem;
+    .comparison-slide {
+      display: none;
     }
     
-    .demo-select {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid var(--gray-300);
-      border-radius: 0.5rem;
-      font-family: inherit;
-      font-size: 1rem;
-      transition: border-color 0.3s ease;
+    .comparison-slide.active {
+      display: block;
+    }
+    
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr;
+    }
+    
+    .before-message, .after-message {
+      padding: 2rem;
+    }
+    
+    .before-message {
+      background-color: var(--gray-100);
+      border-right: 1px solid var(--gray-200);
+    }
+    
+    .after-message {
       background-color: white;
     }
     
-    .demo-select:focus {
-      outline: none;
-      border-color: var(--primary);
+    .comparison-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
     }
     
-    .demo-result {
-      background-color: var(--gray-50);
-      border-radius: 0.75rem;
-      overflow: hidden;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    .comparison-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--gray-600);
+      letter-spacing: 0.05em;
     }
     
-    .demo-message-container {
-      padding: 2rem;
-      min-height: 300px;
+    .after-message .comparison-label {
+      color: var(--primary);
+    }
+    
+    .comparison-type {
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+    
+    .message-content {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--gray-800);
+    }
+    
+    .message-bubble {
+      background-color: #e5e5ea;
+      border-radius: 1rem;
+      padding: 1rem;
+      position: relative;
+      max-width: 100%;
+    }
+    
+    .message-bubble.enhanced {
+      background-color: #d1e7dd;
+      animation: glow 2s infinite;
+    }
+    
+    .comparison-arrow {
       display: flex;
       align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      color: var(--gray-500);
     }
     
-    .demo-message {
-      background-color: white;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      border-left: 4px solid var(--primary);
-      font-style: italic;
-      color: var(--gray-700);
-      line-height: 1.6;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    .comparison-controls {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
     }
     
+    .comparison-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background-color: var(--gray-300);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .comparison-dot.active {
+      background-color: var(--primary);
+      transform: scale(1.2);
+    }
+    
+    /* Mobile responsiveness */
     @media (max-width: 768px) {
-      .demo-container {
+      .comparison-grid {
         grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
       }
       
-      .demo-message-container {
-        min-height: 200px;
+      .comparison-arrow {
+        transform: rotate(90deg);
+        margin: 1rem 0;
+        justify-self: center;
+      }
+      
+      .before-message {
+        border-right: none;
+        border-bottom: 1px solid var(--gray-200);
       }
     }
   </style>
@@ -695,14 +818,59 @@
     </div>
   </header>
 
-  <section class="hero">
+  <div class="floating-nav">
     <div class="container">
-      <h1>Craft <span>Meaningful</span> Messages with AI</h1>
-      <p>
-        HeartGlow AI helps you craft personalized messages for the important people in your life. 
-        Our AI-powered platform understands relationships and helps you communicate more authentically.
-      </p>
+      <div class="floating-nav-inner">
+        <div class="floating-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+          </svg>
+          <span>HeartGlow AI</span>
+        </div>
+        <div class="floating-links">
+          <a href="#features" onclick="document.querySelector('.features').scrollIntoView({behavior: 'smooth'}); return false;">Features</a>
+          <a href="#how-it-works" onclick="document.querySelector('.how-it-works').scrollIntoView({behavior: 'smooth'}); return false;">How It Works</a>
+          <a href="#examples" onclick="document.querySelector('.examples').scrollIntoView({behavior: 'smooth'}); return false;">Examples</a>
+        </div>
+        <button class="btn btn-primary floating-cta" onclick="document.querySelector('.signup').scrollIntoView({behavior: 'smooth'})">Join Beta</button>
+      </div>
     </div>
+  </div>
+
+  <section class="hero">
+    <div class="container hero-container">
+      <div class="hero-content">
+        <h1>Craft <span>Meaningful</span> Messages with AI</h1>
+        <p>
+          HeartGlow AI helps you craft personalized messages for the important people in your life. 
+          Our AI-powered platform understands relationships and helps you communicate more authentically.
+        </p>
+        <button class="btn btn-primary btn-hero" onclick="document.querySelector('.signup').scrollIntoView({behavior: 'smooth'})">Get Beta Access</button>
+      </div>
+      <div class="hero-illustration">
+        <div class="hero-illustration-container">
+          <div class="floating-message message-1">
+            <div class="message-dot"></div>
+            <div class="message-bubble">Thanks for always being there for me!</div>
+          </div>
+          <div class="floating-message message-2">
+            <div class="message-dot"></div>
+            <div class="message-bubble">Happy Birthday Mom! You mean the world to me.</div>
+          </div>
+          <div class="floating-message message-3">
+            <div class="message-dot"></div>
+            <div class="message-bubble">I'm so proud of what you've accomplished!</div>
+          </div>
+          <div class="hero-glow"></div>
+          <div class="hero-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="hero-heart">
+              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-background-pattern"></div>
   </section>
 
   <section class="features">
@@ -822,6 +990,126 @@
             <p>Our AI crafts a message that you can edit and make your own before sending.</p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="message-comparison">
+    <div class="container">
+      <h2>See the Difference</h2>
+      <p class="comparison-intro">Experience how HeartGlow AI transforms basic messages into meaningful communication.</p>
+      
+      <div class="comparison-slider">
+        <div class="comparison-slide active">
+          <div class="comparison-grid">
+            <div class="before-message">
+              <div class="comparison-header">
+                <div class="comparison-label">Before</div>
+                <div class="comparison-type">Birthday Message</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble">
+                  <p>Happy birthday Dad! Hope you have a good day.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="comparison-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            
+            <div class="after-message">
+              <div class="comparison-header">
+                <div class="comparison-label">With HeartGlow AI</div>
+                <div class="comparison-type">Birthday Message</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble enhanced">
+                  <p>Dad, happy birthday! I've been reflecting on how much your guidance has shaped who I am today. Your wisdom, patience, and unwavering support mean everything to me. I hope your day is filled with all the joy and happiness you deserve!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="comparison-slide">
+          <div class="comparison-grid">
+            <div class="before-message">
+              <div class="comparison-header">
+                <div class="comparison-label">Before</div>
+                <div class="comparison-type">Thank You Note</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble">
+                  <p>Thanks for your help with my project.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="comparison-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            
+            <div class="after-message">
+              <div class="comparison-header">
+                <div class="comparison-label">With HeartGlow AI</div>
+                <div class="comparison-type">Thank You Note</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble enhanced">
+                  <p>I wanted to express my sincere gratitude for your help with my project. Your insights and guidance were invaluable, and I particularly appreciated how you took the time to explain everything so clearly. The project wouldn't have been nearly as successful without your expertise and generosity.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="comparison-slide">
+          <div class="comparison-grid">
+            <div class="before-message">
+              <div class="comparison-header">
+                <div class="comparison-label">Before</div>
+                <div class="comparison-type">Congratulations</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble">
+                  <p>Congrats on the new job!</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="comparison-arrow">
+              <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
+            </div>
+            
+            <div class="after-message">
+              <div class="comparison-header">
+                <div class="comparison-label">With HeartGlow AI</div>
+                <div class="comparison-type">Congratulations</div>
+              </div>
+              <div class="message-content">
+                <div class="message-bubble enhanced">
+                  <p>Congratulations on your new position! I'm so thrilled to see your hard work and talent being recognized. This opportunity couldn't have happened to a more deserving person. I know you'll bring the same passion and dedication to this role that you bring to everything you do. Here's to this exciting new chapter!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="comparison-controls">
+        <button class="comparison-dot active" data-slide="0"></button>
+        <button class="comparison-dot" data-slide="1"></button>
+        <button class="comparison-dot" data-slide="2"></button>
       </div>
     </div>
   </section>
@@ -1107,6 +1395,50 @@
       const messageKey = `${recipient}-${occasion}-${tone}`;
       return messages[messageKey] || defaultMessage;
     }
+    
+    // Floating navigation logic
+    window.addEventListener('scroll', function() {
+      const floatingNav = document.querySelector('.floating-nav');
+      if (window.scrollY > 300) {
+        floatingNav.classList.add('visible');
+      } else {
+        floatingNav.classList.remove('visible');
+      }
+    });
+    
+    // Message comparison slider
+    document.addEventListener('DOMContentLoaded', function() {
+      const comparisonDots = document.querySelectorAll('.comparison-dot');
+      const comparisonSlides = document.querySelectorAll('.comparison-slide');
+      
+      comparisonDots.forEach(dot => {
+        dot.addEventListener('click', function() {
+          const slideIndex = parseInt(this.getAttribute('data-slide'));
+          
+          // Update active dot
+          comparisonDots.forEach(d => d.classList.remove('active'));
+          this.classList.add('active');
+          
+          // Update active slide
+          comparisonSlides.forEach(slide => slide.classList.remove('active'));
+          comparisonSlides[slideIndex].classList.add('active');
+        });
+      });
+      
+      // Auto-rotate slides every 5 seconds
+      let currentSlide = 0;
+      setInterval(() => {
+        currentSlide = (currentSlide + 1) % comparisonSlides.length;
+        
+        // Update active dot
+        comparisonDots.forEach(d => d.classList.remove('active'));
+        comparisonDots[currentSlide].classList.add('active');
+        
+        // Update active slide
+        comparisonSlides.forEach(slide => slide.classList.remove('active'));
+        comparisonSlides[currentSlide].classList.add('active');
+      }, 5000);
+    });
   </script>
 </body>
 </html> 

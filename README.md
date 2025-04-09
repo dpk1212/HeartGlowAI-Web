@@ -1,46 +1,47 @@
-# HeartGlowAI
+# HeartGlow AI
 
-An AI-powered heartfelt message generator for authentic communication in all types of relationships.
+A modern AI platform for crafting personalized messages for your important relationships.
 
 ## About
 
-HeartGlowAI helps users express their emotions and create meaningful, authentic messages for loved ones. The platform features an intuitive emotional onboarding process that guides users through identifying their feelings and crafting personalized messages.
+HeartGlow AI helps users craft meaningful, personalized messages for the important people in their lives. Our AI-powered platform understands relationships and helps people communicate more authentically.
 
 ## Features
 
-- **Emotional Onboarding**: Interactive process to help users identify what they want to express
-- **Message History**: Track and review previous heartfelt messages
-- **Message Composer**: Intuitive interface for crafting messages with emotional context
-- **Responsive Design**: Optimized for both desktop and mobile experiences
-- **Beautiful UI**: Elegant, emotion-focused design with subtle animations and visual feedback
+- **Personalized Messages**: Tailored to each relationship in your life
+- **Emotional Intelligence**: AI that understands the nuances of human relationships
+- **Message Library**: Save your special messages for future reference
 
-## Technologies
+## Beta Program
 
-- HTML5, CSS3, JavaScript
-- Firebase Authentication and Database
-- Responsive Design
+We're currently accepting beta users. [Sign up on our website](https://heartglowai.com) to get:
 
-## Getting Started
-
-1. Clone the repository
-2. Open `home.html` in your browser
-3. Explore the emotional onboarding process and message composer
+- Early access to all features
+- Opportunity to shape the product
+- Personalized onboarding session
+- Extended free trial when we launch
 
 ## Development
 
-To contribute to this project:
+This repository contains the landing page for HeartGlow AI beta signups. The application is built with:
+
+- HTML5
+- CSS3
+- JavaScript (ES6+)
+
+## Quick Start
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/HeartGlowAI.git
+git clone https://github.com/yourusername/heartglow-ai.git
 
-# Navigate to the project directory
-cd HeartGlowAI
+# Navigate to the directory
+cd heartglow-ai
 
-# Make changes and test locally
-# Submit a pull request
+# Open the landing page in your browser
+open index.html
 ```
 
 ## License
 
-MIT 
+Copyright © 2023 HeartGlow AI. All rights reserved. 

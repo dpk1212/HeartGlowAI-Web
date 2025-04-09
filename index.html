@@ -1,1389 +1,518 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HeartGlowAI - AI-Powered Heartfelt Messages</title>
-  <base href="./">
-  <meta name="description" content="Create meaningful, personalized messages for your loved ones with HeartGlowAI's emotional intelligence technology. Express your feelings authentically.">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="/favicon.ico" sizes="any">
-  
-  <!-- Resource Hints -->
-  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HeartGlow AI | Beta Signup</title>
+  <meta name="description" content="HeartGlow AI - Building meaningful connections through AI-powered communication assistance.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://us-central1-heartglowai.cloudfunctions.net" crossorigin>
-  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
-  
-  <!-- Font Loading -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
-  
-  <!-- FontAwesome -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js" integrity="sha512-fD9DI5bZwQxOi7MhYWnnNPlvXdp/2Pj3XSTRrFs5FQa4mizyGLnJcN6tuvUS6LbmgN1ut+XGSABKvjN0H6Aoow==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-  
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-analytics-compat.js"></script>
-  
-  <!-- CSS -->
-  <link rel="stylesheet" href="css/main.css">
-  <link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/perplexity-citations.css">
-  <link rel="stylesheet" href="css/essential-styles.css">
-  
-  <!-- CSS Fallback Script -->
-  <script>
-    // Check if main stylesheets failed to load and ensure essential styles are applied
-    window.addEventListener('load', function() {
-      // Function to check if a stylesheet was loaded
-      function isStylesheetLoaded(href) {
-        // Loop through all loaded stylesheets
-        for (let i = 0; i < document.styleSheets.length; i++) {
-          try {
-            const sheet = document.styleSheets[i];
-            // If the sheet has an href and it matches our target, it's loaded
-            if (sheet.href && sheet.href.includes(href)) {
-              // Try to access rules to check if it's properly loaded
-              const rules = sheet.cssRules || sheet.rules;
-              if (rules && rules.length > 0) {
-                return true;
-              }
-            }
-          } catch (e) {
-            // Security error when trying to access cross-origin stylesheets
-            // This means the stylesheet loaded but we can't check its contents
-            return true;
-          }
-        }
-        return false;
-      }
-      
-      // Apply essential styles with higher specificity if main stylesheets failed
-      if (!isStylesheetLoaded('main.css') || !isStylesheetLoaded('styles.css')) {
-        console.log("Main stylesheets failed to load. Using essential styles as fallback.");
-        
-        // Create a style tag with higher specificity selectors
-        const style = document.createElement('style');
-        style.innerHTML = `
-          /* Force essential styles to have higher specificity */
-          body .connection-card,
-          html body .connection-card {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-            border: 1px solid #8a57de !important;
-          }
-          
-          body .primary-button,
-          html body .primary-button {
-            display: inline-flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-          
-          body .step-footer,
-          html body .step-footer {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-          
-          body #floating-nav-buttons,
-          html body #floating-nav-buttons {
-            display: flex !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    });
-  </script>
-
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #8a57de;
-      --primary-light: #b296ff;
-      --primary-dark: #6a3cb2;
-      --secondary: #ff7eb6;
-      --background-dark: #1a1625;
-      --background-darker: #13101b;
-      --text-light: #ffffff;
-      --text-muted: rgba(255, 255, 255, 0.7);
-      --card-bg: rgba(45, 42, 59, 0.7);
-      --border-radius-sm: 8px;
-      --border-radius-md: 12px;
-      --border-radius-lg: 16px;
-      --border-radius-xl: 24px;
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
-      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.2);
-      --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.3);
-      --spacing-xs: 0.25rem;
-      --spacing-sm: 0.5rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.5rem;
-      --spacing-xl: 2rem;
-      --spacing-xxl: 3rem;
-      --font-size-sm: 0.875rem;
-      --font-size-md: 1rem;
-      --font-size-lg: 1.125rem;
-      --font-size-xl: 1.5rem;
-      --font-size-xxl: 2rem;
-      --font-size-display: 3.5rem;
-    }
-    
-    /* Fix for white rectangles appearing over cards */
-    .message-card:before,
-    .message-card:after,
-    .message-card > *:not(.message-card__inner),
-    .message-card__inner:before,
-    .message-card__inner:after,
-    .message-card__inner > *:not(.message-card__front):not(.message-card__back),
-    .message-card__front > *:not(.message-card__icon):not(.message-card__content),
-    .message-card__back > *:not(.message-card__preview):not(.message-card__button):not(.message-card__insights) {
-      display: none !important;
-      opacity: 0 !important;
-      visibility: hidden !important;
-    }
-    
-    /* Base styles with improved gradients */
-    body {
-      background-color: var(--background-darker);
-      background-image: 
-        radial-gradient(circle at 20% 30%, rgba(138, 87, 222, 0.18) 0%, transparent 35%),
-        radial-gradient(circle at 80% 70%, rgba(255, 126, 182, 0.12) 0%, transparent 35%);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-      color: var(--text-light);
-      line-height: 1.6;
-      min-height: 100vh;
-      margin: 0;
-      padding: 0;
+      --primary: #6366F1;
+      --primary-light: #818CF8;
+      --primary-dark: #4F46E5;
+      --gray-50: #F9FAFB;
+      --gray-100: #F3F4F6;
+      --gray-200: #E5E7EB;
+      --gray-300: #D1D5DB;
+      --gray-600: #4B5563;
+      --gray-700: #374151;
+      --gray-800: #1F2937;
+      --gray-900: #111827;
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
     }
     
     * {
+      margin: 0;
+      padding: 0;
       box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      color: var(--gray-800);
+      background-color: var(--gray-50);
+      line-height: 1.5;
     }
     
     .container {
       max-width: 1200px;
-      width: 100%;
       margin: 0 auto;
-      padding: 0 var(--spacing-lg);
+      padding: 0 1.5rem;
     }
     
-    /* Header styles */
-    .header {
-      padding: var(--spacing-lg) 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+    header {
+      padding: 1.5rem 0;
     }
     
     .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary-dark);
       display: flex;
       align-items: center;
-      text-decoration: none;
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-      color: var(--text-light);
+      gap: 0.5rem;
     }
     
-    .logo-icon {
-      margin-right: var(--spacing-xs);
-      font-size: 1.25em;
-      filter: drop-shadow(0 0 8px rgba(138, 87, 222, 0.6));
-    }
-    
-    .logo-text span {
-      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+    .logo span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     
-    /* Hero section */
+    .logo svg {
+      height: 1.75rem;
+      width: auto;
+    }
+    
     .hero {
-      text-align: center;
-      padding: var(--spacing-xxl) 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-    
-    .heart-container {
-      position: relative;
-      width: 100px;
-      height: 100px;
-      margin-bottom: var(--spacing-xl);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .heart-icon {
-      color: var(--primary);
-      font-size: 60px;
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      background-clip: text;
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 10px rgba(138, 87, 222, 0.5));
-      animation: pulse 3s ease-in-out infinite;
-      z-index: 2;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-    }
-    
-    .heart-glow {
-      position: absolute;
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(138, 87, 222, 0.6) 0%, rgba(138, 87, 222, 0) 70%);
-      z-index: 1;
-      animation: glow 3s ease-in-out infinite;
-    }
-    
-    @keyframes glow {
-      0%, 100% { opacity: 0.4; transform: scale(0.9); }
-      50% { opacity: 0.7; transform: scale(1.1); }
-    }
-    
-    .hero-title {
-      font-family: 'Playfair Display', serif;
-      font-size: var(--font-size-display);
-      font-weight: 700;
-      line-height: 1.2;
-      margin: 0 0 var(--spacing-md);
-      color: var(--text-light);
-      letter-spacing: -0.01em;
-    }
-    
-    /* Emotional guidance microcopy */
-    .hero-subtitle {
-      color: var(--text-muted);
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-xl);
-      max-width: 600px;
+      padding: 5rem 0;
       text-align: center;
     }
     
-    /* Tab section */
-    .tabs {
-      display: flex;
-      justify-content: center;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-xl);
-      background: rgba(26, 22, 37, 0.5);
-      backdrop-filter: blur(10px);
-      padding: var(--spacing-xs);
-      border-radius: var(--border-radius-lg);
-    }
-    
-    .tab {
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius-md);
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: transparent;
-      border: none;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    
-    .tab-icon {
-      font-size: 1.2em;
-    }
-    
-    .tab.active {
-      background: linear-gradient(45deg, rgba(138, 87, 222, 0.2), rgba(178, 150, 255, 0.2));
-      color: var(--text-light);
-      box-shadow: var(--shadow-sm);
-    }
-    
-    /* Cards section */
-    .card-container {
-      margin-top: var(--spacing-xl);
-      width: 100%;
-      max-width: 800px;
-    }
-    
-    .card {
-      background: var(--card-bg);
-      background-image: linear-gradient(125deg, rgba(138, 87, 222, 0.05), rgba(45, 42, 59, 0.7), rgba(138, 87, 222, 0.05));
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow-lg);
-      margin-bottom: var(--spacing-xl);
-      border: 1px solid rgba(138, 87, 222, 0.15);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      position: relative;
-      animation: fadeIn 0.8s ease-out;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.2);
-      border-color: rgba(138, 87, 222, 0.3);
-    }
-    
-    .card-content {
-      padding: var(--spacing-xl);
-    }
-    
-    .premium-badge {
-      position: absolute;
-      top: var(--spacing-md);
-      right: var(--spacing-md);
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: var(--spacing-xs) var(--spacing-md);
-      border-radius: 20px;
-      font-size: var(--font-size-sm);
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-      z-index: 2;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(138, 87, 222, 0.4);
-      animation: pulse-subtle 2s infinite ease-in-out;
-    }
-    
-    @keyframes pulse-subtle {
-      0%, 100% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 15px rgba(138, 87, 222, 0.4); }
-      50% { box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), 0 0 25px rgba(138, 87, 222, 0.6); }
-    }
-    
-    .card-title {
-      font-family: 'Playfair Display', serif;
-      font-size: var(--font-size-xl);
+    h1 {
+      font-size: 3.5rem;
       font-weight: 700;
-      margin-top: 0;
-      margin-bottom: var(--spacing-sm);
-      background: linear-gradient(45deg, #ffffff, #e8e6f1);
+      margin-bottom: 1.5rem;
+      letter-spacing: -0.025em;
+      color: var(--gray-900);
+      line-height: 1.1;
+    }
+    
+    h1 span {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
     }
     
-    .card-description {
-      color: var(--text-muted);
-      margin-bottom: var(--spacing-lg);
-      font-size: var(--font-size-md);
-      line-height: 1.6;
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--gray-600);
+      max-width: 800px;
+      margin: 0 auto 3rem;
     }
     
     .features {
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--spacing-sm);
-      margin-bottom: var(--spacing-lg);
+      padding: 5rem 0;
+      background-color: white;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
     }
     
     .feature {
-      background: rgba(138, 87, 222, 0.15);
-      border-radius: 30px;
-      padding: var(--spacing-xs) var(--spacing-md);
-      font-size: var(--font-size-sm);
-      font-weight: 500;
-      color: var(--text-light);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      position: relative;
-      transition: all 0.2s ease;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      background-color: var(--gray-50);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
     
     .feature:hover {
-      background: rgba(138, 87, 222, 0.25);
-      transform: translateY(-2px);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
-    .feature:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(26, 22, 37, 0.9);
-      color: white;
-      padding: 8px 12px;
-      border-radius: 6px;
-      font-size: 12px;
-      white-space: nowrap;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-      pointer-events: none;
-      margin-bottom: 5px;
-      z-index: 10;
-    }
-    
-    .feature:hover::before {
-      content: '';
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 5px;
-      border-style: solid;
-      border-color: rgba(26, 22, 37, 0.9) transparent transparent transparent;
-      margin-bottom: -5px;
-      z-index: 10;
-      transform: translateX(-50%) rotate(180deg);
-    }
-    
-    .sample {
-      background: rgba(138, 87, 222, 0.1);
-      border-radius: var(--border-radius-md);
-      padding: var(--spacing-xl);
-      font-style: italic;
-      position: relative;
-      color: var(--text-light);
-      border-left: 3px solid var(--primary);
-      margin-top: var(--spacing-xl);
-      margin-bottom: var(--spacing-md);
-      box-shadow: inset 0 0 20px rgba(138, 87, 222, 0.05);
-      font-size: var(--font-size-lg);
-      line-height: 1.7;
-    }
-    
-    .sample::before {
-      content: '"';
-      position: absolute;
-      top: 10px;
-      left: 16px;
-      font-size: 60px;
-      color: rgba(138, 87, 222, 0.2);
-      font-family: Georgia, serif;
-      line-height: 1;
-    }
-    
-    /* CTA Button */
-    .cta {
-      text-align: center;
-      margin: var(--spacing-xxl) 0 var(--spacing-xl);
-      position: relative;
-    }
-    
-    .cta-button {
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      border: none;
-      padding: var(--spacing-md) var(--spacing-xl);
-      border-radius: var(--border-radius-md);
-      font-size: var(--font-size-lg);
-      font-weight: 600;
-      cursor: pointer;
+    .feature-icon {
       display: inline-flex;
       align-items: center;
-      transition: all 0.3s ease;
-      box-shadow: var(--shadow-md), 0 0 20px rgba(138, 87, 222, 0.3);
-      position: relative;
-      overflow: hidden;
-      animation: pulse-cta 3s infinite;
+      justify-content: center;
+      height: 3rem;
+      width: 3rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      background-color: var(--primary-light);
+      color: white;
     }
     
-    @keyframes pulse-cta {
-      0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.03); }
+    .feature h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
     }
     
-    .cta-button:hover {
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-lg), 0 0 30px rgba(138, 87, 222, 0.4);
-      animation: none;
+    .feature p {
+      color: var(--gray-600);
+      line-height: 1.6;
     }
     
-    .cta-button::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-      transition: all 0.6s;
+    .signup {
+      padding: 5rem 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.1) 100%);
     }
     
-    .cta-button:hover::after {
-      left: 100%;
-    }
-    
-    .cta-icon {
-      margin-left: var(--spacing-sm);
-      transition: transform 0.3s;
-    }
-    
-    .cta-button:hover .cta-icon {
-      transform: translateX(4px);
-    }
-
-    .cta-subtext {
-      font-size: var(--font-size-sm);
-      color: var(--text-muted);
-      margin-top: var(--spacing-md);
-    }
-
-    .cta-urgency {
-      font-size: var(--font-size-sm);
-      color: rgba(255, 255, 255, 0.8);
-      margin-top: var(--spacing-sm);
-      background: rgba(138, 87, 222, 0.2);
-      display: inline-block;
-      padding: 5px 12px;
-      border-radius: 4px;
-    }
-    
-    /* Benefits section */
-    .benefits-header {
-      text-align: center;
-      margin-bottom: var(--spacing-xl);
-      font-size: var(--font-size-xl);
-      font-family: 'Playfair Display', serif;
-      color: var(--text-light);
-    }
-    
-    .benefits {
+    .signup-container {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-xl);
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
     }
     
-    .benefit {
-      background: var(--card-bg);
-      backdrop-filter: blur(10px);
-      border-radius: var(--border-radius-lg);
-      padding: var(--spacing-lg);
-      text-align: center;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 1px solid rgba(138, 87, 222, 0.1);
-      box-shadow: var(--shadow-md);
+    .signup-content h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
+      line-height: 1.2;
     }
     
-    .benefit:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
+    .signup-content p {
+      font-size: 1.125rem;
+      color: var(--gray-700);
+      margin-bottom: 2rem;
     }
     
-    .benefit-icon {
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(45deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.2));
+    .signup-list {
+      list-style: none;
+      margin-bottom: 2rem;
+    }
+    
+    .signup-list li {
       display: flex;
       align-items: center;
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+      color: var(--gray-700);
+    }
+    
+    .signup-list li::before {
+      content: "✓";
+      display: inline-flex;
+      align-items: center;
       justify-content: center;
-      margin: 0 auto var(--spacing-md);
-      font-size: 24px;
+      width: 1.5rem;
+      height: 1.5rem;
+      border-radius: 50%;
+      margin-right: 0.75rem;
+      background-color: var(--success);
+      color: white;
+      font-size: 0.875rem;
     }
     
-    .benefit-title {
-      font-weight: 700;
-      font-size: var(--font-size-lg);
-      margin-bottom: var(--spacing-sm);
-      color: var(--text-light);
+    .signup-form {
+      background-color: white;
+      padding: 2.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
     }
     
-    .benefit-text {
-      color: var(--text-muted);
-      font-size: var(--font-size-md);
-      line-height: 1.5;
+    .signup-form h3 {
+      font-size: 1.5rem;
+      margin-bottom: 1.5rem;
+      color: var(--gray-900);
     }
     
-    /* Responsive design */
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--gray-700);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+    
+    .btn {
+      display: inline-block;
+      padding: 0.875rem 1.5rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 1rem;
+      border: none;
+    }
+    
+    .btn-primary {
+      background-color: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background-color: var(--primary-dark);
+    }
+    
+    .btn-block {
+      display: block;
+      width: 100%;
+    }
+    
+    .success-message {
+      display: none;
+      padding: 1rem;
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success);
+      border-radius: 0.5rem;
+      margin-top: 1rem;
+      color: var(--success);
+      font-weight: 500;
+    }
+    
+    footer {
+      padding: 2.5rem 0;
+      background-color: var(--gray-800);
+      color: var(--gray-200);
+    }
+    
+    .footer-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .footer-logo {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: white;
+    }
+    
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+    }
+    
+    .footer-links a {
+      color: var(--gray-300);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-links a:hover {
+      color: white;
+    }
+    
+    .copyright {
+      margin-top: 2rem;
+      text-align: center;
+      color: var(--gray-300);
+      font-size: 0.875rem;
+    }
+    
     @media (max-width: 768px) {
-      .hero-title {
+      h1 {
         font-size: 2.5rem;
       }
       
-      .benefits {
+      .signup-container {
         grid-template-columns: 1fr;
       }
       
-      .tabs {
-        flex-wrap: wrap;
-      }
-    }
-
-    /* Message Type Tabs */
-    .message-tabs {
-      display: flex;
-      gap: var(--spacing-md);
-      justify-content: center;
-      margin-bottom: var(--spacing-xl);
-    }
-    
-    .message-tab {
-      padding: var(--spacing-md) var(--spacing-lg);
-      border-radius: var(--border-radius-lg);
-      background: rgba(45, 42, 59, 0.7);
-      border: 1px solid rgba(138, 87, 222, 0.1);
-      color: var(--text-light);
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-sm);
-    }
-    
-    .message-tab.active {
-      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
-      border-color: rgba(138, 87, 222, 0.3);
-      box-shadow: var(--shadow-md);
-      transform: translateY(-1px);
-    }
-    
-    .message-tab:hover:not(.active) {
-      background: rgba(138, 87, 222, 0.05);
-      transform: translateY(-1px);
-    }
-    
-    /* Message Cards Grid with improved spacing and animations */
-    .message-cards {
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-lg);
-      max-width: 800px;
-      width: 100%;
-      margin: var(--spacing-xl) auto;
-    }
-    
-    /* Handle all card structure to prevent white rectangles */
-    .message-card {
-      position: relative;
-      height: 140px;
-      width: 100%;
-      cursor: pointer;
-      perspective: 1000px;
-      margin-bottom: var(--spacing-md);
-      background: transparent !important;
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      box-shadow: none !important;
-    }
-    
-    .message-card__inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      text-align: left;
-      transition: transform 0.6s;
-      transform-style: preserve-3d;
-      border-radius: var(--border-radius-lg);
-      box-shadow: none !important;
-    }
-    
-    .message-card.flipped .message-card__inner {
-      transform: rotateY(180deg);
-    }
-    
-    .message-card__front,
-    .message-card__back {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      border-radius: var(--border-radius-lg);
-      overflow: hidden;
-      /* Force hardware acceleration */
-      transform: translateZ(0);
-    }
-    
-    .message-card__front {
-      background-color: #2D2A3B;
-      border-left: 4px solid var(--primary);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      display: flex;
-      align-items: center;
-      z-index: 1;
-    }
-    
-    .message-card__back {
-      background-color: #2D2A3B;
-      padding: 1.25rem; /* Updated to match intent-card */
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      text-align: center;
-      transform: rotateY(180deg);
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(138, 87, 222, 0.4);
-      z-index: 2;
-    }
-    
-    /* Add this to prevent text showing through from front to back */
-    .message-card__back::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #2D2A3B;
-      z-index: -1;
-    }
-    
-    .message-card__icon {
-      flex-shrink: 0;
-      font-size: 1.8em;
-      width: 48px;
-      height: 48px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-      border-radius: 8px;
-      margin: 0 var(--spacing-md);
-    }
-    
-    .message-card__content {
-      flex: 1;
-      padding: var(--spacing-md) var(--spacing-lg) var(--spacing-md) var(--spacing-lg);
-      overflow: hidden;
-    }
-    
-    .message-card__title {
-      color: white;
-      font-weight: 600;
-      margin: 0;
-      font-size: var(--font-size-md);
-      line-height: 1.4;
-    }
-    
-    .message-card__subtitle {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: var(--font-size-sm);
-      margin-top: 4px;
-    }
-    
-    .message-card__preview {
-      color: var(--text-muted);
-      font-size: 0.9375rem;
-      line-height: 1.5;
-      margin: 0 0 1rem;
-      font-style: italic;
-      overflow-wrap: break-word;
-      word-break: break-word;
-      hyphens: auto;
-      width: 100%;
-      padding: 0 var(--spacing-sm);
-    }
-    
-    .message-card__button {
-      width: 100%;
-      max-width: 95%;
-      margin-left: auto;
-      margin-right: auto;
-      background: linear-gradient(45deg, var(--primary), var(--primary-light));
-      color: white;
-      padding: 0.5rem 0.75rem;
-      border-radius: var(--border-radius-md);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: 0.875rem;
-      border: none;
-      cursor: pointer;
-      transition: transform 0.3s ease;
-      margin-top: auto;
-      flex-shrink: 0;
-    }
-    
-    .message-card__button:hover {
-      transform: translateY(-2px);
-    }
-    
-    .message-card__insights {
-      position: absolute;
-      top: var(--spacing-sm);
-      right: var(--spacing-sm);
-      color: white;
-      font-size: 1.2em;
-      background: rgba(138, 87, 222, 0.2);
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      cursor: help;
-    }
-    
-    /* Desktop hover flip & scale */
-    @media (hover: hover) and (pointer: fine) {
-      .message-card:hover .message-card__inner {
-        transform: rotateY(180deg);
-      }
-      .message-card:hover {
-        z-index: 10;
-        box-shadow: var(--shadow-lg), 0 0 20px rgba(138, 87, 222, 0.2) !important;
-      }
-    }
-    
-    /* CTA Section */
-    .cta-section {
-      text-align: center;
-      margin-top: var(--spacing-xxl);
-      padding: var(--spacing-xl);
-      background: linear-gradient(135deg, rgba(138, 87, 222, 0.1), rgba(138, 87, 222, 0.05));
-      border-radius: var(--border-radius-lg);
-    }
-    
-    .cta-section__title {
-      font-size: var(--font-size-xl);
-      font-weight: 600;
-      margin-bottom: var(--spacing-md);
-      background: linear-gradient(45deg, var(--text-light), #e8e6f1);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    
-    .cta-section__subtitle {
-      color: var(--text-muted);
-      margin-bottom: var(--spacing-lg);
-    }
-    
-    @media (max-width: 768px) {
-      .message-cards {
-        gap: var(--spacing-md);
-      }
-      
-      .message-card {
-        min-height: 180px;
-      }
-      
-      .message-card__back {
-        padding: 1.25rem;
-      }
-      
-      .message-card__preview {
-        font-size: 0.9375rem;
-        margin-bottom: 1.25rem;
-      }
-      
-      .message-card__button {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        margin-top: auto;
-        position: relative;
-        bottom: 0;
-      }
-      
-      body {
-        padding-bottom: 80px;
+      .footer-content {
+        flex-direction: column;
+        gap: 1.5rem;
       }
     }
     
     @media (max-width: 480px) {
-      .message-card {
-        height: 200px; /* Updated to match intent-card */
+      h1 {
+        font-size: 2rem;
       }
       
-      /* Force fully opaque background on mobile */
-      .message-card__back {
-        background-color: rgb(45, 42, 59);
+      .hero {
+        padding: 3rem 0;
       }
       
-      .message-card__preview {
-        -webkit-line-clamp: 3;
-        margin-bottom: 1.5rem; /* Updated to match intent-card */
-        font-size: 1rem;
-        /* Ensure text is readable */
-        color: rgba(255, 255, 255, 0.85);
-      }
-      
-      .message-card__button {
-        font-size: 0.9375rem;
-        padding: 0.625rem 1rem;
-        /* Add positioning to match intent-card */
-        position: absolute;
-        bottom: 1.25rem;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 90%;
+      .features, .signup {
+        padding: 3rem 0;
       }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <a href="index.html" class="logo">
-        <span class="logo-icon">❤️</span>
-        <span class="logo-text">Heart<span>GlowAI</span></span>
-      </a>
-    </header>
-    
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="heart-container">
-        <div class="heart-glow"></div>
-        <i class="fas fa-heart heart-icon"></i>
+  <header>
+    <div class="container">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+        </svg>
+        <span>HeartGlow AI</span>
       </div>
-      <h1 class="hero-title">What kind of message is on your heart today?</h1>
-      <p class="hero-subtitle">Choose the moment you're in — we'll help you find the right words.</p>
-      
-      <!-- Message Tabs -->
-      <div class="message-tabs">
-        <button class="message-tab active" data-type="professional">
-          <span>💼 Professional Messages</span>
-        </button>
-        <button class="message-tab" data-type="personal">
-          <span>💖 Personal Messages</span>
-        </button>
-      </div>
-      
-      <!-- Professional Intent Cards - Updated with flip functionality -->
-      <div class="intent-cards" id="professional-cards">
-        <!-- Intent Card 1 -->
-        <div class="intent-card" data-card-id="recognize-effort">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress animated"></div>
-              <div class="intent-card__icon">💬</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">Show appreciation for hard work and dedication</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">Your dedication and hard work haven't gone unnoticed. The way you consistently go above and beyond makes a real difference to our team.</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Team recognition, Performance feedback, Milestone celebrations">?</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Intent Card 2 -->
-        <div class="intent-card" data-card-id="give-feedback">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
-              <div class="intent-card__icon">🧠</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">Constructive insights delivered with empathy</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">I value your contributions and want to share some thoughts on how we can work even better together. Would you be open to discussing some ideas?</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Constructive feedback, Growth discussions, Team alignment">?</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Intent Card 3 -->
-        <div class="intent-card" data-card-id="express-gratitude">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress animated"></div>
-              <div class="intent-card__icon">🙏</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">Express genuine gratitude for their help</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">Your support has been invaluable. The way you stepped in to help made a significant impact, and I'm truly grateful for your partnership.</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Gratitude expression, Team appreciation, Project completion">?</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Personal Intent Cards - Updated with flip functionality -->
-      <div class="intent-cards" id="personal-cards" style="display: none;">
-        <!-- Intent Card 1 -->
-        <div class="intent-card" data-card-id="reconnect">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress animated"></div>
-              <div class="intent-card__icon">❤️</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">Reconnect with someone meaningful to you</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">Hey, I just wanted to say you've been on my mind lately. Life's been busy, but that doesn't mean you're not important to me.</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Reconnecting, Expressing care, Building relationships">?</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Intent Card 2 -->
-        <div class="intent-card" data-card-id="express-feelings">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress"></div>
-              <div class="intent-card__icon">✍️</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">Express emotions you've kept to yourself</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">There's something I've wanted to tell you, and I think it's time. Your presence in my life means more to me than you might know.</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Deep conversations, Emotional expression, Building trust">?</div>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Intent Card 3 -->
-        <div class="intent-card" data-card-id="spark-joy">
-          <div class="intent-card__inner">
-            <div class="intent-card__front">
-              <div class="intent-card__progress animated"></div>
-              <div class="intent-card__icon">💬</div>
-              <div class="intent-card__content">
-                <h3 class="intent-card__title">A quick note of warmth or joy</h3>
-              </div>
-            </div>
-            <div class="intent-card__back">
-              <p class="intent-card__preview">Just wanted to brighten your day with a reminder of how amazing you are. Your smile and energy make the world a better place.</p>
-              <button class="intent-card__button">Use This Message <span style="margin-left: 4px;">→</span></button>
-              <div class="intent-card__insights" data-tooltip="Perfect for: Spreading joy, Daily appreciation, Friendship moments">?</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- CTA Section -->
-      <div class="cta">
-        <a href="login.html" class="cta-button">
-          Write Your First Message Now <span class="cta-icon">→</span>
-        </a>
-        <p class="cta-subtext">No signup required. First message is free.</p>
-        <p class="cta-urgency">Limited free messages daily — start now.</p>
-      </div>
-      
-      <!-- Benefits Section -->
-      <h2 class="benefits-header">Why HeartGlow Works</h2>
-      <div class="benefits">
-        <div class="benefit">
-          <div class="benefit-icon">✨</div>
-          <h3 class="benefit-title">AI With Heart</h3>
-          <p class="benefit-text">Understands what you want to say — and helps you say it beautifully.</p>
-        </div>
-        <div class="benefit">
-          <div class="benefit-icon">🔒</div>
-          <h3 class="benefit-title">Emotionally Private</h3>
-          <p class="benefit-text">Everything you say stays yours. Nothing is stored or shared.</p>
-        </div>
-        <div class="benefit">
-          <div class="benefit-icon">⚡</div>
-          <h3 class="benefit-title">Instant, Not Rushed</h3>
-          <p class="benefit-text">Say something real — in seconds, not hours of overthinking.</p>
-        </div>
-      </div>
-    </section>
-  </div>
-  
-  <!-- Sticky CTA for Mobile -->
-  <div class="sticky-cta">
-    <div class="sticky-cta__content">
-      <div class="sticky-cta__text">Ready to create your perfect message?</div>
-      <a href="login.html" class="sticky-cta__button">
-        Write Message Now <span>→</span>
-      </a>
     </div>
-  </div>
-  
-  <!-- JavaScript -->
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h1>Craft <span>Meaningful</span> Messages with AI</h1>
+      <p>
+        HeartGlow AI helps you craft personalized messages for the important people in your life. 
+        Our AI-powered platform understands relationships and helps you communicate more authentically.
+      </p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div class="container">
+      <div class="features-grid">
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>Personalized Messages</h3>
+          <p>Craft messages tailored to each relationship in your life, whether they're family, friends, or colleagues.</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </div>
+          <h3>Emotional Intelligence</h3>
+          <p>Our AI understands the nuances of human relationships and helps you express your feelings appropriately.</p>
+        </div>
+        
+        <div class="feature">
+          <div class="feature-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+            </svg>
+          </div>
+          <h3>Save Special Messages</h3>
+          <p>Build a library of your most meaningful messages and revisit them whenever you want.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="signup">
+    <div class="container signup-container">
+      <div class="signup-content">
+        <h2>Join Our Beta Program</h2>
+        <p>Be among the first to experience HeartGlow AI. Our beta users get:</p>
+        <ul class="signup-list">
+          <li>Early access to all features</li>
+          <li>Opportunity to shape the product</li>
+          <li>Personalized onboarding session</li>
+          <li>Extended free trial when we launch</li>
+        </ul>
+      </div>
+      
+      <div class="signup-form">
+        <h3>Sign Up for Beta Access</h3>
+        <form id="beta-form" action="https://formspree.io/f/mjkyvdal" method="POST">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input type="text" id="name" name="name" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required>
+          </div>
+          
+          <div class="form-group">
+            <label for="role">What best describes you?</label>
+            <select id="role" name="role" required>
+              <option value="" disabled selected>Select an option</option>
+              <option value="personal">Personal User</option>
+              <option value="business">Business User</option>
+              <option value="developer">Developer</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="message">How do you hope to use HeartGlow AI?</label>
+            <textarea id="message" name="message"></textarea>
+          </div>
+          
+          <button type="submit" class="btn btn-primary btn-block">Request Beta Access</button>
+          <div id="success-message" class="success-message">
+            Thank you for your interest! We'll be in touch soon.
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-logo">HeartGlow AI</div>
+        <div class="footer-links">
+          <a href="#">About</a>
+          <a href="#">Privacy</a>
+          <a href="#">Terms</a>
+          <a href="#">Contact</a>
+        </div>
+      </div>
+      <div class="copyright">
+        &copy; 2023 HeartGlow AI. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add staggered entrance animations
-      const intentCards = document.querySelectorAll('.intent-card');
-      intentCards.forEach((card, index) => {
-        // Add staggered entrance animation
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        setTimeout(() => {
-          card.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-          card.style.opacity = '1';
-          card.style.transform = 'translateY(0)';
-        }, 100 + (index * 150));
+    document.getElementById('beta-form').addEventListener('submit', function(event) {
+      const form = this;
+      const successMessage = document.getElementById('success-message');
+      
+      fetch(form.action, {
+        method: form.method,
+        body: new FormData(form),
+        headers: {
+          'Accept': 'application/json'
+        }
+      })
+      .then(response => {
+        if (response.ok) {
+          form.reset();
+          form.style.display = 'none';
+          successMessage.style.display = 'block';
+        } else {
+          response.json().then(data => {
+            if (Object.hasOwn(data, 'errors')) {
+              alert(data.errors.map(error => error.message).join(', '));
+            } else {
+              alert('Something went wrong. Please try again.');
+            }
+          });
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        alert('Something went wrong. Please try again.');
       });
       
-      // Add animated class to progress bars for visual interest
-      document.querySelectorAll('.intent-card__progress').forEach(progressBar => {
-        if (!progressBar.classList.contains('animated')) {
-          if (Math.random() > 0.3) {
-            progressBar.classList.add('animated');
-          }
-        }
-      });
-      
-      // Check if device supports hover
-      const supportsHover = window.matchMedia('(hover: hover)').matches;
-      
-      // Card handling for analytics and navigation
-      let cardClickCount = 0;
-      
-      intentCards.forEach((card, index) => {
-        const cardId = card.getAttribute('data-card-id');
-        const cardFront = card.querySelector('.intent-card__front');
-        const cardBack = card.querySelector('.intent-card__back');
-        const cardTitle = card.querySelector('.intent-card__title').innerText;
-        const cardButton = card.querySelector('.intent-card__button');
-        const cardIcon = card.querySelector('.intent-card__icon');
-        const cardInner = card.querySelector('.intent-card__inner');
-        
-        // Add subtle floating animation to icons
-        if (cardIcon) {
-          cardIcon.style.animation = `float ${2 + Math.random() * 1}s ease-in-out infinite alternate`;
-        }
-        
-        function trackCardInteraction() {
-          cardClickCount++;
-          console.log(`Card interaction: ${cardTitle}`);
-          // Analytics tracking would go here in production
-          // Example: analytics.track('card_interaction', { card_id: cardId, title: cardTitle });
-        }
-        
-        // For desktop, manage hover-based flips
-        if (supportsHover) {
-          // For devices with hover, add interactions
-          card.addEventListener('mouseenter', function() {
-            trackCardInteraction();
-            
-            // Explicitly trigger flip class for better control
-            card.classList.add('hovered');
-            
-            // Subtle glow effect on hover
-            const glow = document.createElement('div');
-            glow.className = 'card-glow-effect';
-            glow.style.position = 'absolute';
-            glow.style.top = '-20px';
-            glow.style.left = '-20px';
-            glow.style.right = '-20px';
-            glow.style.bottom = '-20px';
-            glow.style.background = 'radial-gradient(circle, rgba(138, 87, 222, 0.2) 0%, transparent 70%)';
-            glow.style.zIndex = '-1';
-            glow.style.opacity = '0';
-            glow.style.transition = 'opacity 0.5s ease';
-            
-            card.appendChild(glow);
-            
-            setTimeout(() => {
-              glow.style.opacity = '0.7';
-            }, 10);
-          });
-          
-          card.addEventListener('mouseleave', function() {
-            // Remove hover class
-            card.classList.remove('hovered');
-            
-            const glow = card.querySelector('.card-glow-effect');
-            if (glow) {
-              glow.style.opacity = '0';
-              setTimeout(() => {
-                if (glow.parentNode === card) {
-                  card.removeChild(glow);
-                }
-              }, 500);
-            }
-          });
-        } 
-        // For mobile, manage tap-based flips
-        else {
-          // On touch devices, flip card on tap with better animation
-          card.addEventListener('click', function(e) {
-            if (!card.classList.contains('flipped')) {
-              e.preventDefault();
-              card.classList.add('flipped');
-              
-              // Add subtle scale effect
-              card.style.transition = 'transform 0.3s ease';
-              card.style.transform = 'scale(1.02)';
-              setTimeout(() => {
-                card.style.transform = 'scale(1)';
-              }, 300);
-              
-              trackCardInteraction();
-            }
-          });
-          
-          // Add close functionality for flipped cards on touch devices
-          document.addEventListener('click', function(e) {
-            if (!card.contains(e.target) && card.classList.contains('flipped')) {
-              card.classList.remove('flipped');
-              
-              // Add subtle effect when closing
-              card.style.transition = 'transform 0.2s ease';
-              card.style.transform = 'scale(0.98)';
-              setTimeout(() => {
-                card.style.transform = 'scale(1)';
-              }, 200);
-            }
-          });
-        }
-        
-        // Add button hover effect
-        if (cardButton) {
-          cardButton.addEventListener('mouseenter', function() {
-            this.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-            this.style.transform = 'translateY(-2px) scale(1.02)';
-          });
-          
-          cardButton.addEventListener('mouseleave', function() {
-            this.style.transition = 'transform 0.2s ease';
-            this.style.transform = 'translateY(0) scale(1)';
-          });
-          
-          // Button should always navigate to the next step regardless of device
-          cardButton.addEventListener('click', function(e) {
-            e.stopPropagation(); // Prevent card flip on button click
-            
-            // Add click animation
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-              this.style.transform = 'scale(1)';
-              // Change to login.html to match the rest of the site
-              window.location.href = `login.html?intent=${cardId}`;
-            }, 150);
-          });
-        }
-      });
-      
-      // Add CSS for hover-based flips (more reliable than CSS :hover)
-      const style = document.createElement('style');
-      style.textContent = `
-        .intent-card.hovered .intent-card__inner {
-          transform: rotateY(180deg);
-        }
-        @keyframes float {
-          0% { transform: translateY(0); }
-          100% { transform: translateY(-5px); }
-        }
-      `;
-      document.head.appendChild(style);
-    
-      // Handle the message tab switching with animation
-      const messageTabs = document.querySelectorAll('.message-tab');
-      const professionalCards = document.getElementById('professional-cards');
-      const personalCards = document.getElementById('personal-cards');
-      
-      messageTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-          if (this.classList.contains('active')) return;
-          
-          messageTabs.forEach(t => t.classList.remove('active'));
-          this.classList.add('active');
-          
-          // Add subtle scale effect on click
-          this.style.transform = 'scale(0.95)';
-          setTimeout(() => {
-            this.style.transform = 'translateY(-1px)';
-          }, 150);
-          
-          const type = this.getAttribute('data-type');
-          
-          if (type === 'professional') {
-            // Animate out personal cards
-            if (personalCards.style.display !== 'none') {
-              personalCards.style.opacity = '1';
-              personalCards.style.transition = 'opacity 0.3s ease';
-              personalCards.style.opacity = '0';
-              
-              setTimeout(() => {
-                personalCards.style.display = 'none';
-                
-                // Animate in professional cards
-                professionalCards.style.display = 'flex';
-                professionalCards.style.opacity = '0';
-                
-                // Reset card positions for animation
-                const cards = professionalCards.querySelectorAll('.intent-card');
-                cards.forEach((card, i) => {
-                  card.style.opacity = '0';
-                  card.style.transform = 'translateY(20px)';
-                  
-                  setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                  }, 50 + (i * 100));
-                });
-                
-                professionalCards.style.transition = 'opacity 0.5s ease';
-                professionalCards.style.opacity = '1';
-              }, 300);
-            }
-          } else {
-            // Animate out professional cards
-            if (professionalCards.style.display !== 'none') {
-              professionalCards.style.opacity = '1';
-              professionalCards.style.transition = 'opacity 0.3s ease';
-              professionalCards.style.opacity = '0';
-              
-              setTimeout(() => {
-                professionalCards.style.display = 'none';
-                
-                // Animate in personal cards
-                personalCards.style.display = 'flex';
-                personalCards.style.opacity = '0';
-                
-                // Reset card positions for animation
-                const cards = personalCards.querySelectorAll('.intent-card');
-                cards.forEach((card, i) => {
-                  card.style.opacity = '0';
-                  card.style.transform = 'translateY(20px)';
-                  
-                  setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                  }, 50 + (i * 100));
-                });
-                
-                personalCards.style.transition = 'opacity 0.5s ease';
-                personalCards.style.opacity = '1';
-              }, 300);
-            }
-          }
-        });
-      });
-      
-      // Animation for the heart
-      const heartIcon = document.querySelector('.heart-icon');
-      const heartGlow = document.querySelector('.heart-glow');
-      
-      // Apply subtle animations
-      if (heartIcon && heartGlow) {
-        setInterval(() => {
-          heartGlow.style.animation = 'none';
-          setTimeout(() => {
-            heartGlow.style.animation = 'glow 3s ease-in-out infinite';
-          }, 10);
-        }, 3000);
-      }
+      event.preventDefault();
     });
   </script>
-  </body>
+</body>
 </html> 

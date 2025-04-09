@@ -281,7 +281,7 @@
     }
     
     footer {
-      padding: 2.5rem 0;
+      padding: 3rem 0;
       background-color: var(--gray-800);
       color: var(--gray-200);
     }
@@ -290,12 +290,18 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 2rem;
+      margin-bottom: 2rem;
     }
     
     .footer-logo {
       font-weight: 600;
       font-size: 1.25rem;
       color: white;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
     }
     
     .footer-links {
@@ -313,10 +319,45 @@
       color: white;
     }
     
-    .copyright {
-      margin-top: 2rem;
-      text-align: center;
+    .social-links {
+      display: flex;
+      gap: 1rem;
+    }
+    
+    .social-links a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.5rem;
+      height: 2.5rem;
+      border-radius: 50%;
+      background-color: rgba(255, 255, 255, 0.1);
       color: var(--gray-300);
+      transition: all 0.3s ease;
+    }
+    
+    .social-links a:hover {
+      background-color: var(--primary);
+      color: white;
+      transform: translateY(-3px);
+    }
+    
+    .footer-disclaimer {
+      margin-bottom: 1.5rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background-color: rgba(255, 255, 255, 0.05);
+      font-size: 0.875rem;
+      color: var(--gray-300);
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .copyright {
+      text-align: center;
+      color: var(--gray-400);
       font-size: 0.875rem;
     }
     
@@ -331,6 +372,8 @@
       
       .footer-content {
         flex-direction: column;
+        align-items: center;
+        text-align: center;
         gap: 1.5rem;
       }
     }
@@ -346,6 +389,296 @@
       
       .features, .signup {
         padding: 3rem 0;
+      }
+    }
+    
+    /* Challenges Section */
+    .challenges {
+      padding: 5rem 0;
+      background-color: var(--gray-50);
+    }
+    
+    .challenges h2 {
+      text-align: center;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      color: var(--gray-900);
+    }
+    
+    .challenges-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .challenge-card {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .challenge-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .challenge-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 3rem;
+      width: 3rem;
+      border-radius: 0.5rem;
+      margin-bottom: 1.5rem;
+      background-color: var(--primary-light);
+      color: white;
+    }
+    
+    .challenge-card h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.75rem;
+      color: var(--gray-900);
+      font-weight: 600;
+    }
+    
+    .challenge-card p {
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+    
+    /* How It Works Section */
+    .how-it-works {
+      padding: 5rem 0;
+      background-color: white;
+    }
+    
+    .how-it-works h2 {
+      text-align: center;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      color: var(--gray-900);
+    }
+    
+    .steps {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+    
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 3.5rem;
+      left: 1.5rem;
+      width: 2px;
+      height: calc(100% - 1rem);
+      background-color: var(--primary-light);
+      opacity: 0.5;
+    }
+    
+    .step-number {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background-color: var(--primary);
+      color: white;
+      font-weight: 700;
+      font-size: 1.25rem;
+      margin-right: 1.5rem;
+      box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.3);
+    }
+    
+    .step-content {
+      padding-top: 0.25rem;
+    }
+    
+    .step h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--gray-900);
+    }
+    
+    .step p {
+      color: var(--gray-600);
+      line-height: 1.6;
+    }
+    
+    /* Message Examples Section */
+    .examples {
+      padding: 5rem 0;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(79, 70, 229, 0.1) 100%);
+    }
+    
+    .examples h2 {
+      text-align: center;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 3rem;
+      color: var(--gray-900);
+    }
+    
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+    }
+    
+    .example-card {
+      background-color: white;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .example-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .example-header {
+      padding: 1rem 1.5rem;
+      background-color: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .example-tag {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--primary-light);
+      color: white;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .example-content {
+      padding: 1.5rem;
+      flex-grow: 1;
+    }
+    
+    .example-content p {
+      color: var(--gray-700);
+      line-height: 1.6;
+      font-style: italic;
+    }
+    
+    .example-footer {
+      padding: 1rem 1.5rem;
+      background-color: var(--gray-50);
+      border-top: 1px solid var(--gray-200);
+      color: var(--gray-600);
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    /* Demo Section */
+    .demo {
+      padding: 5rem 0;
+      background-color: white;
+    }
+    
+    .demo h2 {
+      text-align: center;
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--gray-900);
+    }
+    
+    .demo-intro {
+      text-align: center;
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      color: var(--gray-600);
+      font-size: 1.125rem;
+    }
+    
+    .demo-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .demo-controls {
+      background-color: var(--gray-50);
+      padding: 2rem;
+      border-radius: 0.75rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .demo-form .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .demo-select {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.5rem;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+      background-color: white;
+    }
+    
+    .demo-select:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    
+    .demo-result {
+      background-color: var(--gray-50);
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .demo-message-container {
+      padding: 2rem;
+      min-height: 300px;
+      display: flex;
+      align-items: center;
+    }
+    
+    .demo-message {
+      background-color: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      border-left: 4px solid var(--primary);
+      font-style: italic;
+      color: var(--gray-700);
+      line-height: 1.6;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    @media (max-width: 768px) {
+      .demo-container {
+        grid-template-columns: 1fr;
+      }
+      
+      .demo-message-container {
+        min-height: 200px;
       }
     }
   </style>
@@ -411,6 +744,184 @@
     </div>
   </section>
 
+  <section class="challenges">
+    <div class="container">
+      <h2>Solve Common Communication Challenges</h2>
+      <div class="challenges-grid">
+        <div class="challenge-card">
+          <div class="challenge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+          <h3>"I never know what to say..."</h3>
+          <p>Overcome writer's block and find the perfect words for any situation, from congratulations to condolences.</p>
+        </div>
+        
+        <div class="challenge-card">
+          <div class="challenge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 11 12 14 22 4"></polyline>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+            </svg>
+          </div>
+          <h3>"Is this message coming across right?"</h3>
+          <p>Ensure your tone and wording match your intentions, avoiding miscommunication or unintended emotions.</p>
+        </div>
+        
+        <div class="challenge-card">
+          <div class="challenge-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </div>
+          <h3>"How do I maintain this relationship?"</h3>
+          <p>Keep connections strong with timely, thoughtful messages that deepen bonds and show you care.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-it-works">
+    <div class="container">
+      <h2>How HeartGlow AI Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3>Choose Your Recipient</h3>
+            <p>Select who you're writing to and your relationship with them.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3>Specify Your Intent</h3>
+            <p>Tell us what you want to express - a thank you, congratulations, or just keeping in touch.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3>Select Your Tone</h3>
+            <p>Choose how you want your message to sound - warm, professional, casual, or formal.</p>
+          </div>
+        </div>
+        
+        <div class="step">
+          <div class="step-number">4</div>
+          <div class="step-content">
+            <h3>Generate & Personalize</h3>
+            <p>Our AI crafts a message that you can edit and make your own before sending.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="examples">
+    <div class="container">
+      <h2>Messages Crafted with HeartGlow AI</h2>
+      <div class="examples-grid">
+        <div class="example-card">
+          <div class="example-header">
+            <span class="example-tag">Thank You Note</span>
+          </div>
+          <div class="example-content">
+            <p>Thank you so much for your incredible support during my job transition. Your advice and encouragement made all the difference in helping me find my confidence. I'm grateful not just for your practical help, but for how you believed in me even when I was doubting myself.</p>
+          </div>
+          <div class="example-footer">
+            <span>To: Mentor</span>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <div class="example-header">
+            <span class="example-tag">Birthday Wish</span>
+          </div>
+          <div class="example-content">
+            <p>Happy birthday, Mom! As another year passes, I find myself more grateful than ever for your wisdom, your strength, and your endless love. You've shaped who I am in ways I'm still discovering. Today I hope you feel surrounded by all the joy and warmth you've always given to others.</p>
+          </div>
+          <div class="example-footer">
+            <span>To: Mother</span>
+          </div>
+        </div>
+        
+        <div class="example-card">
+          <div class="example-header">
+            <span class="example-tag">Reconnection</span>
+          </div>
+          <div class="example-content">
+            <p>It's been too long since we caught up! I was thinking about our hiking trip last summer and all those stories around the campfire. Those memories always make me smile. I'm going to be in your area next month and would love to grab coffee if you're free. No pressure, but it would be great to reconnect.</p>
+          </div>
+          <div class="example-footer">
+            <span>To: Old Friend</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="demo">
+    <div class="container">
+      <h2>Try HeartGlow AI</h2>
+      <p class="demo-intro">Select options below to see how our AI crafts personalized messages.</p>
+      
+      <div class="demo-container">
+        <div class="demo-controls">
+          <div class="demo-form">
+            <div class="form-group">
+              <label for="demo-recipient">Recipient</label>
+              <select id="demo-recipient" class="demo-select">
+                <option value="friend">Friend</option>
+                <option value="parent">Parent</option>
+                <option value="partner">Partner</option>
+                <option value="colleague">Colleague</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="demo-occasion">Occasion</label>
+              <select id="demo-occasion" class="demo-select">
+                <option value="thank-you">Thank You</option>
+                <option value="birthday">Birthday</option>
+                <option value="congratulations">Congratulations</option>
+                <option value="thinking-of-you">Thinking of You</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="demo-tone">Tone</label>
+              <select id="demo-tone" class="demo-select">
+                <option value="warm">Warm & Friendly</option>
+                <option value="professional">Professional</option>
+                <option value="casual">Casual</option>
+                <option value="heartfelt">Heartfelt</option>
+              </select>
+            </div>
+            
+            <button id="generate-demo" class="btn btn-primary">Generate Message</button>
+          </div>
+        </div>
+        
+        <div class="demo-result">
+          <div class="demo-message-container">
+            <div id="demo-message" class="demo-message">
+              <p>Your personalized message will appear here after you select options and click "Generate Message".</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="signup">
     <div class="container signup-container">
       <div class="signup-content">
@@ -465,16 +976,45 @@
   <footer>
     <div class="container">
       <div class="footer-content">
-        <div class="footer-logo">HeartGlow AI</div>
+        <div class="footer-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+          </svg>
+          HeartGlow AI
+        </div>
         <div class="footer-links">
           <a href="#">About</a>
           <a href="#">Privacy</a>
           <a href="#">Terms</a>
           <a href="#">Contact</a>
         </div>
+        <div class="social-links">
+          <a href="#" aria-label="Twitter">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
+            </svg>
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+              <rect x="2" y="9" width="4" height="12"></rect>
+              <circle cx="4" cy="4" r="2"></circle>
+            </svg>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+              <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+              <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+            </svg>
+          </a>
+        </div>
+      </div>
+      <div class="footer-disclaimer">
+        <p>HeartGlow AI respectfully enhances human communication - we don't replace it. Our platform assists you in expressing your authentic thoughts and feelings.</p>
       </div>
       <div class="copyright">
-        &copy; 2023 HeartGlow AI. All rights reserved.
+        &copy; 2023 HeartGlow AI, Inc. All rights reserved.
       </div>
     </div>
   </footer>
@@ -513,6 +1053,60 @@
       
       event.preventDefault();
     });
+    
+    // Demo message generator
+    document.getElementById('generate-demo').addEventListener('click', function() {
+      const recipient = document.getElementById('demo-recipient').value;
+      const occasion = document.getElementById('demo-occasion').value;
+      const tone = document.getElementById('demo-tone').value;
+      
+      // Show loading state
+      const demoMessage = document.getElementById('demo-message');
+      demoMessage.innerHTML = '<p>Generating your message...</p>';
+      
+      // Simulate API call delay
+      setTimeout(() => {
+        // Get message based on selections
+        const message = getExampleMessage(recipient, occasion, tone);
+        demoMessage.innerHTML = `<p>${message}</p>`;
+      }, 1000);
+    });
+    
+    // Sample messages based on selections
+    function getExampleMessage(recipient, occasion, tone) {
+      const messages = {
+        // Friend messages
+        'friend-thank-you-warm': "Thank you so much for being there for me. Your support means more than I can express, and I'm so lucky to have a friend like you in my life.",
+        'friend-birthday-warm': "Happy Birthday to my amazing friend! I hope your day is filled with all the joy and laughter you bring to others. You deserve nothing but the best!",
+        'friend-congratulations-warm': "Congratulations on your incredible achievement! I'm so proud of you and all the hard work you've put in. Can't wait to celebrate together!",
+        'friend-thinking-of-you-warm': "Just wanted to let you know I've been thinking about you lately. Hope everything is going well, and let's catch up soon over coffee.",
+        
+        // Parent messages
+        'parent-thank-you-heartfelt': "Mom/Dad, I don't say it enough, but thank you for everything you've done and continue to do for me. Your unconditional love and support have shaped who I am today.",
+        'parent-birthday-heartfelt': "Happy birthday to the most amazing parent anyone could ask for. Your wisdom, patience, and love continue to inspire me every day.",
+        'parent-congratulations-heartfelt': "Congratulations on your achievement! I'm so proud to call you my parent, and inspired by your dedication and success.",
+        'parent-thinking-of-you-heartfelt': "Just wanted to let you know I've been thinking about you and all the wonderful memories we've shared. Looking forward to making more soon.",
+        
+        // Partner messages
+        'partner-thank-you-heartfelt': "I just wanted to take a moment to thank you for being my rock, my joy, and my inspiration. Every day with you is a gift.",
+        'partner-birthday-heartfelt': "Happy birthday to the love of my life! You make every day special, but today is all about celebrating you and the wonderful person you are.",
+        'partner-congratulations-heartfelt': "Congratulations, my love! Your hard work and dedication have paid off, and I couldn't be prouder to be by your side through it all.",
+        'partner-thinking-of-you-heartfelt': "Just thinking about you and how lucky I am to have you in my life. You bring so much joy and meaning to every day.",
+        
+        // Colleague messages
+        'colleague-thank-you-professional': "I wanted to express my sincere appreciation for your assistance with the recent project. Your expertise and support made a significant difference.",
+        'colleague-birthday-professional': "Happy birthday! Wishing you a wonderful day and a successful year ahead. It's a pleasure working with you.",
+        'colleague-congratulations-professional': "Congratulations on your well-deserved achievement. Your dedication and excellence are truly inspiring to the entire team.",
+        'colleague-thinking-of-you-professional': "Just reaching out to see how you're doing. I value our professional relationship and hope things are going well for you."
+      };
+      
+      // Default message if specific combination isn't found
+      const defaultMessage = "Thank you for using HeartGlow AI! We help craft personalized messages for every relationship and occasion in your life.";
+      
+      // Try to find the specific message
+      const messageKey = `${recipient}-${occasion}-${tone}`;
+      return messages[messageKey] || defaultMessage;
+    }
   </script>
 </body>
 </html> 

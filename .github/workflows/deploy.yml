@@ -1,1 +1,86 @@
- 
+name: Deploy HeartGlow Dashboard
+
+on:
+  push:
+    branches:
+      - main
+      - verified-deployment
+      - stable-dashboard-deployment
+    paths:
+      - 'heartglow-dashboard/**'
+      - '.github/workflows/deploy.yml'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetch all history for proper branch tracking
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: heartglow-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd heartglow-dashboard
+          npm ci
+
+      - name: Build dashboard
+        run: |
+          cd heartglow-dashboard
+          # Create necessary environment variables
+          echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          npm run export || npm run build
+
+      - name: Prepare deployment files
+        run: |
+          # Create a temporary directory for deployment
+          rm -rf temp_deploy
+          mkdir -p temp_deploy/dashboard
+          
+          # Copy the out directory contents to the dashboard subdirectory
+          cp -r heartglow-dashboard/out/* temp_deploy/dashboard/
+          touch temp_deploy/dashboard/.nojekyll
+          
+          # Create dashboard redirect in temp directory  
+          cat > temp_deploy/dashboard-redirect.html << EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0;url=/dashboard/">
+            <title>Redirecting to Dashboard</title>
+          </head>
+          <body>
+            <p>Redirecting to dashboard...</p>
+            <script>
+              window.location.href = "/dashboard/";
+            </script>
+          </body>
+          </html>
+          EOF
+          
+          touch temp_deploy/.nojekyll
+
+      # Only update the dashboard directory, preserving other content
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: temp_deploy/dashboard
+          target-folder: dashboard
+          clean-exclude: |
+            .nojekyll
+            CNAME
+            index.html
+            assets/**
+            css/**
+            js/**
+            feedback.html
+            robots.txt
+          commit-message: "Deploy dashboard only - preserving main site [skip ci]" 

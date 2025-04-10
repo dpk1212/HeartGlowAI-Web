@@ -22,7 +22,7 @@ const templates: Template[] = [
     title: 'Reconnect',
     description: 'Reach out to someone you\'ve lost touch with, in a thoughtful way.',
     intent: 'reconnect',
-    tone: 'Sincere',
+    tone: 'Warm',
     icon: (
       <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -91,6 +91,27 @@ const templates: Template[] = [
   }
 ];
 
+// Emoji mapping for template tone chips
+const getToneEmoji = (tone: string): string => {
+  switch (tone.toLowerCase()) {
+    case 'sincere':
+      return '🙏';
+    case 'warm':
+      return '💬';
+    case 'empathetic':
+      return '🧘';
+    case 'excited':
+      return '🎉';
+    case 'respectful':
+      return '🤝';
+    case 'humble':
+      return '😔';
+    default:
+      return '';
+  }
+};
+
+// Helper function to get appropriate tone chip color classes
 const getToneColor = (tone: string): string => {
   switch (tone.toLowerCase()) {
     case 'sincere':
@@ -103,6 +124,8 @@ const getToneColor = (tone: string): string => {
       return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
     case 'respectful':
       return 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-200';
+    case 'humble':
+      return 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200';
     default:
       return 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200';
   }
@@ -133,8 +156,8 @@ const TemplateCard: React.FC<{ template: Template; index: number }> = ({ templat
         <h3 className="text-lg font-bold text-heartglow-charcoal dark:text-heartglow-offwhite group-hover:text-heartglow-pink dark:group-hover:text-heartglow-pink transition-colors duration-300">
           {template.title}
         </h3>
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${getToneColor(template.tone)}`}>
-          {template.tone}
+        <span className={`text-xs font-medium px-2 py-1 rounded-full ${getToneColor(template.tone)} flex items-center gap-1`}>
+          {getToneEmoji(template.tone)} {template.tone}
         </span>
       </div>
       
@@ -142,11 +165,13 @@ const TemplateCard: React.FC<{ template: Template; index: number }> = ({ templat
         {template.description}
       </p>
       
-      <div className="mt-4 text-heartglow-indigo dark:text-heartglow-pink text-sm font-medium flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-        <span>Get started</span>
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+      <div className="mt-4 flex items-center justify-center">
+        <span className="bg-heartglow-pink/10 hover:bg-heartglow-pink/20 text-heartglow-pink font-medium py-2 px-4 rounded-full text-sm flex items-center transition-all duration-300 group-hover:shadow-sm">
+          <span>Start Message</span>
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </span>
       </div>
     </Link>
   );

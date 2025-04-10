@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { motion } from 'framer-motion';
-import { collection, query, getDocs, orderBy, limit, collectionGroup } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, limit, collectionGroup, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useAuth, getRouteWithBasePath } from '../pages/_app';
 import { containerVariants, itemVariantsY } from '../lib/animations';
@@ -46,20 +46,21 @@ export default function RecentMessagesList() {
         );
         
         // Create an array of promises to resolve connection names
-        const messagesWithConnectionPromises = userMessages.map(async doc => {
-          const data = doc.data();
+        const messagesWithConnectionPromises = userMessages.map(async docSnapshot => {
+          const data = docSnapshot.data();
           
           // Extract connection ID from the path
           // Path format: users/{userId}/connections/{connectionId}/messages/{messageId}
-          const pathParts = doc.ref.path.split('/');
+          const pathParts = docSnapshot.ref.path.split('/');
           const connectionId = pathParts[3]; // Index 3 should be the connection ID
           
-          // Get connection details
-          const connectionDoc = await db.doc(`users/${user.uid}/connections/${connectionId}`).get();
-          const connectionData = connectionDoc.data();
+          // Get connection details using proper Firestore v9 syntax
+          const connectionDocRef = doc(db, `users/${user.uid}/connections/${connectionId}`);
+          const connectionDocSnapshot = await getDoc(connectionDocRef);
+          const connectionData = connectionDocSnapshot.data();
           
           return {
-            id: doc.id,
+            id: docSnapshot.id,
             text: data.text,
             sentiment: data.sentiment || 'neutral',
             createdAt: data.createdAt?.toDate() || new Date(),

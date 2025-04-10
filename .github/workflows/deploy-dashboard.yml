@@ -1,0 +1,64 @@
+name: Deploy HeartGlow Dashboard
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'heartglow-dashboard/**'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: heartglow-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd heartglow-dashboard
+          npm ci
+
+      - name: Build dashboard
+        run: |
+          cd heartglow-dashboard
+          npm run export
+
+      - name: Setup dashboard directory
+        run: |
+          mkdir -p dashboard
+          cp -r heartglow-dashboard/out/* dashboard/
+          touch dashboard/.nojekyll
+          
+      - name: Create dashboard redirect
+        run: |
+          cat > dashboard-redirect.html << EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0;url=/dashboard/">
+            <title>Redirecting to Dashboard</title>
+          </head>
+          <body>
+            <p>Redirecting to dashboard...</p>
+            <script>
+              window.location.href = "/dashboard/";
+            </script>
+          </body>
+          </html>
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: dashboard
+          target-folder: dashboard
+          clean: true 

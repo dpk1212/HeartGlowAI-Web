@@ -20,7 +20,7 @@ const templates: Template[] = [
   {
     id: 'reconnect',
     title: 'Reconnect',
-    description: 'Reach out to someone you've lost touch with, in a thoughtful way.',
+    description: 'Reach out to someone you\'ve lost touch with, in a thoughtful way.',
     intent: 'reconnect',
     tone: 'sincere',
     icon: (
@@ -68,7 +68,7 @@ const templates: Template[] = [
   {
     id: 'celebrate',
     title: 'Celebrate',
-    description: 'Join in someone's joy with a message that amplifies their happiness.',
+    description: 'Join in someone\'s joy with a message that amplifies their happiness.',
     intent: 'celebration',
     tone: 'excited',
     icon: (
@@ -80,7 +80,7 @@ const templates: Template[] = [
   {
     id: 'request',
     title: 'Request',
-    description: 'Ask for something in a way that's clear, kind, and respectful.',
+    description: 'Ask for something in a way that\'s clear, kind, and respectful.',
     intent: 'request',
     tone: 'respectful',
     icon: (

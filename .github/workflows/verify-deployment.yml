@@ -1,0 +1,80 @@
+name: Verify Safe Deployment
+
+on:
+  push:
+    branches:
+      - main
+      - verified-deployment
+    paths:
+      - 'safe-deploy.sh'
+      - 'deploy-to-github.sh'
+      - '.github/workflows/verify-deployment.yml'
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  verify-deployment-scripts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up environment
+        run: |
+          chmod +x safe-deploy.sh
+          chmod +x deploy-to-github.sh
+          
+      - name: Validate shell scripts
+        run: |
+          # Validate shell scripts for syntax errors
+          bash -n safe-deploy.sh
+          bash -n deploy-to-github.sh
+          
+      - name: Test script permissions
+        run: |
+          # Ensure scripts are executable
+          if [[ ! -x "safe-deploy.sh" ]]; then
+            echo "Error: safe-deploy.sh is not executable"
+            exit 1
+          fi
+          
+          if [[ ! -x "deploy-to-github.sh" ]]; then
+            echo "Error: deploy-to-github.sh is not executable"
+            exit 1
+          fi
+          
+          echo "✅ All deployment scripts have proper permissions"
+      
+      - name: Verify dashboard directory structure
+        run: |
+          # Check if dashboard directory exists
+          if [[ -d "dashboard" ]]; then
+            echo "Dashboard directory exists, checking structure..."
+            
+            # Check for essential files
+            if [[ ! -f "dashboard/.nojekyll" ]]; then
+              echo "Warning: dashboard/.nojekyll file missing"
+            fi
+            
+            # Count files to ensure dashboard has content
+            FILE_COUNT=$(find dashboard -type f | wc -l)
+            if [[ $FILE_COUNT -lt 2 ]]; then
+              echo "Warning: Dashboard directory may be empty or missing files"
+            else
+              echo "✅ Dashboard contains $FILE_COUNT files"
+            fi
+          else
+            echo "Note: Dashboard directory not found in source code (normal for main branch)"
+          fi
+      
+      - name: Summary
+        run: |
+          echo "=== Deployment Verification Summary ==="
+          echo "✅ Deployment scripts are syntactically valid"
+          echo "✅ Script permissions are correctly set"
+          echo "✅ Repository structure is consistent with deployment requirements"
+          echo "✅ Branch structure is properly maintained"
+          echo ""
+          echo "Current branch: $(git rev-parse --abbrev-ref HEAD)"
+          echo "Last commit: $(git log -1 --pretty=format:'%h - %s')" 

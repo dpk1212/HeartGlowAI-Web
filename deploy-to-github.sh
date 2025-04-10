@@ -26,7 +26,7 @@ npm install
 
 # Set up environment variables for GitHub Pages
 echo "Setting up environment variables for production..."
-echo "NEXT_PUBLIC_BASE_PATH=/ConnectlyAI" > .env.production.local
+echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
 
 # Build the Next.js app
 echo "Building dashboard..."
@@ -36,41 +36,66 @@ npm run build
 echo "Exporting static files..."
 npm run export
 
-# Clean or create gh-pages branch
-echo "Preparing gh-pages branch..."
-git checkout -b gh-pages-temp
+# Fetch current gh-pages branch to a temporary directory
+echo "Fetching current gh-pages branch..."
+cd ..
+git fetch origin gh-pages:gh-pages || true
+mkdir -p temp_deploy
+git worktree add temp_deploy gh-pages || git worktree add temp_deploy -b gh-pages
+
+# Create dashboard directory in gh-pages if it doesn't exist
+echo "Preparing dashboard directory..."
+mkdir -p temp_deploy/dashboard
+
+# Clean dashboard directory but preserve other content
+echo "Cleaning dashboard directory..."
+rm -rf temp_deploy/dashboard/*
 
 # Create .nojekyll file to bypass Jekyll processing
 echo "Creating .nojekyll file..."
-touch out/.nojekyll
+touch heartglow-dashboard/out/.nojekyll
+touch temp_deploy/.nojekyll
 
-# Copy the out directory contents to the root
-echo "Moving built files to root..."
-cp -r out/* ../
-cp out/.nojekyll ../
+# Copy the out directory contents to the dashboard subdirectory
+echo "Moving built files to dashboard directory..."
+cp -r heartglow-dashboard/out/* temp_deploy/dashboard/
+cp heartglow-dashboard/out/.nojekyll temp_deploy/dashboard/
 
-# Return to the main directory
-cd ..
+# Create simple redirect from dashboard root to dashboard/index.html
+echo "Creating dashboard redirect..."
+cat > temp_deploy/dashboard/index.html << EOF
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="0;url=index.html">
+  <title>HeartGlow AI Dashboard</title>
+</head>
+<body>
+  <p>Redirecting to dashboard...</p>
+</body>
+</html>
+EOF
 
-# Add all files to git
-echo "Adding files to git..."
-git add .
-
-# Commit the changes
+# Commit and push the changes from the temporary directory
 echo "Committing changes..."
-git commit -m "Deploy HeartGlow AI Dashboard to GitHub Pages"
+cd temp_deploy
+git add .
+git commit -m "Deploy HeartGlow AI Dashboard to /dashboard subdirectory"
 
 # Push to GitHub Pages
 echo "Pushing to gh-pages branch..."
-git push origin gh-pages-temp:gh-pages -f
+git push origin gh-pages
+
+# Clean up
+echo "Cleaning up..."
+cd ..
+git worktree remove temp_deploy
+rm -rf temp_deploy
 
 # Return to original branch
 echo "Returning to original branch..."
 git checkout $CURRENT_BRANCH
 
-# Clean up temporary branch
-echo "Cleaning up..."
-git branch -D gh-pages-temp
-
-echo "Deployment complete! Your HeartGlow AI Dashboard is now available on GitHub Pages."
-echo "Visit: https://$(git config --get remote.origin.url | sed -e 's/^git@github.com://' -e 's/.git$//' -e 's/:/\//' -e 's/^https:\/\/github.com\///')" 
+echo "Deployment complete! Your HeartGlow AI Dashboard is now available at:"
+echo "https://heartglowai.com/dashboard/" 

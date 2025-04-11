@@ -83,8 +83,8 @@ const Footer: React.FC = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link href={getRouteWithBasePath("/templates")} className="text-sm text-gray-600 dark:text-gray-400 hover:text-heartglow-pink dark:hover:text-heartglow-pink transition-colors duration-200">
-                    Templates
+                  <Link href={getRouteWithBasePath("/connections")} className="text-sm text-gray-600 dark:text-gray-400 hover:text-heartglow-pink dark:hover:text-heartglow-pink transition-colors duration-200">
+                    Connections
                   </Link>
                 </li>
                 <li>

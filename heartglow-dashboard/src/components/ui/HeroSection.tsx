@@ -72,7 +72,7 @@ const HeroSection = () => {
             whileTap={{ scale: 0.95 }}
           >
             <Link
-              href={getRouteWithBasePath("/dashboard#templates")}
+              href={getRouteWithBasePath("/#templates")}
               className="text-heartglow-indigo dark:text-heartglow-pink font-medium hover:underline inline-flex items-center group"
               aria-label="Explore message templates"
             >

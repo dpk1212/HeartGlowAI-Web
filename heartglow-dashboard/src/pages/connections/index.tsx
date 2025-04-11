@@ -120,7 +120,7 @@ const ConnectionsPage = () => {
               <div>
                 <div className="flex items-center mb-2">
                   <Link
-                    href={getRouteWithBasePath('/dashboard')}
+                    href={getRouteWithBasePath('/')}
                     className="text-heartglow-indigo dark:text-heartglow-pink hover:underline flex items-center mr-3"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">

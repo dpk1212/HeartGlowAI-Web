@@ -57,7 +57,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
           <nav className="hidden md:flex items-center gap-8 text-sm">
             <Link 
-              href={getRouteWithBasePath("/dashboard")} 
+              href={getRouteWithBasePath("/")} 
               className="text-gray-300 hover:text-white transition-colors duration-200"
               aria-label="Dashboard"
             >
@@ -69,6 +69,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               aria-label="Create a new message"
             >
               Create
+            </Link>
+            <Link 
+              href={getRouteWithBasePath("/connections")} 
+              className="text-gray-300 hover:text-white transition-colors duration-200"
+              aria-label="Manage your connections"
+            >
+              Connections
             </Link>
           </nav>
 

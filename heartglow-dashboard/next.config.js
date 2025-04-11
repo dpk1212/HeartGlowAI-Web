@@ -12,7 +12,10 @@ const nextConfig = {
     // Add a build timestamp to bust cache on new deployments
     NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().getTime().toString(),
   },
-  // Cache control will need to be handled at the server level since headers aren't compatible with export
+  // Disable source maps in production to reduce bundle size
+  productionBrowserSourceMaps: false,
+  // Make sure we're handling paths correctly for the static export
+  assetPrefix: '/dashboard/',
 }
 
 module.exports = nextConfig 

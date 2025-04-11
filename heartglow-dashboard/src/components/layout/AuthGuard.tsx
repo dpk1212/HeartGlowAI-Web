@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../../context/AuthContext';
 
@@ -9,15 +9,32 @@ type AuthGuardProps = {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { currentUser, loading } = useAuth();
   const router = useRouter();
+  const [authCheckComplete, setAuthCheckComplete] = useState(false);
 
   useEffect(() => {
-    if (!loading && !currentUser) {
-      router.push('/login');
+    if (!loading) {
+      if (!currentUser) {
+        router.push('/login');
+      }
+      setAuthCheckComplete(true);
     }
-  }, [currentUser, loading, router]);
+    
+    // Safety timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (!authCheckComplete) {
+        console.warn('Auth guard timeout - forcing completion');
+        setAuthCheckComplete(true);
+        if (!currentUser) {
+          router.push('/login');
+        }
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [currentUser, loading, router, authCheckComplete]);
 
   // Show loading state
-  if (loading) {
+  if (loading && !authCheckComplete) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse">

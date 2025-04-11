@@ -34,13 +34,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('Setting up auth state listener');
+    
+    // Add a timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('Auth state timeout - forcing load complete');
+        setLoading(false);
+      }
+    }, 10000); // 10 second timeout
+    
     const unsubscribe = onAuthStateChangedListener((user) => {
+      console.log('Auth state changed:', user ? 'User logged in' : 'No user');
       setCurrentUser(user);
       setLoading(false);
+      clearTimeout(timeoutId);
     });
 
-    return unsubscribe;
-  }, []);
+    return () => {
+      unsubscribe();
+      clearTimeout(timeoutId);
+    };
+  }, [loading]);
 
   const login = async (email: string, password: string) => {
     return signIn(email, password);

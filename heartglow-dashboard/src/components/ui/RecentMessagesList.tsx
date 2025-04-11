@@ -152,25 +152,38 @@ const RecentMessagesList: React.FC = () => {
   };
 
   useEffect(() => {
+    let isMounted = true;
+    
     const loadMessages = async () => {
+      if (!currentUser) {
+        console.log('No current user, skipping message fetch');
+        if (isMounted) setLoading(false);
+        return;
+      }
+      
       try {
-        setLoading(true);
-        setError(null);
+        if (isMounted) setLoading(true);
+        if (isMounted) setError(null);
         
         // Fetch real data from Firestore
         console.log('Attempting to fetch messages for user:', currentUser?.uid);
         const userMessages = await fetchUserMessages(currentUser);
         console.log('Fetched messages:', userMessages);
-        setMessages(userMessages);
+        
+        if (isMounted) setMessages(userMessages);
       } catch (err) {
         console.error('Error loading messages:', err);
-        setError('Failed to load messages');
+        if (isMounted) setError('Failed to load messages');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadMessages();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [currentUser]);
 
   return (

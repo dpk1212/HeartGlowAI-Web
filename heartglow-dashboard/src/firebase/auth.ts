@@ -50,5 +50,17 @@ export const logOut = async () => {
 };
 
 export const onAuthStateChangedListener = (callback: (user: User | null) => void) => {
-  return onAuthStateChanged(auth, callback);
+  try {
+    console.log('Setting up auth state listener');
+    return onAuthStateChanged(auth, callback, (error) => {
+      console.error('Auth state change error:', error);
+      // Ensure we call the callback even on error to prevent infinite loading
+      callback(null);
+    });
+  } catch (error) {
+    console.error('Failed to set up auth state listener:', error);
+    // Return a dummy unsubscribe function
+    setTimeout(() => callback(null), 100);
+    return () => {};
+  }
 }; 

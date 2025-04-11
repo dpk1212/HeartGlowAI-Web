@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface FormatStepProps {
   onNext: (data: any) => void;
@@ -17,19 +18,19 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   });
 
   const formats = [
-    { id: 'text', label: 'Text Message', icon: '📱' },
-    { id: 'email', label: 'Email', icon: '📧' },
-    { id: 'conversation', label: 'In-Person Conversation', icon: '💬' },
-    { id: 'card', label: 'Greeting Card', icon: '💌' },
-    { id: 'social', label: 'Social Media', icon: '🌐' },
-    { id: 'letter', label: 'Letter', icon: '✉️' }
+    { id: 'text', label: 'Text Message', icon: '📱', description: 'Simple message for direct delivery' },
+    { id: 'email', label: 'Email', icon: '📧', description: 'Formal message with subject line' },
+    { id: 'conversation', label: 'In-Person Conversation', icon: '💬', description: 'Talking points for face-to-face' },
+    { id: 'card', label: 'Greeting Card', icon: '💌', description: 'Perfect for celebration or gratitude' },
+    { id: 'social', label: 'Social Media', icon: '🌐', description: 'Public post or direct message' },
+    { id: 'letter', label: 'Letter', icon: '✉️', description: 'Traditional format for deep connection' }
   ];
 
   const lengths = [
-    { id: 'brief', label: 'Brief', description: '1-2 sentences' },
-    { id: 'standard', label: 'Standard', description: '1 paragraph' },
-    { id: 'detailed', label: 'Detailed', description: '2-3 paragraphs' },
-    { id: 'extended', label: 'Extended', description: 'Full letter/email' }
+    { id: 'brief', label: 'Brief', description: '1-2 sentences', icon: '🔹' },
+    { id: 'standard', label: 'Standard', description: '1 paragraph', icon: '🔸' },
+    { id: 'detailed', label: 'Detailed', description: '2-3 paragraphs', icon: '📝' },
+    { id: 'extended', label: 'Extended', description: 'Full letter/email', icon: '📄' }
   ];
 
   const handleSubmit = () => {
@@ -37,7 +38,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
       format: {
         type: selectedFormat,
         length: selectedLength,
-        ...formatSpecificOptions
+        options: formatSpecificOptions
       }
     });
   };
@@ -46,8 +47,12 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
     switch (selectedFormat) {
       case 'email':
         return (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email Subject
             </label>
             <input
@@ -57,15 +62,19 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emailSubject: e.target.value
               }))}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
               placeholder="Enter email subject"
             />
-          </div>
+          </motion.div>
         );
       case 'text':
         return (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Emoji Usage
             </label>
             <select
@@ -74,19 +83,23 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emojiPreference: e.target.value
               }))}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
             >
               <option value="none">No emojis</option>
               <option value="minimal">Minimal emojis</option>
               <option value="moderate">Moderate emojis</option>
               <option value="frequent">Frequent emojis</option>
             </select>
-          </div>
+          </motion.div>
         );
       case 'conversation':
         return (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Number of Talking Points
             </label>
             <input
@@ -98,14 +111,18 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 talkingPoints: parseInt(e.target.value)
               }))}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
             />
-          </div>
+          </motion.div>
         );
       case 'social':
         return (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-6 p-4 bg-gray-50 dark:bg-gray-800/30 rounded-lg border border-gray-200 dark:border-gray-700"
+          >
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Platform
             </label>
             <select
@@ -114,7 +131,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 platform: e.target.value
               }))}
-              className="w-full p-2 border rounded-lg"
+              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
             >
               <option value="general">General</option>
               <option value="twitter">Twitter</option>
@@ -122,7 +139,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
               <option value="facebook">Facebook</option>
               <option value="linkedin">LinkedIn</option>
             </select>
-          </div>
+          </motion.div>
         );
       default:
         return null;
@@ -130,54 +147,65 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-        Choose Format & Length
-      </h2>
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Choose Format & Length</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Select how your message will be delivered</p>
+      </div>
 
       <div className="space-y-6">
         {/* Format Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
             Message Format
-          </label>
-          <div className="grid grid-cols-2 gap-4">
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {formats.map((format) => (
-              <button
+              <motion.div
                 key={format.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedFormat(format.id)}
-                className={`p-4 border rounded-lg text-left transition-colors ${
+                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                   selectedFormat === format.id
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300'
+                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
                 }`}
               >
-                <span className="text-2xl mb-2 block">{format.icon}</span>
-                <span className="font-medium">{format.label}</span>
-              </button>
+                <div className="flex items-center mb-2">
+                  <span className="text-2xl mr-2">{format.icon}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{format.label}</span>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-gray-400">{format.description}</p>
+              </motion.div>
             ))}
           </div>
         </div>
 
         {/* Length Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
             Message Length
-          </label>
-          <div className="grid grid-cols-2 gap-4">
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {lengths.map((length) => (
-              <button
+              <motion.div
                 key={length.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedLength(length.id)}
-                className={`p-4 border rounded-lg text-left transition-colors ${
+                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                   selectedLength === length.id
-                    ? 'border-blue-600 bg-blue-50'
-                    : 'border-gray-200 hover:border-blue-300'
+                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
                 }`}
               >
-                <span className="font-medium block">{length.label}</span>
-                <span className="text-sm text-gray-500">{length.description}</span>
-              </button>
+                <div className="flex items-center justify-center mb-2">
+                  <span className="text-xl">{length.icon}</span>
+                </div>
+                <h4 className="font-medium text-center text-gray-900 dark:text-white">{length.label}</h4>
+                <p className="text-sm text-center text-gray-500 dark:text-gray-400">{length.description}</p>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -186,23 +214,23 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
         {selectedFormat && renderFormatSpecificOptions()}
       </div>
 
-      <div className="mt-6 flex space-x-4">
+      <div className="flex justify-between">
         <button
           onClick={onBack}
-          className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
           Back
         </button>
         <button
           onClick={handleSubmit}
           disabled={!selectedFormat || !selectedLength}
-          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium ${
             !selectedFormat || !selectedLength
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
           }`}
         >
-          Continue
+          Next
         </button>
       </div>
     </div>

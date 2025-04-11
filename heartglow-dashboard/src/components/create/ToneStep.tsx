@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion } from 'framer-motion';
 
 interface ToneStepProps {
   onNext: (data: any) => void;
@@ -31,66 +32,73 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-        What tone would you like to use?
-      </h2>
-
-      <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
-          {tones.map((tone) => (
-            <button
-              key={tone.id}
-              onClick={() => {
-                setSelectedTone(tone.id);
-                setShowCustom(tone.id === 'custom');
-              }}
-              className={`p-4 border rounded-lg text-left transition-colors ${
-                selectedTone === tone.id
-                  ? 'border-blue-600 bg-blue-50'
-                  : 'border-gray-200 hover:border-blue-300'
-              }`}
-            >
-              <span className="font-medium block">{tone.label}</span>
-              <span className="text-sm text-gray-500">{tone.description}</span>
-            </button>
-          ))}
-        </div>
-
-        {showCustom && (
-          <div className="mt-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Describe your desired tone
-            </label>
-            <input
-              type="text"
-              value={customTone}
-              onChange={(e) => setCustomTone(e.target.value)}
-              className="w-full p-2 border rounded-lg"
-              placeholder="e.g., Encouraging, Empathetic, etc."
-              required
-            />
-          </div>
-        )}
+    <div className="space-y-6">
+      <div className="text-center">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">What tone would you like to use?</h2>
+        <p className="mt-2 text-gray-600 dark:text-gray-400">Select the tone that best fits your message</p>
       </div>
 
-      <div className="mt-6 flex space-x-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {tones.map((tone) => (
+          <motion.div
+            key={tone.id}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              setSelectedTone(tone.id);
+              setShowCustom(tone.id === 'custom');
+            }}
+            className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+              selectedTone === tone.id
+                ? 'border-heartglow-pink bg-heartglow-pink/5'
+                : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
+            }`}
+          >
+            <div>
+              <h3 className="font-medium text-gray-900 dark:text-white">{tone.label}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">{tone.description}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      {showCustom && (
+        <motion.div 
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          className="mt-4"
+        >
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Describe your desired tone
+          </label>
+          <input
+            type="text"
+            value={customTone}
+            onChange={(e) => setCustomTone(e.target.value)}
+            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
+            placeholder="e.g., Encouraging, Empathetic, etc."
+            required
+          />
+        </motion.div>
+      )}
+
+      <div className="flex justify-between">
         <button
           onClick={onBack}
-          className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
         >
           Back
         </button>
         <button
           onClick={handleSubmit}
           disabled={!selectedTone || (showCustom && !customTone)}
-          className={`flex-1 py-2 px-4 rounded-lg transition-colors ${
+          className={`px-4 py-2 rounded-lg font-medium ${
             !selectedTone || (showCustom && !customTone)
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+              : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
           }`}
         >
-          Continue
+          Next
         </button>
       </div>
     </div>

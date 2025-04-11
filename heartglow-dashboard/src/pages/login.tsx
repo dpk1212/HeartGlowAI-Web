@@ -15,7 +15,7 @@ const Login = () => {
   useEffect(() => {
     // If user is already logged in, redirect to dashboard
     if (currentUser) {
-      router.push('/dashboard/dashboard');
+      router.push('/dashboard/');
     }
   }, [currentUser, router]);
 
@@ -31,7 +31,7 @@ const Login = () => {
       setError('');
       setIsLoading(true);
       await login(email, password);
-      router.push('/dashboard/dashboard');
+      router.push('/dashboard/');
     } catch (err: any) {
       setError('Failed to sign in: ' + (err.message || 'Unknown error'));
     } finally {
@@ -44,7 +44,7 @@ const Login = () => {
       setError('');
       setIsLoading(true);
       await loginWithGoogle();
-      router.push('/dashboard/dashboard');
+      router.push('/dashboard/');
     } catch (err: any) {
       setError('Failed to sign in with Google: ' + (err.message || 'Unknown error'));
     } finally {

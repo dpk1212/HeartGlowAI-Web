@@ -1,0 +1,128 @@
+name: Deploy HeartGlow Complete Site
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: heartglow-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd heartglow-dashboard
+          npm ci
+
+      # First build the dashboard with its original config
+      - name: Build dashboard
+        run: |
+          cd heartglow-dashboard
+          echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          npm run build
+          
+          # Save the dashboard build to a separate directory
+          mkdir -p dashboard-build
+          cp -r out/* dashboard-build/
+          
+          # Clean up for next build
+          rm -rf out
+          rm -rf .next
+
+      # Now build the root site (login page)
+      - name: Build root site
+        run: |
+          cd heartglow-dashboard
+          
+          # Backup original next.config.js
+          cp next.config.js next.config.js.bak
+          
+          # Create simpler next.config.js for root
+          cat > next.config.js << EOF
+          /** @type {import('next').NextConfig} */
+          const nextConfig = {
+            reactStrictMode: true,
+            trailingSlash: true,
+            output: 'export',
+            images: {
+              unoptimized: true,
+            },
+          }
+          module.exports = nextConfig
+          EOF
+          
+          # Copy login page to index for root
+          cp src/pages/login.tsx src/pages/index.tsx
+          
+          # Build the root site
+          npm run build
+          
+          # Restore original config
+          mv next.config.js.bak next.config.js
+          
+          # Restore original index if it exists
+          git checkout -- src/pages/index.tsx
+
+      # Deploy both sites together
+      - name: Prepare deployment files
+        run: |
+          # Create a fresh deployment directory
+          rm -rf deploy
+          mkdir -p deploy
+          mkdir -p deploy/dashboard
+          
+          # Copy root site (login page) to root
+          cp -r heartglow-dashboard/out/* deploy/
+          
+          # Copy dashboard to /dashboard directory
+          cp -r heartglow-dashboard/dashboard-build/* deploy/dashboard/
+          
+          # Ensure .nojekyll files exist
+          touch deploy/.nojekyll
+          touch deploy/dashboard/.nojekyll
+          
+          # Create dashboard redirect
+          cat > deploy/dashboard-redirect.html << EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta http-equiv="refresh" content="0;url=/dashboard/">
+            <title>Redirecting to Dashboard</title>
+          </head>
+          <body>
+            <p>Redirecting to dashboard...</p>
+            <script>
+              window.location.href = "/dashboard/";
+            </script>
+          </body>
+          </html>
+          EOF
+          
+          echo "Deployment directory contents:"
+          ls -la deploy
+          echo "Dashboard directory contents:"
+          ls -la deploy/dashboard
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: deploy
+          clean: true
+          clean-exclude: |
+            .nojekyll
+            CNAME
+          commit-message: "Deploy complete site with login page as root" 

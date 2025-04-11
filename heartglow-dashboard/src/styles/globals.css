@@ -78,6 +78,32 @@ body {
   }
 }
 
+/* Wiggle animation for the wave emoji */
+@keyframes wiggle {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(15deg);
+  }
+  50% {
+    transform: rotate(0deg);
+  }
+  75% {
+    transform: rotate(-15deg);
+  }
+}
+
+/* Shadow glow animation */
+@keyframes shadow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 15px 0 rgba(255, 79, 129, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px 5px rgba(255, 79, 129, 0.3);
+  }
+}
+
 /* Custom animation utilities */
 .animate-pulse-slow {
   animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -100,6 +126,16 @@ body {
   );
   background-size: 200% 100%;
   animation: shimmer 3s infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 1.5s ease-in-out infinite;
+  display: inline-block;
+  transform-origin: center bottom;
+}
+
+.hover\:shadow-glow:hover {
+  animation: shadow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Hide scrollbar for clean UI */

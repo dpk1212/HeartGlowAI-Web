@@ -29,6 +29,8 @@ module.exports = {
         'subtle-bounce': 'subtle-bounce 2s ease-in-out infinite',
         'fadeIn': 'fadeIn 0.5s ease-out forwards',
         'shimmer': 'shimmer 3s infinite',
+        'wiggle': 'wiggle 1.5s ease-in-out infinite',
+        'shadow-glow': 'shadow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       keyframes: {
         pulse: {
@@ -51,16 +53,26 @@ module.exports = {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
+        wiggle: {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '25%': { transform: 'rotate(15deg)' },
+          '50%': { transform: 'rotate(0deg)' },
+          '75%': { transform: 'rotate(-15deg)' },
+        },
+        'shadow-pulse': {
+          '0%, 100%': { boxShadow: '0 0 15px 0 rgba(255, 79, 129, 0.1)' },
+          '50%': { boxShadow: '0 0 25px 5px rgba(255, 79, 129, 0.3)' },
+        },
       },
       borderRadius: {
         'xl': '1rem',
         '2xl': '1.5rem',
       },
       boxShadow: {
-        'soft': '0 4px 14px 0 rgba(0, 0, 0, 0.05)',
-        'glow': '0 0 15px rgba(255, 79, 129, 0.3)',
+        'glow': '0 0 20px 0 rgba(255, 79, 129, 0.3)',
       },
     },
   },
   plugins: [],
+  darkMode: 'media',
 } 

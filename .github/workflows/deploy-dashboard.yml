@@ -1,11 +1,14 @@
-name: Deploy HeartGlow Dashboard
+name: 'DEPRECATED - Old Dashboard Deployment Workflow'
 
 on:
   push:
     branches:
-      - main
+      - deprecated-workflow-do-not-use
     paths:
       - 'heartglow-dashboard/**'
+
+# This workflow is no longer in use. Please use the main deploy.yml workflow instead.
+# Left here for reference purposes only.
 
 jobs:
   build-and-deploy:

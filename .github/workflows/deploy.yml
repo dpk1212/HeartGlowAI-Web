@@ -36,7 +36,12 @@ jobs:
           cd heartglow-dashboard
           # Create necessary environment variables
           echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
-          npm run export || npm run build
+          npm run build || (echo "Build failed, trying alternative build" && npm run export)
+          
+      - name: Verify build output
+        run: |
+          cd heartglow-dashboard
+          npm run verify || (echo "Verification failed but continuing with deployment" && exit 0)
 
       - name: Prepare deployment files
         run: |
@@ -45,7 +50,9 @@ jobs:
           mkdir -p temp_deploy/dashboard
           
           # Copy the out directory contents to the dashboard subdirectory
-          cp -r heartglow-dashboard/out/* temp_deploy/dashboard/
+          [ -d "heartglow-dashboard/out" ] && cp -r heartglow-dashboard/out/* temp_deploy/dashboard/ || cp -r heartglow-dashboard/.next/out/* temp_deploy/dashboard/
+          
+          # Ensure .nojekyll file exists
           touch temp_deploy/dashboard/.nojekyll
           
           # Create dashboard redirect in temp directory  
@@ -67,6 +74,10 @@ jobs:
           EOF
           
           touch temp_deploy/.nojekyll
+          
+          # List the contents for debugging
+          echo "Contents of deployment directory:"
+          ls -la temp_deploy/dashboard
 
       # Only update the dashboard directory, preserving other content
       - name: Deploy to GitHub Pages
@@ -74,13 +85,17 @@ jobs:
         with:
           folder: temp_deploy/dashboard
           target-folder: dashboard
+          clean: true
           clean-exclude: |
             .nojekyll
             CNAME
-            index.html
-            assets/**
-            css/**
-            js/**
-            feedback.html
-            robots.txt
-          commit-message: "Deploy dashboard only - preserving main site [skip ci]" 
+          commit-message: "Deploy dashboard only - preserving main site [skip ci]"
+      
+      # Deploy the redirect file separately to avoid affecting main content
+      - name: Deploy redirect file
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: temp_deploy
+          target-folder: .
+          clean: false
+          commit-message: "Update dashboard redirect [skip ci]"

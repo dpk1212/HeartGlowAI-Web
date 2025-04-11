@@ -1,0 +1,72 @@
+name: Deploy HeartGlow Root
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: heartglow-dashboard/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd heartglow-dashboard
+          npm ci
+
+      - name: Prepare for root build
+        run: |
+          cd heartglow-dashboard
+          
+          # Create backup of original next.config.js
+          cp next.config.js next.config.js.original
+          
+          # Copy the root config in place
+          cp next.config.root.js next.config.js
+          
+          # Run the prepare script
+          node build-root.js
+          
+      - name: Build root site
+        run: |
+          cd heartglow-dashboard
+          npm run build
+          
+          # Add .nojekyll file to prevent GitHub Pages processing
+          touch out/.nojekyll
+          
+          # List build output for verification
+          ls -la out
+
+      - name: Deploy to GitHub Pages root
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: heartglow-dashboard/out
+          clean: true
+          clean-exclude: |
+            .nojekyll
+            CNAME
+            dashboard/**
+          commit-message: "Deploy login page to root - replacing landing page"
+
+      - name: Restore original config
+        run: |
+          cd heartglow-dashboard
+          
+          # Restore the original next.config.js
+          mv next.config.js.original next.config.js
+          
+          # Run restore script to recover original index.tsx
+          node restore-index.js 

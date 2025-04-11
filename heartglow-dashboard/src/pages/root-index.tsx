@@ -4,7 +4,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 
-const Login = () => {
+const RootIndex = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -52,27 +52,21 @@ const Login = () => {
     }
   };
 
-  // Helper function to add basePath
-  const getRouteWithBasePath = (path: string): string => {
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    return `${basePath}${path}`;
-  };
-
   return (
     <div className="min-h-screen flex flex-col justify-center bg-heartglow-offwhite dark:bg-heartglow-charcoal">
       <Head>
-        <title>Login | HeartGlow AI</title>
-        <meta name="description" content="Log in to your HeartGlow AI account" />
+        <title>HeartGlow AI | Log In</title>
+        <meta name="description" content="HeartGlow AI - Craft messages with emotional intelligence" />
       </Head>
 
       <div className="w-full max-w-md mx-auto px-4">
         <div className="text-center mb-8">
-          <Link href={"/"} className="text-3xl font-bold text-heartglow-pink">
-            HeartGlow
-          </Link>
-          <h1 className="mt-2 text-2xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">
-            Welcome Back
+          <h1 className="text-4xl font-bold text-heartglow-pink">
+            HeartGlow AI
           </h1>
+          <p className="mt-2 text-lg text-heartglow-charcoal dark:text-heartglow-offwhite">
+            Craft messages with emotional intelligence
+          </p>
         </div>
 
         <div className="login-form bg-white dark:bg-heartglow-deepgray shadow-md rounded-lg p-8">
@@ -161,10 +155,16 @@ const Login = () => {
               </button>
             </div>
           </div>
+          
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              HeartGlow AI helps you craft meaningful messages for your important relationships.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-export default Login; 
+export default RootIndex; 

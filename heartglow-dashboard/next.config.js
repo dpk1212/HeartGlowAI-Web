@@ -8,7 +8,6 @@ const nextConfig = {
     unoptimized: true,
   },
   env: {
-    NEXT_PUBLIC_BASE_PATH: '/dashboard',
     // Add a build timestamp to bust cache on new deployments
     NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().getTime().toString(),
   },

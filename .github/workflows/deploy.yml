@@ -3,7 +3,7 @@ name: Deploy HeartGlow Dashboard
 on:
   push:
     branches:
-      - main
+#      - main
       - verified-deployment
       - stable-dashboard-deployment
     paths:

@@ -138,7 +138,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <div className="bg-white dark:bg-heartglow-deepgray py-4 px-6 border-b border-gray-200 dark:border-gray-800">
         <div className="container mx-auto">
           <h1 className="text-xl font-medium text-heartglow-charcoal dark:text-heartglow-offwhite">
-            Hi {getFirstName()} — <span className="text-heartglow-pink">ready to reach out today?</span>
+            Hi {getFirstName()} — <span className="text-heartglow-pink">welcome to HeartGlow AI! Ready to reach out today?</span>
           </h1>
         </div>
       </div>

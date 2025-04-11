@@ -13,6 +13,7 @@ import {
   deleteDoc
 } from 'firebase/firestore';
 import { db } from './config';
+export { db } from './config';
 import { User } from 'firebase/auth';
 
 // Types from the database schema

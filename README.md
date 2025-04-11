@@ -58,6 +58,28 @@ The site is deployed using GitHub Pages with a custom domain:
 ./safe-deploy.sh
 ```
 
+## Quick Dashboard Updates
+
+For making targeted changes to the dashboard only, we now have a direct method that preserves the main landing page:
+
+```bash
+# 1. Make sure you're on the gh-pages branch
+git checkout gh-pages
+git pull origin gh-pages
+
+# 2. Make your changes to files in heartglow-dashboard/
+
+# 3. Build the dashboard
+cd heartglow-dashboard
+npm run build
+
+# 4. Deploy just the dashboard without affecting the main site
+cd ..  # Return to root directory
+bash deploy-to-github.sh
+```
+
+This method is perfect for quick UI fixes and text changes in the dashboard. See the [Deployment Guide](DEPLOYMENT_GUIDE.md) for more details.
+
 ## Verified Deployment Branch
 
 The `verified-deployment` branch contains a stable and verified version of the codebase that has been tested and confirmed to deploy correctly. If you encounter issues with the gh-pages branch, you can restore from this branch using:

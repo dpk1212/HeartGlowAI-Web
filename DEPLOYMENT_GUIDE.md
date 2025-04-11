@@ -18,6 +18,42 @@ This guide explains the deployment process for HeartGlow AI, including how to sa
 - `verified-deployment`: Stable reference branch for recovery
 - `gh-pages`: Live deployment branch (don't modify directly)
 
+## Quick Dashboard Update Method
+
+For making targeted changes to the dashboard quickly:
+
+1. **Make sure you're on the `gh-pages` branch**
+   ```bash
+   git checkout gh-pages
+   git pull origin gh-pages
+   ```
+
+2. **Make your changes to the dashboard source code**
+   - Edit files in the `heartglow-dashboard/` directory
+   - For example, update components in `heartglow-dashboard/src/components/`
+
+3. **Build the dashboard**
+   ```bash
+   cd heartglow-dashboard
+   npm install  # If dependencies have changed
+   npm run build
+   ```
+
+4. **Deploy using the deploy-to-github.sh script**
+   ```bash
+   cd ..  # Return to root directory
+   bash deploy-to-github.sh
+   ```
+
+5. **Confirm you want to continue with dashboard deployment** when prompted
+
+This method is ideal for:
+- Quick fixes to dashboard UI components
+- Text changes or minor style updates
+- Testing dashboard changes without affecting the main landing page
+
+Note that this method only deploys changes to the dashboard while preserving the main landing page.
+
 ## Safe Deployment Process
 
 ### Standard Deployment Flow
@@ -165,3 +201,36 @@ The script uses Git worktrees and careful file copying to ensure that only the i
 ## Conclusion
 
 Following these guidelines will help ensure smooth deployments of the HeartGlow AI platform and provide quick recovery options when issues arise. 
+
+## Dashboard Build Troubleshooting
+
+### Common Dashboard Build Issues
+
+1. **Path Imports Issue**: 
+   - Error: `Module not found: Can't resolve '@/styles/globals.css'`
+   - Solution: Change import paths from `@/styles/...` to `../styles/...` in relevant files like `_app.tsx`
+
+2. **Headers Configuration Error**:
+   - Error: `Specified "headers" cannot be used with "output: export"`
+   - Solution: Remove the `async headers()` function from `next.config.js` when using `output: export`
+
+3. **Webpack Cache Errors**:
+   - Error: `Error: ENOENT: no such file or directory, stat '.next/cache/webpack/...'`
+   - Solution: Clean the cache and node_modules, then reinstall:
+     ```bash
+     rm -rf .next
+     rm -rf node_modules
+     npm install
+     npm run build
+     ```
+
+4. **Missing Dependencies**:
+   - Error: Various import errors for components or libraries
+   - Solution: Check `package.json` and install any missing dependencies:
+     ```bash
+     npm install [missing-package]
+     ```
+
+5. **Environment Variables Issues**:
+   - Error: `process.env.[VARIABLE] is undefined`
+   - Solution: Ensure all required environment variables are set in `.env.local` or in `next.config.js` for build-time variables 

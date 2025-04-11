@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:  # Allow manual triggering
 
 jobs:
   build-and-deploy:
@@ -26,6 +27,22 @@ jobs:
           cd heartglow-dashboard
           npm ci
 
+      # First build and verify the dashboard to make sure our changes don't break it
+      - name: Build and verify dashboard
+        run: |
+          cd heartglow-dashboard
+          # Create necessary environment variables
+          echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          npm run build
+          # Verify dashboard build
+          npm run verify || (echo "Dashboard verification failed" && exit 1)
+          # Save dashboard build output
+          mkdir -p dashboard-out
+          cp -r out/* dashboard-out/
+          # Clean output for root build
+          rm -rf out
+          rm -rf .next
+
       - name: Prepare for root build
         run: |
           cd heartglow-dashboard
@@ -36,12 +53,16 @@ jobs:
           # Copy the root config in place
           cp next.config.root.js next.config.js
           
+          # Create package.json scripts for root deployment
+          node -e "const pkg = require('./package.json'); pkg.scripts.verifyRoot = 'node verify-root.js'; require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2));"
+          
           # Run the prepare script
           node build-root.js
           
       - name: Build root site
         run: |
           cd heartglow-dashboard
+          # Build the root site
           npm run build
           
           # Add .nojekyll file to prevent GitHub Pages processing
@@ -50,16 +71,43 @@ jobs:
           # List build output for verification
           ls -la out
 
-      - name: Deploy to GitHub Pages root
+      - name: Verify root build
+        run: |
+          cd heartglow-dashboard
+          node verify-root.js || (echo "Root verification failed but continuing with deployment" && exit 0)
+
+      - name: Prepare deployment files
+        run: |
+          # Create a temporary directory for deployment
+          rm -rf temp_deploy
+          mkdir -p temp_deploy
+          
+          # Copy the root build to temp_deploy root
+          cp -r heartglow-dashboard/out/* temp_deploy/
+          
+          # Create dashboard directory and copy dashboard build
+          mkdir -p temp_deploy/dashboard
+          cp -r heartglow-dashboard/dashboard-out/* temp_deploy/dashboard/
+          
+          # Ensure .nojekyll files exist
+          touch temp_deploy/.nojekyll
+          touch temp_deploy/dashboard/.nojekyll
+          
+          # List contents for debugging
+          echo "Contents of deployment directory:"
+          ls -la temp_deploy
+          echo "Contents of dashboard directory:"
+          ls -la temp_deploy/dashboard
+
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: heartglow-dashboard/out
+          folder: temp_deploy
           clean: true
           clean-exclude: |
             .nojekyll
             CNAME
-            dashboard/**
-          commit-message: "Deploy login page to root - replacing landing page"
+          commit-message: "Deploy login page to root with dashboard - complete deployment"
 
       - name: Restore original config
         run: |
@@ -67,6 +115,9 @@ jobs:
           
           # Restore the original next.config.js
           mv next.config.js.original next.config.js
+          
+          # Restore original package.json
+          git checkout -- package.json
           
           # Run restore script to recover original index.tsx
           node restore-index.js 

@@ -9,6 +9,11 @@ on:
     paths:
       - 'heartglow-dashboard/**'
       - '.github/workflows/deploy.yml'
+      - '!heartglow-dashboard/build-root.js'
+      - '!heartglow-dashboard/restore-index.js'
+      - '!heartglow-dashboard/next.config.root.js'
+      - '!heartglow-dashboard/verify-root.js'
+      - '!heartglow-dashboard/src/pages/root-index.tsx'
 
 jobs:
   build-and-deploy:

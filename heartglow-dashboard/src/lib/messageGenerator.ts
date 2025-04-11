@@ -1,4 +1,4 @@
-import { getAuth } from 'firebase/auth';
+// Mock message generator for HeartGlow AI
 
 export interface MessageGenerationParams {
   recipient: {
@@ -22,81 +22,7 @@ export interface MessageGenerationParams {
   };
 }
 
-export async function generateMessage(params: MessageGenerationParams): Promise<{
-  content: string;
-  insights: string[];
-}> {
-  try {
-    // Get user token for authentication
-    const auth = getAuth();
-    const user = auth.currentUser;
-    if (!user) throw new Error('User not authenticated');
-
-    const idToken = await user.getIdToken();
-
-    // Call the cloud function
-    const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${idToken}`
-      },
-      body: JSON.stringify(params)
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return {
-      content: data.content,
-      insights: data.insights || []
-    };
-  } catch (error) {
-    console.error('Error generating message:', error);
-    throw error;
-  }
-}
-
-// Fallback function that uses OpenAI directly if cloud function fails
-export async function generateMessageDirect(params: MessageGenerationParams): Promise<{
-  content: string;
-  insights: string[];
-}> {
-  try {
-    const prompt = buildPrompt(params);
-    
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview",
-      messages: [
-        {
-          role: "system",
-          content: "You are an AI assistant that helps people craft meaningful, personalized messages. Your responses should be warm, thoughtful, and emotionally intelligent."
-        },
-        {
-          role: "user",
-          content: prompt
-        }
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-      top_p: 0.9
-    });
-
-    const content = completion.choices[0]?.message?.content || '';
-    const insights = extractInsights(content);
-
-    return {
-      content,
-      insights
-    };
-  } catch (error) {
-    console.error('Error generating message directly:', error);
-    throw error;
-  }
-}
-
+// Helper functions first, so they're defined before being used
 function buildPrompt(params: MessageGenerationParams): string {
   const {
     recipient,
@@ -133,4 +59,121 @@ function extractInsights(content: string): string[] {
     "Emotional intelligence is demonstrated"
   ];
   return insights;
+}
+
+/**
+ * Generate a mock message without calling OpenAI API
+ */
+function generateMockMessage(params: MessageGenerationParams): string {
+  const { recipient, intent, tone } = params;
+  
+  const greetings = [
+    `Dear ${recipient.name}`,
+    `Hi ${recipient.name}`,
+    `Hello ${recipient.name}`,
+  ];
+  
+  const midSections = [
+    `I wanted to reach out to you as my ${recipient.relationship} to express how much you mean to me.`,
+    `I'm thinking of you today and wanted to share my thoughts.`,
+    `I value our relationship so much and wanted to take a moment to tell you why.`,
+  ];
+  
+  const closings = [
+    `With love and appreciation,`,
+    `Warmly,`,
+    `Thinking of you,`,
+    `With gratitude,`,
+  ];
+  
+  const toneAdjectives: Record<string, string> = {
+    'warm': 'heartfelt',
+    'professional': 'respectful',
+    'casual': 'relaxed',
+    'humorous': 'lighthearted',
+    'sincere': 'genuine',
+    'formal': 'dignified'
+  };
+  
+  // Default to 'thoughtful' if the tone isn't in our map
+  const adjective = toneAdjectives[tone] || 'thoughtful';
+  
+  // Ensure there's a value for intentText
+  const intentText = intent.custom || intent.type || 'this occasion';
+  
+  // Generate the message with selection from arrays
+  const greeting = greetings[Math.floor(Math.random() * greetings.length)];
+  const midSection = midSections[Math.floor(Math.random() * midSections.length)];
+  const closing = closings[Math.floor(Math.random() * closings.length)];
+  
+  // Build specific content based on intent type
+  let intentContent = '';
+  if (intent.type === 'appreciation') {
+    intentContent = 'Thank you for being you and for all that you bring to my life.';
+  } else if (intent.type === 'celebration') {
+    intentContent = 'Congratulations on your achievements and success!';
+  } else if (intent.type === 'support') {
+    intentContent = 'I want you to know that I\'m here for you, no matter what.';
+  } else {
+    intentContent = 'I appreciate having you in my life.';
+  }
+
+  // Build the final message
+  return `
+${greeting},
+
+${midSection}
+
+I wanted to share this ${adjective} message with you for ${intentText}. Your presence in my life brings joy and meaning, and I appreciate all that you do.
+
+${intentContent}
+
+${closing}
+`.trim();
+}
+
+// Main exported functions
+export async function generateMessage(params: MessageGenerationParams): Promise<{
+  content: string;
+  insights: string[];
+}> {
+  try {
+    const prompt = buildPrompt(params);
+    console.log("Generating message with prompt:", prompt);
+    
+    // Use the mock generator
+    const content = generateMockMessage(params);
+    const insights = extractInsights(content);
+
+    return {
+      content,
+      insights
+    };
+  } catch (error) {
+    console.error('Error generating message:', error);
+    throw error;
+  }
+}
+
+// Fallback function that uses the same mock generator
+export async function generateMessageDirect(params: MessageGenerationParams): Promise<{
+  content: string;
+  insights: string[];
+}> {
+  try {
+    const prompt = buildPrompt(params);
+    
+    // Use the mock message generator
+    console.log("Generating direct message with prompt:", prompt);
+    const content = generateMockMessage(params);
+    const insights = extractInsights(content);
+
+    return {
+      content,
+      insights
+    };
+  } catch (error) {
+    console.error('Error generating message directly:', error);
+    throw error;
+  }
 } 

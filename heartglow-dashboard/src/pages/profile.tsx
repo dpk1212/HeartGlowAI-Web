@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import DashboardLayout from '../../components/layout/DashboardLayout';
-import AuthGuard from '../../components/layout/AuthGuard';
+import DashboardLayout from '../components/layout/DashboardLayout';
+import AuthGuard from '../components/layout/AuthGuard';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
 

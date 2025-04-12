@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -10,14 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, loginWithGoogle, currentUser, loading } = useAuth();
-
-  useEffect(() => {
-    // Only redirect if not loading and user is authenticated
-    if (!loading && currentUser) {
-      router.replace('/dashboard/');
-    }
-  }, [currentUser, loading, router]);
+  const { login, loginWithGoogle, currentUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

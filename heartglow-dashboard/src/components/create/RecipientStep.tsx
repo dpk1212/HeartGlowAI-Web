@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { motion } from 'framer-motion';
@@ -18,7 +18,7 @@ interface RecipientStepProps {
 
 export default function RecipientStep({ onNext }: RecipientStepProps) {
   console.log('>>> RecipientStep component rendering started');
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
@@ -26,10 +26,10 @@ export default function RecipientStep({ onNext }: RecipientStepProps) {
 
   useEffect(() => {
     const fetchRecipients = async () => {
-      if (!user) return;
+      if (!currentUser) return;
 
       try {
-        const connectionsRef = collection(db, 'users', user.uid, 'connections');
+        const connectionsRef = collection(db, 'users', currentUser.uid, 'connections');
         const q = query(connectionsRef);
         const querySnapshot = await getDocs(q);
         
@@ -48,7 +48,7 @@ export default function RecipientStep({ onNext }: RecipientStepProps) {
     };
 
     fetchRecipients();
-  }, [user]);
+  }, [currentUser]);
 
   const handleSelect = (recipient: Recipient) => {
     setSelectedRecipient(recipient);

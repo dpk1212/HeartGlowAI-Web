@@ -2,12 +2,6 @@ import React from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-// Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
-
 const HeroSection = () => {
   return (
     <motion.div 
@@ -56,7 +50,7 @@ const HeroSection = () => {
             whileTap={{ scale: 0.95 }}
           >
             <Link 
-              href={getRouteWithBasePath("/create")}
+              href="/create"
               className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:from-heartglow-violet hover:to-heartglow-indigo text-white font-medium rounded-full px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 ease-in-out transform hover:shadow-glow group"
               aria-label="Start creating a new message"
             >
@@ -72,7 +66,7 @@ const HeroSection = () => {
             whileTap={{ scale: 0.95 }}
           >
             <Link
-              href={getRouteWithBasePath("/#templates")}
+              href="/#templates"
               className="text-heartglow-indigo dark:text-heartglow-pink font-medium hover:underline inline-flex items-center group"
               aria-label="Explore message templates"
             >

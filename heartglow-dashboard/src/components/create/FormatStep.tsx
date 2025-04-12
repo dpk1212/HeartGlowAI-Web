@@ -204,14 +204,11 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedFormat(format.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
-                  bg-white border-gray-200 hover:border-heartglow-pink/80 
-                  dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
-                  ${
-                    selectedFormat === format.id
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                  selectedFormat === format.id
                     ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                    : ''
-                  }`}
+                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                }`}
               >
                 <div className="flex items-center mb-2">
                   <span className="text-2xl mr-2">{format.icon}</span>
@@ -235,14 +232,11 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedLength(length.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
-                  bg-white border-gray-200 hover:border-heartglow-pink/80 
-                  dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
-                  ${
-                    selectedLength === length.id
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                  selectedLength === length.id
                     ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                    : ''
-                  }`}
+                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                }`}
               >
                 <div className="flex items-center justify-center mb-2">
                   <span className="text-xl">{length.icon}</span>

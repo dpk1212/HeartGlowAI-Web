@@ -63,14 +63,11 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
                 setCustomTone('');
               }
             }}
-            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
-              bg-white border-gray-200 hover:border-heartglow-pink/80 
-              dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
-              ${
-                selectedTone === tone.id
+            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+              selectedTone === tone.id
                 ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                : ''
-              }`}
+                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60'
+            }`}
           >
             <div>
               <h3 className="font-medium text-gray-900 dark:text-gray-100">{tone.label}</h3>

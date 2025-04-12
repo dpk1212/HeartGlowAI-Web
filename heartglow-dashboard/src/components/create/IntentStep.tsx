@@ -101,14 +101,11 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
             key={intent.id}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
-              bg-white border-gray-200 hover:border-heartglow-pink/80 
-              dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
-              ${
-                selectedIntent === intent.id
+            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+              selectedIntent === intent.id
                 ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                : ''
-              }`}
+                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+            }`}
             onClick={() => handleSelect(intent.id)}
           >
             <div className="flex items-start">

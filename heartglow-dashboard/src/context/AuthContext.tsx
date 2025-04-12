@@ -7,6 +7,8 @@ import {
   onAuthStateChangedListener
 } from '../firebase/auth';
 import { User } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp, increment, getDoc, updateDoc } from 'firebase/firestore';
+import { db } from '../firebase/config';
 
 type AuthContextType = {
   currentUser: User | null;
@@ -36,16 +38,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     console.log('Setting up auth state listener');
     
-    // Add a timeout to prevent infinite loading
     const timeoutId = setTimeout(() => {
       if (loading) {
         console.warn('Auth state timeout - forcing load complete');
         setLoading(false);
       }
-    }, 10000); // 10 second timeout
+    }, 10000);
     
-    const unsubscribe = onAuthStateChangedListener((user) => {
+    const unsubscribe = onAuthStateChangedListener(async (user) => {
       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+      
+      if (user) {
+        const userRef = doc(db, "users", user.uid);
+        try {
+          await setDoc(userRef, { 
+            email: user.email,
+            uid: user.uid,
+            lastLogin: serverTimestamp(),
+            displayName: user.displayName,
+            photoURL: user.photoURL
+          }, { merge: true });
+          
+          const checkSnap = await getDoc(userRef);
+          if (!checkSnap.exists() || checkSnap.data()?.totalMessageCount === undefined) {
+             await updateDoc(userRef, { totalMessageCount: 0 });
+          }
+
+          console.log('User document created/updated in Firestore for:', user.uid);
+        } catch (error) {
+          console.error('Error creating/updating user document:', error);
+        }
+      }
+      
       setCurrentUser(user);
       setLoading(false);
       clearTimeout(timeoutId);

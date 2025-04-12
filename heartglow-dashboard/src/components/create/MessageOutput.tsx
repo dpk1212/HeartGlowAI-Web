@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { generateMessage, generateMessageDirect, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
+import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
 
 interface MessageOutputProps {
   recipient: {
@@ -71,10 +72,26 @@ export default function MessageOutput({
       };
       
       console.log('[autoSaveMessage] Saving data:', messageData);
-      const docRef = await addDoc(collection(db, 'users', currentUser.uid, 'messages'), messageData);
+      const messagesCollectionRef = collection(db, 'users', currentUser.uid, 'messages');
+      const docRef = await addDoc(messagesCollectionRef, messageData);
       console.log('[autoSaveMessage] Message auto-saved successfully with ID:', docRef.id);
+
+      // --- Increment User totalMessageCount --- 
+      const userRef = doc(db, "users", currentUser.uid);
+      await updateDoc(userRef, { totalMessageCount: increment(1) });
+      console.log('[autoSaveMessage] Incremented user totalMessageCount.');
+      // ----------------------------------------
+
+      // --- Update Connection --- 
+      if (recipient.id) { // Only update if we have a connection ID
+         await updateConnectionWithMessage(currentUser, recipient.id);
+      } else {
+          console.warn('[autoSaveMessage] No recipient.id found, cannot update connection message count.');
+      }
+      // ----------------------
+
     } catch (saveError) {
-      console.error('[autoSaveMessage] Error auto-saving message:', saveError);
+      console.error('[autoSaveMessage] Error auto-saving message or updating counts:', saveError);
     }
   };
 

@@ -10,7 +10,9 @@ import {
   Timestamp,
   addDoc,
   updateDoc,
-  deleteDoc
+  deleteDoc,
+  increment,
+  serverTimestamp
 } from 'firebase/firestore';
 import { db } from './config';
 export { db } from './config';
@@ -120,7 +122,7 @@ export const fetchUserConnections = async (user: User | null, maxCount = 10) => 
 };
 
 // Fetch user messages
-export const fetchUserMessages = async (user: User | null, maxCount = 5) => {
+export const fetchUserMessages = async (user: User | null, maxCount = 10) => {
   if (!user) {
     console.log('No authenticated user found for fetching messages');
     return [];
@@ -181,7 +183,25 @@ export const addConnection = async (user: User | null, connectionData: Omit<Conn
   }
 };
 
-// Update an existing connection
+// Update an existing connection (e.g., when a message is sent to them)
+export const updateConnectionWithMessage = async (user: User | null, connectionId: string) => {
+  if (!user || !connectionId) return;
+
+  try {
+    const connectionRef = doc(db, `users/${user.uid}/connections/${connectionId}`);
+    await updateDoc(connectionRef, {
+      messageCount: increment(1),
+      lastMessageDate: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    });
+    console.log(`Updated connection ${connectionId} with new message info.`);
+  } catch (error) {
+    console.error(`Error updating connection ${connectionId} after message:`, error);
+    // Don't throw, allow message saving to continue if connection update fails
+  }
+};
+
+// Update an existing connection (general purpose)
 export const updateConnection = async (user: User | null, connection: Partial<Connection> & { id: string }) => {
   if (!user) throw new Error('User not authenticated');
 

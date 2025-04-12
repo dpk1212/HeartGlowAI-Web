@@ -61,20 +61,19 @@ export default function MessageOutput({
           advanced
         };
 
-        console.log("Generating message with params:", JSON.stringify(params));
-
-        // Try cloud function first, fall back to mock if needed
+        // Try cloud function first, fall back to direct OpenAI if needed
+        let result;
         try {
-          const result = await generateMessage(params);
-          setMessage(result.content);
-          setInsights(result.insights || []);
-        } catch (err) {
-          console.error("Failed to generate message with cloud function:", err);
-          // We don't need a separate fallback as the generateMessage function already includes fallback logic
-          throw err;
+          result = await generateMessage(params);
+        } catch (cloudError) {
+          console.warn('Cloud function failed, falling back to direct OpenAI:', cloudError);
+          result = await generateMessageDirect(params);
         }
+
+        setMessage(result.content);
+        setInsights(result.insights);
       } catch (err) {
-        console.error('Error in message generation:', err);
+        console.error('Error generating message:', err);
         setError('Failed to generate message. Please try again.');
       } finally {
         setIsGenerating(false);
@@ -104,6 +103,8 @@ export default function MessageOutput({
     setIsSaving(true);
     setSaveError('');
     setSaveSuccess(false);
+    console.log('[handleSave] Attempting to save message for user:', user.uid);
+    console.log('[handleSave] Recipient Data:', recipient);
 
     try {
       const messageData = {
@@ -121,14 +122,18 @@ export default function MessageOutput({
         messageIntention: intent.custom || intent.type,
         messageConfigTimestamp: new Date().toISOString()
       };
-
-      await addDoc(collection(db, 'users', user.uid, 'messages'), messageData);
       
+      console.log('[handleSave] Saving data:', messageData);
+
+      const docRef = await addDoc(collection(db, 'users', user.uid, 'messages'), messageData);
+      
+      console.log('[handleSave] Message saved successfully with ID:', docRef.id);
       setSaveSuccess(true);
     } catch (error) {
-      console.error('Error saving message:', error);
+      console.error('[handleSave] Error saving message:', error);
       setSaveError('Failed to save message. Please try again.');
     } finally {
+      console.log('[handleSave] Setting isSaving to false.');
       setIsSaving(false);
     }
   };

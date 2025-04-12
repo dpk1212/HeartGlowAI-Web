@@ -167,7 +167,7 @@ const RecentMessagesList: React.FC = () => {
         
         // Fetch real data from Firestore
         console.log('Attempting to fetch messages for user:', currentUser?.uid);
-        const userMessages = await fetchUserMessages(currentUser);
+        const userMessages = await fetchUserMessages(currentUser, 10);
         console.log('Fetched messages:', userMessages);
         
         if (isMounted) setMessages(userMessages);

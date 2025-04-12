@@ -30,34 +30,35 @@ jobs:
           cd heartglow-dashboard
           npm ci
 
-      # Copy the CNAME file first
-      - name: Prepare CNAME file
+      # Create deployment directories first, separately from other steps
+      - name: Create deployment directories
         run: |
-          echo "heartglowai.com" > CNAME_FILE
-          cat CNAME_FILE
-          
-          # Create deployment directories
           mkdir -p deploy
           mkdir -p deploy/dashboard
           
-          # Copy CNAME to both locations
-          cp CNAME_FILE deploy/CNAME
-          cp CNAME_FILE deploy/dashboard/CNAME
+          # Create CNAME files
+          echo "heartglowai.com" > deploy/CNAME
+          echo "heartglowai.com" > deploy/dashboard/CNAME
+          
+          # Create .nojekyll files
+          touch deploy/.nojekyll
+          touch deploy/dashboard/.nojekyll
+          
+          # Verify directories exist
+          ls -la deploy
+          ls -la deploy/dashboard
 
       # Build dashboard with its enhanced configuration
       - name: Build dashboard
         run: |
           cd heartglow-dashboard
           echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          
           # Ensure the fix-path.js file is up to date
           npm run build
           
-          # Copy dashboard files to the /dashboard directory
-          cp -r out/* deploy/dashboard/
-          
-          # Ensure .nojekyll files exist
-          touch deploy/.nojekyll
-          touch deploy/dashboard/.nojekyll
+          # Copy dashboard files to the /dashboard directory - with verbose flag
+          cp -rv out/* deploy/dashboard/
           
           # Clean output directory for next build
           rm -rf out
@@ -86,19 +87,19 @@ jobs:
           cp src/pages/login.tsx src/pages/index.tsx
           
           # Use the root config and build
-          mv next.config.js next.config.js.bak
-          mv next.config.root.js next.config.js
+          cp next.config.js next.config.js.bak
+          cp next.config.root.js next.config.js
           npm run build
           
           # Restore original config and source files
-          mv next.config.js.bak next.config.js
+          cp next.config.js.bak next.config.js
           git checkout -- src/pages/index.tsx
           
-          # Copy root files to deployment directory
-          cp -r out/* deploy/
+          # Copy root files to deployment directory - with verbose flag
+          cp -rv out/* deploy/
           
           # Also copy the fix-path.js to root for consistency
-          cp public/fix-path.js deploy/
+          cp -v public/fix-path.js deploy/
 
       # Create redirect files for better navigation
       - name: Create redirect files

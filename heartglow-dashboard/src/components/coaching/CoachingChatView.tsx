@@ -3,10 +3,13 @@ import React, { useState, useEffect, useRef } from 'react';
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon } from '@radix-ui/react-icons'; // Example icon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
-import { db, functions } from '../../lib/firebase'; // Import db and functions instance
+import { db } from '../../lib/firebase'; // Import only db
 import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp, addDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
-import { httpsCallable } from 'firebase/functions'; // Import httpsCallable
+import { getFunctions, httpsCallable } from 'firebase/functions'; // Import functions SDK methods
 import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
+
+// Initialize Firebase Functions instance
+const functionsInstance = getFunctions();
 
 interface CoachingChatViewProps {
   threadId: string; // Passed in from the dynamic page
@@ -112,7 +115,8 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
 
       // 2. Call the coachingAssistant Cloud Function
       console.log("Calling coachingAssistant function...");
-      const callCoachingAssistant = httpsCallable(functions, 'coachingAssistant');
+      // Use the initialized functionsInstance
+      const callCoachingAssistant = httpsCallable(functionsInstance, 'coachingAssistant'); 
       await callCoachingAssistant({ 
         threadId: threadId,
         userMessage: messageContent, // Send the original content

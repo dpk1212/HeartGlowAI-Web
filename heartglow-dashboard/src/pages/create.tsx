@@ -12,7 +12,7 @@ import { motion } from 'framer-motion';
 export default function CreatePage() {
   console.log('>>> CreatePage component rendering started');
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { currentUser, loading } = useAuth();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     recipient: null,
@@ -30,7 +30,7 @@ export default function CreatePage() {
     );
   }
 
-  if (!user) {
+  if (!currentUser) {
     router.push('/login');
     return null;
   }

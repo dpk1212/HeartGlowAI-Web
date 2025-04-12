@@ -74,68 +74,29 @@ jobs:
           # Cleanup
           rm -rf out .next
 
-      # Build login page as the root site
-      - name: Build login page for root
-        run: |
-          # Navigate to source directory
-          cd heartglow-dashboard
-          
-          # Create root config
-          cat > next.config.root.js << EOF
-          /** @type {import('next').NextConfig} */
-          const nextConfig = {
-            reactStrictMode: true,
-            trailingSlash: true,
-            output: 'export',
-            images: {
-              unoptimized: true,
-            }
-          }
-          module.exports = nextConfig
-          EOF
-          
-          # Back up original config and use root config
-          cp next.config.js next.config.js.bak
-          cp next.config.root.js next.config.js
-          
-          # Create root index page from login page
-          cp src/pages/login.tsx src/pages/index.tsx
-          
-          # Build
-          npm run build
-          
-          # Copy files using absolute paths
-          echo "Copying root files to $DEPLOY_DIR/"
-          cp -rv out/* $DEPLOY_DIR/
-          
-          # Restore original files
-          cp next.config.js.bak next.config.js
-          git checkout -- src/pages/index.tsx
-          
-          # Debug output
-          echo "Deploy directory contents after root build:"
-          ls -la $DEPLOY_DIR
+      # Build login page as the root site - REMOVED FOR SIMPLICITY
 
       # Create redirect files for better navigation
       - name: Create redirect files
         run: |
-          # Create redirection file
-          cat > $DEPLOY_DIR/dashboard-redirect.html << EOF
+          # Create root index redirection file
+          cat > $DEPLOY_DIR/index.html << EOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
             <meta charset="UTF-8">
-            <meta http-equiv="refresh" content="0;url=/dashboard/">
-            <title>Redirecting to Dashboard</title>
+            <meta http-equiv="refresh" content="0;url=/dashboard/login">
+            <title>Redirecting...</title>
+            <script>window.location.replace("/dashboard/login");</script>
           </head>
           <body>
-            <p>Redirecting to dashboard...</p>
-            <script>
-              window.location.href = "/dashboard/";
-            </script>
+            <p>If you are not redirected, <a href="/dashboard/login">click here to log in</a>.</p>
           </body>
           </html>
           EOF
+
+          # Create dashboard-redirect.html (Optional, maybe remove later if not needed)
+          # cat > $DEPLOY_DIR/dashboard-redirect.html << EOF ... existing redirect ... EOF
           
           # Display deployment structure
           echo "Final deployment directory structure:"

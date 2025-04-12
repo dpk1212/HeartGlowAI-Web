@@ -3,8 +3,9 @@ import React, { useState, useEffect, useRef } from 'react';
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon } from '@radix-ui/react-icons'; // Example icon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
-import { db } from '../../lib/firebase'; // Import db instance
-import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'; // Import Firestore functions
+import { db, functions } from '../../lib/firebase'; // Import db and functions instance
+import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp, addDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
+import { httpsCallable } from 'firebase/functions'; // Import httpsCallable
 import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
 
 interface CoachingChatViewProps {
@@ -86,16 +87,46 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentUser || !threadId) return;
     
-    console.log(`TODO: Send message for thread ${threadId}:`, newMessage);
-    // TODO: Implement actual send logic:
-    // 1. Add user message to Firestore subcollection (`ThreadMessage` type)
-    // 2. Call the `coaching-assistant` Cloud Function with threadId, message history, etc.
-    // 3. Cloud function will process, call OpenAI, and add coach response to subcollection
-    setNewMessage('');
+    const messageContent = newMessage.trim();
+    setNewMessage(''); // Clear input immediately
+
+    // Construct the user message object
+    const userMessageData: Omit<ThreadMessage, 'id' | 'timestamp'> = {
+      threadId: threadId,
+      sender: 'user',
+      content: messageContent,
+    };
+
+    try {
+      // 1. Save user message to Firestore
+      const messagesRef = collection(db, 'coachingThreads', threadId, 'messages');
+      const userMessageDocRef = await addDoc(messagesRef, {
+        ...userMessageData,
+        timestamp: serverTimestamp(), // Use server timestamp
+      });
+      console.log("User message saved with ID: ", userMessageDocRef.id);
+
+      // 2. Call the coachingAssistant Cloud Function
+      console.log("Calling coachingAssistant function...");
+      const callCoachingAssistant = httpsCallable(functions, 'coachingAssistant');
+      await callCoachingAssistant({ 
+        threadId: threadId,
+        userMessage: messageContent, // Send the original content
+       });
+      console.log("coachingAssistant function called successfully.");
+
+      // AI response will be added by the function and picked up by the onSnapshot listener
+
+    } catch (error) {
+      console.error("Error sending message or calling function: ", error);
+      // TODO: Display user-facing error (e.g., could not send message)
+      // Optionally, revert the optimistic UI update or add an error state to the message
+      // For now, just log the error
+    }
   };
   
   // Helper to format timestamp

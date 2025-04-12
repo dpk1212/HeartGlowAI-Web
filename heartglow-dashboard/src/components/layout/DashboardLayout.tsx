@@ -2,7 +2,18 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import Footer from '../ui/Footer';
-import { getInitials } from '../utils/helpers';
+
+// Helper function to get initials from email - RESTORED
+const getInitials = (email: string): string => {
+  if (!email) return '?';
+  const parts = email.split('@');
+  // Ensure parts[0] exists and has length before substring
+  if (parts[0]?.length > 0) {
+      return parts[0].substring(0, 2).toUpperCase();
+  }
+  // Fallback if email format is unexpected (e.g., no @ symbol or empty username)
+  return email.substring(0, 2).toUpperCase() || '?'; 
+};
 
 type DashboardLayoutProps = {
   children: React.ReactNode;

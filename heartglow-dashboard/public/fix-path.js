@@ -69,15 +69,6 @@
     if (pathChanged && newUrl !== currentUrl) {
       window.history.replaceState({}, document.title, newUrl);
       console.log('URL path fixed to:', newUrl);
-      
-      // If we're on a spinner page, try to reload to get the correct content
-      const spinnerElement = document.querySelector('.animate-spin');
-      if (spinnerElement && document.body.contains(spinnerElement)) {
-        console.log('Spinner detected, reloading page to get correct content...');
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      }
     }
   }
   

@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       unsubscribe();
       clearTimeout(timeoutId);
     };
-  }, [loading]);
+  }, []);
 
   const login = async (email: string, password: string) => {
     return signIn(email, password);

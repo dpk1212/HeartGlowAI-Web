@@ -44,7 +44,7 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 dark:text-gray-100">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What tone would you like to use?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select the tone that best fits your message</p>
@@ -63,15 +63,18 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
                 setCustomTone('');
               }
             }}
-            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-              selectedTone === tone.id
-                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/15 via-gray-800/10 to-heartglow-violet/15'
-                : 'border-gray-700 bg-gray-800/40 hover:bg-gray-700/60 hover:border-heartglow-pink/60'
-            }`}
+            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
+              bg-white border-gray-200 hover:border-heartglow-pink/80 
+              dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
+              ${
+                selectedTone === tone.id
+                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
+                : ''
+              }`}
           >
             <div>
-              <h3 className="font-medium text-gray-900 dark:text-white">{tone.label}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{tone.description}</p>
+              <h3 className="font-medium text-gray-900 dark:text-gray-100">{tone.label}</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{tone.description}</p>
             </div>
           </motion.div>
         ))}
@@ -81,16 +84,18 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
         <motion.div 
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: 'auto' }}
-          className="mt-4"
+          className="mt-6"
         >
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label htmlFor="custom-tone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Describe your desired tone
           </label>
           <input
+            id="custom-tone"
             type="text"
             value={customTone}
             onChange={(e) => setCustomTone(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
+            className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent 
+                      dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
             placeholder="e.g., Encouraging, Empathetic..."
             required={showCustom}
           />
@@ -109,7 +114,7 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
           disabled={!selectedTone || (showCustom && !customTone.trim())}
           className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
             !selectedTone || (showCustom && !customTone.trim())
-              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+              ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
               : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
           }`}
         >

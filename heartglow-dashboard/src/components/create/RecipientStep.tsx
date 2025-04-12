@@ -81,14 +81,14 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 dark:text-gray-100">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select a recipient from your connections</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 dark:bg-red-900/20 p-4 rounded-lg text-red-600 dark:text-red-400">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative dark:bg-red-900/30 dark:border-red-700/50 dark:text-red-300" role="alert">
           {error}
         </div>
       )}
@@ -104,17 +104,20 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
               key={recipient.id}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                selectedRecipient?.id === recipient.id
-                  ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/15 via-gray-800/10 to-heartglow-violet/15'
-                  : 'border-gray-700 bg-gray-800/40 hover:bg-gray-700/60 hover:border-heartglow-pink/60'
-              }`}
+              className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 
+                bg-white border-gray-200 hover:border-heartglow-pink/80 
+                dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60 
+                ${
+                  selectedRecipient?.id === recipient.id
+                  ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
+                  : ''
+                }`}
               onClick={() => handleSelect(recipient)}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-white">{recipient.name}</h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">{recipient.relationship}</p>
+                  <h3 className="font-medium text-gray-900 dark:text-gray-100">{recipient.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{recipient.relationship}</p>
                 </div>
                 {recipient.lastContact && (
                   <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -134,7 +137,7 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
           className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
             selectedRecipient
               ? 'bg-heartglow-pink hover:bg-heartglow-pink/90'
-              : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
           }`}
         >
           Next

@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Card, CardHeader, CardTitle, CardDescription, CardFooter } from './card'; // Assuming shadcn card component
-import { Button } from './button'; // Assuming shadcn button component
+// import { Button } from './button'; // Removed shadcn button import
 import { Zap } from 'lucide-react'; // Example icon
 
 const CoachingEntryCard: React.FC = () => {
@@ -18,9 +18,12 @@ const CoachingEntryCard: React.FC = () => {
       </CardHeader>
       <CardFooter>
         <Link href="/coaching" passHref legacyBehavior>
-          <Button variant="outline" className="w-full bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 border-purple-300 dark:border-purple-700 text-purple-700 dark:text-purple-300 hover:text-purple-800 dark:hover:text-purple-200">
-            Start Coaching Session
-          </Button>
+          {/* Replaced shadcn Button with standard button + Tailwind */}
+          <a className="w-full">
+            <button className="w-full inline-flex items-center justify-center px-4 py-2 border border-purple-300 dark:border-purple-700 text-sm font-medium rounded-md shadow-sm text-purple-700 dark:text-purple-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
+              Start Coaching Session
+            </button>
+          </a>
         </Link>
       </CardFooter>
     </Card>

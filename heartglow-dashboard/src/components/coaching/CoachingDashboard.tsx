@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from '../ui/button'; // Corrected path
+// import { Button } from '../ui/button'; // Removed shadcn button import
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
 import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore'; // Import Firestore functions
 import { db } from '../../lib/firebase'; // Import db instance
@@ -68,7 +68,10 @@ const CoachingDashboard: React.FC = () => {
           Your Coaching Chats
         </h1>
         <Link href="/coaching/start" passHref>
-          <Button>Start New Chat</Button>
+          {/* Replaced shadcn Button with standard button + Tailwind */}
+          <button className="inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-heartglow-pink hover:bg-heartglow-pink/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink">
+            Start New Chat
+          </button>
         </Link>
       </div>
 

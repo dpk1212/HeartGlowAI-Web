@@ -10,10 +10,12 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { currentUser, loading } = useAuth();
   const router = useRouter();
   const [authCheckComplete, setAuthCheckComplete] = useState(false);
+  const [redirected, setRedirected] = useState(false);
 
   useEffect(() => {
     if (!loading) {
-      if (!currentUser) {
+      if (!currentUser && !redirected) {
+        setRedirected(true);
         router.replace('/login');
       }
       setAuthCheckComplete(true);
@@ -24,14 +26,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       if (!authCheckComplete) {
         console.warn('Auth guard timeout - forcing completion');
         setAuthCheckComplete(true);
-        if (!currentUser) {
+        if (!currentUser && !redirected) {
+          setRedirected(true);
           router.replace('/login');
         }
       }
     }, 5000);
     
     return () => clearTimeout(timeoutId);
-  }, [currentUser, loading, router]);
+  }, [currentUser, loading, router, authCheckComplete, redirected]);
 
   // Show loading state
   if (loading && !authCheckComplete) {

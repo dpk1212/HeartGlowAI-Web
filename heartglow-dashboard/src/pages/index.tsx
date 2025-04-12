@@ -2,6 +2,7 @@ import { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
@@ -13,13 +14,14 @@ import ComingSoonCard from '../components/ui/ComingSoonCard';
 
 const Dashboard: NextPage = () => {
   const router = useRouter();
+  const { currentUser, loading } = useAuth();
 
   useEffect(() => {
-    // If we're on the root path, redirect to /dashboard
-    if (router.pathname === '/') {
+    // Only redirect to dashboard if we're on the root path AND user is authenticated
+    if (router.pathname === '/' && !loading && currentUser) {
       router.push('/dashboard');
     }
-  }, [router]);
+  }, [router, currentUser, loading]);
 
   return (
     <>

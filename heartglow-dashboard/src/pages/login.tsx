@@ -10,14 +10,14 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, loginWithGoogle, currentUser } = useAuth();
+  const { login, loginWithGoogle, currentUser, loading } = useAuth();
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
-    if (currentUser) {
+    // Only redirect if not loading and user is authenticated
+    if (!loading && currentUser) {
       router.replace('/dashboard/');
     }
-  }, [currentUser, router]);
+  }, [currentUser, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

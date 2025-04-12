@@ -22,28 +22,18 @@ const Dashboard: NextPage = () => {
       <AuthGuard>
         <DashboardLayout>
           <HeroSection />
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-3">
-              <QuickTemplateGrid />
-            </div>
 
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1">
-              <CoachingEntryCard />
-            </div>
-            
-            <div className="md:col-span-2 lg:col-span-2 xl:col-span-3">
-              <ConnectionsCarousel />
-            </div>
-
-            <div className="md:col-span-1 lg:col-span-1 xl:col-span-1">
-              <ComingSoonCard />
-            </div>
-
-            <div className="md:col-span-2 lg:col-span-3 xl:col-span-4 mt-4">
+          {/* Simplified Grid Layout for testing */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Place items simply, let grid wrap them */}
+            <QuickTemplateGrid />
+            <CoachingEntryCard />
+            <ConnectionsCarousel />
+            <ComingSoonCard />
+            {/* Recent Messages might need col-span-2 if we want it full width */}
+            <div className="md:col-span-2">
               <RecentMessagesList />
             </div>
-
           </div>
         </DashboardLayout>
       </AuthGuard>

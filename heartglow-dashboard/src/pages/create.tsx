@@ -10,6 +10,7 @@ import MessageOutput from '../components/create/MessageOutput';
 import { motion } from 'framer-motion';
 
 export default function CreatePage() {
+  console.log('>>> CreatePage component rendering started');
   const router = useRouter();
   const { user, loading } = useAuth();
   const [step, setStep] = useState(1);

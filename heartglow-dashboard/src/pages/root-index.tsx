@@ -13,9 +13,9 @@ const RootIndex = () => {
   const { login, loginWithGoogle, currentUser } = useAuth();
 
   useEffect(() => {
-    // If user is already logged in, redirect to dashboard
+    // If user is already logged in, redirect to the correct dashboard path
     if (currentUser) {
-      router.push('/dashboard/dashboard');
+      router.push('/dashboard');
     }
   }, [currentUser, router]);
 

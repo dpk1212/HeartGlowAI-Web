@@ -8,12 +8,7 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
 import { useAuth } from '../../context/AuthContext';
 import { addConnection } from '../../firebase/db';
-
-// Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
+import { getRouteWithBasePath } from '../../lib/utils';
 
 // Relationship options
 const RELATIONSHIP_OPTIONS = [

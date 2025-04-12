@@ -14,7 +14,7 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   useEffect(() => {
     if (!loading) {
       if (!currentUser) {
-        router.push('/login');
+        router.replace('/login');
       }
       setAuthCheckComplete(true);
     }
@@ -25,13 +25,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
         console.warn('Auth guard timeout - forcing completion');
         setAuthCheckComplete(true);
         if (!currentUser) {
-          router.push('/login');
+          router.replace('/login');
         }
       }
     }, 5000);
     
     return () => clearTimeout(timeoutId);
-  }, [currentUser, loading, router, authCheckComplete]);
+  }, [currentUser, loading, router]);
 
   // Show loading state
   if (loading && !authCheckComplete) {

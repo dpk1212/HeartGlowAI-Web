@@ -45,6 +45,7 @@ export default function CreatePage() {
   };
 
   const renderStep = () => {
+    console.log(`>>> CreatePage rendering step: ${step}`);
     switch (step) {
       case 1:
         return <RecipientStep onNext={handleNext} />;

@@ -17,6 +17,7 @@ interface RecipientStepProps {
 }
 
 export default function RecipientStep({ onNext }: RecipientStepProps) {
+  console.log('>>> RecipientStep component rendering started');
   const { user } = useAuth();
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);

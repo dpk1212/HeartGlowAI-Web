@@ -7,6 +7,7 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: '/dashboard',
+  assetPrefix: '/dashboard',
   env: {
     // Add a build timestamp to bust cache on new deployments
     NEXT_PUBLIC_BUILD_TIMESTAMP: new Date().getTime().toString(),

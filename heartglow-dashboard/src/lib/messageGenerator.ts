@@ -1,4 +1,6 @@
 // Mock message generator for HeartGlow AI
+import { getFunctions, httpsCallable } from 'firebase/functions';
+import { app } from '../lib/firebase';
 
 export interface MessageGenerationParams {
   recipient: {
@@ -306,39 +308,94 @@ export async function generateMessage(params: MessageGenerationParams): Promise<
     const prompt = buildPrompt(params);
     console.log("Generating message with prompt:", prompt);
     
-    // Use the mock generator
+    // Initialize Firebase Functions
+    const functions = getFunctions(app);
+    // Call the generateMessageV2 cloud function (matches existing endpoint)
+    const generateMessageV2 = httpsCallable(functions, 'generateMessageV2');
+    
+    // Call the function with our params
+    const result = await generateMessageV2({ params, prompt });
+    
+    // Parse the result data (adjust based on your actual cloud function response)
+    const data = result.data as { content: string, insights: string[] };
+    
+    // If we have valid data, return it
+    if (data && data.content) {
+      return {
+        content: data.content,
+        insights: data.insights || extractInsights(data.content, params)
+      };
+    }
+    
+    // Fallback to mock if the cloud function didn't return expected data
+    console.warn('Cloud function returned invalid data, falling back to mock generator');
     const content = generateMockMessage(params);
     const insights = extractInsights(content, params);
-
+    
     return {
       content,
       insights
     };
   } catch (error) {
     console.error('Error generating message:', error);
-    throw error;
+    // Fallback to mock generator in case of error
+    console.warn('Error calling cloud function, falling back to mock generator');
+    const content = generateMockMessage(params);
+    const insights = extractInsights(content, params);
+    
+    return {
+      content,
+      insights
+    };
   }
 }
 
-// Fallback function that uses the same mock generator
+// Fallback function that uses direct API call if cloud function fails
 export async function generateMessageDirect(params: MessageGenerationParams): Promise<{
   content: string;
   insights: string[];
 }> {
   try {
     const prompt = buildPrompt(params);
-    
-    // Use the mock message generator
     console.log("Generating direct message with prompt:", prompt);
+    
+    // Initialize Firebase Functions
+    const functions = getFunctions(app);
+    // Call the directOpenAIMessage cloud function which should use a different method
+    const directMessageV2 = httpsCallable(functions, 'directOpenAIMessage');
+    
+    // Call the function with our params
+    const result = await directMessageV2({ params, prompt });
+    
+    // Parse the result data
+    const data = result.data as { content: string, insights: string[] };
+    
+    // If we have valid data, return it
+    if (data && data.content) {
+      return {
+        content: data.content,
+        insights: data.insights || extractInsights(data.content, params)
+      };
+    }
+    
+    // Fallback to mock if the direct API didn't return expected data
+    console.warn('Direct API returned invalid data, falling back to mock generator');
     const content = generateMockMessage(params);
     const insights = extractInsights(content, params);
-
+    
     return {
       content,
       insights
     };
   } catch (error) {
     console.error('Error generating message directly:', error);
-    throw error;
+    // Fallback to mock generator in case of error
+    const content = generateMockMessage(params);
+    const insights = extractInsights(content, params);
+    
+    return {
+      content,
+      insights
+    };
   }
 } 

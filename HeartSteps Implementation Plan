@@ -1,0 +1,69 @@
+# Coaching Chat Implementation Plan
+
+**Core Principle:** This module provides persistent, one-on-one coaching chats focused on specific user connections. Each chat maintains its own context via a dedicated Cloud Function (`coaching-assistant`) interacting with the OpenAI API (Assistants API preferred for context management). This module is separate from the standard message creation flow.
+
+**Phase 1: Foundation & Data Modeling (Simplified)**
+
+*   **Goal:** Define core data structures and create placeholder components for the coaching module.
+*   **Step 1.1: Define Simplified TypeScript Interfaces:**
+    *   In a new file `heartglow-dashboard/src/types/coaching.ts`:
+        *   `CoachingThread`: Stores metadata for a chat about a specific connection (`connectionId`, `userId`, `lastActivity`, `threadTitle` [maybe connection name initially]).
+        *   `ThreadMessage`: Represents a message within a `CoachingThread` (sender=`user`|`coach`, `content`, `timestamp`).
+    *   **Action:** Create `coaching.ts` and define interfaces.
+*   **Step 1.2: Create Revised Placeholder Components & Routing:**
+    *   Create new component files in `heartglow-dashboard/src/components/coaching/`:
+        *   `CoachingDashboard.tsx`: Lists ongoing chat threads, allows starting new ones.
+        *   `StartCoachingChat.tsx`: Component/Modal to select a connection.
+        *   `CoachingChatView.tsx`: The main view for an active chat thread.
+    *   Set up routing (e.g., a `/coaching` page).
+    *   **Action:** Create new component files and routing.
+
+**Phase 2: Starting & Displaying Chats**
+
+*   **Goal:** Allow users to select connections and start/resume coaching chats.
+*   **Step 2.1: Implement Connection Selection UI:**
+    *   In `StartCoachingChat.tsx` (or `CoachingDashboard.tsx`), fetch user's connections (`users/{uid}/connections`).
+    *   Display connections for selection.
+    *   **Action:** Implement Firestore read for connections, build selection UI.
+*   **Step 2.2: Implement Thread Initiation/Resumption Logic:**
+    *   On connection selection:
+        *   Query Firestore for existing `CoachingThread` (`userId`, `connectionId`).
+        *   If found, navigate to `CoachingChatView` for that `threadId`.
+        *   If not found, create a new `CoachingThread`, then navigate to `CoachingChatView`.
+    *   **Action:** Implement Firestore query/write for threads, handle navigation.
+*   **Step 2.3: Implement Chat Listing (`CoachingDashboard.tsx`):**
+    *   Fetch user's `CoachingThread` documents.
+    *   Display list of threads (connection name, last activity).
+    *   Allow navigation to `CoachingChatView`.
+    *   Integrate "Start New Chat".
+    *   **Action:** Implement Firestore query for threads, build dashboard UI.
+
+**Phase 3: Chat Interface & Conversational AI**
+
+*   **Goal:** Build the chat view and implement persistent AI coaching via Cloud Function.
+*   **Step 3.1: Build Chat UI (`CoachingChatView.tsx`):**
+    *   Implement chat bubbles, message input area.
+    *   **Action:** Build React component structure and styling.
+*   **Step 3.2: Fetch Chat History:**
+    *   Load specific `CoachingThread` metadata.
+    *   Fetch `ThreadMessage` history (from subcollection within thread doc).
+    *   Display messages.
+    *   **Action:** Implement Firestore reads for threads/messages.
+*   **Step 3.3: Create/Adapt Dedicated Cloud Function (`coaching-assistant`):**
+    *   Set up/modify Cloud Function for coaching.
+    *   Needs context: `userId`, `connectionId` (for connection details), `messageHistory`.
+    *   **Implement conversational persistence (Assistants API or managed context).**
+    *   **Action:** Set up/refine Cloud Function project structure, implement context handling & OpenAI logic.
+*   **Step 3.4: Implement User Message Sending & AI Response:**
+    *   User sends message -> Save user `ThreadMessage` -> Call `coaching-assistant` -> Receive AI response -> Save coach `ThreadMessage` -> Update UI.
+    *   **Action:** Implement frontend logic for sending messages, calling CF, updating UI/Firestore.
+
+**Phase 4: Enhancements & Polish**
+
+*   **Goal:** Improve usability and add features.
+*   **Step 4.1:** Refine Cloud Function prompting.
+*   **Step 4.2:** Implement loading states, error handling.
+*   **Step 4.3:** Consider features: setting chat topic, message timestamps, saving messages.
+*   **Step 4.4:** Testing.
+
+---

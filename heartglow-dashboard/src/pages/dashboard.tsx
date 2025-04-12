@@ -9,6 +9,7 @@ import QuickTemplateGrid from '../components/ui/QuickTemplateGrid';
 import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
 import ComingSoonCard from '../components/ui/ComingSoonCard';
+import CoachingEntryCard from '../components/ui/CoachingEntryCard';
 
 const Dashboard: NextPage = () => {
   return (
@@ -23,6 +24,7 @@ const Dashboard: NextPage = () => {
           <HeroSection />
           <QuickTemplateGrid />
           <ConnectionsCarousel />
+          <CoachingEntryCard />
           <RecentMessagesList />
           <ComingSoonCard />
         </DashboardLayout>

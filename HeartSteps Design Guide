@@ -1,0 +1,155 @@
+# 💖 Module Name: HeartSteps
+
+**Tagline:** Small emotional steps. Big relationship change.
+
+HeartSteps is HeartGlowAI's most emotionally intelligent feature to date: a guided, relationship-centered coaching system that helps users reconnect, repair, express, and grow closer through structured emotional micro-interactions. It blends long-term coaching plans, AI-generated messages, persistent chat-style support, and emotional reflection — all rooted in real relationship psychology.
+
+## 📊 Core Goals
+
+*   Help users navigate emotionally difficult conversations with empathy and care
+*   Provide clear, warm guidance through chat-like coaching
+*   Deliver daily emotional nudges and actions to rebuild or grow trust
+*   Lower friction in self-expression, making vulnerability approachable
+*   Encourage reflection and emotional learning over time
+*   Create structure and consistency for relationship growth
+*   Deepen retention and repeat use through meaningful relationship outcomes
+
+## 🧠 Expanded Use Cases
+
+| Use Case                   | Relationship Type                  | Emotional Goal                                                    |
+| :------------------------- | :--------------------------------- | :---------------------------------------------------------------- |
+| Reconnect after distance   | Family / Friend / Ex               | Break the silence gently, restore light emotional contact         |
+| Repair after major conflict | Romantic / Friend / Parent         | Acknowledge hurt, rebuild trust gradually                         |
+| Deepen emotional intimacy  | Romantic Partner                   | Increase emotional closeness, affection, and gratitude              |
+| Navigate hard truths       | Coworker / Manager / Peer          | Offer difficult feedback with care and clarity                    |
+| Apologize with emotional maturity | Any                          | Offer a meaningful apology that validates the other person's experience |
+| Begin difficult conversation | Estranged Family / Ex / Child      | Start what feels impossible to say, slowly                        |
+| Rebuild with children or elderly parents | Parent / Grandparent / Adult Child | Say what's been left unsaid, in a supported format                |
+| Navigate a relationship shift | Ex / Former friend                 | Set boundaries, express gratitude, or seek closure                |
+| Celebrate emotional growth | Partner / Child / Parent           | Acknowledge milestones and affirm progress                        |
+
+## 🔁 Structure of the HeartSteps Module
+
+### ✅ 1. Relationship Plans (7, 10, 15, 30 Days)
+
+Each HeartStep plan is a pre-designed or personalized roadmap. The plan includes:
+
+*   Daily AI-generated messages or emotional actions
+*   Short coaching insights
+*   Optional journaling or reflection prompt
+*   Adaptive pacing (can skip, delay, retry)
+
+**Plan Types (with Examples):**
+
+*   **Repair After a Fight (7 days)** — Rebuild trust through short, vulnerable messages
+*   **Reconnection Starter (10 days)** — Gradual ice-breakers for long-lost friends or siblings
+*   **Daily Affection Builder (15 days)** — Sustain warmth and care in romantic partnerships
+*   **Tough Love with Care (5 days)** — Set healthy boundaries or give feedback professionally
+*   **Unsent Messages for Closure (7 days)** — Write but don't necessarily send what you feel
+*   **Pre-Grief Letters (10 days)** — Messages for aging parents or those with illness
+*   **New Relationship Warmth (7 days)** — Early-phase romantic partners or deepening friendships
+*   **Post-Breakup Healing (10 days)** — A guided self-to-other processing journey
+*   **Emotional Safety Builder (Family)** — Slowly build courage to talk about difficult topics
+
+Each plan increases in emotional depth and provides meaningful structure.
+
+### 💬 2. Persistent Chat Interface (GlowCoach)
+
+The heart of HeartSteps is the GlowCoach — a chat-based, emotionally intelligent companion.
+
+GlowCoach is experienced as a living thread. It creates emotional continuity, giving users a single supportive voice throughout the plan.
+
+**Coach Behaviors:**
+
+*   Welcomes user by name and plan context
+*   Tracks emotional tone preference and pace
+*   Offers message ideas or edits based on user feedback
+*   Adjusts tone: "Want to make this softer?" or "Need something lighter today?"
+*   Provides gentle reminders or check-ins
+*   Explains "why this message works"
+
+**Chat Examples:**
+
+*   **Day 1 (Plan: Reconnect with Estranged Brother)**
+    *   🧠 **GlowCoach:** "Welcome, and thank you for being brave enough to start this. �� Let's begin gently."
+    *   💬 **Prompt:** "Hey. I know it's been a while. I've been thinking about how we used to talk."
+    *   🧠 **Coach Insight:** "This message acknowledges emotional presence without pressure or expectation."
+    *   *User options:*
+        *   ✅ \[Send as is]
+        *   ✍️ \[Edit message]
+        *   🔁 \[Try a different version]
+        *   💤 \[Not today]
+
+*   **Day 3 (Plan: Daily Affection Builder - Romantic)**
+    *   🧠 **GlowCoach:** "Let's remind them how much they're seen today."
+    *   💬 **Prompt:** "I noticed how you helped your friend the other day. You always show up for people. I love that about you."
+    *   🧠 **Coach Insight:** "Tiny acknowledgments build emotional trust and nurture intimacy."
+
+*   *If a message doesn't land:*
+    *   🧠 **GlowCoach:** "Totally okay. 💛 Want to try a lighter tone or take a day off?"
+
+*   *Reflection Prompt (Optional):*
+    *   "What was it like to say that today?" → \[Textbox]
+
+### 📅 3. Plan Tracking + Feedback
+
+*   **Daily Status Options:** ✅ Completed, 💤 Skipped, 🔁 Retried
+*   **Progress UI:** Progress bar, calendar view, or streak count
+*   **Feedback Buttons Per Message:**
+    *   😊 "Felt good to send"
+    *   😐 "Neutral"
+    *   😔 "Didn't land well"
+    *   📤 "Haven't sent yet"
+*   **Reflection Entry (optional):**
+    *   "Do you want to remember how this felt?" → \[Save Note]
+*   **History View:** Users can review past messages, feedback, and emotional notes
+*   **Smart Suggestions:** "You skipped Step 4 — want to replace it with something softer?"
+
+## 📦 Technical Structure
+
+| Component     | Details                                                                        |
+| :------------ | :----------------------------------------------------------------------------- |
+| `users`         | Standard user profile, tone preferences, plan participation                    |
+| `plans`         | Master list of predefined or user-custom plans (title, goal, days)             |
+| `planInstances` | User's active plan, tied to chat thread ID, daily progress                   |
+| `threads`       | Full chat history between user and coach (structured by `planInstanceId`)      |
+| `messages`      | Message history including user, assistant, and message type (prompt/response/feedback) |
+| `feedback`      | Tied to message ID, stores user sentiment + reflection                         |
+| `reflections`   | Optional user journaling responses to coach prompts                            |
+| `favorites`     | User-pinned favorite messages or moments                                       |
+
+## ✨ Additional Features
+
+*   🧠 Tone Customization per Plan (e.g., Warm, Honest, Reflective, Playful)
+*   ⏱ Time Suggestions: "Best time to send: morning" or "After a call"
+*   ❤️ Save Favorites: Users can pin messages that really resonate
+*   🔄 Restart Plan: "Start again with a new tone or goal"
+*   💌 Send Later Scheduler: Queue messages for timed delivery
+*   🧩 Custom Plan Builder (Future): User defines goal + tone → gets auto-built plan
+
+## 🧭 Long-Term Experience Vision
+
+*   HeartSteps becomes a relationship health tracker.
+*   Ongoing guided conversations with the same person (like an emotional diary)
+*   Plan branching logic based on recipient's responses and user feedback
+*   Legacy message vault (write letters to be saved, printed, or sent later)
+*   Multi-recipient coaching: "Send a small note to 3 people this week"
+*   Emotional growth scoring: "You've grown your emotional fluency streak!"
+*   Partner/Family dashboard: "Invite your partner to join a 7-day appreciation challenge"
+
+## ✅ Next Steps for Implementation
+
+1.  Build and test 5 full HeartStep plans (7–15 days)
+2.  Implement persistent chat threads per plan with OpenAI API
+3.  Design full conversation UI with branching prompt flows and emotion handling
+4.  Launch feedback and reflection features with Firestore storage
+5.  Expand plan tracking and daily progress tools (calendar, streaks, dashboard)
+6.  Prepare monetization model (free plans vs. pro-only specialty plans)
+
+---
+
+*HeartSteps is HeartGlow's soul. It turns fleeting emotional insight into lifelong relational growth. With the right tone, timing, and support — we don't just help people send better messages.*
+
+*We help them show up.*
+
+*Let's build it.*

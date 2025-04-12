@@ -9,16 +9,10 @@
   <meta http-equiv="Expires" content="0">
   <title>Redirecting...</title>
   <script>
-    // Only redirect 404s to the root if we're not already at the root path
+    // Always redirect 404s to the root for the SPA router to handle.
     // Use location.replace to avoid adding the 404 page to history.
     (function() {
-      // Get the pathname without any query parameters or hash
-      var pathname = window.location.pathname;
-      
-      // Only redirect if we're not already at the root or login page
-      if (pathname !== '/' && pathname !== '/login' && !pathname.includes('/dashboard')) {
-        window.location.replace('/');
-      }
+      window.location.replace('/');
     })();
   </script>
 </head>

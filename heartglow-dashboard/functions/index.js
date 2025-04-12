@@ -8,24 +8,6 @@ const {OpenAI} = require("openai");
 // Initialize Firebase Admin
 admin.initializeApp();
 
-// Helper function to get OpenAI API key from Firestore
-async function getOpenAIKey() {
-  try {
-    const snapshot = await admin.firestore().collection('secrets').doc('secrets').get();
-    if (!snapshot.exists) {
-      throw new Error('Secrets document not found');
-    }
-    const data = snapshot.data();
-    if (!data.openaikey) {
-      throw new Error('OpenAI key not found in secrets');
-    }
-    return data.openaikey;
-  } catch (error) {
-    console.error('Error fetching OpenAI key from Firestore:', error);
-    throw error;
-  }
-}
-
 /**
  * Extracts insights from a generated message based on parameters
  * @param {string} content - The generated message content
@@ -94,12 +76,9 @@ exports.generateMessageV2 = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    // Get OpenAI API key from Firestore
-    const apiKey = await getOpenAIKey();
-    
-    // Initialize OpenAI client with API key from Firestore
+    // Initialize OpenAI client with API key from config
     const openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey: functions.config().openai.api_key,
     });
     
     const {params, prompt} = data;
@@ -179,12 +158,9 @@ exports.directOpenAIMessage = functions.https.onCall(async (data, context) => {
   }
 
   try {
-    // Get OpenAI API key from Firestore
-    const apiKey = await getOpenAIKey();
-    
-    // Initialize OpenAI client with API key from Firestore
+    // Initialize OpenAI client with API key from config
     const openai = new OpenAI({
-      apiKey: apiKey,
+      apiKey: functions.config().openai.api_key,
     });
     
     const {params} = data;

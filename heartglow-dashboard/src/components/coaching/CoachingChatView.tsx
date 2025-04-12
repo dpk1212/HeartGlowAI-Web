@@ -1,59 +1,162 @@
-import React, { useState } from 'react';
-import { Input } from './ui/input'; // Assuming shadcn input
+import React, { useState, useEffect, useRef } from 'react';
+import { Input } from '../ui/input'; // Corrected path
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon } from '@radix-ui/react-icons'; // Example icon
+import { useAuth } from '../../context/AuthContext'; // Import useAuth
+import { db } from '../../lib/firebase'; // Import db instance
+import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp } from 'firebase/firestore'; // Import Firestore functions
+import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
 
 interface CoachingChatViewProps {
   threadId: string; // Passed in from the dynamic page
 }
 
 const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
-  // TODO: Fetch thread metadata (title, connection details)
-  // TODO: Fetch message history
-  // TODO: Implement message sending logic
-
+  const { currentUser } = useAuth(); // Get current user
+  const [threadData, setThreadData] = useState<CoachingThread | null>(null);
+  const [messages, setMessages] = useState<ThreadMessage[]>([]);
+  const [loadingThread, setLoadingThread] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const messagesEndRef = useRef<null | HTMLDivElement>(null); // Ref for scrolling
   
-  // Placeholder: Replace with actual fetched title
-  const threadTitle = `Chat Thread ${threadId.substring(0, 6)}...`; 
+  // Fetch thread metadata
+  useEffect(() => {
+    if (!threadId) return;
+    setLoadingThread(true);
+    setError(null);
+    const threadRef = doc(db, 'coachingThreads', threadId);
+
+    getDoc(threadRef)
+      .then((docSnap) => {
+        if (docSnap.exists()) {
+          // Basic validation: Ensure the user owns this thread
+          const data = { id: docSnap.id, ...docSnap.data() } as CoachingThread;
+          if (data.userId === currentUser?.uid) {
+             setThreadData(data);
+          } else {
+             setError("You don't have permission to view this chat.");
+             console.error("User mismatch for thread access");
+          }
+        } else {
+          setError("Chat thread not found.");
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching thread data: ", err);
+        setError("Failed to load chat details.");
+      })
+      .finally(() => {
+        setLoadingThread(false);
+      });
+  }, [threadId, currentUser]); // Rerun if threadId or user changes
+
+  // Subscribe to message updates
+  useEffect(() => {
+    if (!threadId) return;
+    
+    setLoadingMessages(true);
+    setError(null);
+    const messagesRef = collection(db, 'coachingThreads', threadId, 'messages');
+    const q = query(messagesRef, orderBy('timestamp', 'asc')); // Get messages oldest first
+
+    const unsubscribe = onSnapshot(q, 
+      (querySnapshot) => {
+        const fetchedMessages = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as ThreadMessage[];
+        setMessages(fetchedMessages);
+        setLoadingMessages(false);
+      },
+      (err) => {
+        console.error("Error fetching messages: ", err);
+        setError("Failed to load messages.");
+        setLoadingMessages(false);
+      }
+    );
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [threadId]); // Rerun if threadId changes
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-    console.log(`Sending message for thread ${threadId}:`, newMessage);
-    // TODO: Implement actual send logic (save to Firestore, call CF)
+    if (!newMessage.trim() || !currentUser || !threadId) return;
+    
+    console.log(`TODO: Send message for thread ${threadId}:`, newMessage);
+    // TODO: Implement actual send logic:
+    // 1. Add user message to Firestore subcollection (`ThreadMessage` type)
+    // 2. Call the `coaching-assistant` Cloud Function with threadId, message history, etc.
+    // 3. Cloud function will process, call OpenAI, and add coach response to subcollection
     setNewMessage('');
   };
+  
+  // Helper to format timestamp
+  const formatTimestamp = (timestamp: Timestamp | Date | undefined): string => {
+    if (!timestamp) return '';
+    const date = (timestamp instanceof Timestamp) ? timestamp.toDate() : timestamp;
+    return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
+  };
+
+  if (loadingThread) {
+    return (
+      <div className="flex justify-center items-center h-full p-6">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-heartglow-pink"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="p-6 text-center text-red-600 dark:text-red-400">Error: {error}</div>;
+  }
+  
+  if (!threadData) {
+     return <div className="p-6 text-center text-gray-500 dark:text-gray-400">Chat not found or access denied.</div>;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--header-height)-var(--footer-height)-2rem)] md:h-[calc(100vh-var(--header-height)-var(--footer-height)-4rem)] bg-white dark:bg-heartglow-deepgray border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate">
-          {threadTitle} 
-          {/* TODO: Display connection name/details */}
+          {threadData.threadTitle}
+          {threadData.connectionSnapshot?.name && (
+             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 ml-2">
+               (Regarding: {threadData.connectionSnapshot.name})
+             </span>
+           )}
         </h2>
       </div>
       
       {/* Chat messages area */}
       <div className="flex-grow overflow-y-auto p-4 space-y-4">
-        {/* Placeholder Messages - TODO: Replace with actual fetched messages */}
-        <div className="flex justify-start">
-          <div className="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg max-w-xs lg:max-w-md shadow-sm">
-            <p className="text-sm text-gray-800 dark:text-gray-100">Coach placeholder message...</p>
-          </div>
-        </div>
-        <div className="flex justify-end">
-          <div className="bg-heartglow-pink/80 text-white p-3 rounded-lg max-w-xs lg:max-w-md shadow-sm">
-            <p className="text-sm">User placeholder message...</p>
-          </div>
-        </div>
-         <div className="flex justify-start">
-          <div className="bg-gray-200 dark:bg-gray-700 p-3 rounded-lg max-w-xs lg:max-w-md shadow-sm">
-            <p className="text-sm text-gray-800 dark:text-gray-100">Another coach placeholder message that might be a bit longer to test wrapping.</p>
-          </div>
-        </div>
-        {/* End Placeholder Messages */}
+        {loadingMessages ? (
+           <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-heartglow-pink"></div>
+           </div>
+        ) : messages.length === 0 ? (
+          <p className="text-center text-gray-500 dark:text-gray-400 pt-8">Send a message to start the conversation.</p>
+        ) : (
+          messages.map(msg => (
+            <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+              <div className={`p-3 rounded-lg max-w-xs lg:max-w-md shadow-sm ${msg.sender === 'user' ? 'bg-heartglow-pink/90 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100'}`}>
+                <p className="text-sm">{msg.content}</p>
+                 <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-pink-100/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                   {formatTimestamp(msg.timestamp)}
+                 </p>
+              </div>
+            </div>
+          ))
+        )}
+        {/* Div to target for scrolling */}
+        <div ref={messagesEndRef} /> 
       </div>
 
       {/* Message input area */}
@@ -66,12 +169,13 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
             onChange={(e) => setNewMessage(e.target.value)}
             className="flex-grow bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             aria-label="Message input"
+            disabled={loadingThread || loadingMessages} // Disable input while loading
           />
           <button 
             type="submit"
-            disabled={!newMessage.trim()} 
+            disabled={!newMessage.trim() || loadingThread || loadingMessages}
             aria-label="Send message"
-            className={`shrink-0 inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${!newMessage.trim() ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-heartglow-pink hover:bg-heartglow-pink/90'}`}
+            className={`shrink-0 inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${!newMessage.trim() || loadingThread || loadingMessages ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-heartglow-pink hover:bg-heartglow-pink/90'}`}
           >
             <PaperPlaneIcon className="h-5 w-5" />
           </button>

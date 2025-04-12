@@ -1,13 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-interface AdvancedStepProps {
-  onNext: (data: any) => void;
-  onBack: () => void;
+interface AdvancedData {
+  intensity: number;
+  customInstructions?: string | null;
 }
 
-export default function AdvancedStep({ onNext, onBack }: AdvancedStepProps) {
-  const [intensity, setIntensity] = useState(3);
-  const [customInstructions, setCustomInstructions] = useState('');
+interface AdvancedStepProps {
+  onNext: (data: { advanced: AdvancedData }) => void;
+  onBack: () => void;
+  initialData?: AdvancedData | null;
+}
+
+export default function AdvancedStep({ onNext, onBack, initialData }: AdvancedStepProps) {
+  const [intensity, setIntensity] = useState(initialData?.intensity || 3);
+  const [customInstructions, setCustomInstructions] = useState(initialData?.customInstructions || '');
+
+  useEffect(() => {
+    if (initialData) {
+      setIntensity(initialData.intensity || 3);
+      setCustomInstructions(initialData.customInstructions || '');
+    } else {
+      setIntensity(3);
+      setCustomInstructions('');
+    }
+  }, [initialData]);
 
   const handleNext = () => {
     onNext({
@@ -19,25 +35,26 @@ export default function AdvancedStep({ onNext, onBack }: AdvancedStepProps) {
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-gray-900">
+    <div className="space-y-8">
+      <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center">
         Advanced Options
       </h2>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="intensity-slider" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Message Intensity (1-5)
           </label>
           <input
+            id="intensity-slider"
             type="range"
             min="1"
             max="5"
             value={intensity}
             onChange={(e) => setIntensity(Number(e.target.value))}
-            className="w-full"
+            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-heartglow-pink"
           />
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
             <span>Subtle</span>
             <span>Balanced</span>
             <span>Intense</span>
@@ -45,29 +62,30 @@ export default function AdvancedStep({ onNext, onBack }: AdvancedStepProps) {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="custom-instructions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Custom Instructions (Optional)
           </label>
           <textarea
+            id="custom-instructions"
             value={customInstructions}
             onChange={(e) => setCustomInstructions(e.target.value)}
-            className="w-full p-2 border rounded-lg"
+            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent resize-none dark:placeholder-gray-400"
             rows={4}
-            placeholder="Add any specific instructions or preferences..."
+            placeholder="e.g., Mention our upcoming trip, Keep it under 50 words..."
           />
         </div>
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-8">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50 text-gray-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
         >
           Back
         </button>
         <button
           onClick={handleNext}
-          className="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-heartglow-pink hover:bg-heartglow-pink/90 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink"
         >
           Next
         </button>

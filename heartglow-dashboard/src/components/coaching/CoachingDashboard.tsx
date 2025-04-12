@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Button } from './ui/button'; // Assuming shadcn button
+import { Button } from '../ui/button'; // Corrected path
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
 import { collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore'; // Import Firestore functions
 import { db } from '../../lib/firebase'; // Import db instance

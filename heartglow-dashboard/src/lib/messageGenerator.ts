@@ -308,27 +308,32 @@ export async function generateMessage(params: MessageGenerationParams): Promise<
     const prompt = buildPrompt(params);
     console.log("Generating message with prompt:", prompt);
     
-    // Initialize Firebase Functions
-    const functions = getFunctions(app);
-    // Call the generateMessageV2 cloud function (matches existing endpoint)
-    const generateMessageV2 = httpsCallable(functions, 'generateMessageV2');
-    
-    // Call the function with our params
-    const result = await generateMessageV2({ params, prompt });
-    
-    // Parse the result data (adjust based on your actual cloud function response)
-    const data = result.data as { content: string, insights: string[] };
-    
-    // If we have valid data, return it
-    if (data && data.content) {
-      return {
-        content: data.content,
-        insights: data.insights || extractInsights(data.content, params)
-      };
+    try {
+      // Initialize Firebase Functions
+      const functions = getFunctions(app);
+      // Call the generateMessageV2 cloud function (matches existing endpoint)
+      const generateMessageV2 = httpsCallable(functions, 'generateMessageV2');
+      
+      // Call the function with our params
+      const result = await generateMessageV2({ params, prompt });
+      
+      // Parse the result data (adjust based on your actual cloud function response)
+      const data = result.data as { content: string, insights: string[] };
+      
+      // If we have valid data, return it
+      if (data && data.content) {
+        return {
+          content: data.content,
+          insights: data.insights || extractInsights(data.content, params)
+        };
+      }
+    } catch (cloudFunctionError) {
+      console.warn('Error calling cloud function:', cloudFunctionError);
+      // Continue to fallback
     }
     
-    // Fallback to mock if the cloud function didn't return expected data
-    console.warn('Cloud function returned invalid data, falling back to mock generator');
+    // Always fall back to mock generator if there's any issue
+    console.warn('Falling back to mock generator');
     const content = generateMockMessage(params);
     const insights = extractInsights(content, params);
     
@@ -338,8 +343,7 @@ export async function generateMessage(params: MessageGenerationParams): Promise<
     };
   } catch (error) {
     console.error('Error generating message:', error);
-    // Fallback to mock generator in case of error
-    console.warn('Error calling cloud function, falling back to mock generator');
+    // Final fallback to mock generator in case of any error
     const content = generateMockMessage(params);
     const insights = extractInsights(content, params);
     

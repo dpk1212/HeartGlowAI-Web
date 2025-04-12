@@ -61,19 +61,20 @@ export default function MessageOutput({
           advanced
         };
 
-        // Try cloud function first, fall back to direct OpenAI if needed
-        let result;
-        try {
-          result = await generateMessage(params);
-        } catch (cloudError) {
-          console.warn('Cloud function failed, falling back to direct OpenAI:', cloudError);
-          result = await generateMessageDirect(params);
-        }
+        console.log("Generating message with params:", JSON.stringify(params));
 
-        setMessage(result.content);
-        setInsights(result.insights);
+        // Try cloud function first, fall back to mock if needed
+        try {
+          const result = await generateMessage(params);
+          setMessage(result.content);
+          setInsights(result.insights || []);
+        } catch (err) {
+          console.error("Failed to generate message with cloud function:", err);
+          // We don't need a separate fallback as the generateMessage function already includes fallback logic
+          throw err;
+        }
       } catch (err) {
-        console.error('Error generating message:', err);
+        console.error('Error in message generation:', err);
         setError('Failed to generate message. Please try again.');
       } finally {
         setIsGenerating(false);

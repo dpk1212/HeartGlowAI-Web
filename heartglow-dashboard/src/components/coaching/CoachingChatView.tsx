@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Input } from '../ui/input'; // Corrected path
+// import { Input } from '../ui/input'; // Removed shadcn input import
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon } from '@radix-ui/react-icons'; // Example icon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
@@ -162,12 +162,12 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
       {/* Message input area */}
       <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
-          <Input 
+          <input 
             type="text"
             placeholder="Talk to your coach..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-grow bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
+            className="flex-grow bg-white text-gray-900 border border-gray-300 rounded-md p-3 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             aria-label="Message input"
             disabled={loadingThread || loadingMessages} // Disable input while loading
           />

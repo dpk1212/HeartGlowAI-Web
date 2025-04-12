@@ -10,7 +10,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, loginWithGoogle, currentUser } = useAuth();
+  const { login, loginWithGoogle } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,12 +45,6 @@ const Login = () => {
     }
   };
 
-  // Helper function to add basePath
-  const getRouteWithBasePath = (path: string): string => {
-    const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-    return `${basePath}${path}`;
-  };
-
   return (
     <div className="min-h-screen flex flex-col justify-center bg-heartglow-offwhite dark:bg-heartglow-charcoal">
       <Head>
@@ -60,9 +54,9 @@ const Login = () => {
 
       <div className="w-full max-w-md mx-auto px-4">
         <div className="text-center mb-8">
-          <Link href={"/"} className="text-3xl font-bold text-heartglow-pink">
+          <div className="text-3xl font-bold text-heartglow-pink">
             HeartGlow
-          </Link>
+          </div>
           <h1 className="mt-2 text-2xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">
             Welcome Back
           </h1>

@@ -9,24 +9,10 @@
   <meta http-equiv="Expires" content="0">
   <title>Redirecting...</title>
   <script>
-    // Helps fix GitHub Pages routing issues
+    // Always redirect 404s to the root for the SPA router to handle.
+    // Use location.replace to avoid adding the 404 page to history.
     (function() {
-      // Get the current URL path
-      var pathname = window.location.pathname;
-      
-      // Fix double dashboard issue
-      if (pathname.includes('/dashboard/dashboard/')) {
-        pathname = pathname.replace('/dashboard/dashboard/', '/dashboard/');
-      }
-      
-      // If we're on a path that should exist in the SPA
-      if (pathname.startsWith('/dashboard')) {
-        // GitHub Pages 404 handling - redirect to index.html
-        window.location.href = '/';
-      } else {
-        // Otherwise, redirect to dashboard
-        window.location.href = '/dashboard/';
-      }
+      window.location.replace('/');
     })();
   </script>
 </head>

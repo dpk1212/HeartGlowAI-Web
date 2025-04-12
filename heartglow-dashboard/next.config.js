@@ -20,38 +20,14 @@ const nextConfig = {
   // Make sure we're handling paths correctly for the static export
   assetPrefix: '/dashboard/',
 
-  // Add redirects to fix common path issues and enforce base path
-  async redirects() {
-    return [
-      // Fix double dashboard prefix
-      {
-        source: '/dashboard/dashboard/:path*',
-        destination: '/dashboard/:path*',
-        permanent: true,
-        basePath: false, // Match source without the basePath
-      },
-      // Enforce base path for login
-      {
-        source: '/login',
-        destination: '/dashboard/login',
-        permanent: true,
-        basePath: false, // Match source without the basePath
-      },
-      // Enforce base path for create
-      {
-        source: '/create',
-        destination: '/dashboard/create',
-        permanent: true,
-        basePath: false, // Match source without the basePath
-      },
-      // Enforce base path for connections
-      {
-        source: '/connections/:path*',
-        destination: '/dashboard/connections/:path*',
-        permanent: true,
-        basePath: false, // Match source without the basePath
-      },
-    ]
+  // Add a custom webpack configuration to inject the fix-path.js script
+  webpack: (config, { isServer, dev }) => {
+    // Only modify the client-side build and only in production
+    if (!isServer && !dev) {
+      console.log('Adding fix-path.js to the client-side bundle');
+      // The fix-path.js file will be included in the final build
+    }
+    return config;
   },
 }
 

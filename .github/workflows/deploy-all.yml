@@ -108,9 +108,6 @@ jobs:
           echo "Copying root files to $DEPLOY_DIR/"
           cp -rv out/* $DEPLOY_DIR/
           
-          # Copy fix-path.js
-          cp -v public/fix-path.js $DEPLOY_DIR/
-          
           # Restore original files
           cp next.config.js.bak next.config.js
           git checkout -- src/pages/index.tsx

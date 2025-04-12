@@ -23,7 +23,7 @@ const HeartStepsPage = () => {
 
   return (
     // Basic page structure - can be enhanced with a layout later
-    <div className=\"min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-heartglow-deepgray dark:to-gray-900 py-16 md:py-24">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-heartglow-deepgray dark:to-gray-900 py-16 md:py-24">
        <HeartStepsDashboard />
     </div>
   );

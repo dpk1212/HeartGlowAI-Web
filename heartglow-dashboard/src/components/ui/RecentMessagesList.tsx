@@ -197,17 +197,10 @@ const RecentMessagesList: React.FC = () => {
         </h2>
         
         <div className="flex items-center gap-3">
-          {/* Demo toggle button - only for development purposes */}
-          <button 
-            onClick={toggleDemo} 
-            className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-1 rounded"
-            aria-label="Toggle demo mode for development"
-          >
-            Toggle Demo
-          </button>
+          {/* REMOVED: Demo toggle button */}
           
           <Link 
-            href={getRouteWithBasePath("/create")}
+            href="/create"
             className="text-heartglow-indigo dark:text-heartglow-pink font-medium text-sm flex items-center hover:underline group"
             aria-label="Create a new message"
           >

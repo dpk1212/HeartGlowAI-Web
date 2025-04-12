@@ -148,25 +148,10 @@ const ConnectionsCarousel: React.FC = () => {
         </h2>
         
         <div className="flex items-center gap-3">
-          {/* Demo toggle button - only for development purposes */}
-          <button 
-            onClick={toggleDemo} 
-            className="text-xs bg-gray-100 dark:bg-gray-800 text-gray-500 px-2 py-1 rounded"
-            aria-label="Toggle demo mode for development"
-          >
-            Toggle Demo
-          </button>
+          {/* REMOVED: Demo toggle button */}
           
-          <Link 
-            href="/connections/add"
-            className="text-heartglow-indigo dark:text-heartglow-pink font-medium text-sm flex items-center hover:underline group"
-            aria-label="Add a new connection"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1 transition-transform group-hover:scale-110" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Add New
-          </Link>
+          {/* REMOVED: Add New link */}
+
           <Link 
             href="/connections"
             className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white transition-colors"

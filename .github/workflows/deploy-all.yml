@@ -30,6 +30,20 @@ jobs:
           cd heartglow-dashboard
           npm ci
 
+      # Copy the CNAME file first
+      - name: Prepare CNAME file
+        run: |
+          echo "heartglowai.com" > CNAME_FILE
+          cat CNAME_FILE
+          
+          # Create deployment directories
+          mkdir -p deploy
+          mkdir -p deploy/dashboard
+          
+          # Copy CNAME to both locations
+          cp CNAME_FILE deploy/CNAME
+          cp CNAME_FILE deploy/dashboard/CNAME
+
       # Build dashboard with its enhanced configuration
       - name: Build dashboard
         run: |
@@ -38,16 +52,16 @@ jobs:
           # Ensure the fix-path.js file is up to date
           npm run build
           
-          # Clean up output directory
-          mkdir -p deploy
-          mkdir -p deploy/dashboard
-          
           # Copy dashboard files to the /dashboard directory
           cp -r out/* deploy/dashboard/
           
           # Ensure .nojekyll files exist
           touch deploy/.nojekyll
           touch deploy/dashboard/.nojekyll
+          
+          # Clean output directory for next build
+          rm -rf out
+          rm -rf .next
 
       # Build login page as the root site
       - name: Build login page for root
@@ -109,7 +123,7 @@ jobs:
           
           # Display the deployment structure
           echo "Deployment directory structure:"
-          find deploy -type f | sort
+          find deploy -type f | sort | head -n 20
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

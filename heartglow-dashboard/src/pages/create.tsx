@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/router';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../context/AuthContext';
 import RecipientStep from '../components/create/RecipientStep';
 import IntentStep from '../components/create/IntentStep';
 import FormatStep from '../components/create/FormatStep';

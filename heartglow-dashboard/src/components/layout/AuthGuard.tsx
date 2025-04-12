@@ -10,7 +10,14 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { currentUser, loading } = useAuth();
   const router = useRouter();
 
-  // Show loading state
+  React.useEffect(() => {
+    // Only redirect if loading is complete and there's definitely no user
+    if (!loading && !currentUser) {
+      router.replace('/login');
+    }
+  }, [loading, currentUser, router]);
+
+  // Show loading state while checking auth
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -23,17 +30,15 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // If loading is complete but no user, redirect
-  if (!currentUser) {
-    // Use useEffect to avoid rendering during redirect state change
-    React.useEffect(() => {
-      router.replace('/login');
-    }, [router]);
-    return null; // Render nothing while redirecting
+  // If loading is complete and we have a user, show the children
+  // If no user, the useEffect above will handle the redirect, 
+  // and rendering null prevents rendering children briefly before redirecting.
+  if (currentUser) {
+    return <>{children}</>;
   }
 
-  // If loading complete and user exists, show protected content
-  return <>{children}</>;
+  // If no user and loading is false, render null while redirecting
+  return null;
 };
 
 export default AuthGuard; 

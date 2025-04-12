@@ -12,16 +12,6 @@ const nextConfig = {
   },
   // Disable source maps in production to reduce bundle size
   productionBrowserSourceMaps: false,
-
-  // Add a custom webpack configuration to inject the fix-path.js script
-  webpack: (config, { isServer, dev }) => {
-    // Only modify the client-side build and only in production
-    if (!isServer && !dev) {
-      console.log('Adding fix-path.js to the client-side bundle');
-      // The fix-path.js file will be included in the final build
-    }
-    return config;
-  },
 }
 
 module.exports = nextConfig 

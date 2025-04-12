@@ -1,12 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
 
-// Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
-
 type Template = {
   id: string;
   title: string;
@@ -135,18 +129,17 @@ const TemplateCard: React.FC<{ template: Template; index: number }> = ({ templat
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      window.location.href = getRouteWithBasePath(`/create?intent=${template.intent}&tone=${template.tone.toLowerCase()}`);
+      // Manually navigate for keyboard accessibility, letting router handle basePath
+      window.location.href = `/dashboard/create?intent=${template.intent}&tone=${template.tone.toLowerCase()}`;
     }
   };
 
   return (
     <Link 
-      href={getRouteWithBasePath(`/create?intent=${template.intent}&tone=${template.tone.toLowerCase()}`)}
+      href={`/create?intent=${template.intent}&tone=${template.tone.toLowerCase()}`}
       className="bg-white dark:bg-heartglow-deepgray p-6 rounded-xl shadow-md hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-800 flex flex-col group transform hover:-translate-y-1 hover:scale-105 animate-fadeIn hover:shadow-glow focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-opacity-50"
       style={{ animationDelay: `${index * 100}ms` }}
       aria-label={`Use ${template.title} template with ${template.tone} tone`}
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
     >
       <div className="w-12 h-12 mb-4 flex items-center justify-center rounded-lg bg-gradient-to-br from-heartglow-pink/20 to-heartglow-violet/20 text-heartglow-indigo dark:text-heartglow-pink group-hover:from-heartglow-pink/30 group-hover:to-heartglow-violet/30 transition-colors duration-300">
         {template.icon}

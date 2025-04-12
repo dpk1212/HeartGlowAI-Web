@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import RecipientStep from '../components/create/RecipientStep';
@@ -21,6 +21,21 @@ export default function CreatePage() {
     tone: null,
     advanced: null
   });
+
+  useEffect(() => {
+    if (router.isReady) {
+      const { intent: queryIntent, tone: queryTone } = router.query;
+      
+      if (queryIntent || queryTone) {
+        console.log('>>> Query params found:', { queryIntent, queryTone });
+        setFormData(prev => ({
+          ...prev,
+          intent: queryIntent ? { type: queryIntent as string, custom: '' } : prev.intent, 
+          tone: queryTone ? queryTone as string : prev.tone
+        }));
+      }
+    }
+  }, [router.isReady, router.query]);
 
   if (loading) {
     return (

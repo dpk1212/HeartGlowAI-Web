@@ -35,17 +35,53 @@ export default function MessageOutput({
   advanced
 }: MessageOutputProps) {
   const [isGenerating, setIsGenerating] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
-  const [saveError, setSaveError] = useState('');
-  const [saveSuccess, setSaveSuccess] = useState(false);
   const [message, setMessage] = useState('');
   const [insights, setInsights] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
   const { currentUser } = useAuth();
 
+  const autoSaveMessage = async (generatedMessage: string, generatedInsights: string[]) => {
+    if (!currentUser) {
+      console.warn('[autoSaveMessage] No user logged in, cannot save message.');
+      return; 
+    }
+    if (!generatedMessage) {
+      console.warn('[autoSaveMessage] No message content generated, cannot save.');
+      return;
+    }
+
+    console.log('[autoSaveMessage] Attempting to save message for user:', currentUser.uid);
+    
+    try {
+      const messageData = {
+        content: generatedMessage,
+        recipientName: recipient.name,
+        recipientId: recipient.id || null,
+        relationship: recipient.relationship,
+        intent: intent.type,
+        tone: tone,
+        intensity: advanced?.intensity || 3,
+        createdAt: serverTimestamp(),
+        insights: generatedInsights,
+        messageCategory: intent.type,
+        messageFormat: format.type,
+        messageIntention: intent.custom || intent.type,
+        messageConfigTimestamp: new Date().toISOString()
+      };
+      
+      console.log('[autoSaveMessage] Saving data:', messageData);
+      const docRef = await addDoc(collection(db, 'users', currentUser.uid, 'messages'), messageData);
+      console.log('[autoSaveMessage] Message auto-saved successfully with ID:', docRef.id);
+    } catch (saveError) {
+      console.error('[autoSaveMessage] Error auto-saving message:', saveError);
+    }
+  };
+
   useEffect(() => {
-    const generate = async () => {
+    const generateAndSave = async () => {
+      let generatedContent = '';
+      let generatedInsights: string[] = [];
       try {
         setIsGenerating(true);
         setError(null);
@@ -61,27 +97,39 @@ export default function MessageOutput({
           advanced
         };
 
-        // Try cloud function first, fall back to direct OpenAI if needed
         let result;
         try {
+          console.log('[generateAndSave] Calling generateMessage cloud function...');
           result = await generateMessage(params);
+          console.log('[generateAndSave] Cloud function result:', result);
         } catch (cloudError) {
-          console.warn('Cloud function failed, falling back to direct OpenAI:', cloudError);
+          console.warn('[generateAndSave] Cloud function failed, falling back to direct OpenAI:', cloudError);
           result = await generateMessageDirect(params);
+          console.log('[generateAndSave] Direct OpenAI result:', result);
+        }
+        
+        if (result && result.content) {
+          generatedContent = result.content;
+          generatedInsights = result.insights || [];
+          setMessage(generatedContent);
+          setInsights(generatedInsights);
+        } else {
+           throw new Error('Invalid response from generation function');
         }
 
-        setMessage(result.content);
-        setInsights(result.insights);
       } catch (err) {
         console.error('Error generating message:', err);
         setError('Failed to generate message. Please try again.');
       } finally {
         setIsGenerating(false);
+        if (!error && generatedContent) {
+           await autoSaveMessage(generatedContent, generatedInsights);
+        }
       }
     };
 
-    generate();
-  }, [recipient, intent, format, tone, advanced]);
+    generateAndSave();
+  }, [recipient, intent, format, tone, advanced, currentUser]);
 
   const handleCopyToClipboard = () => {
     navigator.clipboard.writeText(message)
@@ -92,50 +140,6 @@ export default function MessageOutput({
       .catch(err => {
         console.error('Failed to copy message:', err);
       });
-  };
-
-  const handleSave = async () => {
-    if (!currentUser) {
-      setSaveError('You must be logged in to save messages');
-      return;
-    }
-
-    setIsSaving(true);
-    setSaveError('');
-    setSaveSuccess(false);
-    console.log('[handleSave] Attempting to save message for user:', currentUser.uid);
-    console.log('[handleSave] Recipient Data:', recipient);
-
-    try {
-      const messageData = {
-        content: message,
-        recipientName: recipient.name,
-        recipientId: recipient.id || null,
-        relationship: recipient.relationship,
-        intent: intent.type,
-        tone: tone,
-        intensity: advanced?.intensity || 3,
-        createdAt: serverTimestamp(),
-        insights: insights,
-        messageCategory: intent.type,
-        messageFormat: format.type,
-        messageIntention: intent.custom || intent.type,
-        messageConfigTimestamp: new Date().toISOString()
-      };
-      
-      console.log('[handleSave] Saving data:', messageData);
-
-      const docRef = await addDoc(collection(db, 'users', currentUser.uid, 'messages'), messageData);
-      
-      console.log('[handleSave] Message saved successfully with ID:', docRef.id);
-      setSaveSuccess(true);
-    } catch (error) {
-      console.error('[handleSave] Error saving message:', error);
-      setSaveError('Failed to save message. Please try again.');
-    } finally {
-      console.log('[handleSave] Setting isSaving to false.');
-      setIsSaving(false);
-    }
   };
 
   if (isGenerating) {
@@ -242,30 +246,6 @@ export default function MessageOutput({
       
       <div className="flex flex-col sm:flex-row items-center gap-4">
         <button
-          onClick={handleSave}
-          disabled={isSaving || !message}
-          className={`w-full sm:w-auto px-6 py-3 rounded-full ${
-            isSaving || !message
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:from-heartglow-violet hover:to-heartglow-indigo text-white'
-          } font-medium focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 transition-all duration-300 transform hover:-translate-y-1 flex justify-center items-center`}
-        >
-          {isSaving ? (
-            <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-              Saving...
-            </>
-          ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-              </svg>
-              Save Message
-            </>
-          )}
-        </button>
-        
-        <button
           onClick={handleCopyToClipboard}
           className="w-full sm:w-auto px-6 py-3 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors flex justify-center items-center"
         >
@@ -285,14 +265,6 @@ export default function MessageOutput({
             </>
           )}
         </button>
-        
-        {saveSuccess && (
-          <span className="text-green-600 dark:text-green-400 mt-2 sm:mt-0">Message saved successfully!</span>
-        )}
-        
-        {saveError && (
-          <span className="text-red-600 dark:text-red-400 mt-2 sm:mt-0">{saveError}</span>
-        )}
       </div>
 
       <div className="text-center mt-8">

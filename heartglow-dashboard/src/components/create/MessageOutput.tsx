@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../hooks/useAuth';
+import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { generateMessage, generateMessageDirect, MessageGenerationParams } from '../../lib/openai';
@@ -42,7 +42,7 @@ export default function MessageOutput({
   const [message, setMessage] = useState('');
   const [insights, setInsights] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const generate = async () => {
@@ -95,7 +95,7 @@ export default function MessageOutput({
   };
 
   const handleSave = async () => {
-    if (!user) {
+    if (!currentUser) {
       setSaveError('You must be logged in to save messages');
       return;
     }
@@ -103,7 +103,7 @@ export default function MessageOutput({
     setIsSaving(true);
     setSaveError('');
     setSaveSuccess(false);
-    console.log('[handleSave] Attempting to save message for user:', user.uid);
+    console.log('[handleSave] Attempting to save message for user:', currentUser.uid);
     console.log('[handleSave] Recipient Data:', recipient);
 
     try {
@@ -125,7 +125,7 @@ export default function MessageOutput({
       
       console.log('[handleSave] Saving data:', messageData);
 
-      const docRef = await addDoc(collection(db, 'users', user.uid, 'messages'), messageData);
+      const docRef = await addDoc(collection(db, 'users', currentUser.uid, 'messages'), messageData);
       
       console.log('[handleSave] Message saved successfully with ID:', docRef.id);
       setSaveSuccess(true);

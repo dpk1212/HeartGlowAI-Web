@@ -9,35 +9,9 @@ type AuthGuardProps = {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const { currentUser, loading } = useAuth();
   const router = useRouter();
-  const [authCheckComplete, setAuthCheckComplete] = useState(false);
-  const [redirected, setRedirected] = useState(false);
-
-  useEffect(() => {
-    if (!loading) {
-      if (!currentUser && !redirected) {
-        setRedirected(true);
-        router.replace('/login');
-      }
-      setAuthCheckComplete(true);
-    }
-    
-    // Safety timeout to prevent infinite loading
-    const timeoutId = setTimeout(() => {
-      if (!authCheckComplete) {
-        console.warn('Auth guard timeout - forcing completion');
-        setAuthCheckComplete(true);
-        if (!currentUser && !redirected) {
-          setRedirected(true);
-          router.replace('/login');
-        }
-      }
-    }, 5000);
-    
-    return () => clearTimeout(timeoutId);
-  }, [currentUser, loading, router, authCheckComplete, redirected]);
 
   // Show loading state
-  if (loading && !authCheckComplete) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-pulse">
@@ -49,12 +23,16 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
     );
   }
 
-  // If not logged in, we're redirecting so don't show anything
+  // If loading is complete but no user, redirect
   if (!currentUser) {
-    return null;
+    // Use useEffect to avoid rendering during redirect state change
+    React.useEffect(() => {
+      router.replace('/login');
+    }, [router]);
+    return null; // Render nothing while redirecting
   }
 
-  // If logged in, show protected content
+  // If loading complete and user exists, show protected content
   return <>{children}</>;
 };
 

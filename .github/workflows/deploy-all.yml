@@ -6,7 +6,7 @@ on:
       - main
   workflow_dispatch:  # Allow manual triggering
 
-permissions: # Added to allow pushing to gh-pages
+permissions:
   contents: write
 
 jobs:
@@ -30,31 +30,32 @@ jobs:
           cd heartglow-dashboard
           npm ci
 
-      # First build the dashboard with its original config
+      # Build dashboard with its enhanced configuration
       - name: Build dashboard
         run: |
           cd heartglow-dashboard
           echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          # Ensure the fix-path.js file is up to date
           npm run build
           
-          # Save the dashboard build to a separate directory
-          mkdir -p dashboard-build
-          cp -r out/* dashboard-build/
+          # Clean up output directory
+          mkdir -p deploy
+          mkdir -p deploy/dashboard
           
-          # Clean up for next build
-          rm -rf out
-          rm -rf .next
+          # Copy dashboard files to the /dashboard directory
+          cp -r out/* deploy/dashboard/
+          
+          # Ensure .nojekyll files exist
+          touch deploy/.nojekyll
+          touch deploy/dashboard/.nojekyll
 
-      # Now build the root site (login page)
-      - name: Build root site
+      # Build login page as the root site
+      - name: Build login page for root
         run: |
           cd heartglow-dashboard
           
-          # Backup original next.config.js
-          cp next.config.js next.config.js.bak
-          
-          # Create simpler next.config.js for root
-          cat > next.config.js << EOF
+          # Create a separate Next.js config for the root build
+          cat > next.config.root.js << EOF
           /** @type {import('next').NextConfig} */
           const nextConfig = {
             reactStrictMode: true,
@@ -62,7 +63,7 @@ jobs:
             output: 'export',
             images: {
               unoptimized: true,
-            },
+            }
           }
           module.exports = nextConfig
           EOF
@@ -70,34 +71,25 @@ jobs:
           # Copy login page to index for root
           cp src/pages/login.tsx src/pages/index.tsx
           
-          # Build the root site
+          # Use the root config and build
+          mv next.config.js next.config.js.bak
+          mv next.config.root.js next.config.js
           npm run build
           
-          # Restore original config
+          # Restore original config and source files
           mv next.config.js.bak next.config.js
-          
-          # Restore original index if it exists
           git checkout -- src/pages/index.tsx
+          
+          # Copy root files to deployment directory
+          cp -r out/* deploy/
+          
+          # Also copy the fix-path.js to root for consistency
+          cp public/fix-path.js deploy/
 
-      # Deploy both sites together
-      - name: Prepare deployment files
+      # Create redirect files for better navigation
+      - name: Create redirect files
         run: |
-          # Create a fresh deployment directory
-          rm -rf deploy
-          mkdir -p deploy
-          mkdir -p deploy/dashboard
-          
-          # Copy root site (login page) to root
-          cp -r heartglow-dashboard/out/* deploy/
-          
-          # Copy dashboard to /dashboard directory
-          cp -r heartglow-dashboard/dashboard-build/* deploy/dashboard/
-          
-          # Ensure .nojekyll files exist
-          touch deploy/.nojekyll
-          touch deploy/dashboard/.nojekyll
-          
-          # Create dashboard redirect
+          # Create a simple redirect from root to dashboard
           cat > deploy/dashboard-redirect.html << EOF
           <!DOCTYPE html>
           <html lang="en">
@@ -115,10 +107,9 @@ jobs:
           </html>
           EOF
           
-          echo "Deployment directory contents:"
-          ls -la deploy
-          echo "Dashboard directory contents:"
-          ls -la deploy/dashboard
+          # Display the deployment structure
+          echo "Deployment directory structure:"
+          find deploy -type f | sort
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
@@ -128,4 +119,4 @@ jobs:
           clean-exclude: |
             .nojekyll
             CNAME
-          commit-message: "Deploy complete site with login page as root" 
+          commit-message: "Deploy consolidated site with improved path handling" 

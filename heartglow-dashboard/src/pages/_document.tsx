@@ -80,6 +80,8 @@ export default function Document() {
       <body className="bg-heartglow-offwhite dark:bg-heartglow-charcoal">
         <Main />
         <NextScript />
+        {/* Include the path fixing script on every page */}
+        <script src="/dashboard/fix-path.js"></script>
       </body>
     </Html>
   );

@@ -1,21 +1,55 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
+// Define more specific types
+interface FormatData {
+  type: string;
+  length: string;
+  options?: Record<string, any>;
+}
+
 interface FormatStepProps {
-  onNext: (data: any) => void;
+  onNext: (data: { format: FormatData }) => void; // Use specific type
   onBack: () => void;
-  initialData?: any;
+  initialData?: FormatData | null; // Use specific type, allow null
 }
 
 const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
-  const [selectedFormat, setSelectedFormat] = useState(initialData?.format || '');
+  // Initialize state from initialData
+  const [selectedFormat, setSelectedFormat] = useState(initialData?.type || '');
   const [selectedLength, setSelectedLength] = useState(initialData?.length || '');
-  const [formatSpecificOptions, setFormatSpecificOptions] = useState({
-    emailSubject: '',
-    emojiPreference: 'moderate',
-    talkingPoints: 3,
-    platform: 'general'
-  });
+  const [formatSpecificOptions, setFormatSpecificOptions] = useState(
+    initialData?.options || { // Initialize options from initialData or defaults
+      emailSubject: '',
+      emojiPreference: 'moderate',
+      talkingPoints: 3,
+      platform: 'general'
+    }
+  );
+
+  // Update state if initialData changes
+  useEffect(() => {
+    if (initialData) {
+      setSelectedFormat(initialData.type || '');
+      setSelectedLength(initialData.length || '');
+      setFormatSpecificOptions(initialData.options || {
+        emailSubject: '',
+        emojiPreference: 'moderate',
+        talkingPoints: 3,
+        platform: 'general'
+      });
+    } else {
+      // Reset if no initialData
+      setSelectedFormat('');
+      setSelectedLength('');
+      setFormatSpecificOptions({
+        emailSubject: '',
+        emojiPreference: 'moderate',
+        talkingPoints: 3,
+        platform: 'general'
+      });
+    }
+  }, [initialData]);
 
   const formats = [
     { id: 'text', label: 'Text Message', icon: '📱', description: 'Simple message for direct delivery' },
@@ -62,7 +96,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emailSubject: e.target.value
               }))}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
               placeholder="Enter email subject"
             />
           </motion.div>
@@ -83,7 +117,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emojiPreference: e.target.value
               }))}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
             >
               <option value="none">No emojis</option>
               <option value="minimal">Minimal emojis</option>
@@ -109,9 +143,9 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
               value={formatSpecificOptions.talkingPoints}
               onChange={(e) => setFormatSpecificOptions(prev => ({
                 ...prev,
-                talkingPoints: parseInt(e.target.value)
+                talkingPoints: parseInt(e.target.value, 10) || 1
               }))}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
             />
           </motion.div>
         );
@@ -131,7 +165,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 platform: e.target.value
               }))}
-              className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white"
+              className="w-full p-3 border rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
             >
               <option value="general">General</option>
               <option value="twitter">Twitter</option>
@@ -147,16 +181,16 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Choose Format & Length</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Select how your message will be delivered</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Choose Format & Length</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select how your message will be delivered</p>
       </div>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Format Selection */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Message Format
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -168,7 +202,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 onClick={() => setSelectedFormat(format.id)}
                 className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                   selectedFormat === format.id
-                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10'
+                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
                     : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
                 }`}
               >
@@ -184,7 +218,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
 
         {/* Length Selection */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-3">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
             Message Length
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -196,7 +230,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 onClick={() => setSelectedLength(length.id)}
                 className={`p-4 rounded-lg border cursor-pointer transition-colors ${
                   selectedLength === length.id
-                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10'
+                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
                     : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
                 }`}
               >
@@ -214,20 +248,20 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
         {selectedFormat && renderFormatSpecificOptions()}
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-8">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
         >
           Back
         </button>
         <button
           onClick={handleSubmit}
           disabled={!selectedFormat || !selectedLength}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
             !selectedFormat || !selectedLength
-              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-              : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
+              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+              : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
           }`}
         >
           Next

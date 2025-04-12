@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface IntentStepProps {
   onNext: (data: { intent: { type: string; custom?: string; } }) => void;
   onBack: () => void;
+  initialData?: { type: string; custom?: string; };
 }
 
 const intents = [
@@ -51,10 +52,25 @@ const intents = [
   }
 ];
 
-export default function IntentStep({ onNext, onBack }: IntentStepProps) {
-  const [selectedIntent, setSelectedIntent] = useState<string | null>(null);
-  const [customIntent, setCustomIntent] = useState('');
-  const [showCustom, setShowCustom] = useState(false);
+export default function IntentStep({ onNext, onBack, initialData }: IntentStepProps) {
+  const [selectedIntent, setSelectedIntent] = useState<string | null>(initialData?.type || null);
+  const [customIntent, setCustomIntent] = useState(initialData?.type === 'custom' ? initialData.custom || '' : '');
+  const [showCustom, setShowCustom] = useState(initialData?.type === 'custom');
+
+  useEffect(() => {
+    if (initialData) {
+      setSelectedIntent(initialData.type);
+      const isCustom = initialData.type === 'custom';
+      setShowCustom(isCustom);
+      if (isCustom) {
+        setCustomIntent(initialData.custom || '');
+      }
+    } else {
+      setSelectedIntent(null);
+      setCustomIntent('');
+      setShowCustom(false);
+    }
+  }, [initialData]);
 
   const handleSelect = (intentId: string) => {
     setSelectedIntent(intentId);
@@ -73,21 +89,21 @@ export default function IntentStep({ onNext, onBack }: IntentStepProps) {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">What's the purpose of your message?</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Select the intent that best matches your goal</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What's the purpose of your message?</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select the intent that best matches your goal</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {intents.map((intent) => (
           <motion.div
             key={intent.id}
-            whileHover={{ scale: 1.02, boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             className={`p-4 rounded-lg border cursor-pointer transition-all ${
               selectedIntent === intent.id
-                ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10'
+                ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
                 : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
             }`}
             onClick={() => handleSelect(intent.id)}
@@ -117,28 +133,28 @@ export default function IntentStep({ onNext, onBack }: IntentStepProps) {
           <textarea
             value={customIntent}
             onChange={(e) => setCustomIntent(e.target.value)}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-            placeholder="e.g., I want to invite them to a family event, I need to request time off from my manager..."
+            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
+            placeholder="e.g., Invite to an event, ask for a favor..."
             rows={3}
-            required
+            required={showCustom}
           />
         </motion.div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-8">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
         >
           Back
         </button>
         <button
           onClick={handleNext}
-          disabled={!selectedIntent || (showCustom && !customIntent)}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            !selectedIntent || (showCustom && !customIntent)
-              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-              : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
+          disabled={!selectedIntent || (showCustom && !customIntent.trim())}
+          className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
+            !selectedIntent || (showCustom && !customIntent.trim())
+              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+              : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
           }`}
         >
           Next

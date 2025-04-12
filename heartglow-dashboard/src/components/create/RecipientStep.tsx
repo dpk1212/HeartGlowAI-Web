@@ -14,14 +14,15 @@ interface Recipient {
 
 interface RecipientStepProps {
   onNext: (data: { recipient: Recipient }) => void;
+  initialData?: { recipient?: Recipient };
 }
 
-export default function RecipientStep({ onNext }: RecipientStepProps) {
+export default function RecipientStep({ onNext, initialData }: RecipientStepProps) {
   console.log('>>> RecipientStep component rendering started');
   const { currentUser } = useAuth();
   const [recipients, setRecipients] = useState<Recipient[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(null);
+  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(initialData?.recipient || null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,6 +51,17 @@ export default function RecipientStep({ onNext }: RecipientStepProps) {
     fetchRecipients();
   }, [currentUser]);
 
+  useEffect(() => {
+    if (initialData?.recipient) {
+      const recipientExists = recipients.some(r => r.id === initialData.recipient!.id);
+      if (recipientExists) {
+        setSelectedRecipient(initialData.recipient);
+      } else if (recipients.length > 0) {
+        console.warn("Initial recipient not found in the current list.");
+      }
+    }
+  }, [initialData, recipients]);
+
   const handleSelect = (recipient: Recipient) => {
     setSelectedRecipient(recipient);
   };
@@ -71,8 +83,8 @@ export default function RecipientStep({ onNext }: RecipientStepProps) {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Select a recipient from your connections</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select a recipient from your connections</p>
       </div>
 
       {error && (
@@ -115,14 +127,14 @@ export default function RecipientStep({ onNext }: RecipientStepProps) {
         )}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end mt-8">
         <button
           onClick={handleNext}
           disabled={!selectedRecipient}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
             selectedRecipient
-              ? 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+              ? 'bg-heartglow-pink hover:bg-heartglow-pink/90'
+              : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
           }`}
         >
           Next

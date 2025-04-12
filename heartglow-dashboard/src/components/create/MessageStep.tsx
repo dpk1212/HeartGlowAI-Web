@@ -23,10 +23,11 @@ interface MessageStepProps {
     intensity: number;
     customInstructions?: string;
   };
+  initialData?: { message?: string };
 }
 
-export default function MessageStep({ onNext, onBack, recipient, intent, format, tone, advanced }: MessageStepProps) {
-  const [message, setMessage] = useState('');
+export default function MessageStep({ onNext, onBack, recipient, intent, format, tone, advanced, initialData }: MessageStepProps) {
+  const [message, setMessage] = useState(initialData?.message || '');
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -62,10 +63,10 @@ export default function MessageStep({ onNext, onBack, recipient, intent, format,
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Write your message</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Write your message</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
           Write a message for {recipient.name} ({recipient.relationship})
         </p>
       </div>
@@ -75,11 +76,11 @@ export default function MessageStep({ onNext, onBack, recipient, intent, format,
           <button
             onClick={handleGenerate}
             disabled={isGenerating}
-            className={`px-4 py-2 rounded-lg font-medium flex items-center space-x-2 ${
+            className={`inline-flex items-center justify-center px-5 py-2.5 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
               isGenerating
-                ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-                : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
-            }`}
+                ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+                : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
+            } space-x-2`}
           >
             {isGenerating ? (
               <>
@@ -121,26 +122,26 @@ export default function MessageStep({ onNext, onBack, recipient, intent, format,
             className="w-full h-64 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-heartglow-pink focus:border-transparent resize-none"
             placeholder="Write your message here..."
           />
-          <div className="absolute bottom-4 right-4 text-sm text-gray-500 dark:text-gray-400">
+          <div className="absolute bottom-3 right-3 text-xs text-gray-500 dark:text-gray-400">
             {message.length} characters
           </div>
         </motion.div>
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-8">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
         >
           Back
         </button>
         <button
           onClick={handleNext}
           disabled={!message.trim()}
-          className={`px-4 py-2 rounded-lg font-medium ${
+          className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
             message.trim()
-              ? 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
+              ? 'bg-heartglow-pink hover:bg-heartglow-pink/90'
+              : 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
           }`}
         >
           Next

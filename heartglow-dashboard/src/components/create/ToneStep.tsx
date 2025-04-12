@@ -1,41 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 interface ToneStepProps {
-  onNext: (data: any) => void;
+  onNext: (data: { tone: string }) => void;
   onBack: () => void;
-  initialData?: any;
+  initialData?: string | null;
 }
 
-const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
-  const [selectedTone, setSelectedTone] = useState(initialData?.type || '');
-  const [customTone, setCustomTone] = useState(initialData?.custom || '');
-  const [showCustom, setShowCustom] = useState(false);
+const tones = [
+  { id: 'warm', label: 'Warm', description: 'Friendly and affectionate' },
+  { id: 'casual', label: 'Casual', description: 'Relaxed and informal' },
+  { id: 'sincere', label: 'Sincere', description: 'Honest and heartfelt' },
+  { id: 'playful', label: 'Playful', description: 'Light and fun' },
+  { id: 'formal', label: 'Formal', description: 'Professional and respectful' },
+  { id: 'reflective', label: 'Reflective', description: 'Thoughtful and introspective' },
+  { id: 'custom', label: 'Custom', description: 'Define your own tone' }
+];
 
-  const tones = [
-    { id: 'warm', label: 'Warm', description: 'Friendly and affectionate' },
-    { id: 'casual', label: 'Casual', description: 'Relaxed and informal' },
-    { id: 'sincere', label: 'Sincere', description: 'Honest and heartfelt' },
-    { id: 'playful', label: 'Playful', description: 'Light and fun' },
-    { id: 'formal', label: 'Formal', description: 'Professional and respectful' },
-    { id: 'reflective', label: 'Reflective', description: 'Thoughtful and introspective' },
-    { id: 'custom', label: 'Custom', description: 'Define your own tone' }
-  ];
+const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
+  const isStandardTone = (toneId: string | null | undefined): boolean => 
+    !!toneId && tones.some(t => t.id === toneId && t.id !== 'custom');
+
+  const initialIsCustom = initialData ? !isStandardTone(initialData) : false;
+  const [selectedTone, setSelectedTone] = useState<string | null>(initialIsCustom ? 'custom' : initialData || null);
+  const [customTone, setCustomTone] = useState(initialIsCustom ? initialData || '' : '');
+  const [showCustom, setShowCustom] = useState(initialIsCustom);
+
+  useEffect(() => {
+    const isCustom = initialData ? !isStandardTone(initialData) : false;
+    setSelectedTone(isCustom ? 'custom' : initialData || null);
+    setShowCustom(isCustom);
+    setCustomTone(isCustom ? initialData || '' : '');
+  }, [initialData]);
 
   const handleSubmit = () => {
-    onNext({
-      tone: {
-        type: selectedTone,
-        custom: showCustom ? customTone : null
-      }
-    });
+    let finalTone = '';
+    if (selectedTone) {
+      finalTone = showCustom ? customTone.trim() : selectedTone;
+    }
+    if (finalTone) {
+      onNext({ tone: finalTone });
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">What tone would you like to use?</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">Select the tone that best fits your message</p>
+        <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What tone would you like to use?</h2>
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select the tone that best fits your message</p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -47,10 +59,13 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
             onClick={() => {
               setSelectedTone(tone.id);
               setShowCustom(tone.id === 'custom');
+              if (tone.id !== 'custom') {
+                setCustomTone('');
+              }
             }}
             className={`p-4 rounded-lg border cursor-pointer transition-colors ${
               selectedTone === tone.id
-                ? 'border-heartglow-pink bg-heartglow-pink/5'
+                ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
                 : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
             }`}
           >
@@ -75,27 +90,27 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
             type="text"
             value={customTone}
             onChange={(e) => setCustomTone(e.target.value)}
-            className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white"
-            placeholder="e.g., Encouraging, Empathetic, etc."
-            required
+            className="w-full p-3 border rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent"
+            placeholder="e.g., Encouraging, Empathetic..."
+            required={showCustom}
           />
         </motion.div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex justify-between mt-8">
         <button
           onClick={onBack}
-          className="px-4 py-2 rounded-lg font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
         >
           Back
         </button>
         <button
           onClick={handleSubmit}
-          disabled={!selectedTone || (showCustom && !customTone)}
-          className={`px-4 py-2 rounded-lg font-medium ${
-            !selectedTone || (showCustom && !customTone)
-              ? 'bg-gray-200 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-              : 'bg-heartglow-pink text-white hover:bg-heartglow-pink/90'
+          disabled={!selectedTone || (showCustom && !customTone.trim())}
+          className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
+            !selectedTone || (showCustom && !customTone.trim())
+              ? 'bg-gray-300 dark:bg-gray-600 cursor-not-allowed'
+              : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
           }`}
         >
           Next

@@ -2,19 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
 import Footer from '../ui/Footer';
-
-// Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
-
-// Helper function to get initials from email
-const getInitials = (email: string): string => {
-  if (!email) return '?';
-  const parts = email.split('@');
-  return parts[0].substring(0, 2).toUpperCase();
-};
+import { getInitials } from '../utils/helpers';
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
@@ -46,7 +34,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       <header className="bg-heartglow-charcoal text-white py-4 px-6 shadow-md sticky top-0 z-10">
         <div className="container mx-auto flex justify-between items-center">
           <Link 
-            href={getRouteWithBasePath("/dashboard")} 
+            href="/"
             className="flex items-center gap-2"
             aria-label="HeartGlow Dashboard Home"
           >
@@ -57,21 +45,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
           <nav className="hidden md:flex items-center gap-8 text-sm">
             <Link 
-              href={getRouteWithBasePath("/")} 
+              href="/"
               className="text-gray-300 hover:text-white transition-colors duration-200"
               aria-label="Dashboard"
             >
               Dashboard
             </Link>
             <Link 
-              href={getRouteWithBasePath("/create")} 
+              href="/create"
               className="text-gray-300 hover:text-white transition-colors duration-200"
               aria-label="Create a new message"
             >
               Create
             </Link>
             <Link 
-              href={getRouteWithBasePath("/connections")} 
+              href="/connections"
               className="text-gray-300 hover:text-white transition-colors duration-200"
               aria-label="Manage your connections"
             >
@@ -105,7 +93,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         <p className="text-sm font-medium text-heartglow-charcoal dark:text-white">{currentUser.email}</p>
                       </div>
                       <Link 
-                        href={getRouteWithBasePath("/profile")}
+                        href="/profile"
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 flex items-center"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,7 +102,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                         Profile
                       </Link>
                       <Link 
-                        href={getRouteWithBasePath("/settings")}
+                        href="/settings"
                         className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200 flex items-center"
                       >
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">

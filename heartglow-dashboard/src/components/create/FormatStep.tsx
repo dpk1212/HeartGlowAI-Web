@@ -84,7 +84,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800/60 dark:border-gray-700"
+            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-heartglow-deepgray dark:border-gray-600"
           >
             <label htmlFor="email-subject" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Email Subject
@@ -97,7 +97,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emailSubject: e.target.value
               }))}
-              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
+              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Enter email subject"
             />
           </motion.div>
@@ -107,7 +107,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800/60 dark:border-gray-700"
+            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-heartglow-deepgray dark:border-gray-600"
           >
             <label htmlFor="emoji-usage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Emoji Usage
@@ -119,7 +119,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 emojiPreference: e.target.value
               }))}
-              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600"
             >
               <option value="none">No emojis</option>
               <option value="minimal">Minimal emojis</option>
@@ -133,7 +133,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800/60 dark:border-gray-700"
+            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-heartglow-deepgray dark:border-gray-600"
           >
             <label htmlFor="talking-points" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Number of Talking Points
@@ -148,7 +148,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 talkingPoints: parseInt(e.target.value, 10) || 1
               }))}
-              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
+              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             />
           </motion.div>
         );
@@ -157,7 +157,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-gray-800/60 dark:border-gray-700"
+            className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200 dark:bg-heartglow-deepgray dark:border-gray-600"
           >
             <label htmlFor="platform" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
               Platform
@@ -169,7 +169,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 ...prev,
                 platform: e.target.value
               }))}
-              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600"
+              className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600"
             >
               <option value="general">General</option>
               <option value="twitter">Twitter</option>
@@ -185,7 +185,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   };
 
   return (
-    <div className="space-y-8 dark:text-gray-100">
+    <div className="space-y-8 dark:text-heartglow-offwhite">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Choose Format & Length</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select how your message will be delivered</p>
@@ -194,7 +194,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
       <div className="space-y-8">
         {/* Format Selection */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-heartglow-offwhite mb-4">
             Message Format
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -206,13 +206,13 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 onClick={() => setSelectedFormat(format.id)}
                 className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                   selectedFormat === format.id
-                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
                 }`}
               >
                 <div className="flex items-center mb-2">
                   <span className="text-2xl mr-2">{format.icon}</span>
-                  <span className="font-medium text-gray-900 dark:text-gray-100">{format.label}</span>
+                  <span className="font-medium text-gray-900 dark:text-heartglow-offwhite">{format.label}</span>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{format.description}</p>
               </motion.div>
@@ -222,7 +222,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
 
         {/* Length Selection */}
         <div>
-          <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-heartglow-offwhite mb-4">
             Message Length
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -234,14 +234,14 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 onClick={() => setSelectedLength(length.id)}
                 className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                   selectedLength === length.id
-                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
                 }`}
               >
                 <div className="flex items-center justify-center mb-2">
                   <span className="text-xl">{length.icon}</span>
                 </div>
-                <h4 className="font-medium text-center text-gray-900 dark:text-gray-100">{length.label}</h4>
+                <h4 className="font-medium text-center text-gray-900 dark:text-heartglow-offwhite">{length.label}</h4>
                 <p className="text-sm text-center text-gray-600 dark:text-gray-400">{length.description}</p>
               </motion.div>
             ))}

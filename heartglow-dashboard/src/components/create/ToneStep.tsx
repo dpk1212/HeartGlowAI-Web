@@ -44,7 +44,7 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
   };
 
   return (
-    <div className="space-y-8 dark:text-gray-100">
+    <div className="space-y-8 dark:text-heartglow-offwhite">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What tone would you like to use?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select the tone that best fits your message</p>
@@ -65,12 +65,12 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
             }}
             className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
               selectedTone === tone.id
-                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60'
+                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink'
             }`}
           >
             <div>
-              <h3 className="font-medium text-gray-900 dark:text-gray-100">{tone.label}</h3>
+              <h3 className="font-medium text-gray-900 dark:text-heartglow-offwhite">{tone.label}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">{tone.description}</p>
             </div>
           </motion.div>
@@ -92,7 +92,7 @@ const ToneStep = ({ onNext, onBack, initialData }: ToneStepProps) => {
             value={customTone}
             onChange={(e) => setCustomTone(e.target.value)}
             className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent 
-                      dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
+                      dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             placeholder="e.g., Encouraging, Empathetic..."
             required={showCustom}
           />

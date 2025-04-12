@@ -89,7 +89,7 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
   };
 
   return (
-    <div className="space-y-8 dark:text-gray-100">
+    <div className="space-y-8 dark:text-heartglow-offwhite">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">What's the purpose of your message?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select the intent that best matches your goal</p>
@@ -103,8 +103,8 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
             whileTap={{ scale: 0.98 }}
             className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
               selectedIntent === intent.id
-                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
             }`}
             onClick={() => handleSelect(intent.id)}
           >
@@ -113,7 +113,7 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
                 {intent.icon}
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 dark:text-gray-100">{intent.title}</h3>
+                <h3 className="font-medium text-gray-900 dark:text-heartglow-offwhite">{intent.title}</h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400">{intent.description}</p>
               </div>
             </div>
@@ -135,7 +135,7 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
             value={customIntent}
             onChange={(e) => setCustomIntent(e.target.value)}
             className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent resize-none 
-                      dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
+                      dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             placeholder="e.g., Invite to an event, ask for a favor..."
             rows={3}
             required={showCustom}

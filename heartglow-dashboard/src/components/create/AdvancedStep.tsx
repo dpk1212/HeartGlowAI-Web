@@ -35,7 +35,7 @@ export default function AdvancedStep({ onNext, onBack, initialData }: AdvancedSt
   };
 
   return (
-    <div className="space-y-8 dark:text-gray-100">
+    <div className="space-y-8 dark:text-heartglow-offwhite">
       <h2 className="text-3xl font-bold text-gray-900 dark:text-white text-center">
         Advanced Options
       </h2>
@@ -52,7 +52,7 @@ export default function AdvancedStep({ onNext, onBack, initialData }: AdvancedSt
             max="5"
             value={intensity}
             onChange={(e) => setIntensity(Number(e.target.value))}
-            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-600 accent-heartglow-pink"
+            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-heartglow-pink"
           />
           <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400 mt-1">
             <span>Subtle</span>
@@ -69,7 +69,7 @@ export default function AdvancedStep({ onNext, onBack, initialData }: AdvancedSt
             id="custom-instructions"
             value={customInstructions}
             onChange={(e) => setCustomInstructions(e.target.value)}
-            className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent resize-none dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600 dark:placeholder-gray-400"
+            className="w-full p-3 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent resize-none dark:bg-heartglow-deepgray dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             rows={4}
             placeholder="e.g., Mention our upcoming trip, Keep it under 50 words..."
           />

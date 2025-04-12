@@ -81,7 +81,7 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
   }
 
   return (
-    <div className="space-y-8 dark:text-gray-100">
+    <div className="space-y-8 dark:text-heartglow-offwhite">
       <div className="text-center">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select a recipient from your connections</p>
@@ -106,14 +106,14 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
               whileTap={{ scale: 0.98 }}
               className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                 selectedRecipient?.id === recipient.id
-                  ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/25 dark:via-black/10 dark:to-heartglow-violet/25' 
-                  : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-gray-800/40 dark:border-gray-700 dark:hover:bg-gray-700/60 dark:hover:border-heartglow-pink/60' 
+                  ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                  : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
               }`}
               onClick={() => handleSelect(recipient)}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium text-gray-900 dark:text-gray-100">{recipient.name}</h3>
+                  <h3 className="font-medium text-gray-900 dark:text-heartglow-offwhite">{recipient.name}</h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">{recipient.relationship}</p>
                 </div>
                 {recipient.lastContact && (

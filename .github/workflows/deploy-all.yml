@@ -30,10 +30,15 @@ jobs:
           cd heartglow-dashboard
           npm ci
 
-      # Create deployment directories first, separately from other steps
-      - name: Create deployment directories
+      # Use a simplified approach with absolute paths
+      - name: Prepare deployment workspace
         run: |
-          mkdir -p deploy
+          # Store absolute paths
+          echo "WORKSPACE_ROOT=$(pwd)" >> $GITHUB_ENV
+          echo "DEPLOY_DIR=$(pwd)/deploy" >> $GITHUB_ENV
+          
+          # Clean and recreate deployment directories
+          rm -rf deploy
           mkdir -p deploy/dashboard
           
           # Create CNAME files
@@ -44,32 +49,38 @@ jobs:
           touch deploy/.nojekyll
           touch deploy/dashboard/.nojekyll
           
-          # Verify directories exist
+          # Debug outputs
+          echo "Workspace root: $WORKSPACE_ROOT"
+          echo "Deploy directory: $DEPLOY_DIR"
           ls -la deploy
           ls -la deploy/dashboard
 
       # Build dashboard with its enhanced configuration
       - name: Build dashboard
         run: |
+          # Navigate to source directory
           cd heartglow-dashboard
+          
+          # Set environment variables
           echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
           
-          # Ensure the fix-path.js file is up to date
+          # Build the dashboard
           npm run build
           
-          # Copy dashboard files to the /dashboard directory - with verbose flag
-          cp -rv out/* deploy/dashboard/
+          # Copy files using absolute paths
+          echo "Copying dashboard files to $DEPLOY_DIR/dashboard/"
+          cp -rv out/* $DEPLOY_DIR/dashboard/
           
-          # Clean output directory for next build
-          rm -rf out
-          rm -rf .next
+          # Cleanup
+          rm -rf out .next
 
       # Build login page as the root site
       - name: Build login page for root
         run: |
+          # Navigate to source directory
           cd heartglow-dashboard
           
-          # Create a separate Next.js config for the root build
+          # Create root config
           cat > next.config.root.js << EOF
           /** @type {import('next').NextConfig} */
           const nextConfig = {
@@ -83,29 +94,36 @@ jobs:
           module.exports = nextConfig
           EOF
           
-          # Copy login page to index for root
-          cp src/pages/login.tsx src/pages/index.tsx
-          
-          # Use the root config and build
+          # Back up original config and use root config
           cp next.config.js next.config.js.bak
           cp next.config.root.js next.config.js
+          
+          # Create root index page from login page
+          cp src/pages/login.tsx src/pages/index.tsx
+          
+          # Build
           npm run build
           
-          # Restore original config and source files
+          # Copy files using absolute paths
+          echo "Copying root files to $DEPLOY_DIR/"
+          cp -rv out/* $DEPLOY_DIR/
+          
+          # Copy fix-path.js
+          cp -v public/fix-path.js $DEPLOY_DIR/
+          
+          # Restore original files
           cp next.config.js.bak next.config.js
           git checkout -- src/pages/index.tsx
           
-          # Copy root files to deployment directory - with verbose flag
-          cp -rv out/* deploy/
-          
-          # Also copy the fix-path.js to root for consistency
-          cp -v public/fix-path.js deploy/
+          # Debug output
+          echo "Deploy directory contents after root build:"
+          ls -la $DEPLOY_DIR
 
       # Create redirect files for better navigation
       - name: Create redirect files
         run: |
-          # Create a simple redirect from root to dashboard
-          cat > deploy/dashboard-redirect.html << EOF
+          # Create redirection file
+          cat > $DEPLOY_DIR/dashboard-redirect.html << EOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
@@ -122,9 +140,9 @@ jobs:
           </html>
           EOF
           
-          # Display the deployment structure
-          echo "Deployment directory structure:"
-          find deploy -type f | sort | head -n 20
+          # Display deployment structure
+          echo "Final deployment directory structure:"
+          find $DEPLOY_DIR -type f | head -n 20
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4

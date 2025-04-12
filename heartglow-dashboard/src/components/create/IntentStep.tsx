@@ -101,10 +101,10 @@ export default function IntentStep({ onNext, onBack, initialData }: IntentStepPr
             key={intent.id}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
-            className={`p-4 rounded-lg border cursor-pointer transition-all ${
+            className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
               selectedIntent === intent.id
-                ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
-                : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
+                ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/15 via-gray-800/10 to-heartglow-violet/15'
+                : 'border-gray-700 bg-gray-800/40 hover:bg-gray-700/60 hover:border-heartglow-pink/60'
             }`}
             onClick={() => handleSelect(intent.id)}
           >

@@ -200,10 +200,10 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedFormat(format.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                   selectedFormat === format.id
-                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
+                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/15 via-gray-800/10 to-heartglow-violet/15'
+                    : 'border-gray-700 bg-gray-800/40 hover:bg-gray-700/60 hover:border-heartglow-pink/60'
                 }`}
               >
                 <div className="flex items-center mb-2">
@@ -228,10 +228,10 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedLength(length.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
                   selectedLength === length.id
-                    ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 ring-2 ring-heartglow-pink'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-heartglow-pink'
+                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/15 via-gray-800/10 to-heartglow-violet/15'
+                    : 'border-gray-700 bg-gray-800/40 hover:bg-gray-700/60 hover:border-heartglow-pink/60'
                 }`}
               >
                 <div className="flex items-center justify-center mb-2">

@@ -4,12 +4,6 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { fetchUserConnections, Connection as DbConnection, getConnectionFrequency, formatRelativeTime } from '../../firebase/db';
 
-// Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
-
 // Helper function to get initials from name
 const getInitials = (name: string): string => {
   if (!name) return '?';
@@ -229,7 +223,7 @@ const ConnectionsCarousel: React.FC = () => {
               transition={{ delay: 0.5 }}
             >
               <Link 
-                href={getRouteWithBasePath("/connections/add")}
+                href="/connections/add"
                 className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-6 py-3 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300 transform hover:-translate-y-1"
                 aria-label="Save your first important connection"
               >
@@ -268,13 +262,6 @@ const ConnectionsCarousel: React.FC = () => {
                   New
                 </span>
               </div>
-              <Link 
-                href={getRouteWithBasePath("/connections")}
-                className="text-xs text-heartglow-indigo dark:text-heartglow-pink hover:underline"
-                aria-label="View all connections"
-              >
-                View all
-              </Link>
             </div>
           </div>
         )}

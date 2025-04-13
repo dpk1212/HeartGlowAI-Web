@@ -8,7 +8,7 @@ import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp, addDoc,
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import functions SDK methods
 import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
 
-// Initialize Firebase Functions instance (Re-added)
+// Initialize Firebase Functions instance (Corrected again)
 const functionsInstance = getFunctions();
 
 interface CoachingChatViewProps {

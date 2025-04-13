@@ -26,7 +26,7 @@ const Login = () => {
       setError('');
       setIsLoading(true);
       await login(email, password);
-      router.replace('/dashboard');
+      router.replace('/');
     } catch (err: any) {
       setError('Failed to sign in: ' + (err.message || 'Unknown error'));
     } finally {
@@ -39,7 +39,7 @@ const Login = () => {
       setError('');
       setIsLoading(true);
       await loginWithGoogle();
-      router.replace('/dashboard');
+      router.replace('/');
     } catch (err: any) {
       setError('Failed to sign in with Google: ' + (err.message || 'Unknown error'));
     } finally {

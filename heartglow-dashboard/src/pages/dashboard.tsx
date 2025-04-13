@@ -23,14 +23,12 @@ const Dashboard: NextPage = () => {
         <DashboardLayout>
           <HeroSection />
 
-          {/* Simplified Grid Layout for testing */}
+          {/* Simplified Grid Layout (Restored) */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Place items simply, let grid wrap them */}
             <QuickTemplateGrid />
             <CoachingEntryCard />
             <ConnectionsCarousel />
             <ComingSoonCard />
-            {/* Recent Messages might need col-span-2 if we want it full width */}
             <div className="md:col-span-2">
               <RecentMessagesList />
             </div>

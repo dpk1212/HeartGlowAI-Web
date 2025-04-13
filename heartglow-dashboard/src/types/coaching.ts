@@ -8,6 +8,7 @@ export interface CoachingThread {
   threadTitle: string; // e.g., "Chat about Kate" or user-defined topic
   lastActivity: Timestamp; // Timestamp of the last message
   createdAt: Timestamp;
+  initialPurpose?: string; // Optional: Purpose selected at creation
   // Optional: Store connection details snapshot here for quick display?
   connectionSnapshot?: { 
     name: string;

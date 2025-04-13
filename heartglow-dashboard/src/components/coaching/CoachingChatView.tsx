@@ -11,6 +11,8 @@ import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import 
 // Initialize Firebase Functions instance (Corrected again)
 const functionsInstance = getFunctions();
 
+// Trivial change to force rebuild
+
 interface CoachingChatViewProps {
   threadId: string; // Passed in from the dynamic page
 }

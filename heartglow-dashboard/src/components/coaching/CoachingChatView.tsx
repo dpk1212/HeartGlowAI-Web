@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/router'; // Import useRouter
-import { Input } from '../ui/input'; // Removed shadcn input import
+// import { Input } from '../ui/input'; // Removed shadcn input import
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon, TrashIcon } from '@radix-ui/react-icons'; // Added TrashIcon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth

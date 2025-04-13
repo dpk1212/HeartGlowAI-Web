@@ -11,7 +11,7 @@ import QuickTemplateGrid from '../components/ui/QuickTemplateGrid';
 import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
 import ComingSoonCard from '../components/ui/ComingSoonCard';
-// import CoachingEntryCard from '../components/ui/CoachingEntryCard'; // Still commented out
+import CoachingEntryCard from '../components/ui/CoachingEntryCard';
 
 // Renamed back to Dashboard or keep IndexPage if preferred
 const IndexPage: NextPage = () => {
@@ -29,10 +29,15 @@ const IndexPage: NextPage = () => {
       <AuthGuard>
         <DashboardLayout>
           <HeroSection />
-          {/* Simplified Grid Layout */}
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <QuickTemplateGrid />
-             {/* <CoachingEntryCard /> */}
+          {/* Place Coaching Card directly below Hero, above the grid */}
+          <div className="mt-8 mb-8">
+             <CoachingEntryCard />
+          </div>
+          
+          {/* Reverted Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <QuickTemplateGrid /> {/* Removed className */} 
+             {/* CoachingEntryCard removed from here */}
              <ConnectionsCarousel />
              <ComingSoonCard />
              <div className="md:col-span-2">

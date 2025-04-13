@@ -61,14 +61,6 @@ const HeroSection = () => {
             </Link>
           </motion.div>
           
-          <Link 
-            href="/coaching"
-            className="inline-flex items-center justify-center bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-indigo-500 hover:to-purple-600 text-white font-medium rounded-full px-8 py-4 shadow-md hover:shadow-lg transition-all duration-300 ease-in-out group"
-            aria-label="Start AI Coaching Session"
-          >
-             Try AI Coaching
-          </Link>
-          
           <motion.div
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}

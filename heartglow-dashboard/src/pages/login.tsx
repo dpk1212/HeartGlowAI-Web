@@ -112,6 +112,35 @@ const Login = () => {
               </div>
             </motion.div>
           </div>
+
+          {/* Testimonials Section */}
+          <motion.div 
+            className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700/50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6, duration: 0.5 }}
+          >
+            <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-5 text-center md:text-left">Trusted by Communicators Like You</h3>
+            <div className="space-y-5">
+              {/* Testimonial 1 */}
+              <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700/30 flex items-start gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-indigo-200 to-purple-200 dark:from-indigo-700 dark:to-purple-700 flex items-center justify-center text-sm font-semibold text-indigo-800 dark:text-indigo-100">JS</span>
+                <div>
+                  <p className="text-sm italic text-gray-600 dark:text-gray-300">"HeartGlow has been a game-changer for navigating tricky work conversations. Highly recommend!"</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">- Jordan S., Product Manager</p>
+                </div>
+              </div>
+              {/* Testimonial 2 (Optional) */}
+              {/* <div className="bg-white dark:bg-gray-800/50 p-4 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700/30 flex items-start gap-3">
+                <span className="flex-shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-pink-200 to-rose-200 dark:from-pink-700 dark:to-rose-700 flex items-center justify-center text-sm font-semibold text-pink-800 dark:text-pink-100">AM</span>
+                <div>
+                  <p className="text-sm italic text-gray-600 dark:text-gray-300">"Finally feel confident expressing myself, even when it's tough. Thank you, HeartGlow!"</p>
+                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mt-1">- Alex M., Freelancer</p>
+                </div>
+              </div> */}
+            </div>
+          </motion.div>
+
         </div>
 
         <motion.div 

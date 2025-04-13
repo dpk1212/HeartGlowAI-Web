@@ -47,7 +47,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     
     const unsubscribe = onAuthStateChangedListener(async (user) => {
       console.log('Auth state changed:', user ? 'User logged in' : 'No user');
+
+      // Set user and loading state immediately
+      setCurrentUser(user);
+      setLoading(false);
+      clearTimeout(timeoutId);
       
+      // Perform Firestore operations afterwards if user exists
       if (user) {
         const userRef = doc(db, "users", user.uid);
         try {
@@ -69,10 +75,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           console.error('Error creating/updating user document:', error);
         }
       }
-      
-      setCurrentUser(user);
-      setLoading(false);
-      clearTimeout(timeoutId);
     });
 
     return () => {

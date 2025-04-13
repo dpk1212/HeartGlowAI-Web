@@ -129,8 +129,8 @@ export default function AllConnectionsPage() {
                             {connections.map(conn => (
                                 <ConnectionGridCard key={conn.id} connection={conn} />
                             ))}
-                        </div>
-                    )}
+                </div>
+              )}
           </div>
         </DashboardLayout>
       </AuthGuard>

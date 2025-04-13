@@ -30,7 +30,7 @@ const IndexPage: NextPage = () => {
         <DashboardLayout>
           <HeroSection />
           {/* Place Coaching Card directly below Hero, above the grid */}
-          <div className="mt-8 mb-8 w-full">
+          <div className="mt-8 mb-8">
              <CoachingEntryCard />
           </div>
           

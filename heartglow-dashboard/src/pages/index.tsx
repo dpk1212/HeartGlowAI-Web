@@ -29,14 +29,21 @@ const IndexPage: NextPage = () => {
       <AuthGuard>
         <DashboardLayout>
           <HeroSection />
-          {/* Place Coaching Card directly below Hero, above the grid */}
+          {/* Removed the separate div for CoachingEntryCard */}
+          {/* 
           <div className="mt-8 mb-8">
              <CoachingEntryCard />
-          </div>
+          </div> 
+          */}
           
-          {/* Reverted Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <QuickTemplateGrid /> {/* Removed className */} 
+          {/* Reverted Grid Layout - Coaching Card moved inside and made full width */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8"> 
+             {/* Coaching Card spans full width on medium screens */}
+             <div className="md:col-span-2">
+               <CoachingEntryCard />
+             </div>
+
+             <QuickTemplateGrid /> 
              {/* CoachingEntryCard removed from here */}
              <ConnectionsCarousel />
              <ComingSoonCard />

@@ -159,7 +159,7 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
   return (
     <div className="flex flex-col h-[calc(100vh-var(--header-height)-var(--footer-height)-2rem)] md:h-[calc(100vh-var(--header-height)-var(--footer-height)-4rem)] bg-white dark:bg-heartglow-deepgray border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
       {/* Header */}
-      <div className="p-4 border-b dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate">
           {threadData.threadTitle}
           {threadData.connectionSnapshot?.name && (
@@ -170,8 +170,8 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
         </h2>
       </div>
       
-      {/* Chat messages area */}
-      <div className="flex-grow overflow-y-auto p-4 space-y-4">
+      {/* Chat messages area - Added scroll-smooth */}
+      <div className="flex-grow overflow-y-auto p-4 md:p-6 space-y-4 bg-white dark:bg-heartglow-deepgray scroll-smooth">
         {loadingMessages ? (
            <div className="flex justify-center items-center py-8">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-heartglow-pink"></div>
@@ -181,9 +181,12 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
         ) : (
           messages.map(msg => (
             <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`p-3 rounded-lg max-w-xs lg:max-w-md shadow-sm ${msg.sender === 'user' ? 'bg-heartglow-pink/90 text-white' : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100'}`}>
-                <p className="text-sm">{msg.content}</p>
-                 <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-pink-100/80' : 'text-gray-500 dark:text-gray-400'}`}>
+              <div className={`py-2 px-4 rounded-2xl max-w-sm md:max-w-md lg:max-w-lg shadow-sm ${msg.sender === 'user' 
+                  ? 'bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white rounded-br-none' 
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-100 rounded-bl-none'
+              }`}>
+                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                 <p className={`text-xs mt-1 text-right ${msg.sender === 'user' ? 'text-pink-100/80' : 'text-gray-500 dark:text-gray-400'}`}>
                    {formatTimestamp(msg.timestamp)}
                  </p>
               </div>
@@ -194,23 +197,26 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
         <div ref={messagesEndRef} /> 
       </div>
 
-      {/* Message input area */}
-      <div className="p-4 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+      {/* Message input area - Improved styling */}
+      <div className="p-3 md:p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
         <form onSubmit={handleSendMessage} className="flex items-center space-x-3">
           <input 
             type="text"
             placeholder="Talk to your coach..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-grow bg-white text-gray-900 border border-gray-300 rounded-md p-3 placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
+            className="flex-grow bg-white dark:bg-gray-700 text-gray-900 dark:text-heartglow-offwhite border border-gray-300 dark:border-gray-600 rounded-lg p-3 placeholder-gray-400 dark:placeholder-gray-400 focus:ring-2 focus:ring-heartglow-pink focus:border-transparent text-sm"
             aria-label="Message input"
-            disabled={loadingThread || loadingMessages} // Disable input while loading
+            disabled={loadingThread || loadingMessages}
           />
           <button 
             type="submit"
             disabled={!newMessage.trim() || loadingThread || loadingMessages}
             aria-label="Send message"
-            className={`shrink-0 inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${!newMessage.trim() || loadingThread || loadingMessages ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' : 'bg-heartglow-pink hover:bg-heartglow-pink/90'}`}
+            className={`shrink-0 inline-flex items-center justify-center px-4 h-12 w-12 rounded-full text-white transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-800 ${!newMessage.trim() || loadingThread || loadingMessages 
+              ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed' 
+              : 'bg-gradient-to-br from-heartglow-pink to-heartglow-violet hover:from-heartglow-violet hover:to-heartglow-indigo shadow-md hover:shadow-lg'
+            }`}
           >
             <PaperPlaneIcon className="h-5 w-5" />
           </button>

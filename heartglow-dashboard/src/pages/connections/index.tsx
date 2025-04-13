@@ -8,7 +8,7 @@ import AuthGuard from '../../components/layout/AuthGuard';
 
 // Helper to get initials (could be moved to utils)
 const getInitials = (name: string): string => {
-    if (!name) return '?';
+  if (!name) return '?';
     return name.split(' ').map((n) => n[0]).join('').toUpperCase().substring(0, 2);
 };
 
@@ -69,59 +69,59 @@ const ConnectionGridCard: React.FC<{ connection: DbConnection }> = ({ connection
 
 // Main page component
 export default function AllConnectionsPage() {
-    const { currentUser } = useAuth();
+  const { currentUser } = useAuth();
     const [connections, setConnections] = useState<DbConnection[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
         const loadData = async () => {
             if (!currentUser) return;
-            try {
-                setLoading(true);
+      try {
+        setLoading(true);
                 const userConnections = await fetchUserConnections(currentUser, 1000); // Fetch all
                 setConnections(userConnections);
-                setError(null);
-            } catch (err) {
+        setError(null);
+      } catch (err) {
                 console.error("Error fetching all connections:", err);
                 setError("Failed to load connections.");
-            } finally {
-                setLoading(false);
-            }
-        };
+      } finally {
+        setLoading(false);
+      }
+    };
         loadData();
-    }, [currentUser]);
+  }, [currentUser]);
 
-    return (
-        <AuthGuard>
-            <DashboardLayout>
+  return (
+      <AuthGuard>
+        <DashboardLayout>
                 <div className="container mx-auto py-8 px-4 max-w-6xl">
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
                         <Link href="/connections/add" className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Add Connection
-                        </Link>
-                    </div>
-
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                        </svg>
+                        Add Connection
+                      </Link>
+                          </div>
+                          
                     {loading && (
                         <div className="flex justify-center items-center py-20">
                             <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-heartglow-pink"></div>
-                        </div>
+                            </div>
                     )}
 
                     {error && (
                         <div className="text-center py-10 bg-red-50 dark:bg-red-900/20 p-6 rounded-lg">
                             <p className="text-red-600 dark:text-red-300">{error}</p>
-                        </div>
+                            </div>
                     )}
 
                     {!loading && !error && connections.length === 0 && (
                         <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/30 p-6 rounded-lg">
                             <p className="text-gray-600 dark:text-gray-400">You haven't added any connections yet.</p>
-                        </div>
+                          </div>
                     )}
 
                     {!loading && !error && connections.length > 0 && (
@@ -131,8 +131,8 @@ export default function AllConnectionsPage() {
                             ))}
                         </div>
                     )}
-                </div>
-            </DashboardLayout>
-        </AuthGuard>
-    );
+          </div>
+        </DashboardLayout>
+      </AuthGuard>
+  );
 }

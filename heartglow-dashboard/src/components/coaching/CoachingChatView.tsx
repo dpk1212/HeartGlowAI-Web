@@ -3,10 +3,13 @@ import { useRouter } from 'next/router'; // Import useRouter
 // import { Button } from './ui/button'; // Removed unused shadcn button import
 import { PaperPlaneIcon, TrashIcon } from '@radix-ui/react-icons'; // Added TrashIcon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
-import { db, functionsInstance } from '../../lib/firebase'; // Renamed functions import
+import { db } from '../../lib/firebase'; // Import only db
 import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp, addDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
-import { httpsCallable } from 'firebase/functions'; // Import functions SDK methods
+import { getFunctions, httpsCallable } from 'firebase/functions'; // Import functions SDK methods
 import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
+
+// Initialize Firebase Functions instance (Re-added)
+const functionsInstance = getFunctions();
 
 interface CoachingChatViewProps {
   threadId: string; // Passed in from the dynamic page

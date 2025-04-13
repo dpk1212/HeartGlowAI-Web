@@ -4,6 +4,8 @@ import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp }
 import { db } from '../../lib/firebase';
 import { useRouter } from 'next/router';
 import { CoachingThread } from '../../types/coaching'; // Import the type
+import { httpsCallable } from 'firebase/functions'; // Import httpsCallable
+import { getFunctions } from 'firebase/functions'; // Import getFunctions
 
 interface StartCoachingChatProps {
   onClose: () => void;
@@ -15,6 +17,9 @@ interface Connection {
   name: string;
   relationship: string;
 }
+
+// Initialize Firebase Functions instance
+const functionsInstance = getFunctions(); 
 
 const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
   const { currentUser } = useAuth();
@@ -48,7 +53,7 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
     fetchConnections();
   }, [currentUser]);
 
-  const handleStartChat = async () => { // Make async
+  const handleStartChat = async () => { 
     if (!selectedConnection || !currentUser || isStartingChat) return;
     
     setIsStartingChat(true);
@@ -63,6 +68,7 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
 
       const querySnapshot = await getDocs(q);
       let threadId: string;
+      let isNewThread = false; // Flag to check if we created a new thread
 
       if (!querySnapshot.empty) {
         // Existing thread found
@@ -70,13 +76,14 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
         console.log(`Found existing thread: ${threadId}`);
       } else {
         // No existing thread, create a new one
+        isNewThread = true; // Set the flag
         console.log(`No existing thread found for connection ${selectedConnection}. Creating new one.`);
         const selectedConnDetails = connections.find(c => c.id === selectedConnection);
         const newThreadData: Omit<CoachingThread, 'id'> = {
           userId: currentUser.uid,
           connectionId: selectedConnection,
           threadTitle: `Chat about ${selectedConnDetails?.name || 'Connection'}`,
-          lastActivity: serverTimestamp() as Timestamp, // Use server timestamp
+          lastActivity: serverTimestamp() as Timestamp, 
           createdAt: serverTimestamp() as Timestamp,
           connectionSnapshot: selectedConnDetails ? { 
             name: selectedConnDetails.name,
@@ -87,18 +94,32 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
         const docRef = await addDoc(threadsRef, newThreadData);
         threadId = docRef.id;
         console.log(`Created new thread: ${threadId}`);
+        
+        // --- Trigger initial coach message --- 
+        if (isNewThread) {
+          console.log(`Triggering initial coach message for new thread: ${threadId}`);
+          try {
+            const callCoachingAssistant = httpsCallable(functionsInstance, 'coachingAssistant');
+            // Call without userMessage to signal initial trigger
+            await callCoachingAssistant({ threadId: threadId }); 
+            console.log(`Initial message trigger function called successfully for thread: ${threadId}`);
+          } catch (triggerError) {
+             // Log the error but don't block navigation
+             console.error(`Error triggering initial coach message for thread ${threadId}:`, triggerError);
+             // Optionally, display a non-critical error to the user
+          } 
+        }
+        // --- End trigger --- 
       }
 
       // Navigate to the chat view
       router.push(`/coaching/${threadId}`);
-      // onClose(); // Navigation should effectively close the modal/view
 
     } catch (error) {
       console.error("Error starting or finding chat thread: ", error);
       setStartChatError("Could not start or find the chat thread. Please try again.");
-      setIsStartingChat(false); // Ensure loading state is reset on error
+      setIsStartingChat(false); 
     }
-    // No need to set isStartingChat to false on success, as we navigate away
   };
 
   return (

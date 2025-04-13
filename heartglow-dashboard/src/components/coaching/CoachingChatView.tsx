@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-// import { Input } from '../ui/input'; // Removed shadcn input import
+import { useRouter } from 'next/router'; // Import useRouter
+import { Input } from '../ui/input'; // Removed shadcn input import
 // import { Button } from './ui/button'; // Removed unused shadcn button import
-import { PaperPlaneIcon } from '@radix-ui/react-icons'; // Example icon
+import { PaperPlaneIcon, TrashIcon } from '@radix-ui/react-icons'; // Added TrashIcon
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
-import { db } from '../../lib/firebase'; // Import only db
+import { db, functionsInstance } from '../../lib/firebase'; // Renamed functions import
 import { doc, getDoc, collection, query, orderBy, onSnapshot, Timestamp, addDoc, serverTimestamp } from 'firebase/firestore'; // Import Firestore functions
-import { getFunctions, httpsCallable } from 'firebase/functions'; // Import functions SDK methods
+import { httpsCallable } from 'firebase/functions'; // Import functions SDK methods
 import { CoachingThread, ThreadMessage } from '../../types/coaching'; // Import types
-
-// Initialize Firebase Functions instance
-const functionsInstance = getFunctions();
 
 interface CoachingChatViewProps {
   threadId: string; // Passed in from the dynamic page
@@ -24,6 +22,8 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
   const [error, setError] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const messagesEndRef = useRef<null | HTMLDivElement>(null); // Ref for scrolling
+  const router = useRouter(); // Initialize router
+  const [isDeleting, setIsDeleting] = useState(false); // State for delete operation
   
   // Fetch thread metadata
   useEffect(() => {
@@ -140,6 +140,32 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
     return date.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit', hour12: true });
   };
 
+  const handleDeleteChat = async () => {
+    if (isDeleting) return;
+    
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this entire chat thread? This action cannot be undone."
+    );
+
+    if (confirmDelete) {
+      setIsDeleting(true);
+      console.log(`Attempting to delete thread: ${threadId}`);
+      try {
+        const callDeleteFunction = httpsCallable(functionsInstance, 'deleteCoachingThread');
+        const result = await callDeleteFunction({ threadId: threadId });
+        console.log("Delete function result:", result);
+        // On success, navigate back to the coaching dashboard
+        router.push('/coaching'); 
+      } catch (error) {
+         console.error(`Error deleting thread ${threadId}:`, error);
+         // TODO: Show user-facing error message
+         alert(`Failed to delete chat: ${error.message || 'Unknown error'}`);
+         setIsDeleting(false);
+      } 
+      // No need to set isDeleting false on success, as we navigate away
+    }
+  };
+
   if (loadingThread) {
     return (
       <div className="flex justify-center items-center h-full p-6">
@@ -158,8 +184,8 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
 
   return (
     <div className="flex flex-col h-[calc(100vh-var(--header-height)-var(--footer-height)-2rem)] md:h-[calc(100vh-var(--header-height)-var(--footer-height)-4rem)] bg-white dark:bg-heartglow-deepgray border border-gray-200 dark:border-gray-700 rounded-lg shadow-md overflow-hidden">
-      {/* Header */}
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10">
+      {/* Header - Added delete button */}
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 sticky top-0 z-10 flex items-center justify-between">
         <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 truncate">
           {threadData.threadTitle}
           {threadData.connectionSnapshot?.name && (
@@ -168,6 +194,18 @@ const CoachingChatView: React.FC<CoachingChatViewProps> = ({ threadId }) => {
              </span>
            )}
         </h2>
+        <button 
+          onClick={handleDeleteChat}
+          disabled={isDeleting}
+          className={`p-2 rounded-md text-gray-500 dark:text-gray-400 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-600 dark:hover:text-red-400 transition-colors duration-200 ${isDeleting ? 'opacity-50 cursor-not-allowed' : ''}`}
+          aria-label="Delete chat thread"
+        >
+           {isDeleting ? (
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+           ) : (
+              <TrashIcon className="h-5 w-5" />
+           )}
+        </button>
       </div>
       
       {/* Chat messages area - Added scroll-smooth */}

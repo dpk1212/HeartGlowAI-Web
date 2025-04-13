@@ -18,6 +18,15 @@ interface Connection {
   relationship: string;
 }
 
+// Define possible chat purposes
+const chatPurposes = [
+  { id: 'improve_communication', label: 'Improve Communication' },
+  { id: 'navigate_disagreement', label: 'Navigate Disagreement' },
+  { id: 'express_appreciation', label: 'Express Appreciation' },
+  { id: 'strengthen_connection', label: 'Strengthen Connection' },
+  { id: 'open_chat', label: 'Open Chat / Other' },
+];
+
 // Initialize Firebase Functions instance
 const functionsInstance = getFunctions(); 
 
@@ -27,6 +36,7 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
   const [selectedConnection, setSelectedConnection] = useState<string | null>(null);
+  const [selectedPurpose, setSelectedPurpose] = useState<string | null>(null); // New state for purpose
   const [isStartingChat, setIsStartingChat] = useState(false); // Add state for starting chat
   const [startChatError, setStartChatError] = useState<string | null>(null); // Add error state
 
@@ -54,7 +64,8 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
   }, [currentUser]);
 
   const handleStartChat = async () => { 
-    if (!selectedConnection || !currentUser || isStartingChat) return;
+    // Ensure a connection AND a purpose are selected
+    if (!selectedConnection || !selectedPurpose || !currentUser || isStartingChat) return;
     
     setIsStartingChat(true);
     setStartChatError(null);
@@ -79,6 +90,7 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
         isNewThread = true; // Set the flag
         console.log(`No existing thread found for connection ${selectedConnection}. Creating new one.`);
         const selectedConnDetails = connections.find(c => c.id === selectedConnection);
+        // Include initialPurpose in the new thread data
         const newThreadData: Omit<CoachingThread, 'id'> = {
           userId: currentUser.uid,
           connectionId: selectedConnection,
@@ -89,27 +101,25 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
             name: selectedConnDetails.name,
             relationship: selectedConnDetails.relationship,
           } : undefined,
+          initialPurpose: selectedPurpose, // Add selected purpose
         };
 
         const docRef = await addDoc(threadsRef, newThreadData);
         threadId = docRef.id;
         console.log(`Created new thread: ${threadId}`);
         
-        // --- Trigger initial coach message --- 
+        // Trigger initial coach message, passing the purpose
         if (isNewThread) {
-          console.log(`Triggering initial coach message for new thread: ${threadId}`);
+          console.log(`Triggering initial coach message for new thread: ${threadId} with purpose: ${selectedPurpose}`);
           try {
             const callCoachingAssistant = httpsCallable(functionsInstance, 'coachingAssistant');
-            // Call without userMessage to signal initial trigger
-            await callCoachingAssistant({ threadId: threadId }); 
+            // Pass threadId AND initialPurpose
+            await callCoachingAssistant({ threadId: threadId, initialPurpose: selectedPurpose }); 
             console.log(`Initial message trigger function called successfully for thread: ${threadId}`);
           } catch (triggerError) {
-             // Log the error but don't block navigation
              console.error(`Error triggering initial coach message for thread ${threadId}:`, triggerError);
-             // Optionally, display a non-critical error to the user
           } 
         }
-        // --- End trigger --- 
       }
 
       // Navigate to the chat view
@@ -127,21 +137,20 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
       <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
         Start Coaching Chat
       </h2>
+      
+      {/* Step 1: Select Connection */}
+      <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">1. Select Connection</h3>
       {loadingConnections ? (
-        <p className="text-gray-500 dark:text-gray-400">Loading connections...</p>
+        <p>Loading connections...</p>
       ) : connections.length === 0 ? (
-        <p className="text-gray-500 dark:text-gray-400">No connections found. Add connections first.</p>
+        <p>No connections found.</p>
       ) : (
-        <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+        <div className="space-y-3 max-h-40 overflow-y-auto pr-2 mb-6 border rounded-md p-2 border-gray-300 dark:border-gray-600">
           {connections.map(conn => (
             <div 
               key={conn.id}
               onClick={() => setSelectedConnection(conn.id)}
-              className={`p-3 border rounded-md cursor-pointer transition-colors 
-                ${selectedConnection === conn.id 
-                  ? 'bg-heartglow-pink/10 border-heartglow-pink ring-1 ring-heartglow-pink' 
-                  : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
+              className={`p-3 border rounded-md cursor-pointer transition-colors ${selectedConnection === conn.id ? 'bg-heartglow-pink/10 border-heartglow-pink ring-1 ring-heartglow-pink' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
             >
               <p className="font-medium text-gray-900 dark:text-gray-100">{conn.name}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400">{conn.relationship}</p>
@@ -149,6 +158,22 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
           ))}
         </div>
       )}
+
+      {/* Step 2: Select Initial Purpose */}
+      <h3 className={`text-lg font-medium mb-2 ${!selectedConnection ? 'text-gray-400 dark:text-gray-600' : 'text-gray-700 dark:text-gray-300'}`}>2. Select Initial Purpose</h3>
+      <div className={`space-y-2 ${!selectedConnection ? 'opacity-50 pointer-events-none' : ''}`}> 
+        {chatPurposes.map(purpose => (
+            <div 
+              key={purpose.id}
+              onClick={() => setSelectedPurpose(purpose.id)}
+              className={`p-3 border rounded-md cursor-pointer transition-colors ${selectedPurpose === purpose.id ? 'bg-indigo-100 dark:bg-indigo-900/40 border-indigo-500 dark:border-indigo-600 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700'}`}
+            >
+              <p className="font-medium text-gray-900 dark:text-gray-100">{purpose.label}</p>
+            </div>
+          ))}
+      </div>
+
+      {/* Action Buttons */}
       <div className="mt-6 flex justify-end space-x-3">
         <button 
           onClick={onClose}
@@ -158,15 +183,12 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
         </button>
         <button
           onClick={handleStartChat}
-          disabled={!selectedConnection || loadingConnections || isStartingChat}
-          className={`px-4 py-2 rounded-md border border-transparent shadow-sm font-medium text-white flex items-center justify-center
-            ${!selectedConnection || loadingConnections || isStartingChat
-              ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' 
-              : 'bg-heartglow-pink hover:bg-heartglow-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink'
-            }`}
+          // Disable if connection or purpose not selected, or loading
+          disabled={!selectedConnection || !selectedPurpose || loadingConnections || isStartingChat}
+          className={`px-4 py-2 rounded-md border border-transparent shadow-sm font-medium text-white flex items-center justify-center ${!selectedConnection || !selectedPurpose || loadingConnections || isStartingChat ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed' : 'bg-heartglow-pink hover:bg-heartglow-pink/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink'}`}
         >
           {isStartingChat ? (
-            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
           ) : null}
           {isStartingChat ? 'Starting...' : 'Start Chat'}
         </button>

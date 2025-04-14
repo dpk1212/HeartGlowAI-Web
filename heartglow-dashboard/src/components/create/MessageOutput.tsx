@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
 import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
 
 interface MessageOutputProps {
   recipient: {
@@ -42,7 +43,14 @@ export default function MessageOutput({
   const [message, setMessage] = useState('');
   const [insights, setInsights] = useState<string[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
+  const { challenges: challengeDefs } = useChallenges();
+  const [applyToChallenge, setApplyToChallenge] = useState(true);
+
+  const activeUserChallenge = userProfile?.activeChallenge;
+  const activeChallengeDefinition = activeUserChallenge 
+      ? challengeDefs.find(def => def.id === activeUserChallenge.challengeId) 
+      : null;
 
   const autoSaveMessage = async (generatedMessage: string, generatedInsights: string[]) => {
     if (!currentUser) {
@@ -70,7 +78,8 @@ export default function MessageOutput({
         messageCategory: intent.type,
         messageFormat: format.type,
         messageIntention: intent.custom || intent.type,
-        messageConfigTimestamp: new Date().toISOString()
+        messageConfigTimestamp: new Date().toISOString(),
+        appliedToChallenge: !!activeUserChallenge && applyToChallenge,
       };
       
       console.log('[autoSaveMessage] Saving data:', messageData);
@@ -269,6 +278,26 @@ export default function MessageOutput({
               </motion.li>
             ))}
           </ul>
+        </motion.div>
+      )}
+
+      {activeUserChallenge && activeChallengeDefinition && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45 }}
+          className="flex items-center justify-center my-6 p-4 bg-gray-800/60 border border-gray-700 rounded-lg"
+        >
+          <input
+            type="checkbox"
+            id="applyChallengeCheckbox"
+            checked={applyToChallenge}
+            onChange={(e) => setApplyToChallenge(e.target.checked)}
+            className="w-5 h-5 rounded text-heartglow-pink bg-gray-700 border-gray-600 focus:ring-heartglow-pink dark:focus:ring-offset-gray-800"
+          />
+          <label htmlFor="applyChallengeCheckbox" className="ml-3 text-sm font-medium text-gray-300">
+            Count this message towards the challenge: <span className="font-semibold text-indigo-300">{activeChallengeDefinition.name}</span>
+          </label>
         </motion.div>
       )}
 

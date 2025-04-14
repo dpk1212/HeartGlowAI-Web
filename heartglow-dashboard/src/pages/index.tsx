@@ -1,8 +1,6 @@
+import React from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
-// import { useEffect } from 'react'; // Removed
-// import { useAuth } from '../context/AuthContext'; // Removed
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
@@ -12,13 +10,11 @@ import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
 import ComingSoonCard from '../components/ui/ComingSoonCard';
 import CoachingEntryCard from '../components/ui/CoachingEntryCard';
+import ChallengeCard from '../components/ui/ChallengeCard';
+import GlowScoreSummaryCard from '../components/ui/GlowScoreSummaryCard';
 
-// Renamed back to Dashboard or keep IndexPage if preferred
+// This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
-  const router = useRouter(); // Keep router if needed elsewhere, otherwise remove
-  // Removed useAuth hook call and useEffect for redirect
-
-  // Render the Dashboard content directly behind AuthGuard
   return (
     <>
       <Head>
@@ -29,20 +25,18 @@ const IndexPage: NextPage = () => {
       <AuthGuard>
         <DashboardLayout>
           <HeroSection />
-          {/* Place Coaching Card directly below Hero, above the grid */}
-          <div className="mt-8 mb-8">
-             <CoachingEntryCard />
-          </div>
-          
-          {/* Reverted Grid Layout */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <QuickTemplateGrid /> {/* Removed className */} 
-             {/* CoachingEntryCard removed from here */}
-             <ConnectionsCarousel />
-             <ComingSoonCard />
-             <div className="md:col-span-2">
-               <RecentMessagesList />
-             </div>
+
+          {/* Grid Layout including new challenge/score cards */}
+          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ChallengeCard /> 
+            <GlowScoreSummaryCard />
+            <QuickTemplateGrid />
+            <CoachingEntryCard />
+            <ConnectionsCarousel />
+            <ComingSoonCard />
+            <div className="md:col-span-2">
+              <RecentMessagesList />
+            </div>
           </div>
         </DashboardLayout>
       </AuthGuard>
@@ -50,4 +44,4 @@ const IndexPage: NextPage = () => {
   );
 };
 
-export default IndexPage; 
+export default IndexPage; // Export as IndexPage 

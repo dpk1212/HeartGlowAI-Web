@@ -22,7 +22,7 @@ import { getAuth, getIdToken } from "firebase/auth";
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
   // Use the explicitly imported type for assertion (optional but can help diagnostics)
-  const { user, userProfile, loading: authLoading } = useAuth() as AuthContextType;
+  const { currentUser: user, userProfile, loading: authLoading } = useAuth();
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError, refetchChallenges } = useChallenges();
 
   // Combined loading state: wait for both user profile and challenge definitions

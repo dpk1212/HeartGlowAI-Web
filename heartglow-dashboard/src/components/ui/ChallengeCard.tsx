@@ -57,21 +57,23 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
   const handleSkipChallenge = async () => {
     if (isSkipping) return; // Prevent double clicks
     setIsSkipping(true); // Set loading state
-    console.log("Attempting to skip challenge...");
+    console.log("[handleSkipChallenge] Attempting to skip..."); // Log start
     try {
+      console.log("[handleSkipChallenge] Calling cloud function...");
       const skipChallengeFunction = httpsCallable(functions, 'skipCurrentChallenge');
-      // const result = await skipChallengeFunction();
-      // console.log("Skip challenge function called successfully:", result);
-      // TODO: Add user feedback (e.g., toast notification) and state update without reload
+      const result = await skipChallengeFunction();
+      console.log("[handleSkipChallenge] Cloud function call successful, result:", result);
 
-      // Set flag in sessionStorage before reloading
+      console.log("[handleSkipChallenge] Setting sessionStorage flag...");
       sessionStorage.setItem('skippedChallenge', 'true');
       
+      console.log("[handleSkipChallenge] Reloading page...");
       window.location.reload(); // Temporary refresh
     } catch (error) {
-      console.error("Error calling skipCurrentChallenge function:", error);
+      console.error("[handleSkipChallenge] Error calling skipCurrentChallenge function:", error); // Log error
       // TODO: Show user-facing error message
     } finally {
+      console.log("[handleSkipChallenge] Running finally block."); // Log finally
       setIsSkipping(false); // Unset loading state
     }
   };

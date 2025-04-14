@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 
@@ -12,18 +12,21 @@ import ComingSoonCard from '../components/ui/ComingSoonCard';
 import CoachingEntryCard from '../components/ui/CoachingEntryCard';
 import ChallengeCard from '../components/ui/ChallengeCard';
 import GlowScoreSummaryCard from '../components/ui/GlowScoreSummaryCard';
+import ChallengeSelection from '../components/ui/ChallengeSelection';
 import { useAuth } from '../context/AuthContext';
 // Explicitly import the type
 import type { AuthContextType } from '../context/AuthContext'; 
 import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
 // Import Firebase auth methods needed for token
 import { getAuth, getIdToken } from "firebase/auth";
+import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling selectChallenge
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
   // Use the explicitly imported type for assertion (optional but can help diagnostics)
   const { currentUser: user, userProfile, loading: authLoading } = useAuth();
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
+  const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Loading state for select/skip
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -80,6 +83,40 @@ const IndexPage: NextPage = () => {
      connectionsReached: userProfile?.metrics?.uniqueConnectionsMessagedWeekly?.length ?? 0,
      messagesSentThisWeek: userProfile?.metrics?.weeklyMessageCount ?? 0,
      reflectionsCompleted: userProfile?.metrics?.reflectionsCompletedCount ?? 0,
+  };
+
+  // Filter available challenges for selection (exclude recent history)
+  const challengeHistoryIds = userProfile?.challengeHistory?.slice(-5).map((h: any) => h.challengeId) || [];
+  const availableChallengesForSelection = challengeDefs.filter(
+      (def) => !challengeHistoryIds.includes(def.id) && def.id !== activeUserChallenge?.challengeId
+  );
+
+  // --- Select Challenge Handler ---
+  const handleSelectChallenge = async (challengeId: string) => {
+    if (!user) {
+      console.error("Cannot select: User not authenticated");
+      // TODO: Show error to user
+      return;
+    }
+    setIsChallengeActionLoading(true);
+    console.log(`Attempting to select challenge ${challengeId}...`);
+    try {
+      const functions = getFunctions();
+      const selectChallengeFunction = httpsCallable(functions, 'selectChallenge');
+      const result = await selectChallengeFunction({ challengeId });
+      console.log("Select challenge function result:", result);
+      // SUCCESS! 
+      // Ideally, update AuthContext state here instead of reloading.
+      // For now, Firestore listener in AuthContext should pick up the change,
+      // but a manual refetch or optimistic update would be better.
+      // Let the listener handle it for now (might have slight delay).
+      // window.location.reload(); // Avoid reload if listener works
+    } catch (error) {
+      console.error("Error calling selectChallenge function:", error);
+      // TODO: Show error to user
+    } finally {
+      setIsChallengeActionLoading(false);
+    }
   };
 
   // --- Skip Challenge Handler (Updated) ---
@@ -160,13 +197,24 @@ const IndexPage: NextPage = () => {
           <HeroSection />
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Conditionally render ChallengeCard based on calculated props */}
-            {challengeCardProps ? (
-              <ChallengeCard {...challengeCardProps} />
-            ) : (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 text-center text-gray-500 dark:text-gray-400 flex items-center justify-center min-h-[150px]">
-                <p>No active challenge assigned yet.<br/> A new one will appear soon!</p> {/* Updated message */}
+            {/* Conditionally render ChallengeCard or ChallengeSelection */}
+            {activeUserChallenge ? (
+              // Pass challengeCardProps if it exists (means active challenge is loaded)
+              challengeCardProps ? <ChallengeCard {...challengeCardProps} /> : <div>Loading challenge card...</div>
+            ) : challengesLoading ? (
+              // Show loading state while challenges are loading for selection
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 animate-pulse min-h-[200px]">
+                 <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mx-auto mb-6"></div>
+                 <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full mb-4"></div>
+                 <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
               </div>
+            ) : (
+              // Show selection component if no active challenge and definitions are loaded
+              <ChallengeSelection 
+                availableChallenges={availableChallengesForSelection} 
+                onSelectChallenge={handleSelectChallenge} 
+                isLoading={isChallengeActionLoading}
+              />
             )}
             <GlowScoreSummaryCard {...glowScoreData} />
             <QuickTemplateGrid />

@@ -20,6 +20,15 @@ export * from './challengeScheduler';
 // Export Progress Updater function(s)
 export * from './progressUpdater';
 
+// Export Challenge Assignment function(s)
+export * from './challengeAssignment';
+
+// Export Progress Tracking function(s)
+// export * from './progressTracking'; // Removed this line
+
+// Export Challenge Selection function(s)
+export * from './challengeSelection';
+
 // --- Removed explicit import/export for challengeActions ---
 // import { skipChallenge } from './challengeActions';
 // export { skipChallenge };

@@ -13,11 +13,14 @@ import CoachingEntryCard from '../components/ui/CoachingEntryCard';
 import ChallengeCard from '../components/ui/ChallengeCard';
 import GlowScoreSummaryCard from '../components/ui/GlowScoreSummaryCard';
 import { useAuth } from '../context/AuthContext';
+// Explicitly import the type
+import type { AuthContextType } from '../context/AuthContext'; 
 import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
-  const { userProfile, loading: authLoading } = useAuth();
+  // Use the explicitly imported type for assertion (optional but can help diagnostics)
+  const { userProfile, loading: authLoading } = useAuth() as AuthContextType;
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
 
   // Combined loading state: wait for both user profile and challenge definitions

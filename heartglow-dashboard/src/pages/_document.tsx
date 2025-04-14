@@ -9,7 +9,7 @@ export default function Document() {
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
-        <link rel="icon" href="/dashboard/favicon.ico" />
+        <link rel="icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         {/* Force specific style rules */}
         <style dangerouslySetInnerHTML={{ __html: `

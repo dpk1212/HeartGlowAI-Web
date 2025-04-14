@@ -108,8 +108,23 @@ const IndexPage: NextPage = () => {
         throw new Error(`HTTP error ${response.status}: ${errorText}`);
       }
 
-      const result = await response.json();
-      console.log("Skip challenge function result:", result);
+      // Attempt to parse JSON, handle potential errors
+      let result = {};
+      try {
+          const contentType = response.headers.get("content-type");
+          if (contentType && contentType.indexOf("application/json") !== -1) {
+              result = await response.json();
+              console.log("Skip challenge function result (JSON):", result);
+          } else {
+              // Handle non-JSON success responses if any (shouldn't happen with current function)
+              result = await response.text(); 
+              console.log("Skip challenge function result (text):", result); 
+          }
+      } catch (parseError) {
+          console.error("Error parsing skip challenge response:", parseError);
+          // Decide how to proceed if JSON parsing fails despite response.ok
+          // Maybe treat as success but log the parsing error
+      }
 
       // --- IMPORTANT: Refresh user data --- 
       // After successfully skipping, the userProfile state needs to be updated
@@ -127,9 +142,11 @@ const IndexPage: NextPage = () => {
   // --- End Skip Challenge Handler ---
 
   // Make sure to pass handleSkipChallenge to the ChallengeCard if it accepts it
+  /* // Removed - ChallengeCard uses its own internal handler
   if (challengeCardProps) {
       challengeCardProps.onSkip = handleSkipChallenge; // Add the handler to props
   }
+  */
 
   return (
     <>

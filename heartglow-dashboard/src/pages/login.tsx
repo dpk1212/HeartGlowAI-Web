@@ -50,8 +50,14 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-heartglow-charcoal dark:to-indigo-900/50 p-4 md:p-8 font-sans">
       <Head>
-        <title>Connect Deeper | HeartGlow AI</title>
-        <meta name="description" content="Log in or sign up for HeartGlow AI - Communicate better, connect deeper with AI-powered messaging and coaching." />
+        <title>Login or Sign Up | HeartGlow AI Communication Assistant</title>
+        <meta name="description" content="Access HeartGlow AI: Craft personalized messages, improve communication, and build stronger connections with our AI assistant and coaching features." />
+        <meta name="keywords" content="HeartGlow AI login, sign up, AI communication tool, AI message writer, relationship coaching AI, communication skills, personalized messages" />
+        <meta property="og:title" content="Login or Sign Up | HeartGlow AI Communication Assistant" />
+        <meta property="og:description" content="Access HeartGlow AI to craft personalized messages, improve communication, and build stronger connections." />
+        <meta property="og:image" content="https://heartglowai.com/assets/og-image.png" />
+        <meta property="og:url" content="https://heartglowai.com/dashboard/login" />
+        <meta property="og:type" content="website" />
       </Head>
 
       <motion.div 

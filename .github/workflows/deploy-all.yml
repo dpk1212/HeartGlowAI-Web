@@ -70,6 +70,10 @@ jobs:
           # Copy files using absolute paths
           echo "Copying dashboard files to $DEPLOY_DIR/dashboard/"
           cp -rv out/* $DEPLOY_DIR/dashboard/
+
+          # Explicitly copy favicon to the ROOT deploy directory as well
+          echo "Copying favicon to $DEPLOY_DIR/"
+          cp public/favicon.ico $DEPLOY_DIR/
           
           # Cleanup
           rm -rf out .next
@@ -77,20 +81,35 @@ jobs:
       # Build login page as the root site - REMOVED FOR SIMPLICITY
 
       # Create redirect files for better navigation
-      - name: Create redirect files
+      - name: Create root index.html with meta tags and redirect
         run: |
-          # Create root index redirection file
+          # Create root index redirection file with proper meta tags
           cat > $DEPLOY_DIR/index.html << EOF
           <!DOCTYPE html>
           <html lang="en">
           <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            
+            <!-- Favicon -->
+            <link rel="icon" href="/favicon.ico" />
+            
+            <!-- SEO / Social Sharing Meta Tags -->
+            <title>HeartGlow AI: Communicate Authentically, Connect Deeply</title>
+            <meta name="description" content="Struggling to express yourself? HeartGlow AI helps you craft authentic messages and build stronger bonds. Say what matters, gently." />
+            <meta property="og:title" content="HeartGlow AI: Communicate Authentically, Connect Deeply" />
+            <meta property="og:description" content="Struggling to express yourself? HeartGlow AI uses emotional intelligence to help you craft authentic messages, navigate tough conversations, and build stronger bonds. Say what matters, gently." />
+            <meta property="og:image" content="https://heartglowai.com/assets/og-image.png" /> 
+            <meta property="og:url" content="https://heartglowai.com/" />
+            <meta property="og:type" content="website" />
+            <meta name="twitter:card" content="summary_large_image" />
+
+            <!-- Redirect Logic -->
             <meta http-equiv="refresh" content="0;url=/dashboard/login">
-            <title>Redirecting...</title>
             <script>window.location.replace("/dashboard/login");</script>
           </head>
           <body>
-            <p>If you are not redirected, <a href="/dashboard/login">click here to log in</a>.</p>
+            <p>Redirecting to login... If you are not redirected, <a href="/dashboard/login">click here</a>.</p>
           </body>
           </html>
           EOF

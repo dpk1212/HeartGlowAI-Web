@@ -150,14 +150,31 @@ export default function MessageOutput({
         setError('Failed to generate message. Please try again.');
       } finally {
         setIsGenerating(false);
-        if (!error && generatedContent) {
-           await autoSaveMessage(generatedContent, generatedInsights);
-        }
+        // if (!error && generatedContent) {
+        //    await autoSaveMessage(generatedContent, generatedInsights); // <-- REMOVE AUTOSAVE CALL
+        // }
       }
     };
 
     generateAndSave();
-  }, [recipient, intent, format, tone, advanced, currentUser]);
+  // }, [recipient, intent, format, tone, advanced, currentUser]); // Dependencies might need adjustment if autoSaveMessage is removed
+  }, [recipient, intent, format, tone, advanced]); // Remove currentUser from dependencies if only used in autoSave
+
+  // Handler for the new Save button
+  const handleConfirmSave = async () => {
+    if (!message) {
+      console.error("No message content to save.");
+      // Maybe show an error to the user
+      return;
+    }
+    console.log("handleConfirmSave triggered. applyToChallenge state:", applyToChallenge);
+    // Call the existing save logic, which now reads the current checkbox state
+    await autoSaveMessage(message, insights);
+    // Optionally, copy after saving or navigate
+    handleCopyToClipboard(message); // Example: Copy after saving
+    // Optionally navigate or show success message
+    alert("Message saved!"); // Placeholder feedback
+  };
 
   const handleCopyToClipboard = (textToCopy: string) => {
     navigator.clipboard.writeText(textToCopy)
@@ -307,18 +324,24 @@ export default function MessageOutput({
         transition={{ delay: 0.5 + (insights.length * 0.1) }}
         className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-700/50 mt-8"
       >
+        {/* Main Save Button (replaces Copy) */}
         <button 
-          onClick={() => handleCopyToClipboard(message)}
-          className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg ${isCopied ? 'bg-green-600/90 hover:bg-green-700 text-white' : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
+          // onClick={() => handleCopyToClipboard(message)}
+          onClick={handleConfirmSave} // Call the new save handler
+          className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
+          // className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg ${isCopied ? 'bg-green-600/90 hover:bg-green-700 text-white' : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
         >
-          {isCopied ? (
+          {/* {isCopied ? (
             <Check size={20} className="mr-2" />
           ) : (
             <ClipboardCopy size={20} className="mr-2" />
-          )}
-          {isCopied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
+          )} */}
+          {/* {isCopied ? 'Copied to Clipboard!' : 'Copy to Clipboard'} */}
+          <ClipboardCopy size={20} className="mr-2" /> {/* Keep icon */}
+          Save & Copy Message
         </button>
 
+        {/* Return to Dashboard Link */}
         <Link href="/" legacyBehavior>
           <a className="inline-flex items-center text-sm text-gray-400 hover:text-gray-200 transition-colors">
             <ArrowLeft size={16} className="mr-1.5" />

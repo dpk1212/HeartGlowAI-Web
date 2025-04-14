@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/router'; // Import for navigation
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling Cloud Function
 import { Gift, Sparkles, MessageSquareText, Users, Zap } from 'lucide-react'; // Import from lucide-react
@@ -42,6 +42,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
 }) => {
   const router = useRouter();
   const functions = getFunctions(); // Get Firebase Functions instance
+  const [isSkipping, setIsSkipping] = useState(false); // Add skipping state
 
   // Prevent division by zero or negative goals
   const safeGoal = Math.max(1, goal || 1);
@@ -54,17 +55,24 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
   };
 
   const handleSkipChallenge = async () => {
+    if (isSkipping) return; // Prevent double clicks
+    setIsSkipping(true); // Set loading state
     console.log("Attempting to skip challenge...");
     try {
-      // Use the function name deployed previously
       const skipChallengeFunction = httpsCallable(functions, 'skipCurrentChallenge');
-      const result = await skipChallengeFunction();
-      console.log("Skip challenge function called successfully:", result);
+      // const result = await skipChallengeFunction();
+      // console.log("Skip challenge function called successfully:", result);
       // TODO: Add user feedback (e.g., toast notification) and state update without reload
+
+      // Set flag in sessionStorage before reloading
+      sessionStorage.setItem('skippedChallenge', 'true');
+      
       window.location.reload(); // Temporary refresh
     } catch (error) {
       console.error("Error calling skipCurrentChallenge function:", error);
       // TODO: Show user-facing error message
+    } finally {
+      setIsSkipping(false); // Unset loading state
     }
   };
 
@@ -136,8 +144,8 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         </div>
       </div>
 
-      {/* Actions Section - Pushed to bottom, improved button styling */} 
-      <div className="flex space-x-4 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700/50"> {/* Added mt-auto to push down */}
+      {/* Actions Section - Updated Skip Button */}
+      <div className="flex space-x-4 mt-auto pt-4 border-t border-gray-200 dark:border-gray-700/50">
         <button
             onClick={handleStartChallenge}
             className={`flex-1 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 ${
@@ -151,14 +159,22 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         </button>
         <button
             onClick={handleSkipChallenge}
-            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900 ${
-              isCompleted
+            className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-gray-900 flex items-center justify-center ${
+              isCompleted || isSkipping
                 ? 'bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-400 cursor-not-allowed'
                 : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600'
             }`}
-            disabled={isCompleted} // Disable if completed
+            disabled={isCompleted || isSkipping} // Disable if completed or skipping
         >
-            Skip
+          {isSkipping ? (
+             // Simple spinner
+             <svg className="animate-spin h-5 w-5 text-gray-500 dark:text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+             </svg>
+          ) : (
+             'Skip'
+          )}
         </button>
       </div>
     </div>

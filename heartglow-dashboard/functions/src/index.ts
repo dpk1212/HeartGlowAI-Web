@@ -106,7 +106,7 @@ export const skipCurrentChallenge = functions.https.onRequest((req, res) => {
 
       // Transaction succeeded if it didn't throw
       console.log(`Successfully skipped challenge for user ${userId}`);
-      res.status(200).send({ status: 'success', message: 'Challenge skipped successfully.' });
+      res.status(200).send({ status: 'skipped', message: 'Challenge skipped successfully.' });
 
     } catch (error: any) {
         // Handle specific errors thrown from transaction

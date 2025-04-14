@@ -42,7 +42,17 @@ const IndexPage: NextPage = () => {
     // Check if previously there WAS an active challenge and now there is NONE
     if (prevChallengeId && !currentChallengeId) {
       console.log('Challenge completed or skipped, triggering confetti!');
-      setShowConfetti(true);
+      
+      // Check sessionStorage to see if this removal was due to a skip
+      const wasSkipped = sessionStorage.getItem('skippedChallenge') === 'true';
+      if (wasSkipped) {
+        console.log('Challenge was skipped, suppressing confetti.');
+        sessionStorage.removeItem('skippedChallenge'); // Clear the flag
+      } else {
+        // Only show confetti if it wasn't a skip
+        setShowConfetti(true);
+      }
+
       // Optional: Hide confetti after a delay
       // const timer = setTimeout(() => setShowConfetti(false), 7000); // 7 seconds
       // return () => clearTimeout(timer);

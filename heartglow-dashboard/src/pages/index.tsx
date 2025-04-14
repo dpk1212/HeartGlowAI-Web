@@ -23,7 +23,7 @@ import { getAuth, getIdToken } from "firebase/auth";
 const IndexPage: NextPage = () => {
   // Use the explicitly imported type for assertion (optional but can help diagnostics)
   const { currentUser: user, userProfile, loading: authLoading } = useAuth();
-  const { challenges: challengeDefs, loading: challengesLoading, error: challengesError, refetchChallenges } = useChallenges();
+  const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;

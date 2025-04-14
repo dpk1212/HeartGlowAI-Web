@@ -1,6 +1,7 @@
 import React from 'react';
 // Assuming Icons component exists or can be created
-import { XpIcon, FireIcon, UsersIcon, MessageIcon, LightbulbIcon, ArrowRightIcon } from './Icons'; 
+// import { XpIcon, FireIcon, UsersIcon, MessageIcon, LightbulbIcon, ArrowRightIcon } from './Icons'; 
+import { Sparkles, Flame, Users, MessageSquareText, Lightbulb, ArrowRight } from 'lucide-react';
 
 // TODO: Define props based on Phase 1 Data Modeling (user glowscore data)
 interface GlowScoreSummaryCardProps {
@@ -43,7 +44,8 @@ const GlowScoreSummaryCard: React.FC<GlowScoreSummaryCardProps> = ({
       <div className="mb-4">
         <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Your GlowScore</h3>
         <p className="text-3xl font-bold text-gray-900 dark:text-white flex items-center">
-           <XpIcon className="w-6 h-6 mr-2 text-yellow-500" /> 
+           {/* <XpIcon className="w-6 h-6 mr-2 text-yellow-500" /> */}
+           <Sparkles className="w-6 h-6 mr-2 text-yellow-500" /> 
            {glowScoreXP} XP
         </p>
       </div>
@@ -58,19 +60,23 @@ const GlowScoreSummaryCard: React.FC<GlowScoreSummaryCardProps> = ({
       {/* Metrics Grid */}
       <div className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm text-gray-700 dark:text-gray-300 mb-6">
         <div className="flex items-center">
-          <FireIcon className="w-4 h-4 mr-2 text-red-500" />
+          {/* <FireIcon className="w-4 h-4 mr-2 text-red-500" /> */}
+          <Flame className="w-4 h-4 mr-2 text-red-500" />
           <span>Streak: {streak} Days</span>
         </div>
         <div className="flex items-center">
-          <UsersIcon className="w-4 h-4 mr-2 text-blue-500" />
+          {/* <UsersIcon className="w-4 h-4 mr-2 text-blue-500" /> */}
+          <Users className="w-4 h-4 mr-2 text-blue-500" />
           <span>Connections: {connectionsReached}</span>
         </div>
         <div className="flex items-center">
-          <MessageIcon className="w-4 h-4 mr-2 text-green-500" />
+          {/* <MessageIcon className="w-4 h-4 mr-2 text-green-500" /> */}
+          <MessageSquareText className="w-4 h-4 mr-2 text-green-500" /> {/* Using MessageSquareText */}
           <span>Messages (Week): {messagesSentThisWeek}</span>
         </div>
         <div className="flex items-center">
-          <LightbulbIcon className="w-4 h-4 mr-2 text-purple-500" />
+          {/* <LightbulbIcon className="w-4 h-4 mr-2 text-purple-500" /> */}
+          <Lightbulb className="w-4 h-4 mr-2 text-purple-500" />
           <span>Reflections: {reflectionsCompleted}</span>
         </div>
       </div>
@@ -82,7 +88,8 @@ const GlowScoreSummaryCard: React.FC<GlowScoreSummaryCardProps> = ({
           className="w-full inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-indigo-600 to-purple-700 hover:from-indigo-700 hover:to-purple-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition-all duration-300 ease-in-out transform hover:scale-105"
         >
           View My Emotional Growth 
-          <ArrowRightIcon className="w-4 h-4 ml-2" />
+          {/* <ArrowRightIcon className="w-4 h-4 ml-2" /> */}
+          <ArrowRight className="w-4 h-4 ml-2" />
         </button>
       </div>
        {/* TODO: Add motivational moments/text based on tier/progress */} 

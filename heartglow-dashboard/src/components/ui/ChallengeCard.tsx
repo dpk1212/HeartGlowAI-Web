@@ -1,7 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/router'; // Import for navigation
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling Cloud Function
-import { Gift, XpIcon } from './Icons'; // Assuming an Icons component exists or can be created
+import { Gift, Sparkles } from 'lucide-react'; // Import from lucide-react
 
 // TODO: Define props based on Phase 1 Data Modeling (challenge data, user progress)
 interface ChallengeCardProps {
@@ -111,7 +111,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
         {/* Rewards Section - Improved layout and icons */} 
         <div className="mb-6 flex items-center space-x-4 text-sm text-indigo-500 dark:text-indigo-300">
           <span className="flex items-center">
-            <XpIcon className="w-4 h-4 mr-1.5 text-yellow-500" /> {/* Custom XP Icon */}
+            <Sparkles className="w-4 h-4 mr-1.5 text-yellow-500" /> 
             <span className="font-medium">+{rewardXP} XP</span>
           </span>
           {rewardUnlock && (

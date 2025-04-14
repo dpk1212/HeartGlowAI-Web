@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { motion } from 'framer-motion';
+import { Plus } from 'lucide-react';
+import Link from 'next/link';
 
 interface Recipient {
   id: string;
@@ -82,10 +84,16 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
 
   return (
     <div className="space-y-8 dark:text-heartglow-offwhite">
-      <div className="text-center">
+      <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
-        <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Select a recipient from your connections</p>
+        <Link href="/connections" legacyBehavior>
+          <a className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-colors">
+            <Plus size={16} className="-ml-1 mr-2" />
+            Add Connection
+          </a>
+        </Link>
       </div>
+      <p className="mt-2 text-sm text-gray-600 dark:text-gray-400 text-center">Select a recipient from your connections</p>
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative dark:bg-red-900/30 dark:border-red-700/50 dark:text-red-300" role="alert">
@@ -96,7 +104,13 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
       <div className="grid gap-4">
         {recipients.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 dark:text-gray-400">No recipients found. Add some connections first.</p>
+            <p className="text-gray-500 dark:text-gray-400 mb-4">No recipients found.</p>
+            <Link href="/connections" legacyBehavior>
+              <a className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-colors">
+                <Plus size={16} className="-ml-1 mr-2" />
+                Add Your First Connection
+              </a>
+            </Link>
           </div>
         ) : (
           recipients.map((recipient) => (

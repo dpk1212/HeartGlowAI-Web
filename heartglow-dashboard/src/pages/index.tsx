@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
@@ -20,6 +21,8 @@ import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
 // Import Firebase auth methods needed for token
 import { getAuth, getIdToken } from "firebase/auth";
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling selectChallenge
+import Confetti from 'react-confetti'; // Import confetti library
+import useWindowSize from '../hooks/useWindowSize'; // Import hook for confetti dimensions
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
@@ -27,6 +30,30 @@ const IndexPage: NextPage = () => {
   const { currentUser: user, userProfile, loading: authLoading } = useAuth();
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
   const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Loading state for select/skip
+  const router = useRouter(); // Import and use useRouter for navigation
+  const { width, height } = useWindowSize(); // Get window size for confetti
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [prevChallengeId, setPrevChallengeId] = useState<string | null | undefined>(undefined);
+
+  // Effect to detect challenge completion for animation
+  useEffect(() => {
+    const currentChallengeId = userProfile?.activeChallenge?.challengeId;
+
+    // Check if previously there WAS an active challenge and now there is NONE
+    if (prevChallengeId && !currentChallengeId) {
+      console.log('Challenge completed or skipped, triggering confetti!');
+      setShowConfetti(true);
+      // Optional: Hide confetti after a delay
+      // const timer = setTimeout(() => setShowConfetti(false), 7000); // 7 seconds
+      // return () => clearTimeout(timer);
+    }
+
+    // Update previous challenge ID for the next check
+    // Only update if the profile is loaded to avoid initial undefined -> null trigger
+    if (!authLoading) {
+        setPrevChallengeId(currentChallengeId ?? null);
+    }
+  }, [userProfile?.activeChallenge, authLoading, prevChallengeId]); // Depend on activeChallenge and loading state
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -83,6 +110,8 @@ const IndexPage: NextPage = () => {
      connectionsReached: userProfile?.metrics?.uniqueConnectionsMessagedWeekly?.length ?? 0,
      messagesSentThisWeek: userProfile?.metrics?.weeklyMessageCount ?? 0,
      reflectionsCompleted: userProfile?.metrics?.reflectionsCompletedCount ?? 0,
+     // Add the navigation handler
+     onViewGrowth: () => router.push('/growth') 
   };
 
   // Filter available challenges for selection (exclude recent history)
@@ -227,6 +256,18 @@ const IndexPage: NextPage = () => {
           </div>
         </DashboardLayout>
       </AuthGuard>
+
+      {/* Confetti Animation Overlay */} 
+      {showConfetti && 
+        <Confetti 
+          width={width}
+          height={height}
+          recycle={false}
+          numberOfPieces={400}
+          gravity={0.15}
+          onConfettiComplete={() => setShowConfetti(false)} // Stop rendering when complete
+        />
+      }
     </>
   );
 };

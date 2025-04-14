@@ -5,6 +5,8 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from '
 import { generateMessage, generateMessageDirect, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
+import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
 
 interface MessageOutputProps {
   recipient: {
@@ -148,41 +150,44 @@ export default function MessageOutput({
     generateAndSave();
   }, [recipient, intent, format, tone, advanced, currentUser]);
 
-  const handleCopyToClipboard = () => {
-    navigator.clipboard.writeText(message)
+  const handleCopyToClipboard = (textToCopy: string) => {
+    navigator.clipboard.writeText(textToCopy)
       .then(() => {
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
       })
       .catch(err => {
-        console.error('Failed to copy message:', err);
+        console.error('Failed to copy:', err);
+        // TODO: Show error toast?
       });
   };
 
   if (isGenerating) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heartglow-pink mb-4"></div>
-        <p className="text-gray-600 dark:text-gray-300">Crafting your heartfelt message...</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">This may take a moment</p>
+      <div className="flex flex-col items-center justify-center text-center py-20 max-w-md mx-auto">
+        <motion.div 
+           animate={{ rotate: 360 }} 
+           transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+           className="w-16 h-16 mb-6 rounded-full border-4 border-gray-600 border-t-heartglow-pink"
+         />
+        <h2 className="text-xl font-semibold text-gray-300 mb-2">Crafting your heartfelt message...</h2>
+        <p className="text-gray-400">This may take just a moment.</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="text-center py-8">
-        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-          </svg>
+      <div className="text-center py-12 max-w-md mx-auto bg-gray-800/50 border border-red-500/30 rounded-xl p-8">
+        <div className="w-16 h-16 bg-red-900/30 text-red-400 rounded-full flex items-center justify-center mx-auto mb-5">
+          <AlertTriangle size={32} />
         </div>
-        <h3 className="text-lg font-medium text-red-600 dark:text-red-400 mb-2">
+        <h3 className="text-xl font-semibold text-red-400 mb-3">
           {error}
         </h3>
         <button 
           onClick={() => window.location.reload()}
-          className="inline-flex items-center justify-center bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 font-medium rounded-full px-6 py-2"
+          className="mt-4 inline-flex items-center justify-center bg-gray-600 hover:bg-gray-500 text-gray-100 font-medium rounded-lg px-6 py-2.5 transition-colors"
         >
           Try Again
         </button>
@@ -194,107 +199,104 @@ export default function MessageOutput({
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="space-y-6"
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="max-w-3xl mx-auto py-8 md:py-12 space-y-8"
     >
-      <div className="text-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Message Is Ready</h2>
-        <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Crafted for {recipient.name} with {format.type === 'email' ? 'an email' : 'a message'} that conveys {intent.type}
-        </p>
+      <div className="text-center">
+        <motion.h2 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-transparent bg-clip-text mb-2">
+            Your Message Is Ready
+        </motion.h2>
+        <motion.p 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="mt-2 text-lg text-gray-400">
+            Crafted for {recipient.name} with {format.type === 'email' ? 'an email' : 'a message'} that conveys {intent.type}
+        </motion.p>
       </div>
 
-      <div className="bg-white dark:bg-heartglow-deepgray p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-heartglow-charcoal dark:text-heartglow-offwhite">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 md:p-8 rounded-xl shadow-lg border border-gray-700/80">
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-xl font-semibold text-white">
             Message for {recipient.name}
           </h3>
           <button 
-            onClick={handleCopyToClipboard}
-            className="text-sm px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors flex items-center"
+            onClick={() => handleCopyToClipboard(message)}
+            className={`text-sm px-3 py-1.5 rounded-full transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 focus:ring-offset-gray-900 ${isCopied ? 'bg-green-600/80 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+            aria-label={isCopied ? "Copied!" : "Copy message"}
           >
             {isCopied ? (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                Copied!
-              </>
+              <Check size={16} className="mr-1.5" />
             ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-                Copy
-              </>
+              <Copy size={16} className="mr-1.5" />
             )}
+            {isCopied ? 'Copied!' : 'Copy'}
           </button>
         </div>
-        <div className="prose dark:prose-invert max-w-none bg-gray-50 dark:bg-gray-800/30 p-5 rounded-lg border border-gray-100 dark:border-gray-700">
-          <p className="whitespace-pre-wrap text-gray-800 dark:text-gray-200">{message}</p>
+        <div className="bg-gray-900/50 p-5 rounded-lg border border-gray-700 min-h-[150px]">
+          <p className="whitespace-pre-wrap text-gray-200 text-base md:text-lg leading-relaxed">{message}</p>
         </div>
-      </div>
+      </motion.div>
 
       {insights.length > 0 && (
-        <div className="bg-white dark:bg-heartglow-deepgray p-6 rounded-lg shadow-md border border-gray-100 dark:border-gray-800">
-          <h3 className="text-lg font-semibold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 md:p-8 rounded-xl shadow-lg border border-gray-700/80">
+          <h3 className="text-xl font-semibold mb-5 text-white">
             Why This Message Works
           </h3>
-          <ul className="space-y-3">
+          <ul className="space-y-4">
             {insights.map((insight, index) => (
               <motion.li
                 key={index}
-                initial={{ opacity: 0, x: -20 }}
+                initial={{ opacity: 0, x: -15 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="flex items-start"
+                transition={{ delay: 0.5 + index * 0.1 }}
+                className="flex items-start text-gray-300 text-base"
               >
-                <div className="min-w-[20px] h-5 flex items-center justify-center mr-2 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-heartglow-pink" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <span className="text-gray-700 dark:text-gray-300">{insight}</span>
+                <CheckCircle size={20} className="w-5 h-5 mr-3 mt-1 text-heartglow-pink flex-shrink-0" />
+                <span>{insight}</span>
               </motion.li>
             ))}
           </ul>
-        </div>
+        </motion.div>
       )}
-      
-      <div className="flex flex-col sm:flex-row items-center gap-4">
-        <button
-          onClick={handleCopyToClipboard}
-          className="w-full sm:w-auto px-6 py-3 rounded-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 font-medium transition-colors flex justify-center items-center"
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 + (insights.length * 0.1) }}
+        className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-700/50 mt-8"
+      >
+        <button 
+          onClick={() => handleCopyToClipboard(message)}
+          className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg ${isCopied ? 'bg-green-600/90 hover:bg-green-700 text-white' : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
         >
           {isCopied ? (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              Copied to Clipboard
-            </>
+            <Check size={20} className="mr-2" />
           ) : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
-              Copy to Clipboard
-            </>
+            <ClipboardCopy size={20} className="mr-2" />
           )}
+          {isCopied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
         </button>
-      </div>
 
-      <div className="text-center mt-8">
-        <button
-          onClick={() => window.location.href = '/dashboard'}
-          className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors text-sm flex items-center mx-auto"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Return to Dashboard
-        </button>
-      </div>
+        <Link href="/dashboard" legacyBehavior>
+          <a className="inline-flex items-center text-sm text-gray-400 hover:text-gray-200 transition-colors">
+            <ArrowLeft size={16} className="mr-1.5" />
+            Return to Dashboard
+          </a>
+        </Link>
+      </motion.div>
     </motion.div>
   );
 } 

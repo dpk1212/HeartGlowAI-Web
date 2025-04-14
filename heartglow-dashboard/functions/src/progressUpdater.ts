@@ -62,8 +62,14 @@ export const updateUserProgressOnMessage = functions.firestore
         let challengeCriteriaMet = false;
         let newlyUnlockedFeature: string | null = null; // To store potential unlock
 
-        // --- Challenge Logic ---
-        if (updatedChallengeData && updatedChallengeData.status === 'active') {
+        // --- Check if message should apply to challenge --- 
+        console.log(`[ProgressUpdater] Received messageData:`, messageData); // Log entire message data
+        const shouldApplyToChallenge = messageData.appliedToChallenge === true;
+        console.log(`[ProgressUpdater] Message ${messageId} for user ${userId}. Should apply to challenge? ${shouldApplyToChallenge}`);
+
+        // --- Challenge Logic (Conditional) ---
+        if (shouldApplyToChallenge && updatedChallengeData && updatedChallengeData.status === 'active') {
+          console.log(`[ProgressUpdater] Entering challenge check logic for challenge ${updatedChallengeData.challengeId}...`);
           const challengeDefSnapshot = await db.collection('challenges').doc(updatedChallengeData.challengeId).get();
           if (challengeDefSnapshot.exists) {
               const challengeDef = challengeDefSnapshot.data();
@@ -104,8 +110,10 @@ export const updateUserProgressOnMessage = functions.firestore
               }
           } else {
               console.warn(`Challenge definition ${updatedChallengeData.challengeId} not found.`);
-              updatedChallengeData = null;
+              updatedChallengeData = null; // Clear invalid active challenge if definition missing
           }
+        } else if (updatedChallengeData && updatedChallengeData.status === 'active') {
+            console.log(`[ProgressUpdater] Skipping challenge check for message ${messageId} because shouldApplyToChallenge is ${shouldApplyToChallenge}.`);
         }
 
         // --- Metrics Logic ---

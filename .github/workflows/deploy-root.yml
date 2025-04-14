@@ -84,6 +84,9 @@ jobs:
           
           # Copy the root build to temp_deploy root
           cp -r heartglow-dashboard/out/* temp_deploy/
+
+          # Explicitly copy favicon to the deployment root
+          cp heartglow-dashboard/public/favicon.ico temp_deploy/
           
           # Create dashboard directory and copy dashboard build
           mkdir -p temp_deploy/dashboard

@@ -38,10 +38,16 @@ const IndexPage: NextPage = () => {
   // Effect to detect challenge completion for animation
   useEffect(() => {
     const currentChallengeId = userProfile?.activeChallenge?.challengeId;
+    console.log("[ConfettiEffect] Running check.", { 
+        prevChallengeId,
+        currentChallengeId,
+        authLoading,
+        profileExists: !!userProfile 
+    });
 
     // Check if previously there WAS an active challenge and now there is NONE
     if (prevChallengeId && !currentChallengeId) {
-      console.log('Challenge completed or skipped, triggering confetti!');
+      console.log('[ConfettiEffect] Condition met: Had previous challenge, now have none.');
       
       // Check sessionStorage to see if this removal was due to a skip
       const wasSkipped = sessionStorage.getItem('skippedChallenge') === 'true';
@@ -50,6 +56,7 @@ const IndexPage: NextPage = () => {
         sessionStorage.removeItem('skippedChallenge'); // Clear the flag
       } else {
         // Only show confetti if it wasn't a skip
+        console.log('[ConfettiEffect] Triggering confetti!');
         setShowConfetti(true);
       }
 
@@ -61,6 +68,7 @@ const IndexPage: NextPage = () => {
     // Update previous challenge ID for the next check
     // Only update if the profile is loaded to avoid initial undefined -> null trigger
     if (!authLoading) {
+        console.log('[ConfettiEffect] Updating prevChallengeId from', prevChallengeId, 'to', currentChallengeId ?? null);
         setPrevChallengeId(currentChallengeId ?? null);
     }
   }, [userProfile?.activeChallenge, authLoading, prevChallengeId]); // Depend on activeChallenge and loading state

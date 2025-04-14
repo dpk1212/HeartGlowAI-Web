@@ -290,7 +290,7 @@ export default function MessageOutput({
           {isCopied ? 'Copied to Clipboard!' : 'Copy to Clipboard'}
         </button>
 
-        <Link href="/dashboard" legacyBehavior>
+        <Link href="/" legacyBehavior>
           <a className="inline-flex items-center text-sm text-gray-400 hover:text-gray-200 transition-colors">
             <ArrowLeft size={16} className="mr-1.5" />
             Return to Dashboard

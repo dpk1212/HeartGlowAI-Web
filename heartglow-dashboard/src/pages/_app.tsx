@@ -49,6 +49,14 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta httpEquiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
         <meta httpEquiv="Pragma" content="no-cache" />
         <meta httpEquiv="Expires" content="0" />
+
+        <title>HeartGlow AI</title>
+        <meta property="og:title" content="HeartGlow AI: Communicate Authentically, Connect Deeply" />
+        <meta property="og:description" content="Struggling to express yourself? HeartGlow AI uses emotional intelligence to help you craft authentic messages, navigate tough conversations, and build stronger bonds. Say what matters, gently." />
+        <meta property="og:image" content="https://heartglowai.com/assets/og-image.png" />
+        <meta property="og:url" content="https://heartglowai.com/" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <AuthProvider>
         <Component {...pageProps} />

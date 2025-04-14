@@ -10,6 +10,8 @@ import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
 import ComingSoonCard from '../components/ui/ComingSoonCard';
 import CoachingEntryCard from '../components/ui/CoachingEntryCard';
+import ChallengeCard from '../components/ui/ChallengeCard';
+import GlowScoreSummaryCard from '../components/ui/GlowScoreSummaryCard';
 
 const Dashboard: NextPage = () => {
   return (
@@ -25,6 +27,8 @@ const Dashboard: NextPage = () => {
 
           {/* Simplified Grid Layout (Restored) */}
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <ChallengeCard />
+            <GlowScoreSummaryCard />
             <QuickTemplateGrid />
             <CoachingEntryCard />
             <ConnectionsCarousel />

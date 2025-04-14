@@ -1,7 +1,20 @@
 import React from 'react';
 import { useRouter } from 'next/router'; // Import for navigation
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling Cloud Function
-import { Gift, Sparkles } from 'lucide-react'; // Import from lucide-react
+import { Gift, Sparkles, MessageSquareText, Users, Zap } from 'lucide-react'; // Import from lucide-react
+
+// Helper function to map icon names to Lucide components
+const getIconComponent = (iconName?: string) => {
+  switch (iconName) {
+    case 'SparklesIcon': return <Sparkles className="w-6 h-6" />;
+    case 'GiftIcon': return <Gift className="w-6 h-6" />;
+    case 'MessageSquareTextIcon': return <MessageSquareText className="w-6 h-6" />;
+    case 'UsersIcon': return <Users className="w-6 h-6" />;
+    case 'ZapIcon': return <Zap className="w-6 h-6" />;
+    // Add more mappings based on your challengesData icon names
+    default: return <Sparkles className="w-6 h-6" />; // Default icon
+  }
+};
 
 // TODO: Define props based on Phase 1 Data Modeling (challenge data, user progress)
 interface ChallengeCardProps {
@@ -88,7 +101,7 @@ const ChallengeCard: React.FC<ChallengeCardProps> = ({
     <div className="bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 p-6 md:p-8 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col h-full transition-all duration-300 hover:shadow-xl">
       <div className="flex-grow"> {/* Allow content to grow */}
         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-3 flex items-center">
-           <span className="text-2xl mr-3">{icon}</span> {/* Display Icon */}
+           <span className="text-2xl mr-3 text-indigo-400">{getIconComponent(icon)}</span> 
            {title}
         </h3>
         <p className="text-gray-600 dark:text-gray-300 mb-5 text-base">{description}</p>

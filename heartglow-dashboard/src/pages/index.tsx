@@ -16,12 +16,14 @@ import { useAuth } from '../context/AuthContext';
 // Explicitly import the type
 import type { AuthContextType } from '../context/AuthContext'; 
 import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
+// Import Firebase auth methods needed for token
+import { getAuth, getIdToken } from "firebase/auth";
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
   // Use the explicitly imported type for assertion (optional but can help diagnostics)
-  const { userProfile, loading: authLoading } = useAuth() as AuthContextType;
-  const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
+  const { user, userProfile, loading: authLoading } = useAuth() as AuthContextType;
+  const { challenges: challengeDefs, loading: challengesLoading, error: challengesError, refetchChallenges } = useChallenges();
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -45,13 +47,22 @@ const IndexPage: NextPage = () => {
     // Find the definition only if the user has an active challenge
     const activeChallengeDefinition = challengeDefs.find(def => def.id === activeUserChallenge.challengeId);
 
+    // Safely determine the goal, prioritizing the active challenge data, 
+    // but using definition criteria value only if it's numeric and relevant.
+    let goalValue = activeUserChallenge.goal ?? 1;
+    if (activeChallengeDefinition?.criteria?.type === 'sendMessageToMultiple' && 
+        typeof activeChallengeDefinition.criteria.value === 'number') {
+        goalValue = activeChallengeDefinition.criteria.value;        
+    }
+    goalValue = Math.max(1, goalValue); // Ensure goal is at least 1
+
     // Create props for the ChallengeCard
     challengeCardProps = {
       title: activeChallengeDefinition?.name ?? activeUserChallenge.challengeId,
       description: activeChallengeDefinition?.description ?? (challengesError ? "Error loading details" : "Loading details..."),
       icon: activeChallengeDefinition?.icon,
       progress: activeUserChallenge.progress ?? 0, // Provide default value
-      goal: activeChallengeDefinition?.criteria?.value ?? activeUserChallenge.goal ?? 1, // Use definition criteria if possible, fallback
+      goal: goalValue, // Use the safely determined goalValue
       rewardXP: activeChallengeDefinition?.rewardXP ?? activeUserChallenge.rewardXP ?? 0,
       rewardUnlock: activeChallengeDefinition?.rewardUnlock ?? activeUserChallenge.rewardUnlock,
       // Add a loading state specifically for the card if definition is missing after load
@@ -70,6 +81,55 @@ const IndexPage: NextPage = () => {
      messagesSentThisWeek: userProfile?.metrics?.weeklyMessageCount ?? 0,
      reflectionsCompleted: userProfile?.metrics?.reflectionsCompletedCount ?? 0,
   };
+
+  // --- Skip Challenge Handler (Updated) ---
+  const handleSkipChallenge = async () => {
+    if (!user) {
+      console.error("Cannot skip: User not authenticated");
+      // TODO: Show error to user
+      return;
+    }
+    console.log("Attempting to skip challenge via HTTPS...");
+    try {
+      const idToken = await getIdToken(user); // Get the ID token
+      const functionUrl = `https://us-central1-heartglowai.cloudfunctions.net/skipCurrentChallenge`; // Ensure function name is correct
+
+      const response = await fetch(functionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${idToken}`,
+          'Content-Type': 'application/json'
+        },
+        // No body needed for skip, based on current function
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error ${response.status}: ${errorText}`);
+      }
+
+      const result = await response.json();
+      console.log("Skip challenge function result:", result);
+
+      // --- IMPORTANT: Refresh user data --- 
+      // After successfully skipping, the userProfile state needs to be updated
+      // This usually requires triggering a refetch in your AuthContext or manually updating it.
+      // For now, let's assume a simple refresh action might be available (e.g., refetchUserProfile)
+      // OR trigger a page reload as a basic way to refresh data:
+      window.location.reload(); 
+      // A more sophisticated approach would be better (e.g., optimistic update + context refetch)
+
+    } catch (error) {
+      console.error("Error calling skipCurrentChallenge function:", error);
+      // TODO: Show error to user
+    }
+  };
+  // --- End Skip Challenge Handler ---
+
+  // Make sure to pass handleSkipChallenge to the ChallengeCard if it accepts it
+  if (challengeCardProps) {
+      challengeCardProps.onSkip = handleSkipChallenge; // Add the handler to props
+  }
 
   return (
     <>

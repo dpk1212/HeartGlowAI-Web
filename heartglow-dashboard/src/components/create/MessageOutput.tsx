@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from '
 import { generateMessage, generateMessageDirect, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
-import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle } from 'lucide-react';
+import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface MessageOutputProps {

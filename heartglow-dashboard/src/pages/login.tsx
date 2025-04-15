@@ -321,7 +321,7 @@ const Login = () => {
                 className="mt-12 text-center text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg max-w-2xl mx-auto flex items-center justify-center gap-2"
             >
                <Lock size={16} className="flex-shrink-0 text-indigo-400" />
-               <span><strong>Note:</strong> These are real emotional use cases. HeartGlow never stores or shares your messages.</span>
+               <span><strong>Note:</strong> These are real emotional use cases. Messages stored securely in your private account and never shared.</span>
             </motion.div>
         </div>
       </section>

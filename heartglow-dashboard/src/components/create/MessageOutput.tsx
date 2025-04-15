@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
-import { generateMessage, generateMessageDirect, MessageGenerationParams } from '../../lib/openai';
+import { generateMessage, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
 import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -311,90 +311,4 @@ export default function MessageOutput({
           </h3>
           <button 
             onClick={() => handleCopyToClipboard(message)}
-            className={`text-sm px-3 py-1.5 rounded-full transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 focus:ring-offset-gray-900 ${isCopied ? 'bg-green-600/80 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-            aria-label={isCopied ? "Copied!" : "Copy message"}
-          >
-            {isCopied ? (
-              <Check size={16} className="mr-1.5" />
-            ) : (
-              <Copy size={16} className="mr-1.5" />
-            )}
-            {isCopied ? 'Copied!' : 'Copy'}
-          </button>
-        </div>
-        <div className="bg-gray-900/50 p-5 rounded-lg border border-gray-700 min-h-[150px]">
-          <p className="whitespace-pre-wrap text-gray-200 text-base md:text-lg leading-relaxed">{message}</p>
-        </div>
-      </motion.div>
-
-      {insights.length > 0 && (
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 md:p-8 rounded-xl shadow-lg border border-gray-700/80">
-          <h3 className="text-xl font-semibold mb-5 text-white">
-            Why This Message Works
-          </h3>
-          <ul className="space-y-4">
-            {insights.map((insight, index) => (
-              <motion.li
-                key={index}
-                initial={{ opacity: 0, x: -15 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.5 + index * 0.1 }}
-                className="flex items-start text-gray-300 text-base"
-              >
-                <CheckCircle size={20} className="w-5 h-5 mr-3 mt-1 text-heartglow-pink flex-shrink-0" />
-                <span>{insight}</span>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
-      )}
-
-      {activeUserChallenge && activeChallengeDefinition && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.45 }}
-          className="flex items-center justify-center my-6 p-4 bg-gray-800/60 border border-gray-700 rounded-lg"
-        >
-          <input
-            type="checkbox"
-            id="applyChallengeCheckbox"
-            checked={applyToChallenge}
-            onChange={(e) => setApplyToChallenge(e.target.checked)}
-            className="w-5 h-5 rounded text-heartglow-pink bg-gray-700 border-gray-600 focus:ring-heartglow-pink dark:focus:ring-offset-gray-800"
-          />
-          <label htmlFor="applyChallengeCheckbox" className="ml-3 text-sm font-medium text-gray-300">
-            Count this message towards the challenge: <span className="font-semibold text-indigo-300">{activeChallengeDefinition.name}</span>
-          </label>
-        </motion.div>
-      )}
-
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 + (insights.length * 0.1) }}
-        className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-700/50 mt-8"
-      >
-        <button 
-          onClick={handleConfirmSave}
-          className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
-        >
-          <ClipboardCopy size={20} className="mr-2" />
-          Save & Copy Message
-        </button>
-
-        <Link 
-          href="/" 
-          className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft size={16} className="mr-1.5" />
-          Return to Dashboard
-        </Link>
-      </motion.div>
-    </motion.div>
-  );
-} 
+            className={`

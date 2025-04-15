@@ -1,46 +1,17 @@
-import { generateMessage as generateMessageImpl } from './messageGenerator';
+import {
+  generateMessage as generateMessageImpl,
+  MessageGenerationParams as MessageGenerationParamsImpl // Import the type from messageGenerator
+} from './messageGenerator';
 
-// Interface for message generation parameters that matches the MessageOutput component
-export interface MessageGenerationParams {
-  recipient: {
-    name: string;
-    relationship: string;
-    id?: string;
-  };
-  intent: {
-    type: string;
-    custom?: string;
-  };
-  format: {
-    type: string;
-    length: string;
-    options?: Record<string, any>;
-  };
-  tone: string;
-  advanced?: {
-    intensity: number;
-    customInstructions?: string;
-  };
-  userUid?: string;
-}
+// Re-export the correct type definition from messageGenerator
+export type MessageGenerationParams = MessageGenerationParamsImpl;
 
-/**
- * Generate a message using the local message generator
- */
-export async function generateMessage(params: MessageGenerationParams): Promise<any> {
-  try {
-    // Use the implementation from messageGenerator.ts
-    return generateMessageImpl(params);
-  } catch (error) {
-    console.error("Error generating message:", error);
-    throw error;
-  }
-}
+// Re-export the generateMessage function from messageGenerator
+// This acts as a facade if needed, but mostly ensures consistency
+export const generateMessage = generateMessageImpl;
 
-/**
- * Generate a message directly without processing
- * This is a simpler version that can be used as a fallback
- */
+// Remove the old, outdated direct function
+/*
 export async function generateMessageDirect(params: MessageGenerationParams): Promise<any> {
   try {
     // Use the same implementation for direct generation
@@ -53,4 +24,12 @@ export async function generateMessageDirect(params: MessageGenerationParams): Pr
       insights: []
     };
   }
-} 
+}
+*/
+
+// Remove the old interface definition
+/*
+export interface MessageGenerationParams {
+  // ... old fields ...
+}
+*/ 

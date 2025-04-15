@@ -1,3 +1,7 @@
+// These lines are removed entirely as they caused persistent build errors
+// import {onRequest} from "firebase-functions/v2/https";
+// import * as logger from "firebase-functions/logger";
+
 import * as functions from "firebase-functions"; // Add import
 import * as admin from "firebase-admin"; // Add import
 import cors = require("cors"); // Use require-style import for cors
@@ -28,6 +32,12 @@ export * from './challengeAssignment';
 
 // Export Challenge Selection function(s)
 export * from './challengeSelection';
+
+// Export Challenge Action function(s)
+export * from './challengeActions';
+
+// Export Coaching Thread function(s)
+// export * from './coachingThreads'; // Temporarily commented out due to missing file
 
 // --- Removed explicit import/export for challengeActions ---
 // import { skipChallenge } from './challengeActions';
@@ -124,7 +134,13 @@ export const skipCurrentChallenge = functions.https.onRequest((req, res) => {
 });
 
 // --- Export Message Generation function --- 
-export * from './messageGeneration';
+// export * from './messageGeneration';
+import { generateEnhancedMessage } from './messageGeneration';
+export { generateEnhancedMessage };
+
+// --- Export Message Insights function ---
+import { generateMessageInsights } from './messageInsights';
+export { generateMessageInsights };
 
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';

@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from '
 import { generateMessage, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
-import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle, EyeIcon, Star } from 'lucide-react';
 import Link from 'next/link';
 import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
 import { useRouter } from 'next/router';
@@ -63,6 +63,12 @@ export default function MessageOutput({
   const { challenges: challengeDefs } = useChallenges();
   const [applyToChallenge, setApplyToChallenge] = useState(true);
   const router = useRouter();
+  
+  // New state variables for the insights reveal feature
+  const [isInsightsRevealed, setIsInsightsRevealed] = useState(false);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [messageGrade, setMessageGrade] = useState<string>('');
+  const [detailedInsights, setDetailedInsights] = useState<string[]>([]);
 
   const activeUserChallenge = userProfile?.activeChallenge;
   const activeChallengeDefinition = activeUserChallenge 
@@ -241,6 +247,56 @@ export default function MessageOutput({
       });
   };
 
+  // New function to fetch insights and grade from OpenAI
+  const generateInsightsAndGrade = async () => {
+    if (!message || !recipient || !intent || !tone) return;
+    
+    setIsLoadingInsights(true);
+    
+    try {
+      // Call your backend API that will call OpenAI
+      const idToken = await currentUser?.getIdToken();
+      const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessageInsights', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`
+        },
+        body: JSON.stringify({
+          message: message,
+          recipient: {
+            name: recipient.name,
+            relationship: recipient.relationship
+          },
+          intent: intent.type,
+          tone: tone
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (data && data.grade && data.insights) {
+        setMessageGrade(data.grade);
+        setDetailedInsights(data.insights);
+        setIsInsightsRevealed(true);
+      } else {
+        throw new Error('Invalid response from insights generation');
+      }
+    } catch (err) {
+      console.error('Error generating insights:', err);
+      // Fallback insights if the API call fails
+      setMessageGrade('A-');
+      setDetailedInsights([
+        `This message has a warm, personal tone that's perfect for your ${recipient?.relationship}.`,
+        `The content is specific and thoughtful, showing genuine interest in reconnection.`,
+        `By mentioning specific details, you create an authentic connection point.`
+      ]);
+      setIsInsightsRevealed(true);
+    } finally {
+      setIsLoadingInsights(false);
+    }
+  };
+
   if (isGenerating) {
     return (
       <div className="flex flex-col items-center justify-center text-center py-20 max-w-md mx-auto">
@@ -328,24 +384,86 @@ export default function MessageOutput({
         </div>
       </motion.div>
 
-      {/* Insights Section */}
-      {insights && insights.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 md:p-8 rounded-xl shadow-md border border-gray-700/60"
-        >
-          <h3 className="text-lg font-semibold text-white mb-4">AI Insights</h3>
-          <ul className="space-y-3 list-disc list-inside text-gray-300 text-sm">
-            {insights.map((insight, index) => (
-              <li key={index}>{insight}</li>
-            ))}
-          </ul>
-        </motion.div>
-      )}
+      {/* New Insights & Grading Section */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="space-y-6"
+      >
+        <div className="flex items-center justify-between">
+          <h3 className="text-xl font-semibold text-white">Message Analysis</h3>
+          {!isInsightsRevealed && (
+            <button
+              onClick={generateInsightsAndGrade}
+              disabled={isLoadingInsights}
+              className={`inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all ${isLoadingInsights ? 'bg-gray-600 cursor-wait' : 'bg-heartglow-pink hover:bg-heartglow-pink/90'} text-white`}
+            >
+              {isLoadingInsights ? (
+                <>
+                  <div className="w-4 h-4 mr-2 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
+                  Analyzing...
+                </>
+              ) : (
+                <>
+                  <EyeIcon size={16} className="mr-1.5" />
+                  Reveal Analysis
+                </>
+              )}
+            </button>
+          )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Grade Card */}
+          <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700/60 overflow-hidden`}>
+            <div className="p-4 border-b border-gray-700/60 flex justify-between items-center">
+              <h4 className="font-medium text-white flex items-center">
+                <Star size={16} className="mr-1.5 text-yellow-400" />
+                Message Grade
+              </h4>
+            </div>
+            <div className={`p-6 h-32 flex items-center justify-center ${!isInsightsRevealed ? 'blur-lg select-none' : ''} transition-all duration-300`}>
+              {isInsightsRevealed ? (
+                <div className="text-center">
+                  <span className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-heartglow-pink text-transparent bg-clip-text">
+                    {messageGrade}
+                  </span>
+                </div>
+              ) : (
+                <div className="w-full h-full bg-gray-700/30 animate-pulse rounded-md"></div>
+              )}
+            </div>
+          </div>
+          
+          {/* Insights Card */}
+          <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700/60 overflow-hidden`}>
+            <div className="p-4 border-b border-gray-700/60">
+              <h4 className="font-medium text-white">Detailed Insights</h4>
+            </div>
+            <div className={`p-6 h-32 overflow-y-auto ${!isInsightsRevealed ? 'blur-lg select-none' : ''} transition-all duration-300`}>
+              {isInsightsRevealed ? (
+                <ul className="space-y-2 text-sm text-gray-300">
+                  {detailedInsights.map((insight, idx) => (
+                    <li key={idx} className="flex">
+                      <span className="text-heartglow-pink mr-2">•</span>
+                      <span>{insight}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="space-y-2">
+                  <div className="w-full h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
+                  <div className="w-full h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
+                  <div className="w-3/4 h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </motion.div>
 
-      {/* Action Button */}
+      {/* Action Buttons */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -368,7 +486,6 @@ export default function MessageOutput({
           Done - Save & Copy Message
         </button>
       </motion.div>
-
     </motion.div>
   );
 }

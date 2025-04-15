@@ -136,6 +136,8 @@ exports.skipCurrentChallenge = functions.https.onRequest((req, res) => {
         }
     }); // End CORS handler wrapper
 });
+// --- Export Message Generation function --- 
+__exportStar(require("./messageGeneration"), exports);
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';
 console.log('Importing and exporting Cloud Functions...');

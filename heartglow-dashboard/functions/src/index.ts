@@ -123,6 +123,9 @@ export const skipCurrentChallenge = functions.https.onRequest((req, res) => {
   }); // End CORS handler wrapper
 });
 
+// --- Export Message Generation function --- 
+export * from './messageGeneration';
+
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';
 

@@ -5,7 +5,7 @@ import RecipientStep from '../components/create/RecipientStep';
 import IntentStep from '../components/create/IntentStep';
 import FormatStep from '../components/create/FormatStep';
 import ToneStep from '../components/create/ToneStep';
-import AdvancedStep from '../components/create/AdvancedStep';
+import ContextStyleStep from '../components/create/ContextStyleStep';
 import MessageOutput from '../components/create/MessageOutput';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -14,7 +14,7 @@ const stepsInfo = [
   { number: 2, label: 'Intent' },
   { number: 3, label: 'Format' },
   { number: 4, label: 'Tone' },
-  { number: 5, label: 'Refine' },
+  { number: 5, label: 'Context & Style' },
 ];
 
 export default function CreatePage() {
@@ -22,12 +22,18 @@ export default function CreatePage() {
   const router = useRouter();
   const { currentUser, loading } = useAuth();
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<any>({
     recipient: null,
+    connectionData: null,
     intent: null,
     format: null,
     tone: null,
-    advanced: null
+    promptedBy: '',
+    messageGoal: '',
+    formalityLevel: 3,
+    emotionalDepth: 3,
+    customInstructionsText: '',
+    customInstructionsOptions: {},
   });
 
   useEffect(() => {
@@ -80,10 +86,30 @@ export default function CreatePage() {
       switch (step) {
         case 1: return <RecipientStep onNext={handleNext} initialData={formData.recipient} />;
         case 2: return <IntentStep onNext={handleNext} onBack={handleBack} initialData={formData.intent} />;
-        case 3: return <FormatStep onNext={handleNext} onBack={handleBack} initialData={formData.format} />;
+        case 3: return <FormatStep onNext={handleNext} onBack={handleBack} initialData={{ type: formData.format?.type, length: formData.format?.length, options: formData.format?.options }} />;
         case 4: return <ToneStep onNext={handleNext} onBack={handleBack} initialData={formData.tone} />;
-        case 5: return <AdvancedStep onNext={handleNext} onBack={handleBack} initialData={formData.advanced} />;
-        case 6: return <MessageOutput recipient={formData.recipient} intent={formData.intent} format={formData.format} tone={formData.tone} advanced={formData.advanced} />;
+        case 5: return <ContextStyleStep onNext={handleNext} onBack={handleBack} initialData={{
+          promptedBy: formData.promptedBy,
+          messageGoal: formData.messageGoal,
+          formalityLevel: formData.formalityLevel,
+          emotionalDepth: formData.emotionalDepth,
+          customInstructionsText: formData.customInstructionsText,
+          customInstructionsOptions: formData.customInstructionsOptions,
+        }} />;
+        case 6: 
+          return <MessageOutput 
+            recipient={formData.recipient}
+            connectionData={formData.connectionData}
+            intent={formData.intent}
+            format={formData.format}
+            tone={formData.tone}
+            promptedBy={formData.promptedBy}
+            messageGoal={formData.messageGoal}
+            formalityLevel={formData.formalityLevel}
+            emotionalDepth={formData.emotionalDepth}
+            customInstructionsText={formData.customInstructionsText}
+            customInstructionsOptions={formData.customInstructionsOptions}
+          />;
         default: return null;
       }
     }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { FileText, AlignCenter, AlignLeft, AlignJustify } from 'lucide-react';
 
 // Define more specific types
 interface FormatData {
@@ -17,7 +18,7 @@ interface FormatStepProps {
 const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   // Initialize state from initialData
   const [selectedFormat, setSelectedFormat] = useState(initialData?.type || '');
-  const [selectedLength, setSelectedLength] = useState(initialData?.length || '');
+  const [selectedLength, setSelectedLength] = useState(initialData?.length || 'Standard (1 paragraph)');
   const [formatSpecificOptions, setFormatSpecificOptions] = useState(
     initialData?.options || { // Initialize options from initialData or defaults
       emailSubject: '',
@@ -31,7 +32,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   useEffect(() => {
     if (initialData) {
       setSelectedFormat(initialData.type || '');
-      setSelectedLength(initialData.length || '');
+      setSelectedLength(initialData.length || 'Standard (1 paragraph)');
       setFormatSpecificOptions(initialData.options || {
         emailSubject: '',
         emojiPreference: 'moderate',
@@ -41,7 +42,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
     } else {
       // Reset if no initialData
       setSelectedFormat('');
-      setSelectedLength('');
+      setSelectedLength('Standard (1 paragraph)');
       setFormatSpecificOptions({
         emailSubject: '',
         emojiPreference: 'moderate',
@@ -61,10 +62,10 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
   ];
 
   const lengths = [
-    { id: 'brief', label: 'Brief', description: '1-2 sentences', icon: '🔹' },
-    { id: 'standard', label: 'Standard', description: '1 paragraph', icon: '🔸' },
-    { id: 'detailed', label: 'Detailed', description: '2-3 paragraphs', icon: '📝' },
-    { id: 'extended', label: 'Extended', description: 'Full letter/email', icon: '📄' }
+    { id: 'Very short (1-2 sentences)', label: 'Very Short', description: '1-2 sentences', icon: <AlignCenter size={20}/> },
+    { id: 'Short (approx. 1 paragraph)', label: 'Short', description: '~1 paragraph', icon: <AlignLeft size={20}/> },
+    { id: 'Medium (approx. 2 paragraphs)', label: 'Medium', description: '~2 paragraphs', icon: <AlignJustify size={20}/> },
+    { id: 'Long (3+ paragraphs)', label: 'Long', description: '3+ paragraphs', icon: <FileText size={20}/> }
   ];
 
   const handleSubmit = () => {
@@ -232,17 +233,19 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setSelectedLength(length.id)}
-                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 flex flex-col items-center justify-between h-full ${
                   selectedLength === length.id
                     ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
                     : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
                 }`}
               >
-                <div className="flex items-center justify-center mb-2">
-                  <span className="text-xl">{length.icon}</span>
+                <div className="flex flex-col items-center text-center flex-grow justify-center">
+                  <div className="mb-3 text-heartglow-indigo dark:text-heartglow-pink">
+                    {length.icon}
+                  </div>
+                  <h4 className="font-medium text-gray-900 dark:text-heartglow-offwhite mb-1">{length.label}</h4>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{length.description}</p>
                 </div>
-                <h4 className="font-medium text-center text-gray-900 dark:text-heartglow-offwhite">{length.label}</h4>
-                <p className="text-sm text-center text-gray-600 dark:text-gray-400">{length.description}</p>
               </motion.div>
             ))}
           </div>
@@ -252,7 +255,7 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
         {selectedFormat && renderFormatSpecificOptions()}
       </div>
 
-      <div className="flex justify-between mt-8">
+      <div className="flex justify-between mt-12">
         <button
           onClick={onBack}
           className="inline-flex items-center justify-center px-6 py-3 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md shadow-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 transition-colors"
@@ -263,9 +266,9 @@ const FormatStep = ({ onNext, onBack, initialData }: FormatStepProps) => {
           onClick={handleSubmit}
           disabled={!selectedFormat || !selectedLength}
           className={`inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink ${
-            !selectedFormat || !selectedLength
-              ? 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
-              : 'bg-heartglow-pink hover:bg-heartglow-pink/90'
+            selectedFormat && selectedLength
+              ? 'bg-heartglow-pink hover:bg-heartglow-pink/90'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700 dark:text-gray-400'
           }`}
         >
           Next

@@ -12,32 +12,47 @@ import { useRouter } from 'next/router';
 
 interface MessageOutputProps {
   recipient: {
+    id: string;
     name: string;
     relationship: string;
-    id?: string;
-  };
+  } | null;
+  connectionData: {
+    specificRelationship?: string;
+    yearsKnown?: number;
+    communicationStyle?: string;
+    relationshipGoal?: string;
+    lastMessageDate?: any;
+  } | null;
   intent: {
     type: string;
     custom?: string;
-  };
+  } | null;
   format: {
     type: string;
     length: string;
     options?: Record<string, any>;
-  };
-  tone: string;
-  advanced?: {
-    intensity: number;
-    customInstructions?: string;
-  };
+  } | null;
+  tone: string | null;
+  promptedBy?: string;
+  messageGoal?: string;
+  formalityLevel?: number;
+  emotionalDepth?: number;
+  customInstructionsText?: string;
+  customInstructionsOptions?: Record<string, boolean>;
 }
 
 export default function MessageOutput({ 
   recipient,
+  connectionData,
   intent,
   format,
   tone,
-  advanced
+  promptedBy,
+  messageGoal,
+  formalityLevel,
+  emotionalDepth,
+  customInstructionsText,
+  customInstructionsOptions
 }: MessageOutputProps) {
   const [isGenerating, setIsGenerating] = useState(true);
   const [isCopied, setIsCopied] = useState(false);
@@ -55,8 +70,8 @@ export default function MessageOutput({
       : null;
 
   const autoSaveMessage = async (generatedMessage: string, generatedInsights: string[]) => {
-    if (!currentUser) {
-      console.warn('[autoSaveMessage] No user logged in, cannot save message.');
+    if (!currentUser || !recipient) {
+      console.warn('[autoSaveMessage] No user or recipient, cannot save message.');
       return; 
     }
     if (!generatedMessage) {
@@ -72,14 +87,17 @@ export default function MessageOutput({
         recipientName: recipient.name,
         recipientId: recipient.id || null,
         relationship: recipient.relationship,
-        intent: intent.type,
-        tone: tone,
-        intensity: advanced?.intensity || 3,
+        intent: intent?.type || 'unknown',
+        tone: tone || 'neutral',
+        formality: formalityLevel ?? 3,
+        depth: emotionalDepth ?? 3,
+        promptContext: promptedBy || null,
+        goalContext: messageGoal || null,
         createdAt: serverTimestamp(),
         insights: generatedInsights,
-        messageCategory: intent.type,
-        messageFormat: format.type,
-        messageIntention: intent.custom || intent.type,
+        messageCategory: intent?.type || 'unknown',
+        messageFormat: format?.type || 'unknown',
+        messageLength: format?.length || 'unknown',
         messageConfigTimestamp: new Date().toISOString(),
         appliedToChallenge: !!activeUserChallenge && applyToChallenge,
       };
@@ -112,6 +130,11 @@ export default function MessageOutput({
     const generateAndSave = async () => {
       let generatedContent = '';
       let generatedInsights: string[] = [];
+      if (!recipient || !intent || !format || !tone) {
+        setError("Missing required information to generate message.");
+        setIsGenerating(false);
+        return; 
+      }
       try {
         setIsGenerating(true);
         setError(null);
@@ -119,23 +142,34 @@ export default function MessageOutput({
         const params: MessageGenerationParams = {
           recipient: {
             name: recipient.name,
-            relationship: recipient.relationship
+            relationship: recipient.relationship,
+            id: recipient.id
           },
+          connectionData: connectionData || {},
           intent,
           format,
           tone,
-          advanced
+          promptedBy: promptedBy || '',
+          messageGoal: messageGoal || '',
+          style: {
+             formality: formalityLevel || 3,
+             depth: emotionalDepth || 3,
+             length: format.length
+          },
+          customInstructions: {
+             text: customInstructionsText || '',
+             options: customInstructionsOptions || {}
+          }
         };
 
         let result;
         try {
-          console.log('[generateAndSave] Calling generateMessage cloud function...');
+          console.log('[generateAndSave] Calling generateMessage cloud function with params:', params);
           result = await generateMessage(params);
           console.log('[generateAndSave] Cloud function result:', result);
         } catch (cloudError) {
-          console.warn('[generateAndSave] Cloud function failed, falling back to direct OpenAI:', cloudError);
-          result = await generateMessageDirect(params);
-          console.log('[generateAndSave] Direct OpenAI result:', result);
+          console.warn('[generateAndSave] Cloud function failed, falling back:', cloudError);
+          throw cloudError;
         }
         
         if (result && result.content) {
@@ -152,35 +186,38 @@ export default function MessageOutput({
         setError('Failed to generate message. Please try again.');
       } finally {
         setIsGenerating(false);
-        // if (!error && generatedContent) {
-        //    await autoSaveMessage(generatedContent, generatedInsights); // <-- REMOVE AUTOSAVE CALL
-        // }
       }
     };
 
     generateAndSave();
-  // }, [recipient, intent, format, tone, advanced, currentUser]); // Dependencies might need adjustment if autoSaveMessage is removed
-  }, [recipient, intent, format, tone, advanced]); // Remove currentUser from dependencies if only used in autoSave
+  }, [
+      recipient,
+      connectionData,
+      intent,
+      format,
+      tone,
+      promptedBy,
+      messageGoal,
+      formalityLevel,
+      emotionalDepth,
+      customInstructionsText,
+      customInstructionsOptions
+  ]);
 
-  // Handler for the new Save button
   const handleConfirmSave = async () => {
-    if (!message) {
-      console.error("No message content to save.");
-      // Maybe show an error to the user
+    if (!message || !recipient) {
+      console.error("No message content or recipient to save.");
       return;
     }
     console.log("handleConfirmSave triggered. applyToChallenge state:", applyToChallenge);
-    // Call the existing save logic, which now reads the current checkbox state
     await autoSaveMessage(message, insights);
 
-    // --- Check for Challenge Completion and Set Flag ---
     if (applyToChallenge && activeUserChallenge) {
-      // Check if THIS message completes the challenge 
       const definition = challengeDefs.find(d => d.id === activeUserChallenge.challengeId);
       const goal = definition?.criteria?.value ?? activeUserChallenge.goal ?? 1;
       const currentProgress = activeUserChallenge.progress ?? 0;
       console.log(`[handleConfirmSave] Checking challenge completion: Progress=${currentProgress}, Goal=${goal}`);
-      if (currentProgress + 1 >= Number(goal)) { 
+      if (currentProgress + 1 >= Number(goal)) {
         console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag...');
         sessionStorage.setItem('challengeCompleted', 'true');
         console.log('[handleConfirmSave] sessionStorage flag set.');
@@ -188,14 +225,8 @@ export default function MessageOutput({
         console.log('[handleConfirmSave] Challenge not yet completed by this message.');
       }
     }
-    // -------------------------------------------------
 
-    // Optionally, copy after saving or navigate
-    handleCopyToClipboard(message); // Example: Copy after saving
-    // Optionally navigate or show success message
-    // alert("Message saved!"); // Placeholder feedback - REMOVED
-
-    // Navigate back to dashboard after save
+    handleCopyToClipboard(message);
     router.push('/');
   };
 
@@ -207,7 +238,6 @@ export default function MessageOutput({
       })
       .catch(err => {
         console.error('Failed to copy:', err);
-        // TODO: Show error toast?
       });
   };
 
@@ -244,6 +274,8 @@ export default function MessageOutput({
     );
   }
 
+  const recipientName = recipient?.name || 'them';
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -264,7 +296,7 @@ export default function MessageOutput({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           className="mt-2 text-lg text-gray-400">
-            Crafted for {recipient.name} with {format.type === 'email' ? 'an email' : 'a message'} that conveys {intent.type}
+            Crafted for {recipientName} with {format?.type === 'email' ? 'an email' : 'a message'} that conveys {intent?.type || 'your intention'}
         </motion.p>
       </div>
 
@@ -275,7 +307,7 @@ export default function MessageOutput({
         className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 md:p-8 rounded-xl shadow-lg border border-gray-700/80">
         <div className="flex items-center justify-between mb-5">
           <h3 className="text-xl font-semibold text-white">
-            Message for {recipient.name}
+            Message for {recipientName}
           </h3>
           <button 
             onClick={() => handleCopyToClipboard(message)}
@@ -347,26 +379,16 @@ export default function MessageOutput({
         transition={{ delay: 0.5 + (insights.length * 0.1) }}
         className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-gray-700/50 mt-8"
       >
-        {/* Main Save Button (replaces Copy) */}
         <button 
-          // onClick={() => handleCopyToClipboard(message)}
-          onClick={handleConfirmSave} // Call the new save handler
+          onClick={handleConfirmSave}
           className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
-          // className={`w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-lg text-base font-semibold transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 shadow-md hover:shadow-lg ${isCopied ? 'bg-green-600/90 hover:bg-green-700 text-white' : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white hover:from-heartglow-pink/90 hover:to-heartglow-violet/90'}`}
         >
-          {/* {isCopied ? (
-            <Check size={20} className="mr-2" />
-          ) : (
-            <ClipboardCopy size={20} className="mr-2" />
-          )} */}
-          {/* {isCopied ? 'Copied to Clipboard!' : 'Copy to Clipboard'} */}
-          <ClipboardCopy size={20} className="mr-2" /> {/* Keep icon */}
+          <ClipboardCopy size={20} className="mr-2" />
           Save & Copy Message
         </button>
 
-        {/* Return to Dashboard Link - REMOVE THIS or change its behavior */}
         <Link 
-          href="/" // Keep href for non-JS users, but button handles primary nav
+          href="/" 
           className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors"
         >
           <ArrowLeft size={16} className="mr-1.5" />

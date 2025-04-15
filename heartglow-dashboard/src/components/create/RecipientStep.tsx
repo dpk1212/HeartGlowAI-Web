@@ -1,30 +1,49 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { db } from '../../lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 
-interface Recipient {
+interface RecipientData {
   id: string;
   name: string;
   relationship: string;
-  lastContact?: string;
+  specificRelationship?: string;
+  lastContact?: string | Timestamp;
+  yearsKnown?: number;
+  communicationStyle?: string;
+  relationshipGoal?: string;
   notes?: string;
 }
 
+interface RecipientStepOutput {
+  recipient: {
+    id: string;
+    name: string;
+    relationship: string;
+  };
+  connectionData: {
+    specificRelationship?: string;
+    yearsKnown?: number;
+    communicationStyle?: string;
+    relationshipGoal?: string;
+    lastMessageDate?: any;
+  };
+}
+
 interface RecipientStepProps {
-  onNext: (data: { recipient: Recipient }) => void;
-  initialData?: { recipient?: Recipient };
+  onNext: (data: RecipientStepOutput) => void;
+  initialData?: RecipientStepOutput['recipient'];
 }
 
 export default function RecipientStep({ onNext, initialData }: RecipientStepProps) {
   console.log('>>> RecipientStep component rendering started');
   const { currentUser } = useAuth();
-  const [recipients, setRecipients] = useState<Recipient[]>([]);
+  const [recipients, setRecipients] = useState<RecipientData[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedRecipient, setSelectedRecipient] = useState<Recipient | null>(initialData?.recipient || null);
+  const [selectedRecipient, setSelectedRecipient] = useState<RecipientData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,9 +58,20 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
         const fetchedRecipients = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
-        })) as Recipient[];
+        })) as RecipientData[];
 
         setRecipients(fetchedRecipients);
+
+        if (initialData?.id) {
+          const foundRecipient = fetchedRecipients.find(r => r.id === initialData.id);
+          if (foundRecipient) {
+            setSelectedRecipient(foundRecipient);
+          } else {
+            console.warn("Initial recipient ID not found in the current list.");
+            setSelectedRecipient(null);
+          }
+        }
+
       } catch (err) {
         setError('Failed to load recipients. Please try again.');
         console.error('Error fetching recipients:', err);
@@ -51,26 +81,43 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
     };
 
     fetchRecipients();
-  }, [currentUser]);
+  }, [currentUser, initialData?.id]);
 
-  useEffect(() => {
-    if (initialData?.recipient) {
-      const recipientExists = recipients.some(r => r.id === initialData.recipient!.id);
-      if (recipientExists) {
-        setSelectedRecipient(initialData.recipient);
-      } else if (recipients.length > 0) {
-        console.warn("Initial recipient not found in the current list.");
-      }
-    }
-  }, [initialData, recipients]);
-
-  const handleSelect = (recipient: Recipient) => {
+  const handleSelect = (recipient: RecipientData) => {
     setSelectedRecipient(recipient);
   };
 
   const handleNext = () => {
     if (selectedRecipient) {
-      onNext({ recipient: selectedRecipient });
+      const output: RecipientStepOutput = {
+        recipient: {
+          id: selectedRecipient.id,
+          name: selectedRecipient.name,
+          relationship: selectedRecipient.relationship,
+        },
+        connectionData: {
+          specificRelationship: selectedRecipient.specificRelationship,
+          yearsKnown: selectedRecipient.yearsKnown,
+          communicationStyle: selectedRecipient.communicationStyle,
+          relationshipGoal: selectedRecipient.relationshipGoal,
+          lastMessageDate: selectedRecipient.lastContact instanceof Timestamp 
+                             ? selectedRecipient.lastContact.toDate() 
+                             : selectedRecipient.lastContact
+        }
+      };
+      onNext(output);
+    }
+  };
+
+  const formatLastContact = (dateInput: string | Timestamp | undefined): string | null => {
+    if (!dateInput) return null;
+    try {
+      const date = dateInput instanceof Timestamp ? dateInput.toDate() : new Date(dateInput);
+      if (isNaN(date.getTime())) return null;
+      return date.toLocaleDateString();
+    } catch (e) {
+      console.error("Error formatting date:", e);
+      return null;
     }
   };
 
@@ -86,7 +133,7 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
     <div className="space-y-8 dark:text-heartglow-offwhite">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Who would you like to message?</h2>
-        <Link href="/connections" legacyBehavior>
+        <Link href="/connections/add" legacyBehavior>
           <a className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-colors">
             <Plus size={16} className="-ml-1 mr-2" />
             Add Connection
@@ -105,7 +152,7 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
         {recipients.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 dark:text-gray-400 mb-4">No recipients found.</p>
-            <Link href="/connections" legacyBehavior>
+            <Link href="/connections/add" legacyBehavior>
               <a className="inline-flex items-center px-4 py-2 border border-gray-600 text-sm font-medium rounded-md shadow-sm text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-colors">
                 <Plus size={16} className="-ml-1 mr-2" />
                 Add Your First Connection
@@ -113,31 +160,34 @@ export default function RecipientStep({ onNext, initialData }: RecipientStepProp
             </Link>
           </div>
         ) : (
-          recipients.map((recipient) => (
-            <motion.div
-              key={recipient.id}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
-                selectedRecipient?.id === recipient.id
-                  ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
-                  : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
-              }`}
-              onClick={() => handleSelect(recipient)}
-            >
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium text-gray-900 dark:text-heartglow-offwhite">{recipient.name}</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{recipient.relationship}</p>
+          recipients.map((recipient) => {
+            const formattedLastContact = formatLastContact(recipient.lastContact);
+            return (
+              <motion.div
+                key={recipient.id}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={`p-4 rounded-lg border cursor-pointer transition-all duration-200 ${
+                  selectedRecipient?.id === recipient.id
+                    ? 'border-transparent ring-2 ring-heartglow-pink bg-gradient-to-br from-heartglow-pink/10 via-white to-heartglow-violet/10 dark:from-heartglow-pink/40 dark:to-heartglow-violet/40' 
+                    : 'bg-white border-gray-200 hover:border-heartglow-pink/80 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-heartglow-pink' 
+                }`}
+                onClick={() => handleSelect(recipient)}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-medium text-gray-900 dark:text-heartglow-offwhite">{recipient.name}</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">{recipient.specificRelationship || recipient.relationship}</p>
+                  </div>
+                  {formattedLastContact && (
+                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                      Last contact: {formattedLastContact}
+                    </span>
+                  )}
                 </div>
-                {recipient.lastContact && (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    Last contact: {new Date(recipient.lastContact).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </motion.div>
-          ))
+              </motion.div>
+            );
+          })
         )}
       </div>
 

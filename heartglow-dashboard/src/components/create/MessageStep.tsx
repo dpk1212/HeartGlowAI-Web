@@ -47,7 +47,8 @@ export default function MessageStep({ onNext, onBack, recipient, intent, format,
         intent,
         format: {
           type: format.type,
-          options: format.options
+          options: format.options,
+          length: format.length
         },
         tone,
         style: {

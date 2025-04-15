@@ -204,7 +204,35 @@ const Login = () => {
                  </button>
                </div>
              </form>
-             
+
+             {/* Divider */}
+             <div className="mt-6">
+               <div className="relative">
+                 <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                   <div className="w-full border-t border-gray-300 dark:border-gray-700/50"></div>
+                 </div>
+                 <div className="relative flex justify-center text-sm">
+                   <span className="px-3 bg-white dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
+                     Or
+                   </span>
+                 </div>
+               </div>
+             </div>
+
+             {/* Google Sign In Button */}
+             <div className="mt-6">
+                 <button
+                   type="button"
+                   onClick={handleGoogleSignIn}
+                   disabled={isLoading}
+                   className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-base font-medium text-heartglow-charcoal dark:text-heartglow-offwhite hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                 >
+                    <svg className="w-5 h-5 mr-3" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 110.3 512 0 401.7 0 261.8S110.3 11.6 244 11.6c67.3 0 120.3 24.1 162.6 63.9L349.3 127c-36.1-33.6-81.3-51.6-105.3-51.6-84.9 0-153.9 69.1-153.9 153.9s69 153.9 153.9 153.9c97.2 0 135.1-67.3 140.8-103.8H244v-71.5h244c2.6 12.9 3.9 26.7 3.9 41.4z"></path></svg>
+                   <span>Continue with Google</span>
+                 </button>
+               </div>
+
+             {/* Toggle Mode Button */}
              <div className="mt-5 text-center">
                <button 
                  onClick={toggleMode}

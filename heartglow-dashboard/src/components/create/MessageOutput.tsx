@@ -216,23 +216,40 @@ export default function MessageOutput({
       return;
     }
     console.log("handleConfirmSave triggered. applyToChallenge state:", applyToChallenge);
+    
+    // First, save the message
     await autoSaveMessage(message, insights);
 
+    // Check if this message completes an active challenge
     if (applyToChallenge && activeUserChallenge) {
       const definition = challengeDefs.find(d => d.id === activeUserChallenge.challengeId);
       const goal = definition?.criteria?.value ?? activeUserChallenge.goal ?? 1;
       const currentProgress = activeUserChallenge.progress ?? 0;
+      
       console.log(`[handleConfirmSave] Checking challenge completion: Progress=${currentProgress}, Goal=${goal}`);
+      
+      // Will this message complete the challenge? (currentProgress is BEFORE this message is counted)
       if (currentProgress + 1 >= Number(goal)) {
-        console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag...');
+        console.log('[handleConfirmSave] Challenge will be completed! Setting sessionStorage flag...');
+        
+        // Set the flag that will trigger confetti on dashboard return
         sessionStorage.setItem('challengeCompleted', 'true');
-        console.log('[handleConfirmSave] sessionStorage flag set.');
+        
+        // Add a timestamp to prevent stale flags (optional)
+        sessionStorage.setItem('challengeCompletedTimestamp', Date.now().toString());
+        
+        console.log('[handleConfirmSave] Challenge completion flag set. Confetti will show on dashboard.');
       } else {
-        console.log('[handleConfirmSave] Challenge not yet completed by this message.');
+        console.log('[handleConfirmSave] Challenge not yet completed by this message. Still needs more progress.');
       }
+    } else {
+      console.log('[handleConfirmSave] No active challenge or not applying to challenge.');
     }
 
+    // Copy message to clipboard
     handleCopyToClipboard(message);
+    
+    // Navigate back to dashboard - confetti will be triggered by the flag we set
     router.push('/');
   };
 

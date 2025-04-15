@@ -39,52 +39,78 @@ const IndexPage: NextPage = () => {
   useEffect(() => {
     // --- Check for immediate completion flag FIRST ---
     const completedFlagValue = sessionStorage.getItem('challengeCompleted');
-    console.log(`[ConfettiEffect] Checking sessionStorage for challengeCompleted flag. Value: ${completedFlagValue}`);
-    const justCompleted = completedFlagValue === 'true';
-    if (justCompleted) {
-      console.log('[ConfettiEffect] Detected challengeCompleted flag. Triggering confetti!');
-      setShowConfetti(true);
+    const completedTimestamp = sessionStorage.getItem('challengeCompletedTimestamp');
+    
+    console.log(`[ConfettiEffect] Checking sessionStorage for challengeCompleted flag. Value: ${completedFlagValue}, Timestamp: ${completedTimestamp}`);
+    
+    if (completedFlagValue === 'true') {
+      // Check if the completion flag is fresh (within last 5 minutes)
+      const isTimestampValid = completedTimestamp && 
+          (Date.now() - parseInt(completedTimestamp)) < 5 * 60 * 1000;
+      
+      if (!completedTimestamp || isTimestampValid) {
+        console.log('[ConfettiEffect] Detected valid completion flag. Triggering confetti!');
+        setShowConfetti(true);
+      } else {
+        console.log('[ConfettiEffect] Found stale completion flag. Ignoring.');
+      }
+      
+      // Clear the flags regardless
       sessionStorage.removeItem('challengeCompleted');
-      // We can potentially return early here if we don't need the prevChallengeId logic after this specific completion
-      // return; // Optional: uncomment if no further logic needed in this case
+      sessionStorage.removeItem('challengeCompletedTimestamp');
+      
+      // Return early - we've handled the direct flag case
+      return;
     }
     // ----------------------------------------------------
 
+    // No direct completion flag present, check for challenge state changes
     const currentChallengeId = userProfile?.activeChallenge?.challengeId;
-    console.log("[ConfettiEffect] Running check.", { 
+    
+    console.log("[ConfettiEffect] Running state change check.", { 
         prevChallengeId,
         currentChallengeId,
         authLoading,
         profileExists: !!userProfile 
     });
 
-    // Check if previously there WAS an active challenge and now there is NONE
-    if (prevChallengeId && !currentChallengeId) {
-      console.log('[ConfettiEffect] Condition met: Had previous challenge, now have none.');
+    // Only proceed with checks if we have loaded user data
+    if (authLoading || prevChallengeId === undefined) {
+      console.log('[ConfettiEffect] Still loading or first render, skipping state change check');
       
-      // Check sessionStorage to see if this removal was due to a skip
+      // Initialize prevChallengeId on first load, but don't trigger effects
+      if (!authLoading && prevChallengeId === undefined) {
+        console.log('[ConfettiEffect] Setting initial challenge ID:', currentChallengeId ?? null);
+        setPrevChallengeId(currentChallengeId ?? null);
+      }
+      return;
+    }
+
+    // Important: Check if previously there WAS an active challenge and now there is NONE
+    // This would indicate a completed challenge (unless it was skipped)
+    if (prevChallengeId && !currentChallengeId) {
+      console.log('[ConfettiEffect] Potential completion detected: Had previous challenge, now have none.');
+      
+      // Check if this was due to a skip action
       const wasSkipped = sessionStorage.getItem('skippedChallenge') === 'true';
+      
       if (wasSkipped) {
-        console.log('Challenge was skipped, suppressing confetti.');
-        sessionStorage.removeItem('skippedChallenge'); // Clear the flag
+        console.log('[ConfettiEffect] Challenge was explicitly skipped, suppressing confetti.');
+        sessionStorage.removeItem('skippedChallenge'); // Clear the skip flag
       } else {
-        // Only show confetti if it wasn't a skip
-        console.log('[ConfettiEffect] Triggering confetti!');
+        // Not skipped - must have been completed! Show confetti
+        console.log('[ConfettiEffect] Challenge completed naturally. Triggering confetti!');
         setShowConfetti(true);
       }
-
-      // Optional: Hide confetti after a delay
-      // const timer = setTimeout(() => setShowConfetti(false), 7000); // 7 seconds
-      // return () => clearTimeout(timer);
     }
 
-    // Update previous challenge ID for the next check
-    // Only update if the profile is loaded to avoid initial undefined -> null trigger
-    if (!authLoading) {
-        console.log('[ConfettiEffect] Updating prevChallengeId from', prevChallengeId, 'to', currentChallengeId ?? null);
-        setPrevChallengeId(currentChallengeId ?? null);
+    // Always update previous challenge ID for the next state change check
+    // (but only when user data is fully loaded to avoid false positives)
+    if (!authLoading && currentChallengeId !== prevChallengeId) {
+      console.log('[ConfettiEffect] Updating prevChallengeId from', prevChallengeId, 'to', currentChallengeId ?? null);
+      setPrevChallengeId(currentChallengeId ?? null);
     }
-  }, [userProfile?.activeChallenge, authLoading, prevChallengeId]); // Depend on activeChallenge and loading state
+  }, [userProfile?.activeChallenge, authLoading, prevChallengeId]); // Dependencies
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -186,7 +212,13 @@ const IndexPage: NextPage = () => {
       // TODO: Show error to user
       return;
     }
-    console.log("Attempting to skip challenge via HTTPS...");
+    
+    // IMPORTANT: Set skip flag BEFORE making the API call
+    // This ensures the confetti effect won't trigger even if the page refreshes
+    console.log('[handleSkipChallenge] Setting skippedChallenge flag in sessionStorage');
+    sessionStorage.setItem('skippedChallenge', 'true');
+    
+    console.log("[handleSkipChallenge] Attempting to skip challenge via HTTPS...");
     try {
       const idToken = await getIdToken(user); // Get the ID token
       const functionUrl = `https://us-central1-heartglowai.cloudfunctions.net/skipCurrentChallenge`; // Ensure function name is correct
@@ -211,11 +243,11 @@ const IndexPage: NextPage = () => {
           const contentType = response.headers.get("content-type");
           if (contentType && contentType.indexOf("application/json") !== -1) {
               result = await response.json();
-              console.log("Skip challenge function result (JSON):", result);
+              console.log("[handleSkipChallenge] Skip challenge function result (JSON):", result);
           } else {
               // Handle non-JSON success responses if any (shouldn't happen with current function)
               result = await response.text(); 
-              console.log("Skip challenge function result (text):", result); 
+              console.log("[handleSkipChallenge] Skip challenge function result (text):", result); 
           }
       } catch (parseError) {
           console.error("Error parsing skip challenge response:", parseError);
@@ -223,19 +255,14 @@ const IndexPage: NextPage = () => {
           // Maybe treat as success but log the parsing error
       }
 
-      // --- IMPORTANT: Set skip flag BEFORE refreshing ---
-      // This allows the confetti effect to know it shouldn't trigger
-      sessionStorage.setItem('skippedChallenge', 'true');
-
-      // --- IMPORTANT: Refresh user data ---
-      // Instead of reloading, navigate back to the dashboard.
       // The AuthContext listener should update the profile eventually.
+      console.log("[handleSkipChallenge] Skip successful, navigating back to dashboard");
       router.push('/'); // Navigate to base path (which is /dashboard)
-      // window.location.reload(); 
-      // A more sophisticated approach would be better (e.g., optimistic update + context refetch)
-
+      
     } catch (error) {
       console.error("Error calling skipCurrentChallenge function:", error);
+      // Remove the flag if the skip failed
+      sessionStorage.removeItem('skippedChallenge');
       // TODO: Show error to user
     }
   };

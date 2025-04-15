@@ -8,6 +8,7 @@ import { addConnection, updateConnectionWithMessage, deleteConnection } from '..
 import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
+import { useRouter } from 'next/router';
 
 interface MessageOutputProps {
   recipient: {
@@ -46,6 +47,7 @@ export default function MessageOutput({
   const { currentUser, userProfile } = useAuth();
   const { challenges: challengeDefs } = useChallenges();
   const [applyToChallenge, setApplyToChallenge] = useState(true);
+  const router = useRouter();
 
   const activeUserChallenge = userProfile?.activeChallenge;
   const activeChallengeDefinition = activeUserChallenge 
@@ -170,10 +172,29 @@ export default function MessageOutput({
     console.log("handleConfirmSave triggered. applyToChallenge state:", applyToChallenge);
     // Call the existing save logic, which now reads the current checkbox state
     await autoSaveMessage(message, insights);
+
+    // --- Check for Challenge Completion and Set Flag ---
+    if (applyToChallenge && activeUserChallenge) {
+      // Check if THIS message completes the challenge 
+      // (Simple check: assume progress increases by 1, compare with goal)
+      // A more robust check might involve querying the DB or getting updated userProfile
+      const definition = challengeDefs.find(d => d.id === activeUserChallenge.challengeId);
+      const goal = definition?.criteria?.value ?? activeUserChallenge.goal ?? 1;
+      const currentProgress = activeUserChallenge.progress ?? 0;
+      if (currentProgress + 1 >= goal) {
+        console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag.');
+        sessionStorage.setItem('challengeCompleted', 'true');
+      }
+    }
+    // -------------------------------------------------
+
     // Optionally, copy after saving or navigate
     handleCopyToClipboard(message); // Example: Copy after saving
     // Optionally navigate or show success message
-    alert("Message saved!"); // Placeholder feedback
+    // alert("Message saved!"); // Placeholder feedback - REMOVED
+
+    // Navigate back to dashboard after save
+    router.push('/');
   };
 
   const handleCopyToClipboard = (textToCopy: string) => {
@@ -341,12 +362,13 @@ export default function MessageOutput({
           Save & Copy Message
         </button>
 
-        {/* Return to Dashboard Link */}
-        <Link href="/" legacyBehavior>
-          <a className="inline-flex items-center text-sm text-gray-400 hover:text-gray-200 transition-colors">
-            <ArrowLeft size={16} className="mr-1.5" />
-            Return to Dashboard
-          </a>
+        {/* Return to Dashboard Link - REMOVE THIS or change its behavior */}
+        <Link 
+          href="/" // Keep href for non-JS users, but button handles primary nav
+          className="inline-flex items-center text-sm font-medium text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft size={16} className="mr-1.5" />
+          Return to Dashboard
         </Link>
       </motion.div>
     </motion.div>

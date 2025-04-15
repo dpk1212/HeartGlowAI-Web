@@ -37,6 +37,17 @@ const IndexPage: NextPage = () => {
 
   // Effect to detect challenge completion for animation
   useEffect(() => {
+    // --- Check for immediate completion flag FIRST ---
+    const justCompleted = sessionStorage.getItem('challengeCompleted') === 'true';
+    if (justCompleted) {
+      console.log('[ConfettiEffect] Detected challengeCompleted flag. Triggering confetti!');
+      setShowConfetti(true);
+      sessionStorage.removeItem('challengeCompleted');
+      // We can potentially return early here if we don't need the prevChallengeId logic after this specific completion
+      // return; // Optional: uncomment if no further logic needed in this case
+    }
+    // ----------------------------------------------------
+
     const currentChallengeId = userProfile?.activeChallenge?.challengeId;
     console.log("[ConfettiEffect] Running check.", { 
         prevChallengeId,
@@ -214,12 +225,11 @@ const IndexPage: NextPage = () => {
       // This allows the confetti effect to know it shouldn't trigger
       sessionStorage.setItem('skippedChallenge', 'true');
 
-      // --- IMPORTANT: Refresh user data --- 
-      // After successfully skipping, the userProfile state needs to be updated
-      // This usually requires triggering a refetch in your AuthContext or manually updating it.
-      // For now, let's assume a simple refresh action might be available (e.g., refetchUserProfile)
-      // OR trigger a page reload as a basic way to refresh data:
-      window.location.reload(); 
+      // --- IMPORTANT: Refresh user data ---
+      // Instead of reloading, navigate back to the dashboard.
+      // The AuthContext listener should update the profile eventually.
+      router.push('/'); // Navigate to base path (which is /dashboard)
+      // window.location.reload(); 
       // A more sophisticated approach would be better (e.g., optimistic update + context refetch)
 
     } catch (error) {

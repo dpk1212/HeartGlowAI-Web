@@ -41,10 +41,24 @@ export default function MessageStep({ onNext, onBack, recipient, intent, format,
           name: recipient.name,
           relationship: recipient.relationship
         },
+        connectionData: {},
+        promptedBy: '',
+        messageGoal: '',
         intent,
-        format,
+        format: {
+          type: format.type,
+          options: format.options
+        },
         tone,
-        advanced
+        style: {
+          formality: advanced?.intensity ?? 3,
+          depth: advanced?.intensity ?? 3,
+          length: format.length
+        },
+        customInstructions: {
+          text: advanced?.customInstructions ?? '',
+          options: {}
+        }
       };
 
       const result = await generateMessage(params);

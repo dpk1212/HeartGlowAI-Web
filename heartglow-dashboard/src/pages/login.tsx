@@ -511,7 +511,7 @@ const Login = () => {
                 className="flex items-center gap-4 p-4 bg-white dark:bg-gray-800/50 rounded-lg shadow"
               >
                  <Lock className="w-8 h-8 text-indigo-500 flex-shrink-0" />
-                 <span className="text-gray-700 dark:text-gray-300">We don't store or share your messages</span>
+                 <span className="text-gray-700 dark:text-gray-300">Your messages are stored securely in your private account.</span>
               </motion.div>
               {/* Trust Point 4 */} 
               <motion.div 

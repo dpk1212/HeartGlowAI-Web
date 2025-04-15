@@ -311,12 +311,20 @@ export default function MessageOutput({
           </h3>
           <button 
             onClick={() => handleCopyToClipboard(message)}
-            className={`
-```
+            className={`text-sm px-3 py-1.5 rounded-full transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 focus:ring-offset-gray-900 ${isCopied ? 'bg-green-600/80 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+            aria-label={isCopied ? "Copied!" : "Copy message"}
+          >
+            {isCopied ? (
+              <Check size={16} className="mr-1.5" />
+            ) : (
+              <Copy size={16} className="mr-1.5" />
+            )}
+            {isCopied ? 'Copied!' : 'Copy'}
+          </button>
         </div>
 
         <div className="bg-gray-900/50 p-5 rounded-lg border border-gray-700 min-h-[150px]">
-          {message}
+          <p className="whitespace-pre-wrap text-gray-200 text-base md:text-lg leading-relaxed">{message}</p>
         </div>
       </motion.div>
     </motion.div>

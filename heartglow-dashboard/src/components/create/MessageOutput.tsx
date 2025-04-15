@@ -312,3 +312,9 @@ export default function MessageOutput({
           <button 
             onClick={() => handleCopyToClipboard(message)}
             className={`
+```
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}

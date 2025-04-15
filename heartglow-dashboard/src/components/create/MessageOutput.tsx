@@ -271,9 +271,14 @@ export default function MessageOutput({
     setIsLoadingInsights(true);
     
     try {
-      // Call your backend API that will call OpenAI
+      // Get the auth token
       const idToken = await currentUser?.getIdToken();
-      const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessageInsights', {
+      if (!idToken) {
+        throw new Error("Authentication required");
+      }
+      
+      // Call the HTTP version of the function with CORS support
+      const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessageInsightsHttp', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -289,6 +294,12 @@ export default function MessageOutput({
           tone: tone
         })
       });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`HTTP error ${response.status}: ${errorText}`);
+        throw new Error(`Error from server: ${response.status}`);
+      }
       
       const data = await response.json();
       

@@ -139,8 +139,8 @@ import { generateEnhancedMessage } from './messageGeneration';
 export { generateEnhancedMessage };
 
 // --- Export Message Insights function ---
-import { generateMessageInsights } from './messageInsights';
-export { generateMessageInsights };
+import { generateMessageInsights, generateMessageInsightsHttp } from './messageInsights';
+export { generateMessageInsights, generateMessageInsightsHttp };
 
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';

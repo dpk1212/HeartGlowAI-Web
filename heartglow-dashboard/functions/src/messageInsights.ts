@@ -1,6 +1,18 @@
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import OpenAI from 'openai';
+import cors from 'cors'; // Fixed import
+
+// Initialize CORS middleware with specific domains
+const corsHandler = cors({
+  origin: [
+    'https://heartglowai.com', 
+    'https://www.heartglowai.com',
+    'http://localhost:3000'
+  ],
+  methods: ['GET', 'POST'],
+  credentials: true
+});
 
 // Ensure admin is initialized (idempotent)
 try { admin.initializeApp(); } catch (e) { console.log("Admin SDK already initialized."); }
@@ -99,6 +111,92 @@ export const generateMessageInsights = functions.https.onCall(async (data, conte
       error.message
     );
   }
+});
+
+// Also create an HTTP version of the function for direct fetch calls
+export const generateMessageInsightsHttp = functions.https.onRequest((request, response) => {
+  // Apply CORS middleware
+  return corsHandler(request, response, async () => {
+    // Check for authentication
+    const authHeader = request.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      response.status(401).json({ error: 'Unauthorized: Missing or invalid authentication token' });
+      return;
+    }
+
+    const idToken = authHeader.split('Bearer ')[1];
+    
+    try {
+      // Verify the ID token
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      const userId = decodedToken.uid;
+      
+      console.log(`User ${userId} called generateMessageInsightsHttp via HTTP endpoint`);
+      
+      // Get request body
+      const params = request.body;
+      
+      if (!params || !params.message) {
+        response.status(400).json({ error: 'Missing required parameters' });
+        return;
+      }
+      
+      // Get API key from environment variables
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        console.error("OpenAI API key not configured in environment variables.");
+        response.status(500).json({ error: 'API key not configured' });
+        return;
+      }
+
+      const openai = new OpenAI({ apiKey });
+      
+      // Build the prompt for message analysis
+      const prompt = buildInsightsPrompt(params);
+      
+      // Call OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4-turbo-preview",
+        messages: [{ 
+          role: "user", 
+          content: prompt 
+        }],
+        temperature: 0.7,
+        max_tokens: 500,
+        response_format: { type: "json_object" },
+      });
+
+      const responseContent = completion.choices[0]?.message?.content?.trim();
+      
+      if (!responseContent) {
+        response.status(500).json({ error: 'Failed to get valid content from OpenAI' });
+        return;
+      }
+      
+      try {
+        // Parse the JSON response
+        const parsedResponse = JSON.parse(responseContent);
+        
+        if (!parsedResponse.grade || !parsedResponse.insights || !Array.isArray(parsedResponse.insights)) {
+          response.status(500).json({ error: 'Response missing required fields' });
+          return;
+        }
+        
+        response.status(200).json({
+          grade: parsedResponse.grade,
+          insights: parsedResponse.insights
+        });
+        
+      } catch (parseError) {
+        console.error("Error parsing OpenAI response:", parseError);
+        response.status(500).json({ error: 'Failed to parse insights from AI response' });
+      }
+      
+    } catch (error: any) {
+      console.error("Error in generateMessageInsightsHttp:", error);
+      response.status(500).json({ error: 'Internal server error', message: error.message });
+    }
+  });
 });
 
 /**

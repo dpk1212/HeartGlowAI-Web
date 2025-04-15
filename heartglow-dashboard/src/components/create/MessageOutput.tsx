@@ -176,14 +176,16 @@ export default function MessageOutput({
     // --- Check for Challenge Completion and Set Flag ---
     if (applyToChallenge && activeUserChallenge) {
       // Check if THIS message completes the challenge 
-      // (Simple check: assume progress increases by 1, compare with goal)
-      // A more robust check might involve querying the DB or getting updated userProfile
       const definition = challengeDefs.find(d => d.id === activeUserChallenge.challengeId);
       const goal = definition?.criteria?.value ?? activeUserChallenge.goal ?? 1;
       const currentProgress = activeUserChallenge.progress ?? 0;
-      if (currentProgress + 1 >= Number(goal)) {
-        console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag.');
+      console.log(`[handleConfirmSave] Checking challenge completion: Progress=${currentProgress}, Goal=${goal}`);
+      if (currentProgress + 1 >= Number(goal)) { 
+        console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag...');
         sessionStorage.setItem('challengeCompleted', 'true');
+        console.log('[handleConfirmSave] sessionStorage flag set.');
+      } else {
+        console.log('[handleConfirmSave] Challenge not yet completed by this message.');
       }
     }
     // -------------------------------------------------

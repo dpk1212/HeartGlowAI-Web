@@ -38,7 +38,9 @@ const IndexPage: NextPage = () => {
   // Effect to detect challenge completion for animation
   useEffect(() => {
     // --- Check for immediate completion flag FIRST ---
-    const justCompleted = sessionStorage.getItem('challengeCompleted') === 'true';
+    const completedFlagValue = sessionStorage.getItem('challengeCompleted');
+    console.log(`[ConfettiEffect] Checking sessionStorage for challengeCompleted flag. Value: ${completedFlagValue}`);
+    const justCompleted = completedFlagValue === 'true';
     if (justCompleted) {
       console.log('[ConfettiEffect] Detected challengeCompleted flag. Triggering confetti!');
       setShowConfetti(true);

@@ -260,6 +260,9 @@ const IndexPage: NextPage = () => {
           <HeroSection />
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* HeartGlow Guide positioned at the top */}
+            <CoachingEntryCard />
+            
             {/* Conditionally render ChallengeCard or ChallengeSelection */}
             {activeUserChallenge ? (
               // Pass challengeCardProps if it exists (means active challenge is loaded)
@@ -281,7 +284,6 @@ const IndexPage: NextPage = () => {
             )}
             <GlowScoreSummaryCard {...glowScoreData} />
             <QuickTemplateGrid />
-            <CoachingEntryCard />
             <ConnectionsCarousel />
             <ComingSoonCard />
             <div className="md:col-span-2">

@@ -5,7 +5,7 @@ import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from '
 import { generateMessage, MessageGenerationParams } from '../../lib/openai';
 import { motion } from 'framer-motion';
 import { addConnection, updateConnectionWithMessage, deleteConnection } from '../../firebase/db';
-import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle, EyeIcon, Star } from 'lucide-react';
+import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle, EyeIcon, Star, LightbulbIcon } from 'lucide-react';
 import Link from 'next/link';
 import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
 import { useRouter } from 'next/router';
@@ -397,17 +397,17 @@ export default function MessageOutput({
             <button
               onClick={generateInsightsAndGrade}
               disabled={isLoadingInsights}
-              className={`inline-flex items-center justify-center px-4 py-2 rounded-full text-sm font-medium transition-all ${isLoadingInsights ? 'bg-gray-600 cursor-wait' : 'bg-heartglow-pink hover:bg-heartglow-pink/90'} text-white`}
+              className={`inline-flex items-center justify-center px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-300 shadow-lg ${isLoadingInsights ? 'bg-gray-600 cursor-wait' : 'bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:scale-105'} text-white`}
             >
               {isLoadingInsights ? (
                 <>
                   <div className="w-4 h-4 mr-2 rounded-full border-2 border-white border-t-transparent animate-spin"></div>
-                  Analyzing...
+                  Analyzing your message...
                 </>
               ) : (
                 <>
-                  <EyeIcon size={16} className="mr-1.5" />
-                  Reveal Analysis
+                  <EyeIcon size={16} className="mr-2" />
+                  Reveal Message Analysis
                 </>
               )}
             </button>
@@ -416,51 +416,124 @@ export default function MessageOutput({
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Grade Card */}
-          <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700/60 overflow-hidden`}>
-            <div className="p-4 border-b border-gray-700/60 flex justify-between items-center">
+          <motion.div 
+            initial={{ scale: 1 }}
+            animate={{ 
+              scale: isInsightsRevealed ? [1, 1.05, 1] : 1,
+              transition: { duration: 0.5, times: [0, 0.5, 1] }
+            }}
+            className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-xl border border-gray-700/50 overflow-hidden transform transition-all duration-500 hover:shadow-heartglow-pink/20`}
+          >
+            <div className="p-4 border-b border-gray-700/60 bg-gray-800/60 flex justify-between items-center">
               <h4 className="font-medium text-white flex items-center">
-                <Star size={16} className="mr-1.5 text-yellow-400" />
+                <Star size={18} className="mr-2 text-yellow-400" />
                 Message Grade
               </h4>
             </div>
-            <div className={`p-6 h-32 flex items-center justify-center ${!isInsightsRevealed ? 'blur-lg select-none' : ''} transition-all duration-300`}>
+            <div className={`p-8 flex flex-col items-center justify-center relative min-h-[180px] transition-all duration-500`}>
               {isInsightsRevealed ? (
-                <div className="text-center">
-                  <span className="text-5xl font-bold bg-gradient-to-r from-yellow-400 to-heartglow-pink text-transparent bg-clip-text">
-                    {messageGrade}
-                  </span>
-                </div>
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="text-center"
+                >
+                  <div className="relative">
+                    <span className="text-7xl font-bold bg-gradient-to-r from-yellow-300 to-heartglow-pink text-transparent bg-clip-text">
+                      {messageGrade}
+                    </span>
+                    <motion.div 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5, duration: 0.3 }}
+                      className="absolute -top-4 -right-6"
+                    >
+                      <Star size={24} className="text-yellow-300 fill-yellow-300" />
+                    </motion.div>
+                  </div>
+                  <motion.p 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="mt-4 text-gray-400 text-sm"
+                  >
+                    Based on intent, tone & relationship
+                  </motion.p>
+                </motion.div>
               ) : (
-                <div className="w-full h-full bg-gray-700/30 animate-pulse rounded-md"></div>
+                <>
+                  <div className="w-32 h-32 rounded-full bg-gray-700/30 animate-pulse mb-4 flex items-center justify-center">
+                    <Star size={32} className="text-gray-600/50" />
+                  </div>
+                  <div className="w-2/3 h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
+                </>
+              )}
+
+              {/* Optional glow effect behind the grade */}
+              {isInsightsRevealed && (
+                <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/5 to-heartglow-pink/5 rounded-xl pointer-events-none"></div>
               )}
             </div>
-          </div>
+          </motion.div>
           
           {/* Insights Card */}
-          <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-gray-700/60 overflow-hidden`}>
-            <div className="p-4 border-b border-gray-700/60">
-              <h4 className="font-medium text-white">Detailed Insights</h4>
+          <motion.div 
+            initial={{ y: 0 }}
+            animate={{ 
+              y: isInsightsRevealed ? [0, -5, 0] : 0,
+              transition: { duration: 0.5, delay: 0.1, times: [0, 0.5, 1] }
+            }}
+            className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-xl border border-gray-700/50 overflow-hidden transform transition-all duration-500 hover:shadow-heartglow-violet/20`}
+          >
+            <div className="p-4 border-b border-gray-700/60 bg-gray-800/60">
+              <h4 className="font-medium text-white flex items-center">
+                <LightbulbIcon size={18} className="mr-2 text-heartglow-pink" />
+                Detailed Insights
+              </h4>
             </div>
-            <div className={`p-6 h-32 overflow-y-auto ${!isInsightsRevealed ? 'blur-lg select-none' : ''} transition-all duration-300`}>
+            <div className={`p-6 min-h-[180px] overflow-y-auto ${!isInsightsRevealed ? 'blur-lg select-none' : ''} transition-all duration-500`}>
               {isInsightsRevealed ? (
-                <ul className="space-y-2 text-sm text-gray-300">
+                <motion.ul 
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                  className="space-y-4 text-sm text-gray-300"
+                >
                   {detailedInsights.map((insight, idx) => (
-                    <li key={idx} className="flex">
-                      <span className="text-heartglow-pink mr-2">•</span>
+                    <motion.li 
+                      key={idx} 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.2 + (idx * 0.1) }}
+                      className="flex items-start"
+                    >
+                      <span className="text-heartglow-pink mr-2 mt-1">•</span>
                       <span>{insight}</span>
-                    </li>
+                    </motion.li>
                   ))}
-                </ul>
+                </motion.ul>
               ) : (
-                <div className="space-y-2">
-                  <div className="w-full h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
-                  <div className="w-full h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
-                  <div className="w-3/4 h-4 bg-gray-700/30 animate-pulse rounded-md"></div>
+                <div className="space-y-4 h-full flex flex-col justify-center">
+                  <div className="w-full h-5 bg-gray-700/30 animate-pulse rounded-md"></div>
+                  <div className="w-full h-5 bg-gray-700/30 animate-pulse rounded-md"></div>
+                  <div className="w-3/4 h-5 bg-gray-700/30 animate-pulse rounded-md"></div>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
+
+        {/* Explanation Text */}
+        {isInsightsRevealed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="text-center text-sm text-gray-500"
+          >
+            Powered by AI analysis to help you craft better messages
+          </motion.div>
+        )}
       </motion.div>
 
       {/* Action Buttons */}

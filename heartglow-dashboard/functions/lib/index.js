@@ -1,224 +1,142 @@
-/**
- * HeartGlowAI Message Generation Cloud Functions
- */
-const functions = require("firebase-functions");
-const admin = require("firebase-admin");
-const {OpenAI} = require("openai");
-
-// Initialize Firebase Admin
-admin.initializeApp();
-
-/**
- * Extracts insights from a generated message based on parameters
- * @param {string} content - The generated message content
- * @param {object} params - The message parameters
- * @return {string[]} Array of insight strings
- */
-function extractInsights(content, params) {
-  const {intent, tone, recipient} = params;
-  
-  // Base insights that apply to most messages
-  const baseInsights = [
-    `This message maintains a ${tone} tone that creates an authentic connection`,
-    `The personalized content acknowledges your relationship as ${recipient.relationship}`,
-    `The language is emotionally intelligent and considerate`,
-  ];
-  
-  // Custom insights based on intent
-  switch (intent.type) {
-    case "gratitude":
-      return [
-        "Expressing appreciation in a specific way makes the message feel genuine",
-        "This acknowledges their impact without creating obligation",
-        "The message balances warmth with respect for boundaries",
-      ];
-    case "support":
-      return [
-        "Offering support without presuming to know exactly what they need",
-        "The message conveys presence without demanding a response",
-        "The tone provides comfort while respecting their agency",
-      ];
-    case "celebration":
-      return [
-        "Recognizing their achievement with specific praise feels meaningful",
-        "The message focuses on their qualities rather than just outcomes",
-        "The tone balances excitement with sincerity",
-      ];
-    case "reconnection":
-      return [
-        "Opening with warmth helps bridge the gap in communication",
-        "Acknowledging the time apart without dwelling on it creates safety",
-        "The message offers a path forward without pressure",
-      ];
-    case "check-in":
-      return [
-        "The casual tone makes responding feel optional, not obligatory",
-        "Showing interest without prying creates emotional safety",
-        "Offering specific ways to connect makes following up easier",
-      ];
-    default:
-      return baseInsights;
-  }
-}
-
-/**
- * Cloud function to generate a message using OpenAI
- * This matches the existing endpoint:
- * https://us-central1-heartglowai.cloudfunctions.net/generateMessageV2
- */
-exports.generateMessageV2 = functions.https.onCall(async (data, context) => {
-  // Verify authentication
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "The function must be called while authenticated."
-    );
-  }
-
-  try {
-    // Initialize OpenAI client with API key from config
-    const openai = new OpenAI({
-      apiKey: functions.config().openai.api_key,
-    });
-    
-    const {params, prompt} = data;
-    
-    // Create system message with formatting instructions
-    const systemPrompt = `You are HeartGlowAI, an emotionally intelligent AI that crafts heartfelt, personalized messages. 
-    
-Format your response as a JSON object with two properties:
-1. "content": The message text
-2. "insights": An array of 3 strings explaining why the message works emotionally`;
-
-    // Call OpenAI API with parameters from ESSENTIAL_RESTART.md
-    const response = await openai.chat.completions.create({
-      model: "gpt-4-turbo-preview", // Match existing configuration
-      messages: [
-        {role: "system", content: systemPrompt},
-        {role: "user", content: prompt},
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-      top_p: 0.9,
-      response_format: {type: "json_object"},
-    });
-
-    // Parse the response
-    const responseContent = response.choices[0]?.message?.content;
-    
-    if (!responseContent) {
-      throw new Error("No content received from OpenAI");
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
     }
-
-    try {
-      // Parse the JSON response
-      const parsedResponse = JSON.parse(responseContent);
-      
-      // Validate the response format
-      if (!parsedResponse.content) {
-        throw new Error("Invalid response format");
-      }
-      
-      // Return the generated message and insights
-      return {
-        content: parsedResponse.content,
-        insights: parsedResponse.insights || 
-          extractInsights(parsedResponse.content, params),
-      };
-    } catch (parseError) {
-      console.error("Error parsing OpenAI response:", parseError);
-      
-      // If JSON parsing fails, treat the entire response as the message content
-      return {
-        content: responseContent,
-        insights: extractInsights(responseContent, params),
-      };
-    }
-  } catch (error) {
-    console.error("Error calling OpenAI:", error);
-    throw new functions.https.HttpsError(
-        "internal",
-        "Failed to generate message with OpenAI.",
-        error
-    );
-  }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
 });
-
-/**
- * Alternative implementation for direct message generation
- * This serves as a fallback if the primary method fails
- */
-exports.directOpenAIMessage = functions.https.onCall(async (data, context) => {
-  // Verify authentication
-  if (!context.auth) {
-    throw new functions.https.HttpsError(
-        "unauthenticated",
-        "The function must be called while authenticated."
-    );
-  }
-
-  try {
-    // Initialize OpenAI client with API key from config
-    const openai = new OpenAI({
-      apiKey: functions.config().openai.api_key,
-    });
-    
-    const {params} = data;
-    
-    // Simplified prompt for direct generation
-    const simplifiedPrompt = 
-      `Generate a heartfelt message for ${params.recipient.name} who is my ${params.recipient.relationship}.
-The message should express ${params.intent.type || params.intent.custom}.
-The tone should be ${params.tone}.
-Format as ${params.format.type}.
-
-Your response should be a JSON object with:
-1. "content": The message text
-2. "insights": An array of 3 strings about why this message works emotionally`;
-
-    // Call OpenAI API with simpler setup but same parameters
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Use a faster model for the fallback
-      messages: [
-        {role: "user", content: simplifiedPrompt},
-      ],
-      temperature: 0.7,
-      max_tokens: 1000,
-      top_p: 0.9,
-      response_format: {type: "json_object"},
-    });
-
-    const responseContent = response.choices[0]?.message?.content;
-    
-    if (!responseContent) {
-      throw new Error("No content received from OpenAI");
-    }
-
-    try {
-      // Parse the JSON response
-      const parsedResponse = JSON.parse(responseContent);
-      
-      // Return the generated message and insights
-      return {
-        content: parsedResponse.content || responseContent,
-        insights: parsedResponse.insights || 
-          extractInsights(parsedResponse.content || responseContent, params),
-      };
-    } catch (parseError) {
-      console.error("Error parsing OpenAI direct response:", parseError);
-      
-      // Fallback to returning raw content
-      return {
-        content: responseContent,
-        insights: extractInsights(responseContent, params),
-      };
-    }
-  } catch (error) {
-    console.error("Error in direct OpenAI call:", error);
-    throw new functions.https.HttpsError(
-        "internal",
-        "Failed to generate message directly with OpenAI.",
-        error
-    );
-  }
-}); 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.skipCurrentChallenge = void 0;
+const functions = __importStar(require("firebase-functions")); // Add import
+const admin = __importStar(require("firebase-admin")); // Add import
+const cors = require("cors"); // Use require-style import for cors
+// Initialize Firebase Admin SDK (ensure this is done only once) - Add this
+try {
+    admin.initializeApp();
+}
+catch (e) { /* Ignored */ }
+const db = admin.firestore(); // Add this
+// Configure CORS options
+// IMPORTANT: Restrict this to your actual frontend domain in production!
+const corsHandler = cors({ origin: true }); // Allows all origins for now, refine later
+// Import and re-export functions from their respective files
+// Export Challenge Scheduler function(s)
+__exportStar(require("./challengeScheduler"), exports);
+// Export Progress Updater function(s)
+__exportStar(require("./progressUpdater"), exports);
+// Export Challenge Assignment function(s)
+__exportStar(require("./challengeAssignment"), exports);
+// Export Progress Tracking function(s)
+// export * from './progressTracking'; // Removed this line
+// Export Challenge Selection function(s)
+__exportStar(require("./challengeSelection"), exports);
+// --- Removed explicit import/export for challengeActions ---
+// import { skipChallenge } from './challengeActions';
+// export { skipChallenge };
+// --- Define skipCurrentChallenge as an onRequest function ---
+exports.skipCurrentChallenge = functions.https.onRequest((req, res) => {
+    // Wrap the function logic with the CORS handler
+    corsHandler(req, res, async () => {
+        // --- Authentication ---
+        // For onRequest, you need to manually verify the user.
+        // Typically, the frontend sends the Firebase ID token in the Authorization header.
+        // Example: const idToken = req.headers.authorization?.split('Bearer ')[1];
+        // You would then verify this token using admin.auth().verifyIdToken(idToken)
+        // For now, we'll *assume* authentication is handled and get userId (replace with real verification)
+        let userId = null;
+        try {
+            if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+                console.error('No Bearer token found');
+                res.status(403).send('Unauthorized: No token provided');
+                return;
+            }
+            const idToken = req.headers.authorization.split('Bearer ')[1];
+            const decodedToken = await admin.auth().verifyIdToken(idToken);
+            userId = decodedToken.uid;
+            console.log(`Authenticated user ${userId} attempting to skip challenge.`);
+        }
+        catch (error) {
+            console.error('Error verifying Firebase ID token:', error);
+            res.status(403).send('Unauthorized: Invalid token');
+            return;
+        }
+        // --- End Authentication ---
+        if (!userId) {
+            res.status(403).send('Unauthorized'); // Should not happen if verification works
+            return;
+        }
+        const userRef = db.collection('users').doc(userId);
+        try {
+            await db.runTransaction(async (transaction) => {
+                const userDoc = await transaction.get(userRef);
+                if (!userDoc.exists) {
+                    console.error(`User document not found for ${userId}`);
+                    // Don't send response inside transaction, throw an error instead
+                    throw new Error('User not found.');
+                }
+                const userData = userDoc.data() || {};
+                const activeChallenge = userData.activeChallenge;
+                if (!activeChallenge || activeChallenge.status !== 'active') {
+                    console.log(`User ${userId} has no active challenge to skip.`);
+                    // Don't send response inside transaction, throw specific error/signal
+                    throw new Error('NO_ACTIVE_CHALLENGE');
+                }
+                let updatedChallengeHistory = userData.challengeHistory || [];
+                updatedChallengeHistory.push({
+                    challengeId: activeChallenge.challengeId,
+                    status: 'skipped',
+                    assignedDate: activeChallenge.assignedDate,
+                });
+                if (updatedChallengeHistory.length > 20) {
+                    updatedChallengeHistory = updatedChallengeHistory.slice(-20);
+                }
+                transaction.update(userRef, {
+                    activeChallenge: null,
+                    challengeHistory: updatedChallengeHistory
+                });
+                // Important: Don't send response inside transaction!
+            });
+            // Transaction succeeded if it didn't throw
+            console.log(`Successfully skipped challenge for user ${userId}`);
+            res.status(200).send({ status: 'skipped', message: 'Challenge skipped successfully.' });
+        }
+        catch (error) {
+            // Handle specific errors thrown from transaction
+            if (error.message === 'User not found.') {
+                res.status(404).send('User not found.');
+            }
+            else if (error.message === 'NO_ACTIVE_CHALLENGE') {
+                res.status(200).send({ status: 'success', message: 'No active challenge to skip.' });
+            }
+            else {
+                // Handle generic errors
+                console.error(`Error skipping challenge for user ${userId}:`, error);
+                res.status(500).send('Internal Server Error: Failed to skip challenge.');
+            }
+        }
+    }); // End CORS handler wrapper
+});
+// --- Add exports for your OTHER existing functions below --- 
+// e.g., export * from './yourOtherFunctionFile';
+console.log('Importing and exporting Cloud Functions...');
+//# sourceMappingURL=index.js.map

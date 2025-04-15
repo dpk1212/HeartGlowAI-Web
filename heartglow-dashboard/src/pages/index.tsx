@@ -210,6 +210,10 @@ const IndexPage: NextPage = () => {
           // Maybe treat as success but log the parsing error
       }
 
+      // --- IMPORTANT: Set skip flag BEFORE refreshing ---
+      // This allows the confetti effect to know it shouldn't trigger
+      sessionStorage.setItem('skippedChallenge', 'true');
+
       // --- IMPORTANT: Refresh user data --- 
       // After successfully skipping, the userProfile state needs to be updated
       // This usually requires triggering a refetch in your AuthContext or manually updating it.

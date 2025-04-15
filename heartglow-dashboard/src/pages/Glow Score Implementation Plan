@@ -1,0 +1,90 @@
+## Detailed Implementation Plan
+
+Here's a proposed plan, broken down into phases, focusing on enhancing the user experience and integrating smoothly with the existing application and brand principles:
+
+**Phase 1: Data Modeling (Foundation)**
+
+Define how challenge and score data will be stored, likely within Firestore.
+
+1.  **User Document (`users/{userId}`):** Extend the user document to include fields like:
+    *   `glowScoreXP: number` (Initialize at 0)
+    *   `glowScoreTier: string` (e.g., '🌱 Opening Up')
+    *   `currentStreak: number` (Initialize at 0)
+    *   `lastMessageTimestamp: timestamp | null`
+    *   `activeChallenge: object | null` (Structure TBD, maybe `{ challengeId: string, progress: number, goal: number, assignedDate: timestamp, status: 'active' }`)
+    *   `metrics: object` (To store intermediate values like `toneCounts`, `uniqueConnectionsMessagedWeekly`, `reflectionsCompletedCount`)
+
+2.  **Challenges Collection (`challenges/{challengeId}`):** Create a new top-level collection to define the available challenges:
+    *   `name: string`
+    *   `description: string`
+    *   `promptExample: string`
+    *   `criteria: object` (e.g., `{ type: 'message_count', count: 2 }`, `{ type: 'intent', value: 'reconnection' }`, `{ type: 'recipient_type', value: 'family', count: 2 }`)
+    *   `rewardXP: number`
+    *   `rewardUnlock: string | null` (e.g., 'templatePack:gratitude')
+    *   `icon: string` (Emoji or identifier)
+    *   `isActive: boolean` (To control which challenges are in rotation)
+
+**Phase 2: Backend Logic (The Engine)**
+
+Create the systems (likely Firebase Cloud Functions) to manage challenges and scoring.
+
+1.  **Challenge Assignment Function:**
+    *   Triggered weekly (e.g., via Cloud Scheduler).
+    *   Queries active users.
+    *   Selects an appropriate, unused challenge from the `challenges` collection for each user based on criteria (e.g., avoid repetition, maybe tier-based).
+    *   Updates the `activeChallenge` field in the user's document.
+
+2.  **XP & Progress Update Function:**
+    *   Triggered `onWrite` to the user's messages collection (or a dedicated event).
+    *   When a message is sent:
+        *   Award base XP for sending.
+        *   Check `activeChallenge`: If criteria met, increment `activeChallenge.progress`.
+        *   If `progress >= goal`, mark challenge complete, award `rewardXP`, clear `activeChallenge` (or move to history).
+        *   Update `lastMessageTimestamp` and recalculate `currentStreak`.
+        *   Update relevant fields in `user.metrics` (tone counts, unique connections).
+        *   Recalculate `glowScoreXP` based on all contributions.
+        *   Update `glowScoreTier` based on XP thresholds.
+        *   Atomically update the user document.
+    *   Similar logic triggered by reflection completion, etc.
+
+**Phase 3: Frontend UI Components (The Interface)**
+
+Develop the React components as described in the design guide.
+
+1.  **`ChallengeCard` Component:**
+    *   Props: `challengeData`, `userData` (for progress).
+    *   Displays challenge details, progress, rewards.
+    *   Includes "Start" (navigates to `/create` potentially pre-filled?), "Skip," and "Track Progress" actions.
+    *   Handles visual state updates (e.g., completion animation).
+
+2.  **`GlowScoreSummaryCard` Component:**
+    *   Props: `userData` (for score, tier, metrics).
+    *   Displays the summary information as outlined.
+    *   Includes link/button to a potential future "Emotional Growth" detail page.
+
+3.  **Motivational UI Elements:**
+    *   Toasts or subtle notifications for XP gains, challenge completion, tier upgrades.
+    *   Potentially dynamic text within the cards ("You're almost there!", "New Tier Unlocked!").
+
+**Phase 4: Integration (Connecting the Pieces)**
+
+Wire the backend and frontend together within the existing application flow.
+
+1.  **Dashboard (`pages/dashboard.tsx`):**
+    *   Fetch the user's data including `activeChallenge` and `glowScore` details (likely via an updated `AuthContext` or dedicated hook).
+    *   Render the `ChallengeCard` and `GlowScoreSummaryCard` components, passing the fetched data. Ensure layout is balanced and doesn't overwhelm the core "create message" flow.
+
+2.  **Message Creation/Sending Flow (`pages/create.tsx`, API endpoint):**
+    *   Ensure all necessary data (user ID, message details, tone, recipient info) is available when a message is successfully sent to trigger the backend `XP & Progress Update Function`.
+
+3.  **Context/State Management (`context/AuthContext.tsx` or similar):**
+    *   Update the context to include the user's challenge and GlowScore data so it's readily available for UI components.
+
+**Enhancing User Experience & Maintaining Brand Voice:**
+
+*   **Onboarding:** Introduce GlowScore gently ("Your score grows with every thoughtful message") and the *first* challenge as an exciting starting point.
+*   **Subtlety:** Place the cards strategically. The Challenge might be prominent, while the GlowScore could be slightly less emphasized initially. Avoid overly aggressive "gamification" visuals.
+*   **Affirming Language:** Strictly adhere to the positive, encouraging tone described in the guide for all UI text, notifications, and tier names. Frame everything around growth and effort, not just points.
+*   **Feedback:** Use microinteractions (gentle glows, subtle animations) for positive reinforcement, avoiding jarring sounds or overly flashy effects.
+*   **Privacy:** Reassure users (perhaps in a tooltip or FAQ) that their GlowScore is private and for their personal reflection only.
+*   **Skipping/Flexibility:** Ensure the "Skip Challenge" option is easy to use and doesn't feel like failure.

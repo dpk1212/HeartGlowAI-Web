@@ -4,6 +4,19 @@ import * as admin from "firebase-admin";
 // import * as admin from "firebase-admin";
 // admin.initializeApp();
 
+// Define a type for the challenge data structure from Firestore
+type Challenge = {
+  id: string;
+  name?: string; // Mark other fields as optional or provide defaults
+  description?: string;
+  promptExample?: string;
+  icon?: string;
+  criteria?: { type: string; count?: number; value?: string };
+  rewardXP?: number;
+  rewardUnlock?: string | null;
+  isActive?: boolean;
+};
+
 // Initialize Firebase Admin SDK (ensure this is done only once, typically at the top level)
 try {
   admin.initializeApp();
@@ -43,7 +56,11 @@ export const assignWeeklyChallenge = functions.pubsub.schedule('0 3 * * 1')
         return null;
       }
 
-      const allChallenges = challengesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      // Use the defined type when mapping
+      const allChallenges: Challenge[] = challengesSnapshot.docs.map(doc => {
+          return { id: doc.id, ...(doc.data() as Omit<Challenge, 'id'>) }; // Assert the type of doc.data()
+      });
+
       const batch = db.batch();
       let assignedCount = 0;
       const now = admin.firestore.Timestamp.now(); // Get current timestamp once
@@ -68,18 +85,18 @@ export const assignWeeklyChallenge = functions.pubsub.schedule('0 3 * * 1')
             .slice(-5) // Look at last 5 entries
             .map((h: { challengeId: string }) => h.challengeId);
 
-        let availableChallenges = allChallenges.filter(c => !recentHistoryIds.includes(c.id));
+        let availableChallenges: Challenge[] = allChallenges.filter(c => !recentHistoryIds.includes(c.id));
 
-        let selectedChallenge;
+        let selectedChallenge: Challenge;
         if (availableChallenges.length === 0) {
           console.warn(`No suitable *new* challenges found for user ${userId}, reusing from all active.`);
-          // Fallback: use all challenges if filtered list is empty, or skip user
           if (allChallenges.length === 0) return; // Really no challenges available
            availableChallenges = allChallenges; // Use all as fallback pool
         }
         // Select a random challenge from the determined pool
         selectedChallenge = availableChallenges[Math.floor(Math.random() * availableChallenges.length)];
 
+        // Now accessing properties should be type-safe
         const goal = selectedChallenge.criteria?.count ?? 1;
         const rewardXP = selectedChallenge.rewardXP ?? 0;
         const rewardUnlock = selectedChallenge.rewardUnlock ?? null;

@@ -13,7 +13,7 @@
   "engines": {
     "node": "18"
   },
-  "main": "index.js",
+  "main": "lib/index.js",
   "dependencies": {
     "@types/cors": "^2.8.17",
     "cors": "^2.8.5",

@@ -35,7 +35,6 @@ export const skipChallenge = functions.https.onCall(async (data, context) => {
       }
 
       // 3. Prepare update data
-      const skippedChallengeData = { ...activeChallenge, status: 'skipped' };
       let updatedChallengeHistory = userData.challengeHistory || [];
 
       // Add skipped challenge to history

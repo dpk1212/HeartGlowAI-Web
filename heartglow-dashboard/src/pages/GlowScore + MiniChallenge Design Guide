@@ -1,0 +1,260 @@
+HeartGlow Mini Challenges + GlowScore Design Guide
+
+🌟 Overview
+
+This guide outlines the UX/UI design structure, logic, and visual recommendations for implementing two powerful engagement features:
+
+Mini Challenges — lightweight weekly missions that encourage emotional connection
+
+GlowScore — a gentle, non-competitive emotional progress tracker
+
+These features reinforce HeartGlow’s core brand promise: helping people build better relationships, one meaningful message at a time.
+
+🔁 MINI CHALLENGES
+
+🔬 Purpose
+
+Encourage habit formation and intentional messaging
+
+Create emotional missions that align with user goals
+
+Gently increase frequency of connection and deepen relationship quality
+
+🔍 UX Placement
+
+Location
+
+Function
+
+Dashboard Top
+
+Display this week's challenge prominently
+
+GlowGuide Chat Header
+
+Contextual reminder: "You're 1 message away from completing your challenge"
+
+Challenge History Tab (Future)
+
+View past completed or skipped challenges
+
+✍️ UI Structure
+
+[Challenge Card Component]
+----------------------------------
+🌟 This Week’s Challenge
+"Reconnect with someone you haven’t spoken to in a while."
+
+[Start Challenge]   [Skip]   [Track Progress]
+
+Progress: 1/2 messages sent ✅
+Reward: +50 XP  |  🔓 Unlock: Gratitude Template Pack
+----------------------------------
+
+🎨 Visual Design
+
+Soft card with rounded corners
+
+Subtle glowing border on active challenge
+
+Emoji or icon that reflects tone: 💌 🤝 ❤️
+
+Microinteraction: confetti pulse when completed
+
+📆 Challenge Types (First 10 Examples)
+
+Challenge Name
+
+Description
+
+Message Prompt Example
+
+Appreciation Week
+
+Thank 2 people who made a difference
+
+"I just wanted to thank you for how you showed up last week. It meant a lot."
+
+Reconnection Tap
+
+Reach out to someone after time apart
+
+"Hey, you've been on my mind lately. Would love to reconnect."
+
+Thoughtful Follow-Up
+
+Continue a previous conversation
+
+"I’ve been reflecting more on what we talked about — and I wanted to share this."
+
+Heartfelt Apology
+
+Make space for repair
+
+"I realize now how my words might have landed. I’m truly sorry for that."
+
+Vulnerability Challenge
+
+Share a truth you often hold in
+
+"This is hard for me to say, but I want to be honest with you..."
+
+Daily Check-In
+
+Send a message every day for 5 days
+
+"Just wanted to check in and see how you're doing. No pressure to reply."
+
+3-Message Week
+
+Reach out to 3 different people this week
+
+"You've popped into my head recently, and I wanted to say hi."
+
+Family Connection
+
+Send 2 messages to family members
+
+"I don’t say it enough, but I really appreciate everything you’ve done for me."
+
+Emotional Celebration
+
+Celebrate someone’s effort or growth
+
+"I've noticed how much you've been working on yourself — and I admire it."
+
+Memory Vault
+
+Share a special story or memory
+
+"Remember when we used to stay up talking for hours? I still think about that night."
+
+🗣️ Voice & Tone
+
+Encouraging, never demanding
+
+Warm prompts: "You’re almost there" / "One more person to message"
+
+Reflective wrap-up: "How did that feel? Want to save a note?"
+
+✨ GLOWSCORE
+
+🔬 Purpose
+
+Provide users with an emotional progress indicator
+
+Track consistency, message depth, tone variety, and effort
+
+Gently gamify without competition or comparison
+
+🌐 GlowScore Attributes
+
+Metric
+
+What It Tracks
+
+Message Consistency
+
+Frequency of messaging over time
+
+Tone Variety
+
+Balance of gratitude, vulnerability, affection, etc.
+
+Contact Engagement
+
+How many unique connections the user is messaging
+
+Reflection
+
+Number of completed insight/reflection prompts
+
+Challenge Completion
+
+Weekly mini-challenge participation
+
+✍️ UI Elements
+
+[GlowScore Summary Card]
+----------------------------------
+Your GlowScore: 220 XP ✨
+Current Tier: ✨ Communicator in Bloom
+
+Streak: 5 Days 🔥
+Connections Reached: 6
+Messages Sent: 12 this week
+Reflections Completed: 4
+
+[View My Emotional Growth →]
+----------------------------------
+
+📈 Milestone Levels
+
+Tier
+
+XP Range
+
+Description
+
+🌱 Opening Up
+
+0–50
+
+You’ve started showing up. That’s huge.
+
+🌟 Making Moves
+
+51–150
+
+You’re beginning to express what matters.
+
+🔥 Communicator in Bloom
+
+151–300
+
+You’re building momentum. It’s being felt.
+
+💫 HeartGuide
+
+301–500
+
+Your words are creating connection.
+
+🕊 Legacy Builder
+
+500+
+
+You’re building something lasting and beautiful.
+
+🚀 Motivational Moments
+
+Reward messages after new tier: "You've grown into a HeartGuide. Beautiful work."
+
+Encourage next goal: "3 more reflections to reach Legacy Builder."
+
+Daily encouragements: "You're creating something meaningful every time you show up."
+
+🎉 Implementation Tips
+
+Use animation tastefully (glow, pulse, sparkles)
+
+Celebrate small wins immediately (snackable joy)
+
+Keep tracking subtle, private, and affirming
+
+Combine with onboarding: "Your GlowScore grows with every message you send."
+
+Let GlowScore and Mini Challenges turn connection into a relationship habit — not just a one-time tool.
+
+Next Steps:
+
+Build challenge engine (triggering, tracking, reset logic)
+
+Design challenge UI module (card + modal style)
+
+Implement XP reward system tied to messages + feedback
+
+Begin testing messaging variation library by intent category
+
+Draft full 30-day GlowScore engagement journey (nudges, unlocks, messages)
+

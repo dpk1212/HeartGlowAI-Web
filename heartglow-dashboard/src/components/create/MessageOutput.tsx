@@ -327,6 +327,40 @@ export default function MessageOutput({
           <p className="whitespace-pre-wrap text-gray-200 text-base md:text-lg leading-relaxed">{message}</p>
         </div>
       </motion.div>
+
+      {/* Insights Section */}
+      {insights && insights.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 p-6 md:p-8 rounded-xl shadow-md border border-gray-700/60"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4">AI Insights</h3>
+          <ul className="space-y-3 list-disc list-inside text-gray-300 text-sm">
+            {insights.map((insight, index) => (
+              <li key={index}>{insight}</li>
+            ))}
+          </ul>
+        </motion.div>
+      )}
+
+      {/* Action Button */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="flex justify-center mt-8"
+      >
+        <button
+          onClick={handleConfirmSave}
+          className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:from-heartglow-pink/90 hover:to-heartglow-violet/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-all duration-150 ease-in-out transform hover:scale-105"
+        >
+          <CheckCircle size={20} className="mr-2" />
+          Done - Save & Copy Message
+        </button>
+      </motion.div>
+
     </motion.div>
   );
 }

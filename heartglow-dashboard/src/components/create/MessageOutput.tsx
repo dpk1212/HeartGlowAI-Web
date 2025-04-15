@@ -313,7 +313,11 @@ export default function MessageOutput({
             onClick={() => handleCopyToClipboard(message)}
             className={`
 ```
-        </motion.div>
+        </div>
+
+        <div className="bg-gray-900/50 p-5 rounded-lg border border-gray-700 min-h-[150px]">
+          {message}
+        </div>
       </motion.div>
     </motion.div>
   );

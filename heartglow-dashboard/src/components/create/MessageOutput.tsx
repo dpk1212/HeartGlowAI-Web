@@ -181,7 +181,7 @@ export default function MessageOutput({
       const definition = challengeDefs.find(d => d.id === activeUserChallenge.challengeId);
       const goal = definition?.criteria?.value ?? activeUserChallenge.goal ?? 1;
       const currentProgress = activeUserChallenge.progress ?? 0;
-      if (currentProgress + 1 >= goal) {
+      if (currentProgress + 1 >= Number(goal)) {
         console.log('[handleConfirmSave] Challenge appears completed. Setting sessionStorage flag.');
         sessionStorage.setItem('challengeCompleted', 'true');
       }

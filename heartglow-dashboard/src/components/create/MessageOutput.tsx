@@ -350,8 +350,16 @@ export default function MessageOutput({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="flex justify-center mt-8"
+        className="flex justify-center gap-4 mt-8"
       >
+        <Link href="/">
+          <button
+            className="inline-flex items-center justify-center px-8 py-3 border border-gray-600 text-base font-medium rounded-full shadow-sm text-white bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-900 transition-all duration-150 ease-in-out"
+          >
+            <ArrowLeft size={20} className="mr-2" />
+            Return to Dashboard
+          </button>
+        </Link>
         <button
           onClick={handleConfirmSave}
           className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-full shadow-sm text-white bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:from-heartglow-pink/90 hover:to-heartglow-violet/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink focus:ring-offset-gray-900 transition-all duration-150 ease-in-out transform hover:scale-105"

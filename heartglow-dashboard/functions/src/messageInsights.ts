@@ -63,6 +63,7 @@ export const generateMessageInsights = functions.https.onCall(async (data, conte
     
     // Build the prompt for message analysis
     const prompt = buildInsightsPrompt(params);
+    console.log("Generated analysis prompt for message");
     
     // Call OpenAI API
     const completion = await openai.chat.completions.create({
@@ -82,6 +83,8 @@ export const generateMessageInsights = functions.https.onCall(async (data, conte
       throw new Error("Failed to get valid content from OpenAI.");
     }
     
+    console.log("Received response from OpenAI:", responseContent.substring(0, 100) + "...");
+    
     try {
       // Parse the JSON response
       const parsedResponse = JSON.parse(responseContent);
@@ -89,6 +92,8 @@ export const generateMessageInsights = functions.https.onCall(async (data, conte
       if (!parsedResponse.grade || !parsedResponse.insights || !Array.isArray(parsedResponse.insights)) {
         throw new Error("Response missing required fields");
       }
+      
+      console.log(`Successfully extracted grade (${parsedResponse.grade}) and ${parsedResponse.insights.length} insights`);
       
       return {
         grade: parsedResponse.grade,

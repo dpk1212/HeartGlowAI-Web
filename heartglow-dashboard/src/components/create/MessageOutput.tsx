@@ -9,6 +9,7 @@ import { Copy, Check, ClipboardCopy, ArrowLeft, AlertTriangle, CheckCircle, EyeI
 import Link from 'next/link';
 import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
 import { useRouter } from 'next/router';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 interface MessageOutputProps {
   recipient: {
@@ -271,37 +272,25 @@ export default function MessageOutput({
     setIsLoadingInsights(true);
     
     try {
-      // Get the auth token
-      const idToken = await currentUser?.getIdToken();
-      if (!idToken) {
-        throw new Error("Authentication required");
-      }
+      // Get Firebase functions
+      const functions = getFunctions();
       
-      // Call the HTTP version of the function with CORS support
-      const response = await fetch('https://us-central1-heartglowai.cloudfunctions.net/generateMessageInsightsHttp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${idToken}`
+      // Create a callable function reference
+      const generateInsightsFunction = httpsCallable(functions, 'generateMessageInsights');
+      
+      // Call the function
+      const result = await generateInsightsFunction({
+        message: message,
+        recipient: {
+          name: recipient.name,
+          relationship: recipient.relationship
         },
-        body: JSON.stringify({
-          message: message,
-          recipient: {
-            name: recipient.name,
-            relationship: recipient.relationship
-          },
-          intent: intent.type,
-          tone: tone
-        })
+        intent: intent.type,
+        tone: tone
       });
       
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`HTTP error ${response.status}: ${errorText}`);
-        throw new Error(`Error from server: ${response.status}`);
-      }
-      
-      const data = await response.json();
+      // Extract data from the result
+      const data = result.data as { grade: string, insights: string[] };
       
       if (data && data.grade && data.insights) {
         setMessageGrade(data.grade);

@@ -278,8 +278,8 @@ export default function MessageOutput({
       // Create a callable function reference
       const generateInsightsFunction = httpsCallable(functions, 'generateMessageInsights');
       
-      // Call the function
-      const result = await generateInsightsFunction({
+      // Prepare payload
+      const payload = {
         message: message,
         recipient: {
           name: recipient.name,
@@ -287,7 +287,12 @@ export default function MessageOutput({
         },
         intent: intent.type,
         tone: tone
-      });
+      };
+
+      console.log(">>> Frontend: Payload being sent to generateMessageInsights:", JSON.stringify(payload, null, 2));
+
+      // Call the function
+      const result = await generateInsightsFunction(payload);
       
       // Extract data from the result
       const data = result.data as { grade: string, insights: string[] };

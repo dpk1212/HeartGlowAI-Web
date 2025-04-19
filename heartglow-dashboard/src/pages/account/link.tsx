@@ -85,13 +85,24 @@ const LinkAccountPage = () => {
     try {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      await linkWithCredential(currentUser!, result.credential);
+
+      // --- Correct way to get OAuth credential for linking --- 
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (!credential) {
+        // This case might happen if the popup result doesn't contain expected tokens.
+        throw new Error("Could not get Google credential from result.");
+      }
+      // --- End correction ---
+
+      // currentUser is checked above, assert non-null for linkWithCredential
+      await linkWithCredential(currentUser!, credential); // Use the obtained OAuthCredential
       console.log("Google account linked successfully!");
       router.push('/'); // Redirect to dashboard on success
     } catch (err) {
       console.error("Google linking error:", err);
+      // Check if the error object has a 'code' property
       if (typeof err === 'object' && err !== null && 'code' in err) {
-         const firebaseError = err as { code: string; message: string };
+         const firebaseError = err as { code: string; message: string }; // Type assertion
          switch (firebaseError.code) {
            case 'auth/credential-already-in-use':
              setError("This Google account is already associated with another HeartGlow account or already linked.");
@@ -105,11 +116,19 @@ const LinkAccountPage = () => {
            case 'auth/unauthorized-domain':
              setError("This domain isn't authorized for Google Sign-In. (Configuration Issue)");
              break;
+           case 'auth/user-mismatch': // Error if linking different users
+             setError("Cannot link credentials for different users.") 
+             break;
            default:
              setError(`An unexpected error occurred: ${firebaseError.message}`);
          }
       } else {
-         setError("An unexpected error occurred during Google linking.");
+         // Handle the case from the explicit throw above
+         if (err instanceof Error) {
+           setError(err.message);
+         } else {
+           setError("An unexpected error occurred during Google linking.");
+         }
       }
     } finally {
       setLoadingGoogle(false);

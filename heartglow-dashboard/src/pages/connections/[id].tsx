@@ -172,12 +172,13 @@ const ConnectionDetailPage = () => {
       // Delete from Firestore
       await deleteConnection(currentUser, connection.id);
 
-      // Explicitly target the index.html within the connections path
-      const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-      const redirectPath = `${basePath}/connections/index.html`;
-      console.log('>>> Redirecting after delete to explicit file:', redirectPath);
+      // Revert to using getRouteWithBasePath, relying on trailingSlash: true
+      const redirectPath = getRouteWithBasePath('/connections');
+      // const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+      // const redirectPath = `${basePath}/connections/index.html`;
+      console.log('>>> Redirecting after delete to directory:', redirectPath); // Update log message
 
-      // Redirect to connections list index.html instead
+      // Redirect to connections list directory
       router.push(redirectPath);
       
     } catch (err: any) {

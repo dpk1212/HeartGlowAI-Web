@@ -19,8 +19,11 @@ git pull origin gh-pages
 
 # Update dashboard directory
 echo "📤 Updating dashboard files..."
-rm -rf dashboard/* || mkdir -p dashboard
-cp -r heartglow-dashboard/out/* dashboard/
+# Remove old dashboard directory entirely
+rm -rf dashboard
+# Move the output directory to be the new dashboard directory
+mv heartglow-dashboard/out dashboard || { echo "❌ Failed to move build output"; exit 1; }
+# Ensure .nojekyll is present
 touch dashboard/.nojekyll
 
 # Commit and push changes

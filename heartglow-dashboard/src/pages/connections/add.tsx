@@ -255,8 +255,7 @@ const AddConnectionPage = () => {
                         id="relationship"
                         value={relationship}
                         onChange={(e) => setRelationship(e.target.value)}
-                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-heartglow-pink focus:border-transparent shadow-sm appearance-none pr-8 bg-no-repeat bg-right"
-                        style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23${document.documentElement.classList.contains('dark') ? '9ca3af' : '6b7280'}" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>')`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em' }}
+                        className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-heartglow-pink focus:border-transparent shadow-sm appearance-none pr-10 bg-no-repeat bg-right-[0.75rem] bg-center bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%236b7280&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')] dark:bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%239ca3af&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')]"
                         required
                       >
                         {RELATIONSHIP_OPTIONS.map((option) => (
@@ -363,10 +362,9 @@ const AddConnectionPage = () => {
                           </label>
                           <select
                             id="yearsKnown"
-                            value={yearsKnown === undefined ? '' : String(yearsKnown)} // Handle undefined for initial option
+                            value={yearsKnown === undefined ? '' : String(yearsKnown)}
                             onChange={(e) => setYearsKnown(e.target.value === '' ? undefined : Number(e.target.value))}
-                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-heartglow-pink focus:border-transparent shadow-sm appearance-none pr-8 bg-no-repeat bg-right"
-                           style={{ backgroundImage: `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="%23${document.documentElement.classList.contains('dark') ? '9ca3af' : '6b7280'}" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" /></svg>')`, backgroundPosition: 'right 0.75rem center', backgroundSize: '1.25em' }}
+                            className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700/50 text-gray-900 dark:text-white focus:ring-2 focus:ring-heartglow-pink focus:border-transparent shadow-sm appearance-none pr-10 bg-no-repeat bg-right-[0.75rem] bg-center bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%236b7280&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')] dark:bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%239ca3af&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')]"
                           >
                             {YEARS_KNOWN_OPTIONS.map((option) => (
                               <option key={option.label} value={option.value === undefined ? '' : option.value}>

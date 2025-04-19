@@ -9,8 +9,8 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 const stepsInfo = [
   { number: 1, label: 'Recipient' },
-  { number: 2, label: 'Purpose & Tone' },
-  { number: 3, label: 'Refine & Generate' },
+  { number: 2, label: 'Message Essence' },
+  { number: 3, label: 'Delivery & Details' },
 ];
 
 export default function CreatePage() {
@@ -82,16 +82,27 @@ export default function CreatePage() {
     const currentStepComponent = () => {
       switch (step) {
         case 1: return <RecipientStep onNext={handleNext} initialData={formData.recipient} />;
-        case 2: return <PurposeToneStep onNext={handleNext} onBack={handleBack} initialData={{ intent: formData.intent, tone: formData.tone }} />;
-        case 3: return <RefineGenerateStep onNext={handleNext} onBack={handleBack} initialData={{
-          format: formData.format,
-          promptedBy: formData.promptedBy,
-          messageGoal: formData.messageGoal,
-          formalityLevel: formData.formalityLevel,
-          emotionalDepth: formData.emotionalDepth,
-          customInstructionsText: formData.customInstructionsText,
-          customInstructionsOptions: formData.customInstructionsOptions,
-        }} />;
+        case 2: return <PurposeToneStep
+                        onNext={handleNext}
+                        onBack={handleBack}
+                        initialData={{
+                          intent: formData.intent,
+                          tone: formData.tone,
+                          formalityLevel: formData.formalityLevel,
+                          emotionalDepth: formData.emotionalDepth,
+                          messageGoal: formData.messageGoal
+                        }}
+                     />;
+        case 3: return <RefineGenerateStep
+                        onNext={handleNext}
+                        onBack={handleBack}
+                        initialData={{
+                          format: formData.format,
+                          promptedBy: formData.promptedBy,
+                          customInstructionsText: formData.customInstructionsText,
+                          customInstructionsOptions: formData.customInstructionsOptions,
+                        }}
+                     />;
         case 4: 
           return <MessageOutput 
             recipient={formData.recipient}

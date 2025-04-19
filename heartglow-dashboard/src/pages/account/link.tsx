@@ -7,8 +7,7 @@ import {
   EmailAuthProvider, 
   GoogleAuthProvider,
   linkWithCredential,
-  signInWithPopup, // Needed for Google linking flow
-  FirebaseError // Import FirebaseError for specific error handling
+  signInWithPopup // Needed for Google linking flow
 } from 'firebase/auth';
 import { auth } from '../../firebase/auth'; // Import the exported auth instance
 
@@ -43,13 +42,14 @@ const LinkAccountPage = () => {
     console.log("Attempting to link with Email/Password...");
     try {
       const credential = EmailAuthProvider.credential(email, password);
-      await linkWithCredential(currentUser, credential);
+      await linkWithCredential(currentUser!, credential);
       console.log("Email account linked successfully!");
       router.push('/'); // Redirect to dashboard on success
     } catch (err) {
       console.error("Email linking error:", err);
-      if (err instanceof FirebaseError) {
-        switch (err.code) {
+      if (typeof err === 'object' && err !== null && 'code' in err) {
+        const firebaseError = err as { code: string; message: string };
+        switch (firebaseError.code) {
           case 'auth/email-already-in-use':
             setError("This email address is already associated with another account.");
             break;
@@ -63,7 +63,7 @@ const LinkAccountPage = () => {
              setError("This email/password is already linked to your account.");
              break;
           default:
-            setError(`An unexpected error occurred: ${err.message}`);
+            setError(`An unexpected error occurred: ${firebaseError.message}`);
         }
       } else {
         setError("An unexpected error occurred during email linking.");
@@ -84,17 +84,15 @@ const LinkAccountPage = () => {
     console.log("Attempting to link with Google...");
     try {
       const provider = new GoogleAuthProvider();
-      // We need to sign in with popup first to get the credential for linking
-      // This might briefly show the user as signed in with Google before linking completes
       const result = await signInWithPopup(auth, provider);
-      // If successful, link this credential to the existing anonymous user
-      await linkWithCredential(currentUser, result.credential); 
+      await linkWithCredential(currentUser!, result.credential);
       console.log("Google account linked successfully!");
       router.push('/'); // Redirect to dashboard on success
     } catch (err) {
       console.error("Google linking error:", err);
-      if (err instanceof FirebaseError) {
-         switch (err.code) {
+      if (typeof err === 'object' && err !== null && 'code' in err) {
+         const firebaseError = err as { code: string; message: string };
+         switch (firebaseError.code) {
            case 'auth/credential-already-in-use':
              setError("This Google account is already associated with another HeartGlow account or already linked.");
              break;
@@ -108,7 +106,7 @@ const LinkAccountPage = () => {
              setError("This domain isn't authorized for Google Sign-In. (Configuration Issue)");
              break;
            default:
-             setError(`An unexpected error occurred: ${err.message}`);
+             setError(`An unexpected error occurred: ${firebaseError.message}`);
          }
       } else {
          setError("An unexpected error occurred during Google linking.");

@@ -209,7 +209,7 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
                     whileHover={{ scale: 1.03, y: -1 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={() => setSelectedFormat(format.id)}
-                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-150 flex items-center space-x-2 text-sm h-full ${
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-150 flex items-center space-x-2 text-sm ${
                       isSelected
                         ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 shadow-md'
                         : 'bg-white border-gray-200 hover:border-heartglow-pink/50 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:border-heartglow-pink/60'

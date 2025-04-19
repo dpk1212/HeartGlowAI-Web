@@ -10,6 +10,8 @@ import {
   signInWithPopup // Needed for Google linking flow
 } from 'firebase/auth';
 import { auth } from '../../firebase/auth'; // Import the exported auth instance
+import { motion } from 'framer-motion'; // Import motion
+import { LockKeyhole, Save, Mail, User } from 'lucide-react'; // Import icons
 
 const LinkAccountPage = () => {
   const { currentUser } = useAuth();
@@ -137,92 +139,129 @@ const LinkAccountPage = () => {
 
   // Show loading indicator while waiting for currentUser or if linking
   if (!currentUser) {
-     return <div className="flex justify-center items-center min-h-screen">Loading user data...</div>;
+     return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-heartglow-charcoal dark:to-indigo-900/50">Loading user data...</div>;
   }
   // Redirect is handled by useEffect, but we can show a message if not anonymous yet
   if (!currentUser.isAnonymous) {
-    return <div className="flex justify-center items-center min-h-screen">Redirecting...</div>;
+    return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-heartglow-charcoal dark:to-indigo-900/50">Redirecting...</div>;
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-heartglow-charcoal dark:to-indigo-900/50">
       <Head>
-        <title>Create Account - HeartGlow AI</title>
+        <title>Secure Your Account - HeartGlow AI</title>
       </Head>
-      <div className="w-full max-w-md p-8 space-y-6 bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white">Create Your HeartGlow Account</h1>
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-          Save your connections, messages, and progress permanently by linking your current session to an account.
-        </p>
+      
+      {/* Use motion for subtle animation */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md p-8 md:p-10 space-y-6 bg-white dark:bg-gray-900/80 backdrop-blur-md rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50"
+      >
+        <div className="text-center">
+           {/* Add an icon */}
+           <div className="inline-flex items-center justify-center w-16 h-16 mb-6 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 dark:from-indigo-900/40 dark:to-purple-900/40 text-indigo-500 shadow-lg">
+              <Save className="w-8 h-8" />
+           </div>
+           <h1 className="text-2xl md:text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Secure Your Account</h1>
+           <p className="mt-3 text-base text-gray-600 dark:text-gray-300">
+             Save your progress permanently and access your messages across all devices by creating a free account.
+           </p>
+        </div>
 
-        {error && <p className="text-red-500 text-sm text-center mb-4">{error}</p>}
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 bg-red-100 dark:bg-red-900/40 border border-red-300 dark:border-red-700/50 text-red-700 dark:text-red-300 rounded-lg text-sm text-center shadow-sm"
+          >
+            {error}
+          </motion.div> 
+        )}
 
         {/* Email/Password Linking Form */}
-        <form onSubmit={handleLinkWithEmail} className="space-y-4">
+        <form onSubmit={handleLinkWithEmail} className="space-y-5">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email address</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-              placeholder="you@example.com"
-            />
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Email address</label>
+            {/* Input with icon */}
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                <Mail className="h-4 w-4" />
+              </span>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="appearance-none block w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/50 focus:border-heartglow-pink dark:bg-gray-800 dark:text-white transition duration-200"
+                placeholder="you@example.com"
+              />
+            </div>
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:text-white"
-              placeholder="••••••••"
-            />
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Password</label>
+            {/* Input with icon */}
+             <div className="relative">
+                <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                  <LockKeyhole className="h-4 w-4" />
+                </span>
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="appearance-none block w-full pl-10 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/50 focus:border-heartglow-pink dark:bg-gray-800 dark:text-white transition duration-200"
+                  placeholder="Create a password"
+                />
+            </div>
           </div>
+          {/* Updated Button Style */}
           <button
             type="submit"
-            disabled={loadingEmail || loadingGoogle} // Disable if either is loading
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            disabled={loadingEmail || loadingGoogle}
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:from-heartglow-pink/90 hover:to-heartglow-violet/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-900 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed transform hover:scale-105"
           >
             {loadingEmail ? 'Linking Email...' : 'Create Account with Email'}
           </button>
         </form>
 
+        {/* Divider */}
         <div className="relative my-4">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+          <div className="absolute inset-0 flex items-center" aria-hidden="true">
+            <div className="w-full border-t border-gray-300 dark:border-gray-700/50" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
+            <span className="px-3 bg-white dark:bg-gray-900/80 text-gray-500 dark:text-gray-400">
+              Or
+            </span>
           </div>
         </div>
 
-        {/* Google Linking Button */}
+        {/* Google Linking Button - Updated Style */}
         <div>
           <button
             type="button"
             onClick={handleLinkWithGoogle}
-            disabled={loadingEmail || loadingGoogle} // Disable if either is loading
-            className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+            disabled={loadingEmail || loadingGoogle}
+            className="w-full inline-flex justify-center items-center py-3 px-4 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-base font-medium text-heartglow-charcoal dark:text-heartglow-offwhite hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900 transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            {/* Basic Google Icon Placeholder */}
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20"> <path fillRule="evenodd" d="M10 2C5.03 2 1 6.03 1 11s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm5.2 6.88l-1.52.93C13.17 10.6 12.14 11 11 11h-.06c-1.3 0-2.4-.84-2.84-2H10c.4 0 .77-.14.95-.38.18-.24.26-.52.23-.8l-.09-.75c-.03-.28-.14-.55-.34-.75s-.47-.31-.75-.31H8.1c-.66 0-1.2.54-1.2 1.2v.01c0 .66.54 1.2 1.2 1.2H10c.17 0 .33.03.48.09l.02.01c.5.18.9.56 1.12 1.04.23.48.29.98.17 1.46l-.17.68c-.12.48-.4.9-.8 1.2-.4.3-.88.46-1.38.46h-.01c-.66 0-1.2-.54-1.2-1.2 0-.1.01-.19.04-.28l.11-.44c.12-.48.4-.9.8-1.2.4-.3.88-.46 1.38-.46h.16c.34 0 .67.07.97.2l1.52.93c.49.3.49.8 0 1.1l-1.52.93c-.3.18-.63.28-.97.28h-.16c-.96 0-1.84-.45-2.4-1.18-.56-.73-.8-1.66-.64-2.58l.11-.44C7.81 8.84 8.6 8 9.9 8h.16c.96 0 1.84.45 2.4 1.18.56.73.8 1.66.64 2.58l-.11.44c-.03.09-.04.18-.04.28 0 .66-.54 1.2-1.2 1.2h-.01c-.5 0-.98-.16-1.38-.46-.4-.3-.68-.72-.8-1.2l-.17-.68c-.12-.48-.06-.98.17-1.46.22-.48.62-.86 1.12-1.04l.02-.01c.15-.06.31-.09.48-.09H10v-1h-.06c-.5 0-.98.16-1.38.46-.4.3-.68.72-.8 1.2l-.11.44c-.16.92.08 1.85.64 2.58.56.73 1.44 1.18 2.4 1.18h.16c.5 0 .98-.16 1.38-.46.4-.3.68-.72.8-1.2l1.52-.93c.49-.3.49-.8 0-1.1z" clipRule="evenodd" /> </svg>
+            <svg className="w-5 h-5 mr-3" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 381.5 512 244 512 110.3 512 0 401.7 0 261.8S110.3 11.6 244 11.6c67.3 0 120.3 24.1 162.6 63.9L349.3 127c-36.1-33.6-81.3-51.6-105.3-51.6-84.9 0-153.9 69.1-153.9 153.9s69 153.9 153.9 153.9c97.2 0 135.1-67.3 140.8-103.8H244v-71.5h244c2.6 12.9 3.9 26.7 3.9 41.4z"></path></svg>
             {loadingGoogle ? 'Linking Google...' : 'Continue with Google'}
           </button>
         </div>
 
-        <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+        {/* Terms Link Placeholder */}
+        <p className="mt-6 text-xs text-center text-gray-500 dark:text-gray-400">
           By creating an account, you agree to our Terms of Service and Privacy Policy (links to be added).
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

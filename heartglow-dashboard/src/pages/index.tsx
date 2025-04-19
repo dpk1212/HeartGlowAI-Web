@@ -21,8 +21,6 @@ import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
 // Import Firebase auth methods needed for token
 import { getAuth, getIdToken } from "firebase/auth";
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling selectChallenge
-import Confetti from 'react-confetti'; // Import confetti library
-import useWindowSize from '../hooks/useWindowSize'; // Import hook for confetti dimensions
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
@@ -31,86 +29,6 @@ const IndexPage: NextPage = () => {
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
   const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Loading state for select/skip
   const router = useRouter(); // Import and use useRouter for navigation
-  const { width, height } = useWindowSize(); // Get window size for confetti
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [prevChallengeId, setPrevChallengeId] = useState<string | null | undefined>(undefined);
-
-  // Effect to detect challenge completion for animation
-  useEffect(() => {
-    // --- Check for immediate completion flag FIRST ---
-    const completedFlagValue = sessionStorage.getItem('challengeCompleted');
-    const completedTimestamp = sessionStorage.getItem('challengeCompletedTimestamp');
-    
-    console.log(`[ConfettiEffect] Checking sessionStorage for challengeCompleted flag. Value: ${completedFlagValue}, Timestamp: ${completedTimestamp}`);
-    
-    if (completedFlagValue === 'true') {
-      // Check if the completion flag is fresh (within last 5 minutes)
-      const isTimestampValid = completedTimestamp && 
-          (Date.now() - parseInt(completedTimestamp)) < 5 * 60 * 1000;
-      
-      if (!completedTimestamp || isTimestampValid) {
-        console.log('[ConfettiEffect] Detected valid completion flag. Triggering confetti!');
-        setShowConfetti(true);
-      } else {
-        console.log('[ConfettiEffect] Found stale completion flag. Ignoring.');
-      }
-      
-      // Clear the flags regardless
-      sessionStorage.removeItem('challengeCompleted');
-      sessionStorage.removeItem('challengeCompletedTimestamp');
-      
-      // Return early - we've handled the direct flag case
-      return;
-    }
-    // ----------------------------------------------------
-
-    // No direct completion flag present, check for challenge state changes
-    const currentChallengeId = userProfile?.activeChallenge?.challengeId;
-    
-    console.log("[ConfettiEffect] Running state change check.", { 
-        prevChallengeId,
-        currentChallengeId,
-        authLoading,
-        profileExists: !!userProfile 
-    });
-
-    // Only proceed with checks if we have loaded user data
-    if (authLoading || prevChallengeId === undefined) {
-      console.log('[ConfettiEffect] Still loading or first render, skipping state change check');
-      
-      // Initialize prevChallengeId on first load, but don't trigger effects
-      if (!authLoading && prevChallengeId === undefined) {
-        console.log('[ConfettiEffect] Setting initial challenge ID:', currentChallengeId ?? null);
-        setPrevChallengeId(currentChallengeId ?? null);
-      }
-      return;
-    }
-
-    // Important: Check if previously there WAS an active challenge and now there is NONE
-    // This would indicate a completed challenge (unless it was skipped)
-    if (prevChallengeId && !currentChallengeId) {
-      console.log('[ConfettiEffect] Potential completion detected: Had previous challenge, now have none.');
-      
-      // Check if this was due to a skip action
-      const wasSkipped = sessionStorage.getItem('skippedChallenge') === 'true';
-      
-      if (wasSkipped) {
-        console.log('[ConfettiEffect] Challenge was explicitly skipped, suppressing confetti.');
-        sessionStorage.removeItem('skippedChallenge'); // Clear the skip flag
-      } else {
-        // Not skipped - must have been completed! Show confetti
-        console.log('[ConfettiEffect] Challenge completed naturally. Triggering confetti!');
-        setShowConfetti(true);
-      }
-    }
-
-    // Always update previous challenge ID for the next state change check
-    // (but only when user data is fully loaded to avoid false positives)
-    if (!authLoading && currentChallengeId !== prevChallengeId) {
-      console.log('[ConfettiEffect] Updating prevChallengeId from', prevChallengeId, 'to', currentChallengeId ?? null);
-      setPrevChallengeId(currentChallengeId ?? null);
-    }
-  }, [userProfile?.activeChallenge, authLoading, prevChallengeId]); // Dependencies
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -213,11 +131,6 @@ const IndexPage: NextPage = () => {
       return;
     }
     
-    // IMPORTANT: Set skip flag BEFORE making the API call
-    // This ensures the confetti effect won't trigger even if the page refreshes
-    console.log('[handleSkipChallenge] Setting skippedChallenge flag in sessionStorage');
-    sessionStorage.setItem('skippedChallenge', 'true');
-    
     console.log("[handleSkipChallenge] Attempting to skip challenge via HTTPS...");
     try {
       const idToken = await getIdToken(user); // Get the ID token
@@ -261,8 +174,6 @@ const IndexPage: NextPage = () => {
       
     } catch (error) {
       console.error("Error calling skipCurrentChallenge function:", error);
-      // Remove the flag if the skip failed
-      sessionStorage.removeItem('skippedChallenge');
       // TODO: Show error to user
     }
   };
@@ -321,18 +232,6 @@ const IndexPage: NextPage = () => {
           </div>
         </DashboardLayout>
       </AuthGuard>
-
-      {/* Confetti Animation Overlay */} 
-      {showConfetti && 
-        <Confetti 
-          width={width}
-          height={height}
-          recycle={false}
-          numberOfPieces={400}
-          gravity={0.15}
-          onConfettiComplete={() => setShowConfetti(false)} // Stop rendering when complete
-        />
-      }
     </>
   );
 };

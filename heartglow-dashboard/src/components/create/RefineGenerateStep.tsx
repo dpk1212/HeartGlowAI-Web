@@ -204,7 +204,7 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
            {formats.map((format) => {
               const isSelected = selectedFormat === format.id;
               return (
-                <div key={format.id}>
+                <div key={format.id} className={`${isSelected ? 'col-span-2 sm:col-span-3' : ''}`}>
                   <motion.div
                     whileHover={{ scale: 1.03, y: -1 }}
                     whileTap={{ scale: 0.97 }}

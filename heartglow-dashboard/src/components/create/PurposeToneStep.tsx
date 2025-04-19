@@ -86,6 +86,24 @@ const LabelledSlider = ({ label, value, onChange, min = 1, max = 5, helpText, ic
   );
 };
 
+// Define SectionWrapper OUTSIDE the main component
+const SectionWrapper: React.FC<{ title: string; description: string; children: React.ReactNode }> = ({ title, description, children }) => (
+  <div className="space-y-4 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
+    <div className="text-left mb-4">
+      <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
+         {/* Add appropriate icon based on title? Hardcoded for now */}
+         {title === 'Purpose' && <Edit3 size={20} className="mr-2 text-heartglow-pink"/>}
+         {title === 'Tone' && <Smile size={20} className="mr-2 text-heartglow-violet"/>}
+         {title === 'Style' && <BarChartHorizontal size={20} className="mr-2 text-blue-500"/>}
+         {title === 'Refine Goal' && <MessageSquare size={20} className="mr-2 text-green-500"/>}
+         {title}
+       </h2>
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
+    </div>
+    {children}
+  </div>
+);
+
 const PurposeToneStep: React.FC<PurposeToneStepProps> = ({ onNext, onBack, initialData }) => {
   // --- State Management ---
   const [selectedIntent, setSelectedIntent] = useState<string | null>(initialData?.intent?.type || null);
@@ -193,25 +211,7 @@ const PurposeToneStep: React.FC<PurposeToneStepProps> = ({ onNext, onBack, initi
       transition={{ duration: 0.5 }}
       className="space-y-8 dark:text-heartglow-offwhite"
     >
-      {/* Section Wrapper Function for Consistency */}
-      const SectionWrapper: React.FC<{ title: string; description: string; children: React.ReactNode }> = ({ title, description, children }) => (
-        <div className="space-y-4 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
-          <div className="text-left mb-4">
-            <h2 className="text-xl font-semibold text-gray-800 dark:text-white flex items-center">
-               {/* Add appropriate icon based on title? Hardcoded for now */}
-               {title === 'Purpose' && <Edit3 size={20} className="mr-2 text-heartglow-pink"/>}
-               {title === 'Tone' && <Smile size={20} className="mr-2 text-heartglow-violet"/>}
-               {title === 'Style' && <BarChartHorizontal size={20} className="mr-2 text-blue-500"/>}
-               {title === 'Refine Goal' && <MessageSquare size={20} className="mr-2 text-green-500"/>}
-               {title}
-             </h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
-          </div>
-          {children}
-        </div>
-      );
-
-      {/* Intent Section */}
+      {/* Intent Section - Now uses the globally defined SectionWrapper */}
       <SectionWrapper title="Purpose" description="What's the main goal of your message?">
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {intents.map((intent) => (

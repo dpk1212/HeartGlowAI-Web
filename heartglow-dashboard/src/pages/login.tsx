@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
@@ -14,7 +14,14 @@ const Login = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, loginWithGoogle, signup } = useAuth();
+  const { login, loginWithGoogle, signup, currentUser, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && currentUser) {
+      console.log('Login Page: User already logged in, redirecting to /');
+      router.replace('/');
+    }
+  }, [currentUser, loading, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,6 +68,10 @@ const Login = () => {
     setIsSigningUp(!isSigningUp);
     setError('');
   };
+
+  if (loading || currentUser) {
+    return <div className="min-h-screen flex items-center justify-center">Checking authentication...</div>;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-100 via-purple-50 to-indigo-100 dark:from-gray-950 dark:via-heartglow-charcoal dark:to-indigo-900/50 font-sans">

@@ -2,19 +2,15 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../context/AuthContext';
 import RecipientStep from '../components/create/RecipientStep';
-import IntentStep from '../components/create/IntentStep';
-import FormatStep from '../components/create/FormatStep';
-import ToneStep from '../components/create/ToneStep';
-import ContextStyleStep from '../components/create/ContextStyleStep';
+import PurposeToneStep from '../components/create/PurposeToneStep';
+import RefineGenerateStep from '../components/create/RefineGenerateStep';
 import MessageOutput from '../components/create/MessageOutput';
 import { AnimatePresence, motion } from 'framer-motion';
 
 const stepsInfo = [
   { number: 1, label: 'Recipient' },
-  { number: 2, label: 'Intent' },
-  { number: 3, label: 'Format' },
-  { number: 4, label: 'Tone' },
-  { number: 5, label: 'Context & Style' },
+  { number: 2, label: 'Purpose & Tone' },
+  { number: 3, label: 'Refine & Generate' },
 ];
 
 export default function CreatePage() {
@@ -65,6 +61,7 @@ export default function CreatePage() {
   }
 
   const handleNext = (data: any) => {
+    console.log(`>>> Data received from step ${step}:`, data);
     setFormData(prev => ({ ...prev, ...data }));
     setStep(prev => prev + 1);
   };
@@ -85,10 +82,9 @@ export default function CreatePage() {
     const currentStepComponent = () => {
       switch (step) {
         case 1: return <RecipientStep onNext={handleNext} initialData={formData.recipient} />;
-        case 2: return <IntentStep onNext={handleNext} onBack={handleBack} initialData={formData.intent} />;
-        case 3: return <FormatStep onNext={handleNext} onBack={handleBack} initialData={{ type: formData.format?.type, length: formData.format?.length, options: formData.format?.options }} />;
-        case 4: return <ToneStep onNext={handleNext} onBack={handleBack} initialData={formData.tone} />;
-        case 5: return <ContextStyleStep onNext={handleNext} onBack={handleBack} initialData={{
+        case 2: return <PurposeToneStep onNext={handleNext} onBack={handleBack} initialData={{ intent: formData.intent, tone: formData.tone }} />;
+        case 3: return <RefineGenerateStep onNext={handleNext} onBack={handleBack} initialData={{
+          format: formData.format,
           promptedBy: formData.promptedBy,
           messageGoal: formData.messageGoal,
           formalityLevel: formData.formalityLevel,
@@ -96,7 +92,7 @@ export default function CreatePage() {
           customInstructionsText: formData.customInstructionsText,
           customInstructionsOptions: formData.customInstructionsOptions,
         }} />;
-        case 6: 
+        case 4: 
           return <MessageOutput 
             recipient={formData.recipient}
             connectionData={formData.connectionData}
@@ -139,7 +135,7 @@ export default function CreatePage() {
           transition={{ duration: 0.5, delay: 0.1 }}
           className="bg-white dark:bg-heartglow-deepgray text-gray-900 dark:text-gray-100 rounded-xl shadow-xl overflow-hidden p-8 sm:p-10">
           
-          {step <= 5 && (
+          {step <= 3 && (
             <div className="mb-10 sm:mb-12">
               <div className="flex items-start justify-between">
                 {stepsInfo.map((stepInfo, index) => (

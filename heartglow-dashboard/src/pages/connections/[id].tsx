@@ -15,10 +15,10 @@ import {
 import { db, Connection, updateConnection, deleteConnection, formatRelativeTime } from '../../firebase/db';
 
 // Helper function to add basePath
-const getRouteWithBasePath = (path: string): string => {
-  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  return `${basePath}${path}`;
-};
+// const getRouteWithBasePath = (path: string): string => {
+//   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+//   return `${basePath}${path}`;
+// };
 
 // Relationship options
 const RELATIONSHIP_OPTIONS = [
@@ -173,7 +173,7 @@ const ConnectionDetailPage = () => {
       await deleteConnection(currentUser, connection.id);
 
       // Revert to using getRouteWithBasePath, relying on trailingSlash: true
-      const redirectPath = getRouteWithBasePath('/connections');
+      const redirectPath = '/connections'; // Use absolute path
       // const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
       // const redirectPath = `${basePath}/connections/index.html`;
       console.log('>>> Redirecting after delete to directory:', redirectPath); // Update log message
@@ -215,7 +215,7 @@ const ConnectionDetailPage = () => {
             </h3>
             <div className="mt-6">
               <Link
-                href={getRouteWithBasePath('/dashboard')}
+                href="/dashboard"
                 className="px-6 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-200"
               >
                 Back to Dashboard
@@ -241,7 +241,7 @@ const ConnectionDetailPage = () => {
             <div className="mb-8">
               <div className="flex items-center mb-2">
                 <Link
-                  href={getRouteWithBasePath('/connections')}
+                  href="/connections"
                   className="text-heartglow-indigo dark:text-heartglow-pink hover:underline flex items-center mr-3"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -572,7 +572,7 @@ const ConnectionDetailPage = () => {
                   {/* Actions */}
                   <div className="flex justify-between mt-8">
                     <Link
-                      href={getRouteWithBasePath(`/create?recipient=${connection?.id}`)}
+                      href={`/create?recipient=${connection?.id}`}
                       className="px-6 py-2 bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white rounded-lg shadow-md hover:shadow-lg transition-all duration-200"
                     >
                       Create Message

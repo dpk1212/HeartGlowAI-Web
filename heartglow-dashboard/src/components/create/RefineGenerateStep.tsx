@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FileText, AlignCenter, AlignLeft, AlignJustify, Paperclip, MessageCircle } from 'lucide-react';
 
 // --- Types and Constants from FormatStep ---
@@ -112,12 +112,12 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
 
   // --- Render Logic ---
 
-  // Function to render format-specific options - Minor styling tweaks
-  const renderFormatSpecificOptions = () => {
+  // Modified renderFormatSpecificOptions to return the JSX directly for embedding
+  const renderFormatSpecificOptionsContent = () => {
      switch (selectedFormat) {
       case 'email':
         return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-3 rounded-md bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50">
+          <>
             <label htmlFor="email-subject" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Subject (Optional)</label>
             <input
               id="email-subject"
@@ -127,11 +127,11 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
               className="w-full p-2 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-1 focus:ring-heartglow-pink focus:border-heartglow-pink text-sm dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
               placeholder="Enter email subject"
             />
-          </motion.div>
+          </>
         );
       case 'text':
         return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-3 rounded-md bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50">
+          <>
             <label htmlFor="emoji-usage" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Emoji Usage</label>
             <select
               id="emoji-usage"
@@ -144,11 +144,11 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
               <option value="frequent">Frequent</option>
               <option value="none">None</option>
             </select>
-          </motion.div>
+          </>
         );
       case 'conversation':
         return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-3 rounded-md bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50">
+           <>
             <label htmlFor="talking-points" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Number of Talking Points</label>
             <input
               id="talking-points"
@@ -159,11 +159,11 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
               onChange={(e) => setFormatSpecificOptions(prev => ({ ...prev, talkingPoints: parseInt(e.target.value, 10) || 1 }))}
                className="w-full p-2 border rounded-lg bg-white text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-1 focus:ring-heartglow-pink focus:border-heartglow-pink text-sm dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400"
             />
-          </motion.div>
+          </>
         );
       case 'social':
         return (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 p-3 rounded-md bg-gray-50 dark:bg-gray-800/30 border border-gray-200 dark:border-gray-700/50">
+          <>
             <label htmlFor="platform" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">Platform</label>
             <select
               id="platform"
@@ -177,7 +177,7 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
               <option value="facebook">Facebook</option>
               <option value="linkedin">LinkedIn</option>
             </select>
-          </motion.div>
+          </>
         );
       default:
         return null;
@@ -196,87 +196,97 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
         <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">Choose the final format and add specific instructions.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-        <div className="space-y-6 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
-               <Paperclip size={18} className="mr-2 text-heartglow-pink"/> Format
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
-              {formats.map((format) => (
-                <motion.div
-                  key={format.id}
-                  whileHover={{ scale: 1.03, y: -1 }}
-                  whileTap={{ scale: 0.97 }}
-                  onClick={() => setSelectedFormat(format.id)}
-                   className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-150 flex items-center space-x-2 text-sm ${
-                     selectedFormat === format.id
-                      ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 shadow-md'
-                      : 'bg-white border-gray-200 hover:border-heartglow-pink/50 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:border-heartglow-pink/60'
-                  }`}
-                >
-                   <span className="text-lg">{format.icon}</span>
-                   <span className="font-medium text-gray-800 dark:text-gray-200">{format.label}</span>
-                </motion.div>
-              ))}
-            </div>
-            {renderFormatSpecificOptions()}
-          </div>
-
-          <div className="pt-4 border-t border-gray-200 dark:border-gray-700/50">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
-              <AlignJustify size={18} className="mr-2 text-heartglow-violet"/> Length
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              {lengths.map((len) => (
-                <motion.button
-                  key={len.id}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setSelectedLength(len.id)}
-                   className={`px-3 py-1.5 rounded-full border text-xs font-medium flex items-center gap-1.5 transition-colors duration-150 ${
-                    selectedLength === len.id
-                      ? 'border-transparent ring-2 ring-heartglow-violet bg-heartglow-violet/10 text-heartglow-violet dark:bg-heartglow-violet/20 dark:text-heartglow-violet-light shadow-sm'
-                      : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-300 dark:hover:bg-gray-600'
-                  }`}
-                >
-                   {len.icon}
-                   {len.label}
-                </motion.button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-4 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
-              <MessageCircle size={18} className="mr-2 text-blue-500"/> Context & Instructions
-            </h3>
-            <p className="text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4">Add background, specific points to include/avoid, or other guidance for the AI.</p>
-
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">Quick Options:</label>
-              <div className="flex items-center gap-4 flex-wrap">
-                <div className="flex items-center">
-                  <input id="mentionMemory" type="checkbox" checked={customInstructionsOptions.mentionMemory} onChange={() => handleCheckboxChange('mentionMemory')} className="h-4 w-4 text-heartglow-pink border-gray-300 rounded focus:ring-heartglow-pink dark:bg-gray-700 dark:border-gray-600"/>
-                  <label htmlFor="mentionMemory" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">Mention specific memory/event</label>
+      <div className="space-y-4 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
+         <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
+            <Paperclip size={18} className="mr-2 text-heartglow-pink"/> Format
+         </h3>
+         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+           {formats.map((format) => {
+              const isSelected = selectedFormat === format.id;
+              return (
+                <div key={format.id}>
+                  <motion.div
+                    whileHover={{ scale: 1.03, y: -1 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedFormat(format.id)}
+                    className={`p-3 rounded-lg border-2 cursor-pointer transition-all duration-150 flex items-center space-x-2 text-sm h-full ${
+                      isSelected
+                        ? 'border-heartglow-pink bg-heartglow-pink/5 dark:bg-heartglow-pink/10 shadow-md'
+                        : 'bg-white border-gray-200 hover:border-heartglow-pink/50 dark:bg-heartglow-deepgray dark:border-gray-600 dark:hover:border-heartglow-pink/60'
+                    }`}
+                  >
+                    <span className="text-lg">{format.icon}</span>
+                    <span className="font-medium text-gray-800 dark:text-gray-200">{format.label}</span>
+                  </motion.div>
+                  {/* Animate presence for format specific options */}
+                  <AnimatePresence>
+                    {isSelected && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                        animate={{ opacity: 1, height: 'auto', marginTop: '0.75rem' }}
+                        exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                        className="p-3 rounded-md bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 overflow-hidden"
+                      >
+                        {renderFormatSpecificOptionsContent()}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <div className="flex items-center">
-                  <input id="askQuestion" type="checkbox" checked={customInstructionsOptions.askQuestion} onChange={() => handleCheckboxChange('askQuestion')} className="h-4 w-4 text-heartglow-pink border-gray-300 rounded focus:ring-heartglow-pink dark:bg-gray-700 dark:border-gray-600"/>
-                  <label htmlFor="askQuestion" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">Include a question</label>
-                </div>
-              </div>
-            </div>
+              );
+          })}
+         </div>
+      </div>
 
-            <textarea
-              value={contextInstructions}
-              onChange={(e) => setContextInstructions(e.target.value)}
-              placeholder="e.g., &#10;• Prompt: Saw their vacation photos.&#10;• Goal: Ask about the trip, say I miss them.&#10;• Avoid mentioning work.&#10;• Mention the funny thing that happened last week."
-              className="w-full p-3 border rounded-lg bg-gray-50 text-gray-900 border-gray-300 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-y min-h-[120px] dark:bg-gray-700 dark:text-heartglow-offwhite dark:border-gray-600 dark:placeholder-gray-400/70"
-              rows={6}
-            />
+      <div className="space-y-3 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
+        <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
+           <AlignJustify size={18} className="mr-2 text-heartglow-violet"/> Length
+        </h3>
+        <div className="flex w-full rounded-lg bg-gray-100 dark:bg-gray-700 p-1 border border-gray-200 dark:border-gray-600">
+          {lengths.map((len) => (
+            <button
+              key={len.id}
+              onClick={() => setSelectedLength(len.id)}
+              className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium flex items-center justify-center gap-1.5 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1 dark:focus:ring-offset-gray-700 focus:ring-heartglow-violet/60 ${
+                selectedLength === len.id
+                  ? 'bg-white dark:bg-heartglow-violet text-heartglow-violet dark:text-white shadow-sm'
+                  : 'text-gray-600 hover:bg-gray-200/60 dark:text-gray-300 dark:hover:bg-gray-600/60'
+              }`}
+            >
+              {len.icon}
+              {len.label}
+            </button>
+          ))}
         </div>
+      </div>
+
+      <div className="space-y-4 p-6 rounded-xl bg-white dark:bg-gray-800/20 border border-gray-200 dark:border-gray-700/30 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-800 dark:text-heartglow-offwhite mb-3 flex items-center">
+            <MessageCircle size={18} className="mr-2 text-blue-500"/> Context & Instructions
+          </h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 -mt-2 mb-4">Add background, specific points to include/avoid, or other guidance for the AI.</p>
+
+           <div className="space-y-2">
+             <label className="block text-xs font-medium text-gray-500 dark:text-gray-400">Quick Options:</label>
+             <div className="flex items-center gap-4 flex-wrap">
+               <div className="flex items-center">
+                 <input id="mentionMemory" type="checkbox" checked={customInstructionsOptions.mentionMemory} onChange={() => handleCheckboxChange('mentionMemory')} className="h-4 w-4 text-heartglow-pink border-gray-300 rounded focus:ring-heartglow-pink dark:bg-gray-700 dark:border-gray-600"/>
+                 <label htmlFor="mentionMemory" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">Mention specific memory/event</label>
+               </div>
+               <div className="flex items-center">
+                 <input id="askQuestion" type="checkbox" checked={customInstructionsOptions.askQuestion} onChange={() => handleCheckboxChange('askQuestion')} className="h-4 w-4 text-heartglow-pink border-gray-300 rounded focus:ring-heartglow-pink dark:bg-gray-700 dark:border-gray-600"/>
+                 <label htmlFor="askQuestion" className="ml-2 block text-sm text-gray-700 dark:text-gray-300">Include a question</label>
+               </div>
+             </div>
+           </div>
+
+          <textarea
+            value={contextInstructions}
+            onChange={(e) => setContextInstructions(e.target.value)}
+            placeholder="e.g., &#10;• Prompt: Saw their vacation photos.&#10;• Goal: Ask about the trip, say I miss them.&#10;• Avoid mentioning work.&#10;• Mention the funny thing that happened last week."
+            className="w-full p-3 border rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-heartglow-offwhite border-gray-300 dark:border-gray-600 placeholder-gray-400 dark:placeholder-gray-400/70 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm resize-y min-h-[120px] shadow-sm"
+            rows={6}
+          />
       </div>
 
       <div className="flex justify-between mt-10 pt-6 border-t border-gray-200 dark:border-gray-700/50">

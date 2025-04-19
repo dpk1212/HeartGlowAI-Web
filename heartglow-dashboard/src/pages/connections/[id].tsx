@@ -172,8 +172,8 @@ const ConnectionDetailPage = () => {
       // Delete from Firestore
       await deleteConnection(currentUser, connection.id);
       
-      // Redirect to dashboard
-      router.push(getRouteWithBasePath('/dashboard'));
+      // Redirect to connections list instead
+      router.push(getRouteWithBasePath('/connections'));
       
     } catch (err: any) {
       console.error('Error deleting connection:', err);

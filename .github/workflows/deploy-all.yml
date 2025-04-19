@@ -37,60 +37,73 @@ jobs:
           echo "WORKSPACE_ROOT=$(pwd)" >> $GITHUB_ENV
           echo "DEPLOY_DIR=$(pwd)/deploy" >> $GITHUB_ENV
           
-          # Clean and recreate deployment directory
+          # Clean and recreate deployment directories
           rm -rf deploy
-          mkdir -p deploy
+          mkdir -p deploy/dashboard
           
-          # Create CNAME file in root
+          # Create CNAME files
           echo "heartglowai.com" > deploy/CNAME
+          echo "heartglowai.com" > deploy/dashboard/CNAME
           
-          # Create .nojekyll file in root
+          # Create .nojekyll files
           touch deploy/.nojekyll
+          touch deploy/dashboard/.nojekyll
           
           # Debug outputs
           echo "Workspace root: $WORKSPACE_ROOT"
           echo "Deploy directory: $DEPLOY_DIR"
           ls -la deploy
+          ls -la deploy/dashboard
 
-      # Build dashboard for root deployment
-      - name: Build dashboard for root
+      # Build dashboard with its enhanced configuration
+      - name: Build dashboard
         run: |
           # Navigate to source directory
           cd heartglow-dashboard
           
-          # REMOVED: Environment variable for base path (build for root)
-          # echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
+          # Set environment variables
+          echo "NEXT_PUBLIC_BASE_PATH=/dashboard" > .env.production.local
           
-          # Build the dashboard (for root)
+          # Build the dashboard
           npm run build
           
-          # Copy files using absolute paths to the ROOT deploy directory
-          echo "Copying dashboard build files to $DEPLOY_DIR/"
-          cp -rv out/* $DEPLOY_DIR/
+          # Copy files using absolute paths
+          echo "Copying dashboard files to $DEPLOY_DIR/dashboard/"
+          cp -rv out/* $DEPLOY_DIR/dashboard/
 
-          # REMOVED: Favicon copy (should be handled by Next.js build output)
+          # Explicitly copy favicon to the ROOT deploy directory as well
+          echo "Copying favicon to $DEPLOY_DIR/"
+          cp public/favicon.ico $DEPLOY_DIR/
           
           # Cleanup
           rm -rf out .next
 
-      # REMOVED STEP: No longer copying the separate root index.html
-      # - name: Copy root landing page files 
-      #  run: | ... 
+      # Build login page as the root site - REMOVED FOR SIMPLICITY
 
-      # Display deployment structure
-      - name: Show final deployment structure
+      # Copy root landing page files instead of creating redirect
+      - name: Copy root landing page files 
         run: |
-          echo "Final deployment directory structure:"
-          ls -la $DEPLOY_DIR
-          # Show top-level files/folders in deploy dir
-          find $DEPLOY_DIR -maxdepth 1 -ls 
+          echo "Copying root index.html from $WORKSPACE_ROOT/index.html to $DEPLOY_DIR/index.html"
+          cp $WORKSPACE_ROOT/index.html $DEPLOY_DIR/index.html
+          
+          # You might need to copy other assets used by the landing page (e.g., CSS, JS, images)
+          # Example: If you have an 'assets' folder in the root:
+          # if [ -d "$WORKSPACE_ROOT/assets" ]; then
+          #  echo "Copying root assets directory..."
+          #  cp -r $WORKSPACE_ROOT/assets $DEPLOY_DIR/
+          # fi
+          # Add similar copy commands for any other necessary root files/folders.
+
+          # Display deployment structure
+          echo "Final deployment directory structure after copying root files:"
+          find $DEPLOY_DIR -type f | head -n 20
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: deploy # Deploy the root directory containing the dashboard build
+          folder: deploy
           clean: true
           clean-exclude: |
             .nojekyll
             CNAME
-          commit-message: "Deploy dashboard to root" # Updated commit message 
+          commit-message: "Deploy site: Use main index.html and dashboard build" # Updated commit message 

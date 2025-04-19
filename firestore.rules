@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Users can only read/write their own documents in the /users collection
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+
+      // Example: Allow users to read/write their own connections
+      // Adjust paths based on your actual data structure
+      match /connections/{connectionId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+
+      // Example: Allow users to read/write their own messages
+      match /messages/{messageId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
+      
+       // Example: Allow users to read/write their own challenges/progress if stored under their user doc
+       match /challenges/{challengeId} {
+         allow read, write: if request.auth != null && request.auth.uid == userId;
+       }
+
+       // Add rules for other user-specific subcollections as needed
+    }
+
+    // Add rules for other collections if they exist (e.g., shared data)
+    // Example: A 'publicChallenges' collection readable by any authenticated user
+    // match /publicChallenges/{challengeId} {
+    //  allow read: if request.auth != null;
+    //  allow write: if false; // Or restrict to admin roles
+    // }
+  }
+} 

@@ -77,15 +77,10 @@ function buildEnhancedPrompt(params: GenerationParams): string {
 
 
     // Construct the final prompt
-    const prompt = `### Persona
-Act as an expert in empathetic communication named HeartGlow AI. Your goal is to help the user craft authentic, thoughtful messages that build stronger relationships, tailored to the specific context provided.
-
-### Context
-${context}
-### Message Requirements
-${requirements}
-### Task
-Based *only* on the Context and Requirements provided above, write the message content. Focus on authenticity, warmth, and achieving the User's Goal. Do not add any extra commentary, analysis, introduction, or sign-off (like "Sincerely"). Output *only* the raw message text suitable for the specified format.`;
+    // Simplified separator and clearer instructions
+    // Correctly escaped backslashes for newline characters
+    const separator = "\\n%%%INSIGHTS%%%\\n"; // Use escaped \\n within the string
+    const prompt = `### Persona\nAct as an expert in empathetic communication named HeartGlow AI. Your goal is to help the user craft authentic, thoughtful messages that build stronger relationships, tailored to the specific context provided.\n\n### Context\n${context}\n### Message Requirements\n${requirements}\n### Task\nYour response MUST follow this exact structure:\n1.  First, provide ONLY the generated message content based on the Context and Requirements. Do NOT add any introductory text, commentary, or sign-off before the message.\n2.  Immediately after the message content, add the exact separator line: \`${separator}\` \n3.  Immediately following the separator, provide 2-3 concise bullet points (each starting with '*') explaining *why* the generated message is effective for the given Context and Requirements. Focus on tone, intent alignment, and relationship suitability. Do NOT add any text after the final bullet point.\n\n### Output Structure Example:\n[Generated Message Content Only]\n%%%INSIGHTS%%%\n* Insight explaining effectiveness 1.\n* Insight explaining effectiveness 2.`;
 
     return prompt;
 }
@@ -112,10 +107,10 @@ export const generateEnhancedMessage = functions.https.onCall(async (data, conte
 
     try {
         // --- OpenAI API Call ---
-        // Ensure API key is set in environment variables
+        // Get API key from environment variables
         const apiKey = process.env.OPENAI_API_KEY;
         if (!apiKey) {
-            console.error("OpenAI API key not configured.");
+            console.error("OpenAI API key not configured in environment variables.");
             throw new functions.https.HttpsError('internal', 'API key not configured.');
         }
 
@@ -134,22 +129,56 @@ export const generateEnhancedMessage = functions.https.onCall(async (data, conte
             presence_penalty: 0,
         });
 
-        const messageContent = completion.choices[0]?.message?.content?.trim();
+        const rawCompletion = completion.choices[0]?.message?.content?.trim();
 
-        if (!messageContent) {
+        if (!rawCompletion) {
             throw new Error("Failed to get valid content from OpenAI.");
         }
 
-        // --- Generate Basic Insights (Can be enhanced later) ---
-        // TODO: Consider a separate LLM call for better insights, or refine this logic
-        const insights = [
-            `Generated using ${model} based on detailed context.`,
-            `Tone aimed for: ${params.tone}.`,
-            `Tailored for relationship: ${params.recipient.relationship}.`
-        ];
+        // --- Parse Message and Insights ---
+        // Look for the new, simple separator
+        const separator = "\n%%%INSIGHTS%%%\n"; 
+        const parts = rawCompletion.split(separator);
+        
+        let messageContent = '';
+        let parsedInsights: string[] = [];
 
-        console.log("Successfully generated message content.");
-        return { content: messageContent, insights: insights };
+        if (parts.length >= 2) {
+            messageContent = parts[0].trim();
+            const insightsText = parts[1].trim();
+            // Split insights by common list markers (newline followed by *, -, or •)
+            // Also trim each insight and filter empty ones
+            parsedInsights = insightsText
+                .split(/\n\s*[-*•]\s*/)
+                .map(insight => insight.trim())
+                .filter(insight => insight.length > 0);
+
+            // If splitting by list marker yields only one item (or zero), 
+            // maybe the AI just listed them separated by newlines only.
+            if (parsedInsights.length <= 1 && insightsText.includes('\n')) {
+                parsedInsights = insightsText
+                    .split(/\n+/)
+                    .map(insight => insight.trim())
+                    .filter(insight => insight.length > 0);
+            }
+
+        } else {
+            // Fallback if separator is not found (treat entire response as message)
+            console.warn('[generateEnhancedMessage] Separator not found in OpenAI response. Treating entire response as message.');
+            messageContent = rawCompletion;
+            // Provide basic fallback insights if parsing failed
+            parsedInsights = [
+                `Generated using ${model}.`,
+                `Tone aimed for: ${params.tone}.`,
+                `Tailored for relationship: ${params.recipient.relationship}.`,
+                `(Using fallback insights as structure was not recognized)` // Add note about fallback
+            ];
+        }
+
+        // --- Deprecated Basic Insights Generation ---
+        // const insights = [\n        //     `Generated using ${model} based on detailed context.`,\n        //     `Tone aimed for: ${params.tone}.`,\n        //     `Tailored for relationship: ${params.recipient.relationship}.`\n        // ];\n
+        console.log("Successfully generated message content and parsed insights.");
+        return { content: messageContent, insights: parsedInsights }; // Return parsed content and insights
 
     } catch (error: any) {
         console.error("Error calling OpenAI or processing response:", error);

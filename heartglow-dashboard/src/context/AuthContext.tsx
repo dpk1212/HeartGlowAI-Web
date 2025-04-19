@@ -4,7 +4,8 @@ import {
   signInWithGoogle, 
   auth_signUp as signUp,
   logOut,
-  onAuthStateChangedListener
+  onAuthStateChangedListener,
+  signInAnonymously
 } from '../firebase/auth';
 import { User } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, increment, getDoc, updateDoc, DocumentData, onSnapshot, Unsubscribe } from 'firebase/firestore';
@@ -68,13 +69,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isInitialAuthCheckComplete, setIsInitialAuthCheckComplete] = useState(false);
 
   useEffect(() => {
     console.log('Setting up auth state listener');
     let profileUnsubscribe: Unsubscribe | null = null;
     
     const unsubscribe = onAuthStateChangedListener(async (user) => {
-      console.log('Auth state changed:', user ? `User logged in ${user.uid}` : 'No user');
+      console.log('Auth state changed:', user ? `User logged in ${user.uid} (Anonymous: ${user.isAnonymous})` : 'No user');
 
       setCurrentUser(user);
 
@@ -85,9 +87,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       
       if (!user) {
-        setUserProfile(null);
-        setLoading(false);
+        if (isInitialAuthCheckComplete) {
+          console.log('User logged out or session ended.');
+          setUserProfile(null);
+          setLoading(false);
+        } else {
+          console.log('Initial load: No user found, attempting anonymous sign-in...');
+          setLoading(true);
+          try {
+            await signInAnonymously();
+            console.log('Anonymous sign-in successful, waiting for state update.');
+          } catch (error) {
+            console.error('Anonymous sign-in failed:', error);
+            setUserProfile(null);
+            setLoading(false);
+          } finally {
+            setIsInitialAuthCheckComplete(true);
+          }
+        }
       } else {
+        setIsInitialAuthCheckComplete(true);
         setLoading(true);
         const userRef = doc(db, "users", user.uid);
         console.log(`Setting up profile listener for user ${user.uid}`);
@@ -95,16 +114,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         profileUnsubscribe = onSnapshot(userRef, async (docSnap) => {
            if (docSnap.exists()) {
              console.log(`Profile data received for user ${user.uid}:`, docSnap.data());
-             setUserProfile({ uid: user.uid, ...docSnap.data() } as UserProfile);
+             const profileData = docSnap.data() as Omit<UserProfile, 'uid'>;
+             setUserProfile({ 
+               uid: user.uid, 
+               email: user.email ?? profileData.email ?? null,
+               displayName: user.displayName ?? profileData.displayName ?? null,
+               photoURL: user.photoURL ?? profileData.photoURL ?? null,
+               lastLogin: profileData.lastLogin ?? serverTimestamp(),
+               totalMessageCount: profileData.totalMessageCount ?? 0,
+               glowScoreXP: profileData.glowScoreXP ?? 0,
+               glowScoreTier: profileData.glowScoreTier ?? '🌱 Opening Up',
+               currentStreak: profileData.currentStreak ?? 0,
+               lastMessageTimestamp: profileData.lastMessageTimestamp ?? null,
+               activeChallenge: profileData.activeChallenge ?? null,
+               challengeHistory: profileData.challengeHistory ?? [],
+               metrics: profileData.metrics ?? { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
+               unlockedFeatures: profileData.unlockedFeatures ?? []
+             });
            } else {
              console.log(`Profile not found for ${user.uid}, creating...`);
              try {
-               const initialProfile: Partial<UserProfile> = {
-                 email: user.email,
+               const initialProfile: UserProfile = {
                  uid: user.uid,
-                 lastLogin: serverTimestamp(),
+                 email: user.email,
                  displayName: user.displayName,
                  photoURL: user.photoURL,
+                 lastLogin: serverTimestamp(),
                  totalMessageCount: 0,
                  glowScoreXP: 0,
                  glowScoreTier: '🌱 Opening Up',
@@ -117,13 +152,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);
-             } catch (error) {
-               console.error('Error creating initial user document:', error);
-               setUserProfile(null);
-               setLoading(false);
-             }
+           } catch (error) {
+             console.error('Error creating initial user document:', error);
+             setUserProfile(null);
+             setLoading(false);
            }
-           setLoading(false); 
         }, (error) => {
             console.error(`Error listening to profile for ${user.uid}:`, error);
             setUserProfile(null);

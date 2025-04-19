@@ -1,0 +1,29 @@
+# Implementation Plan: Firebase Anonymous Auth with Optional Upgrade
+
+**Goal:** Lower initial user friction by allowing users to use the dashboard features (connections, message creation/storage) without an explicit login, while providing an option to create a permanent account later to save data across devices/sessions.
+
+**Steps:**
+
+1.  **Modify Core Authentication Logic:**
+    *   [ ] Identify the central authentication state listener (likely in `_app.tsx`, `src/context/AuthContext.tsx`, or similar).
+    *   [ ] On app load, if no user is detected (`onAuthStateChanged` returns `null`), automatically call `signInAnonymously()` from the Firebase Auth SDK.
+    *   [ ] Adjust any initial redirection logic that forces users to `/login`. The app should load directly into the main dashboard view (`/`) for anonymous users.
+    *   [ ] Ensure `user.uid` is correctly passed down (e.g., via Context) for both anonymous and logged-in users.
+
+2.  **Verify Data Association:**
+    *   [ ] Confirm that Firestore database reads/writes (for connections, messages, user settings, etc.) consistently use the `user.uid` from the authenticated user state (anonymous or permanent). Check files interacting with Firestore (e.g., in `src/lib/`, `src/firebase/`, pages like `create.tsx`, `connections/*`).
+    *   [ ] No code changes expected if `user.uid` is already used correctly, but verification is needed.
+
+3.  **Implement Account Linking UI & Logic:**
+    *   [ ] Choose location(s) for the "Save Account" / "Link Account" prompt (e.g., `src/pages/settings.tsx`, `src/pages/profile.tsx`, a persistent banner in the layout).
+    *   [ ] Add UI elements (buttons, forms) for linking methods (e.g., Email/Password, Google Sign-in).
+    *   [ ] Implement the Firebase `linkWithCredential` logic triggered by user interaction with the new UI elements. Handle success and error states (e.g., display messages).
+    *   [ ] Update the UI state upon successful linking to reflect the permanent account status.
+
+4.  **Update Firestore Security Rules:**
+    *   [ ] Locate the `firestore.rules` file (likely in the project root or `firebase/` directory).
+    *   [ ] Review and update rules to ensure they grant access based on `request.auth.uid`.
+    *   [ ] Verify that rules correctly protect user data, allowing only the authenticated user (anonymous or permanent) to access their specific documents (e.g., `match /users/{userId}/{document=**} { allow read, write: if request.auth != null && request.auth.uid == userId; }`).
+
+5.  **Add User Communication:**
+    *   [ ] Add clear text in the UI (e.g., near the linking options, in tooltips) explaining that the current session is temporary and that creating an account will save their data securely across devices.

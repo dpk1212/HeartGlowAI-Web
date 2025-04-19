@@ -4,6 +4,9 @@ import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+import { Button } from '../components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
 // Placeholder component for a toggle switch (replace with actual implementation later)
 const ToggleSwitchPlaceholder = ({ label }: { label: string }) => (
@@ -55,11 +58,36 @@ export default function SettingsPage() {
 
                 {/* Account Settings */}
                 <div>
-                  <h2 className="text-xl font-semibold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite">Account (Coming Soon)</h2>
-                   <div className="space-y-4">
-                     <button disabled className="text-sm text-blue-600 hover:underline cursor-not-allowed">Change Password</button>
-                     <button disabled className="text-sm text-red-600 hover:underline cursor-not-allowed">Delete Account</button>
-                   </div>
+                  <h2 className="text-xl font-semibold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite">Account</h2>
+                  
+                  {currentUser?.isAnonymous && (
+                    <div className="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/50 border border-yellow-200 dark:border-yellow-800 rounded-md text-sm text-yellow-700 dark:text-yellow-200 flex items-start space-x-3">
+                       <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                       <div>
+                         <p className="font-medium">Save Your Progress!</p>
+                         <p className="mt-1">
+                           You're currently using a temporary session. Create a permanent account to save your connections, messages, and progress across devices.
+                         </p>
+                         <Link href="/account/link" passHref className="mt-3 inline-block">
+                           <Button variant="outline" size="sm" className="bg-yellow-100 dark:bg-yellow-800/60 hover:bg-yellow-200 dark:hover:bg-yellow-700/60 border-yellow-300 dark:border-yellow-600 text-yellow-800 dark:text-yellow-100">
+                             Create Permanent Account
+                           </Button>
+                         </Link>
+                       </div>
+                    </div>
+                  )}
+
+                  <div className="space-y-4">
+                    {!currentUser?.isAnonymous ? (
+                      <>
+                        {/* Show these options only for permanent accounts */}
+                        <button disabled className="text-sm text-blue-600 hover:underline cursor-not-allowed">Change Password (Coming Soon)</button>
+                        <button disabled className="text-sm text-red-600 hover:underline cursor-not-allowed">Delete Account (Coming Soon)</button>
+                      </>
+                    ) : (
+                       <p className="text-sm text-gray-500 dark:text-gray-400">Account options will be available after creating a permanent account.</p>
+                    )}
+                  </div>
                 </div>
 
               </div>

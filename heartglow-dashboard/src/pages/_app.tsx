@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import { useEffect } from 'react';
 import Head from 'next/head';
 import { AuthProvider } from '../context/AuthContext';
+import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 
 // Helper function to get route with base path
 export function getRouteWithBasePath(path: string): string {
@@ -59,6 +60,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <AuthProvider>
+        <AccountLinkBanner />
         <Component {...pageProps} />
       </AuthProvider>
     </>

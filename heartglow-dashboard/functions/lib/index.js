@@ -1,4 +1,7 @@
 "use strict";
+// These lines are removed entirely as they caused persistent build errors
+// import {onRequest} from "firebase-functions/v2/https";
+// import * as logger from "firebase-functions/logger";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -26,7 +29,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.skipCurrentChallenge = void 0;
+exports.generateMessageInsightsHttp = exports.generateMessageInsights = exports.generateEnhancedMessage = exports.skipCurrentChallenge = void 0;
 const functions = __importStar(require("firebase-functions")); // Add import
 const admin = __importStar(require("firebase-admin")); // Add import
 const cors = require("cors"); // Use require-style import for cors
@@ -50,6 +53,10 @@ __exportStar(require("./challengeAssignment"), exports);
 // export * from './progressTracking'; // Removed this line
 // Export Challenge Selection function(s)
 __exportStar(require("./challengeSelection"), exports);
+// Export Challenge Action function(s)
+__exportStar(require("./challengeActions"), exports);
+// Export Coaching Thread function(s)
+// export * from './coachingThreads'; // Temporarily commented out due to missing file
 // --- Removed explicit import/export for challengeActions ---
 // import { skipChallenge } from './challengeActions';
 // export { skipChallenge };
@@ -137,7 +144,13 @@ exports.skipCurrentChallenge = functions.https.onRequest((req, res) => {
     }); // End CORS handler wrapper
 });
 // --- Export Message Generation function --- 
-__exportStar(require("./messageGeneration"), exports);
+// export * from './messageGeneration';
+const messageGeneration_1 = require("./messageGeneration");
+Object.defineProperty(exports, "generateEnhancedMessage", { enumerable: true, get: function () { return messageGeneration_1.generateEnhancedMessage; } });
+// --- Export Message Insights function ---
+const messageInsights_1 = require("./messageInsights");
+Object.defineProperty(exports, "generateMessageInsights", { enumerable: true, get: function () { return messageInsights_1.generateMessageInsights; } });
+Object.defineProperty(exports, "generateMessageInsightsHttp", { enumerable: true, get: function () { return messageInsights_1.generateMessageInsightsHttp; } });
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';
 console.log('Importing and exporting Cloud Functions...');

@@ -6,11 +6,12 @@ import {
   signInWithPopup,
   signOut,
   onAuthStateChanged,
-  User
+  User,
+  signInAnonymously as firebaseSignInAnonymously
 } from 'firebase/auth';
 import { app } from './config';
 
-const auth = getAuth(app);
+export const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 
 export const signIn = async (email: string, password: string) => {
@@ -36,6 +37,15 @@ export const signInWithGoogle = async () => {
     return await signInWithPopup(auth, googleProvider);
   } catch (error) {
     console.error('Error signing in with Google:', error);
+    throw error;
+  }
+};
+
+export const signInAnonymously = async () => {
+  try {
+    return await firebaseSignInAnonymously(auth);
+  } catch (error) {
+    console.error('Error signing in anonymously:', error);
     throw error;
   }
 };

@@ -5,7 +5,6 @@ import AuthGuard from '../components/layout/AuthGuard';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Button } from '../components/ui/button';
 import { AlertCircle } from 'lucide-react';
 
 // Placeholder component for a toggle switch (replace with actual implementation later)
@@ -69,9 +68,11 @@ export default function SettingsPage() {
                            You're currently using a temporary session. Create a permanent account to save your connections, messages, and progress across devices.
                          </p>
                          <Link href="/account/link" passHref className="mt-3 inline-block">
-                           <Button variant="outline" size="sm" className="bg-yellow-100 dark:bg-yellow-800/60 hover:bg-yellow-200 dark:hover:bg-yellow-700/60 border-yellow-300 dark:border-yellow-600 text-yellow-800 dark:text-yellow-100">
+                           <button 
+                             className="px-3 py-1.5 border border-yellow-300 dark:border-yellow-600 rounded-md text-sm font-medium text-yellow-800 dark:text-yellow-100 bg-yellow-100 dark:bg-yellow-800/60 hover:bg-yellow-200 dark:hover:bg-yellow-700/60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                           >
                              Create Permanent Account
-                           </Button>
+                           </button>
                          </Link>
                        </div>
                     </div>

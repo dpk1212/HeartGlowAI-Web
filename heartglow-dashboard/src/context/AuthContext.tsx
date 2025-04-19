@@ -131,6 +131,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                metrics: profileData.metrics ?? { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
                unlockedFeatures: profileData.unlockedFeatures ?? []
              });
+             setLoading(false);
            } else {
              console.log(`Profile not found for ${user.uid}, creating...`);
              try {
@@ -152,10 +153,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);
-           } catch (error) {
-             console.error('Error creating initial user document:', error);
-             setUserProfile(null);
-             setLoading(false);
+             } catch (error) {
+               console.error('Error creating initial user document:', error);
+               setUserProfile(null);
+               setLoading(false);
+             }
            }
         }, (error) => {
             console.error(`Error listening to profile for ${user.uid}:`, error);

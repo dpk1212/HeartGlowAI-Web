@@ -297,7 +297,7 @@ export default function MessageOutput({
       const functions = getFunctions();
       
       // Create a callable function reference
-      const generateInsightsFunction = httpsCallable(functions, 'generateMessageInsights');
+      const generateInsightsFunction = httpsCallable(functions, 'generateMessageInsightsV2');
       
       // Prepare payload
       const payload = {
@@ -310,7 +310,7 @@ export default function MessageOutput({
         tone: tone // Send tone
       };
 
-      console.log(">>> Frontend: Payload being sent to generateMessageInsights:", JSON.stringify(payload, null, 2));
+      console.log(">>> Frontend: Payload being sent to generateMessageInsightsV2:", JSON.stringify(payload, null, 2));
 
       // Call the function (httpsCallable automatically includes the refreshed token)
       const result = await generateInsightsFunction(payload);

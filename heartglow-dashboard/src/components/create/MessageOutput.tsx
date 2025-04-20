@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { ChallengeDefinition, useChallenges } from '../../hooks/useChallenges';
 import { useRouter } from 'next/router';
 import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getAuth } from 'firebase/auth';
 
 interface MessageOutputProps {
   recipient: {
@@ -267,12 +268,32 @@ export default function MessageOutput({
 
   // New function to fetch insights and grade from OpenAI
   const generateInsightsAndGrade = async () => {
-    if (!message || !recipient || !intent || !tone) return;
+    if (!message || !recipient || !intent || !tone) {
+      console.error("Missing data for insights generation.");
+      return;
+    }
+    // Ensure currentUser is available from context
+    if (!currentUser) {
+      console.error("User not authenticated. Cannot generate insights.");
+      setError("Authentication error. Please refresh and try again."); // Show error to user
+      return;
+    }
     
     setIsLoadingInsights(true);
+    setError(null); // Clear previous errors
     
     try {
-      // Get Firebase functions
+      // --- Force Token Refresh ---
+      const auth = getAuth(); // Get auth instance
+      const idTokenResult = await auth.currentUser?.getIdTokenResult(true); // Force refresh
+      if (!idTokenResult?.token) {
+         throw new Error("Failed to refresh authentication token.");
+      }
+      console.log("Successfully refreshed ID token before calling generateMessageInsights.");
+      // --- End Token Refresh ---
+
+
+      // Get Firebase functions instance
       const functions = getFunctions();
       
       // Create a callable function reference
@@ -285,13 +306,13 @@ export default function MessageOutput({
           name: recipient.name,
           relationship: recipient.relationship
         },
-        intent: intent.type,
-        tone: tone
+        intent: intent.type, // Send intent type
+        tone: tone // Send tone
       };
 
       console.log(">>> Frontend: Payload being sent to generateMessageInsights:", JSON.stringify(payload, null, 2));
 
-      // Call the function
+      // Call the function (httpsCallable automatically includes the refreshed token)
       const result = await generateInsightsFunction(payload);
       
       // Extract data from the result
@@ -302,18 +323,28 @@ export default function MessageOutput({
         setDetailedInsights(data.insights);
         setIsInsightsRevealed(true);
       } else {
-        throw new Error('Invalid response from insights generation');
+        // Handle cases where the function executed but returned unexpected data
+        console.error("Invalid response structure from insights generation:", data);
+        throw new Error('Invalid response structure from insights generation');
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error generating insights:', err);
-      // Fallback insights if the API call fails
-      setMessageGrade('A-');
-      setDetailedInsights([
-        `This message has a warm, personal tone that's perfect for your ${recipient?.relationship}.`,
-        `The content is specific and thoughtful, showing genuine interest in reconnection.`,
-        `By mentioning specific details, you create an authentic connection point.`
-      ]);
-      setIsInsightsRevealed(true);
+       // Provide more specific feedback if possible
+      let errorMessage = 'Failed to generate message analysis.';
+      if (err.code === 'unauthenticated' || err.message?.includes('token')) {
+           errorMessage = 'Authentication failed. Please refresh and try again.';
+      } else if (err.message?.includes('Invalid response structure')) {
+           errorMessage = 'Received an invalid response from the analysis service.';
+      } else if (err.code === 'unavailable') {
+          errorMessage = 'The analysis service is temporarily unavailable. Please try again later.';
+      }
+      setError(errorMessage); // Show error to user
+
+      // Optional: Fallback insights if needed, but showing error is better
+      // setMessageGrade('N/A');
+      // setDetailedInsights(['Could not load insights due to an error.']);
+      // setIsInsightsRevealed(true); // Maybe reveal to show the error message placeholder
+
     } finally {
       setIsLoadingInsights(false);
     }

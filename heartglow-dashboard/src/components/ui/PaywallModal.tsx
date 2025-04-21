@@ -54,59 +54,23 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, content: c
   const content = customContent || defaultContent;
 
   const handleUpgradeClick = async () => {
-    setIsLoading(true);
-    setError(null);
-
     if (!currentUser) {
         setError('User not authenticated. Please log in again.');
         setIsLoading(false);
         return;
     }
 
-    try {
-      // Get Firebase ID token
-      const token = await currentUser.getIdToken();
-      
-      // 1. Call your backend to create a checkout session
-      const response = await fetch('/api/stripe/create-checkout-session', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`, // Send token in header
-        },
-      });
+    // Construct the payment link URL with the Firebase UID as client_reference_id
+    // Reference: https://buy.stripe.com/4gw03z8Tf1cW2sw8ww
+    const paymentLinkUrl = `https://buy.stripe.com/4gw03z8Tf1cW2sw8ww?client_reference_id=${currentUser.uid}`;
 
-      const sessionData = await response.json();
+    console.log('Redirecting to Stripe Payment Link:', paymentLinkUrl);
 
-      if (!response.ok || !sessionData.url) {
-        throw new Error(sessionData.error || 'Failed to create checkout session.');
-      }
+    // Redirect the user directly
+    window.location.href = paymentLinkUrl;
 
-      // 2. Redirect to Stripe Checkout
-      const stripe = await stripePromise;
-      if (!stripe) {
-          throw new Error('Stripe.js failed to load.');
-      }
-      const { error: stripeError } = await stripe.redirectToCheckout({ sessionId: sessionData.sessionId });
-
-      if (stripeError) {
-        console.error('Stripe Redirect Error:', stripeError);
-        setError(stripeError.message || 'Could not redirect to Stripe.');
-      }
-      // If redirection fails or is cancelled, stop loading
-      setIsLoading(false);
-
-    } catch (err) {
-      console.error('Upgrade Error:', err);
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      // Handle specific auth errors if getIdToken fails
-      if (message.includes('auth/user-token-expired')) {
-          setError('Your session has expired. Please log in again.');
-      } else {
-          setError(message);
-      }
-      setIsLoading(false);
-    }
+    // Set loading state to provide visual feedback while redirecting
+    setIsLoading(false);
   };
 
   return (

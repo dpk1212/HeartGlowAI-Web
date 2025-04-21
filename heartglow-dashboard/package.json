@@ -12,6 +12,7 @@
     "verify": "node verify-deploy.js"
   },
   "dependencies": {
+    "@heroicons/react": "^2.2.0",
     "@radix-ui/react-icons": "^1.3.2",
     "firebase": "^9.23.0",
     "framer-motion": "^10.16.4",

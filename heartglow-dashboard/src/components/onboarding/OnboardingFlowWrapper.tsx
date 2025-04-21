@@ -22,7 +22,8 @@ interface OnboardingFlowWrapperProps {
   setCurrentStep: React.Dispatch<React.SetStateAction<number>>;
 }
 
-const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentStep, setCurrentStep }) => {
+// Remove React.FC type and explicit return type
+const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWrapperProps) => {
   const { userProfile, updateUserProfile } = useAuth();
   const router = useRouter();
   // State to hold onboarding form data
@@ -150,10 +151,12 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
     exit: { opacity: 0, x: -50 },
   };
 
+  // This function determines what content to render based on the currentStep
   const renderCurrentStep = () => {
     let stepContent;
-    const userName = userProfile?.firstName || 'there'; // Get user's first name or use 'there'
+    const userName = userProfile?.displayName || 'there'; // Use displayName instead of firstName
 
+    // The switch statement populates the stepContent variable
     switch (currentStep) {
       case 1: // Welcome Step (Updated)
         stepContent = (
@@ -384,11 +387,15 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-2">
                    <button
                       onClick={() => setCurrentStep(3)} // Go back to Input (Step 3)
-                     // ... rest of back button props ...
+                       // Adding back the button styling and text content
+                      className="w-full sm:w-auto px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
+                    >
+                      Try Again
                     </button>
                     <button
                       onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Continue' from Step 4"); setCurrentStep(5); }} // Go to NEW Affirmation Step (Step 5)
-                     // ... rest of continue button props ...
+                       // Ensure this button also has its styling
+                      className="w-full sm:flex-1 px-8 py-3 bg-heartglow-pink text-white font-bold rounded-lg shadow-lg hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
                     >
                       Continue
                     </button>
@@ -591,7 +598,9 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       default:
         stepContent = <div>Unknown Step: {currentStep}</div>;
     }
-    // --- Wrap step content with motion.div ---
+
+    // IMPORTANT: This return statement wraps the chosen stepContent in the motion div
+    // It MUST be inside renderCurrentStep but AFTER the switch statement.
     return (
       <motion.div
         key={currentStep} // Key change triggers animation
@@ -601,16 +610,18 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
         exit="exit"
         transition={{ duration: 0.3, ease: "easeInOut" }}
       >
-        {stepContent}
+        {stepContent} 
       </motion.div>
     );
-  };
+  }; // END of renderCurrentStep function
 
+  // MAIN RETURN STATEMENT FOR THE COMPONENT
+  // This is what OnboardingFlowWrapper actually returns
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950 p-4 sm:p-6">
       <div className="bg-white dark:bg-gray-800 p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden"> {/* Darker card background */}
         <AnimatePresence mode="wait">
-          {renderCurrentStep()}
+          {renderCurrentStep()} // Call the function that returns the step content
         </AnimatePresence>
       </div>
       {/* Render the modal outside the step animation */}
@@ -621,6 +632,6 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       />
     </div>
   );
-};
+}; // END of OnboardingFlowWrapper component definition
 
 export default OnboardingFlowWrapper; 

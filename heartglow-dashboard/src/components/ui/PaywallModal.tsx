@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Dialog } from '@headlessui/react'; // Using Headless UI for modal accessibility
-import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon, HeartIcon, UserGroupIcon, ChartBarIcon, PencilIcon, BrainIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon, PencilIcon } from '@heroicons/react/24/outline'; // Removed unused/invalid icons
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
 
 // Load Stripe.js with your publishable key (should be public)

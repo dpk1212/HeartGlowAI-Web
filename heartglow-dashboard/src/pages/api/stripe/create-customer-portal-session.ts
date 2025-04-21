@@ -18,7 +18,7 @@ try {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20', // Use your desired Stripe API version
+  apiVersion: '2025-03-31.basil', // Use the specific version required by types
 });
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {

@@ -8,7 +8,7 @@ import {
   signInAnonymously
 } from '../firebase/auth';
 import { User } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp, increment, getDoc, updateDoc, DocumentData, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, increment, getDoc, updateDoc, DocumentData, onSnapshot, Unsubscribe, FieldValue as FirebaseFieldValue } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 // Define a type for the extended user profile data from Firestore
@@ -54,6 +54,15 @@ export type UserProfile = {
   coachingSessionsStarted?: number; // Count of coaching sessions initiated
 };
 
+// Define a type for the data passed to updateUserProfile
+// Allows standard fields OR FieldValue for specific numeric fields
+export type UserProfileUpdateData = 
+  Partial<Omit<UserProfile, 'totalMessageCount' | 'coachingSessionsStarted'>> 
+  & { 
+    totalMessageCount?: number | FirebaseFieldValue; 
+    coachingSessionsStarted?: number | FirebaseFieldValue; 
+};
+
 export type AuthContextType = {
   currentUser: User | null;
   userProfile: UserProfile | null;
@@ -62,7 +71,7 @@ export type AuthContextType = {
   loginWithGoogle: () => Promise<any>;
   signup: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
-  updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
+  updateUserProfile: (data: UserProfileUpdateData) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -203,7 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
-  const updateUserProfile = async (data: Partial<UserProfile>) => {
+  const updateUserProfile = async (data: UserProfileUpdateData) => {
     if (!currentUser) {
       throw new Error("User not authenticated to update profile.");
     }
@@ -212,14 +221,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       console.log(`Updating profile for user ${currentUser.uid} with data:`, data);
       await updateDoc(userRef, { 
         ...data, 
-        // Optionally add a lastUpdated timestamp?
-        // lastUpdated: serverTimestamp() 
       });
       console.log(`Profile updated successfully for user ${currentUser.uid}.`);
-      // Note: The onSnapshot listener should automatically update the local userProfile state.
     } catch (error) {
       console.error("Error updating user profile:", error);
-      throw error; // Re-throw the error for the caller to handle if needed
+      throw error;
     }
   };
 

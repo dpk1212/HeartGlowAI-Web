@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
 import { buffer } from 'micro';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase/config'; // Adjust path if needed
+import { db } from '../../../firebase/config';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10',
+  apiVersion: '2025-03-31.basil',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;

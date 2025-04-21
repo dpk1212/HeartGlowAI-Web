@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Dialog } from '@headlessui/react'; // Using Headless UI for modal accessibility
 import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../../context/AuthContext'; // Import useAuth
 
 // Load Stripe.js with your publishable key (should be public)
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
@@ -12,6 +13,7 @@ interface PaywallModalProps {
 }
 
 const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
+  const { currentUser } = useAuth(); // Get current user from AuthContext
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,15 +29,23 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     setError(null);
 
+    if (!currentUser) {
+        setError('User not authenticated. Please log in again.');
+        setIsLoading(false);
+        return;
+    }
+
     try {
+      // Get Firebase ID token
+      const token = await currentUser.getIdToken();
+      
       // 1. Call your backend to create a checkout session
       const response = await fetch('/api/stripe/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`, // Send token in header
         },
-        // You might need to send the user ID if your backend auth needs it
-        // body: JSON.stringify({ userId: '...' }) 
       });
 
       const sessionData = await response.json();
@@ -61,7 +71,12 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
     } catch (err) {
       console.error('Upgrade Error:', err);
       const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      setError(message);
+      // Handle specific auth errors if getIdToken fails
+      if (message.includes('auth/user-token-expired')) {
+          setError('Your session has expired. Please log in again.');
+      } else {
+          setError(message);
+      }
       setIsLoading(false);
     }
   };

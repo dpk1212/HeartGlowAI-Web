@@ -1,17 +1,29 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import Stripe from 'stripe';
-import { authOptions } from '../auth/[...nextauth]'; // Adjust path if needed
-import { getServerSession } from "next-auth/next"
-import { UserProfile } from '@/context/AuthContext'; // Adjust path if needed
+import admin from 'firebase-admin';
+import { UserProfile } from '../../../context/AuthContext';
 import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/firebase/config'; // Adjust path if needed
+import { db } from '../../../firebase/config';
+
+// Initialize Firebase Admin SDK (only once)
+// It automatically uses GOOGLE_APPLICATION_CREDENTIALS env var if set
+try {
+  if (!admin.apps.length) {
+    admin.initializeApp();
+    console.log('Firebase Admin SDK Initialized');
+  } else {
+    admin.app(); //if already initialized, use that one
+  }
+} catch (e) {
+  console.error('Firebase Admin SDK initialization error:', e);
+}
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-04-10',
+  apiVersion: '2025-03-31.basil',
 });
 
 // TODO: Replace with your actual Price ID from Stripe dashboard
-const PREMIUM_PRICE_ID = 'price_YOUR_PREMIUM_PRICE_ID'; 
+const PREMIUM_PRICE_ID = process.env.STRIPE_PREMIUM_PRICE_ID || 'price_YOUR_PREMIUM_PRICE_ID'; // Use env var
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -20,13 +32,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    // 1. Authenticate User (Using NextAuth in this example)
-    //    Replace with your actual auth method if not using NextAuth
-    const session = await getServerSession(req, res, authOptions)
-    if (!session?.user?.id) { // Check for user ID from your session object
-      return res.status(401).json({ error: 'Unauthorized' });
+    // 1. Authenticate User using Firebase Admin SDK
+    const authorization = req.headers.authorization;
+    if (!authorization?.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'Unauthorized: Missing Bearer token' });
     }
-    const userId = session.user.id;
+    const idToken = authorization.split('Bearer ')[1];
+    if (!idToken) {
+      return res.status(401).json({ error: 'Unauthorized: Invalid token format' });
+    }
+
+    let decodedToken;
+    try {
+        decodedToken = await admin.auth().verifyIdToken(idToken);
+    } catch (authError) {
+        console.error('Error verifying Firebase ID token:', authError);
+        return res.status(401).json({ error: 'Unauthorized: Invalid token' });
+    }
+    
+    const userId = decodedToken.uid;
+    const userEmail = decodedToken.email; // Get email from token
 
     // 2. Get User Profile (Optional but good for existing Stripe Customer ID)
     let stripeCustomerId: string | undefined;
@@ -58,7 +83,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       ],
       mode: 'subscription',
       customer: stripeCustomerId, // Pass existing customer ID if available
-      customer_email: !stripeCustomerId ? session.user.email : undefined, // Pass email if creating new customer
+      customer_email: !stripeCustomerId ? userEmail : undefined, // Pass email if creating new customer
       success_url: `${appUrl}/?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/`,
       // Store user ID in metadata to link Stripe customer/subscription back

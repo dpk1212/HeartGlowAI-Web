@@ -64,7 +64,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   }
 
   const showOnboarding = userProfile && userProfile.hasCompletedOnboarding === false;
-  // Determine if the dashboard tour should be shown
   const showDashboardTour = userProfile && userProfile.hasCompletedOnboarding === true && userProfile.hasSeenDashboardTour === false;
 
   // Function to mark tour as complete
@@ -80,15 +79,14 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
 
   return (
     <>
-       {/* Wrap the main content area to apply blur conditionally */} 
-      <div className={showDashboardTour ? 'filter blur-sm brightness-75 transition-all duration-300' : 'transition-all duration-300'}>
+       {/* REMOVED conditional blur/brightness class from this wrapper */}
+      <div> 
         {showOnboarding ? (
           <OnboardingFlowWrapper 
             currentStep={onboardingStep} 
             setCurrentStep={setOnboardingStep} 
           />
         ) : (
-          // Render main app content if onboarding is complete
           <>
             <AccountLinkBanner />
             <Component {...pageProps} />
@@ -96,7 +94,7 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
         )}
       </div>
 
-       {/* Render Dashboard Tour if active (conditionally rendered inside component) */}
+      {/* DashboardTour now handles its own overlay/highlighting */}
       <DashboardTour isActive={showDashboardTour} onComplete={handleCompleteTour} />
 
       {/* Render GlowGuide persistently */}

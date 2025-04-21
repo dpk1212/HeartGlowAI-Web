@@ -195,34 +195,35 @@ const IndexPage: NextPage = () => {
 
       <AuthGuard>
         <DashboardLayout>
-          <HeroSection />
+          <div data-tour-id="hero-start-message">
+             <HeroSection />
+          </div>
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* HeartGlow Guide spanning both columns right after hero section */}
-            <div className="md:col-span-2">
+            <div className="md:col-span-2" data-tour-id="coaching-card">
               <CoachingEntryCard />
             </div>
             
-            {/* Conditionally render ChallengeCard or ChallengeSelection */}
-            {activeUserChallenge ? (
-              // Pass challengeCardProps if it exists (means active challenge is loaded)
-              challengeCardProps ? <ChallengeCard {...challengeCardProps} /> : <div>Loading challenge card...</div>
-            ) : challengesLoading ? (
-              // Show loading state while challenges are loading for selection
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 animate-pulse min-h-[200px]">
-                 <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mx-auto mb-6"></div>
-                 <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full mb-4"></div>
-                 <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
-              </div>
-            ) : (
-              // Show selection component if no active challenge and definitions are loaded
-              <ChallengeSelection 
-                availableChallenges={availableChallengesForSelection} 
-                onSelectChallenge={handleSelectChallenge} 
-                isLoading={isChallengeActionLoading}
-              />
-            )}
-            <GlowScoreSummaryCard {...glowScoreData} />
+            <div data-tour-id="challenge-section">
+              {activeUserChallenge ? (
+                challengeCardProps ? <ChallengeCard {...challengeCardProps} /> : <div>Loading challenge card...</div>
+              ) : challengesLoading ? (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 animate-pulse min-h-[200px]">
+                   <div className="h-6 bg-gray-300 dark:bg-gray-700 rounded w-1/2 mx-auto mb-6"></div>
+                   <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full mb-4"></div>
+                   <div className="h-20 bg-gray-300 dark:bg-gray-700 rounded w-full"></div>
+                </div>
+              ) : (
+                <ChallengeSelection 
+                  availableChallenges={availableChallengesForSelection} 
+                  onSelectChallenge={handleSelectChallenge} 
+                  isLoading={isChallengeActionLoading}
+                />
+              )}
+            </div>
+            <div data-tour-id="glowscore-card">
+              <GlowScoreSummaryCard {...glowScoreData} />
+            </div>
             <QuickTemplateGrid />
             <ConnectionsCarousel />
             <ComingSoonCard />

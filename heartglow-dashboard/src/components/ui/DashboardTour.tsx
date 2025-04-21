@@ -9,28 +9,28 @@ interface DashboardTourProps {
 // Define the steps for react-joyride
 // Map existing steps to the Step interface
 const steps: Step[] = [
-  { 
+  { // Step 1: Message Generation 
     target: "[data-tour-id='hero-start-message']", 
     content: "Ready to connect? ✨ This is your main starting point for crafting AI-powered messages.", 
     title: "Start Here!", 
     disableBeacon: true // Start immediately without the beacon pulse
   },
-  { 
+  { // Step 2: GlowGuide
     target: ".glow-guide-button", 
     content: "✅ Click the 💡 GlowGuide anytime for tips related to what you're doing.", 
     title: "Always Here to Help!" 
   },
-  { 
-    target: "[data-tour-id='coaching-card']", 
-    content: "❤️ Access AI coaching sessions or helpful guides here anytime for deeper support.", 
-    title: "Deeper Support & Guidance"
+  { // Step 3: Connections (New Target)
+    target: "[data-tour-id='connections-carousel']", // Updated target
+    content: "🫂 Keep track of your important connections here for easy message drafting.", // Updated content
+    title: "Your Connections" // Updated title
   },
-  { 
+  { // Step 4: Challenges 
     target: "[data-tour-id='challenge-section']", 
     content: "🎯 These guided activities help you practice communication skills and earn GlowScore XP.", 
     title: "Take on Challenges!" 
   },
-  { 
+  { // Step 5: GlowScore
     target: "[data-tour-id='glowscore-card']", 
     content: "📈 See your XP, communication streaks, and growth over time.", 
     title: "Track Your Progress!" 

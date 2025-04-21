@@ -225,7 +225,9 @@ const IndexPage: NextPage = () => {
               <GlowScoreSummaryCard {...glowScoreData} />
             </div>
             <QuickTemplateGrid />
-            <ConnectionsCarousel />
+            <div data-tour-id="connections-carousel">
+              <ConnectionsCarousel />
+            </div>
             <ComingSoonCard />
             <div className="md:col-span-2">
               <RecentMessagesList />

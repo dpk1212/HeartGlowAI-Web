@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 // import { LightBulbIcon } from '@radix-ui/react-icons'; // Example icon
-import '../../styles/GlowGuide.css'; // Import the CSS file
 
 interface GlowGuideButtonProps {
     onClick: () => void;

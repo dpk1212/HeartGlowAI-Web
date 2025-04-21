@@ -1,5 +1,6 @@
 import React from 'react';
-import '../../styles/GlowGuide.css'; // Import the CSS file
+// Removed incorrect global CSS import
+// import '../../styles/GlowGuide.css'; 
 
 interface GlowGuidePanelProps {
   isOpen: boolean;

@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/GlowGuide.css';
 import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';

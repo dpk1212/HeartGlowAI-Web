@@ -10,7 +10,6 @@ import {
   MagicWandIcon,
   BookmarkFilledIcon,
   BarChartIcon,
-  LightBulbIcon,
   MixIcon,
   Link2Icon
 } from '@radix-ui/react-icons'; // Example Icons
@@ -18,7 +17,7 @@ import { useRouter } from 'next/router'; // Import useRouter
 import { motion, AnimatePresence } from 'framer-motion'; // Import framer-motion
 // Import the modal
 import AddConnectionModal from './AddConnectionModal';
-import { HeartIcon } from '@heroicons/react/24/outline'; // Example for relationship icons
+import { HeartIcon, LightBulbIcon } from '@heroicons/react/24/outline'; // Use Heroicon for LightBulb
 import PaywallModal from '../ui/PaywallModal'; // Import the PaywallModal
 
 // Placeholder components for individual steps - create these later

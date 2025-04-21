@@ -29,13 +29,24 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
     setIsLoading(true);
     setError(null);
 
-    if (!currentUser) {
-        setError('User not authenticated. Please log in again.');
+    if (!currentUser?.uid) { // Check for UID directly
+        setError('User not authenticated or UID missing. Please log in again.');
         setIsLoading(false);
         return;
     }
 
     try {
+      // --- Direct Redirect Logic --- 
+      const paymentLink = \"https://buy.stripe.com/4gw03z8Tf1cW2sw8ww\"; // Your specific link
+      const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
+      console.log('Redirecting to Stripe Payment Link from Modal:', urlWithRef);
+      window.location.href = urlWithRef;
+      // Redirect happens, so no need to stop loading immediately unless redirect fails
+      // but window.location.href doesn't provide feedback on failure here.
+      // setIsLoading(false); // Can potentially remove this if redirect is assumed to work
+      // ---------------------------
+
+      /* // --- REMOVED: Old fetch logic --- 
       // Get Firebase ID token
       const token = await currentUser.getIdToken();
       
@@ -67,17 +78,13 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
       }
       // If redirection fails or is cancelled, stop loading
       setIsLoading(false);
+      */ // --- END REMOVED --- 
 
     } catch (err) {
-      console.error('Upgrade Error:', err);
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      // Handle specific auth errors if getIdToken fails
-      if (message.includes('auth/user-token-expired')) {
-          setError('Your session has expired. Please log in again.');
-      } else {
-          setError(message);
-      }
-      setIsLoading(false);
+      console.error('Upgrade Error (Redirect Setup):', err);
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred preparing the upgrade link.';
+      setError(message);
+      setIsLoading(false); // Stop loading on error
     }
   };
 

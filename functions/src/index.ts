@@ -22,13 +22,20 @@
 "use strict";
 
 // Using import syntax for TypeScript
-import * as functions from "firebase-functions";
+// import * as functions from "firebase-functions"; // <-- REMOVE THIS LINE
 import * as admin from "firebase-admin";
 import {OpenAI} from "openai";
+import Stripe from "stripe";
 
 // v2 Imports for Callable Functions
 import {onCall, HttpsError} from "firebase-functions/v2/https";
 import * as logger from "firebase-functions/logger"; // Use v2 logger
+
+// v1 Imports for HTTP Request Functions (needed for webhooks)
+import {onRequest} from "firebase-functions/v1/https"; // <-- Add v1 onRequest import
+
+// Import functions config loader explicitly
+import {config} from "firebase-functions";
 
 // Ensure admin is initialized (idempotent)
 try {
@@ -36,6 +43,11 @@ try {
 } catch (e) {
   logger.info("Admin SDK already initialized."); // Use v2 logger
 }
+
+// Initialize Stripe client robustly
+// Access config using functions.config()
+// const stripeSecretKey = config().stripe?.secret_key || process.env.STRIPE_SECRET_KEY; // Moved inside handler
+let stripe: Stripe | null = null; // Initialize as null globally
 
 // Define expected structure for data passed to the function
 interface InsightsRequestData {
@@ -258,6 +270,135 @@ export const generateMessageInsights = onCall(
       throw new HttpsError( "internal", errorMsg, errorTyped.message );
     }
   }); // End of onCall
+
+// --- NEW: Stripe Webhook Handler ---
+
+/**
+ * Firebase HTTP function to handle Stripe webhooks.
+ * v1 HTTPS function is recommended for webhooks by Stripe docs.
+ */
+export const stripeWebhook = onRequest(async (request, response) => {
+  // --- Initialize Stripe inside the handler ---
+  if (!stripe) { // Initialize only once per instance
+    const stripeSecretKey = config().stripe?.secret_key || process.env.STRIPE_SECRET_KEY;
+    if (!stripeSecretKey) {
+      logger.error(
+        "CRITICAL: Stripe secret key not configured. "+
+        "Ensure 'stripe.secret_key' is set in Firebase Functions config "+
+        "using `firebase functions:config:set stripe.secret_key=...` and deploy."
+      );
+      // Cannot proceed without a key at runtime
+      response.status(500).send("Server Configuration Error: Missing Stripe secret key.");
+      return;
+    } else {
+      stripe = new Stripe(stripeSecretKey, {
+        apiVersion: "2025-03-31.basil",
+        typescript: true,
+      });
+      logger.info("Stripe client initialized for webhook handler instance.");
+    }
+  }
+  // -------------------------------------------
+
+  const signature = request.headers["stripe-signature"] as string;
+
+  // Ensure you have set stripe.webhook_secret in Firebase config
+  const webhookSecret = config().stripe?.webhook_secret || process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (!webhookSecret) {
+    logger.error(
+      "CRITICAL: Stripe webhook secret is not configured. "+
+      "Ensure 'stripe.webhook_secret' is set in Firebase Functions config "+
+      "using `firebase functions:config:set stripe.webhook_secret=...` and deploy."
+    );
+    response.status(400).send("Webhook Error: Missing webhook secret configuration.");
+    return;
+  }
+
+  let event: Stripe.Event;
+
+  try {
+    // Use rawBody for verification
+    event = stripe.webhooks.constructEvent( // Use the now-initialized stripe client
+      request.rawBody,
+      signature,
+      webhookSecret
+    );
+  } catch (err) {
+    const error = err as Error;
+    logger.error("Webhook signature verification failed.", error.message);
+    response.status(400).send(`Webhook Error: ${error.message}`);
+    return;
+  }
+
+  logger.info("Received Stripe event:", event.type);
+
+  // Handle the checkout.session.completed event
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object as Stripe.Checkout.Session;
+
+    // Retrieve the client_reference_id (Firebase UID)
+    const clientReferenceId = session.client_reference_id;
+    // Ensure customer and subscription IDs are treated as strings (can be null/object)
+    const stripeCustomerId = typeof session.customer === 'string' ? session.customer : null;
+    const subscriptionId = typeof session.subscription === 'string' ? session.subscription : null;
+
+    if (!clientReferenceId) {
+      logger.error(
+        "Missing client_reference_id in checkout.session.completed",
+        {sessionId: session.id}
+      );
+      // Respond early, nothing to do without the user ID
+      response.status(200).send("Success (no client_reference_id)");
+      return;
+    }
+
+    logger.info(
+      `Checkout session completed for user UID: ${clientReferenceId}`,
+      {sessionId: session.id, customer: stripeCustomerId, subscription: subscriptionId}
+    );
+
+    // --- Provision access ---
+    try {
+      const userRef = admin.firestore().collection('users').doc(clientReferenceId);
+      await userRef.set({
+        stripeCustomerId: stripeCustomerId,
+        stripeSubscriptionId: subscriptionId,
+        isPremium: true, // Set premium status to true
+        // Consider adding subscription end date later by fetching subscription details if needed
+      }, { merge: true }); // Use merge: true to avoid overwriting other user data
+
+      logger.info(`Successfully updated Firestore for user ${clientReferenceId} to premium.`);
+
+    } catch (firestoreError) {
+      logger.error(
+        `Error updating Firestore for user ${clientReferenceId}:`,
+        firestoreError
+      );
+      // Decide if this should be a 500 error to Stripe.
+      // Generally, if provisioning fails, you might want Stripe to retry.
+      // However, ensure your function is idempotent if it retries.
+      // For now, we still send 200 to acknowledge receipt, but log the critical failure.
+      // response.status(500).send("Internal Server Error: Failed to update user data.");
+      // return;
+    }
+    // ------------------------------
+
+    // Example: Log success and respond to Stripe
+    // logger.info(`Successfully processed checkout for user ${clientReferenceId}`); // Moved logging inside try block
+  }
+
+  // Add handlers for other events if needed (e.g., subscription updates/cancellations)
+  // else if (event.type === 'customer.subscription.updated') { ... }
+  // else if (event.type === 'customer.subscription.deleted') { ... }
+
+  // Return a 200 response to acknowledge receipt of the event
+  response.status(200).send("Received");
+});
+
+// --- Optional: Customer Portal Function ---
+// You might want a function to create a portal session later.
+// export const createCustomerPortal = onCall(async (request) => { ... });
 
 // Add exports for any other functions defined in this file below
 // e.g., export { someOtherFunction } from "./otherFile";

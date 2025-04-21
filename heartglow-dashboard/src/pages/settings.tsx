@@ -5,7 +5,7 @@ import AuthGuard from '../components/layout/AuthGuard';
 import Head from 'next/head';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, CreditCard } from 'lucide-react';
 
 // Placeholder component for a toggle switch (replace with actual implementation later)
 const ToggleSwitchPlaceholder = ({ label }: { label: string }) => (
@@ -18,7 +18,21 @@ const ToggleSwitchPlaceholder = ({ label }: { label: string }) => (
 );
 
 export default function SettingsPage() {
-  const { currentUser } = useAuth(); // Needed for AuthGuard
+  const { currentUser, userProfile, loading } = useAuth(); // Added userProfile and loading
+
+  // --- Handle Upgrade Button Click ---
+  const handleUpgradeClick = () => {
+    if (currentUser?.uid) {
+      const paymentLink = "https://buy.stripe.com/4gw03z8Tf1cW2sw8ww"; // Your specific link
+      const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
+      console.log('Redirecting to Stripe:', urlWithRef);
+      window.location.href = urlWithRef;
+    } else {
+      console.error('User not logged in, cannot upgrade.');
+      // Optionally show a message to the user
+    }
+  };
+  // ---------------------------------
 
   return (
     <>
@@ -37,6 +51,34 @@ export default function SettingsPage() {
               
               <div className="bg-white dark:bg-heartglow-deepgray rounded-lg shadow-md p-6 border border-gray-100 dark:border-gray-800">
                 
+                {/* --- Subscription Section --- */}
+                <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
+                  <h2 className="text-xl font-semibold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite flex items-center">
+                    <CreditCard className="mr-2 h-5 w-5" /> Subscription
+                  </h2>
+                  {loading ? (
+                    <p className="text-gray-500 dark:text-gray-400">Loading subscription status...</p>
+                  ) : userProfile?.isPremium ? (
+                    <div className="flex items-center space-x-2 text-green-600 dark:text-green-400">
+                       <CheckCircle className="h-5 w-5" />
+                       <span>Current Plan: <span className="font-semibold">HeartGlow Premium</span></span>
+                       {/* Optionally add manage subscription button later */}
+                       {/* <button className="text-sm text-blue-600 hover:underline">Manage Subscription</button> */}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <p className="text-gray-700 dark:text-gray-400">Current Plan: Free</p>
+                      <button 
+                        onClick={handleUpgradeClick}
+                        className="px-4 py-2 bg-heartglow-pink text-white rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-deepgray transition duration-150 ease-in-out"
+                      >
+                        Upgrade to Premium ($4.99/month)
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {/* -------------------------- */}
+
                 {/* Appearance Settings */}
                 <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-700">
                   <h2 className="text-xl font-semibold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite">Appearance</h2>

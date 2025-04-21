@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { addConnection } from '../../firebase/db'; // Assuming db.ts is in firebase folder
 import { RELATIONSHIP_OPTIONS } from '../../utils/constants'; // Import from new location
+import { PersonPlusIcon } from '@radix-ui/react-icons'; // Example icon
 
 interface AddConnectionModalProps {
   isOpen: boolean;
@@ -51,30 +52,36 @@ const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ isOpen, onClose
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-      <div className="bg-white dark:bg-heartglow-gray p-6 rounded-lg shadow-xl w-full max-w-md m-4">
-        <form onSubmit={handleSave} className="space-y-4">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">Add Your First Connection</h2>
+    <div className="fixed inset-0 z-[1200] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+      <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl w-full max-w-md m-4 border border-gray-200 dark:border-gray-700">
+        <form onSubmit={handleSave} className="space-y-5">
+          <div className="flex items-center justify-center flex-col text-center mb-2">
+            <div className="p-3 bg-gradient-to-br from-heartglow-pink/20 to-heartglow-violet/20 rounded-full mb-3">
+              <PersonPlusIcon className="w-7 h-7 text-heartglow-pink" />
+            </div>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Your First Connection</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Save their details to easily send messages later.</p>
+          </div>
           
           <div>
-            <label htmlFor="conn-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Name</label>
+            <label htmlFor="conn-name" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Name</label>
             <input 
               type="text"
               id="conn-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-heartglow-pink focus:border-heartglow-pink dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
               required
             />
           </div>
 
           <div>
-            <label htmlFor="conn-relationship" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Relationship</label>
+            <label htmlFor="conn-relationship" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Relationship</label>
             <select
               id="conn-relationship"
               value={relationship}
               onChange={(e) => setRelationship(e.target.value)}
-              className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-heartglow-pink focus:border-heartglow-pink dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 appearance-none pr-10 bg-no-repeat bg-right-[0.75rem] bg-center bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%236b7280&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')] dark:bg-[url('data:image/svg+xml,%3csvg xmlns=&apos;http://www.w3.org/2000/svg&apos; fill=&apos;none&apos; viewBox=&apos;0 0 24 24&apos; stroke-width=&apos;1.5&apos; stroke=&apos;%239ca3af&apos;%3e%3cpath stroke-linecap=&apos;round&apos; stroke-linejoin=&apos;round&apos; d=&apos;M19.5 8.25l-7.5 7.5-7.5-7.5&apos; /%3e%3c/svg%3e')]"
             >
               {RELATIONSHIP_OPTIONS.map(option => (
                 <option key={option} value={option}>{option}</option>
@@ -84,35 +91,35 @@ const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ isOpen, onClose
 
           {relationship === 'Other' && (
             <div>
-              <label htmlFor="conn-other-relationship" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Please specify</label>
+              <label htmlFor="conn-other-relationship" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Please specify</label>
               <input 
                 type="text"
                 id="conn-other-relationship"
                 value={otherRelationship}
                 onChange={(e) => setOtherRelationship(e.target.value)}
-                className="mt-1 w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-heartglow-pink focus:border-heartglow-pink dark:bg-gray-700 dark:text-white"
+                className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                 required
               />
             </div>
           )}
 
           {error && (
-            <p className="text-sm text-red-600 dark:text-red-400">Error: {error}</p>
+            <p className="text-sm text-red-500 dark:text-red-400">Error: {error}</p>
           )}
 
-          <div className="flex justify-end space-x-3 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 pt-3">
             <button 
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-heartglow-gray disabled:opacity-50"
+              className="w-full sm:w-auto mt-2 sm:mt-0 px-5 py-2.5 border border-gray-300 dark:border-gray-500 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800 disabled:opacity-50"
             >
               Cancel
             </button>
             <button 
               type="submit"
               disabled={isSaving}
-              className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-heartglow-pink hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-heartglow-gray disabled:opacity-50 flex items-center"
+              className="w-full sm:w-auto px-6 py-2.5 border border-transparent rounded-lg shadow-md text-sm font-bold text-white bg-heartglow-pink hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-heartglow-pink dark:focus:ring-offset-gray-800 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center"
             >
               {isSaving ? (
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

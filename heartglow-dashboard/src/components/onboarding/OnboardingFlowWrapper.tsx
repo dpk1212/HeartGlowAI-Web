@@ -7,6 +7,7 @@ import { useRouter } from 'next/router'; // Import useRouter
 import { motion, AnimatePresence } from 'framer-motion'; // Import framer-motion
 // Import the modal
 import AddConnectionModal from './AddConnectionModal';
+import { HeartIcon } from '@heroicons/react/24/outline'; // Example for relationship icons
 
 // Placeholder components for individual steps - create these later
 // import OnboardingWelcome from './OnboardingWelcome';
@@ -28,6 +29,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
   const [onboardingData, setOnboardingData] = useState<any>({ // Use a more specific type later
     recipientInput: '', 
     selectedIntent: null,
+    selectedRelationship: null, // Added state for relationship type
   });
   // State for message generation result
   const [generatedMessage, setGeneratedMessage] = useState<string | null>(null);
@@ -43,7 +45,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
   // TODO: Implement logic to advance steps (handleNext)
   // TODO: Implement logic to update userProfile.hasCompletedOnboarding via a function from AuthContext or Firestore call
 
-  // Intents for Step 2
+  // Intents for Step 3 (previously Step 2)
   const coreIntents = [
     { id: 'check_in', label: 'Just Checking In', emoji: '👋' },
     { id: 'thank_you', label: 'Say Thanks', emoji: '🙏' },
@@ -51,7 +53,15 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
     { id: 'celebrate', label: 'Celebrate Good News', emoji: '🎉' },
   ];
 
-  // Renamed from handleStep2Submit for clarity
+  // Relationship types for New Step 2
+  const relationshipTypes = [
+    { id: 'partner', label: 'Partner', emoji: '💖' },
+    { id: 'parent', label: 'Parent', emoji: '👨‍👩‍👧' },
+    { id: 'friend', label: 'Friend', emoji: '😊' },
+    { id: 'coworker', label: 'Co-Worker', emoji: '🤝' },
+  ];
+
+  // Renamed from handleStep2Submit for clarity - Now for Step 3
   const handleGenerateFirstMessage = async () => {
     console.log("[Analytics] Onboarding Action: Click 'Draft my Message'"); // Analytics
     setIsGenerating(true);
@@ -62,7 +72,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
     const params: MessageGenerationParams = {
       recipient: {
         name: onboardingData.recipientInput,
-        relationship: 'Unknown' // Placeholder relationship for onboarding
+        relationship: onboardingData.selectedRelationship || 'Unknown' // Use selected relationship if available
       },
       connectionData: {},
       intent: { type: onboardingData.selectedIntent, custom: '' },
@@ -81,7 +91,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       if (result && result.content) {
         setGeneratedMessage(result.content);
         console.log("[Analytics] Onboarding Event: Message Generation Success"); // Analytics
-        setCurrentStep(3); // Move to reveal step on success
+        setCurrentStep(4); // Move to reveal step (Step 4)
       } else {
         console.error("[Analytics] Onboarding Event: Message Generation Failed - Empty response"); // Analytics
         throw new Error(result.content || 'Empty response from generation function'); // Throw error if content is missing
@@ -90,15 +100,13 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       console.error("[Onboarding] Error generating message:", error);
       console.error("[Analytics] Onboarding Event: Message Generation Failed", { error: error.message }); // Analytics
       setGenerationError(error.message || 'An unknown error occurred during message generation.');
-      // Don't advance step on error, stay on step 2 for user to see/retry?
-      // Or maybe advance to step 3 to show the error there? Let's show error on step 3.
-      setCurrentStep(3);
+      setCurrentStep(4); // Still go to reveal step (Step 4) to show error
     } finally {
       setIsGenerating(false);
     }
   };
 
-  // Function to mark onboarding complete and handle navigation/actions
+  // Function to mark onboarding complete and handle navigation/actions - Step numbers inside might need adjustment later if adding more steps
   const handleCompleteOnboarding = async (nextAction: 'dashboard' | 'connections' | 'create') => {
     console.log(`[Analytics] Onboarding Action: Complete Onboarding - ${nextAction}`); // Analytics
     try {
@@ -144,8 +152,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
 
   const renderCurrentStep = () => {
     let stepContent;
+    const userName = userProfile?.firstName || 'there'; // Get user's first name or use 'there'
+
     switch (currentStep) {
-      case 1:
+      case 1: // Welcome Step (Updated)
         stepContent = (
           <div className="text-center flex flex-col items-center">
              {/* Enhanced Visual: Add an Icon */}
@@ -153,84 +163,135 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                  <MagicWandIcon className="w-8 h-8 text-heartglow-pink" />
              </div>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
-              Welcome to HeartGlow AI!
+              Hi {userName}, we're so glad you're here! {/* Personalized Greeting */}
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-              {/* MODIFIED: Sharpened value proposition */}
-              Find the right words, effortlessly. Your AI communication assistant is here. Let our AI help you craft the perfect message in seconds.
+              Ready to start saying the things that matter? Let our AI help you craft the perfect message in seconds. {/* Updated Text */}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-8">
                Need help anytime? Click the 💡 icon!
             </p>
-            <button 
-              onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Get Started'"); setCurrentStep(2); }}
+            <button
+              onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Get Started'"); setCurrentStep(2); }} // Go to NEW Step 2
               // Enhanced Styling for CTA
               className="w-full px-8 py-3 bg-heartglow-pink text-white font-bold rounded-lg shadow-lg hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
             >
-              Let's Craft Your First Message!
+              Let's Get Started! {/* Slightly modified button text */}
             </button>
           </div>
         );
         break;
-      case 2:
+
+      case 2: // NEW Step: Relationship Focus
         stepContent = (
           <div className="flex flex-col">
-            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-5 text-center">
-              Craft Your First Message
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4 text-center">
+              What kind of relationship matters most right now?
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
-              Tell us who this is for and the main goal. Our AI will draft a starting point.
+              This helps us tailor suggestions for you later on.
+            </p>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+                {relationshipTypes.map((type) => (
+                  <button
+                    key={type.id}
+                    onClick={() => setOnboardingData({ ...onboardingData, selectedRelationship: type.label })} // Store the label for now
+                     className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedRelationship === type.label
+                      ? 'bg-indigo-100/50 border-indigo-500 ring-2 ring-indigo-500 dark:bg-indigo-900/30 dark:border-indigo-600 transform scale-105'
+                      : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`
+                     }
+                  >
+                    <span className="text-3xl mb-2" role="img" aria-label={type.label}>{type.emoji}</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{type.label}</span>
+                  </button>
+                ))}
+            </div>
+             {/* Buttons Section */}
+            <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 mt-4">
+                 <button
+                   onClick={() => setCurrentStep(1)} // Go back to Welcome
+                   className="w-full sm:w-auto px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
+                >
+                  Back
+                </button>
+                <button
+                  onClick={() => {
+                     console.log(`[Analytics] Onboarding Action: Selected Relationship - ${onboardingData.selectedRelationship}`);
+                     setCurrentStep(3); // Go to Message Crafting (now Step 3)
+                  }}
+                  disabled={!onboardingData.selectedRelationship}
+                  className="w-full sm:flex-1 px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105 disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-md"
+                >
+                  Next
+                </button>
+            </div>
+          </div>
+        );
+        break;
+
+      case 3: // Message Crafting Input (Previously Step 2)
+        const suggestedRecipient = onboardingData.selectedRelationship ? `Your ${onboardingData.selectedRelationship}` : 'Someone important';
+        stepContent = (
+          <div className="flex flex-col">
+             {/* MODIFIED Title */}
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-5 text-center">
+              Let's check in with {suggestedRecipient}
+            </h2>
+             {/* MODIFIED Subtext */}
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
+               Just one message to get things rolling. Tell us their name and the main goal.
             </p>
 
             <div className="mb-6">
               <label htmlFor="recipientInput" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Who is this message for?
+                Who is this message for? (Their Name)
               </label>
-              <input 
+              {/* Input field remains the same */}
+              <input
                 type="text"
                 id="recipientInput"
                 value={onboardingData.recipientInput}
                 onChange={(e) => setOnboardingData({ ...onboardingData, recipientInput: e.target.value })}
-                placeholder="e.g., Mom, Alex (My Boss), Sarah - Helps AI tailor the tone" // MODIFIED: Added placeholder hint
-                // Enhanced input styling
+                placeholder={`e.g., ${onboardingData.selectedRelationship === 'Parent' ? 'Mom' : onboardingData.selectedRelationship === 'Partner' ? 'Alex' : 'Sarah'}`} // Dynamic placeholder
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-base"
               />
             </div>
 
             <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                What's the main goal?
-              </label>
-              {/* Enhanced Intent Selection Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {coreIntents.map((intent) => (
-                  <button 
-                    key={intent.id}
-                    onClick={() => setOnboardingData({ ...onboardingData, selectedIntent: intent.id })}
-                    // Enhanced card-like styling for buttons
-                    className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedIntent === intent.id 
-                      ? 'bg-heartglow-pink/10 border-heartglow-pink ring-2 ring-heartglow-pink dark:bg-heartglow-pink/20 dark:border-heartglow-pink/80 transform scale-105' 
-                      : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`}
-                  >
-                    <span className="text-3xl mb-2" role="img" aria-label={intent.label}>{intent.emoji}</span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{intent.label}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
-                Tip: Choose the goal that feels closest. Check 💡 for more guidance.
-              </p>
+               {/* Intent selection remains the same */}
+               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                 What's the main goal?
+               </label>
+               <div className="grid grid-cols-2 gap-4">
+                 {coreIntents.map((intent) => (
+                   <button
+                     key={intent.id}
+                     onClick={() => setOnboardingData({ ...onboardingData, selectedIntent: intent.id })}
+                     className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedIntent === intent.id
+                       ? 'bg-heartglow-pink/10 border-heartglow-pink ring-2 ring-heartglow-pink dark:bg-heartglow-pink/20 dark:border-heartglow-pink/80 transform scale-105'
+                       : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`
+                    }
+                   >
+                     <span className="text-3xl mb-2" role="img" aria-label={intent.label}>{intent.emoji}</span>
+                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{intent.label}</span>
+                   </button>
+                 ))}
+               </div>
+               <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 text-center">
+                 Tip: Choose the goal that feels closest. Check 💡 for more guidance.
+               </p>
             </div>
 
-            {/* Buttons Section */}
+            {/* Buttons Section - Updated Back Button */}
             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 mt-4">
-                 <button 
-                   onClick={() => setCurrentStep(1)} // Go back
+                 <button
+                   onClick={() => setCurrentStep(2)} // Go back to Relationship selection
                    className="w-full sm:w-auto px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
                 >
                   Back
                 </button>
-                <button 
+                {/* Generate button remains the same, uses handleGenerateFirstMessage which now advances to Step 4 */}
+                <button
                   onClick={handleGenerateFirstMessage}
                   disabled={!onboardingData.recipientInput || !onboardingData.selectedIntent || isGenerating}
                   // Enhanced styling for primary action
@@ -253,196 +314,272 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
           </div>
         );
         break;
-      case 3:
+
+      case 4: // Message Reveal (Previously Step 3)
         stepContent = (
           <div className="text-center flex flex-col">
-            {isGenerating ? ( 
-              <div className="flex flex-col items-center justify-center p-16 space-y-4">
-                 <svg className="animate-spin h-10 w-10 text-heartglow-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            {isGenerating ? (
+              // Enhanced Loading State
+              <div className="flex flex-col items-center justify-center p-10 space-y-4 min-h-[300px]">
+                 <svg className="animate-spin h-10 w-10 text-heartglow-pink mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                 {/* MODIFIED: Engaging loading text */}
-                 <span className="text-base text-gray-600 dark:text-gray-400">Conjuring the perfect words...</span>
-                  <div className="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mt-4"></div>
+                 <span className="text-lg font-medium text-gray-600 dark:text-gray-400">Conjuring the perfect words...</span>
+                 <p className="text-sm text-gray-500 dark:text-gray-500">Our AI is thinking just for you ✨</p>
               </div>
             ) : generationError ? (
-              <div className="space-y-6 flex flex-col items-center">
+              <div className="space-y-6">
                  <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-full">
                      <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                      </svg>
                  </div>
                 <h2 className="text-xl font-semibold text-red-500 dark:text-red-400">
-                  {/* MODIFIED: Slightly warmer error title */}
                   Hmm, AI Needs Inspiration!
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 bg-red-50 dark:bg-red-800/30 border border-red-200 dark:border-red-700/50 p-4 rounded-lg">
-                  {/* MODIFIED: Warmer error message */}
                   {generationError}
                   <br/> Could you try adjusting your request slightly?
                 </p>
                 <button 
-                  onClick={() => setCurrentStep(2)} // Go back to retry
+                  onClick={() => setCurrentStep(3)} // Go back to Input (now Step 3)
                   className="w-full px-6 py-3 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-lg shadow-sm hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
                 >
                   Go Back & Try Again
                 </button>
               </div>
             ) : generatedMessage ? (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                  {/* MODIFIED: More exciting reveal title */}
                   Voila! Here's a draft for {onboardingData.recipientInput || 'them'}!
                 </h2>
-                 {/* Enhanced Message Display */}
-                <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-600 shadow-inner text-left min-h-[150px]">
+                {/* Added explanation text */}
+                <p className="text-sm text-indigo-600 dark:text-indigo-300 font-medium">
+                  This was crafted just for you — based on your intent and who it's for.
+                </p>
+                {/* Message Display */}
+                <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-600 shadow-inner text-left min-h-[120px]">
                   <p className="text-gray-800 dark:text-gray-100 whitespace-pre-wrap leading-relaxed text-base">
                     {generatedMessage}
                   </p>
                 </div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                   ✨ Great starting point! Remember, you can always edit this in the full editor.
-                   {/* MODIFIED: Added premium hint about saving */}
-                   <br/> <span className="font-medium text-heartglow-pink">Upgrade anytime to save your favorite drafts.</span>
+                {/* Added personalization prompt */}
+                <div className="mt-4 space-y-2 text-center">
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                     Want to add something personal before sending?
+                  </p>
+                  <div className="flex justify-center gap-2 flex-wrap">
+                      {/* Placeholder buttons - non-functional for now */}
+                      <button className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">+ Add inside joke</button>
+                      <button className="px-3 py-1 text-xs bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded-full hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors">+ Make it warmer</button>
+                  </div>
+                </div>
+                 {/* Updated Upgrade Prompt */}
+                 <p className="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-gray-700/50">
+                    ✨ Remember, you can fully edit this in the main editor.
+                   <br/> <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-heartglow-pink hover:underline">Upgrade to begin building your emotional journey & save drafts.</a>
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                   Not quite right? Check the 💡 guide for tips on refining prompts later.
-                </p>
-                {/* Enhanced Button Layout */}
+                {/* Buttons Section - Update Continue Button Logic */}
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-2">
-                   <button 
-                      onClick={() => setCurrentStep(2)} // Go back to retry/change input
-                      className="w-full sm:w-auto px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
-                    >
-                      Try Again
+                   <button
+                      onClick={() => setCurrentStep(3)} // Go back to Input (Step 3)
+                     // ... rest of back button props ...
                     </button>
-                    <button 
-                      onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Continue' from Step 3"); setCurrentStep(4); }}
-                      // Primary action style
-                      className="w-full sm:flex-1 px-8 py-3 bg-heartglow-pink text-white font-bold rounded-lg shadow-lg hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
+                    <button
+                      onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Continue' from Step 4"); setCurrentStep(5); }} // Go to NEW Affirmation Step (Step 5)
+                     // ... rest of continue button props ...
                     >
                       Continue
                     </button>
                 </div>
               </div>
-            ) : ( 
+            ) : (
               <div>Loading message or an unexpected state occurred.</div>
             )}
           </div>
         );
         break;
-      case 4:
-        stepContent = (
+
+      case 5: // NEW Step: Affirmation & Commitment
+         stepContent = (
           <div className="text-center space-y-6 flex flex-col items-center">
-             {/* Enhanced Icon Presentation */}
-             <div className="p-3 bg-gradient-to-br from-indigo-200 to-violet-200 dark:from-indigo-800/50 dark:to-violet-800/50 rounded-full mb-4 shadow-inner">
-                <ChatBubbleIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />
+             {/* Optional: Add a gentle icon, e.g., seedling or heart */}
+             <div className="p-3 bg-gradient-to-br from-green-100 to-emerald-100 dark:from-green-900/30 dark:to-emerald-900/30 rounded-full mb-4 shadow-inner">
+                 {/* Placeholder Icon */} 
+                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                 </svg>
              </div>
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-              Need More Guidance?
+              That took courage.
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
-              Beyond single messages, our AI Coach helps you navigate 
-              tricky conversations and communication challenges.
-              Find it anytime on your dashboard!
-              {/* MODIFIED: Added premium hint about saving coaching */}
-              <br/> <span className="font-medium text-indigo-500 dark:text-indigo-300">Upgrade to save your coaching sessions and track insights.</span>
+              Taking the first step is often the hardest. Ready to keep nurturing your connections?
             </p>
+            {/* Streak Incentive */}
+            <p className="text-sm text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700/50 p-3 rounded-md border border-gray-200 dark:border-gray-600/80">
+              🌱 <span className="font-medium">Grow your GlowScore:</span> Send 1 message a day to build your streak!
+            </p>
+            {/* CTAs */}
+            <div className="w-full space-y-3 pt-4">
+              <button 
+                 onClick={() => {
+                     console.log("[Analytics] Onboarding Action: Affirmation -> Add Connection");
+                     setIsAddConnectionModalOpen(true); // Open modal, completion handled there
+                  }}
+                 className="w-full flex items-center justify-center px-6 py-3 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/10 hover:bg-heartglow-pink/20 dark:hover:bg-heartglow-pink/30 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg font-semibold text-gray-800 dark:text-gray-100"
+              >
+                 <PersonIcon className="h-5 w-5 mr-2 text-heartglow-pink" />
+                 Add Your First Connection
+              </button>
+              <button 
+                 onClick={() => { 
+                     console.log("[Analytics] Onboarding Action: Affirmation -> Explore Dashboard (Challenges)");
+                     // For now, just continue to next step (HeartSteps Teaser)
+                     // Later, could potentially navigate directly to dashboard or challenges section if handleCompleteOnboarding is called here.
+                     setCurrentStep(6); 
+                  }}
+                 className="w-full flex items-center justify-center px-6 py-3 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out font-medium text-gray-700 dark:text-gray-200"
+              >
+                 {/* Dashboard/Challenge Icon? */}
+                  <DashboardIcon className="h-5 w-5 mr-2 text-indigo-500" />
+                 Explore What's Next
+              </button>
+            </div>
+            {/* Back Button */}
+            <button 
+              onClick={() => setCurrentStep(4)} // Go back to Reveal (Step 4)
+              className="mt-4 px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
+            >
+              Back
+            </button>
+          </div>
+         );
+         break;
+
+      case 6: // HeartSteps Teaser (Previously Step 5)
+         // NOTE: Renumbered again
+         stepContent = (
+          <div className="text-center space-y-6 flex flex-col items-center">
+             {/* Icon Presentation */}
+             <div className="p-3 bg-gradient-to-br from-indigo-200 to-violet-200 dark:from-indigo-800/50 dark:to-violet-800/50 rounded-full mb-4 shadow-inner">
+                {/* Using ChatBubbleIcon, could be changed */}
+                <ChatBubbleIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-300" aria-hidden="true" /> 
+             </div>
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+              Introducing HeartSteps Guidance {/* Renamed */}
+            </h2>
+            <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
+              {/* Benefit-focused description */}
+              Navigate real-life conversations with clarity, calm, and care. 
+              HeartSteps is here for the moments that need more than just a single message.
+            </p>
+            {/* Sample Prompt Example */}
+            <div className="w-full bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg border border-gray-200 dark:border-gray-600/80 text-left">
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-1 font-medium">Example prompt:</p>
+                <p className="text-sm text-gray-700 dark:text-gray-200 italic">
+                  "I want to bring up something I've been holding in with my partner..."
+                </p>
+            </div>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+               Find HeartSteps anytime on your dashboard!
+            </p>
+            {/* Updated Upgrade Prompt */}
+            <p className="text-sm text-gray-600 dark:text-gray-300 pt-4 border-t border-gray-200 dark:border-gray-700/50">
+              <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-indigo-500 dark:text-indigo-300 hover:underline">Upgrade to track your growth, reflect on sessions, and save insights.</a>
+            </p>
+
+            {/* Buttons Section - Update Back/Continue Button Logic */}
             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 w-full">
-                <button 
-                  onClick={() => setCurrentStep(3)} // Go back
-                  // Style consistent with other back buttons
-                  className="w-full sm:w-auto px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
+                <button
+                  onClick={() => setCurrentStep(5)} // Go back to Affirmation (Step 5)
+                  // ... rest of back button props ...
                 >
                   Back
                 </button>
-                <button 
-                  onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 4"); setCurrentStep(5); }}
-                   // Style consistent with primary CTAs, but maybe different color?
-                  className="w-full sm:flex-1 px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
+                <button
+                  onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 6"); setCurrentStep(7); }} // Go to Next Steps (now Step 7)
+                  // ... rest of continue button props ...
                 >
-                  {/* MODIFIED: More engaging button text */}
-                  Good to Know
+                  Got It!
                 </button>
             </div>
           </div>
         );
         break;
-      case 5:
+
+      case 7: // Next Steps (Previously Step 6)
+        // NOTE: Renumbered again
         stepContent = (
           <div className="text-center flex flex-col">
             <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               You're Ready to Glow!
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-              You've crafted your first message! Choose where to go next, or add your first connection (recommended).
+              You've started your journey! Choose where to go next, or add your first connection.
             </p>
-            
-            {/* Enhanced Action Cards */}
+
+            {/* Enhanced Action Cards with Updated Upgrade Framing */}
             <div className="space-y-4">
                 {/* Option 1: Add Connection (Highlighted) */}
-                <button 
+                <button
                   onClick={() => {
                      console.log("[Analytics] Onboarding Action: Click 'Add Your First Connection'");
                      setIsAddConnectionModalOpen(true);
                   }}
-                  // Highlighted Card Style
                   className="w-full flex items-center text-left p-5 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/10 hover:bg-heartglow-pink/20 dark:hover:bg-heartglow-pink/30 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg"
                 >
                   <PersonIcon className="h-7 w-7 mr-4 text-heartglow-pink flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-semibold text-base text-gray-800 dark:text-gray-100">Add Your First Connection</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                       {/* MODIFIED: Explain benefit & add premium hint */}
-                       Get personalized suggestions & track interactions. <span className="font-medium">Upgrade to save unlimited connections.</span>
+                       {/* Updated Framing */}
+                       Get personalized suggestions. <a href="#" onClick={(e) => {e.stopPropagation(); e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-heartglow-pink hover:underline">Upgrade to nurture unlimited connections on your journey.</a>
                       </p>
                   </div>
                    <span className="text-xs font-medium text-white bg-heartglow-pink px-2 py-0.5 rounded-full ml-2">Recommended</span>
                 </button>
 
                 {/* Option 2: Explore Dashboard */}
-                 <button 
-                  onClick={() => handleCompleteOnboarding('dashboard')} 
-                  // Standard Card Style
-                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
+                 <button
+                  onClick={() => handleCompleteOnboarding('dashboard')}
+                  className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
                  >
                   <DashboardIcon className="h-6 w-6 mr-4 text-indigo-500 flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-medium text-gray-700 dark:text-gray-200">Explore Your Dashboard</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                       {/* MODIFIED: Slightly more benefit-oriented */}
-                       Discover challenges, track your GlowScore & find coaching.
+                       Discover challenges, track your GlowScore & find HeartSteps.
                       </p>
                   </div>
                 </button>
 
                 {/* Option 3: Craft Another Message */}
-                 <button 
-                  onClick={() => handleCompleteOnboarding('create')} 
-                  // Standard Card Style
-                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
+                 <button
+                  onClick={() => handleCompleteOnboarding('create')}
+                  className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
                 >
                   <Pencil2Icon className="h-6 w-6 mr-4 text-green-500 flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-medium text-gray-700 dark:text-gray-200">Craft Another Message</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                       {/* MODIFIED: Explain benefit */}
                        Use the full editor with more tones & styles.
                       </p>
                   </div>
                 </button>
             </div>
-            {/* MODIFIED: Added general premium tease */}
+            {/* Updated General Upgrade Tease with Tiers */}
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700/50">
-               Ready for the full experience? <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your messages, connections, and coaching progress!
+               Ready to deepen your journey? <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your progress, revisit messages, and unlock your full potential:
+               <br/> <span className="font-mono text-xs tracking-tight">🌱 Opening Up → 🔥 In Bloom → 🕊️ Legacy Builder</span>
             </p>
             {/* GlowGuide Hint */} 
              <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">
                  Confused? The 💡 guide explains each option.
               </p>
-             <button 
-               onClick={() => setCurrentStep(4)} // Go back 
+             <button
+               onClick={() => setCurrentStep(6)} // Go back to HeartSteps (Step 6)
                className="w-full sm:w-auto mt-6 px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-200 ease-in-out"
             >
               Back
@@ -450,8 +587,9 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
           </div>
         );
         break;
+
       default:
-        stepContent = <div>Unknown Step</div>;
+        stepContent = <div>Unknown Step: {currentStep}</div>;
     }
     // --- Wrap step content with motion.div ---
     return (
@@ -476,7 +614,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
         </AnimatePresence>
       </div>
       {/* Render the modal outside the step animation */}
-      <AddConnectionModal 
+      <AddConnectionModal
         isOpen={isAddConnectionModalOpen}
         onClose={() => setIsAddConnectionModalOpen(false)}
         onSave={handleSaveConnection}

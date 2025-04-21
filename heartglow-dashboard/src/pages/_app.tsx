@@ -1,9 +1,12 @@
 import '../styles/globals.css';
 import type { AppProps } from 'next/app';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Head from 'next/head';
-import { AuthProvider } from '../context/AuthContext';
+import { AuthProvider, useAuth } from '../context/AuthContext';
 import AccountLinkBanner from '../components/ui/AccountLinkBanner';
+import OnboardingFlowWrapper from '../components/onboarding/OnboardingFlowWrapper';
+import GlowGuideButton from '../components/onboarding/GlowGuideButton';
+import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
 
 // Helper function to get route with base path
 export function getRouteWithBasePath(path: string): string {
@@ -11,7 +14,12 @@ export function getRouteWithBasePath(path: string): string {
   return `${basePath}${path}`;
 }
 
-export default function App({ Component, pageProps }: AppProps) {
+// --- Add InnerApp component to use hooks ---
+function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProps['router'] }) {
+  const { userProfile, loading } = useAuth();
+  const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
+  const [onboardingStep, setOnboardingStep] = useState(1);
+
   // --- START: Theme Handling --- 
   useEffect(() => {
     // Check localStorage first, then system preference
@@ -43,6 +51,62 @@ export default function App({ Component, pageProps }: AppProps) {
     }
   }, []);
 
+  // --- START: Onboarding Logic ---
+  if (loading) {
+    // Optional: Render a global loading spinner or minimal layout
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heartglow-pink"></div>
+      </div>
+    );
+  }
+
+  const showOnboarding = userProfile && userProfile.hasCompletedOnboarding === false;
+
+  if (showOnboarding) {
+    // Render the Onboarding Flow - Placeholder for now
+    return (
+        <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
+            <h1 className="text-2xl font-bold text-heartglow-pink mb-4">Onboarding Flow Placeholder</h1>
+            <p className="text-gray-700 dark:text-gray-300">The onboarding experience will be displayed here.</p>
+            {/* TODO: Remove this temporary placeholder div */} 
+        </div>
+    );
+  }
+  // --- END: Onboarding Logic ---
+
+  return (
+    <>
+      {showOnboarding ? (
+        <OnboardingFlowWrapper 
+          currentStep={onboardingStep} 
+          setCurrentStep={setOnboardingStep} 
+        />
+      ) : (
+        // Render main app content if onboarding is complete
+        <>
+          <AccountLinkBanner />
+          <Component {...pageProps} />
+        </>
+      )}
+
+      {/* Render GlowGuide persistently */}
+      <GlowGuideButton 
+        onClick={() => setIsGlowGuideOpen(true)} 
+        pulse={showOnboarding}
+      />
+      <GlowGuidePanel 
+        isOpen={isGlowGuideOpen} 
+        onClose={() => setIsGlowGuideOpen(false)} 
+        isOnboarding={showOnboarding}
+        currentOnboardingStep={showOnboarding ? onboardingStep : undefined}
+      />
+    </>
+  );
+}
+
+// --- Main App Component ---
+export default function App({ Component, pageProps, router }: AppProps) {
   return (
     <>
       <Head>
@@ -60,8 +124,7 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <AuthProvider>
-        <AccountLinkBanner />
-        <Component {...pageProps} />
+        <InnerApp Component={Component} pageProps={pageProps} router={router} />
       </AuthProvider>
     </>
   );

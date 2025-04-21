@@ -29,7 +29,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateMessageInsightsHttp = exports.generateMessageInsights = exports.generateEnhancedMessage = exports.skipCurrentChallenge = void 0;
+exports.generateMessageInsightsV2 = exports.generateEnhancedMessage = exports.skipCurrentChallenge = void 0;
 const functions = __importStar(require("firebase-functions")); // Add import
 const admin = __importStar(require("firebase-admin")); // Add import
 const cors = require("cors"); // Use require-style import for cors
@@ -147,10 +147,12 @@ exports.skipCurrentChallenge = functions.https.onRequest((req, res) => {
 // export * from './messageGeneration';
 const messageGeneration_1 = require("./messageGeneration");
 Object.defineProperty(exports, "generateEnhancedMessage", { enumerable: true, get: function () { return messageGeneration_1.generateEnhancedMessage; } });
-// --- Export Message Insights function ---
-const messageInsights_1 = require("./messageInsights");
-Object.defineProperty(exports, "generateMessageInsights", { enumerable: true, get: function () { return messageInsights_1.generateMessageInsights; } });
-Object.defineProperty(exports, "generateMessageInsightsHttp", { enumerable: true, get: function () { return messageInsights_1.generateMessageInsightsHttp; } });
+// --- Export NEW Message Insights function ---
+const messageInsightsV2_1 = require("./messageInsightsV2");
+Object.defineProperty(exports, "generateMessageInsightsV2", { enumerable: true, get: function () { return messageInsightsV2_1.generateMessageInsightsV2; } });
+// --- Export Message Insights function --- (Removed old export)
+// import { generateMessageInsights } from './messageInsights';
+// export { generateMessageInsights };
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';
 console.log('Importing and exporting Cloud Functions...');

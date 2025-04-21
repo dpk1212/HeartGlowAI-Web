@@ -138,9 +138,13 @@ export const skipCurrentChallenge = functions.https.onRequest((req, res) => {
 import { generateEnhancedMessage } from './messageGeneration';
 export { generateEnhancedMessage };
 
-// --- Export Message Insights function ---
-import { generateMessageInsights } from './messageInsights';
-export { generateMessageInsights };
+// --- Export NEW Message Insights function ---
+import { generateMessageInsightsV2 } from './messageInsightsV2';
+export { generateMessageInsightsV2 };
+
+// --- Export Message Insights function --- (Removed old export)
+// import { generateMessageInsights } from './messageInsights';
+// export { generateMessageInsights };
 
 // --- Add exports for your OTHER existing functions below --- 
 // e.g., export * from './yourOtherFunctionFile';

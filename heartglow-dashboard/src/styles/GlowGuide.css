@@ -1,0 +1,106 @@
+/* GlowGuide.css */
+
+.glow-guide-button {
+  position: fixed;
+  bottom: 1.5rem; /* 24px */
+  right: 1.5rem; /* 24px */
+  background-color: var(--heartglow-pink); /* Use CSS variable if defined, else fallback */
+  color: white;
+  border-radius: 9999px; /* Full */
+  padding: 0.75rem; /* 12px */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease-in-out, background-color 0.2s;
+  z-index: 1000; /* Ensure it's above other content */
+  font-size: 1.25rem; /* Adjust icon size if needed */
+}
+
+.glow-guide-button:hover {
+  background-color: var(--heartglow-violet); /* Example hover color */
+  transform: scale(1.1);
+}
+
+/* --- Add Pulse Animation --- */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+/* --- End Pulse Animation --- */
+
+.glow-guide-panel-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: flex-end; /* Align panel to the right */
+  z-index: 1050;
+}
+
+.glow-guide-panel-content {
+  background-color: white;
+  /* Consider dark mode colors */
+  /* @media (prefers-color-scheme: dark) { background-color: #some-dark-gray; } */
+  width: 100%;
+  max-width: 350px; /* Adjust width as needed */
+  height: 100%;
+  padding: 1.5rem; /* 24px */
+  box-shadow: -2px 0 5px rgba(0,0,0,0.2);
+  overflow-y: auto;
+  position: relative; /* For close button positioning */
+  /* Add animation for sliding in */
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Basic slide-in animation */
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.glow-guide-close-button {
+  position: absolute;
+  top: 0.75rem; /* 12px */
+  right: 0.75rem; /* 12px */
+  background: none;
+  border: none;
+  font-size: 1.5rem; /* 24px */
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280; /* gray-500 */
+}
+
+.glow-guide-close-button:hover {
+  color: #111827; /* gray-900 */
+}
+
+/* TODO: Add dark mode styles using .dark selector if needed */
+.dark .glow-guide-panel-content {
+  background-color: var(--heartglow-gray); /* Example dark mode background */
+  color: var(--heartglow-offwhite);
+}
+
+.dark .glow-guide-close-button {
+  color: #9ca3af; /* gray-400 */
+}
+
+.dark .glow-guide-close-button:hover {
+   color: #f3f4f6; /* gray-100 */
+} 

@@ -41,6 +41,7 @@ export type UserProfile = {
     reflectionsCompletedCount?: number;
   };
   unlockedFeatures?: string[];
+  hasCompletedOnboarding?: boolean; // Added for onboarding flow tracking
 };
 
 export type AuthContextType = {
@@ -51,6 +52,7 @@ export type AuthContextType = {
   loginWithGoogle: () => Promise<any>;
   signup: (email: string, password: string) => Promise<any>;
   logout: () => Promise<void>;
+  updateUserProfile: (data: Partial<UserProfile>) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -129,7 +131,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                activeChallenge: profileData.activeChallenge ?? null,
                challengeHistory: profileData.challengeHistory ?? [],
                metrics: profileData.metrics ?? { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
-               unlockedFeatures: profileData.unlockedFeatures ?? []
+               unlockedFeatures: profileData.unlockedFeatures ?? [],
+               hasCompletedOnboarding: profileData.hasCompletedOnboarding ?? false
              });
              setLoading(false);
            } else {
@@ -149,7 +152,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                  activeChallenge: null,
                  challengeHistory: [],
                  metrics: { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
-                 unlockedFeatures: []
+                 unlockedFeatures: [],
+                 hasCompletedOnboarding: false // Default to false for new users
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);
@@ -177,6 +181,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, []);
 
+  const updateUserProfile = async (data: Partial<UserProfile>) => {
+    if (!currentUser) {
+      throw new Error("User not authenticated to update profile.");
+    }
+    const userRef = doc(db, "users", currentUser.uid);
+    try {
+      console.log(`Updating profile for user ${currentUser.uid} with data:`, data);
+      await updateDoc(userRef, { 
+        ...data, 
+        // Optionally add a lastUpdated timestamp?
+        // lastUpdated: serverTimestamp() 
+      });
+      console.log(`Profile updated successfully for user ${currentUser.uid}.`);
+      // Note: The onSnapshot listener should automatically update the local userProfile state.
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      throw error; // Re-throw the error for the caller to handle if needed
+    }
+  };
+
   const login = async (email: string, password: string) => {
     return signIn(email, password);
   };
@@ -200,7 +224,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     login,
     loginWithGoogle,
     signup,
-    logout
+    logout,
+    updateUserProfile,
   };
 
   return (

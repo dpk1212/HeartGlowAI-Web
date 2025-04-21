@@ -170,35 +170,35 @@ const DashboardTour: React.FC<DashboardTourProps> = ({ isActive, onComplete }) =
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.2, ease: 'easeOut' }}
-          className="absolute bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-6 max-w-sm w-full text-center border border-gray-200 dark:border-gray-700 pointer-events-auto" 
+          className="absolute bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-4 sm:p-6 w-[90vw] sm:w-full sm:max-w-sm text-center border border-gray-200 dark:border-gray-700 pointer-events-auto" 
           style={tooltipStyle} 
       >
           {/* Arrow Element */}
           {arrowPosition && <div style={arrowFinalStyle}></div>}
           
-          <h3 className="text-lg font-semibold text-heartglow-pink mb-3">{currentStepData.title}</h3>
-          <p className="text-sm text-gray-700 dark:text-gray-300 mb-5 leading-relaxed">
+          <h3 className="text-base sm:text-lg font-semibold text-heartglow-pink mb-2 sm:mb-3">{currentStepData.title}</h3>
+          <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 mb-4 sm:mb-5 leading-relaxed">
               {currentStepData.text}
           </p>
           
-          <div className="flex justify-between items-center mt-4">
+          <div className="flex justify-between items-center mt-3 sm:mt-4">
               {/* Step Counter */}
               <span className="text-xs text-gray-400 dark:text-gray-500">
                   Step {currentStepData.step} of {tourSteps.length}
               </span>
 
-              {/* Buttons */}
+              {/* Buttons - Adjust padding/size for mobile? */}
               {isLastStep ? (
                   <button 
                       onClick={handleDone}
-                      className="px-5 py-2 bg-heartglow-pink text-white font-semibold rounded-lg shadow-md hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition duration-200"
+                      className="px-4 sm:px-5 py-2 text-sm sm:text-base bg-heartglow-pink text-white font-semibold rounded-lg shadow-md hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition duration-200"
                   >
                       Done
                   </button>
               ) : (
                    <button 
                       onClick={handleNext}
-                      className="px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition duration-200"
+                      className="px-4 sm:px-5 py-2 text-sm sm:text-base bg-indigo-600 text-white font-semibold rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition duration-200"
                    >
                       Next
                   </button>

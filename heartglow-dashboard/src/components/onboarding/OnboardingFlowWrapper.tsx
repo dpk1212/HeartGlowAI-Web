@@ -152,10 +152,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
              <div className="p-3 bg-gradient-to-br from-heartglow-pink/20 to-heartglow-violet/20 rounded-full mb-5">
                  <MagicWandIcon className="w-8 h-8 text-heartglow-pink" />
              </div>
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-3">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Welcome to HeartGlow AI!
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
+            <p className="text-base text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
               Unlock authentic communication. Let our AI help you craft the perfect message in seconds.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-8">
@@ -174,7 +174,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       case 2:
         stepContent = (
           <div className="flex flex-col">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-5 text-center">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-5 text-center">
               Craft Your First Message
             </h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 text-center">
@@ -192,7 +192,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                 onChange={(e) => setOnboardingData({ ...onboardingData, recipientInput: e.target.value })}
                 placeholder="e.g., Friend, Mom, Partner, Colleague"
                 // Enhanced input styling
-                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 text-base"
+                className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-base"
               />
             </div>
 
@@ -209,7 +209,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                     // Enhanced card-like styling for buttons
                     className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedIntent === intent.id 
                       ? 'bg-heartglow-pink/10 border-heartglow-pink ring-2 ring-heartglow-pink dark:bg-heartglow-pink/20 dark:border-heartglow-pink/80 transform scale-105' 
-                      : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:shadow-md'}`}
+                      : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`}
                   >
                     <span className="text-3xl mb-2" role="img" aria-label={intent.label}>{intent.emoji}</span>
                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">{intent.label}</span>
@@ -255,12 +255,13 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
         stepContent = (
           <div className="text-center flex flex-col">
             {isGenerating ? ( 
-              <div className="flex justify-center items-center p-16">
+              <div className="flex flex-col items-center justify-center p-16 space-y-4">
                  <svg className="animate-spin h-10 w-10 text-heartglow-pink" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                 <span className="ml-3 text-gray-600 dark:text-gray-400">Drafting your message...</span>
+                 <span className="text-base text-gray-600 dark:text-gray-400">Drafting your message...</span>
+                  <div className="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mt-4"></div>
               </div>
             ) : generationError ? (
               <div className="space-y-6 flex flex-col items-center">
@@ -269,10 +270,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                      </svg>
                  </div>
-                <h2 className="text-xl font-semibold text-red-600 dark:text-red-400">
+                <h2 className="text-xl font-semibold text-red-500 dark:text-red-400">
                   Oops! Couldn't Draft Message
                 </h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 bg-red-50 dark:bg-red-800/20 border border-red-200 dark:border-red-700/50 p-4 rounded-lg">
+                <p className="text-sm text-gray-600 dark:text-gray-300 bg-red-50 dark:bg-red-800/30 border border-red-200 dark:border-red-700/50 p-4 rounded-lg">
                   {generationError} 
                   <br/> Please try again, or adjust your inputs.
                 </p>
@@ -285,16 +286,16 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
               </div>
             ) : generatedMessage ? (
               <div className="space-y-6">
-                <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+                <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
                   Here's your first draft!
                 </h2>
                  {/* Enhanced Message Display */}
-                <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900 p-5 rounded-lg border border-gray-200 dark:border-gray-700 shadow-inner text-left min-h-[150px]">
-                  <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap leading-relaxed text-base">
+                <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-600 shadow-inner text-left min-h-[150px]">
+                  <p className="text-gray-800 dark:text-gray-100 whitespace-pre-wrap leading-relaxed text-base">
                     {generatedMessage}
                   </p>
                 </div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
                    ✨ Our AI crafted this starting point. You can fully edit messages later.
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -330,10 +331,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
              <div className="p-3 bg-gradient-to-br from-indigo-200 to-violet-200 dark:from-indigo-800/50 dark:to-violet-800/50 rounded-full mb-4 shadow-inner">
                 <ChatBubbleIcon className="h-8 w-8 text-indigo-600 dark:text-indigo-300" aria-hidden="true" />
              </div>
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
               Need More Guidance?
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+            <p className="text-base text-gray-600 dark:text-gray-300 leading-relaxed">
               Beyond single messages, our AI Coach helps you navigate 
               tricky conversations and communication challenges.
               Find it anytime on your dashboard!
@@ -360,10 +361,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
       case 5:
         stepContent = (
           <div className="text-center flex flex-col">
-            <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
+            <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
               You're Ready to Glow!
             </h2>
-            <p className="text-base text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
+            <p className="text-base text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
               You've crafted your first message! Choose where to go next, or add your first connection (recommended).
             </p>
             
@@ -376,11 +377,11 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                      setIsAddConnectionModalOpen(true);
                   }}
                   // Highlighted Card Style
-                  className="w-full flex items-center text-left p-5 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/5 hover:bg-heartglow-pink/10 dark:hover:bg-heartglow-pink/20 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg"
+                  className="w-full flex items-center text-left p-5 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/10 hover:bg-heartglow-pink/20 dark:hover:bg-heartglow-pink/30 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg"
                 >
                   <PersonIcon className="h-7 w-7 mr-4 text-heartglow-pink flex-shrink-0" />
                   <div className="flex-grow">
-                     <span className="font-semibold text-base text-gray-800 dark:text-gray-200">Add Your First Connection</span>
+                     <span className="font-semibold text-base text-gray-800 dark:text-gray-100">Add Your First Connection</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">Save contacts to easily message them later.</p>
                   </div>
                    <span className="text-xs font-medium text-white bg-heartglow-pink px-2 py-0.5 rounded-full ml-2">Recommended</span>
@@ -390,11 +391,11 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                  <button 
                   onClick={() => handleCompleteOnboarding('dashboard')} 
                   // Standard Card Style
-                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:shadow-md transition-all duration-200 ease-in-out"
+                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
                  >
                   <DashboardIcon className="h-6 w-6 mr-4 text-indigo-500 flex-shrink-0" />
                   <div className="flex-grow">
-                     <span className="font-medium text-gray-700 dark:text-gray-300">Explore Your Dashboard</span>
+                     <span className="font-medium text-gray-700 dark:text-gray-200">Explore Your Dashboard</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">See challenges, coaching, and more.</p>
                   </div>
                 </button>
@@ -403,11 +404,11 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                  <button 
                   onClick={() => handleCompleteOnboarding('create')} 
                   // Standard Card Style
-                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-700/30 hover:bg-gray-50 dark:hover:bg-gray-700/60 hover:shadow-md transition-all duration-200 ease-in-out"
+                   className="w-full flex items-center text-left p-4 border border-gray-200 dark:border-gray-600/80 rounded-xl bg-white dark:bg-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md transition-all duration-200 ease-in-out"
                 >
                   <Pencil2Icon className="h-6 w-6 mr-4 text-green-500 flex-shrink-0" />
                   <div className="flex-grow">
-                     <span className="font-medium text-gray-700 dark:text-gray-300">Craft Another Message</span>
+                     <span className="font-medium text-gray-700 dark:text-gray-200">Craft Another Message</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">Use the full editor with more options.</p>
                   </div>
                 </button>
@@ -444,8 +445,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-heartglow-deepgray dark:to-gray-900 p-4 sm:p-6">
-      <div className="bg-white dark:bg-heartglow-gray p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden"> {/* Enhanced card style */}
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950 p-4 sm:p-6">
+      <div className="bg-white dark:bg-gray-800 p-8 sm:p-10 rounded-xl shadow-2xl w-full max-w-lg overflow-hidden"> {/* Darker card background */}
         <AnimatePresence mode="wait">
           {renderCurrentStep()}
         </AnimatePresence>

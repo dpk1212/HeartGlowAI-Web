@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { addConnection } from '../../firebase/db'; // Assuming db.ts is in firebase folder
 import { RELATIONSHIP_OPTIONS } from '../../utils/constants'; // Import from new location
-import { PersonPlusIcon } from '@radix-ui/react-icons'; // Example icon
+import { PersonIcon } from '@radix-ui/react-icons'; // Corrected icon import
 
 interface AddConnectionModalProps {
   isOpen: boolean;
@@ -57,7 +57,7 @@ const AddConnectionModal: React.FC<AddConnectionModalProps> = ({ isOpen, onClose
         <form onSubmit={handleSave} className="space-y-5">
           <div className="flex items-center justify-center flex-col text-center mb-2">
             <div className="p-3 bg-gradient-to-br from-heartglow-pink/20 to-heartglow-violet/20 rounded-full mb-3">
-              <PersonPlusIcon className="w-7 h-7 text-heartglow-pink" />
+              <PersonIcon className="w-7 h-7 text-heartglow-pink" />
             </div>
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Add Your First Connection</h2>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Save their details to easily send messages later.</p>

@@ -16,8 +16,8 @@ const steps: Step[] = [
     disableBeacon: true 
   },
   { // Step 2: GlowGuide
-    target: ".glow-guide-button", 
-    content: "✅ Click the 💡 GlowGuide anytime for tips related to what you're doing.", 
+    target: "[data-tour-id='coaching-entry-card']",
+    content: "✅ Click the 💡 HeartGlow Guide anytime for personalized coaching and tips.",
     title: "Always Here to Help!" 
   },
   { // Step 3: Connections (New Target)

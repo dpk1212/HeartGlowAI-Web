@@ -6,7 +6,10 @@ import { Heart } from 'lucide-react'; // Changed from Zap to Heart icon
 
 const CoachingEntryCard: React.FC = () => {
   return (
-    <div className="rounded-lg border border-rose-200 dark:border-rose-800/50 bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-900/30 dark:to-amber-900/30 shadow-lg hover:shadow-xl transition-shadow duration-300 p-6">
+    <div 
+      className="rounded-lg border border-rose-200 dark:border-rose-800/50 bg-gradient-to-br from-rose-100 to-amber-100 dark:from-rose-900/30 dark:to-amber-900/30 shadow-lg hover:shadow-xl transition-shadow duration-300 p-6"
+      data-tour-id="coaching-entry-card"
+    >
       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
         <div className="mb-4 md:mb-0 md:flex-1">
           <div className="flex items-center text-xl font-semibold text-gray-800 dark:text-gray-100 mb-1">

@@ -21,6 +21,7 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   const { userProfile, loading, updateUserProfile } = useAuth();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(1);
+  const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
 
   // --- START: Theme Handling --- 
   useEffect(() => {
@@ -37,6 +38,27 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     //       (e.g., a theme toggle button). If not, it will primarily follow system pref.
   }, []);
   // --- END: Theme Handling ---
+
+  // --- START: Tour Delay Logic ---
+  useEffect(() => {
+    let timerId: NodeJS.Timeout | null = null;
+    const shouldShowTour = userProfile && userProfile.hasCompletedOnboarding === true && userProfile.hasSeenDashboardTour === false;
+
+    if (shouldShowTour && !isTourActiveDelayed) {
+      timerId = setTimeout(() => {
+        setIsTourActiveDelayed(true);
+      }, 500); // 500ms delay
+    } else if (!shouldShowTour) {
+      setIsTourActiveDelayed(false); // Reset if tour should not be shown
+    }
+
+    return () => {
+      if (timerId) {
+        clearTimeout(timerId);
+      }
+    };
+  }, [userProfile, isTourActiveDelayed]); // Depend on userProfile and the delayed state itself
+  // --- END: Tour Delay Logic ---
 
   // Force cache refresh on new deployments
   useEffect(() => {
@@ -68,6 +90,7 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
 
   // Function to mark tour as complete
   const handleCompleteTour = async () => {
+    setIsTourActiveDelayed(false);
     try {
         await updateUserProfile({ hasSeenDashboardTour: true });
         // State will update via listener, no need to manually set state here
@@ -95,7 +118,12 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
       </div>
 
       {/* DashboardTour now handles its own overlay/highlighting */}
-      <DashboardTour isActive={showDashboardTour} onComplete={handleCompleteTour} />
+      {showDashboardTour && (
+        <DashboardTour 
+          isActive={isTourActiveDelayed} 
+          onComplete={handleCompleteTour} 
+        />
+      )}
 
       {/* Render GlowGuide persistently */}
       <GlowGuideButton 

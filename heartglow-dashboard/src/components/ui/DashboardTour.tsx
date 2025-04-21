@@ -16,6 +16,16 @@ const steps: Step[] = [
     disableBeacon: true // Start immediately without the beacon pulse
   },
   { 
+    target: ".glow-guide-button", 
+    content: "✅ Click the 💡 GlowGuide anytime for tips related to what you're doing.", 
+    title: "Always Here to Help!" 
+  },
+  { 
+    target: "[data-tour-id='coaching-card']", 
+    content: "❤️ Access AI coaching sessions or helpful guides here anytime for deeper support.", 
+    title: "Deeper Support & Guidance"
+  },
+  { 
     target: "[data-tour-id='challenge-section']", 
     content: "🎯 These guided activities help you practice communication skills and earn GlowScore XP.", 
     title: "Take on Challenges!" 
@@ -24,16 +34,6 @@ const steps: Step[] = [
     target: "[data-tour-id='glowscore-card']", 
     content: "📈 See your XP, communication streaks, and growth over time.", 
     title: "Track Your Progress!" 
-  },
-  { 
-    target: "[data-tour-id='coaching-card']", 
-    content: "❤️ Access AI coaching sessions or helpful guides here anytime.", 
-    title: "Need Deeper Support?" 
-  },
-  { 
-    target: ".glow-guide-button", 
-    content: "✅ Click the 💡 GlowGuide anytime for tips related to what you're doing.", 
-    title: "Always Here to Help!" 
   },
 ];
 

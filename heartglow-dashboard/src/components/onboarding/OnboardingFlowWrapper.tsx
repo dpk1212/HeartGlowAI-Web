@@ -413,7 +413,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                  {/* Updated Upgrade Prompt */}
                  <p className="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-gray-700/50">
                     ✨ Remember, you can fully edit this in the main editor.
-                   <br/> <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-heartglow-pink hover:underline">Upgrade to begin building your emotional journey & save drafts.</a>
+                   <br/> <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 4)"); setShowPaywall(true); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to begin building your emotional journey & save drafts.</a>
                 </p>
                 {/* Buttons Section - Update Continue Button Logic */}
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-2">
@@ -526,7 +526,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
             </p>
             {/* Updated Upgrade Prompt */}
             <p className="text-sm text-gray-600 dark:text-gray-300 pt-4 border-t border-gray-200 dark:border-gray-700/50">
-              <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-indigo-500 dark:text-indigo-300 hover:underline">Upgrade to track your growth, reflect on sessions, and save insights.</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 6)"); setShowPaywall(true); }} className="font-medium text-indigo-500 dark:text-indigo-300 hover:underline">Upgrade to track your growth, reflect on sessions, and save insights.</a>
             </p>
 
             {/* Buttons Section - Update Back/Continue Button Logic */}
@@ -578,7 +578,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                      <span className="font-semibold text-base text-gray-800 dark:text-gray-100">Add Your First Connection</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">
                        {/* Updated Framing */}
-                       Get personalized suggestions. <a href="#" onClick={(e) => {e.stopPropagation(); e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="font-medium text-heartglow-pink hover:underline">Upgrade to nurture unlimited connections on your journey.</a>
+                       Get personalized suggestions. <a href="#" onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Add Connection)"); setShowPaywall(true); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to nurture unlimited connections on your journey.</a>
                       </p>
                   </div>
                    <span className="text-xs font-medium text-white bg-heartglow-pink px-2 py-0.5 rounded-full ml-2">Recommended</span>
@@ -614,7 +614,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
             </div>
             {/* Updated General Upgrade Tease with Tiers */}
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700/50">
-               Ready to deepen your journey? <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your progress, revisit messages, and unlock your full potential:
+               Ready to deepen your journey? <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Footer)"); setShowPaywall(true); }} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your progress, revisit messages, and unlock your full potential:
                <br/> <span className="font-mono text-xs tracking-tight">🌱 Opening Up → 🔥 In Bloom → 🕊️ Legacy Builder</span>
             </p>
             {/* GlowGuide Hint */} 

@@ -1,52 +1,69 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Dialog } from '@headlessui/react'; // Using Headless UI for modal accessibility
-import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon, HeartIcon, UserGroupIcon, ChartBarIcon, PencilIcon, BrainIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
 
 // Load Stripe.js with your publishable key (should be public)
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+interface PaywallFeature {
+  name: string;
+  icon?: React.ComponentType<React.SVGProps<SVGSVGElement>>; // Icon component is optional
+}
+
+interface PaywallContent {
+  title: React.ReactNode;
+  description: React.ReactNode;
+  features: PaywallFeature[];
+  ctaText: string;
+  footerText: React.ReactNode;
+  dismissText?: string; // Optional override for dismiss button text
+}
+
 interface PaywallModalProps {
   isOpen: boolean;
   onClose: () => void;
+  content?: PaywallContent; // Optional content prop
 }
 
-const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
+// Default content if no custom content is provided
+const defaultFeatures: PaywallFeature[] = [
+  { name: 'Save Unlimited Messages', icon: BookmarkIcon },
+  { name: 'Continue Your Coaching Journey', icon: ChatBubbleLeftRightIcon },
+  { name: 'Track & Deepen Your Connections', icon: UsersIcon },
+  { name: 'Grow with GlowScore & Challenges', icon: SparklesIcon },
+  { name: 'Unlock Premium Tones & Templates', icon: PencilIcon }, // Changed icon
+];
+
+const defaultContent: PaywallContent = {
+  title: "Keep Growing. Keep Glowing.",
+  description: "You've taken the first step — now unlock the full journey of connection. HeartGlow Premium gives you the space, tools, and support to deepen your relationships — one message, one insight, one meaningful moment at a time.",
+  features: defaultFeatures,
+  ctaText: "Upgrade to HeartGlow Premium",
+  footerText: <>Start your growth for just $4.99/month – Cancel anytime</>, // Example price, adjust as needed
+  dismissText: "Not now. Keep exploring for free."
+};
+
+const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, content: customContent }) => {
   const { currentUser } = useAuth(); // Get current user from AuthContext
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const features = [
-    { name: 'Save Unlimited Messages', icon: BookmarkIcon },
-    { name: 'Continue Your Coaching Journey', icon: ChatBubbleLeftRightIcon },
-    { name: 'Track & Deepen Your Connections', icon: UsersIcon },
-    { name: 'Grow with GlowScore & Challenges', icon: SparklesIcon },
-    { name: 'Unlock Premium Tones & Templates', icon: SparklesIcon }, // Consider a different icon
-  ];
+  // Use custom content if provided, otherwise use defaults
+  const content = customContent || defaultContent;
 
   const handleUpgradeClick = async () => {
     setIsLoading(true);
     setError(null);
 
-    if (!currentUser?.uid) { // Check for UID directly
-        setError('User not authenticated or UID missing. Please log in again.');
+    if (!currentUser) {
+        setError('User not authenticated. Please log in again.');
         setIsLoading(false);
         return;
     }
 
     try {
-      // --- Direct Redirect Logic --- 
-      const paymentLink = "https://buy.stripe.com/4gw03z8Tf1cW2sw8ww"; // Ensure standard quote
-      const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
-      console.log('Redirecting to Stripe Payment Link from Modal:', urlWithRef);
-      window.location.href = urlWithRef;
-      // Redirect happens, so no need to stop loading immediately unless redirect fails
-      // but window.location.href doesn't provide feedback on failure here.
-      // setIsLoading(false); // Can potentially remove this if redirect is assumed to work
-      // ---------------------------
-
-      /* // --- REMOVED: Old fetch logic --- 
       // Get Firebase ID token
       const token = await currentUser.getIdToken();
       
@@ -78,13 +95,17 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
       }
       // If redirection fails or is cancelled, stop loading
       setIsLoading(false);
-      */ // --- END REMOVED --- 
 
     } catch (err) {
-      console.error('Upgrade Error (Redirect Setup):', err);
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred preparing the upgrade link.';
-      setError(message);
-      setIsLoading(false); // Stop loading on error
+      console.error('Upgrade Error:', err);
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
+      // Handle specific auth errors if getIdToken fails
+      if (message.includes('auth/user-token-expired')) {
+          setError('Your session has expired. Please log in again.');
+      } else {
+          setError(message);
+      }
+      setIsLoading(false);
     }
   };
 
@@ -98,16 +119,21 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
         {/* The actual dialog panel */}
         <Dialog.Panel className="mx-auto w-full max-w-lg rounded-xl bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 p-8 shadow-2xl border border-gray-200 dark:border-gray-700">
           <Dialog.Title className="text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-heartglow-pink to-heartglow-violet mb-2">
-            Keep Growing. Keep Glowing.
+            {content.title}
           </Dialog.Title>
-          <Dialog.Description className="text-center text-gray-600 dark:text-gray-300 mb-6">
-            You've taken the first step — now unlock the full journey of connection. HeartGlow Premium gives you the space, tools, and support to deepen your relationships — one message, one insight, one meaningful moment at a time.
+          <Dialog.Description className="text-center text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line">
+            {content.description}
           </Dialog.Description>
 
           <div className="space-y-3 mb-8">
-            {features.map((feature) => (
+            {content.features.map((feature) => (
               <div key={feature.name} className="flex items-start">
-                <feature.icon className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                {/* Use a default check icon if no specific icon provided */}
+                {feature.icon ? (
+                  <feature.icon className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                ) : (
+                  <CheckIcon className="h-5 w-5 text-green-500 mr-3 mt-0.5 flex-shrink-0" aria-hidden="true" />
+                )}
                 <span className="text-gray-700 dark:text-gray-200">{feature.name}</span>
               </div>
             ))}
@@ -138,11 +164,11 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
                 Processing...
               </>
             ) : (
-              'Upgrade to HeartGlow Premium'
+              content.ctaText
             )}
           </button>
            <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-2">
-             Start your growth for just $4.99/month – Cancel anytime
+             {content.footerText}
            </p>
 
           <button
@@ -150,7 +176,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
             disabled={isLoading}
             className="w-full mt-4 px-6 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition duration-200 ease-in-out disabled:opacity-60"
           >
-            Not now. Keep exploring for free.
+            {content.dismissText || defaultContent.dismissText}
           </button>
 
         </Dialog.Panel>

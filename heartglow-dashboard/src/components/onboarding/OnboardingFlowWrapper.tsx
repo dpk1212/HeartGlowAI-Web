@@ -2,12 +2,24 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 // Import the message generation function and type
 import { generateMessage, MessageGenerationParams } from '../../lib/messageGenerator';
-import { ChatBubbleIcon, DashboardIcon, PersonIcon, Pencil2Icon, MagicWandIcon } from '@radix-ui/react-icons'; // Example Icons
+import {
+  ChatBubbleIcon,
+  DashboardIcon,
+  PersonIcon,
+  Pencil2Icon,
+  MagicWandIcon,
+  BookmarkFilledIcon,
+  BarChartIcon,
+  LightBulbIcon,
+  MixIcon,
+  Link2Icon
+} from '@radix-ui/react-icons'; // Example Icons
 import { useRouter } from 'next/router'; // Import useRouter
 import { motion, AnimatePresence } from 'framer-motion'; // Import framer-motion
 // Import the modal
 import AddConnectionModal from './AddConnectionModal';
 import { HeartIcon } from '@heroicons/react/24/outline'; // Example for relationship icons
+import PaywallModal from '../ui/PaywallModal'; // Import the PaywallModal
 
 // Placeholder components for individual steps - create these later
 // import OnboardingWelcome from './OnboardingWelcome';
@@ -37,6 +49,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false); // State for modal
+  const [showPaywall, setShowPaywall] = useState(false); // State for the onboarding paywall
 
   // --- Analytics: Log step view ---
   useEffect(() => {
@@ -61,6 +74,26 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
     { id: 'friend', label: 'Friend', emoji: '😊' },
     { id: 'coworker', label: 'Co-Worker', emoji: '🤝' },
   ];
+
+  // --- Onboarding Paywall Content --- (Define the specific content here)
+  const onboardingPaywallContent = {
+    title: <>✨ You just said something that matters.</>,
+    description: <>
+      Imagine how your relationships could feel… if you did that more often.
+      {'\n\n'}
+      With HeartGlow Premium, you'll unlock the full journey:
+    </>,
+    features: [
+      { name: 'Save every message you create — love notes, check-ins, or hard truths', icon: BookmarkFilledIcon },
+      { name: 'Track how your emotional communication grows with GlowScore', icon: BarChartIcon },
+      { name: 'Get ongoing guidance for romantic, personal, and tough conversations', icon: LightBulbIcon },
+      { name: 'Access deeper message templates and tone styles', icon: MixIcon },
+      { name: 'Build habits of care, clarity, and connection — one message at a time', icon: Link2Icon },
+    ],
+    ctaText: "💖 Upgrade to HeartGlow Premium",
+    footerText: <>Start free. Cancel anytime. Always private.</>,
+    dismissText: "Maybe later. Finish onboarding."
+  };
 
   // Renamed from handleStep2Submit for clarity - Now for Step 3
   const handleGenerateFirstMessage = async () => {
@@ -506,8 +539,12 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                   Back
                 </button>
                 <button
-                  onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 6"); setCurrentStep(7); }} // Go to Next Steps (now Step 7)
+                  onClick={() => {
+                     console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 6 - Triggering Paywall");
+                     setShowPaywall(true); // Show the paywall instead of going to Step 7
+                  }}
                   // ... rest of continue button props ...
+                  className="w-full sm:flex-1 px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
                 >
                   Got It!
                 </button>
@@ -630,6 +667,18 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
         onClose={() => setIsAddConnectionModalOpen(false)}
         onSave={handleSaveConnection}
       />
+      {/* Render the Paywall Modal conditionally */} 
+      {showPaywall && (
+          <PaywallModal
+            isOpen={showPaywall}
+            onClose={() => {
+              console.log("[Analytics] Onboarding Action: Dismissed Paywall");
+              setShowPaywall(false);
+              handleCompleteOnboarding('dashboard'); // Complete onboarding and go to dashboard after closing
+            }}
+            content={onboardingPaywallContent} // Pass the specific onboarding content
+          />
+      )}
     </div>
   );
 }; // END of OnboardingFlowWrapper component definition

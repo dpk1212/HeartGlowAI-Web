@@ -13,19 +13,7 @@ const steps: Step[] = [
     target: "[data-tour-id='hero-start-message']", 
     content: "Ready to connect? ✨ This is your main starting point for crafting AI-powered messages.", 
     title: "Start Here!", 
-    disableBeacon: true, 
-    // Add delay specifically for the first step to allow HeroSection animation
-    floaterProps: { 
-      styles: { 
-        floater: {
-          // Using options.offset to delay attachment/calculation
-          // Note: This is a slight workaround; ideally check element visibility/animation state
-          options: { 
-            offset: 600 // Delay in ms (Hero animation is 500ms)
-          }
-        }
-      }
-    }
+    disableBeacon: true 
   },
   { // Step 2: GlowGuide
     target: ".glow-guide-button", 

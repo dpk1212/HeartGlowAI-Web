@@ -64,18 +64,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
 
   const showOnboarding = userProfile && userProfile.hasCompletedOnboarding === false;
 
-  if (showOnboarding) {
-    // Render the Onboarding Flow - Placeholder for now
-    return (
-        <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 dark:bg-gray-900">
-            <h1 className="text-2xl font-bold text-heartglow-pink mb-4">Onboarding Flow Placeholder</h1>
-            <p className="text-gray-700 dark:text-gray-300">The onboarding experience will be displayed here.</p>
-            {/* TODO: Remove this temporary placeholder div */} 
-        </div>
-    );
-  }
-  // --- END: Onboarding Logic ---
-
   return (
     <>
       {showOnboarding ? (

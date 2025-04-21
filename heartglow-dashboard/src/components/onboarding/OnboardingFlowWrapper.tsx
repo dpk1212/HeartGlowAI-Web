@@ -671,9 +671,9 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
           <PaywallModal
             isOpen={showPaywall}
             onClose={() => {
-              console.log("[Analytics] Onboarding Action: Dismissed Paywall");
+              console.log("[Analytics] Onboarding Action: Dismissed Paywall - Continuing Onboarding");
               setShowPaywall(false);
-              handleCompleteOnboarding('dashboard'); // Complete onboarding and go to dashboard after closing
+              setCurrentStep(7); // Go to the final onboarding step (Next Steps)
             }}
             content={onboardingPaywallContent} // Pass the specific onboarding content
           />

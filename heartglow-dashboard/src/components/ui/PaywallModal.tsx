@@ -37,7 +37,7 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose }) => {
 
     try {
       // --- Direct Redirect Logic --- 
-      const paymentLink = \"https://buy.stripe.com/4gw03z8Tf1cW2sw8ww\"; // Your specific link
+      const paymentLink = "https://buy.stripe.com/4gw03z8Tf1cW2sw8ww"; // Ensure standard quote
       const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
       console.log('Redirecting to Stripe Payment Link from Modal:', urlWithRef);
       window.location.href = urlWithRef;

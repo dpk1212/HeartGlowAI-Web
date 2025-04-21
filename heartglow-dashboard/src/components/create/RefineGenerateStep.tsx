@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FileText, AlignCenter, AlignLeft, AlignJustify, Paperclip, MessageCircle } from 'lucide-react';
+import { FileText, AlignCenter, AlignLeft, AlignJustify, Paperclip, MessageCircle, PencilRuler } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { usePaywall } from '../../context/PaywallContext';
 
 // --- Types and Constants from FormatStep ---
 interface FormatData {
@@ -44,7 +46,14 @@ interface RefineGenerateStepProps {
   initialData?: Partial<Pick<RefineGenerateData, 'format' | 'customInstructionsOptions'> & { promptedBy?: string; customInstructionsText?: string }> | null;
 }
 
+// Define the free message limit
+const FREE_MESSAGE_LIMIT = 3;
+
 const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack, initialData }) => {
+  // Get user profile and paywall context
+  const { userProfile } = useAuth();
+  const { openPaywall } = usePaywall();
+
   // --- State Management ---
   // Format State
   const [selectedFormat, setSelectedFormat] = useState(initialData?.format?.type || '');
@@ -88,6 +97,17 @@ const RefineGenerateStep: React.FC<RefineGenerateStepProps> = ({ onNext, onBack,
   };
 
   const handleSubmit = () => {
+    // --- Paywall Check --- 
+    const messagesGenerated = userProfile?.totalMessageCount ?? 0;
+    const isPremium = userProfile?.isPremium ?? false;
+
+    if (!isPremium && messagesGenerated >= FREE_MESSAGE_LIMIT) {
+       console.log(`Paywall triggered: Message generation limit (${FREE_MESSAGE_LIMIT}) reached.`);
+       openPaywall(); // Open the modal
+       return; // Stop before calling onNext
+    }
+    // --- End Paywall Check ---
+
     const currentFormat: FormatData | null = selectedFormat
       ? {
           type: selectedFormat,

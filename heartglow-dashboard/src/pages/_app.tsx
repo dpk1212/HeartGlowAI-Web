@@ -4,6 +4,8 @@ import type { AppProps } from 'next/app';
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
 import { AuthProvider, useAuth } from '../context/AuthContext';
+import { PaywallProvider, usePaywall } from '../context/PaywallContext';
+import PaywallModal from '../components/ui/PaywallModal';
 import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 import OnboardingFlowWrapper from '../components/onboarding/OnboardingFlowWrapper';
 import GlowGuideButton from '../components/onboarding/GlowGuideButton';
@@ -19,6 +21,7 @@ export function getRouteWithBasePath(path: string): string {
 // --- Add InnerApp component to use hooks ---
 function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProps['router'] }) {
   const { userProfile, loading, updateUserProfile } = useAuth();
+  const { isPaywallOpen, closePaywall } = usePaywall();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(1);
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
@@ -136,6 +139,9 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
         isOnboarding={showOnboarding} 
         currentOnboardingStep={showOnboarding ? onboardingStep : undefined} 
       />
+
+      {/* Render Paywall Modal Conditionally */}
+      <PaywallModal isOpen={isPaywallOpen} onClose={closePaywall} />
     </>
   );
 }
@@ -159,7 +165,9 @@ export default function App({ Component, pageProps, router }: AppProps) {
         <meta name="twitter:card" content="summary_large_image" />
       </Head>
       <AuthProvider>
-        <InnerApp Component={Component} pageProps={pageProps} router={router} />
+        <PaywallProvider>
+          <InnerApp Component={Component} pageProps={pageProps} router={router} />
+        </PaywallProvider>
       </AuthProvider>
     </>
   );

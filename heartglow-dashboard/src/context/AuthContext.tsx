@@ -43,6 +43,15 @@ export type UserProfile = {
   unlockedFeatures?: string[];
   hasCompletedOnboarding?: boolean; // Added for onboarding flow tracking
   hasSeenDashboardTour?: boolean; // Added for dashboard orientation tour
+
+  // --- Stripe Subscription Fields ---
+  isPremium?: boolean;           // Tracks active premium status
+  stripeCustomerId?: string;     // Stripe Customer ID
+  stripeSubscriptionId?: string; // Active Stripe Subscription ID
+  subscriptionEndDate?: any;   // Optional: Track when subscription ends (Timestamp)
+
+  // --- Usage Tracking ---
+  coachingSessionsStarted?: number; // Count of coaching sessions initiated
 };
 
 export type AuthContextType = {
@@ -134,7 +143,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                metrics: profileData.metrics ?? { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
                unlockedFeatures: profileData.unlockedFeatures ?? [],
                hasCompletedOnboarding: profileData.hasCompletedOnboarding ?? false,
-               hasSeenDashboardTour: profileData.hasSeenDashboardTour ?? false
+               hasSeenDashboardTour: profileData.hasSeenDashboardTour ?? false,
+               isPremium: profileData.isPremium ?? false,
+               stripeCustomerId: profileData.stripeCustomerId ?? '',
+               stripeSubscriptionId: profileData.stripeSubscriptionId ?? '',
+               subscriptionEndDate: profileData.subscriptionEndDate ?? null,
+               coachingSessionsStarted: profileData.coachingSessionsStarted ?? 0
              });
              setLoading(false);
            } else {
@@ -156,7 +170,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                  metrics: { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
                  unlockedFeatures: [],
                  hasCompletedOnboarding: false,
-                 hasSeenDashboardTour: false
+                 hasSeenDashboardTour: false,
+                 isPremium: false,
+                 stripeCustomerId: '',
+                 stripeSubscriptionId: '',
+                 subscriptionEndDate: null,
+                 coachingSessionsStarted: 0
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
+import { usePaywall } from '../../context/PaywallContext';
 import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, getConnectionFrequency } from '../../firebase/db';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
@@ -69,10 +70,12 @@ const ConnectionGridCard: React.FC<{ connection: DbConnection }> = ({ connection
 
 // Main page component
 export default function AllConnectionsPage() {
-  const { currentUser } = useAuth();
-    const [connections, setConnections] = useState<DbConnection[]>([]);
+  const { currentUser, userProfile } = useAuth();
+  const { openPaywall } = usePaywall();
+  const [connections, setConnections] = useState<DbConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const FREE_CONNECTION_LIMIT = 2;
 
   useEffect(() => {
         const loadData = async () => {
@@ -92,19 +95,34 @@ export default function AllConnectionsPage() {
         loadData();
   }, [currentUser]);
 
+  const handleAddConnectionClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
+    
+    if (!canAddMore) {
+       console.log('Paywall triggered: Connection limit reached.');
+       e.preventDefault(); // Stop navigation
+       openPaywall();      // Open the modal
+    }
+    // Otherwise, allow default Link behavior (navigation)
+  };
+
   return (
       <AuthGuard>
         <DashboardLayout>
                 <div className="container mx-auto py-8 px-4 max-w-6xl">
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
-                        <Link href="/connections/add" className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300">
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>
-                        Add Connection
-                      </Link>
-                          </div>
+                        <Link 
+                          href="/connections/add" 
+                          onClick={handleAddConnectionClick} 
+                          className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Add Connection
+                        </Link>
+                    </div>
                           
                     {loading && (
                         <div className="flex justify-center items-center py-20">
@@ -129,9 +147,17 @@ export default function AllConnectionsPage() {
                             {connections.map(conn => (
                                 <ConnectionGridCard key={conn.id} connection={conn} />
                             ))}
+                            {!userProfile?.isPremium && connections.length >= FREE_CONNECTION_LIMIT && (
+                              <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 text-center">
+                                 <p className="text-sm text-gray-500 dark:text-gray-400">
+                                    Upgrade to Premium to add more connections.
+                                    <button onClick={() => openPaywall()} className="ml-2 text-heartglow-pink font-medium hover:underline">Upgrade</button>
+                                 </p>
+                              </div>
+                            )}
+                        </div>
+                    )}
                 </div>
-              )}
-          </div>
         </DashboardLayout>
       </AuthGuard>
   );

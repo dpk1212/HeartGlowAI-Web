@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, increment } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useRouter } from 'next/router';
 import { CoachingThread } from '../../types/coaching'; // Import the type
 import { httpsCallable } from 'firebase/functions'; // Import httpsCallable
 import { getFunctions } from 'firebase/functions'; // Import getFunctions
+import { usePaywall } from '../../context/PaywallContext'; // Import usePaywall
 
 interface StartCoachingChatProps {
   onClose: () => void;
@@ -30,8 +31,12 @@ const chatPurposes = [
 // Initialize Firebase Functions instance
 const functionsInstance = getFunctions(); 
 
+// Define the free coaching limit
+const FREE_COACHING_LIMIT = 1;
+
 const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile, updateUserProfile } = useAuth();
+  const { openPaywall } = usePaywall();
   const router = useRouter(); // Add router hook
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loadingConnections, setLoadingConnections] = useState(true);
@@ -64,7 +69,6 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
   }, [currentUser]);
 
   const handleStartChat = async () => { 
-    // Ensure a connection AND a purpose are selected
     if (!selectedConnection || !selectedPurpose || !currentUser || isStartingChat) return;
     
     setIsStartingChat(true);
@@ -79,18 +83,30 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
 
       const querySnapshot = await getDocs(q);
       let threadId: string;
-      let isNewThread = false; // Flag to check if we created a new thread
+      let isNewThread = false;
 
       if (!querySnapshot.empty) {
-        // Existing thread found
+        // Existing thread found - Allow access (or implement paywall for resuming later)
         threadId = querySnapshot.docs[0].id;
         console.log(`Found existing thread: ${threadId}`);
       } else {
+        // ----- PAYWALL CHECK FOR NEW THREAD ----- 
+        const sessionsStarted = userProfile?.coachingSessionsStarted ?? 0;
+        const isPremium = userProfile?.isPremium ?? false;
+        
+        if (!isPremium && sessionsStarted >= FREE_COACHING_LIMIT) {
+            console.log(`Paywall triggered: Coaching session limit (${FREE_COACHING_LIMIT}) reached.`);
+            setStartChatError('Upgrade to Premium to start more coaching sessions.');
+            setIsStartingChat(false);
+            openPaywall(); // Open the modal
+            return; // Stop execution
+        }
+        // ----- END PAYWALL CHECK -----
+
         // No existing thread, create a new one
-        isNewThread = true; // Set the flag
+        isNewThread = true;
         console.log(`No existing thread found for connection ${selectedConnection}. Creating new one.`);
         const selectedConnDetails = connections.find(c => c.id === selectedConnection);
-        // Include initialPurpose in the new thread data
         const newThreadData: Omit<CoachingThread, 'id'> = {
           userId: currentUser.uid,
           connectionId: selectedConnection,
@@ -101,12 +117,24 @@ const StartCoachingChat = ({ onClose }: StartCoachingChatProps) => {
             name: selectedConnDetails.name,
             relationship: selectedConnDetails.relationship,
           } : undefined,
-          initialPurpose: selectedPurpose, // Add selected purpose
+          initialPurpose: selectedPurpose,
         };
 
         const docRef = await addDoc(threadsRef, newThreadData);
         threadId = docRef.id;
         console.log(`Created new thread: ${threadId}`);
+
+        // --- Increment Usage Counter --- 
+        if (isNewThread) {
+           try {
+              await updateUserProfile({ coachingSessionsStarted: increment(1) });
+              console.log(`Incremented coachingSessionsStarted for user ${currentUser.uid}`);
+           } catch (updateError) {
+              console.error(`Failed to increment coachingSessionsStarted for user ${currentUser.uid}`, updateError);
+              // Decide if this is critical - maybe proceed anyway but log?
+           }
+        }
+        // --- End Increment Usage Counter --- 
         
         // Trigger initial coach message, passing the purpose
         if (isNewThread) {

@@ -8,6 +8,7 @@ import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 import OnboardingFlowWrapper from '../components/onboarding/OnboardingFlowWrapper';
 import GlowGuideButton from '../components/onboarding/GlowGuideButton';
 import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
+import DashboardTour from '../components/ui/DashboardTour';
 
 // Helper function to get route with base path
 export function getRouteWithBasePath(path: string): string {
@@ -17,7 +18,7 @@ export function getRouteWithBasePath(path: string): string {
 
 // --- Add InnerApp component to use hooks ---
 function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProps['router'] }) {
-  const { userProfile, loading } = useAuth();
+  const { userProfile, loading, updateUserProfile } = useAuth();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [onboardingStep, setOnboardingStep] = useState(1);
 
@@ -63,32 +64,51 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   }
 
   const showOnboarding = userProfile && userProfile.hasCompletedOnboarding === false;
+  // Determine if the dashboard tour should be shown
+  const showDashboardTour = userProfile && userProfile.hasCompletedOnboarding === true && userProfile.hasSeenDashboardTour === false;
+
+  // Function to mark tour as complete
+  const handleCompleteTour = async () => {
+    try {
+        await updateUserProfile({ hasSeenDashboardTour: true });
+        // State will update via listener, no need to manually set state here
+    } catch (error) {
+        console.error("Failed to update profile after dashboard tour:", error);
+        // Maybe show an error to the user
+    }
+  };
 
   return (
     <>
-      {showOnboarding ? (
-        <OnboardingFlowWrapper 
-          currentStep={onboardingStep} 
-          setCurrentStep={setOnboardingStep} 
-        />
-      ) : (
-        // Render main app content if onboarding is complete
-        <>
-          <AccountLinkBanner />
-          <Component {...pageProps} />
-        </>
-      )}
+       {/* Wrap the main content area to apply blur conditionally */} 
+      <div className={showDashboardTour ? 'filter blur-sm brightness-75 transition-all duration-300' : 'transition-all duration-300'}>
+        {showOnboarding ? (
+          <OnboardingFlowWrapper 
+            currentStep={onboardingStep} 
+            setCurrentStep={setOnboardingStep} 
+          />
+        ) : (
+          // Render main app content if onboarding is complete
+          <>
+            <AccountLinkBanner />
+            <Component {...pageProps} />
+          </>
+        )}
+      </div>
+
+       {/* Render Dashboard Tour if active (conditionally rendered inside component) */}
+      <DashboardTour isActive={showDashboardTour} onComplete={handleCompleteTour} />
 
       {/* Render GlowGuide persistently */}
       <GlowGuideButton 
         onClick={() => setIsGlowGuideOpen(true)} 
-        pulse={showOnboarding}
+        pulse={showOnboarding} 
       />
       <GlowGuidePanel 
         isOpen={isGlowGuideOpen} 
         onClose={() => setIsGlowGuideOpen(false)} 
-        isOnboarding={showOnboarding}
-        currentOnboardingStep={showOnboarding ? onboardingStep : undefined}
+        isOnboarding={showOnboarding} 
+        currentOnboardingStep={showOnboarding ? onboardingStep : undefined} 
       />
     </>
   );

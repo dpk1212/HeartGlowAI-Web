@@ -42,6 +42,7 @@ export type UserProfile = {
   };
   unlockedFeatures?: string[];
   hasCompletedOnboarding?: boolean; // Added for onboarding flow tracking
+  hasSeenDashboardTour?: boolean; // Added for dashboard orientation tour
 };
 
 export type AuthContextType = {
@@ -132,7 +133,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                challengeHistory: profileData.challengeHistory ?? [],
                metrics: profileData.metrics ?? { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
                unlockedFeatures: profileData.unlockedFeatures ?? [],
-               hasCompletedOnboarding: profileData.hasCompletedOnboarding ?? false
+               hasCompletedOnboarding: profileData.hasCompletedOnboarding ?? false,
+               hasSeenDashboardTour: profileData.hasSeenDashboardTour ?? false
              });
              setLoading(false);
            } else {
@@ -153,7 +155,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                  challengeHistory: [],
                  metrics: { weeklyMessageCount: 0, uniqueConnectionsMessagedWeekly: [], toneCounts: {}, reflectionsCompletedCount: 0 },
                  unlockedFeatures: [],
-                 hasCompletedOnboarding: false // Default to false for new users
+                 hasCompletedOnboarding: false,
+                 hasSeenDashboardTour: false
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);

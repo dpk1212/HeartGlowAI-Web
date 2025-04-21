@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { 
   signIn,
   signInWithGoogle, 
@@ -10,6 +10,10 @@ import {
 import { User } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp, increment, getDoc, updateDoc, DocumentData, onSnapshot, Unsubscribe, FieldValue as FirebaseFieldValue } from 'firebase/firestore';
 import { db } from '../firebase/config';
+
+// Import Firebase Analytics
+import { logEvent } from 'firebase/analytics';
+import { analytics as firebaseAnalytics } from '../lib/firebase'; // Import the analytics instance
 
 // Define a type for the extended user profile data from Firestore
 export type UserProfile = {
@@ -91,6 +95,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isInitialAuthCheckComplete, setIsInitialAuthCheckComplete] = useState(false);
+  const previousUserProfileRef = useRef<UserProfile | null>(null); // Ref to store previous profile
+
+  // --- Analytics Helper (Simplified for context) ---
+  const logAuthEvent = async (eventName: string, params?: { [key: string]: any }) => {
+    try {
+      const analyticsInstance = await firebaseAnalytics; // Resolve the promise
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, eventName, params);
+        console.log(`[Firebase Analytics] Logged auth event: ${eventName}`, params);
+      } else {
+        console.warn('[Firebase Analytics] Analytics not supported or initialized.');
+      }
+    } catch (error) {
+      console.error('[Firebase Analytics] Error logging auth event:', error);
+    }
+  };
 
   useEffect(() => {
     console.log('Setting up auth state listener');
@@ -136,7 +156,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
            if (docSnap.exists()) {
              console.log(`Profile data received for user ${user.uid}:`, docSnap.data());
              const profileData = docSnap.data() as Omit<UserProfile, 'uid'>;
-             setUserProfile({ 
+             
+             // Construct the new profile object
+             const newProfile: UserProfile = {
                uid: user.uid, 
                email: user.email ?? profileData.email ?? null,
                displayName: user.displayName ?? profileData.displayName ?? null,
@@ -158,7 +180,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                stripeSubscriptionId: profileData.stripeSubscriptionId ?? '',
                subscriptionEndDate: profileData.subscriptionEndDate ?? null,
                coachingSessionsStarted: profileData.coachingSessionsStarted ?? 0
-             });
+             };
+             
+             // --- Check for Premium Status Change ---
+             const previousProfile = previousUserProfileRef.current;
+             if (previousProfile && !previousProfile.isPremium && newProfile.isPremium) {
+               console.log('User transitioned to Premium! Logging subscription_completed event.');
+               logAuthEvent('subscription_completed', {
+                 stripe_customer_id: newProfile.stripeCustomerId,
+                 // Add any other relevant parameters like plan ID if available/needed
+               });
+             }
+             
+             // Update state and previous state ref
+             setUserProfile(newProfile);
+             previousUserProfileRef.current = newProfile; // Store current profile for next comparison
+             
              setLoading(false);
            } else {
              console.log(`Profile not found for ${user.uid}, creating...`);
@@ -209,8 +246,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         console.log('Unsubscribing from profile listener during cleanup');
         profileUnsubscribe();
       }
+      previousUserProfileRef.current = null; // Clear ref on cleanup
     };
   }, []);
+
+  // Update userProfileRef whenever userProfile state changes (alternative way to track previous state)
+  /* useEffect(() => {
+    previousUserProfileRef.current = userProfile;
+  }, [userProfile]); */
 
   const updateUserProfile = async (data: UserProfileUpdateData) => {
     if (!currentUser) {

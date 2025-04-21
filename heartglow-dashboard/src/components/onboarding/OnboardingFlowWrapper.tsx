@@ -20,6 +20,10 @@ import AddConnectionModal from './AddConnectionModal';
 import { HeartIcon, LightBulbIcon } from '@heroicons/react/24/outline'; // Use Heroicon for LightBulb
 import PaywallModal from '../ui/PaywallModal'; // Import the PaywallModal
 
+// Import Firebase Analytics
+import { logEvent } from 'firebase/analytics';
+import { analytics as firebaseAnalytics } from '../../lib/firebase'; // Import the analytics instance
+
 // Placeholder components for individual steps - create these later
 // import OnboardingWelcome from './OnboardingWelcome';
 // import OnboardingMinimalInput from './OnboardingMinimalInput';
@@ -50,13 +54,32 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
   const [isAddConnectionModalOpen, setIsAddConnectionModalOpen] = useState(false); // State for modal
   const [showPaywall, setShowPaywall] = useState(false); // State for the onboarding paywall
 
+  // --- Analytics Helper ---
+  const logOnboardingEvent = async (eventName: string, params?: { [key: string]: any }) => {
+    try {
+      const analyticsInstance = await firebaseAnalytics; // Resolve the promise
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, eventName, {
+          ...params,
+          onboarding_step: currentStep, // Automatically add current step
+        });
+        console.log(`[Firebase Analytics] Logged event: ${eventName}`, { onboarding_step: currentStep, ...params });
+      } else {
+        console.warn('[Firebase Analytics] Analytics not supported or initialized.');
+      }
+    } catch (error) {
+      console.error('[Firebase Analytics] Error logging event:', error);
+    }
+  };
+
   // --- Analytics: Log step view ---
   useEffect(() => {
-    console.log(`[Analytics] Onboarding Step View: ${currentStep}`);
-  }, [currentStep]);
+    // console.log(`[Analytics] Onboarding Step View: ${currentStep}`);
+    logOnboardingEvent('onboarding_step_viewed');
+  }, [currentStep]); // Rerun when currentStep changes
 
-  // TODO: Implement logic to advance steps (handleNext)
-  // TODO: Implement logic to update userProfile.hasCompletedOnboarding via a function from AuthContext or Firestore call
+  // TODO: Implement logic to advance steps (handleNext) - This seems handled by setCurrentStep calls
+  // TODO: Implement logic to update userProfile.hasCompletedOnboarding - This is done in handleCompleteOnboarding
 
   // Intents for Step 3 (previously Step 2)
   const coreIntents = [
@@ -96,7 +119,8 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
 
   // Renamed from handleStep2Submit for clarity - Now for Step 3
   const handleGenerateFirstMessage = async () => {
-    console.log("[Analytics] Onboarding Action: Click 'Draft my Message'"); // Analytics
+    // console.log("[Analytics] Onboarding Action: Click 'Draft my Message'"); // Analytics
+    logOnboardingEvent('onboarding_action', { action_description: 'generate_first_message' });
     setIsGenerating(true);
     setGeneratedMessage(null); // Clear previous message
     setGenerationError(null);
@@ -123,16 +147,21 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
       console.log("[Onboarding] Received result:", result);
       if (result && result.content) {
         setGeneratedMessage(result.content);
-        console.log("[Analytics] Onboarding Event: Message Generation Success"); // Analytics
+        // console.log("[Analytics] Onboarding Event: Message Generation Success"); // Analytics
+        logOnboardingEvent('onboarding_message_generation', { status: 'success' });
         setCurrentStep(4); // Move to reveal step (Step 4)
       } else {
-        console.error("[Analytics] Onboarding Event: Message Generation Failed - Empty response"); // Analytics
-        throw new Error(result.content || 'Empty response from generation function'); // Throw error if content is missing
+        // console.error("[Analytics] Onboarding Event: Message Generation Failed - Empty response"); // Analytics
+        const errorMsg = result?.content || 'Empty response from generation function';
+        logOnboardingEvent('onboarding_message_generation', { status: 'failure', error_message: errorMsg });
+        throw new Error(errorMsg); // Throw error if content is missing
       }
     } catch (error: any) { // Catch errors
       console.error("[Onboarding] Error generating message:", error);
-      console.error("[Analytics] Onboarding Event: Message Generation Failed", { error: error.message }); // Analytics
-      setGenerationError(error.message || 'An unknown error occurred during message generation.');
+      // console.error("[Analytics] Onboarding Event: Message Generation Failed", { error: error.message }); // Analytics
+      const errorMsg = error.message || 'An unknown error occurred during message generation.';
+      logOnboardingEvent('onboarding_message_generation', { status: 'failure', error_message: errorMsg });
+      setGenerationError(errorMsg);
       setCurrentStep(4); // Still go to reveal step (Step 4) to show error
     } finally {
       setIsGenerating(false);
@@ -141,10 +170,12 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
 
   // Function to mark onboarding complete and handle navigation/actions - Step numbers inside might need adjustment later if adding more steps
   const handleCompleteOnboarding = async (nextAction: 'dashboard' | 'connections' | 'create') => {
-    console.log(`[Analytics] Onboarding Action: Complete Onboarding - ${nextAction}`); // Analytics
+    // console.log(`[Analytics] Onboarding Action: Complete Onboarding - ${nextAction}`); // Analytics
+    logOnboardingEvent('onboarding_action', { action_description: `complete_onboarding_${nextAction}` });
     try {
       console.log("[Onboarding] Marking onboarding as complete...");
       await updateUserProfile({ hasCompletedOnboarding: true });
+      logOnboardingEvent('onboarding_completed', { final_action: nextAction });
       // The AuthContext listener will eventually update the state, causing _app.tsx to re-render and remove the wrapper.
       // We can navigate immediately.
       console.log(`[Onboarding] Navigating based on action: ${nextAction}`);
@@ -170,10 +201,17 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
 
   // --- Handler for saving connection from modal ---
   const handleSaveConnection = (connectionId: string) => {
-    console.log(`[Analytics] Onboarding Event: First Connection Added (ID: ${connectionId})`);
+    // console.log(`[Analytics] Onboarding Event: First Connection Added (ID: ${connectionId})`);
+    logOnboardingEvent('onboarding_action', { action_description: 'first_connection_added', connection_id: connectionId });
     setIsAddConnectionModalOpen(false);
     // After saving, mark onboarding complete and go to dashboard
     handleCompleteOnboarding('dashboard'); 
+  };
+
+  // --- Trigger Paywall Helper ---
+  const triggerPaywall = (source: string) => {
+    logOnboardingEvent('onboarding_action', { action_description: 'show_paywall', source: source });
+    setShowPaywall(true);
   };
 
   // --- Motion Variants for Step Transitions ---
@@ -207,7 +245,11 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                Need help anytime? Click the 💡 icon!
             </p>
             <button
-              onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Get Started'"); setCurrentStep(2); }} // Go to NEW Step 2
+              onClick={() => {
+                // console.log("[Analytics] Onboarding Action: Click 'Get Started'");
+                logOnboardingEvent('onboarding_action', { action_description: 'click_get_started' });
+                setCurrentStep(2);
+              }} // Go to NEW Step 2
               // Enhanced Styling for CTA
               className="w-full px-8 py-3 bg-heartglow-pink text-white font-bold rounded-lg shadow-lg hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
             >
@@ -230,7 +272,10 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                 {relationshipTypes.map((type) => (
                   <button
                     key={type.id}
-                    onClick={() => setOnboardingData({ ...onboardingData, selectedRelationship: type.label })} // Store the label for now
+                    onClick={() => {
+                        setOnboardingData({ ...onboardingData, selectedRelationship: type.label }); // Store the label for now
+                        logOnboardingEvent('onboarding_action', { action_description: 'select_relationship', relationship_type: type.label });
+                    }}
                      className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedRelationship === type.label
                       ? 'bg-indigo-100/50 border-indigo-500 ring-2 ring-indigo-500 dark:bg-indigo-900/30 dark:border-indigo-600 transform scale-105'
                       : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`
@@ -251,7 +296,8 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                 </button>
                 <button
                   onClick={() => {
-                     console.log(`[Analytics] Onboarding Action: Selected Relationship - ${onboardingData.selectedRelationship}`);
+                     // console.log(`[Analytics] Onboarding Action: Selected Relationship - ${onboardingData.selectedRelationship}`); // Logged on selection now
+                     logOnboardingEvent('onboarding_action', { action_description: 'click_next_from_relationship' });
                      setCurrentStep(3); // Go to Message Crafting (now Step 3)
                   }}
                   disabled={!onboardingData.selectedRelationship}
@@ -301,7 +347,10 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                  {coreIntents.map((intent) => (
                    <button
                      key={intent.id}
-                     onClick={() => setOnboardingData({ ...onboardingData, selectedIntent: intent.id })}
+                     onClick={() => {
+                         setOnboardingData({ ...onboardingData, selectedIntent: intent.id });
+                         logOnboardingEvent('onboarding_action', { action_description: 'select_intent', intent_id: intent.id });
+                     }}
                      className={`flex flex-col items-center justify-center text-center p-4 border rounded-xl transition-all duration-200 ease-in-out shadow-sm h-28 ${onboardingData.selectedIntent === intent.id
                        ? 'bg-heartglow-pink/10 border-heartglow-pink ring-2 ring-heartglow-pink dark:bg-heartglow-pink/20 dark:border-heartglow-pink/80 transform scale-105'
                        : 'border-gray-200 dark:border-gray-600/50 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600/80 hover:shadow-md'}`
@@ -325,7 +374,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                 >
                   Back
                 </button>
-                {/* Generate button remains the same, uses handleGenerateFirstMessage which now advances to Step 4 */}
+                {/* Generate button remains the same, uses handleGenerateFirstMessage which now advances to Step 4 and logs its own action */}
                 <button
                   onClick={handleGenerateFirstMessage}
                   disabled={!onboardingData.recipientInput || !onboardingData.selectedIntent || isGenerating}
@@ -413,7 +462,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                  {/* Updated Upgrade Prompt */}
                  <p className="text-sm text-gray-500 dark:text-gray-400 pt-3 border-t border-gray-200 dark:border-gray-700/50">
                     ✨ Remember, you can fully edit this in the main editor.
-                   <br/> <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 4)"); setShowPaywall(true); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to begin building your emotional journey & save drafts.</a>
+                   <br/> <a href="#" onClick={(e) => { e.preventDefault(); /* console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 4)"); */ logOnboardingEvent('onboarding_action', { action_description: 'click_upgrade_link', source: 'step_4_reveal' }); triggerPaywall('step_4_reveal_link'); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to begin building your emotional journey & save drafts.</a>
                 </p>
                 {/* Buttons Section - Update Continue Button Logic */}
                 <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-2">
@@ -425,7 +474,11 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                       Try Again
                     </button>
                     <button
-                      onClick={() => { console.log("[Analytics] Onboarding Action: Click 'Continue' from Step 4"); setCurrentStep(5); }} // Go to NEW Affirmation Step (Step 5)
+                      onClick={() => { 
+                          // console.log("[Analytics] Onboarding Action: Click 'Continue' from Step 4"); 
+                          logOnboardingEvent('onboarding_action', { action_description: 'continue_from_reveal' }); 
+                          setCurrentStep(5); 
+                      }} // Go to NEW Affirmation Step (Step 5)
                        // Ensure this button also has its styling
                       className="w-full sm:flex-1 px-8 py-3 bg-heartglow-pink text-white font-bold rounded-lg shadow-lg hover:bg-heartglow-violet focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
                     >
@@ -464,7 +517,8 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
             <div className="w-full space-y-3 pt-4">
               <button 
                  onClick={() => {
-                     console.log("[Analytics] Onboarding Action: Affirmation -> Add Connection");
+                     // console.log("[Analytics] Onboarding Action: Affirmation -> Add Connection");
+                     logOnboardingEvent('onboarding_action', { action_description: 'open_add_connection_modal', source: 'step_5_affirmation' });
                      setIsAddConnectionModalOpen(true); // Open modal, completion handled there
                   }}
                  className="w-full flex items-center justify-center px-6 py-3 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/10 hover:bg-heartglow-pink/20 dark:hover:bg-heartglow-pink/30 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg font-semibold text-gray-800 dark:text-gray-100"
@@ -474,7 +528,8 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
               </button>
               <button 
                  onClick={() => { 
-                     console.log("[Analytics] Onboarding Action: Affirmation -> Explore Dashboard (Challenges)");
+                     // console.log("[Analytics] Onboarding Action: Affirmation -> Explore Dashboard (Challenges)");
+                     logOnboardingEvent('onboarding_action', { action_description: 'click_explore_next' });
                      // For now, just continue to next step (HeartSteps Teaser)
                      // Later, could potentially navigate directly to dashboard or challenges section if handleCompleteOnboarding is called here.
                      setCurrentStep(6); 
@@ -526,7 +581,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
             </p>
             {/* Updated Upgrade Prompt */}
             <p className="text-sm text-gray-600 dark:text-gray-300 pt-4 border-t border-gray-200 dark:border-gray-700/50">
-              <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 6)"); setShowPaywall(true); }} className="font-medium text-indigo-500 dark:text-indigo-300 hover:underline">Upgrade to track your growth, reflect on sessions, and save insights.</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); /* console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 6)"); */ logOnboardingEvent('onboarding_action', { action_description: 'click_upgrade_link', source: 'step_6_teaser' }); triggerPaywall('step_6_teaser_link'); }} className="font-medium text-indigo-500 dark:text-indigo-300 hover:underline">Upgrade to track your growth, reflect on sessions, and save insights.</a>
             </p>
 
             {/* Buttons Section - Update Back/Continue Button Logic */}
@@ -539,8 +594,9 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                 </button>
                 <button
                   onClick={() => {
-                     console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 6 - Triggering Paywall");
-                     setShowPaywall(true); // Show the paywall instead of going to Step 7
+                     // console.log("[Analytics] Onboarding Action: Click 'Got It' from Step 6 - Triggering Paywall");
+                     logOnboardingEvent('onboarding_action', { action_description: 'click_got_it_teaser' });
+                     triggerPaywall('step_6_got_it'); // Show the paywall instead of going to Step 7
                   }}
                   // ... rest of continue button props ...
                   className="w-full sm:flex-1 px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
@@ -568,7 +624,8 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                 {/* Option 1: Add Connection (Highlighted) */}
                 <button
                   onClick={() => {
-                     console.log("[Analytics] Onboarding Action: Click 'Add Your First Connection'");
+                     // console.log("[Analytics] Onboarding Action: Click 'Add Your First Connection'");
+                     logOnboardingEvent('onboarding_action', { action_description: 'open_add_connection_modal', source: 'step_7_next_steps' });
                      setIsAddConnectionModalOpen(true);
                   }}
                   className="w-full flex items-center text-left p-5 border-2 border-heartglow-pink dark:border-heartglow-pink rounded-xl bg-heartglow-pink/10 hover:bg-heartglow-pink/20 dark:hover:bg-heartglow-pink/30 ring-2 ring-heartglow-pink/50 transition-all duration-200 ease-in-out shadow-md hover:shadow-lg"
@@ -578,7 +635,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
                      <span className="font-semibold text-base text-gray-800 dark:text-gray-100">Add Your First Connection</span>
                      <p className="text-sm text-gray-500 dark:text-gray-400">
                        {/* Updated Framing */}
-                       Get personalized suggestions. <a href="#" onClick={(e) => { e.stopPropagation(); e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Add Connection)"); setShowPaywall(true); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to nurture unlimited connections on your journey.</a>
+                       Get personalized suggestions. <a href="#" onClick={(e) => { e.stopPropagation(); e.preventDefault(); /* console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Add Connection)"); */ logOnboardingEvent('onboarding_action', { action_description: 'click_upgrade_link', source: 'step_7_add_connection' }); triggerPaywall('step_7_add_connection_link'); }} className="font-medium text-heartglow-pink hover:underline">Upgrade to nurture unlimited connections on your journey.</a>
                       </p>
                   </div>
                    <span className="text-xs font-medium text-white bg-heartglow-pink px-2 py-0.5 rounded-full ml-2">Recommended</span>
@@ -614,7 +671,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
             </div>
             {/* Updated General Upgrade Tease with Tiers */}
             <p className="text-sm text-gray-600 dark:text-gray-300 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700/50">
-               Ready to deepen your journey? <a href="#" onClick={(e) => { e.preventDefault(); console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Footer)"); setShowPaywall(true); }} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your progress, revisit messages, and unlock your full potential:
+               Ready to deepen your journey? <a href="#" onClick={(e) => { e.preventDefault(); /* console.log("[Analytics] Onboarding Action: Click Upgrade Link (Step 7 - Footer)"); */ logOnboardingEvent('onboarding_action', { action_description: 'click_upgrade_link', source: 'step_7_footer' }); triggerPaywall('step_7_footer_link'); }} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your progress, revisit messages, and unlock your full potential:
                <br/> <span className="font-mono text-xs tracking-tight">🌱 Opening Up → 🔥 In Bloom → 🕊️ Legacy Builder</span>
             </p>
             {/* GlowGuide Hint */} 
@@ -671,8 +728,13 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
           <PaywallModal
             isOpen={showPaywall}
             onClose={() => {
-              console.log("[Analytics] Onboarding Action: Dismissed Paywall - Continuing Onboarding");
+              // console.log("[Analytics] Onboarding Action: Dismissed Paywall - Continuing Onboarding");
+              logOnboardingEvent('onboarding_action', { action_description: 'dismiss_paywall' });
               setShowPaywall(false);
+              // Ensure we log the view for step 7 if they came from step 6
+              if (currentStep === 6) {
+                  logOnboardingEvent('onboarding_step_viewed', { step_number: 7 }); 
+              }
               setCurrentStep(7); // Go to the final onboarding step (Next Steps)
             }}
             content={onboardingPaywallContent} // Pass the specific onboarding content

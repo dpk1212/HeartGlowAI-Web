@@ -4,6 +4,10 @@ import { Dialog } from '@headlessui/react'; // Using Headless UI for modal acces
 import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon, PencilIcon } from '@heroicons/react/24/outline'; // Removed unused/invalid icons
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
 
+// Import Firebase Analytics
+import { logEvent } from 'firebase/analytics';
+import { analytics as firebaseAnalytics } from '../../lib/firebase'; // Import the analytics instance
+
 // Load Stripe.js with your publishable key (should be public)
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -53,7 +57,28 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, content: c
   // Use custom content if provided, otherwise use defaults
   const content = customContent || defaultContent;
 
+  // --- Analytics Helper (Simplified for this component) ---
+  const logPaywallEvent = async (eventName: string, params?: { [key: string]: any }) => {
+    try {
+      const analyticsInstance = await firebaseAnalytics; // Resolve the promise
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, eventName, params);
+        console.log(`[Firebase Analytics] Logged paywall event: ${eventName}`, params);
+      } else {
+        console.warn('[Firebase Analytics] Analytics not supported or initialized.');
+      }
+    } catch (error) {
+      console.error('[Firebase Analytics] Error logging paywall event:', error);
+    }
+  };
+
   const handleUpgradeClick = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    // --- Log Analytics Event ---
+    logPaywallEvent('paywall_action', { action_description: 'click_upgrade_cta' });
+
     if (!currentUser) {
         setError('User not authenticated. Please log in again.');
         setIsLoading(false);

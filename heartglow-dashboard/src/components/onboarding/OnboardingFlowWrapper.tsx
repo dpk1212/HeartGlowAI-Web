@@ -156,7 +156,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
               Welcome to HeartGlow AI!
             </h2>
             <p className="text-base text-gray-600 dark:text-gray-300 mb-6 leading-relaxed">
-              Unlock authentic communication. Let our AI help you craft the perfect message in seconds.
+              {/* MODIFIED: Sharpened value proposition */}
+              Find the right words, effortlessly. Your AI communication assistant is here. Let our AI help you craft the perfect message in seconds.
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400 mb-8">
                Need help anytime? Click the 💡 icon!
@@ -190,7 +191,7 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                 id="recipientInput"
                 value={onboardingData.recipientInput}
                 onChange={(e) => setOnboardingData({ ...onboardingData, recipientInput: e.target.value })}
-                placeholder="e.g., Friend, Mom, Partner, Colleague"
+                placeholder="e.g., Mom, Alex (My Boss), Sarah - Helps AI tailor the tone" // MODIFIED: Added placeholder hint
                 // Enhanced input styling
                 className="w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-heartglow-pink focus:border-transparent dark:bg-gray-700 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 text-base"
               />
@@ -241,7 +242,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Drafting...
+                      {/* MODIFIED: Engaging loading text */}
+                      Conjuring the perfect words...
                     </>
                   ) : (
                     'Draft my Message ✨'
@@ -260,7 +262,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                 <span className="text-base text-gray-600 dark:text-gray-400">Drafting your message...</span>
+                 {/* MODIFIED: Engaging loading text */}
+                 <span className="text-base text-gray-600 dark:text-gray-400">Conjuring the perfect words...</span>
                   <div className="w-full h-32 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse mt-4"></div>
               </div>
             ) : generationError ? (
@@ -271,11 +274,13 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                      </svg>
                  </div>
                 <h2 className="text-xl font-semibold text-red-500 dark:text-red-400">
-                  Oops! Couldn't Draft Message
+                  {/* MODIFIED: Slightly warmer error title */}
+                  Hmm, AI Needs Inspiration!
                 </h2>
                 <p className="text-sm text-gray-600 dark:text-gray-300 bg-red-50 dark:bg-red-800/30 border border-red-200 dark:border-red-700/50 p-4 rounded-lg">
-                  {generationError} 
-                  <br/> Please try again, or adjust your inputs.
+                  {/* MODIFIED: Warmer error message */}
+                  {generationError}
+                  <br/> Could you try adjusting your request slightly?
                 </p>
                 <button 
                   onClick={() => setCurrentStep(2)} // Go back to retry
@@ -287,7 +292,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
             ) : generatedMessage ? (
               <div className="space-y-6">
                 <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                  Here's your first draft!
+                  {/* MODIFIED: More exciting reveal title */}
+                  Voila! Here's a draft for {onboardingData.recipientInput || 'them'}!
                 </h2>
                  {/* Enhanced Message Display */}
                 <div className="bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700/50 dark:to-gray-800/50 p-5 rounded-lg border border-gray-200 dark:border-gray-600 shadow-inner text-left min-h-[150px]">
@@ -296,7 +302,9 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                   </p>
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
-                   ✨ Our AI crafted this starting point. You can fully edit messages later.
+                   ✨ Great starting point! Remember, you can always edit this in the full editor.
+                   {/* MODIFIED: Added premium hint about saving */}
+                   <br/> <span className="font-medium text-heartglow-pink">Upgrade anytime to save your favorite drafts.</span>
                 </p>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                    Not quite right? Check the 💡 guide for tips on refining prompts later.
@@ -338,6 +346,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
               Beyond single messages, our AI Coach helps you navigate 
               tricky conversations and communication challenges.
               Find it anytime on your dashboard!
+              {/* MODIFIED: Added premium hint about saving coaching */}
+              <br/> <span className="font-medium text-indigo-500 dark:text-indigo-300">Upgrade to save your coaching sessions and track insights.</span>
             </p>
             <div className="flex flex-col-reverse sm:flex-row sm:justify-between sm:items-center gap-3 pt-4 w-full">
                 <button 
@@ -352,7 +362,8 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                    // Style consistent with primary CTAs, but maybe different color?
                   className="w-full sm:flex-1 px-8 py-3 bg-indigo-600 text-white font-bold rounded-lg shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-heartglow-gray transition duration-300 ease-in-out transform hover:scale-105"
                 >
-                  Got It!
+                  {/* MODIFIED: More engaging button text */}
+                  Good to Know
                 </button>
             </div>
           </div>
@@ -382,7 +393,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                   <PersonIcon className="h-7 w-7 mr-4 text-heartglow-pink flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-semibold text-base text-gray-800 dark:text-gray-100">Add Your First Connection</span>
-                     <p className="text-sm text-gray-500 dark:text-gray-400">Save contacts to easily message them later.</p>
+                     <p className="text-sm text-gray-500 dark:text-gray-400">
+                       {/* MODIFIED: Explain benefit & add premium hint */}
+                       Get personalized suggestions & track interactions. <span className="font-medium">Upgrade to save unlimited connections.</span>
+                      </p>
                   </div>
                    <span className="text-xs font-medium text-white bg-heartglow-pink px-2 py-0.5 rounded-full ml-2">Recommended</span>
                 </button>
@@ -396,7 +410,10 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                   <DashboardIcon className="h-6 w-6 mr-4 text-indigo-500 flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-medium text-gray-700 dark:text-gray-200">Explore Your Dashboard</span>
-                     <p className="text-sm text-gray-500 dark:text-gray-400">See challenges, coaching, and more.</p>
+                     <p className="text-sm text-gray-500 dark:text-gray-400">
+                       {/* MODIFIED: Slightly more benefit-oriented */}
+                       Discover challenges, track your GlowScore & find coaching.
+                      </p>
                   </div>
                 </button>
 
@@ -409,10 +426,17 @@ const OnboardingFlowWrapper: React.FC<OnboardingFlowWrapperProps> = ({ currentSt
                   <Pencil2Icon className="h-6 w-6 mr-4 text-green-500 flex-shrink-0" />
                   <div className="flex-grow">
                      <span className="font-medium text-gray-700 dark:text-gray-200">Craft Another Message</span>
-                     <p className="text-sm text-gray-500 dark:text-gray-400">Use the full editor with more options.</p>
+                     <p className="text-sm text-gray-500 dark:text-gray-400">
+                       {/* MODIFIED: Explain benefit */}
+                       Use the full editor with more tones & styles.
+                      </p>
                   </div>
                 </button>
             </div>
+            {/* MODIFIED: Added general premium tease */}
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-8 pt-4 border-t border-gray-200 dark:border-gray-700/50">
+               Ready for the full experience? <a href="#" onClick={(e) => {e.preventDefault(); alert('Navigate to Upgrade Page (TODO)')}} className="text-heartglow-pink font-semibold hover:underline">Upgrade anytime</a> to save all your messages, connections, and coaching progress!
+            </p>
             {/* GlowGuide Hint */} 
              <p className="text-xs text-gray-500 dark:text-gray-400 mt-6">
                  Confused? The 💡 guide explains each option.

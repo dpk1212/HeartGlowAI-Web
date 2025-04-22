@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { usePaywall } from '../../context/PaywallContext';
-import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, getConnectionFrequency } from '../../firebase/db';
+import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, getConnectionFrequency, addConnection } from '../../firebase/db';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
 import NewConnectionModal from '../../components/modals/NewConnectionModal';
@@ -97,6 +97,27 @@ export default function AllConnectionsPage() {
         loadData();
   }, [currentUser]);
 
+  const handleSaveConnection = async (name: string, relationship: string) => {
+    if (!currentUser) {
+      console.error("User object not available, cannot save connection.");
+      throw new Error("Authentication error.");
+    }
+    console.log('Attempting to save connection:', { userId: currentUser.uid, name, relationship });
+    try {
+      await addConnection(currentUser, { name, relationship });
+      console.log('Connection saved successfully from connections page.');
+      // Refetch data after saving
+      setLoading(true);
+      const userConnections = await fetchUserConnections(currentUser, 1000);
+      setConnections(userConnections);
+      setLoading(false);
+      // No need to explicitly call onClose here, modal handles it on success
+    } catch (error) {
+      console.error("Error saving connection from connections page:", error);
+      throw error; // Let modal display the error
+    }
+  };
+
   const handleAddConnectionClick = () => {
     const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
     
@@ -165,6 +186,7 @@ export default function AllConnectionsPage() {
                 <NewConnectionModal 
                    isOpen={isNewConnectionModalOpen}
                    onClose={() => setIsNewConnectionModalOpen(false)}
+                   onSave={handleSaveConnection}
                 />
         </DashboardLayout>
       </AuthGuard>

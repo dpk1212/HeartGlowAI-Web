@@ -125,13 +125,14 @@ export default function AllConnectionsPage() {
   const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
 
   return (
-    <Dialog> {/* Wrap section with Dialog */} 
-      <AuthGuard>
-        <DashboardLayout>
-          <div className="container mx-auto py-8 px-4 max-w-6xl">
-            <div className="flex justify-between items-center mb-8">
-              <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
-              
+    <AuthGuard>
+      <DashboardLayout>
+        <div className="container mx-auto py-8 px-4 max-w-6xl">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
+            
+            {/* Dialog component now wraps only the trigger and content */}
+            <Dialog>
               {/* Conditional Button: Trigger or Paywall */} 
               {canAddMore ? (
                 <DialogTrigger asChild>
@@ -147,14 +148,23 @@ export default function AllConnectionsPage() {
                     openPaywall();
                   }}
                   className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
+                  // Add tooltip or different text for clarity?
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Add Connection (Upgrade)
                 </Button>
               )}
-            </div>
-                          
-            {loading && (
+              
+              {/* Modal Content - Rendered by Dialog when triggered */}
+              {/* NewConnectionModal should render DialogContent internally */}
+              <NewConnectionModal 
+                 onSave={handleSaveConnection} 
+              />
+            </Dialog> {/* Dialog component ends here */} 
+
+          </div>
+                        
+          {loading && (
                 <div className="flex justify-center items-center py-20">
                     <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-heartglow-pink"></div>
                     </div>
@@ -188,14 +198,7 @@ export default function AllConnectionsPage() {
                 </div>
             )}
           </div>
-                
-          {/* Modal Content - Placed within Dialog wrapper, rendered on trigger */}
-          <NewConnectionModal 
-             onSave={handleSaveConnection} 
-             // No isOpen or onClose needed 
-          />
         </DashboardLayout>
       </AuthGuard>
-    </Dialog> {/* Changed comment format */}
   );
 }

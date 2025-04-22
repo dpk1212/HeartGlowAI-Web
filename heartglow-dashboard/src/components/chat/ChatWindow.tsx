@@ -5,13 +5,14 @@ import MessageInput from './MessageInput';
 import { Bars3Icon } from '@heroicons/react/24/outline';
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 // --- Default Welcome Data ---
 const heartglowAIConnection: Connection = {
   id: 'heartglow-ai-welcome',
   name: 'HeartGlow AI',
   relationship: null, // Provide null for relationship
-  createdAt: new Date(), // Provide a default Date for createdAt
+  createdAt: Timestamp.now(), // Use Timestamp.now() instead of new Date()
   // Add other required fields here if the error persists, e.g.:
   // userId: 'system', 
   // lastMessageTimestamp: null,

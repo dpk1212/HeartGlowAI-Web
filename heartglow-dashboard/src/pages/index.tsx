@@ -25,7 +25,7 @@ import ChatLayout from '@/components/chat/ChatLayout';
 import { Connection, Message } from '@/types';
 import { useConnections } from '@/hooks/useConnections';
 import { useMessages } from '@/hooks/useMessages';
-import { addConnection } from '@/firebase/firestoreUtils'; // Assuming firestore utils exist
+import { addConnection } from '@/firebase/db'; // Change import path
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
@@ -90,11 +90,11 @@ const IndexPage: NextPage = () => {
   };
 
   const handleSaveConnection = async (name: string, relationship: string) => {
-    if (!userId) {
-      console.error("User ID not available, cannot save connection.");
+    if (!user) {
+      console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error."); // Throw error to be caught in modal
     }
-    console.log('Attempting to save connection:', { userId, name, relationship });
+    console.log('Attempting to save connection:', { userId: user.uid, name, relationship });
     try {
       // Option 1: Call a cloud function (if you have one)
       // const functions = getFunctions();
@@ -102,7 +102,7 @@ const IndexPage: NextPage = () => {
       // await callCreateConnection({ name, relationship });
       
       // Option 2: Use a client-side utility function (more direct)
-      await addConnection(userId, { name, relationship }); // Assuming this function exists
+      await addConnection(user, { name, relationship }); // Pass user object
       
       console.log('Connection saved successfully');
       // Optionally: Select the new connection? Or refresh connections list?

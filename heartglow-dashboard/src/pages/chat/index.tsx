@@ -3,7 +3,7 @@ import ChatLayout from '@/components/chat/ChatLayout'; // Import the main layout
 import { Connection, Message } from '@/types'; // Import shared types
 import { useConnections } from '@/hooks/useConnections'; // Import connections hook
 import { useMessages } from '@/hooks/useMessages'; // Import messages hook
-import { addConnection } from '@/firebase/firestoreUtils'; // <<< ADD THIS IMPORT
+import { addConnection } from '@/firebase/db'; // <<< CHANGE IMPORT PATH
 
 // --- Firebase Imports ---
 // TODO: Verify these imports match your Firebase setup
@@ -58,13 +58,13 @@ const ChatPage = () => {
 
   // Handler for saving a connection
   const handleSaveConnection = async (name: string, relationship: string) => {
-    if (!userId) {
-      console.error("User ID not available, cannot save connection.");
+    if (!user) { // Check for user object
+      console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error."); // Throw error to be caught in modal
     }
-    console.log('Attempting to save connection:', { userId, name, relationship });
+    console.log('Attempting to save connection:', { userId: user.uid, name, relationship }); // Log userId if needed
     try {
-      await addConnection(userId, { name, relationship }); // Assuming this function exists
+      await addConnection(user, { name, relationship }); // Pass user object
       console.log('Connection saved successfully');
       // Refreshing might happen automatically if useConnections hook listens to Firestore changes.
     } catch (error) {

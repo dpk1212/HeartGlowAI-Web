@@ -1,12 +1,22 @@
 import React from 'react';
+import { cn } from "@/lib/utils"; // Import cn utility
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 // TODO: Define actual Connection type (perhaps import from a types file)
+// Assuming Connection type includes name and relationship
 type Connection = { 
   id: string; 
   name: string; 
-  relationship?: string; // Optional field example
-  lastMessageSnippet?: string; // Optional field example
-  lastMessageTimestamp?: any; // For sorting or display
+  relationship?: string; 
+};
+
+// Helper function for initials (can be moved to utils later)
+const getInitials = (name: string): string => {
+  if (!name) return '?';
+  const names = name.split(' ');
+  if (names.length === 1) return names[0].charAt(0).toUpperCase();
+  return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
 };
 
 interface ConnectionListProps {
@@ -20,45 +30,51 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
   selectedConnectionId,
   onSelect,
 }) => {
-  // Optional: Sort connections, e.g., by last message timestamp
-  // const sortedConnections = [...connections].sort((a, b) => ...);
 
+  // No outer div needed, ScrollArea is in parent
   return (
-    <div className="overflow-y-auto flex-grow space-y-2 pr-1">
+    <div className="space-y-1"> {/* Add slight space between buttons */} 
       {connections.length > 0 ? (
         connections.map((conn) => (
-          <div
+          <Button
             key={conn.id}
+            variant="ghost" // Use ghost variant for list items
             onClick={() => onSelect(conn.id)}
-            className={`
-              p-3 rounded-lg cursor-pointer transition duration-150 ease-in-out 
-              hover:bg-gray-700 
-              focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50
-              ${
-                selectedConnectionId === conn.id
-                  ? 'bg-gradient-to-r from-pink-800/50 to-purple-800/40 border border-pink-600/80 shadow-md' // Enhanced selected style
-                  : 'bg-gray-700/60' // Standard item style
-              }
-            `}
-          >
-            <p className={`font-semibold truncate text-sm ${selectedConnectionId === conn.id ? 'text-white' : 'text-gray-100'}`}>
-              {conn.name || 'Unnamed Connection'}
-            </p>
-            {conn.relationship && (
-              <p className="text-xs text-gray-400 truncate mt-1">
-                {conn.relationship}
-              </p>
+            className={cn(
+              "w-full justify-start h-auto p-3 text-left", // Base styles: full width, left align, auto height, padding
+              selectedConnectionId === conn.id ? 
+                "bg-muted hover:bg-muted" : // Selected style
+                "hover:bg-muted/50" // Hover style for non-selected
             )}
-             {/* Optional: Display last message snippet */}
-             {/* {conn.lastMessageSnippet && (
-              <p className="text-xs text-gray-400 truncate mt-1">
-                {conn.lastMessageSnippet}
-              </p>
-            )} */}
-          </div>
+          >
+            <div className="flex items-center space-x-3">
+              <Avatar className="h-8 w-8"> {/* Slightly smaller avatar */} 
+                {/* <AvatarImage src="/path/to/image.jpg" /> */}
+                <AvatarFallback className="bg-pink-600/80 text-white"> {/* Example fallback style */} 
+                  {getInitials(conn.name)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="overflow-hidden"> {/* Prevent text overflow */} 
+                <p className={cn(
+                  "font-medium truncate text-sm", 
+                  selectedConnectionId === conn.id ? 'text-primary-foreground' : 'text-primary-foreground' // Text color (might adjust based on theme)
+                  )}>
+                  {conn.name || 'Unnamed Connection'}
+                </p>
+                {conn.relationship && (
+                  <p className={cn(
+                    "text-xs truncate",
+                    selectedConnectionId === conn.id ? 'text-muted-foreground' : 'text-muted-foreground' // Muted text color
+                    )}>
+                    {conn.relationship}
+                  </p>
+                )}
+              </div>
+            </div>
+          </Button>
         ))
       ) : (
-        <p className="text-gray-400 text-center py-4">No connections found.</p>
+        <p className="text-muted-foreground text-center py-4 text-sm">No connections found.</p>
       )}
     </div>
   );

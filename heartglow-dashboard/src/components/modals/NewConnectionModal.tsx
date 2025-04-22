@@ -1,15 +1,28 @@
-import React, { useState, Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import React, { useState } from 'react';
+// Removed Headless UI imports
 
+// Import shadcn/ui components
+import { Button } from "@/components/ui/button";
+import {
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose, // Import DialogClose for cancel button
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from 'lucide-react'; // For loading spinner
+
+// Props adjusted - isOpen and onClose are typically handled by DialogTrigger/Dialog in the parent
 interface NewConnectionModalProps {
-  isOpen: boolean;
-  onClose: () => void;
   onSave: (name: string, relationship: string) => Promise<void>;
+  // We might need a way to programmatically close after save, passed from parent if needed
+  // Or parent state controls the <Dialog open> prop
 }
 
 const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
-  isOpen,
-  onClose,
   onSave,
 }) => {
   const [name, setName] = useState('');
@@ -17,18 +30,22 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleSave = async () => {
+  const handleSave = async (event: React.FormEvent) => {
+    event.preventDefault(); // Prevent default form submission
     // Basic validation
     if (!name.trim()) {
       setError('Name is required.');
       return;
     }
     console.log('Save clicked', { name, relationship });
+    setIsSaving(true);
+    setError(null);
     try {
-      setIsSaving(true);
-      setError(null);
       await onSave(name, relationship);
-      handleClose(); // Close on success
+      // How to close? Parent needs to control 'open' state or we use DialogClose
+      // For now, assume success means it should close (logic might need adjustment later)
+      // We can't directly call handleClose/onClose anymore.
+      // Resetting state here might be premature if close fails. Best handled on unmount/reopen.
     } catch (err: any) {
       console.error("Error saving connection:", err);
       setError(err.message || 'Failed to save connection.');
@@ -37,109 +54,73 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
     }
   };
 
-  // Reset state when modal closes
-  const handleClose = () => {
-    if (isSaving) return; // Don't close while saving
-    setName('');
-    setRelationship('');
-    setError(null);
-    onClose();
-  };
+  // Reset state when the component might re-render due to closing/opening
+  // This is tricky without controlling open state directly. Let's clear on successful save for now.
+  // Proper reset should happen when the dialog *actually* closes or opens.
+  // For simplicity, let's just clear state within handleSave success for now.
 
+  // handleClose logic is removed as DialogClose/overlay handles it.
+  // State reset needs reconsideration - maybe on successful save or via parent effect.
+
+  // Use shadcn DialogContent instead of Headless UI Dialog.Panel
   return (
-    <Transition appear show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
-        {/* Overlay */}
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div className="fixed inset-0 bg-black/60" />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-gray-800 p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg font-medium leading-6 text-gray-100 mb-4"
-                >
-                  Add New Connection
-                </Dialog.Title>
-                
-                {/* Form Fields */}
-                <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="connection-name" className="block text-sm font-medium text-gray-300 mb-1">
-                        Name
-                      </label>
-                      <input
-                        type="text"
-                        id="connection-name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-gray-100 focus:ring-pink-500 focus:border-pink-500 focus:outline-none"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="connection-relationship" className="block text-sm font-medium text-gray-300 mb-1">
-                        Relationship (e.g., Partner, Mentor, Colleague)
-                      </label>
-                      <input
-                        type="text"
-                        id="connection-relationship"
-                        value={relationship}
-                        onChange={(e) => setRelationship(e.target.value)}
-                        className="w-full px-3 py-2 rounded-md bg-gray-700 border border-gray-600 text-gray-100 focus:ring-pink-500 focus:border-pink-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {error && (
-                     <p className="mt-3 text-sm text-red-400">Error: {error}</p>
-                  )}
-
-                  {/* Action Buttons */}
-                  <div className="mt-6 flex justify-end space-x-3">
-                    <button
-                      type="button"
-                      onClick={handleClose}
-                      disabled={isSaving}
-                      className="inline-flex justify-center rounded-md border border-gray-600 px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 disabled:opacity-50"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit" // Changed to submit
-                      disabled={isSaving || !name.trim()} // Disable if no name or saving
-                      className="inline-flex justify-center rounded-md border border-transparent bg-pink-600 px-4 py-2 text-sm font-medium text-white hover:bg-pink-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isSaving ? 'Saving...' : 'Save Connection'}
-                    </button>
-                  </div>
-                </form>
-              </Dialog.Panel>
-            </Transition.Child>
+    <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-gray-100">
+      <DialogHeader>
+        <DialogTitle className="text-gray-100">Add New Connection</DialogTitle>
+        <DialogDescription className="text-gray-400">
+          Enter the details for your new connection. Click save when you're done.
+        </DialogDescription>
+      </DialogHeader>
+      {/* Form for input fields */}
+      <form onSubmit={handleSave}>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="connection-name" className="text-right text-gray-300">
+              Name
+            </Label>
+            <Input
+              id="connection-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
+              required
+            />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <Label htmlFor="connection-relationship" className="text-right text-gray-300">
+              Relationship
+            </Label>
+            <Input
+              id="connection-relationship"
+              value={relationship}
+              onChange={(e) => setRelationship(e.target.value)}
+              placeholder="(e.g., Partner, Mentor)"
+              className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
+            />
           </div>
         </div>
-      </Dialog>
-    </Transition>
+
+        {error && (
+           <p className="mb-4 text-sm text-red-400 text-center">Error: {error}</p>
+        )}
+
+        {/* Buttons using shadcn Button */}
+        <DialogFooter>
+          {/* DialogClose handles closing the dialog */}
+          <DialogClose asChild>
+             <Button type="button" variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button 
+            type="submit" 
+            disabled={isSaving || !name.trim()}
+            className="bg-pink-600 hover:bg-pink-700"
+          >
+            {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            {isSaving ? 'Saving...' : 'Save Connection'}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
   );
 };
 

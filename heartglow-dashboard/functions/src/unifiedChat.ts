@@ -8,36 +8,18 @@ try {
 }
 const db = admin.firestore();
 
-// --- Helper Function to Fetch API Key (Copied from coachingAssistant source) ---
-/**
- * Fetches the OpenAI API key securely from Firestore.
- * @return {Promise<string>} The OpenAI API key.
- * @throws {Error} If the key cannot be fetched.
- */
-async function getOpenApiKey(): Promise<string> {
-  try {
-    const docSnap = await db.collection('secrets').doc('secrets').get();
-    const apiKey = docSnap.data()?.openaikey;
-    if (!docSnap.exists || !apiKey) {
-      functions.logger.error("OpenAI API key not found in Firestore at secrets/secrets");
-      // Use HttpsError for consistency if this might be called from an HTTP function later
-      throw new functions.https.HttpsError("internal", "Server configuration error: Missing API key.");
-    }
-    return apiKey;
-  } catch (error: any) {
-    functions.logger.error("Error fetching API key from Firestore:", error);
-    // Rethrow as HttpsError or a generic error
-    if (error instanceof functions.https.HttpsError) throw error;
-    throw new functions.https.HttpsError("internal", "Could not retrieve API key.", error.message);
-  }
-}
-
 // --- Helper Function for Core AI Coaching Logic ---
 async function generateCoachResponse(userMessageText: string, history: admin.firestore.DocumentData[]): Promise<string> {
     functions.logger.info(`Generating coach response for: "${userMessageText}"`);
     try {
-        // Fetch API Key
-        const apiKey = await getOpenApiKey();
+        // Fetch API Key from Environment Variable
+        const apiKey = process.env.OPENAI_API_KEY; // Use environment variable
+
+        if (!apiKey) {
+             functions.logger.error("OpenAI API key environment variable (OPENAI_API_KEY) is not set.");
+             throw new functions.https.HttpsError("internal", "Server configuration error: Missing API key configuration.");
+        }
+
         const {OpenAI} = await import("openai"); // Dynamic import inside async function
         const openai = new OpenAI({ apiKey });
 
@@ -84,90 +66,118 @@ async function generateCoachResponse(userMessageText: string, history: admin.fir
  * This function will handle routing to the appropriate AI model (coaching/generation)
  * and writing the AI response back to the same subcollection.
  */
-export const handleNewMessage = functions.firestore
-  .document("connections/{connectionId}/messages/{messageId}")
-  .onCreate(async (snapshot, context) => {
-    const { connectionId, messageId } = context.params;
-    const messageData = snapshot.data();
+export const handleChatMessage = functions.https.onCall(async (data, context) => {
+  // --- Authentication Check ---
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
+  }
+  const userId = context.auth.uid; // Get UID from context
 
-    // Ensure messageData is defined and has expected fields
-    if (!messageData || !messageData.sender || !messageData.text) {
-      console.error(`Invalid message data for message ${messageId} in connection ${connectionId}:`, messageData);
-      return; // Exit if data is invalid
-    }
+  // --- Input Validation ---
+  const { connectionId, messageText } = data;
+  if (!connectionId || typeof connectionId !== 'string' || !messageText || typeof messageText !== 'string') {
+    throw new functions.https.HttpsError('invalid-argument', 'The function must be called with "connectionId" (string) and "messageText" (string) arguments.');
+  }
 
-    const sender = messageData.sender;
-    const text = messageData.text;
+  functions.logger.info(`[${userId}] handleChatMessage called for connection ${connectionId}`);
 
-    console.log(`[${connectionId}] New message ${messageId} from ${sender}: "${text}"`);
+  // --- Step 1: Save User's Message to Firestore ---
+  const userMessage = {
+    sender: 'user',
+    text: messageText,
+    timestamp: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
+    // Optionally add userId if needed for rules/querying, though path has it
+    // userId: userId 
+  };
+  const messagesRef = db.collection('users').doc(userId).collection('connections').doc(connectionId).collection('messages');
+  let userMessageRef; // To get the ID if needed
+  try {
+      userMessageRef = await messagesRef.add(userMessage);
+      functions.logger.info(`[${userId}/${connectionId}] User message ${userMessageRef.id} saved.`);
+  } catch (error) {
+      functions.logger.error(`[${userId}/${connectionId}] Error saving user message:`, error);
+      throw new functions.https.HttpsError('internal', 'Failed to save user message.', error);
+  }
 
-    // --- Step 1: Ignore messages sent by the AI itself ---
-    if (sender === 'ai') {
-        console.log(`[${connectionId}] Ignoring message ${messageId} as it's from AI.`);
-        return; // Don't process messages from the AI
-    }
-
-    // --- Step 2: Implement determineInteractionType ---
-    // TODO: Add logic to analyze messageData.text and potentially recent history
-    let interactionType: 'coaching' | 'generation' | 'clarification' = 'coaching'; // Default
-    const lowerCaseText = text.toLowerCase();
+  // --- Step 2: Implement determineInteractionType (Placeholder) ---
+  // TODO: Add logic to analyze messageText and potentially recent history
+  let interactionType: 'coaching' | 'generation' | 'clarification' = 'coaching'; // Default
+  const lowerCaseText = messageText.toLowerCase();
     // Simple keyword check for message generation intent
-    if (lowerCaseText.includes("help me write") || 
-        lowerCaseText.includes("draft a message") || 
+    if (lowerCaseText.includes("help me write") ||
+        lowerCaseText.includes("draft a message") ||
         lowerCaseText.includes("how do i say") ||
         lowerCaseText.includes("what should i text") ||
         lowerCaseText.includes("send a message saying")) {
         interactionType = 'generation';
     }
-    // TODO: Add logic for 'clarification' if needed
-    console.log(`[${connectionId}] Determined interaction type: ${interactionType}`);
+  // TODO: Add logic for 'clarification' if needed
+  functions.logger.info(`[${userId}/${connectionId}] Determined interaction type: ${interactionType}`);
 
-    // --- Step 3: Prepare for AI model Call (Fetch Context) ---
-    let history: admin.firestore.DocumentData[] = [];
-    try {
-        const historySnapshot = await db.collection("connections").doc(connectionId).collection("messages")
-            .orderBy("timestamp", "desc") // Get recent messages first
-            .limit(10) // Limit context window (adjust as needed)
-            .get();
-        history = historySnapshot.docs.map(doc => doc.data()).reverse(); // Reverse to maintain chronological order
-        console.log(`[${connectionId}] Fetched last ${history.length} messages for context.`);
-    } catch (error) {
-        console.error(`[${connectionId}] Error fetching message history:`, error);
-        // Decide if we should proceed without history or return
-        // return; // Example: Stop if history fetch fails
-    }
-    
-    // TODO: Implement actual calls to OpenAI or other models based on interactionType and history
-    console.log(`[${connectionId}] TODO: Call AI model for ${interactionType} with text: "${text}" and history.`);
-    const aiResponseText = await generateCoachResponse(text, history);
 
-    // --- Step 4: Write AI response back to Firestore ---
-    try {
-        const messagesRef = db.collection("connections").doc(connectionId).collection("messages");
-        await messagesRef.add({
-            sender: 'ai',
-            text: aiResponseText,
-            timestamp: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
-            interactionType: interactionType // Include the determined type
-        });
-        console.log(`[${connectionId}] AI response added successfully.`);
-    } catch (error) {
-        console.error(`[${connectionId}] Error writing AI response for message ${messageId}:`, error);
-    }
+  // --- Step 3: Fetch History and Prepare for AI Call ---
+  let history: admin.firestore.DocumentData[] = [];
+  try {
+    // Fetch history from the correct path
+    const historySnapshot = await messagesRef // Use the ref we already have
+      .orderBy("timestamp", "desc") // Get recent messages first
+      .limit(11) // Limit context window + the message just added (adjust as needed)
+      .get();
 
-    // --- Step 5: Optionally update the parent Connection document ---
-    // TODO: Update Connection.lastMessagePreview and Connection.timestamp
-    try {
-        const connectionRef = db.collection("connections").doc(connectionId);
-        // Use the *actual* AI response text if/when the placeholder is replaced
-        const previewText = aiResponseText.length > 90 ? aiResponseText.substring(0, 90) + "..." : aiResponseText;
+    // Filter out the message we *just* added (it's in messageText) and map, then reverse
+    history = historySnapshot.docs
+        .filter(doc => doc.id !== userMessageRef?.id) // Exclude the current user message doc
+        .map(doc => doc.data())
+        .reverse(); // Reverse to maintain chronological order for the AI
 
-        await connectionRef.update({
-            lastMessagePreview: previewText, 
-            timestamp: admin.firestore.FieldValue.serverTimestamp() // Update timestamp on new AI message
-        });
-        console.log(`[${connectionId}] Connection document updated.`);
-    } catch (error) {
-        console.error(`[${connectionId}] Error updating connection document ${connectionId}:`, error);
-    }
+    functions.logger.info(`[${userId}/${connectionId}] Fetched last ${history.length} messages for context.`);
+  } catch (error) {
+    functions.logger.error(`[${userId}/${connectionId}] Error fetching message history:`, error);
+    // Continue without history, but log it. Could also throw here.
+  }
+
+  // --- Step 4: Call AI Model ---
+  let aiResponseText = "Sorry, I encountered an issue generating a response."; // Default error message
+  try {
+      // Pass the current message text and the fetched history
+      aiResponseText = await generateCoachResponse(messageText, history); 
+  } catch (error) {
+      functions.logger.error(`[${userId}/${connectionId}] Error calling generateCoachResponse:`, error);
+      // Keep default error message, the error is already logged
+      // Optionally re-throw if client needs specific failure info
+      // throw new functions.https.HttpsError('internal', 'AI processing failed.', error);
+  }
+
+  // --- Step 5: Write AI response back to Firestore ---
+  try {
+    await messagesRef.add({
+      sender: 'ai',
+      text: aiResponseText,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      interactionType: interactionType
+    });
+    functions.logger.info(`[${userId}/${connectionId}] AI response added successfully.`);
+  } catch (error) {
+    functions.logger.error(`[${userId}/${connectionId}] Error writing AI response:`, error);
+    // Don't throw here, user message is saved, AI just failed to save response
+  }
+
+   // --- Step 6: Optionally update the parent Connection document ---
+  // TODO: Consider if updating lastMessagePreview is still needed on the USER's connection doc
+  try {
+      const connectionRef = db.collection('users').doc(userId).collection('connections').doc(connectionId);
+      const previewText = aiResponseText.length > 90 ? aiResponseText.substring(0, 90) + "..." : aiResponseText;
+      await connectionRef.update({
+          lastMessagePreview: previewText,
+          timestamp: admin.firestore.FieldValue.serverTimestamp()
+      });
+      functions.logger.info(`[${userId}/${connectionId}] Connection document updated.`);
+  } catch (error) {
+      functions.logger.error(`[${userId}/${connectionId}] Error updating connection document:`, error);
+  }
+
+  // --- Step 7: Return Success (or result if needed) ---
+   // Return success status and maybe the AI response or message ID if client needs it
+  return { success: true, message: aiResponseText }; 
+
 }); 

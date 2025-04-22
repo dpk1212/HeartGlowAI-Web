@@ -43,7 +43,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               <p className="text-gray-400">Loading connections...</p>
             </div>
           ) : (
-             {/* Use ConnectionList component */}
+             // Render ConnectionList when not loading
              <ConnectionList
                connections={connections}
                selectedConnectionId={selectedConnectionId}

@@ -41,7 +41,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
               }
             `}
           >
-            <p className="font-semibold text-gray-100 truncate text-sm">
+            <p className={`font-semibold truncate text-sm ${selectedConnectionId === conn.id ? 'text-white' : 'text-gray-100'}`}>
               {conn.name || 'Unnamed Connection'}
             </p>
             {conn.relationship && (

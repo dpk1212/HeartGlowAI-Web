@@ -31,9 +31,11 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   const selectedConnection = connections.find(c => c.id === selectedConnectionId);
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white font-sans">
+    // Make container relative for potential absolute positioning later (e.g., mobile menu button)
+    <div className="relative flex h-screen bg-gray-900 text-white font-sans overflow-hidden">
       {/* Sidebar - Connection List */}
-      <div className="w-64 md:w-72 flex-shrink-0 bg-gray-800 p-4 border-r border-gray-700 flex flex-col">
+      {/* Hide on small screens (mobile), flex (visible) on medium screens and up */}
+      <div className="hidden md:flex md:flex-col w-64 md:w-72 flex-shrink-0 bg-gray-800 p-4 border-r border-gray-700">
         <h1 className="text-2xl font-bold mb-6 text-pink-400">HeartGlow</h1>
         <h2 className="text-lg font-semibold mb-4 text-gray-300">Your Connections</h2>
         {
@@ -58,6 +60,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
       </div>
 
       {/* Main Chat Area - Use ChatWindow component */}
+      {/* This will now take full width on mobile since sidebar is hidden */}
       <ChatWindow
         connection={selectedConnection} // Pass the found connection object or undefined
         messages={messages}

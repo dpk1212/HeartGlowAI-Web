@@ -51,10 +51,12 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled = false, i
         onClick={handleSend}
         disabled={disabled || isSending || !inputText.trim()}
         className={`
-          p-3 rounded-full transition duration-200 ease-in-out 
+          p-3 rounded-lg transition duration-200 ease-in-out
+          flex items-center justify-center
+          w-11 h-11
           ${(!disabled && !isSending && inputText.trim())
-            ? 'bg-pink-500 hover:bg-pink-600 text-white' // Enabled state
-            : 'bg-gray-600 text-gray-400 cursor-not-allowed' // Disabled state
+            ? 'bg-pink-500 hover:bg-pink-600 text-white'
+            : 'bg-gray-600 text-gray-400 cursor-not-allowed'
           }
           focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-pink-500
         `}

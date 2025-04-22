@@ -30,7 +30,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   }
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
       <div className={`flex flex-col max-w-xs md:max-w-md lg:max-w-lg ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Message Bubble */}
         <div
@@ -47,7 +47,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         </div>
         {/* Timestamp (optional, shown below the bubble) */}
         {formattedTimestamp && (
-          <p className={`text-xs mt-1 ${isUser ? 'text-gray-500 mr-1' : 'text-gray-500 ml-1'}`}>
+          <p className={`text-xs mt-1 ${isUser ? 'text-gray-400 mr-1' : 'text-gray-400 ml-1'}`}>
             {formattedTimestamp}
           </p>
         )}

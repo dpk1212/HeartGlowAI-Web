@@ -97,7 +97,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
          <MessageInput 
            onSend={onSendMessage} 
            disabled={isWelcomeState || isLoadingMessages} // Disable if welcome OR loading real messages
-           placeholder={isWelcomeState ? "Select or create a connection..." : "Type your message..."} // Custom placeholder for welcome state
          />
       </div>
     </div>

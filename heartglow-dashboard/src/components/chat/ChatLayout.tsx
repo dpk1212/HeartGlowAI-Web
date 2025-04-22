@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 // import { MenuIcon, XIcon } from '@heroicons/react/outline'; // v1 import
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // v2 import
+import { useRouter } from 'next/router'; // Import useRouter
 // Import sub-components
 import ConnectionList from './ConnectionList';
 import ChatWindow from './ChatWindow';
@@ -29,10 +30,16 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 }) => {
   const selectedConnection = connections.find(c => c.id === selectedConnectionId);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const router = useRouter(); // Get router instance
 
   // Helper function to pass down
   const toggleMobileSidebar = () => setIsMobileSidebarOpen(!isMobileSidebarOpen);
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
+
+  const handleNewConnectionClick = () => {
+    router.push('/create'); // Navigate to the create page
+    closeMobileSidebar(); // Close sidebar if open on mobile after clicking
+  };
 
   return (
     // Outer container needed for relative positioning context if sidebar uses absolute
@@ -84,7 +91,10 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
          )
         }
          {/* Consider styling/positioning this button better within scrollable area */}
-         <button className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex-shrink-0">
+         <button 
+           onClick={handleNewConnectionClick}
+           type="button"
+           className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200 flex-shrink-0">
            + New Connection
          </button>
       </div>
@@ -102,7 +112,10 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
       {/* Styling similar to ChatGPT sidebar: slightly darker bg? */}
       <div className="hidden md:flex md:flex-col md:w-72 md:flex-shrink-0 bg-gray-850 p-3 border-r border-gray-700"> {/* Adjusted bg, padding */}
          {/* Maybe add a 'New Chat/Connection' button at the top like ChatGPT */}
-         <button className="mb-4 w-full border border-gray-600 hover:border-gray-500 text-gray-200 font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-between">
+         <button 
+           onClick={handleNewConnectionClick}
+           type="button"
+           className="mb-4 w-full border border-gray-600 hover:border-gray-500 text-gray-200 font-semibold py-2 px-4 rounded-lg transition duration-200 flex items-center justify-between">
            <span>+ New Connection</span>
            {/* Add edit/pen icon maybe? */}
          </button>

@@ -39,15 +39,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
 
   const isWelcomeState = !connection;
-  const scrollAreaRef = useRef<HTMLDivElement>(null); // Ref for the viewport
+  const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
 
   // Scroll to bottom when messages change or connection changes
   useEffect(() => {
-    if (scrollAreaRef.current) {
+    if (scrollContainerRef.current) {
       // Use timeout to ensure DOM update before scrolling
       setTimeout(() => {
-        if (scrollAreaRef.current) {
-          scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
         }
       }, 0);
     }
@@ -107,8 +107,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       ) : (
         // Only show message list and input if not in welcome state
         <>
-          {/* Message List Area using ScrollArea */}
-          <ScrollArea className="flex-1 p-4 sm:p-6" viewportRef={scrollAreaRef}>
+          {/* Message List Area using ScrollArea with direct ref */}
+          <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollContainerRef}>
             <MessageList messages={messages} isLoading={isLoadingMessages} />
             <ScrollBar />
           </ScrollArea>

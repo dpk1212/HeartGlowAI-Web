@@ -25,16 +25,16 @@ const steps: Step[] = [
     content: "🫂 Keep track of your important connections here for easy message drafting.", // Updated content
     title: "Your Connections" // Updated title
   },
-  { // Step 4: Challenges 
-    target: "[data-tour-id='challenge-section']", 
-    content: "🎯 These guided activities help you practice communication skills and earn GlowScore XP.", 
-    title: "Take on Challenges!" 
-  },
-  { // Step 5: GlowScore
-    target: "[data-tour-id='glowscore-card']", 
-    content: "📈 See your XP, communication streaks, and growth over time.", 
-    title: "Track Your Progress!" 
-  },
+  // { // Step 4: Challenges - REMOVED as section is hidden
+  //   target: "[data-tour-id='challenge-section']", 
+  //   content: "🎯 These guided activities help you practice communication skills and earn GlowScore XP.", 
+  //   title: "Take on Challenges!" 
+  // },
+  // { // Step 5: GlowScore - REMOVED as section is hidden
+  //   target: "[data-tour-id='glowscore-card']", 
+  //   content: "📈 See your XP, communication streaks, and growth over time.", 
+  //   title: "Track Your Progress!" 
+  // },
 ];
 
 // Define basic theme styles

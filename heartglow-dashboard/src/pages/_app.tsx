@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PaywallProvider, usePaywall } from '../context/PaywallContext';
 import PaywallModal from '../components/ui/PaywallModal';
 import AccountLinkBanner from '../components/ui/AccountLinkBanner';
-import OnboardingFlowWrapper from '../components/onboarding/OnboardingFlowWrapper';
 import GlowGuideButton from '../components/onboarding/GlowGuideButton';
 import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
 import DashboardTour from '../components/ui/DashboardTour';
@@ -23,7 +22,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   const { userProfile, loading, updateUserProfile } = useAuth();
   const { isPaywallOpen, closePaywall } = usePaywall();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
-  const [onboardingStep, setOnboardingStep] = useState(1);
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
 
   // --- START: Theme Handling --- 
@@ -88,7 +86,7 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     );
   }
 
-  const showOnboarding = userProfile && userProfile.hasCompletedOnboarding === false;
+  // Determine if the tour should show - based only on profile flags now
   const showDashboardTour = userProfile && userProfile.hasCompletedOnboarding === true && userProfile.hasSeenDashboardTour === false;
 
   // Function to mark tour as complete
@@ -103,21 +101,27 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     }
   };
 
+  // --- START: Onboarding Completion Logic (if needed) ---
+  // We need to ensure new users eventually get `hasCompletedOnboarding` set to true
+  // so the DashboardTour can trigger. Let's set it to true automatically
+  // if it's false, now that the modal flow is removed.
+  useEffect(() => {
+    if (userProfile && userProfile.hasCompletedOnboarding === false) {
+      console.log("Old onboarding flow removed. Marking onboarding as complete automatically.");
+      updateUserProfile({ hasCompletedOnboarding: true });
+      // Optionally, force the Dashboard Tour to start immediately for these users?
+      // Or let the regular logic handle it after profile update.
+    }
+  }, [userProfile, updateUserProfile]);
+  // --- END: Onboarding Completion Logic ---
+
   return (
     <>
        {/* REMOVED conditional blur/brightness class from this wrapper */}
+       {/* Always render the main content now, no old onboarding check */}
       <div> 
-        {showOnboarding ? (
-          <OnboardingFlowWrapper 
-            currentStep={onboardingStep} 
-            setCurrentStep={setOnboardingStep} 
-          />
-        ) : (
-          <>
-            <AccountLinkBanner />
-            <Component {...pageProps} />
-          </>
-        )}
+        <AccountLinkBanner />
+        <Component {...pageProps} />
       </div>
 
       {/* DashboardTour now handles its own overlay/highlighting */}
@@ -128,16 +132,16 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
         />
       )}
 
-      {/* Render GlowGuide persistently */}
+      {/* Render GlowGuide persistently - remove props related to old onboarding */}
       <GlowGuideButton 
         onClick={() => setIsGlowGuideOpen(true)} 
-        pulse={showOnboarding} 
+        // pulse={showOnboarding} // Removed pulse prop
       />
       <GlowGuidePanel 
         isOpen={isGlowGuideOpen} 
         onClose={() => setIsGlowGuideOpen(false)} 
-        isOnboarding={showOnboarding} 
-        currentOnboardingStep={showOnboarding ? onboardingStep : undefined} 
+        // isOnboarding={showOnboarding} // Removed isOnboarding prop
+        // currentOnboardingStep={showOnboarding ? onboardingStep : undefined} // Removed step prop
       />
 
       {/* Render Paywall Modal Conditionally */}

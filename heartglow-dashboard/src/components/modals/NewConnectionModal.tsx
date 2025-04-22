@@ -4,13 +4,13 @@ import { Dialog, Transition } from '@headlessui/react';
 interface NewConnectionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // TODO: Add onSave prop: onSave: (name: string, relationship: string) => Promise<void>;
+  onSave: (name: string, relationship: string) => Promise<void>;
 }
 
 const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
   isOpen,
   onClose,
-  // onSave,
+  onSave,
 }) => {
   const [name, setName] = useState('');
   const [relationship, setRelationship] = useState('');
@@ -23,20 +23,18 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
       setError('Name is required.');
       return;
     }
-    // TODO: Implement actual save logic
     console.log('Save clicked', { name, relationship });
-    // try {
-    //   setIsSaving(true);
-    //   setError(null);
-    //   await onSave(name, relationship);
-    //   handleClose(); // Close on success
-    // } catch (err) {
-    //   console.error("Error saving connection:", err);
-    //   setError(err.message || 'Failed to save connection.');
-    // } finally {
-    //   setIsSaving(false);
-    // }
-    handleClose(); // Temporarily close on click
+    try {
+      setIsSaving(true);
+      setError(null);
+      await onSave(name, relationship);
+      handleClose(); // Close on success
+    } catch (err: any) {
+      console.error("Error saving connection:", err);
+      setError(err.message || 'Failed to save connection.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Reset state when modal closes

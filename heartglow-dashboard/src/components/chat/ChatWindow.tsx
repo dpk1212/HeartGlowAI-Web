@@ -23,7 +23,7 @@ const welcomeMessages: Message[] = [
     id: 'welcome-msg-1',
     sender: 'ai',
     text: "Welcome to HeartGlow! I'm here to help you navigate your relationships. Select a connection from the sidebar or create a new one to get started.",
-    timestamp: new Date(), // Use current time for welcome message
+    timestamp: Timestamp.now(), // Use Timestamp.now() for the welcome message timestamp
   },
 ];
 // --- End Default Welcome Data ---

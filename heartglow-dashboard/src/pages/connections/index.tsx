@@ -6,7 +6,7 @@ import { usePaywall } from '../../context/PaywallContext';
 import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, getConnectionFrequency } from '../../firebase/db';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
-import NewConnectionModal from '../../components/modals/NewConnectionModal';
+import NewConnectionModal from '@/components/modals/NewConnectionModal';
 
 // Helper to get initials (could be moved to utils)
 const getInitials = (name: string): string => {

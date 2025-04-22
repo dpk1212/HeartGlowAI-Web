@@ -7,6 +7,10 @@ import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, g
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
 import NewConnectionModal from '../../components/modals/NewConnectionModal';
+// Import shadcn Dialog components and Button
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button"; // Assuming Button is already added or add it
+import { Plus } from 'lucide-react'; // For button icon
 
 // Helper to get initials (could be moved to utils)
 const getInitials = (name: string): string => {
@@ -76,7 +80,6 @@ export default function AllConnectionsPage() {
   const [connections, setConnections] = useState<DbConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isNewConnectionModalOpen, setIsNewConnectionModalOpen] = useState(false);
   const FREE_CONNECTION_LIMIT = 2;
 
   useEffect(() => {
@@ -111,84 +114,88 @@ export default function AllConnectionsPage() {
       const userConnections = await fetchUserConnections(currentUser, 1000);
       setConnections(userConnections);
       setLoading(false);
-      // No need to explicitly call onClose here, modal handles it on success
+      // Dialog should close automatically via shadcn mechanisms (DialogClose or state change if controlled)
     } catch (error) {
       console.error("Error saving connection from connections page:", error);
       throw error; // Let modal display the error
     }
   };
 
-  const handleAddConnectionClick = () => {
-    const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
-    
-    if (!canAddMore) {
-       console.log('Paywall triggered: Connection limit reached.');
-       openPaywall();      // Open the paywall modal
-    } else {
-      // Open the new connection modal instead of navigating
-      setIsNewConnectionModalOpen(true);
-    }
-  };
+  // Determine if user can add more connections
+  const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
 
   return (
+    <Dialog> {/* Wrap section with Dialog */} 
       <AuthGuard>
         <DashboardLayout>
-                <div className="container mx-auto py-8 px-4 max-w-6xl">
-                    <div className="flex justify-between items-center mb-8">
-                        <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
-                        <button 
-                          type="button"
-                          onClick={handleAddConnectionClick} 
-                          className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                          </svg>
-                          Add Connection
-                        </button>
-                    </div>
+          <div className="container mx-auto py-8 px-4 max-w-6xl">
+            <div className="flex justify-between items-center mb-8">
+              <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
+              
+              {/* Conditional Button: Trigger or Paywall */} 
+              {canAddMore ? (
+                <DialogTrigger asChild>
+                  <Button className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300">
+                    <Plus className="h-5 w-5 mr-2" />
+                    Add Connection
+                  </Button>
+                </DialogTrigger>
+              ) : (
+                <Button 
+                  onClick={() => {
+                    console.log('Paywall triggered: Connection limit reached.');
+                    openPaywall();
+                  }}
+                  className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Connection (Upgrade)
+                </Button>
+              )}
+            </div>
                           
-                    {loading && (
-                        <div className="flex justify-center items-center py-20">
-                            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-heartglow-pink"></div>
-                            </div>
-                    )}
+            {loading && (
+                <div className="flex justify-center items-center py-20">
+                    <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-heartglow-pink"></div>
+                    </div>
+            )}
 
-                    {error && (
-                        <div className="text-center py-10 bg-red-50 dark:bg-red-900/20 p-6 rounded-lg">
-                            <p className="text-red-600 dark:text-red-300">{error}</p>
-                            </div>
-                    )}
+            {error && (
+                <div className="text-center py-10 bg-red-50 dark:bg-red-900/20 p-6 rounded-lg">
+                    <p className="text-red-600 dark:text-red-300">{error}</p>
+                    </div>
+            )}
 
-                    {!loading && !error && connections.length === 0 && (
-                        <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/30 p-6 rounded-lg">
-                            <p className="text-gray-600 dark:text-gray-400">You haven't added any connections yet.</p>
-                          </div>
-                    )}
+            {!loading && !error && connections.length === 0 && (
+                <div className="text-center py-10 bg-gray-50 dark:bg-gray-800/30 p-6 rounded-lg">
+                    <p className="text-gray-600 dark:text-gray-400">You haven't added any connections yet.</p>
+                  </div>
+            )}
 
-                    {!loading && !error && connections.length > 0 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                            {connections.map(conn => (
-                                <ConnectionGridCard key={conn.id} connection={conn} />
-                            ))}
-                            {!userProfile?.isPremium && connections.length >= FREE_CONNECTION_LIMIT && (
-                              <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 text-center">
-                                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                                    Upgrade to Premium to add more connections.
-                                    <button onClick={() => openPaywall()} className="ml-2 text-heartglow-pink font-medium hover:underline">Upgrade</button>
-                                 </p>
-                              </div>
-                            )}
-                        </div>
+            {!loading && !error && connections.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {connections.map(conn => (
+                        <ConnectionGridCard key={conn.id} connection={conn} />
+                    ))}
+                    {!userProfile?.isPremium && connections.length >= FREE_CONNECTION_LIMIT && (
+                      <div className="flex items-center justify-center p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg border border-dashed border-gray-300 dark:border-gray-700 text-center">
+                         <p className="text-sm text-gray-500 dark:text-gray-400">
+                            Upgrade to Premium to add more connections.
+                            <button onClick={() => openPaywall()} className="ml-2 text-heartglow-pink font-medium hover:underline">Upgrade</button>
+                         </p>
+                      </div>
                     )}
                 </div>
+            )}
+          </div>
                 
-                <NewConnectionModal 
-                   isOpen={isNewConnectionModalOpen}
-                   onClose={() => setIsNewConnectionModalOpen(false)}
-                   onSave={handleSaveConnection}
-                />
+          {/* Modal Content - Placed within Dialog wrapper, rendered on trigger */}
+          <NewConnectionModal 
+             onSave={handleSaveConnection} 
+             // No isOpen or onClose needed 
+          />
         </DashboardLayout>
       </AuthGuard>
+    </Dialog> {/* End Dialog wrapper */} 
   );
 }

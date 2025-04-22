@@ -3,6 +3,7 @@ import ChatLayout from '@/components/chat/ChatLayout'; // Import the main layout
 import { Connection, Message } from '@/types'; // Import shared types
 import { useConnections } from '@/hooks/useConnections'; // Import connections hook
 import { useMessages } from '@/hooks/useMessages'; // Import messages hook
+import { addConnection } from '@/firebase/firestoreUtils'; // <<< ADD THIS IMPORT
 
 // --- Firebase Imports ---
 // TODO: Verify these imports match your Firebase setup
@@ -53,6 +54,23 @@ const ChatPage = () => {
     console.log(`Selected connection: ${connectionId}`);
     setSelectedConnectionId(connectionId); 
     // useMessages hook automatically refetches when selectedConnectionId changes
+  };
+
+  // Handler for saving a connection
+  const handleSaveConnection = async (name: string, relationship: string) => {
+    if (!userId) {
+      console.error("User ID not available, cannot save connection.");
+      throw new Error("Authentication error."); // Throw error to be caught in modal
+    }
+    console.log('Attempting to save connection:', { userId, name, relationship });
+    try {
+      await addConnection(userId, { name, relationship }); // Assuming this function exists
+      console.log('Connection saved successfully');
+      // Refreshing might happen automatically if useConnections hook listens to Firestore changes.
+    } catch (error) {
+      console.error("Error saving connection:", error);
+      throw error; // Rethrow the error so the modal can display it
+    }
   };
 
   // Handler for sending a message
@@ -127,6 +145,7 @@ const ChatPage = () => {
       selectedConnectionId={selectedConnectionId}
       onSelectConnection={handleSelectConnection}
       onSendMessage={handleSendMessage}
+      onSaveConnection={handleSaveConnection}
       isLoadingConnections={isLoadingConnections} // Pass down loading states
       isLoadingMessages={isLoadingMessages}
       // TODO: Pass isSendingMessage down if MessageInput needs it directly

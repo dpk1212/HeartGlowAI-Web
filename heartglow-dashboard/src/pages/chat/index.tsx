@@ -93,11 +93,19 @@ const ChatPage = () => {
     try {
       const functions = getFunctions();
       const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
-      // Pass selectedConnectionId (which is null for general chat)
-      const result = await callHandleChatMessage({ 
-        connectionId: selectedConnectionId, 
-        messageText: textToSend // Use trimmed text
-      });
+      
+      // Prepare payload conditionally
+      const payload: { messageText: string; connectionId?: string | null } = {
+        messageText: textToSend,
+      };
+      if (selectedConnectionId !== null && selectedConnectionId !== undefined) {
+        payload.connectionId = selectedConnectionId;
+      }
+
+      // Pass the conditional payload
+      // Note: We are now explicitly omitting connectionId when it's null/undefined
+      console.log("Calling handleChatMessage with payload:", payload); // Add logging
+      const result = await callHandleChatMessage(payload);
       
       console.log("Cloud function raw result:", result);
       const resultData = result.data as { success?: boolean; error?: string; messageId?: string };

@@ -204,7 +204,8 @@ const IndexPage: NextPage = () => {
               <CoachingEntryCard />
             </div>
             
-            <div data-tour-id="challenge-section">
+            {/* Hide Challenge Section */}
+            <div data-tour-id="challenge-section" style={{ display: 'none' }}>
               {activeUserChallenge ? (
                 challengeCardProps ? <ChallengeCard {...challengeCardProps} /> : <div>Loading challenge card...</div>
               ) : challengesLoading ? (
@@ -221,15 +222,23 @@ const IndexPage: NextPage = () => {
                 />
               )}
             </div>
-            <div data-tour-id="glowscore-card">
+            {/* Hide GlowScore Section */}
+            <div data-tour-id="glowscore-card" style={{ display: 'none' }}>
               <GlowScoreSummaryCard {...glowScoreData} />
             </div>
-            <QuickTemplateGrid />
+            {/* Hide Quick Templates Section */}
+            <div style={{ display: 'none' }}>
+              <QuickTemplateGrid />
+            </div>
             <div data-tour-id="connections-carousel">
               <ConnectionsCarousel />
             </div>
-            <ComingSoonCard />
-            <div className="md:col-span-2">
+            {/* Hide Coming Soon Section */}
+            <div style={{ display: 'none' }}>
+              <ComingSoonCard />
+            </div>
+            {/* Hide Recent Messages Section */}
+            <div className="md:col-span-2" style={{ display: 'none' }}>
               <RecentMessagesList />
             </div>
           </div>

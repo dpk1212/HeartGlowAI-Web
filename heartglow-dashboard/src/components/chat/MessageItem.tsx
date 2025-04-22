@@ -30,24 +30,23 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   }
 
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-3`}>
-      <div className={`flex flex-col max-w-xs md:max-w-md lg:max-w-lg ${isUser ? 'items-end' : 'items-start'}`}>
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex flex-col max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl ${isUser ? 'items-end' : 'items-start'}`}>
         {/* Message Bubble */}
         <div
           className={`
-            px-4 py-2 rounded-lg shadow-md 
+            px-4 py-2.5 rounded-2xl shadow-md
             ${isUser 
-              ? 'bg-gradient-to-br from-pink-500 to-purple-600 text-white rounded-br-none' // User message style
-              : 'bg-gray-700 text-gray-100 rounded-bl-none' // AI message style
+              ? 'bg-gradient-to-br from-pink-500 to-purple-600 text-white rounded-br-lg'
+              : 'bg-gray-700 text-gray-100 rounded-bl-lg'
             }
           `}
         >
-          {/* TODO: Potentially render markdown or handle line breaks */}
-          <p className="text-sm whitespace-pre-wrap">{message.text}</p>
+          <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
         </div>
-        {/* Timestamp (optional, shown below the bubble) */}
+        {/* Timestamp */}
         {formattedTimestamp && (
-          <p className={`text-xs mt-1 ${isUser ? 'text-gray-400 mr-1' : 'text-gray-400 ml-1'}`}>
+          <p className={`text-[11px] mt-1.5 ${isUser ? 'text-gray-500 mr-1' : 'text-gray-500 ml-1'}`}>
             {formattedTimestamp}
           </p>
         )}

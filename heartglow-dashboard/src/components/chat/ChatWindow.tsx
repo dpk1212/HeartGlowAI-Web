@@ -37,22 +37,22 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   return (
     <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-gray-850 to-gray-900">
       {/* Chat Header */}
-      <div className="p-4 border-b border-gray-700 bg-gray-800 shadow-sm sticky top-0 z-10">
-        <h3 className="text-xl font-semibold text-gray-100 truncate">
+      <div className="px-4 sm:px-6 py-3 border-b border-gray-700 bg-gray-800 shadow-sm sticky top-0 z-10">
+        <h3 className="text-lg sm:text-xl font-semibold text-gray-100 truncate">
           Chat with {connection.name || '...'}
         </h3>
          {connection.relationship && (
-           <p className="text-sm text-gray-400">({connection.relationship})</p>
+           <p className="text-xs sm:text-sm text-gray-400">({connection.relationship})</p>
          )}
       </div>
 
       {/* Message List Area - Use MessageList component */}
-      <div className="flex-1 p-4 overflow-y-auto">
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto">
          <MessageList messages={messages} isLoading={isLoadingMessages} />
       </div>
 
       {/* Message Input Area - Use MessageInput component */}
-      <div className="p-4 border-t border-gray-700 bg-gray-800 sticky bottom-0 z-10">
+      <div className="px-4 sm:px-6 py-3 border-t border-gray-700 bg-gray-800 sticky bottom-0 z-10">
          <MessageInput 
            onSend={onSendMessage} 
           //  isSending={isSending} // Pass sending state here 

@@ -49,7 +49,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading }) => {
 
   // Render Message List
   return (
-    <div className="flex-1 space-y-4 pb-4">
+    <div className="flex-1 space-y-5 pb-4">
       {messages.map((msg, index) => (
         <MessageItem
           key={msg.id || index} // Use index as fallback key if id isn't guaranteed yet

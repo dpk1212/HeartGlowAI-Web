@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { MenuIcon, XIcon } from '@heroicons/react/outline';
 // Import sub-components
 import ConnectionList from './ConnectionList';
 import ChatWindow from './ChatWindow';
@@ -29,14 +30,41 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   isLoadingMessages,
 }) => {
   const selectedConnection = connections.find(c => c.id === selectedConnectionId);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    // Make container relative for potential absolute positioning later (e.g., mobile menu button)
-    <div className="relative flex h-screen bg-gray-900 text-white font-sans overflow-hidden">
-      {/* Sidebar - Connection List */}
-      {/* Hide on small screens (mobile), flex (visible) on medium screens and up */}
-      <div className="hidden md:flex md:flex-col w-64 md:w-72 flex-shrink-0 bg-gray-800 p-4 border-r border-gray-700">
-        <h1 className="text-2xl font-bold mb-6 text-pink-400">HeartGlow</h1>
+    <div className="flex h-full bg-gray-900 text-white font-sans overflow-hidden">
+      <div className="md:hidden absolute top-3 left-3 z-40">
+        <button
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+          aria-label="Open sidebar"
+        >
+          {isSidebarOpen ? (
+            <XIcon className="h-6 w-6" aria-hidden="true" />
+          ) : (
+            <MenuIcon className="h-6 w-6" aria-hidden="true" />
+          )}
+        </button>
+      </div>
+
+      <div
+        className={`
+          flex flex-col w-72 flex-shrink-0 bg-gray-800 p-4 border-r border-gray-700 transition-transform duration-300 ease-in-out z-30
+          absolute inset-y-0 left-0 transform md:relative md:translate-x-0
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+        `}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-pink-400">HeartGlow</h1>
+          <button
+             onClick={() => setIsSidebarOpen(false)}
+             className="md:hidden p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white"
+             aria-label="Close sidebar"
+           >
+             <XIcon className="h-5 w-5" aria-hidden="true" />
+           </button>
+        </div>
         <h2 className="text-lg font-semibold mb-4 text-gray-300">Your Connections</h2>
         {
           isLoadingConnections ? (
@@ -45,28 +73,37 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               <p className="text-gray-400">Loading connections...</p>
             </div>
           ) : (
-             // Render ConnectionList when not loading
              <ConnectionList
                connections={connections}
                selectedConnectionId={selectedConnectionId}
-               onSelect={onSelectConnection}
+               onSelect={(id) => {
+                 onSelectConnection(id);
+                 setIsSidebarOpen(false);
+               }}
              />
           )
         }
-        {/* Optional: Add New Connection Button */}
-         <button className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+        <button className="mt-4 w-full bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
            + New Connection
          </button>
       </div>
 
-      {/* Main Chat Area - Use ChatWindow component */}
-      {/* This will now take full width on mobile since sidebar is hidden */}
-      <ChatWindow
-        connection={selectedConnection} // Pass the found connection object or undefined
-        messages={messages}
-        onSendMessage={onSendMessage}
-        isLoadingMessages={isLoadingMessages}
-      />
+      {isSidebarOpen && (
+         <div
+           className="fixed inset-0 bg-black/60 z-20 md:hidden"
+           onClick={() => setIsSidebarOpen(false)}
+           aria-hidden="true"
+         />
+       )}
+
+      <div className="flex-1 flex flex-col min-w-0">
+         <ChatWindow
+           connection={selectedConnection}
+           messages={messages}
+           onSendMessage={onSendMessage}
+           isLoadingMessages={isLoadingMessages}
+         />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { PaperAirplaneIcon } from '@heroicons/react/solid'; // Using solid icon
+// import { PaperAirplaneIcon } from '@heroicons/react/solid'; // v1 import
+import { PaperAirplaneIcon } from '@heroicons/react/20/solid'; // v2 import (20px size)
 
 interface MessageInputProps {
   onSend: (messageText: string) => void;

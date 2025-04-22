@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { MenuIcon, XIcon } from '@heroicons/react/outline';
+// import { MenuIcon, XIcon } from '@heroicons/react/outline'; // v1 import
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // v2 import
 // Import sub-components
 import ConnectionList from './ConnectionList';
 import ChatWindow from './ChatWindow';
@@ -41,9 +42,11 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           aria-label="Open sidebar"
         >
           {isSidebarOpen ? (
-            <XIcon className="h-6 w-6" aria-hidden="true" />
+            // <XIcon className="h-6 w-6" aria-hidden="true" /> // v1 usage
+            <XMarkIcon className="h-6 w-6" aria-hidden="true" /> // v2 usage
           ) : (
-            <MenuIcon className="h-6 w-6" aria-hidden="true" />
+            // <MenuIcon className="h-6 w-6" aria-hidden="true" /> // v1 usage
+            <Bars3Icon className="h-6 w-6" aria-hidden="true" /> // v2 usage
           )}
         </button>
       </div>
@@ -62,7 +65,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
              className="md:hidden p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white"
              aria-label="Close sidebar"
            >
-             <XIcon className="h-5 w-5" aria-hidden="true" />
+             {/* <XIcon className="h-5 w-5" aria-hidden="true" /> // v1 usage */}
+             <XMarkIcon className="h-5 w-5" aria-hidden="true" /> // v2 usage
            </button>
         </div>
         <h2 className="text-lg font-semibold mb-4 text-gray-300">Your Connections</h2>

@@ -5,6 +5,8 @@ import {
   orderBy,
   onSnapshot,
   getFirestore,
+  CollectionReference,
+  DocumentData,
   Unsubscribe,
   limit
 } from 'firebase/firestore';
@@ -28,10 +30,10 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Don't fetch if userId or connectionId is missing
-    if (!userId || !connectionId) {
+    // Fetch only if userId is available
+    if (!userId) {
       setMessages([]);
-      setIsLoading(false); 
+      setIsLoading(false);
       setError(null);
       return;
     }
@@ -41,13 +43,22 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
     let unsubscribe: Unsubscribe | null = null;
 
     try {
-      const db = getFirestore(); // Get Firestore instance
-      const messagesRef = collection(db, 'users', userId, 'connections', connectionId, 'messages');
+      const db = getFirestore();
+      let messagesCollectionRef: CollectionReference<DocumentData>;
+
+      // Determine the correct collection path
+      if (connectionId) {
+        // Path for a specific connection
+        messagesCollectionRef = collection(db, 'users', userId, 'connections', connectionId, 'messages');
+        console.log(`Setting up listener for connection messages: users/${userId}/connections/${connectionId}/messages`); // Debug log
+      } else {
+        // Path for the general HeartGlow AI chat for this user
+        // IMPORTANT: Adjust this path if your structure is different!
+        messagesCollectionRef = collection(db, 'users', userId, 'chats', 'heartglow-ai', 'messages');
+        console.log(`Setting up listener for general AI chat: users/${userId}/chats/heartglow-ai/messages`); // Debug log
+      }
       
-      // Query messages, ordered by timestamp ascending
-      // Consider adding limit() for performance with very long chats, though requires pagination logic
-      const q = query(messagesRef, orderBy('timestamp', 'asc')); 
-      // Example with limit: query(messagesRef, orderBy('timestamp', 'desc'), limit(50)); // descending for last N
+      const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
 
       unsubscribe = onSnapshot(q, 
         (querySnapshot) => {
@@ -55,12 +66,12 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
             id: doc.id,
             ...(doc.data() as Omit<Message, 'id'>),
           }));
-          // If query was descending for limit, reverse here: fetchedMessages.reverse()
           setMessages(fetchedMessages);
           setIsLoading(false);
+          console.log(`Fetched ${fetchedMessages.length} messages for ${connectionId || 'general chat'}`); // Debug log
         },
         (err) => {
-          console.error(`Error fetching messages for connection ${connectionId}: `, err);
+          console.error(`Error fetching messages for ${connectionId || 'general chat'}: `, err);
           setError(err);
           setIsLoading(false);
         }
@@ -68,17 +79,18 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
 
     } catch (err) {
       console.error("Error setting up message listener: ", err);
-       setError(err instanceof Error ? err : new Error('Failed to setup listener'));
+      setError(err instanceof Error ? err : new Error('Failed to setup listener'));
       setIsLoading(false);
     }
 
     // Cleanup function
     return () => {
       if (unsubscribe) {
+        console.log(`Unsubscribing from messages for ${connectionId || 'general chat'}`); // Debug log
         unsubscribe();
       }
     };
-  // Depend on both userId and connectionId
+  // Depend on userId and connectionId (null connectionId is now a valid state)
   }, [userId, connectionId]); 
 
   return { messages, isLoading, error };

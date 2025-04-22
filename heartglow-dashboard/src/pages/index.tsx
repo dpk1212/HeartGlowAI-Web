@@ -115,18 +115,34 @@ const IndexPage: NextPage = () => {
   };
 
   const handleSendMessage = async (messageText: string) => {
-    if (!selectedConnectionId || !userId) { return; }
+    // Allow sending even if selectedConnectionId is null (for general chat)
+    // Only require userId
+    if (!userId) { 
+      console.error("User not authenticated, cannot send message.");
+      // Maybe show an error toast to the user here
+      return; 
+    }
+    
+    // If message is empty, do nothing (trim check)
+    if (!messageText.trim()) {
+        return;
+    }
+
     setIsSendingMessage(true);
+    console.log(`Sending message: "${messageText}" for connection: ${selectedConnectionId || 'General AI Chat'}`); // Log which chat
     try {
       const functions = getFunctions();
       const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
+      // Pass selectedConnectionId (which will be null for general chat)
       const result = await callHandleChatMessage({ connectionId: selectedConnectionId, messageText });
       const resultData = result.data as { success?: boolean; error?: string; messageId?: string };
       if (!resultData?.success) {
         throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
       }
+      console.log('Cloud function processed message successfully.');
     } catch (error) { 
       console.error("Error calling handleChatMessage function:", error);
+      // TODO: Show error toast to user
     } finally {
       setIsSendingMessage(false);
     }

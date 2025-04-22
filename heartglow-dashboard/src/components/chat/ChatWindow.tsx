@@ -2,18 +2,12 @@ import React, { useEffect, useRef } from 'react';
 // Import sub-components
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { Bars3Icon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/outline';
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
 import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 // Import Card components
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import ScrollArea
 
 // Remove HeartGlow AI connection/message constants - welcome state is now a Card
@@ -38,7 +32,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // isSending, // Add this when state is managed
 }) => {
 
-  const isWelcomeState = !connection;
   const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
 
   // Scroll to bottom when messages change or connection changes
@@ -71,9 +64,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
          {/* Connection Name / Header Title */}
          <div className="flex-1 text-center truncate px-12"> {/* Increased padding for burger */}
             <h3 className="text-base sm:text-lg font-semibold text-gray-100">
-              {isWelcomeState ? 'HeartGlow AI' : (connection.name || 'Chat')} 
+              {connection ? (connection.name || 'Chat') : 'HeartGlow AI'} 
             </h3>
-            {!isWelcomeState && connection.relationship && (
+            {/* Show relationship only if a specific connection is selected */}
+            {connection?.relationship && (
               <p className="text-xs text-gray-400 hidden sm:block">({connection.relationship})</p>
             )}
          </div>
@@ -84,44 +78,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       </div>
 
-      {/* Conditional Content: Welcome Card or Chat */}
-      {isWelcomeState ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6">
-          <Card className="w-full max-w-lg bg-gray-800 border-gray-700 text-gray-100">
-            <CardHeader className="items-center text-center">
-              <SparklesIcon className="h-12 w-12 text-pink-400 mb-3" />
-              <CardTitle className="text-2xl">Welcome to HeartGlow!</CardTitle>
-              <CardDescription className="text-gray-400">
-                Your personal AI relationship navigator.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="text-center text-gray-300">
-              <p>
-                Select a connection from the sidebar to view your chat history 
-                or create a new connection to get started.
-              </p>
-              {/* Optional: Add buttons here later e.g. "+ New Connection" */}
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        // Only show message list and input if not in welcome state
-        <>
-          {/* Message List Area using ScrollArea with direct ref */}
-          <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollContainerRef}>
-            <MessageList messages={messages} isLoading={isLoadingMessages} />
-            <ScrollBar />
-          </ScrollArea>
+      {/* Chat interface always rendered */}
+      {/* Message List Area */}
+      <ScrollArea className="flex-1 p-4 sm:p-6" ref={scrollContainerRef}>
+        <MessageList messages={messages} isLoading={isLoadingMessages} />
+        <ScrollBar />
+      </ScrollArea>
 
-          {/* Message Input Area - Disable if in welcome state */} 
-          <div className="sticky bottom-0 z-10 p-3 sm:p-4 bg-gray-900 border-t border-gray-700">
-             <MessageInput 
-               onSend={onSendMessage} 
-               disabled={isLoadingMessages} // Disable only when loading messages
-             />
-          </div>
-        </>
-      )}
+      {/* Message Input Area */}
+      <div className="sticky bottom-0 z-10 p-3 sm:p-4 bg-gray-900 border-t border-gray-700">
+         <MessageInput 
+           onSend={onSendMessage} 
+           disabled={isLoadingMessages} // Only disable if messages are loading
+         />
+      </div>
     </div>
   );
 };

@@ -75,40 +75,42 @@ const ChatPage = () => {
 
   // Handler for sending a message
   const handleSendMessage = async (messageText: string) => {
-    if (!selectedConnectionId || !userId) {
-      console.error("User ID or Connection ID is missing for sending message.");
-      // TODO: Show error to user (e.g., toast notification)
+    // Allow sending even if selectedConnectionId is null
+    if (!userId) {
+      console.error("User ID is missing for sending message.");
       return;
     }
+    
+    // Trim and check if message is empty
+    const textToSend = messageText.trim();
+    if (!textToSend) {
+        return;
+    }
 
-    console.log(`Sending message to ${selectedConnectionId}: ${messageText}`);
+    console.log(`Sending message to ${selectedConnectionId || 'General AI Chat'}: ${textToSend}`);
     setIsSendingMessage(true);
 
     try {
-      // --- Actual Cloud Function Call ---
-      const functions = getFunctions(); // Pass 'app' if needed: getFunctions(app)
+      const functions = getFunctions();
       const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
-      console.log(`Calling handleChatMessage for connection ${selectedConnectionId}`);
-      
+      // Pass selectedConnectionId (which is null for general chat)
       const result = await callHandleChatMessage({ 
         connectionId: selectedConnectionId, 
-        messageText: messageText 
+        messageText: textToSend // Use trimmed text
       });
       
       console.log("Cloud function raw result:", result);
-      const resultData = result.data as { success?: boolean; error?: string; messageId?: string }; // Type assertion
+      const resultData = result.data as { success?: boolean; error?: string; messageId?: string };
       
       if (!resultData?.success) {
-        // Throw an error if the function explicitly reported failure
         throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
       }
       
       console.log(`Message processed by cloud function. User message ID: ${resultData?.messageId || 'N/A'}`);
-      // --- UI updates automatically via Firestore listeners --- 
       
-    } catch (error) { // Catch errors from httpsCallable or the explicit throw above
+    } catch (error) { 
       console.error("Error calling handleChatMessage function:", error);
-      // TODO: Show error toast/message to user (e.g., check error.code, error.message)
+      // TODO: Show error toast/message to user
     } finally {
       setIsSendingMessage(false);
     }

@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
-import HeroSection from '../components/ui/HeroSection';
 import QuickTemplateGrid from '../components/ui/QuickTemplateGrid';
 import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
@@ -22,6 +21,12 @@ import { useChallenges, ChallengeDefinition } from '../hooks/useChallenges';
 import { getAuth, getIdToken } from "firebase/auth";
 import { getFunctions, httpsCallable } from 'firebase/functions'; // Import for calling selectChallenge
 
+// --- Chat Imports ---
+import ChatLayout from '@/components/chat/ChatLayout';
+import { Connection, Message } from '@/types';
+import { useConnections } from '@/hooks/useConnections';
+import { useMessages } from '@/hooks/useMessages';
+
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
   // Use the explicitly imported type for assertion (optional but can help diagnostics)
@@ -29,6 +34,12 @@ const IndexPage: NextPage = () => {
   const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges();
   const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Loading state for select/skip
   const router = useRouter(); // Import and use useRouter for navigation
+  const userId = user?.uid;
+
+  // --- Chat State ---
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
+  // --- End Chat State ---
 
   // Combined loading state: wait for both user profile and challenge definitions
   const isLoading = authLoading || challengesLoading;
@@ -38,10 +49,24 @@ const IndexPage: NextPage = () => {
     return (
       <DashboardLayout>
         <div className="flex justify-center items-center h-screen">
-          Loading Dashboard...
+          {/* TODO: Replace with better spinner */}
+          Authenticating...
         </div>
       </DashboardLayout>
     );
+  }
+
+  // Handle case where user is not logged in after loading
+  if (!userId) {
+     // Redirect logic or display message
+     // router.push('/login'); // Example redirect
+     return (
+      <DashboardLayout>
+         <div className="flex justify-center items-center h-screen">
+           Please log in.
+         </div>
+      </DashboardLayout>
+     );
   }
 
   // Data is loaded, proceed with calculations
@@ -94,6 +119,55 @@ const IndexPage: NextPage = () => {
   const availableChallengesForSelection = challengeDefs.filter(
       (def) => !challengeHistoryIds.includes(def.id) && def.id !== activeUserChallenge?.challengeId
   );
+
+  // --- Chat Hooks ---
+  const { 
+    connections: chatConnections, // Renamed to avoid conflict
+    isLoading: isLoadingConnections, 
+    error: connectionsError 
+  } = useConnections(userId); 
+  
+  const { 
+    messages: chatMessages, // Renamed to avoid conflict
+    isLoading: isLoadingMessages, 
+    error: messagesError 
+  } = useMessages(userId, selectedConnectionId);
+  // --- End Chat Hooks ---
+
+  // --- Chat Handlers ---
+  const handleSelectConnection = (connectionId: string) => {
+    console.log(`Selected connection: ${connectionId}`);
+    setSelectedConnectionId(connectionId); 
+  };
+
+  const handleSendMessage = async (messageText: string) => {
+    if (!selectedConnectionId || !userId) {
+      console.error("User ID or Connection ID is missing for sending message.");
+      // TODO: Show error toast
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      const functions = getFunctions();
+      const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
+      console.log(`Calling handleChatMessage for connection ${selectedConnectionId}`);
+      const result = await callHandleChatMessage({ 
+        connectionId: selectedConnectionId, 
+        messageText: messageText 
+      });
+      const resultData = result.data as { success?: boolean; error?: string; messageId?: string };
+      if (!resultData?.success) {
+        throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
+      }
+      console.log(`Message processed by cloud function. User message ID: ${resultData?.messageId || 'N/A'}`);
+    } catch (error) { 
+      console.error("Error calling handleChatMessage function:", error);
+      // TODO: Show error toast
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+  // --- End Chat Handlers ---
 
   // --- Select Challenge Handler ---
   const handleSelectChallenge = async (challengeId: string) => {
@@ -186,6 +260,17 @@ const IndexPage: NextPage = () => {
   }
   */
 
+  // --- Error Handling for Data Hooks ---
+  if (connectionsError) {
+    // TODO: Show non-blocking error (e.g., toast)
+    console.error("Error loading connections:", connectionsError);
+  }
+  if (messagesError) {
+    // TODO: Show non-blocking error
+    console.error("Error loading messages:", messagesError);
+  }
+  // --- End Error Handling ---
+
   return (
     <>
       <Head>
@@ -195,14 +280,32 @@ const IndexPage: NextPage = () => {
 
       <AuthGuard>
         <DashboardLayout>
-          <div data-tour-id="hero-start-message">
-             <HeroSection />
-          </div>
+          {/* --- RENDER CHAT INTERFACE --- */}
+          {/* Render ChatLayout directly, replacing the old HeroSection */}
+          {/* It needs to span the full height available within DashboardLayout */}
+          {/* We might need to adjust DashboardLayout's internal padding/margins */}
+           <div className="h-[calc(100vh_-_theme(space.16))] -mt-4 -mx-4"> {/* Adjust height/margins as needed */} 
+             <ChatLayout
+               connections={chatConnections} // Use renamed state variable
+               messages={chatMessages} // Use renamed state variable
+               selectedConnectionId={selectedConnectionId}
+               onSelectConnection={handleSelectConnection}
+               onSendMessage={handleSendMessage}
+               isLoadingConnections={isLoadingConnections}
+               isLoadingMessages={isLoadingMessages}
+               // TODO: Pass isSendingMessage
+             />
+           </div>
+          {/* --- END CHAT INTERFACE --- */}
 
-          <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="md:col-span-2" data-tour-id="coaching-card">
-              <CoachingEntryCard />
-            </div>
+          {/* --- Keep or Remove Other Dashboard Sections --- */}
+          {/* Decide if these other sections should still be displayed */}
+          {/* below or alongside the chat interface, or removed entirely */}
+
+          {/* <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> */}
+            {/* <div className="md:col-span-2" data-tour-id="coaching-card"> */}
+            {/*   <CoachingEntryCard /> */}
+            {/* </div> */}
             
             {/* Hide Challenge Section */}
             <div data-tour-id="challenge-section" style={{ display: 'none' }}>
@@ -230,9 +333,6 @@ const IndexPage: NextPage = () => {
             <div style={{ display: 'none' }}>
               <QuickTemplateGrid />
             </div>
-            <div data-tour-id="connections-carousel">
-              <ConnectionsCarousel />
-            </div>
             {/* Hide Coming Soon Section */}
             <div style={{ display: 'none' }}>
               <ComingSoonCard />
@@ -241,7 +341,7 @@ const IndexPage: NextPage = () => {
             <div className="md:col-span-2" style={{ display: 'none' }}>
               <RecentMessagesList />
             </div>
-          </div>
+          {/* </div> */}
         </DashboardLayout>
       </AuthGuard>
     </>

@@ -76,16 +76,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     }
   }, []);
 
-  // --- START: Onboarding Logic ---
-  if (loading) {
-    // Optional: Render a global loading spinner or minimal layout
-    return (
-      <div className="flex justify-center items-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heartglow-pink"></div>
-      </div>
-    );
-  }
-
   // Determine if the tour should show - based only on profile flags now
   const showDashboardTour = userProfile && userProfile.hasCompletedOnboarding === true && userProfile.hasSeenDashboardTour === false;
 
@@ -114,6 +104,18 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     }
   }, [userProfile, updateUserProfile]);
   // --- END: Onboarding Completion Logic ---
+
+  // --- START: Loading Check (Moved Here) ---
+  // Check for loading state *after* all hooks have been called
+  if (loading) {
+    // Render a global loading spinner or minimal layout
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heartglow-pink"></div>
+      </div>
+    );
+  }
+  // --- END: Loading Check ---
 
   return (
     <>

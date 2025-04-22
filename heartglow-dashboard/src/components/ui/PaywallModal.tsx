@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
+// import { loadStripe, Stripe } from '@stripe/stripe-js'; // Removed Stripe import
 import { Dialog } from '@headlessui/react'; // Using Headless UI for modal accessibility
 import { CheckIcon, LockClosedIcon, SparklesIcon, UsersIcon, BookmarkIcon, ChatBubbleLeftRightIcon, PencilIcon } from '@heroicons/react/24/outline'; // Removed unused/invalid icons
 import { useAuth } from '../../context/AuthContext'; // Import useAuth
@@ -7,9 +7,6 @@ import { useAuth } from '../../context/AuthContext'; // Import useAuth
 // Import Firebase Analytics
 import { logEvent } from 'firebase/analytics';
 import { analytics as firebaseAnalytics } from '../../lib/firebase'; // Import the analytics instance
-
-// Load Stripe.js with your publishable key (should be public)
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 interface PaywallFeature {
   name: string;
@@ -75,8 +72,6 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, content: c
   const handleUpgradeClick = async () => {
     setIsLoading(true);
     setError(null);
-
-    // --- Log Analytics Event ---
     logPaywallEvent('paywall_action', { action_description: 'click_upgrade_cta' });
 
     if (!currentUser) {
@@ -84,18 +79,18 @@ const PaywallModal: React.FC<PaywallModalProps> = ({ isOpen, onClose, content: c
         setIsLoading(false);
         return;
     }
+    
+    // Ensure stripePromise is not needed here - currently uses direct link
+    // if (!stripePromise) {
+    //     setError('Payment system is not available. Please try again later.');
+    //     setIsLoading(false);
+    //     return;
+    // }
 
-    // Construct the payment link URL with the Firebase UID as client_reference_id
-    // Reference: https://buy.stripe.com/4gw03z8Tf1cW2sw8ww
     const paymentLinkUrl = `https://buy.stripe.com/4gw03z8Tf1cW2sw8ww?client_reference_id=${currentUser.uid}`;
-
     console.log('Redirecting to Stripe Payment Link:', paymentLinkUrl);
-
-    // Redirect the user directly
     window.location.href = paymentLinkUrl;
-
-    // Set loading state to provide visual feedback while redirecting
-    setIsLoading(false);
+    setIsLoading(false); // Set loading false after initiating redirect
   };
 
   return (

@@ -196,6 +196,6 @@ export default function AllConnectionsPage() {
           />
         </DashboardLayout>
       </AuthGuard>
-    </Dialog> {/* End Dialog wrapper */} 
+    </Dialog> {/* Changed comment format */}
   );
 }

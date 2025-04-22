@@ -10,7 +10,11 @@ import type { Connection, Message } from '@/types';
 const heartglowAIConnection: Connection = {
   id: 'heartglow-ai-welcome',
   name: 'HeartGlow AI',
-  // No relationship needed
+  relationship: null, // Provide null for relationship
+  createdAt: new Date(), // Provide a default Date for createdAt
+  // Add other required fields here if the error persists, e.g.:
+  // userId: 'system', 
+  // lastMessageTimestamp: null,
 };
 
 const welcomeMessages: Message[] = [

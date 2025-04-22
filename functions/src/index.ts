@@ -402,3 +402,176 @@ export const stripeWebhook = onRequest(async (request, response) => {
 
 // Add exports for any other functions defined in this file below
 // e.g., export { someOtherFunction } from "./otherFile";
+
+// --- NEW: Chat Message Handler ---
+
+interface ChatMessageRequestData {
+  connectionId: string;
+  messageText: string;
+}
+
+interface ChatMessage {
+  text: string;
+  sender: "user" | "ai";
+  timestamp: admin.firestore.Timestamp;
+}
+
+/**
+ * Cloud function v2 to handle incoming chat messages from a user (Callable).
+ * Saves the user message, gets AI response, and saves AI message.
+ * @param {CallableRequest<ChatMessageRequestData>} request - The request object.
+ *   Contains request.data (connectionId, messageText) and request.auth (user UID).
+ * @returns {Promise<{success: boolean, messageId?: string}>} Indicates success.
+ */
+export const handleChatMessage = onCall(
+  {
+    // Enforce timeout and memory limits if needed
+    // timeoutSeconds: 60,
+    // memory: '1GiB',
+    // Allow requests from specific origins if your frontend isn't on the same Firebase project host
+    // cors: ['https://your-frontend-domain.com']
+  },
+  async (request) => {
+    // 1. Authentication and Input Validation
+    if (!request.auth) {
+      logger.warn("handleChatMessage called without authentication.");
+      throw new HttpsError(
+        "unauthenticated",
+        "The function must be called while authenticated.",
+      );
+    }
+    const userId = request.auth.uid;
+    const { connectionId, messageText } = request.data as ChatMessageRequestData;
+
+    logger.info(
+      `User ${userId} sending message to connection ${connectionId}: "${messageText.substring(0, 50)}..."`
+    );
+
+    if (!connectionId || typeof connectionId !== "string" || connectionId.trim() === "") {
+      logger.error("Missing or invalid connectionId.", { userId });
+      throw new HttpsError("invalid-argument", "Missing or invalid 'connectionId'.");
+    }
+    if (!messageText || typeof messageText !== "string" || messageText.trim() === "") {
+       logger.error("Missing or invalid messageText.", { userId, connectionId });
+      throw new HttpsError("invalid-argument", "Missing or invalid 'messageText'.");
+    }
+
+    const db = admin.firestore();
+    const userRef = db.collection('users').doc(userId);
+    const connectionRef = userRef.collection('connections').doc(connectionId);
+    const messagesRef = connectionRef.collection('messages');
+
+    try {
+      // 2. Save User Message to Firestore
+      const userMessage: ChatMessage = {
+        text: messageText,
+        sender: "user",
+        timestamp: admin.firestore.Timestamp.now(),
+      };
+      const userMessageRef = await messagesRef.add(userMessage);
+      logger.info(`User message saved with ID: ${userMessageRef.id}`, { userId, connectionId });
+
+      // Update last message timestamp on the connection (optional but useful)
+      await connectionRef.set({ lastMessageTimestamp: userMessage.timestamp }, { merge: true });
+
+      // 3. Prepare Context for AI
+      // Fetch connection details
+      const connectionSnap = await connectionRef.get();
+      if (!connectionSnap.exists) {
+        logger.error("Connection document not found.", { userId, connectionId });
+        // Don't throw HttpsError here, user message is saved. Log and maybe handle differently?
+        // For now, proceed without specific context, or throw if context is critical.
+        throw new HttpsError("not-found", `Connection ${connectionId} not found.`);
+      }
+      const connectionData = connectionSnap.data() as { name: string, relationship: string }; // Assume these fields exist
+      const recipientName = connectionData.name || "the recipient";
+      const relationship = connectionData.relationship || "this relationship";
+
+      // Fetch recent message history (e.g., last 10 messages)
+      const historyQuery = messagesRef.orderBy("timestamp", "desc").limit(10);
+      const historySnap = await historyQuery.get();
+      const history: ChatMessage[] = historySnap.docs
+        .map(doc => doc.data() as ChatMessage)
+        .reverse(); // Reverse to get chronological order for the prompt
+
+      // 4. Construct AI Prompt
+      // TODO: Refine this prompt significantly based on HeartGlow's goals
+      let systemPrompt = `You are HeartGlow AI, a compassionate assistant helping users navigate their relationships. You are currently chatting with the user about their connection with ${recipientName} (${relationship}). Be supportive, insightful, and helpful. Listen actively and offer constructive advice or help drafting messages when appropriate. Maintain a gentle and understanding tone.`;
+
+      // Add conversation history to the prompt messages
+      const promptMessages: OpenAI.Chat.Completions.ChatCompletionMessageParam[] = [
+        { role: "system", content: systemPrompt },
+        ...history.map((msg): OpenAI.Chat.Completions.ChatCompletionMessageParam => ({
+          role: msg.sender === "user" ? "user" : "assistant",
+          content: msg.text,
+        })),
+        // The latest user message is already included in history here if sender was "user"
+        // If the last message in history isn't the current one, add it:
+        // { role: "user", content: messageText } // Ensure the current message is the last one
+      ];
+
+      // Check if the last message in history is indeed the one we just added
+      if (history.length === 0 || history[history.length - 1].text !== messageText || history[history.length - 1].sender !== "user") {
+           // This case might happen if history limit is 0 or due to timing. Add current message explicitly.
+          promptMessages.push({ role: "user", content: messageText });
+           logger.info("Explicitly added current user message to prompt history.");
+      }
+
+
+      logger.info(`Constructed prompt for OpenAI with ${history.length} history messages.`, { userId, connectionId });
+
+      // 5. Call OpenAI API
+      // TODO: Consider adding user premium status check here
+      const apiKey = process.env.OPENAI_API_KEY;
+      if (!apiKey) {
+        logger.error("OpenAI API key not configured.");
+        throw new HttpsError("internal", "AI service not configured.");
+      }
+      const openai = new OpenAI({ apiKey });
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4-turbo-preview", // Or consider gpt-4o-mini for speed/cost
+        messages: promptMessages,
+        temperature: 0.7, // Adjust as needed for creativity vs consistency
+        max_tokens: 500, // Adjust as needed
+        // response_format: { type: "json_object" }, // Only if specific structured output is needed
+        // user: userId // Pass user ID for monitoring abuse (optional)
+      });
+
+      const aiResponseText = completion.choices[0]?.message?.content?.trim();
+
+      if (!aiResponseText) {
+        logger.error("OpenAI response content was empty or null.", { userId, connectionId });
+        // Don't throw, user message saved, AI failed. Log error. Maybe save placeholder?
+        // For now, just log and return success=false? Or success=true but no AI message?
+        // Let's return success: true but log the error. Frontend can show an error message.
+         return { success: true, error: "AI response was empty." };
+      }
+
+       logger.info(`Received OpenAI response: "${aiResponseText.substring(0, 50)}..."`, { userId, connectionId });
+
+      // 6. Save AI Message to Firestore
+      const aiMessage: ChatMessage = {
+        text: aiResponseText,
+        sender: "ai",
+        timestamp: admin.firestore.Timestamp.now(),
+      };
+      const aiMessageRef = await messagesRef.add(aiMessage);
+       logger.info(`AI message saved with ID: ${aiMessageRef.id}`, { userId, connectionId });
+
+      // Update last message timestamp again
+      await connectionRef.set({ lastMessageTimestamp: aiMessage.timestamp }, { merge: true });
+
+      // 7. Return Success
+      return { success: true, messageId: userMessageRef.id }; // Indicate success
+
+    } catch (error) {
+      logger.error("Error in handleChatMessage:", error, { userId, connectionId });
+      if (error instanceof HttpsError) {
+        throw error; // Re-throw HttpsErrors directly
+      } else {
+        // Throw a generic internal error for unexpected issues
+        throw new HttpsError("internal", "Failed to handle chat message.", (error as Error).message);
+      }
+    }
+  }); // End of handleChatMessage

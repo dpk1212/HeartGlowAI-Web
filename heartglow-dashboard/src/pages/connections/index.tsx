@@ -6,6 +6,7 @@ import { usePaywall } from '../../context/PaywallContext';
 import { fetchUserConnections, Connection as DbConnection, formatRelativeTime, getConnectionFrequency } from '../../firebase/db';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
+import NewConnectionModal from '../../components/modals/NewConnectionModal';
 
 // Helper to get initials (could be moved to utils)
 const getInitials = (name: string): string => {
@@ -75,6 +76,7 @@ export default function AllConnectionsPage() {
   const [connections, setConnections] = useState<DbConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isNewConnectionModalOpen, setIsNewConnectionModalOpen] = useState(false);
   const FREE_CONNECTION_LIMIT = 2;
 
   useEffect(() => {
@@ -95,15 +97,16 @@ export default function AllConnectionsPage() {
         loadData();
   }, [currentUser]);
 
-  const handleAddConnectionClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+  const handleAddConnectionClick = () => {
     const canAddMore = userProfile?.isPremium || connections.length < FREE_CONNECTION_LIMIT;
     
     if (!canAddMore) {
        console.log('Paywall triggered: Connection limit reached.');
-       e.preventDefault(); // Stop navigation
-       openPaywall();      // Open the modal
+       openPaywall();      // Open the paywall modal
+    } else {
+      // Open the new connection modal instead of navigating
+      setIsNewConnectionModalOpen(true);
     }
-    // Otherwise, allow default Link behavior (navigation)
   };
 
   return (
@@ -112,8 +115,8 @@ export default function AllConnectionsPage() {
                 <div className="container mx-auto py-8 px-4 max-w-6xl">
                     <div className="flex justify-between items-center mb-8">
                         <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
-                        <Link 
-                          href="/connections/add" 
+                        <button 
+                          type="button"
                           onClick={handleAddConnectionClick} 
                           className="inline-flex items-center justify-center bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
                         >
@@ -121,7 +124,7 @@ export default function AllConnectionsPage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                           </svg>
                           Add Connection
-                        </Link>
+                        </button>
                     </div>
                           
                     {loading && (
@@ -158,6 +161,11 @@ export default function AllConnectionsPage() {
                         </div>
                     )}
                 </div>
+                
+                <NewConnectionModal 
+                   isOpen={isNewConnectionModalOpen}
+                   onClose={() => setIsNewConnectionModalOpen(false)}
+                />
         </DashboardLayout>
       </AuthGuard>
   );

@@ -14,26 +14,22 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import S
 // const heartglowAIConnection: Connection = { ... };
 // const welcomeMessages: Message[] = [ ... ];
 
-// Sample prompt suggestions for empty states
+// Updated prompt suggestions for empty states - more action-oriented, removed shortText
 const promptSuggestions = [
   {
-    text: "Help me understand and improve my relationship dynamics.",
-    shortText: "Improve relationship",
+    text: "Analyze my current relationship dynamics", // Updated
     icon: SparklesIcon
   },
   {
-    text: "I'm struggling to put my feelings into words. Help me draft a message.",
-    shortText: "Draft a message",
+    text: "Help me draft a message for a specific situation", // Updated
     icon: LightBulbIcon
   },
   {
-    text: "How can I build more connection and intimacy with my partner?",
-    shortText: "Deepen connection",
+    text: "Suggest ways to build deeper connection", // Updated
     icon: SparklesIcon
   },
   {
-    text: "I'm facing a tough situation. Help me think through my options.",
-    shortText: "Talk through situation",
+    text: "Help me think through a difficult situation", // Updated
     icon: LightBulbIcon
   }
 ];
@@ -125,38 +121,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       >
         {/* Empty State with Prompt Suggestions */}
         {showPrompts && !isLoadingMessages && (
-          <div className="h-full flex flex-col items-center justify-center py-8">
-            <div className="mb-6 text-gray-400/80 text-center">
-              <p className="mb-6 text-sm sm:text-base font-medium">How can HeartGlow help you today?</p>
+          <div className="h-full flex flex-col items-center justify-center py-10 px-4"> {/* Increased padding */}
+            <div className="w-full max-w-xl text-center"> {/* Centered content */}
+              {/* New Intro Text */}
+              <p className="mb-6 text-base text-gray-400/90">I'm ready to help you communicate with clarity and care. Choose a starting point:</p>
               
-              {/* Enhanced Chat Bubble Suggestions - ChatGPT Inspired */}
-              <div className="space-y-3 max-w-xl">
+              {/* Enhanced Chat Bubble Suggestions - Single List, No Pills */}
+              <div className="space-y-3.5"> {/* Increased spacing */}
                 {promptSuggestions.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handlePromptClick(prompt.text)}
-                    className="w-full text-left p-3.5 rounded-xl bg-[#1E1E2E]/40 hover:bg-[#252538]/70 border border-[#3A3A5C]/30 hover:border-[#4A4A7C]/50 transition-all duration-200 relative group"
+                    // Enhanced Styling: More padding, clearer hover, slightly larger text
+                    className="w-full text-left p-4 rounded-xl bg-[#1E1E2E]/50 hover:bg-[#28283A]/80 border border-[#3A3A5C]/40 hover:border-[#5A5A8C]/60 transition-all duration-200 relative group shadow-sm hover:shadow-md"
                   >
-                    <div className="absolute top-3.5 left-3.5 text-[#9161FC]/70 group-hover:text-heartglow-pink/90 transition-colors duration-200">
+                    <div className="absolute top-4 left-4 text-indigo-400/80 group-hover:text-heartglow-pink/90 transition-colors duration-200"> {/* Adjusted positioning */}
                       <prompt.icon className="h-5 w-5" />
                     </div>
-                    <p className="text-sm text-gray-300/90 ml-8 line-clamp-2">{prompt.text}</p>
+                    {/* Slightly larger text */}
+                    <p className="text-sm sm:text-base text-gray-200/90 ml-9">{prompt.text}</p> 
                   </button>
                 ))}
               </div>
               
-              {/* Additional floating bubble suggestions */}
-              <div className="mt-12 flex flex-wrap justify-center gap-2">
-                {promptSuggestions.map((prompt, index) => (
-                  <button
-                    key={`bubble-${index}`}
-                    onClick={() => handlePromptClick(prompt.text)}
-                    className="px-4 py-2 text-xs bg-[#1E1E2E]/60 text-gray-300/90 rounded-full border border-[#3A3A5C]/30 hover:bg-[#252538] hover:border-heartglow-pink/40 transition-all duration-200 whitespace-nowrap m-1 shadow-sm hover:shadow"
-                  >
-                    {prompt.shortText}
-                  </button>
-                ))}
-              </div>
+              {/* REMOVED the redundant pill suggestions section */}
+
             </div>
           </div>
         )}

@@ -20,7 +20,7 @@ const heartglowAIConnection: Connection = {
   relationship: 'assistant', // Or 'general', 'reflection', etc.
   createdAt: Timestamp.now(), // Use Firestore Timestamp
   // Add other required Connection fields if necessary, potentially with default/null values
-  imageUrl: '/assets/heartglow-logo.png', // Optional: Add a specific icon/logo
+  // imageUrl: '/assets/heartglow-logo.png', // Removed: imageUrl is not part of the Connection type
 };
 
 interface ChatLayoutProps {

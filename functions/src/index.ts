@@ -36,7 +36,6 @@ try {
 } catch (e) {
   logger.info("Admin SDK already initialized.");
 }
-const db = admin.firestore();
 
 let stripe: Stripe | null = null;
 
@@ -267,7 +266,7 @@ export const handleChatMessage = onCall({
   try {
     let messagesCollectionRef: admin.firestore.CollectionReference;
     let connectionRef: admin.firestore.DocumentReference | null = null;
-    const isGeneralChat = !connectionId;
+    const isGeneralChat = !connectionId || connectionId === 'heartglow-ai';
     const aiPromptContext: AIPromptContext = { isGeneralChat: isGeneralChat };
     let isFirstGeneralMessage = false;
 

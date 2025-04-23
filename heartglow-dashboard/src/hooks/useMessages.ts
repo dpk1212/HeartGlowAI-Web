@@ -47,13 +47,13 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
       let messagesCollectionRef: CollectionReference<DocumentData>;
 
       // Determine the correct collection path
-      if (connectionId) {
-        // Path for a specific connection
+      // Explicitly check for 'heartglow-ai' or null/undefined for general chat
+      if (connectionId && connectionId !== 'heartglow-ai') {
+        // Path for a specific user connection
         messagesCollectionRef = collection(db, 'users', userId, 'connections', connectionId, 'messages');
         console.log(`Setting up listener for connection messages: users/${userId}/connections/${connectionId}/messages`); // Debug log
       } else {
-        // Path for the general HeartGlow AI chat for this user
-        // IMPORTANT: Adjust this path if your structure is different!
+        // Path for the general HeartGlow AI chat (connectionId is null, undefined, or 'heartglow-ai')
         messagesCollectionRef = collection(db, 'users', userId, 'chats', 'heartglow-ai', 'messages');
         console.log(`Setting up listener for general AI chat: users/${userId}/chats/heartglow-ai/messages`); // Debug log
       }

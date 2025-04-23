@@ -70,14 +70,24 @@ const ChatPage = () => {
   };
 
   // Handler for saving a connection
-  const handleSaveConnection = async (name: string, relationship: string) => {
+  const handleSaveConnection = async (name: string, relationship: string, specificRelationship?: string, goal?: string, notes?: string) => {
     if (!user) { // Check for user object
       console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error."); // Throw error to be caught in modal
     }
-    console.log('Attempting to save connection:', { userId: user.uid, name, relationship }); // Log userId if needed
+    // Updated data object to include optional fields
+    const connectionData = {
+      name,
+      relationship,
+      // Only include fields if they have a non-empty value after trimming
+      ...(specificRelationship && { specificRelationship }),
+      ...(goal && { goal }),
+      ...(notes && { notes }),
+    };
+    console.log('Attempting to save connection:', { userId: user.uid, ...connectionData }); // Log userId if needed
     try {
-      await addConnection(user, { name, relationship }); // Pass user object
+      // Pass the complete connectionData object to addConnection
+      await addConnection(user, connectionData);
       console.log('Connection saved successfully');
       // Refreshing might happen automatically if useConnections hook listens to Firestore changes.
     } catch (error) {

@@ -55,6 +55,9 @@ interface ChatMessageRequestData {
 interface AIPromptContext {
    recipientName?: string;
    relationship?: string;
+   specificRelationship?: string;
+   goal?: string;
+   notes?: string;
    isGeneralChat: boolean;
 }
 
@@ -268,24 +271,10 @@ export const handleChatMessage = onCall({
     let connectionRef: admin.firestore.DocumentReference | null = null;
     const isGeneralChat = !connectionId || connectionId === 'heartglow-ai';
     const aiPromptContext: AIPromptContext = { isGeneralChat: isGeneralChat };
-    let isFirstGeneralMessage = false;
 
     if (isGeneralChat) {
       messagesCollectionRef = db.collection('users').doc(userId).collection('chats').doc('heartglow-ai').collection('messages');
       logger.info(`General chat selected for user ${userId}`);
-
-      const snapshot = await messagesCollectionRef.limit(1).get();
-      if (snapshot.empty) {
-        isFirstGeneralMessage = true;
-        logger.info(`First message detected for user ${userId} in general chat. Adding onboarding message.`);
-        const timestamp = admin.firestore.FieldValue.serverTimestamp();
-        await messagesCollectionRef.add({
-          sender: 'ai',
-          text: "Welcome to HeartGlow AI! ✨ I'm here to be your guide in navigating communication challenges and deepening your relationships.\n\nThink of me as your personal communication co-pilot. You can ask me anything about relationships, get help drafting tricky messages, or explore ways to express yourself more authentically.\n\nYou can chat with me here for general guidance, or you can create specific **Connections** using the '+' button on the left sidebar. Setting up a Connection for a specific person (like a partner, family member, or colleague) helps me offer more tailored insights and advice based on that unique relationship context.\n\nSo, what's on your mind today? Are you facing a specific communication situation you'd like help with, or would you perhaps like to start by setting up your first Connection?",
-          timestamp: timestamp,
-        });
-        logger.info(`Onboarding message added for user ${userId}.`);
-      }
 
     } else {
       const connId = connectionId as string;
@@ -301,6 +290,9 @@ export const handleChatMessage = onCall({
       const connectionData = connectionSnap.data();
       aiPromptContext.recipientName = connectionData?.name || "the recipient";
       aiPromptContext.relationship = connectionData?.relationship || "this relationship";
+      aiPromptContext.specificRelationship = connectionData?.specificRelationship;
+      aiPromptContext.goal = connectionData?.goal;
+      aiPromptContext.notes = connectionData?.notes;
     }
 
     const userMessageData = {
@@ -315,11 +307,6 @@ export const handleChatMessage = onCall({
         await connectionRef.set({ lastMessageTimestamp: userMessageData.timestamp }, { merge: true });
     }
 
-    if (isFirstGeneralMessage) {
-      logger.info(`Skipping AI call for the first general message interaction for user ${userId}.`);
-      return { success: true, messageId: userMessageRef.id };
-    }
-
     const historyQuery = messagesCollectionRef.orderBy("timestamp", "desc").limit(10);
     const historySnap = await historyQuery.get();
     const history = historySnap.docs
@@ -328,9 +315,48 @@ export const handleChatMessage = onCall({
 
     let systemPrompt: string;
     if (aiPromptContext.isGeneralChat) {
-        systemPrompt = `You are HeartGlow AI, a compassionate assistant helping users navigate their relationships. Be supportive, insightful, and helpful. Listen actively and offer constructive advice or help drafting messages when appropriate. Maintain a gentle and understanding tone.`;
+        systemPrompt = `You are HeartGlow AI, a highly empathetic and insightful relationship support assistant. Your primary goal is to help users understand their relationships and communicate more effectively.
+
+**Core Principles:**
+- **Empathy First:** Always strive to understand and validate the user's feelings.
+- **Active Listening:** Pay close attention to the user's words and the underlying emotions. Ask clarifying questions if needed before offering significant advice.
+- **Constructive & Actionable:** Provide insights that are helpful and practical. If offering advice or helping draft messages, focus on clarity, kindness, and authenticity.
+- **Balanced Perspective:** Gently encourage users to consider the perspectives of others involved, fostering understanding.
+- **Safety & Boundaries:** Do not provide medical, legal, or crisis counseling. If a user seems in distress, gently suggest seeking professional help. Avoid definitive judgments or prescriptive solutions; empower the user to find their own answers. Maintain a supportive, non-judgmental, and encouraging tone throughout.
+
+**Interaction Style:**
+- Be warm, gentle, and understanding.
+- Use clear and accessible language.
+- Break down complex ideas into smaller parts.
+- Check in with the user to ensure understanding ("Does that make sense?", "How does that resonate with you?").`;
     } else {
-        systemPrompt = `You are HeartGlow AI, a compassionate assistant helping users navigate their relationships. You are currently chatting with the user about their connection with ${aiPromptContext.recipientName} (${aiPromptContext.relationship}). Be supportive, insightful, and helpful, tailoring your advice to this specific relationship context. Listen actively and offer constructive advice or help drafting messages when appropriate. Maintain a gentle and understanding tone.`;
+        systemPrompt = `You are HeartGlow AI, a highly empathetic and insightful relationship support assistant. Your primary goal is to help the user navigate their specific connection with **${aiPromptContext.recipientName}**, whom they describe as their **${aiPromptContext.relationship}**.
+
+**Relationship Context:**
+- **Name:** ${aiPromptContext.recipientName}
+- **General Relationship:** ${aiPromptContext.relationship}
+${aiPromptContext.specificRelationship ? `- **Specific Relationship:** ${aiPromptContext.specificRelationship}` : ''}
+${aiPromptContext.goal ? `- **User's Stated Goal:** ${aiPromptContext.goal}` : ''}
+${aiPromptContext.notes ? `- **User's Notes for Context:** ${aiPromptContext.notes}` : ''}
+
+**Focus on this Specific Connection:**
+- **Tailor Insights:** Leverage all the provided context (name, relationship type, specific role, goal, notes) to frame your insights, questions, and advice specifically for this interaction. Reference ${aiPromptContext.recipientName} using their name and specific relationship (if provided).
+- **Utilize Context:** Remember the user is focused on this particular relationship and may have specific goals or notes. Keep the conversation centered around these unless the user explicitly shifts focus. Refer back to the user's goal or notes if relevant to the current discussion.
+- **Goal Alignment:** If the user stated a goal, gently guide the conversation and advice towards helping them achieve it.
+- **Use Notes for Recall:** Treat the user's notes as important background information or memory aids. Factor them into your understanding of the relationship dynamics.
+
+**Core Principles:**
+- **Empathy First:** Always strive to understand and validate the user's feelings regarding their interactions with ${aiPromptContext.recipientName}.
+- **Active Listening:** Pay close attention to the user's words and the underlying emotions in the context of this relationship. Ask clarifying questions about their interactions or feelings towards ${aiPromptContext.recipientName} before offering significant advice.
+- **Constructive & Actionable:** Provide insights that are helpful and practical for this specific relationship, keeping the user's **goal** in mind if provided. If offering advice or helping draft messages *for* ${aiPromptContext.recipientName}, focus on clarity, kindness, authenticity, and effectiveness within the **${aiPromptContext.relationship} / ${aiPromptContext.specificRelationship || 'general'}** dynamic.
+- **Balanced Perspective:** Gently encourage the user to consider ${aiPromptContext.recipientName}'s perspective in their interactions.
+- **Safety & Boundaries:** Do not provide medical, legal, or crisis counseling. If a user seems in distress regarding this relationship, gently suggest seeking professional help. Avoid definitive judgments or prescriptive solutions; empower the user to find their own answers regarding ${aiPromptContext.recipientName}. Maintain a supportive, non-judgmental, and encouraging tone throughout.
+
+**Interaction Style:**
+- Be warm, gentle, and understanding.
+- Use clear and accessible language.
+- Break down complex relationship dynamics into smaller parts.
+- Check in with the user to ensure understanding ("How does that sound in the context of your relationship with ${aiPromptContext.recipientName}?", "Considering your goal of '${aiPromptContext.goal || 'improving things'}', how might that approach work?", "Based on your note that '${(aiPromptContext.notes || '').substring(0, 30)}...', how does this situation compare?").`;
     }
 
     const promptMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [

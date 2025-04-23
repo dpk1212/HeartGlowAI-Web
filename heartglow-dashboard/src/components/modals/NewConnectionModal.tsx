@@ -13,11 +13,14 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Loader2 } from 'lucide-react'; // For loading spinner
+import { RELATIONSHIP_OPTIONS } from '../../utils/constants'; // Import relationship options
 
 // Props adjusted - isOpen and onClose are typically handled by DialogTrigger/Dialog in the parent
 interface NewConnectionModalProps {
-  onSave: (name: string, relationship: string) => Promise<void>;
+  onSave: (name: string, relationship: string, specificRelationship?: string, goal?: string, notes?: string) => Promise<void>;
   // We might need a way to programmatically close after save, passed from parent if needed
   // Or parent state controls the <Dialog open> prop
 }
@@ -26,7 +29,10 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
   onSave,
 }) => {
   const [name, setName] = useState('');
-  const [relationship, setRelationship] = useState('');
+  const [relationship, setRelationship] = useState(RELATIONSHIP_OPTIONS[0]);
+  const [specificRelationship, setSpecificRelationship] = useState('');
+  const [relationshipGoal, setRelationshipGoal] = useState('');
+  const [notes, setNotes] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,11 +43,17 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
       setError('Name is required.');
       return;
     }
-    console.log('Save clicked', { name, relationship });
+    console.log('Save clicked', { name, relationship, specificRelationship, relationshipGoal, notes });
     setIsSaving(true);
     setError(null);
     try {
-      await onSave(name, relationship);
+      await onSave(
+        name, 
+        relationship, 
+        specificRelationship.trim(), 
+        relationshipGoal.trim(), 
+        notes.trim()
+      );
       // How to close? Parent needs to control 'open' state or we use DialogClose
       // For now, assume success means it should close (logic might need adjustment later)
       // We can't directly call handleClose/onClose anymore.
@@ -64,7 +76,7 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
 
   // Use shadcn DialogContent instead of Headless UI Dialog.Panel
   return (
-    <DialogContent className="sm:max-w-[425px] bg-gray-800 border-gray-700 text-gray-100">
+    <DialogContent className="sm:max-w-[500px] bg-gray-800 border-gray-700 text-gray-100">
       <DialogHeader>
         <DialogTitle className="text-gray-100">Add New Connection</DialogTitle>
         <DialogDescription className="text-gray-400">
@@ -72,40 +84,92 @@ const NewConnectionModal: React.FC<NewConnectionModalProps> = ({
         </DialogDescription>
       </DialogHeader>
       {/* Form for input fields */}
-      <form onSubmit={handleSave}>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="connection-name" className="text-right text-gray-300">
-              Name
+      <form onSubmit={handleSave} className="space-y-5">
+        <div className="space-y-4">
+          {/* Name Field - Required */}
+          <div className="space-y-2">
+            <Label htmlFor="connection-name" className="text-gray-300">
+              Name <span className="text-red-500">*</span>
             </Label>
             <Input
               id="connection-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
+              className="bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
               required
             />
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="connection-relationship" className="text-right text-gray-300">
-              Relationship
+          
+          {/* Relationship Dropdown - Required */}
+          <div className="space-y-2">
+            <Label htmlFor="connection-relationship" className="text-gray-300">
+              Relationship <span className="text-red-500">*</span>
+            </Label>
+            <Select 
+              value={relationship} 
+              onValueChange={setRelationship}
+              required
+            >
+              <SelectTrigger className="bg-gray-700 border-gray-600 text-gray-100">
+                <SelectValue placeholder="Select relationship type" />
+              </SelectTrigger>
+              <SelectContent className="bg-gray-700 border-gray-600 text-gray-100">
+                {RELATIONSHIP_OPTIONS.map(option => (
+                  <SelectItem key={option} value={option}>{option}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          {/* Specific Relationship Field - Optional */}
+          <div className="space-y-2">
+            <Label htmlFor="specific-relationship" className="text-gray-300">
+              Specific Relationship (Optional)
             </Label>
             <Input
-              id="connection-relationship"
-              value={relationship}
-              onChange={(e) => setRelationship(e.target.value)}
-              placeholder="(e.g., Partner, Mentor)"
-              className="col-span-3 bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
+              id="specific-relationship"
+              value={specificRelationship}
+              onChange={(e) => setSpecificRelationship(e.target.value)}
+              placeholder="E.g. Brother, Boss, Best friend"
+              className="bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500"
+            />
+          </div>
+          
+          {/* Relationship Goal Field - Optional */}
+          <div className="space-y-2">
+            <Label htmlFor="relationship-goal" className="text-gray-300">
+              Relationship Goal (Optional)
+            </Label>
+            <Textarea
+              id="relationship-goal"
+              value={relationshipGoal}
+              onChange={(e) => setRelationshipGoal(e.target.value)}
+              placeholder="What do you hope to achieve in this relationship?"
+              className="bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500 resize-none min-h-[80px]"
+            />
+          </div>
+          
+          {/* Notes Field - Optional */}
+          <div className="space-y-2">
+            <Label htmlFor="relationship-notes" className="text-gray-300">
+              Notes (Optional)
+            </Label>
+            <Textarea
+              id="relationship-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Any other details about this person you'd like to remember"
+              className="bg-gray-700 border-gray-600 text-gray-100 focus-visible:ring-pink-500 resize-none min-h-[80px]"
             />
           </div>
         </div>
 
         {error && (
-           <p className="mb-4 text-sm text-red-400 text-center">Error: {error}</p>
+           <p className="text-sm text-red-400 text-center">Error: {error}</p>
         )}
 
         {/* Buttons using shadcn Button */}
-        <DialogFooter>
+        <DialogFooter className="mt-6">
           {/* DialogClose handles closing the dialog */}
           <DialogClose asChild>
              <Button type="button" variant="outline">Cancel</Button>

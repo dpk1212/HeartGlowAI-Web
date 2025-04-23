@@ -26,7 +26,7 @@ interface ChatLayoutProps {
   selectedConnectionId: string | null;
   onSelectConnection: (connectionId: string) => void;
   onSendMessage: (messageText: string) => void;
-  onSaveConnection: (name: string, relationship: string) => Promise<void>; // Keep this for the modal
+  onSaveConnection: (name: string, relationship: string, specificRelationship?: string, goal?: string, notes?: string) => Promise<void>; // Updated to match new fields
   isLoadingConnections: boolean;
   isLoadingMessages: boolean;
 }

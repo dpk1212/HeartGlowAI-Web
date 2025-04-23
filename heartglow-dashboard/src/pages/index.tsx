@@ -94,12 +94,25 @@ const IndexPage: NextPage = () => {
     setSelectedConnectionId(connectionId);
   };
 
-  const handleSaveConnection = async (name: string, relationship: string) => {
+  const handleSaveConnection = async (
+    name: string, 
+    relationship: string, 
+    specificRelationship?: string, 
+    goal?: string, 
+    notes?: string
+  ) => {
     if (!user) {
       console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error."); // Throw error to be caught in modal
     }
-    console.log('Attempting to save connection:', { userId: user.uid, name, relationship });
+    console.log('Attempting to save connection:', { 
+      userId: user.uid, 
+      name, 
+      relationship,
+      specificRelationship,
+      goal,
+      notes
+    });
     try {
       // Option 1: Call a cloud function (if you have one)
       // const functions = getFunctions();
@@ -107,7 +120,13 @@ const IndexPage: NextPage = () => {
       // await callCreateConnection({ name, relationship });
       
       // Option 2: Use a client-side utility function (more direct)
-      await addConnection(user, { name, relationship }); // Pass user object
+      await addConnection(user, { 
+        name, 
+        relationship,
+        specificRelationship,
+        relationshipGoal: goal,
+        notes 
+      }); // Pass user object and all fields
       
       console.log('Connection saved successfully');
       // Optionally: Select the new connection? Or refresh connections list?
@@ -187,7 +206,7 @@ const IndexPage: NextPage = () => {
           />
 
           {/* --- RENDER CHAT INTERFACE --- */}
-           <div className="h-[calc(100vh-240px)] -mt-4 -mx-4"> 
+           <div className="h-[calc(100vh-64px)] -mt-4 -mx-4"> 
              <ChatLayout
                connections={chatConnections}
                messages={chatMessages}

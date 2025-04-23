@@ -221,6 +221,11 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
     exit: { opacity: 0, x: -50 },
   };
 
+  // Force display on both mobile and desktop for new users
+  // The PaywallModal already has this flag internally, but we explicitly set it here
+  // to ensure consistency across components and to document the requirement
+  const isPresentOnAllDevices = true;
+
   // This function determines what content to render based on the currentStep
   const renderCurrentStep = () => {
     let stepContent;

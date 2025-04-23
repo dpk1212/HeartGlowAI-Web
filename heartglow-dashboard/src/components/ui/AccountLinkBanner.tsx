@@ -4,10 +4,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { AlertCircle } from 'lucide-react'; // Using lucide icon
 
 const AccountLinkBanner: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
 
-  // Don't show banner if loading, no user, or user is not anonymous
-  if (loading || !user || !user.isAnonymous) {
+  // Don't show banner if no user, or user is not anonymous
+  if (!user || !user.isAnonymous) {
     return null;
   }
 

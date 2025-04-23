@@ -6,6 +6,7 @@ import Head from 'next/head';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PaywallProvider, usePaywall } from '../context/PaywallContext';
 import PaywallModal from '../components/ui/PaywallModal';
+import onboardingPaywallContent from '../components/ui/OnboardingPaywallContent';
 import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 import GlowGuideButton from '../components/onboarding/GlowGuideButton';
 import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
@@ -23,6 +24,34 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   const { isPaywallOpen, closePaywall } = usePaywall();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
+  // Track if paywall is shown after welcome
+  const [isPostWelcome, setIsPostWelcome] = useState(false);
+
+  // Listen for changes in localStorage to detect when paywall should be shown after welcome
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const shouldShowPaywall = localStorage.getItem('show-paywall-after-welcome');
+      if (shouldShowPaywall === 'true') {
+        setIsPostWelcome(true);
+      } else {
+        setIsPostWelcome(false);
+      }
+    };
+
+    // Check on mount
+    handleStorageChange();
+
+    // Listen for changes
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Custom event for same-window changes
+    window.addEventListener('localStorageChange', handleStorageChange);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageChange', handleStorageChange);
+    };
+  }, []);
 
   // --- START: Theme Handling --- 
   useEffect(() => {
@@ -91,6 +120,12 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     }
   };
 
+  // Custom onClose handler to reset the isPostWelcome flag
+  const handleClosePaywall = () => {
+    setIsPostWelcome(false);
+    closePaywall();
+  };
+
   // --- START: Onboarding Completion Logic (if needed) ---
   // We need to ensure new users eventually get `hasCompletedOnboarding` set to true
   // so the DashboardTour can trigger. Let's set it to true automatically
@@ -145,7 +180,12 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
       />
 
       {/* Render Paywall Modal Conditionally */}
-      <PaywallModal isOpen={isPaywallOpen} onClose={closePaywall} />
+      <PaywallModal 
+        isOpen={isPaywallOpen} 
+        onClose={handleClosePaywall}
+        content={isPostWelcome ? onboardingPaywallContent : undefined}
+        isPostWelcome={isPostWelcome}
+      />
     </>
   );
 }

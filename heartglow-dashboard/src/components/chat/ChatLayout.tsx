@@ -122,10 +122,6 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
         <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-[#13131D]/80 backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
-          <div className="mb-5 px-2">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">HeartGlow</h1>
-          </div>
-          
           {/* New Connection Button - Desktop */}
           <DialogTrigger asChild>
             <Button 

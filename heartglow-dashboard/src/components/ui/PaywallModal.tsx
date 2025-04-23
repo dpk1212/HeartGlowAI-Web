@@ -56,11 +56,11 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
     setIsLoading(true);
     setError(null);
     
-    // Log analytics event - fix analytics check
+    // Log analytics event
     try {
-      const analyticsInstance = await analytics; // Await the promise
-      if (analyticsInstance) { // Check if instance exists
-        logEvent(analyticsInstance, 'begin_checkout', { // Use the resolved instance
+      const analyticsInstance = await analytics;
+      if (analyticsInstance) {
+        logEvent(analyticsInstance, 'begin_checkout', {
           items: [
             {
               item_name: 'Premium Subscription',
@@ -74,16 +74,29 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
       console.error('Error logging analytics event:', err);
     }
     
+    // --- START: Updated Upgrade Logic ---
     try {
-      // Navigate to pricing page
-      router.push('/pricing');
-      onClose();
+      if (currentUser?.uid) {
+        const paymentLink = "https://buy.stripe.com/4gw03z8Tf1cW2sw8ww"; // Use the same link as settings
+        const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
+        console.log('[PaywallModal] Redirecting to Stripe:', urlWithRef);
+        window.location.href = urlWithRef;
+        // Keep onClose() in case the redirect fails or for cleanup, 
+        // but primary action is now the redirect.
+        onClose(); 
+      } else {
+        console.error('[PaywallModal] User not logged in, cannot upgrade.');
+        setError('You must be logged in to upgrade.'); 
+        setIsLoading(false); // Stop loading if user isn't logged in
+        return; // Prevent further execution
+      }
     } catch (err) {
-      console.error('Error initiating upgrade:', err);
-      setError('Something went wrong. Please try again.');
-    } finally {
-      setIsLoading(false);
+      console.error('[PaywallModal] Error initiating upgrade redirect:', err);
+      setError('Something went wrong redirecting to payment. Please try again.');
+      setIsLoading(false); // Stop loading on error
     }
+    // --- END: Updated Upgrade Logic ---
+    // No longer need setIsLoading(false) here if redirect is successful
   };
 
   const handleDismiss = async () => { // Make function async
@@ -108,70 +121,79 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
       className="relative z-50"
     >
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" /> {/* Slightly darker backdrop */}
       
       {/* Modal positioning */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className={`mx-auto max-w-md rounded-xl ${theme === 'dark' ? 'bg-gray-900 border border-gray-700' : 'bg-white shadow-xl'} p-6 w-full transition-all`}>
+        {/* Apply dark theme styles more directly, increase padding, adjust max-width */}
+        <Dialog.Panel className={`mx-auto max-w-lg rounded-xl ${theme === 'dark' ? 'bg-gray-900 border border-gray-700' : 'bg-white shadow-lg'} p-7 sm:p-8 w-full transition-all transform-gpu scale-100 opacity-100 animate-in fade-in zoom-in-95 duration-300`}>
           {/* Close button - only show if not present on all devices */}
           {!isPresentOnAllDevices && (
             <button
               onClick={handleDismiss}
-              className={`absolute top-4 right-4 p-1 rounded-full ${theme === 'dark' ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
+              className={`absolute top-3 right-3 p-1.5 rounded-full ${theme === 'dark' ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'} transition-colors`}
             >
-              <XMarkIcon className="h-5 w-5 text-gray-500" />
+              <span className="sr-only">Close</span>
+              <XMarkIcon className="h-6 w-6" />
             </button>
           )}
           
-          {/* Title */}
-          <Dialog.Title className={`text-xl font-bold mb-2 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          {/* Title - Increase size, add spacing */}
+          <Dialog.Title className={`text-2xl sm:text-3xl font-bold mb-3 text-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
             {displayContent.title}
           </Dialog.Title>
           
-          {/* Description */}
-          <p className={`mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          {/* Description - Increase size, center, add spacing */}
+          <p className={`mb-7 text-base text-center max-w-md mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
             {displayContent.description}
           </p>
           
-          {/* Features list */}
-          <div className="space-y-4 mb-6">
+          {/* Features list - Improve layout and icon display */}
+          <div className="space-y-5 mb-8">
             {displayContent.features.map((feature, index) => (
               <div key={index} className="flex items-start">
-                <svg className={`h-5 w-5 mr-2 mt-0.5 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
+                {/* Use a consistent check icon */}
+                <CheckIcon className={`h-6 w-6 mr-3 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
                 <div>
-                  <p className={`font-medium ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feature.name}</p>
+                  <p className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feature.name}</p>
                   {feature.description && (
-                    <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{feature.description}</p>
+                    <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{feature.description}</p>
                   )}
                 </div>
               </div>
             ))}
           </div>
           
-          {/* CTA Button */}
+          {/* CTA Button - Increase size and prominence */}
           <button
-            onClick={handleUpgrade}
+            onClick={handleUpgrade} // Functionality will be updated next
             disabled={isLoading}
-            className={`w-full py-3 px-4 rounded-lg font-medium transition
-              ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-700 active:bg-indigo-800'}
-              ${theme === 'dark' ? 'bg-indigo-600 text-white' : 'bg-indigo-600 text-white'}`}
+            className={`w-full py-3.5 px-5 rounded-lg text-lg font-semibold transition duration-150 ease-in-out flex items-center justify-center
+              ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-700 active:bg-indigo-800 transform hover:scale-[1.02]'}
+              ${theme === 'dark' ? 'bg-indigo-600 text-white shadow-md hover:shadow-lg' : 'bg-indigo-600 text-white shadow-md hover:shadow-lg'}`}
           >
-            {isLoading ? 'Processing...' : displayContent.ctaText}
+            {isLoading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Processing...
+              </>
+            ) : displayContent.ctaText}
           </button>
           
-          {/* Error message */}
+          {/* Error message - Standard styling */}
           {error && (
-            <p className="mt-2 text-sm text-red-500">
+            <p className="mt-3 text-sm text-center text-red-600 dark:text-red-400">
               {error}
             </p>
           )}
           
-          {/* Footer text */}
+          {/* Footer text - Adjust spacing and size */}
           {displayContent.footerText && (
-            <p className={`mt-4 text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {displayContent.footerText}
+            <p className={`mt-5 text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
+              {displayContent.footerText.replace('\n', ' ')} {/* Replace newline with space for single line display */}
             </p>
           )}
         </Dialog.Panel>

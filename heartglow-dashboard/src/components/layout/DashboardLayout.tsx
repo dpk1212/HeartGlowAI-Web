@@ -4,13 +4,13 @@ import Link from 'next/link';
 import Footer from '../ui/Footer';
 import { cn } from "@/lib/utils";
 
-// Import shadcn/ui components
+// Import shadcn/ui components & icons
 import {
   NavigationMenu,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  navigationMenuTriggerStyle,
+  // navigationMenuTriggerStyle, // Removed for simpler link style
 } from "@/components/ui/navigation-menu";
 import {
   DropdownMenu,
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut } from 'lucide-react';
+import { User, Settings, LogOut, BrainCircuit, BarChart3, Sparkles } from 'lucide-react'; // Add new icons if preferred over emojis
 
 // Helper function to get initials - simplified
 const getInitials = (email: string): string => {
@@ -54,38 +54,51 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="bg-card text-card-foreground border-b py-3 px-6 sticky top-0 z-30">
+      {/* Apply subtle background/blur to header */}
+      <header className="bg-card/80 backdrop-blur-sm text-card-foreground border-b border-border/50 py-3 px-6 sticky top-0 z-30">
         <div className="container mx-auto flex justify-between items-center">
           <Link 
-            href="/"
-            className="flex items-center gap-2"
+            href="/" // Link to main chat/dashboard
+            className="flex items-center gap-2 group" // Added group for potential hover effects
             aria-label="HeartGlow Dashboard Home"
           >
-            <span className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">
+            {/* Add subtle pulse animation to logo text */}
+            <span className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent animate-pulse-subtle">
               HeartGlow
             </span>
           </Link>
 
+          {/* Updated Navigation Menu */}
           <NavigationMenu className="hidden md:block">
-            <NavigationMenuList>
+            <NavigationMenuList className="gap-2"> {/* Added gap */} 
+              {/* Chat Link */}
               <NavigationMenuItem>
                 <Link href="/" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Dashboard
+                  {/* Use simple link style, add padding/hover manually */}
+                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
+                    <BrainCircuit className="h-4 w-4" /> {/* Use icon */}
+                    {/* Or 🧠 */}
+                    Chat
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+              {/* Insights Link (mapped to /growth for now) */}
               <NavigationMenuItem>
-                <Link href="/create" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Create
+                <Link href="/growth" legacyBehavior passHref>
+                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
+                    <BarChart3 className="h-4 w-4" /> {/* Use icon */}
+                    {/* Or 📈 */}
+                    Insights
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
+              {/* GlowScore Link (mapped to / for now, could be /glowscore) */}
               <NavigationMenuItem>
-                <Link href="/connections" legacyBehavior passHref>
-                  <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                    Connections
+                <Link href="/" legacyBehavior passHref> 
+                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
+                    <Sparkles className="h-4 w-4" /> {/* Use icon */}
+                    {/* Or ✨ */}
+                    GlowScore
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
@@ -96,14 +109,21 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             {currentUser && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
-                    <Avatar className="h-10 w-10 border-2 border-transparent hover:border-ring transition-colors">
+                  {/* Add hover glow and transition to button */}
+                  <Button 
+                    variant="ghost" 
+                    className="relative h-10 w-10 rounded-full p-0 transition-shadow hover:shadow-glow focus-visible:ring-1 focus-visible:ring-ring"
+                  >
+                    <Avatar className="h-10 w-10 border-2 border-transparent">
                       <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white font-medium">
                         {getInitials(currentUser.email || '')}
                       </AvatarFallback>
+                      {/* TODO: Add AvatarImage here if user profile pics are available */}
+                      {/* <AvatarImage src={userProfile?.avatarUrl} alt="User avatar" /> */} 
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
+                {/* Dropdown content remains the same */}
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">

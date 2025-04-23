@@ -130,11 +130,10 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   // --- END: Onboarding Completion Logic ---
 
   // --- START: Loading Check (Moved Here) ---
-  // Check for loading state *after* all hooks have been called
   if (loading) {
-    // Render a global loading spinner or minimal layout
+    // Apply gradient to loading screen as well for consistency
     return (
-      <div className="flex justify-center items-center min-h-screen">
+      <div className="flex justify-center items-center min-h-screen bg-gradient-to-tr from-gradientFrom to-gradientTo">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-heartglow-pink"></div>
       </div>
     );
@@ -143,9 +142,8 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
 
   return (
     <>
-       {/* REMOVED conditional blur/brightness class from this wrapper */}
-       {/* Always render the main content now, no old onboarding check */}
-      <div> 
+      {/* Apply gradient, min-height, and default text color to this main wrapper div */}
+      <div className="min-h-screen bg-gradient-to-tr from-gradientFrom to-gradientTo text-foreground"> 
         <AccountLinkBanner />
         <Component {...pageProps} />
       </div>

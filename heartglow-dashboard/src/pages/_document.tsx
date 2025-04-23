@@ -11,6 +11,21 @@ export default function Document() {
         <meta httpEquiv="Expires" content="0" />
         <link rel="icon" href="/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        {/* Preconnect to Google Fonts */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+
+        {/* Link to Plus Jakarta Sans (example weights: 400, 500, 700) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
+
+        {/* Link to DM Serif Display (example weight: 400) */}
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&display=swap"
+          rel="stylesheet"
+        />
         {/* Force specific style rules */}
         <style dangerouslySetInnerHTML={{ __html: `
           :root {

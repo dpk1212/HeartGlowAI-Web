@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-// import { MenuIcon, XIcon } from '@heroicons/react/outline'; // v1 import
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'; // v2 import
+import { Bars3Icon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 // Import sub-components
 import ConnectionList from './ConnectionList';
 import ChatWindow from './ChatWindow';
-import NewConnectionModal from '../modals/NewConnectionModal'; // Import the modal content
+import NewConnectionModal from '../modals/NewConnectionModal';
 // Import shadcn/ui components
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -19,8 +18,6 @@ const heartglowAIConnection: Connection = {
   name: 'HeartGlow AI',
   relationship: 'assistant', // Or 'general', 'reflection', etc.
   createdAt: Timestamp.now(), // Use Firestore Timestamp
-  // Add other required Connection fields if necessary, potentially with default/null values
-  // imageUrl: '/assets/heartglow-logo.png', // Removed: imageUrl is not part of the Connection type
 };
 
 interface ChatLayoutProps {
@@ -32,7 +29,6 @@ interface ChatLayoutProps {
   onSaveConnection: (name: string, relationship: string) => Promise<void>; // Keep this for the modal
   isLoadingConnections: boolean;
   isLoadingMessages: boolean;
-  // TODO: Add isSending state for message input
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({
@@ -51,52 +47,48 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   // Find selected connection from the combined list
   const selectedConnection = allConnections.find(c => c.id === selectedConnectionId);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  // Remove state and handlers for old modal
-  // const [isNewConnectionModalOpen, setIsNewConnectionModalOpen] = useState(false); 
-  // const openNewConnectionModal = () => { ... };
-  // const closeNewConnectionModal = () => { ... };
 
   const toggleMobileSidebar = () => setIsMobileSidebarOpen(!isMobileSidebarOpen);
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
 
-  // Dialog state is now controlled internally by shadcn Dialog/DialogTrigger
-
   return (
-    <Dialog> {/* Wrap relevant part of the layout with Dialog */}
-      <div className="relative flex h-full bg-gray-900 text-white font-sans overflow-hidden">
+    <Dialog>
+      <div className="relative flex h-full overflow-hidden bg-gradient-to-b from-[#0E0E1A] to-[#14141F] text-white font-sans">
         {/* --- Mobile Sidebar (Fixed, Sliding) --- */}
         <div
           className={`
             fixed inset-y-0 left-0 z-40
             flex flex-col w-72 max-w-[85%] flex-shrink-0
-            bg-gray-800 p-4 border-r border-gray-700
-            transition-transform duration-300 ease-in-out transform
+            bg-gradient-to-b from-[#1A1A2E]/95 to-[#12121E]/95 backdrop-blur-md
+            rounded-r-xl shadow-2xl border-r border-[#2A2A40]/30
+            transition-all duration-300 ease-out transform
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            md:hidden
+            md:hidden p-5
           `}
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-sidebar-title"
         >
           <div className="flex items-center justify-between mb-6">
-            <h1 id="mobile-sidebar-title" className="text-2xl font-bold text-pink-400">HeartGlow</h1>
+            <h1 id="mobile-sidebar-title" className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">HeartGlow</h1>
             <button
-               onClick={closeMobileSidebar}
-               className="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-white"
-               aria-label="Close sidebar"
-             >
-               {/* <XIcon className="h-5 w-5" aria-hidden="true" /> // v1 usage */}
-               <XMarkIcon className="h-5 w-5" aria-hidden="true" /> // v2 usage
-             </button>
+              onClick={closeMobileSidebar}
+              className="p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 transition-all duration-200"
+              aria-label="Close sidebar"
+            >
+              <XMarkIcon className="h-5 w-5" aria-hidden="true" />
+            </button>
           </div>
-          <h2 className="text-lg font-semibold mb-4 text-gray-300 flex-shrink-0">Your Connections</h2>
+          <h2 className="text-base font-medium mb-4 text-gray-200 flex-shrink-0 px-1">Your Connections</h2>
           {isLoadingConnections ? (
-            <div className="flex-grow flex items-center justify-center"><p className="text-gray-400">Loading...</p></div>
+            <div className="flex-grow flex items-center justify-center">
+              <div className="animate-spin h-6 w-6 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
+              <p className="ml-3 text-gray-400 text-sm">Loading connections...</p>
+            </div>
           ) : (
-            // Use ScrollArea for the list
-            <ScrollArea className="flex-grow overflow-y-auto pr-2"> {/* Added padding-right for scrollbar */}
+            <ScrollArea className="flex-grow overflow-y-auto pr-2">
               <ConnectionList
-                connections={allConnections} // Pass the combined list
+                connections={allConnections}
                 selectedConnectionId={selectedConnectionId}
                 onSelect={(id) => {
                   onSelectConnection(id);
@@ -104,76 +96,78 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 }}
               />
             </ScrollArea>
-          )
-          }
+          )}
           {/* New Connection Button - Mobile */}
           <DialogTrigger asChild>
             <Button 
-              variant="default" // Use shadcn Button
-              className="mt-4 w-full flex-shrink-0 bg-pink-600 hover:bg-pink-700" // Adjust styling as needed
-              onClick={closeMobileSidebar} // Close sidebar when opening dialog
+              variant="default"
+              className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
+              onClick={closeMobileSidebar}
             >
-              + New Connection
+              <PlusIcon className="h-4 w-4 mr-2" /> New Connection
             </Button>
           </DialogTrigger>
         </div>
 
         {/* Mobile Overlay - closes sidebar on click */}
         {isMobileSidebarOpen && (
-           <div
-             className="fixed inset-0 bg-black/60 z-30 md:hidden"
-             onClick={closeMobileSidebar}
-             aria-hidden="true"
-           />
-         )}
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+            onClick={closeMobileSidebar}
+            aria-hidden="true"
+          />
+        )}
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
-        {/* Styling similar to ChatGPT sidebar: slightly darker bg? */}
-        <div className="hidden md:flex md:flex-col md:w-72 md:flex-shrink-0 bg-gray-850 p-3 border-r border-gray-700"> {/* Adjusted bg, padding */}
-           {/* New Connection Button - Desktop */}
-           <DialogTrigger asChild>
-             <Button 
-               variant="outline" // Use shadcn Button, maybe outline style?
-               className="mb-4 w-full justify-start border-gray-600 hover:border-gray-500 text-gray-200"
-             >
-               {/* Add icon maybe? <PlusIcon className="mr-2 h-4 w-4" /> */}
-               + New Connection
-             </Button>
-           </DialogTrigger>
-           {/* Connections List takes the rest of the space */}
-           <ScrollArea className="flex-grow overflow-y-auto pr-1"> {/* Wrap list with ScrollArea */}
-             {isLoadingConnections ? (
-               <div className="flex h-full items-center justify-center"><p className="text-gray-400">Loading...</p></div>
-             ) : (
-               <ConnectionList
-                 connections={allConnections} // Pass the combined list
-                 selectedConnectionId={selectedConnectionId}
-                 onSelect={onSelectConnection}
-               />
-             )
-             }
-           </ScrollArea>
-           {/* Optional: User settings/logout at the bottom */}
+        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-[#13131D]/80 backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
+          <div className="mb-5 px-2">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">HeartGlow</h1>
+          </div>
+          
+          {/* New Connection Button - Desktop */}
+          <DialogTrigger asChild>
+            <Button 
+              variant="outline"
+              className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"
+            >
+              <PlusIcon className="h-4 w-4 mr-2" /> New Connection
+            </Button>
+          </DialogTrigger>
+          
+          <h2 className="text-sm uppercase font-medium tracking-wider text-gray-400 mb-3 px-2">Your Connections</h2>
+          
+          {/* Connections List takes the rest of the space */}
+          <ScrollArea className="flex-grow overflow-y-auto pr-1">
+            {isLoadingConnections ? (
+              <div className="flex h-full items-center justify-center py-8">
+                <div className="animate-spin h-5 w-5 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
+                <p className="ml-3 text-gray-400 text-sm">Loading connections...</p>
+              </div>
+            ) : (
+              <ConnectionList
+                connections={allConnections}
+                selectedConnectionId={selectedConnectionId}
+                onSelect={onSelectConnection}
+              />
+            )}
+          </ScrollArea>
         </div>
 
         {/* --- Main Content Area (ChatWindow) --- */}
-        {/* Pass the mobile sidebar toggle function down */}
-        <div className="flex-1 flex flex-col min-w-0 h-full bg-gray-900"> {/* Main chat area background */}
-           <ChatWindow
-             connection={selectedConnection}
-             messages={messages}
-             onSendMessage={onSendMessage}
-             isLoadingMessages={isLoadingMessages}
-             onToggleMobileSidebar={toggleMobileSidebar} // Pass the toggle function
-           />
+        <div className="flex-1 flex flex-col min-w-0 h-full bg-gradient-to-br from-[#111120] to-[#181828]">
+          <ChatWindow
+            connection={selectedConnection}
+            messages={messages}
+            onSendMessage={onSendMessage}
+            isLoadingMessages={isLoadingMessages}
+            onToggleMobileSidebar={toggleMobileSidebar}
+          />
         </div>
 
         {/* --- Render New Connection Modal Content --- */}
-        {/* No longer need isOpen or onClose props */}
         <NewConnectionModal onSave={onSaveConnection} />
-
       </div>
-    </Dialog> /* End Dialog wrapper */
+    </Dialog>
   );
 };
 

@@ -34,50 +34,64 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   // Define Avatar components for user and AI
   const UserAvatar = () => (
-    <Avatar className="h-7 w-7"> {/* Smaller avatar for chat */} 
-      <AvatarFallback className="bg-blue-500 text-white"> {/* User color */} 
+    <Avatar className="h-8 w-8 shadow-md border border-[#2A2A40]/40">
+      <AvatarFallback className="bg-gradient-to-br from-[#4A75D9] to-[#2C4EA0] text-white">
         <User className="h-4 w-4" />
       </AvatarFallback>
     </Avatar>
   );
 
   const AIAvatar = () => (
-    <Avatar className="h-7 w-7">
-      <AvatarFallback className="bg-pink-500 text-white"> {/* AI color */} 
+    <Avatar className="h-8 w-8 shadow-md border border-[#2A2A40]/40">
+      <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white">
         <Sparkles className="h-4 w-4" />
       </AvatarFallback>
     </Avatar>
   );
 
   return (
-    <div className={cn(
-      "flex items-end w-full", 
-      isUser ? "justify-end pl-8 sm:pl-12" : "justify-start pr-8 sm:pr-12", // Add padding to opposite side
-    )}>
-      {!isUser && <div className="mr-2 flex-shrink-0"><AIAvatar /></div>} {/* AI Avatar on left */} 
+    <div 
+      className={cn(
+        "flex items-end w-full group transition-opacity duration-200", 
+        isUser ? "justify-end pl-8 sm:pl-16" : "justify-start pr-8 sm:pr-16"
+      )}
+    >
+      {!isUser && (
+        <div className="mr-3 flex-shrink-0 mb-1">
+          <AIAvatar />
+        </div>
+      )}
       
       {/* Message Content Column */}
-      <div className={cn("flex flex-col max-w-[75%]", isUser ? 'items-end' : 'items-start')}>
+      <div className={cn("flex flex-col max-w-[80%]", isUser ? 'items-end' : 'items-start')}>
         {/* Message Bubble */}
         <div
           className={cn(
-            "px-3.5 py-2 rounded-lg shadow-md max-w-full", // Adjusted padding
+            "px-4 py-2.5 rounded-2xl shadow-md max-w-full transition-all duration-200",
             isUser 
-              ? 'bg-primary text-primary-foreground rounded-br-none' // Use theme colors
-              : 'bg-muted text-muted-foreground rounded-bl-none' // Use theme colors
+              ? 'bg-gradient-to-br from-[#1C3694]/90 to-[#162970]/90 text-white rounded-br-sm border border-[#3D5BCC]/20' 
+              : 'bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20'
           )}
         >
-          <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.text}</p>
         </div>
+        
         {/* Timestamp */}
         {formattedTimestamp && (
-          <p className="text-[10px] mt-1 text-muted-foreground">
+          <p className={cn(
+            "text-[10px] mt-1.5 opacity-70 transition-opacity duration-200 group-hover:opacity-100",
+            isUser ? 'text-blue-300/70' : 'text-pink-300/70'
+          )}>
             {formattedTimestamp}
           </p>
         )}
       </div>
 
-      {isUser && <div className="ml-2 flex-shrink-0"><UserAvatar /></div>} {/* User Avatar on right */} 
+      {isUser && (
+        <div className="ml-3 flex-shrink-0 mb-1">
+          <UserAvatar />
+        </div>
+      )}
     </div>
   );
 };

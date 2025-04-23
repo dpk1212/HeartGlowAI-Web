@@ -30,42 +30,55 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
   selectedConnectionId,
   onSelect,
 }) => {
-
-  // No outer div needed, ScrollArea is in parent
   return (
-    <div className="space-y-1"> {/* Add slight space between buttons */} 
+    <div className="space-y-1.5"> 
       {connections.length > 0 ? (
         connections.map((conn) => (
           <Button
             key={conn.id}
-            variant="ghost" // Use ghost variant for list items
+            variant="ghost"
             onClick={() => onSelect(conn.id)}
             className={cn(
-              "w-full justify-start h-auto p-3 text-left", // Base styles: full width, left align, auto height, padding
-              selectedConnectionId === conn.id ? 
-                "bg-gradient-to-r from-[#382554]/90 to-[#1F1F30]/90 hover:from-[#3D2961]/90 hover:to-[#232335]/90 shadow-sm" : // Enhanced selected style
-                "hover:bg-[#1E1E2D]/70" // Enhanced hover style for non-selected
+              "w-full justify-start h-auto py-3 px-3 text-left rounded-xl transition-all duration-200", 
+              selectedConnectionId === conn.id 
+                ? "bg-gradient-to-r from-[#382554]/95 to-[#1F1F30]/95 hover:from-[#3D2961]/95 hover:to-[#232335]/95 shadow-lg border border-[#4A3270]/20" 
+                : "hover:bg-[#1E1E2D]/80 border border-transparent"
             )}
           >
             <div className="flex items-center space-x-3">
-              <Avatar className="h-9 w-9 border-2 border-transparent shadow-md"> {/* Slightly larger and add shadow */} 
-                {/* <AvatarImage src="/path/to/image.jpg" /> */}
-                <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white font-medium"> {/* Use gradient */} 
+              <Avatar className={cn(
+                "h-10 w-10 shadow-md transition-all duration-300",
+                selectedConnectionId === conn.id 
+                  ? "border-2 border-[#9161FC]/30 ring-2 ring-[#FF4F81]/10" 
+                  : "border border-[#3A3A5C]/40"
+              )}>
+                <AvatarFallback 
+                  className={cn(
+                    "text-sm font-medium transition-all duration-200",
+                    selectedConnectionId === conn.id
+                      ? "bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white" 
+                      : "bg-gradient-to-br from-[#2A2A45] to-[#1A1A30] text-gray-200"
+                  )}
+                > 
                   {getInitials(conn.name)}
                 </AvatarFallback>
               </Avatar>
-              <div className="overflow-hidden"> {/* Prevent text overflow */} 
+              <div className="overflow-hidden"> 
                 <p className={cn(
-                  "font-medium truncate text-base", // Slightly larger text 
-                  selectedConnectionId === conn.id ? 'text-white' : 'text-white/90' // More vibrant text
-                  )}>
+                  "font-medium truncate text-base", 
+                  selectedConnectionId === conn.id 
+                    ? 'text-white' 
+                    : 'text-white/80'
+                )}>
                   {conn.name || 'Unnamed Connection'}
                 </p>
                 {conn.relationship && (
                   <p className={cn(
-                    "text-xs truncate",
-                    selectedConnectionId === conn.id ? 'text-[#E2E2E2]' : 'text-[#C8C8D0]' // Brighter muted text
-                    )}>
+                    "text-xs truncate transition-all duration-200",
+                    selectedConnectionId === conn.id 
+                      ? 'text-[#E2E2E2]' 
+                      : 'text-[#C8C8D0]/70'
+                  )}>
                     {conn.relationship}
                   </p>
                 )}
@@ -74,7 +87,10 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
           </Button>
         ))
       ) : (
-        <p className="text-white/80 text-center py-4 text-sm">No connections found.</p>
+        <div className="text-white/70 text-center py-4 text-sm bg-[#1A1A2E]/50 rounded-lg border border-[#2A2A40]/30 px-3 mt-2">
+          No connections found.
+          <p className="text-xs text-white/50 mt-1">Add your first connection to get started.</p>
+        </div>
       )}
     </div>
   );

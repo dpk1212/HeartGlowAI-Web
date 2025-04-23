@@ -29,6 +29,7 @@ interface ChatLayoutProps {
   onSaveConnection: (name: string, relationship: string, specificRelationship?: string, goal?: string, notes?: string) => Promise<void>; // Updated to match new fields
   isLoadingConnections: boolean;
   isLoadingMessages: boolean;
+  isSendingMessage?: boolean; // Add isSendingMessage prop
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({
@@ -40,6 +41,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   onSaveConnection, // Pass this to the modal
   isLoadingConnections,
   isLoadingMessages,
+  isSendingMessage, // Destructure the new prop
 }) => {
   // Combine the static AI connection with the dynamic ones
   const allConnections = [heartglowAIConnection, ...connections];
@@ -161,6 +163,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             onSendMessage={onSendMessage}
             isLoadingMessages={isLoadingMessages}
             onToggleMobileSidebar={toggleMobileSidebar}
+            isSendingMessage={isSendingMessage} // Pass down isSendingMessage
           />
         </div>
 

@@ -169,8 +169,7 @@ const ChatPage = () => {
       onSaveConnection={handleSaveConnection}
       isLoadingConnections={isLoadingConnections} // Pass down loading states
       isLoadingMessages={isLoadingMessages}
-      // TODO: Pass isSendingMessage down if MessageInput needs it directly
-      // isSending={isSendingMessage} 
+      isSendingMessage={isSendingMessage} // Pass down isSendingMessage state
     />
   );
 };

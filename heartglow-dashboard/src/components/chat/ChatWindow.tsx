@@ -40,6 +40,7 @@ interface ChatWindowProps {
   onSendMessage: (messageText: string) => void;
   isLoadingMessages: boolean;
   onToggleMobileSidebar: () => void; // Receive the toggle function
+  isSendingMessage?: boolean; // Add isSendingMessage prop
   // TODO: Add isSending state
 }
 
@@ -49,6 +50,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   isLoadingMessages,
   onToggleMobileSidebar,
+  isSendingMessage, // Destructure the new prop
   // isSending, // Add this when state is managed
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
@@ -121,37 +123,46 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       >
         {/* Empty State with Prompt Suggestions */}
         {showPrompts && !isLoadingMessages && (
-          <div className="h-full flex flex-col items-center justify-center py-10 px-4"> {/* Increased padding */}
-            <div className="w-full max-w-xl text-center"> {/* Centered content */}
-              {/* New Intro Text */}
-              <p className="mb-6 text-base text-gray-400/90">I'm ready to help you communicate with clarity and care. Choose a starting point:</p>
+          <div className="h-full flex flex-col items-center justify-center py-10 px-4"> 
+            <div className="w-full max-w-xl text-center"> 
+              {/* Static Welcome Message Area */}
+              <div className="mb-8 p-5 rounded-lg bg-[#1E1E2E]/40 border border-[#3A3A5C]/30 text-left shadow-sm">
+                <h3 className="font-semibold text-white mb-2">Welcome to HeartGlow AI! ✨</h3>
+                <p className="text-sm text-gray-300/90 leading-relaxed space-y-2">
+                  <span>I'm here to be your guide in navigating communication challenges and deepening your relationships. Think of me as your personal communication co-pilot.</span>
+                  <span>You can ask me anything about relationships, get help drafting tricky messages, or explore ways to express yourself more authentically.</span>
+                  <span>Chat with me here for general guidance, or create specific **Connections** using the '+' button to get tailored insights.</span>
+                  <span>So, what's on your mind today?</span>
+                </p>
+              </div>
+
+              {/* Prompt Suggestions Area */}
+              <p className="mb-4 text-base text-gray-400/90">Choose a starting point:</p>
               
-              {/* Enhanced Chat Bubble Suggestions - Single List, No Pills */}
-              <div className="space-y-3.5"> {/* Increased spacing */}
+              <div className="space-y-3.5"> 
                 {promptSuggestions.map((prompt, index) => (
                   <button
                     key={index}
                     onClick={() => handlePromptClick(prompt.text)}
-                    // Enhanced Styling: More padding, clearer hover, slightly larger text
                     className="w-full text-left p-4 rounded-xl bg-[#1E1E2E]/50 hover:bg-[#28283A]/80 border border-[#3A3A5C]/40 hover:border-[#5A5A8C]/60 transition-all duration-200 relative group shadow-sm hover:shadow-md"
                   >
-                    <div className="absolute top-4 left-4 text-indigo-400/80 group-hover:text-heartglow-pink/90 transition-colors duration-200"> {/* Adjusted positioning */}
+                    <div className="absolute top-4 left-4 text-indigo-400/80 group-hover:text-heartglow-pink/90 transition-colors duration-200"> 
                       <prompt.icon className="h-5 w-5" />
                     </div>
-                    {/* Slightly larger text */}
                     <p className="text-sm sm:text-base text-gray-200/90 ml-9">{prompt.text}</p> 
                   </button>
                 ))}
               </div>
-              
-              {/* REMOVED the redundant pill suggestions section */}
-
             </div>
           </div>
         )}
         
-        {/* Regular Message List */}
-        <MessageList messages={messages} isLoading={isLoadingMessages} />
+        {/* Regular Message List - Pass isSendingMessage down */}
+        <MessageList 
+            messages={messages} 
+            isLoading={isLoadingMessages} 
+            isSendingMessage={isSendingMessage} // Pass down
+        />
         <ScrollBar />
       </ScrollArea>
 

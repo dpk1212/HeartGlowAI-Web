@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 // Import shadcn components and icons
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Send, Loader2 } from 'lucide-react'; // Use Send icon
+import { Send, Loader2, Sparkles, BarChart2, CornerDownLeft } from 'lucide-react'; // Use Send icon
 
 interface MessageInputProps {
   onSend: (messageText: string) => void;
@@ -40,31 +40,47 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled = false, i
     handleSend();
   };
 
+  // Handler for suggestion button clicks
+  const handleSuggestionClick = useCallback((prompt: string) => {
+    if (!disabled && !isSending) {
+      onSend(prompt);
+      // Optionally clear input text if needed, but usually prompts don't fill the box
+      // setInputText(''); 
+    }
+  }, [onSend, disabled, isSending]);
+
   return (
     <form 
       onSubmit={handleSubmit} 
       className="relative max-w-3xl mx-auto w-full mb-4"
     >
-      {/* Prompt Starter Buttons Container */}
-      <div className="flex items-center justify-center space-x-2 mb-2">
+      {/* Prompt Starter Buttons Container - Enhanced Styling */}
+      <div className="flex flex-wrap items-center justify-center gap-2 mb-3 px-2"> {/* Added flex-wrap and gap */}
         <button 
           type="button" 
-          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors"
-          // onClick={() => {/* Handle suggestion click */}} // Add functionality later
+          onClick={() => handleSuggestionClick("Help Generate a Message")} // Added onClick
+          disabled={disabled || isSending} // Disable button if input is disabled
+          className="inline-flex items-center bg-background/60 hover:bg-muted/80 border border-border/50 text-foreground/80 px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:pointer-events-none" // Adjusted styles
         >
+          <Sparkles className="h-3.5 w-3.5 mr-1.5 text-heartglow-pink/80" /> {/* Added icon */}
           Help Generate a Message
         </button>
-        {/* Add more buttons as needed */}
-         <button 
+        <button 
           type="button" 
-          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors"
+          onClick={() => handleSuggestionClick("Analyze Dynamics")} // Added onClick
+          disabled={disabled || isSending}
+          className="inline-flex items-center bg-background/60 hover:bg-muted/80 border border-border/50 text-foreground/80 px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:pointer-events-none"
         >
+          <BarChart2 className="h-3.5 w-3.5 mr-1.5 text-heartglow-pink/80" /> {/* Added icon */}
           Analyze Dynamics
         </button>
          <button 
           type="button" 
-          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors hidden sm:inline-flex" // Hide on small screens
+          onClick={() => handleSuggestionClick("Suggest a Reply")} // Added onClick
+          disabled={disabled || isSending}
+          className="inline-flex items-center bg-background/60 hover:bg-muted/80 border border-border/50 text-foreground/80 px-3 py-1.5 rounded-full text-xs sm:text-sm transition-colors disabled:opacity-50 disabled:pointer-events-none hidden sm:inline-flex" // Kept hidden on small screens for now
         >
+          <CornerDownLeft className="h-3.5 w-3.5 mr-1.5 text-heartglow-pink/80" /> {/* Added icon */}
           Suggest a Reply
         </button>
       </div>

@@ -12,6 +12,17 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
 
+// Define the static HeartGlow AI connection
+const heartglowAIConnection: Connection = {
+  id: 'heartglow-ai', // Use a reserved ID
+  name: 'HeartGlow AI',
+  relationship: 'assistant', // Or 'general', 'reflection', etc.
+  createdAt: new Date(), // Or null/undefined if not needed
+  // Add other required Connection fields if necessary, potentially with default/null values
+  userId: '', // Assuming userId might be part of the type, add it if needed
+  imageUrl: '/assets/heartglow-logo.png', // Optional: Add a specific icon/logo
+};
+
 interface ChatLayoutProps {
   connections: Connection[];
   messages: Message[];
@@ -34,7 +45,11 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   isLoadingConnections,
   isLoadingMessages,
 }) => {
-  const selectedConnection = connections.find(c => c.id === selectedConnectionId);
+  // Combine the static AI connection with the dynamic ones
+  const allConnections = [heartglowAIConnection, ...connections];
+
+  // Find selected connection from the combined list
+  const selectedConnection = allConnections.find(c => c.id === selectedConnectionId);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   // Remove state and handlers for old modal
   // const [isNewConnectionModalOpen, setIsNewConnectionModalOpen] = useState(false); 
@@ -81,7 +96,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             // Use ScrollArea for the list
             <ScrollArea className="flex-grow overflow-y-auto pr-2"> {/* Added padding-right for scrollbar */}
               <ConnectionList
-                connections={connections}
+                connections={allConnections} // Pass the combined list
                 selectedConnectionId={selectedConnectionId}
                 onSelect={(id) => {
                   onSelectConnection(id);
@@ -131,7 +146,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                <div className="flex h-full items-center justify-center"><p className="text-gray-400">Loading...</p></div>
              ) : (
                <ConnectionList
-                 connections={connections}
+                 connections={allConnections} // Pass the combined list
                  selectedConnectionId={selectedConnectionId}
                  onSelect={onSelectConnection}
                />

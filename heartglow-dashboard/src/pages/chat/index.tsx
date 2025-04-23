@@ -49,6 +49,19 @@ const ChatPage = () => {
     error: messagesError 
   } = useMessages(userId, selectedConnectionId); // Pass potentially null userId
 
+  // --- Effect to Select Default AI Chat for New Users ---
+  useEffect(() => {
+    // Only run if we have a user, connections are loaded, and no connection is selected yet
+    if (userId && !isLoadingConnections && !selectedConnectionId) {
+      // If the user has no connections yet, select the default AI chat
+      if (connections.length === 0) {
+        console.log("New user or no connections found, selecting HeartGlow AI chat.");
+        setSelectedConnectionId('heartglow-ai');
+      }
+    }
+    // Dependencies: Run when user loads, connections load, or connections array changes
+  }, [userId, connections, isLoadingConnections, selectedConnectionId]);
+
   // Handler for selecting a connection
   const handleSelectConnection = (connectionId: string) => {
     console.log(`Selected connection: ${connectionId}`);
@@ -97,12 +110,12 @@ const ChatPage = () => {
       // Prepare payload conditionally
       const payload: { messageText: string; connectionId?: string | null } = {
         messageText: textToSend,
-        connectionId: selectedConnectionId, // Explicitly include null if selectedConnectionId is null
+        connectionId: selectedConnectionId, // Send the actual selected ID ('heartglow-ai' or user connection ID)
       };
 
-      // Pass the conditional payload
-      // Note: We are now explicitly passing null for connectionId when it's the general chat
-      console.log("Calling handleChatMessage with payload:", payload); // Add logging
+      // Pass the payload
+      // Note: The backend 'handleChatMessage' needs to recognize 'heartglow-ai' as the general chat.
+      console.log(`Calling handleChatMessage for ${selectedConnectionId === 'heartglow-ai' ? 'HeartGlow AI' : ('connection ' + selectedConnectionId)} with payload:`, payload);
       const result = await callHandleChatMessage(payload);
       
       console.log("Cloud function raw result:", result);

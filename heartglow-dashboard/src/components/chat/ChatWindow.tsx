@@ -17,24 +17,24 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import S
 // Sample prompt suggestions for empty states
 const promptSuggestions = [
   {
-    text: "Help craft a message to reconnect with an old friend",
-    shortText: "Reconnect with a friend",
-    icon: LightBulbIcon
-  },
-  {
-    text: "How do I have a difficult conversation with my partner?",
-    shortText: "Difficult partner conversation",
+    text: "Help me understand and improve my relationship dynamics.",
+    shortText: "Improve relationship",
     icon: SparklesIcon
   },
   {
-    text: "Write a thoughtful response to criticism I received",
-    shortText: "Respond to criticism",
+    text: "I'm struggling to put my feelings into words. Help me draft a message.",
+    shortText: "Draft a message",
     icon: LightBulbIcon
   },
   {
-    text: "Express gratitude to someone who helped me recently",
-    shortText: "Express gratitude",
+    text: "How can I build more connection and intimacy with my partner?",
+    shortText: "Deepen connection",
     icon: SparklesIcon
+  },
+  {
+    text: "I'm facing a tough situation. Help me think through my options.",
+    shortText: "Talk through situation",
+    icon: LightBulbIcon
   }
 ];
 

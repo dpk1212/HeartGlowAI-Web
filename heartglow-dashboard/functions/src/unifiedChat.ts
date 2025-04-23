@@ -75,35 +75,44 @@ export const handleChatMessage = functions.https.onCall(async (data, context) =>
 
   // --- Input Validation ---
   const { connectionId, messageText } = data;
+  // Allow 'heartglow-ai' as a valid ID
   if (!connectionId || typeof connectionId !== 'string' || !messageText || typeof messageText !== 'string') {
     throw new functions.https.HttpsError('invalid-argument', 'The function must be called with "connectionId" (string) and "messageText" (string) arguments.');
   }
 
-  functions.logger.info(`[${userId}] handleChatMessage called for connection ${connectionId}`);
+  functions.logger.info(`[${userId}] handleChatMessage called for ${connectionId === 'heartglow-ai' ? 'General AI Chat' : 'connection ' + connectionId}`);
+
+  let messagesRef: admin.firestore.CollectionReference;
+  let isGeneralChat = false;
+
+  // --- Determine Firestore Path based on connectionId ---
+  if (connectionId === 'heartglow-ai') {
+    isGeneralChat = true;
+    messagesRef = db.collection('users').doc(userId).collection('generalChat').collection('messages');
+    functions.logger.info(`[${userId}] Using dedicated path for General AI Chat.`);
+  } else {
+    // Path for regular user connections
+    messagesRef = db.collection('users').doc(userId).collection('connections').doc(connectionId).collection('messages');
+  }
 
   // --- Step 1: Save User's Message to Firestore ---
   const userMessage = {
     sender: 'user',
     text: messageText,
-    timestamp: admin.firestore.FieldValue.serverTimestamp(), // Use server timestamp
-    // Optionally add userId if needed for rules/querying, though path has it
-    // userId: userId 
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
   };
-  const messagesRef = db.collection('users').doc(userId).collection('connections').doc(connectionId).collection('messages');
-  let userMessageRef; // To get the ID if needed
+  let userMessageRef;
   try {
       userMessageRef = await messagesRef.add(userMessage);
-      functions.logger.info(`[${userId}/${connectionId}] User message ${userMessageRef.id} saved.`);
+      functions.logger.info(`[${userId}/${connectionId}] User message ${userMessageRef.id} saved to path: ${messagesRef.path}`);
   } catch (error) {
-      functions.logger.error(`[${userId}/${connectionId}] Error saving user message:`, error);
+      functions.logger.error(`[${userId}/${connectionId}] Error saving user message to path ${messagesRef.path}:`, error);
       throw new functions.https.HttpsError('internal', 'Failed to save user message.', error);
   }
 
-  // --- Step 2: Implement determineInteractionType (Placeholder) ---
-  // TODO: Add logic to analyze messageText and potentially recent history
-  let interactionType: 'coaching' | 'generation' | 'clarification' = 'coaching'; // Default
+  // --- Step 2: Implement determineInteractionType (Remains the same) ---
+  let interactionType: 'coaching' | 'generation' | 'clarification' = 'coaching';
   const lowerCaseText = messageText.toLowerCase();
-    // Simple keyword check for message generation intent
     if (lowerCaseText.includes("help me write") ||
         lowerCaseText.includes("draft a message") ||
         lowerCaseText.includes("how do i say") ||
@@ -111,73 +120,64 @@ export const handleChatMessage = functions.https.onCall(async (data, context) =>
         lowerCaseText.includes("send a message saying")) {
         interactionType = 'generation';
     }
-  // TODO: Add logic for 'clarification' if needed
   functions.logger.info(`[${userId}/${connectionId}] Determined interaction type: ${interactionType}`);
-
 
   // --- Step 3: Fetch History and Prepare for AI Call ---
   let history: admin.firestore.DocumentData[] = [];
   try {
-    // Fetch history from the correct path
-    const historySnapshot = await messagesRef // Use the ref we already have
-      .orderBy("timestamp", "desc") // Get recent messages first
-      .limit(11) // Limit context window + the message just added (adjust as needed)
+    const historySnapshot = await messagesRef // Use the determined ref
+      .orderBy("timestamp", "desc") 
+      .limit(11) // Limit context window + the message just added
       .get();
-
-    // Filter out the message we *just* added (it's in messageText) and map, then reverse
     history = historySnapshot.docs
-        .filter(doc => doc.id !== userMessageRef?.id) // Exclude the current user message doc
+        .filter(doc => doc.id !== userMessageRef?.id) 
         .map(doc => doc.data())
-        .reverse(); // Reverse to maintain chronological order for the AI
-
-    functions.logger.info(`[${userId}/${connectionId}] Fetched last ${history.length} messages for context.`);
+        .reverse(); 
+    functions.logger.info(`[${userId}/${connectionId}] Fetched last ${history.length} messages from ${messagesRef.path} for context.`);
   } catch (error) {
-    functions.logger.error(`[${userId}/${connectionId}] Error fetching message history:`, error);
-    // Continue without history, but log it. Could also throw here.
+    functions.logger.error(`[${userId}/${connectionId}] Error fetching message history from ${messagesRef.path}:`, error);
   }
 
-  // --- Step 4: Call AI Model ---
-  let aiResponseText = "Sorry, I encountered an issue generating a response."; // Default error message
+  // --- Step 4: Call AI Model (Remains the same) ---
+  let aiResponseText = "Sorry, I encountered an issue generating a response."; 
   try {
-      // Pass the current message text and the fetched history
-      aiResponseText = await generateCoachResponse(messageText, history); 
+      aiResponseText = await generateCoachResponse(messageText, history);
   } catch (error) {
       functions.logger.error(`[${userId}/${connectionId}] Error calling generateCoachResponse:`, error);
-      // Keep default error message, the error is already logged
-      // Optionally re-throw if client needs specific failure info
-      // throw new functions.https.HttpsError('internal', 'AI processing failed.', error);
   }
 
   // --- Step 5: Write AI response back to Firestore ---
   try {
-    await messagesRef.add({
+    await messagesRef.add({ // Use the determined ref
       sender: 'ai',
       text: aiResponseText,
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
       interactionType: interactionType
     });
-    functions.logger.info(`[${userId}/${connectionId}] AI response added successfully.`);
+    functions.logger.info(`[${userId}/${connectionId}] AI response added successfully to path ${messagesRef.path}.`);
   } catch (error) {
-    functions.logger.error(`[${userId}/${connectionId}] Error writing AI response:`, error);
-    // Don't throw here, user message is saved, AI just failed to save response
+    functions.logger.error(`[${userId}/${connectionId}] Error writing AI response to path ${messagesRef.path}:`, error);
   }
 
-   // --- Step 6: Optionally update the parent Connection document ---
-  // TODO: Consider if updating lastMessagePreview is still needed on the USER's connection doc
-  try {
-      const connectionRef = db.collection('users').doc(userId).collection('connections').doc(connectionId);
-      const previewText = aiResponseText.length > 90 ? aiResponseText.substring(0, 90) + "..." : aiResponseText;
-      await connectionRef.update({
-          lastMessagePreview: previewText,
-          timestamp: admin.firestore.FieldValue.serverTimestamp()
-      });
-      functions.logger.info(`[${userId}/${connectionId}] Connection document updated.`);
-  } catch (error) {
-      functions.logger.error(`[${userId}/${connectionId}] Error updating connection document:`, error);
+  // --- Step 6: Optionally update the parent Connection document (SKIP for general chat) ---
+  if (!isGeneralChat) {
+    try {
+        const connectionRef = db.collection('users').doc(userId).collection('connections').doc(connectionId);
+        const previewText = aiResponseText.length > 90 ? aiResponseText.substring(0, 90) + "..." : aiResponseText;
+        await connectionRef.update({
+            lastMessagePreview: previewText,
+            timestamp: admin.firestore.FieldValue.serverTimestamp()
+        });
+        functions.logger.info(`[${userId}/${connectionId}] Connection document updated.`);
+    } catch (error) {
+        // Log error if the connection doc doesn't exist or update fails, but don't fail the function
+        functions.logger.warn(`[${userId}/${connectionId}] Non-critical error updating connection document (might not exist):`, error);
+    }
+  } else {
+      functions.logger.info(`[${userId}/heartglow-ai] Skipping connection document update for general chat.`);
   }
 
-  // --- Step 7: Return Success (or result if needed) ---
-   // Return success status and maybe the AI response or message ID if client needs it
-  return { success: true, message: aiResponseText }; 
+  // --- Step 7: Return Success ---
+   return { success: true, message: aiResponseText }; 
 
 }); 

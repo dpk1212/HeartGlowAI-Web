@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut, BrainCircuit, BarChart3, Sparkles } from 'lucide-react'; // Add new icons if preferred over emojis
+import { User, Settings, LogOut, BrainCircuit, Users } from 'lucide-react'; // Update icons
 
 // Helper function to get initials - simplified
 const getInitials = (email: string): string => {
@@ -76,29 +76,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <Link href="/" legacyBehavior passHref>
                   {/* Use simple link style, add padding/hover manually */}
                   <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
-                    <BrainCircuit className="h-4 w-4" /> {/* Use icon */}
-                    {/* Or 🧠 */}
+                    <BrainCircuit className="h-4 w-4" />
                     Chat
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>
-              {/* Insights Link (mapped to /growth for now) */}
+              {/* Connections Link */}
               <NavigationMenuItem>
-                <Link href="/growth" legacyBehavior passHref>
+                <Link href="/connections" legacyBehavior passHref>
                   <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
-                    <BarChart3 className="h-4 w-4" /> {/* Use icon */}
-                    {/* Or 📈 */}
-                    Insights
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              {/* GlowScore Link (mapped to / for now, could be /glowscore) */}
-              <NavigationMenuItem>
-                <Link href="/" legacyBehavior passHref> 
-                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
-                    <Sparkles className="h-4 w-4" /> {/* Use icon */}
-                    {/* Or ✨ */}
-                    GlowScore
+                    <Users className="h-4 w-4" />
+                    Connections
                   </NavigationMenuLink>
                 </Link>
               </NavigationMenuItem>

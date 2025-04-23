@@ -187,7 +187,7 @@ const IndexPage: NextPage = () => {
           />
 
           {/* --- RENDER CHAT INTERFACE --- */}
-           <div className="h-[calc(100vh_-_theme(space.16))] -mt-4 -mx-4"> 
+           <div className="h-[calc(100vh-240px)] -mt-4 -mx-4"> 
              <ChatLayout
                connections={chatConnections}
                messages={chatMessages}

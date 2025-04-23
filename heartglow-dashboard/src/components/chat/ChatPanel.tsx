@@ -157,7 +157,7 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => Promise<void>; isSe
     // Use form for accessibility and submission handling
     <form
         onSubmit={handleSubmit}
-        className="flex items-end gap-3 p-4 border-t border-border/20 bg-background/10 backdrop-blur-sm" // Added slight background to input area
+        className="flex items-end gap-3 p-5 border-t border-border/20 bg-background/30 backdrop-blur-sm shadow-inner" 
     >
       {/* Apply new styling to Textarea */}
       <Textarea
@@ -169,7 +169,7 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => Promise<void>; isSe
         // Apply specified classes + resize-none and rows={1} for initial size
         className={cn(
             "flex-1 rounded-2xl bg-background/30 backdrop-blur border border-muted/50 shadow-inner p-4 text-base", // Adjusted padding
-            "placeholder:text-muted-foreground resize-none overflow-y-auto min-h-[52px]", // Set min-height = button height
+            "placeholder:text-muted-foreground resize-none overflow-y-auto min-h-[56px]", // Increased min-height
             "focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-0" // Standard focus outline
         )}
         rows={1} // Start with 1 row, auto-resizes
@@ -217,7 +217,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ messages, isLoadingMessages, onSe
         <ChatMessageList messages={messages} isLoading={isLoadingMessages} />
       )}
       {/* Input area is always visible below message list or empty state */}
-      <ChatInput onSendMessage={onSendMessage} isSending={isSendingMessage} />
+      <div className="sticky bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-background to-transparent pt-3">
+        <ChatInput onSendMessage={onSendMessage} isSending={isSendingMessage} />
+      </div>
     </div>
   );
 };

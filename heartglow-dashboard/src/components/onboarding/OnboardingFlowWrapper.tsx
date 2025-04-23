@@ -99,12 +99,10 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
 
   // --- Onboarding Paywall Content --- (Define the specific content here)
   const onboardingPaywallContent = {
-    title: <>✨ You just said something that matters.</>,
-    description: <>
-      Imagine how your relationships could feel… if you did that more often.
-      {'\n\n'}
-      With HeartGlow Premium, you'll unlock the full journey:
-    </>,
+    title: "✨ You just said something that matters.",
+    description: 
+      `Imagine how your relationships could feel… if you did that more often.\n\n` +
+      `With HeartGlow Premium, you'll unlock the full journey:`,
     features: [
       { name: 'Save every message you create — love notes, check-ins, or hard truths', icon: BookmarkFilledIcon },
       { name: 'Track how your emotional communication grows with GlowScore', icon: BarChartIcon },
@@ -113,7 +111,7 @@ const OnboardingFlowWrapper = ({ currentStep, setCurrentStep }: OnboardingFlowWr
       { name: 'Build habits of care, clarity, and connection — one message at a time', icon: Link2Icon },
     ],
     ctaText: "💖 Upgrade to HeartGlow Premium",
-    footerText: <>Start free. Cancel anytime. Always private.</>,
+    footerText: "Start free. Cancel anytime. Always private.",
     dismissText: "Maybe later. Finish onboarding."
   };
 

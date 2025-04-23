@@ -13,13 +13,13 @@ interface PaywallFeature {
 }
 
 interface PaywallContent {
-  title: React.ReactNode;
-  description: React.ReactNode;
+  title: string;
+  description: string;
   features: PaywallFeature[];
   ctaText: string;
-  footerText: React.ReactNode;
+  footerText: string;
   dismissText?: string;
-  closingMessage?: React.ReactNode;
+  closingMessage?: string;
 }
 
 /**
@@ -28,16 +28,10 @@ interface PaywallContent {
  * Enhanced with more sophisticated visual styling
  */
 export const onboardingPaywallContent: PaywallContent = {
-  title: (
-    <span className="text-gradient-primary font-serif">
-      Great relationships don't just happen. They're built — one message, one moment, one conversation at a time.
-    </span>
-  ),
-  description: (
-    <span className="leading-relaxed">
-      HeartGlowAI is your unified relationship companion — a powerful, private chat experience that helps you improve how you communicate, resolve tension, build connection, and say the things that matter most.
-    </span>
-  ),
+  title: 
+    "Great relationships don't just happen. They're built — one message, one moment, one conversation at a time.",
+  description: 
+    "HeartGlowAI is your unified relationship companion — a powerful, private chat experience that helps you improve how you communicate, resolve tension, build connection, and say the things that matter most.",
   features: [
     { 
       name: 'Real-time chat guidance for navigating love, conflict, and confusion',
@@ -56,12 +50,8 @@ export const onboardingPaywallContent: PaywallContent = {
     },
   ],
   ctaText: "Start Free — Begin Your Premium Journey",
-  footerText: (
-    <span className="space-y-1">
-      <span className="block font-medium">7-day free trial · Cancel anytime · Privacy guaranteed</span>
-      <span className="block text-xs italic mt-2.5">It's not just what you say. It's how you grow through saying it.</span>
-    </span>
-  ),
+  footerText: 
+    "7-day free trial · Cancel anytime · Privacy guaranteed\nIt's not just what you say. It's how you grow through saying it.",
   dismissText: "Continue with free access",
   closingMessage: "You don't have to navigate love, conflict, or connection alone anymore. Let HeartGlow guide the way."
 };

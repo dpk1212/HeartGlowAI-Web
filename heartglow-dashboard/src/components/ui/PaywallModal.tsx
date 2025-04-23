@@ -57,9 +57,10 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
     setError(null);
     
     // Log analytics event - fix analytics check
-    if (analytics) {
-      try {
-        logEvent(analytics, 'begin_checkout', {
+    try {
+      const analyticsInstance = await analytics; // Await the promise
+      if (analyticsInstance) { // Check if instance exists
+        logEvent(analyticsInstance, 'begin_checkout', { // Use the resolved instance
           items: [
             {
               item_name: 'Premium Subscription',
@@ -68,9 +69,9 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
           ],
           source: source,
         });
-      } catch (err) {
-        console.error('Error logging analytics event:', err);
       }
+    } catch (err) {
+      console.error('Error logging analytics event:', err);
     }
     
     try {
@@ -85,16 +86,17 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
     }
   };
 
-  const handleDismiss = () => {
+  const handleDismiss = async () => { // Make function async
     // Log analytics event for dismissing paywall - fix analytics check
-    if (analytics) {
-      try {
-        logEvent(analytics, 'paywall_dismissed', {
+    try {
+      const analyticsInstance = await analytics; // Await the promise
+      if (analyticsInstance) { // Check if instance exists
+        logEvent(analyticsInstance, 'paywall_dismissed', { // Use the resolved instance
           source: source,
         });
-      } catch (err) {
-        console.error('Error logging analytics event:', err);
-      }
+      } 
+    } catch (err) {
+      console.error('Error logging analytics event:', err);
     }
     onClose();
   };

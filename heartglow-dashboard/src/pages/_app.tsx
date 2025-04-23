@@ -184,7 +184,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
         isOpen={isPaywallOpen} 
         onClose={handleClosePaywall}
         content={isPostWelcome ? onboardingPaywallContent : undefined}
-        isPostWelcome={isPostWelcome}
       />
     </>
   );

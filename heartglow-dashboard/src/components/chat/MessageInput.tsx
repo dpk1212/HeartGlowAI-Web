@@ -45,6 +45,30 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled = false, i
       onSubmit={handleSubmit} 
       className="relative max-w-3xl mx-auto w-full mb-4"
     >
+      {/* Prompt Starter Buttons Container */}
+      <div className="flex items-center justify-center space-x-2 mb-2">
+        <button 
+          type="button" 
+          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors"
+          // onClick={() => {/* Handle suggestion click */}} // Add functionality later
+        >
+          Help Generate a Message
+        </button>
+        {/* Add more buttons as needed */}
+         <button 
+          type="button" 
+          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors"
+        >
+          Analyze Dynamics
+        </button>
+         <button 
+          type="button" 
+          className="bg-card/80 hover:bg-card text-muted-foreground px-3 py-1.5 rounded-full text-sm border border-border/50 transition-colors hidden sm:inline-flex" // Hide on small screens
+        >
+          Suggest a Reply
+        </button>
+      </div>
+
       {/* ChatGPT-inspired message box with more compact design */}
       <div 
         className={`
@@ -65,7 +89,7 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled = false, i
             w-full resize-none overflow-y-auto z-10
             bg-transparent border-none text-gray-100 placeholder-gray-400/80
             focus-visible:ring-0 focus-visible:ring-offset-0
-            min-h-[36px] max-h-[120px] py-1.5 px-3 pr-11
+            min-h-[80px] max-h-[200px] py-2.5 px-3 pr-11
             ${disabled || isSending ? 'opacity-60 cursor-not-allowed' : ''}
           `}
           disabled={disabled || isSending}

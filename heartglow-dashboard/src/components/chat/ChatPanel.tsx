@@ -34,8 +34,32 @@ const EmptyChatPanel = () => {
   );
 };
 
+// --- Typing Animation Component ---
+const TypingAnimation = () => {
+  return (
+    <div className="flex items-end gap-2 mt-3 justify-start animate-fadeIn">
+      <Avatar className="h-8 w-8 flex-shrink-0">
+        <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white text-xs">
+          AI
+        </AvatarFallback>
+      </Avatar>
+      <div className="bg-card border border-border/50 rounded-lg rounded-bl-none px-4 py-3 max-w-[100px] shadow-sm">
+        <div className="flex space-x-1">
+          <div className="w-2 h-2 rounded-full bg-gray-300 animate-typing-1"></div>
+          <div className="w-2 h-2 rounded-full bg-gray-300 animate-typing-2"></div>
+          <div className="w-2 h-2 rounded-full bg-gray-300 animate-typing-3"></div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Message List (Corrected Types) ---
-const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean }> = ({ messages, isLoading }) => {
+const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean; isSending?: boolean }> = ({ 
+  messages, 
+  isLoading,
+  isSending 
+}) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,7 +71,7 @@ const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean }> = (
          }
       }, 50);
     }
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isSending]);
 
   if (isLoading) {
     return (
@@ -98,7 +122,11 @@ const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean }> = (
           )}
         </div>
       ))}
-       <div className="h-2" />
+      
+      {/* Show typing animation if a message is being sent */}
+      {isSending && <TypingAnimation />}
+      
+      <div className="h-2" />
     </div>
   );
 };
@@ -214,7 +242,11 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ messages, isLoadingMessages, onSe
         <EmptyChatPanel />
       ) : (
         // Show message list otherwise (handles its own loading state internally)
-        <ChatMessageList messages={messages} isLoading={isLoadingMessages} />
+        <ChatMessageList 
+          messages={messages} 
+          isLoading={isLoadingMessages} 
+          isSending={isSendingMessage}
+        />
       )}
       {/* Input area is always visible below message list or empty state */}
       <div className="sticky bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-background to-transparent pt-3">

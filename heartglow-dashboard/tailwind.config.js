@@ -152,6 +152,16 @@ module.exports = {
             boxShadow: '0 0 25px 5px rgba(255, 79, 129, 0.3)'
           }
         },
+        'typing-animation': {
+          '0%, 100%': {
+            opacity: 0.2,
+            transform: 'translateY(0px)'
+          },
+          '50%': {
+            opacity: 1,
+            transform: 'translateY(-2px)'
+          }
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -170,6 +180,9 @@ module.exports = {
         shimmer: 'shimmer 3s infinite',
         wiggle: 'wiggle 1.5s ease-in-out infinite',
         'shadow-glow': 'shadow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'typing-1': 'typing-animation 1s infinite 0.1s',
+        'typing-2': 'typing-animation 1s infinite 0.3s',
+        'typing-3': 'typing-animation 1s infinite 0.5s',
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },

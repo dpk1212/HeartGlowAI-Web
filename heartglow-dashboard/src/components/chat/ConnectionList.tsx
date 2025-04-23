@@ -43,28 +43,28 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
             className={cn(
               "w-full justify-start h-auto p-3 text-left", // Base styles: full width, left align, auto height, padding
               selectedConnectionId === conn.id ? 
-                "bg-muted hover:bg-muted" : // Selected style
-                "hover:bg-muted/50" // Hover style for non-selected
+                "bg-gradient-to-r from-[#382554]/90 to-[#1F1F30]/90 hover:from-[#3D2961]/90 hover:to-[#232335]/90 shadow-sm" : // Enhanced selected style
+                "hover:bg-[#1E1E2D]/70" // Enhanced hover style for non-selected
             )}
           >
             <div className="flex items-center space-x-3">
-              <Avatar className="h-8 w-8"> {/* Slightly smaller avatar */} 
+              <Avatar className="h-9 w-9 border-2 border-transparent shadow-md"> {/* Slightly larger and add shadow */} 
                 {/* <AvatarImage src="/path/to/image.jpg" /> */}
-                <AvatarFallback className="bg-pink-600/80 text-white"> {/* Example fallback style */} 
+                <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white font-medium"> {/* Use gradient */} 
                   {getInitials(conn.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="overflow-hidden"> {/* Prevent text overflow */} 
                 <p className={cn(
-                  "font-medium truncate text-sm", 
-                  selectedConnectionId === conn.id ? 'text-primary-foreground' : 'text-primary-foreground' // Text color (might adjust based on theme)
+                  "font-medium truncate text-base", // Slightly larger text 
+                  selectedConnectionId === conn.id ? 'text-white' : 'text-white/90' // More vibrant text
                   )}>
                   {conn.name || 'Unnamed Connection'}
                 </p>
                 {conn.relationship && (
                   <p className={cn(
                     "text-xs truncate",
-                    selectedConnectionId === conn.id ? 'text-muted-foreground' : 'text-muted-foreground' // Muted text color
+                    selectedConnectionId === conn.id ? 'text-[#E2E2E2]' : 'text-[#C8C8D0]' // Brighter muted text
                     )}>
                     {conn.relationship}
                   </p>
@@ -74,7 +74,7 @@ const ConnectionList: React.FC<ConnectionListProps> = ({
           </Button>
         ))
       ) : (
-        <p className="text-muted-foreground text-center py-4 text-sm">No connections found.</p>
+        <p className="text-white/80 text-center py-4 text-sm">No connections found.</p>
       )}
     </div>
   );

@@ -3,7 +3,6 @@ import MessageItem from './MessageItem'; // Import the sub-component
 // TODO: Define actual Message type (import from types file) -> Use the shared Message type
 // type Message = { id: string; text: string; sender: 'user' | 'ai'; timestamp: any };
 import { Message } from '@/types'; // Import the shared Message type
-import { useChatState } from '@/context/ChatStateContext'; // Import the context hook
 
 // Define a simple typing indicator component
 const TypingIndicator: React.FC = () => (
@@ -19,12 +18,11 @@ const TypingIndicator: React.FC = () => (
 interface MessageListProps {
   messages: Message[];
   isLoading: boolean; // To handle initial loading state
-  // isSendingMessage?: boolean; // Remove prop
+  isSendingMessage?: boolean; // Add prop for AI typing indicator
 }
 
-const MessageList: React.FC<MessageListProps> = ({ messages, isLoading /*, isSendingMessage*/ }) => {
+const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, isSendingMessage }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { isSendingMessage } = useChatState(); // Get state from context
 
   // <<< Add console log here
   console.log(`MessageList render - isLoading: ${isLoading}, isSendingMessage: ${isSendingMessage}, messages count: ${messages.length}`);
@@ -40,7 +38,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading /*, isSen
   // Scroll to bottom whenever messages change OR when the typing indicator appears/disappears
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isSendingMessage]); // Keep isSendingMessage dependency from context
+  }, [messages, isSendingMessage]); // Add isSendingMessage as a dependency
 
   // Handle Loading State
   if (isLoading && messages.length === 0) { // Only show full loader if messages haven't loaded yet
@@ -83,7 +81,7 @@ const MessageList: React.FC<MessageListProps> = ({ messages, isLoading /*, isSen
           message={msg}
         />
       ))}
-      {/* Conditionally render the typing indicator using context state */}
+      {/* Conditionally render the typing indicator */}
       {isSendingMessage && <TypingIndicator />}
       {/* Dummy div to target for scrolling */}
       <div ref={messagesEndRef} />

@@ -40,7 +40,7 @@ interface ChatWindowProps {
   onSendMessage: (messageText: string) => void;
   isLoadingMessages: boolean;
   onToggleMobileSidebar: () => void; // Receive the toggle function
-  // isSendingMessage?: boolean; // Remove prop
+  isSendingMessage?: boolean; // Add isSendingMessage prop
   // TODO: Add isSending state
 }
 
@@ -50,7 +50,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   isLoadingMessages,
   onToggleMobileSidebar,
-  // isSendingMessage, // Remove from destructuring
+  isSendingMessage, // Destructure the new prop
   // isSending, // Add this when state is managed
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
@@ -73,7 +73,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // Handle clicking a prompt suggestion
   const handlePromptClick = (promptText: string) => {
-    // console.log(`[ChatWindow] handlePromptClick called with: "${promptText}"`); // Remove log
+    console.log(`[ChatWindow] handlePromptClick called with: "${promptText}"`);
     onSendMessage(promptText);
   };
 
@@ -158,11 +158,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           </div>
         )}
         
-        {/* Regular Message List - No longer passing isSendingMessage */}
+        {/* Regular Message List - Pass isSendingMessage down */}
         <MessageList 
             messages={messages} 
             isLoading={isLoadingMessages} 
-            // isSendingMessage={isSendingMessage} // Remove prop
+            isSendingMessage={isSendingMessage} // Pass down
         />
         <ScrollBar />
       </ScrollArea>

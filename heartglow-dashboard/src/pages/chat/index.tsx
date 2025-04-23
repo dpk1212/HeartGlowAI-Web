@@ -4,17 +4,17 @@ import { Connection, Message } from '@/types'; // Import shared types
 import { useConnections } from '@/hooks/useConnections'; // Import connections hook
 import { useMessages } from '@/hooks/useMessages'; // Import messages hook
 import { addConnection } from '@/firebase/db'; // <<< CHANGE IMPORT PATH
-import { getFunctions, httpsCallable } from 'firebase/functions';
-import { useAuth } from '@/hooks/useAuth'; 
-import { ChatStateProvider, useChatState } from '@/context/ChatStateContext'; // Import context
 
 // --- Firebase Imports ---
 // TODO: Verify these imports match your Firebase setup
 // import { getAuth } from "firebase/auth"; 
+import { getFunctions, httpsCallable } from 'firebase/functions';
 // TODO: Import your initialized Firebase app if needed by getAuth/getFunctions
 // import { app } from '@/firebase/firebaseConfig'; 
 
 // --- Auth Hook ---
+import { useAuth } from '@/hooks/useAuth'; 
+
 // TODO: Import actual auth hook if available (preferred)
 // import { useAuth } from '@/context/AuthContext'; 
 
@@ -28,15 +28,13 @@ import { ChatStateProvider, useChatState } from '@/context/ChatStateContext'; //
 // import { useMessages } from '@/hooks/useMessages';
 // import { getFunctions, httpsCallable } from 'firebase/functions'; // For calling cloud functions
 
-// Define ChatPageContent component to access context
-const ChatPageContent: React.FC = () => {
+const ChatPage = () => {
   // --- Authentication ---
   const { user, loading: authLoading } = useAuth(); // Use the custom hook
   const userId = user?.uid; // Get user ID from the hook's user object
-  const { setIsSendingMessage, isSendingMessage } = useChatState(); // Use context state setter and value
 
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
-  // const [isSendingMessage, setIsSendingMessage] = useState(false); // Remove local state
+  const [isSendingMessage, setIsSendingMessage] = useState(false); // State for input disable/spinner
 
   // --- Data Fetching Hooks ---
   const { 
@@ -103,7 +101,7 @@ const ChatPageContent: React.FC = () => {
     }
 
     console.log(`Sending message to ${selectedConnectionId || 'General AI Chat'}: ${textToSend}`);
-    setIsSendingMessage(true); // Use context setter
+    setIsSendingMessage(true);
 
     try {
       const functions = getFunctions();
@@ -133,7 +131,7 @@ const ChatPageContent: React.FC = () => {
       console.error("Error calling handleChatMessage function:", error);
       // TODO: Show error toast/message to user
     } finally {
-      setIsSendingMessage(false); // Use context setter
+      setIsSendingMessage(false);
     }
   };
 
@@ -161,7 +159,6 @@ const ChatPageContent: React.FC = () => {
   //   return <div>Loading Chat...</div>;
   // }
 
-  // console.log(`[ChatPage] Rendering - isSendingMessage: ${isSendingMessage}`); // Remove old log
   return (
     <ChatLayout
       connections={connections}
@@ -172,18 +169,8 @@ const ChatPageContent: React.FC = () => {
       onSaveConnection={handleSaveConnection}
       isLoadingConnections={isLoadingConnections} // Pass down loading states
       isLoadingMessages={isLoadingMessages}
-      // No longer passing isSendingMessage prop
-      // isSendingMessage={isSendingMessage} 
+      isSendingMessage={isSendingMessage} // Pass down isSendingMessage state
     />
-  );
-};
-
-// Original ChatPage now acts as the entry point and provider wrapper
-const ChatPage = () => {
-  return (
-    <ChatStateProvider>
-      <ChatPageContent />
-    </ChatStateProvider>
   );
 };
 

@@ -34,39 +34,40 @@ interface PaywallModalProps {
 // Default content if no custom content is provided
 const defaultFeatures: PaywallFeature[] = [
   { 
-    name: 'Save Unlimited Messages', 
-    description: 'Never lose a meaningful exchange',
+    name: 'Unlimited Message History & Drafts', 
+    description: 'Never lose a meaningful conversation again',
     icon: BookmarkIcon 
   },
   { 
-    name: 'Continue Your Coaching Journey', 
-    description: 'Get guided support for your relationship growth',
+    name: 'AI-Powered Relationship Coaching', 
+    description: 'Get personalized guidance for growth and connection',
     icon: ChatBubbleLeftRightIcon 
   },
   { 
-    name: 'Track & Deepen Your Connections', 
-    description: 'See your relationship progress over time',
+    name: 'Advanced Connection Insights', 
+    description: 'Track relationship progress with detailed analytics',
     icon: UsersIcon 
   },
   { 
-    name: 'Grow with GlowScore & Challenges', 
-    description: 'Gamified improvement for your communication skills',
+    name: 'Exclusive Tones & Templates', 
+    description: 'Access premium message frameworks for any situation',
     icon: SparklesIcon 
   },
   { 
-    name: 'Unlock Premium Tones & Templates', 
-    description: 'Access a library of pre-crafted message frameworks',
-    icon: PencilIcon 
+    name: 'Priority AI Generation', 
+    description: 'Get faster, higher-quality message crafting',
+    icon: LightBulbIcon 
   },
 ];
 
 const defaultContent: PaywallContent = {
-  title: "Keep Growing. Keep Glowing.",
-  description: "You've taken the first step — now unlock the full journey of connection. HeartGlow Premium gives you the space, tools, and support to deepen your relationships — one message, one insight, one meaningful moment at a time.",
+  title: "Ready to Deepen Your Connections?",
+  description: "You've experienced the power of thoughtful communication. HeartGlow Premium helps you build meaningful relationships that last — one message, one conversation, one moment at a time.",
   features: defaultFeatures,
-  ctaText: "Upgrade to HeartGlow Premium",
-  footerText: <>Start your growth for just $4.99/month – Cancel anytime</>, // Example price, adjust as needed
-  dismissText: "Not now. Keep exploring for free."
+  ctaText: "Start 7-Day Free Trial",
+  footerText: <>Premium features, zero risk • Cancel anytime</>,
+  dismissText: "Continue with limited access",
+  closingMessage: "Every relationship worth having deserves the words to make it thrive."
 };
 
 const PaywallModal: React.FC<PaywallModalProps> = ({ 
@@ -131,6 +132,9 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
 
   // Determine if we should use the dark themed styling (for the screenshot version)
   const isDarkTheme = isPostWelcome || !customContent;
+
+  // Force display on both mobile and desktop for new users
+  const isPresentOnAllDevices = true; // This ensures the component renders on all device types
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">

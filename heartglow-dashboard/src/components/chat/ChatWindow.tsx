@@ -1,8 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 // Import sub-components
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { Bars3Icon } from '@heroicons/react/24/outline';
+import { Bars3Icon, LightBulbIcon, SparklesIcon } from '@heroicons/react/24/outline';
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
 import { Timestamp } from 'firebase/firestore'; // Import Timestamp
@@ -13,6 +13,30 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import S
 // Remove HeartGlow AI connection/message constants - welcome state is now a Card
 // const heartglowAIConnection: Connection = { ... };
 // const welcomeMessages: Message[] = [ ... ];
+
+// Sample prompt suggestions for empty states
+const promptSuggestions = [
+  {
+    text: "Help craft a message to reconnect with an old friend",
+    shortText: "Reconnect with a friend",
+    icon: LightBulbIcon
+  },
+  {
+    text: "How do I have a difficult conversation with my partner?",
+    shortText: "Difficult partner conversation",
+    icon: SparklesIcon
+  },
+  {
+    text: "Write a thoughtful response to criticism I received",
+    shortText: "Respond to criticism",
+    icon: LightBulbIcon
+  },
+  {
+    text: "Express gratitude to someone who helped me recently",
+    shortText: "Express gratitude",
+    icon: SparklesIcon
+  }
+];
 
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
@@ -31,8 +55,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onToggleMobileSidebar,
   // isSending, // Add this when state is managed
 }) => {
-
   const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
+  const [showPrompts, setShowPrompts] = useState(messages.length === 0);
 
   // Scroll to bottom when messages change or connection changes
   useEffect(() => {
@@ -44,7 +68,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         }
       }, 0);
     }
+    
+    // Update prompt visibility based on message count
+    setShowPrompts(messages.length === 0);
   }, [messages, connection]); // Dependencies
+
+  // Handle clicking a prompt suggestion
+  const handlePromptClick = (promptText: string) => {
+    onSendMessage(promptText);
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">
@@ -91,12 +123,51 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         className="flex-1 py-4 px-2 sm:px-4 md:px-8 relative z-10" 
         ref={scrollContainerRef}
       >
+        {/* Empty State with Prompt Suggestions */}
+        {showPrompts && !isLoadingMessages && (
+          <div className="h-full flex flex-col items-center justify-center py-8">
+            <div className="mb-6 text-gray-400/80 text-center">
+              <p className="mb-6 text-sm sm:text-base font-medium">How can HeartGlow help you today?</p>
+              
+              {/* Enhanced Chat Bubble Suggestions - ChatGPT Inspired */}
+              <div className="space-y-3 max-w-xl">
+                {promptSuggestions.map((prompt, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePromptClick(prompt.text)}
+                    className="w-full text-left p-3.5 rounded-xl bg-[#1E1E2E]/40 hover:bg-[#252538]/70 border border-[#3A3A5C]/30 hover:border-[#4A4A7C]/50 transition-all duration-200 relative group"
+                  >
+                    <div className="absolute top-3.5 left-3.5 text-[#9161FC]/70 group-hover:text-heartglow-pink/90 transition-colors duration-200">
+                      <prompt.icon className="h-5 w-5" />
+                    </div>
+                    <p className="text-sm text-gray-300/90 ml-8 line-clamp-2">{prompt.text}</p>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Additional floating bubble suggestions */}
+              <div className="mt-12 flex flex-wrap justify-center gap-2">
+                {promptSuggestions.map((prompt, index) => (
+                  <button
+                    key={`bubble-${index}`}
+                    onClick={() => handlePromptClick(prompt.text)}
+                    className="px-4 py-2 text-xs bg-[#1E1E2E]/60 text-gray-300/90 rounded-full border border-[#3A3A5C]/30 hover:bg-[#252538] hover:border-heartglow-pink/40 transition-all duration-200 whitespace-nowrap m-1 shadow-sm hover:shadow"
+                  >
+                    {prompt.shortText}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Regular Message List */}
         <MessageList messages={messages} isLoading={isLoadingMessages} />
         <ScrollBar />
       </ScrollArea>
 
-      {/* Message Input Area */}
-      <div className="sticky bottom-0 z-10 p-3 sm:p-4 border-t border-[#2A2A40]/30 backdrop-blur-md bg-[#111120]/90 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.3)]">
+      {/* Message Input Area - ChatGPT-inspired shorter input */}
+      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4">
         <MessageInput 
           onSend={onSendMessage} 
           disabled={isLoadingMessages}

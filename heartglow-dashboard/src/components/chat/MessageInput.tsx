@@ -43,57 +43,54 @@ const MessageInput: React.FC<MessageInputProps> = ({ onSend, disabled = false, i
   return (
     <form 
       onSubmit={handleSubmit} 
-      className={`
-        flex items-end space-x-3 relative transition-all duration-200
-        ${isFocused ? 'transform scale-[1.01]' : ''}
-      `}
+      className="relative max-w-3xl mx-auto w-full mb-4"
     >
-      {/* Subtle glow when focused */}
-      {isFocused && (
-        <div className="absolute inset-0 -m-1 rounded-xl bg-heartglow-pink/5 blur-md pointer-events-none"></div>
-      )}
-      
-      <Textarea
-        value={inputText}
-        onChange={handleInputChange}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setIsFocused(true)}
-        onBlur={() => setIsFocused(false)}
-        placeholder={disabled ? "Select a connection to chat..." : "Type your message..."}
-        rows={1}
+      {/* ChatGPT-inspired message box with more compact design */}
+      <div 
         className={`
-          flex-1 resize-none overflow-y-auto z-10
-          bg-[#1A1A2E]/80 border-[#2A2A40]/60 text-gray-100 placeholder-gray-400/80
-          hover:border-[#3A3A5C]/80 focus:border-heartglow-pink/30 transition-all duration-200
-          focus-visible:ring-1 focus-visible:ring-heartglow-pink/30 focus-visible:ring-offset-0
-          min-h-[45px] max-h-[150px] rounded-xl shadow-inner backdrop-blur-sm
-          ${disabled || isSending ? 'opacity-60 cursor-not-allowed' : ''}
+          relative rounded-xl shadow-[0_0_10px_rgba(0,0,0,0.1)]
+          p-0.5 bg-[#1A1A2E]/90 transition-all duration-200
+          ${isFocused ? 'ring-1 ring-heartglow-pink/30' : 'ring-1 ring-[#2A2A40]/50'}
         `}
-        disabled={disabled || isSending}
-      />
-      
-      {/* Send Button with enhanced styling */}
-      <Button
-        type="submit"
-        size="icon"
-        disabled={disabled || isSending || !inputText.trim()}
-        className={`
-          h-[45px] w-[45px] flex-shrink-0 rounded-full z-10
-          ${isFocused || inputText.trim() 
-            ? 'bg-gradient-to-br from-heartglow-pink to-heartglow-violet shadow-lg hover:opacity-90 hover:shadow-xl' 
-            : 'bg-[#2A2A40]/80 hover:bg-[#2A2A40]'}
-          disabled:bg-gray-700/40 disabled:text-gray-500
-          transition-all duration-300 ease-out
-          ${isFocused && inputText.trim() ? 'transform scale-[1.05]' : ''}
-        `}
-        aria-label={isSending ? "Sending..." : "Send message"}
       >
-        {isSending ? (
-          <Loader2 className="h-5 w-5 animate-spin" />
-        ) : (
-          <Send className={`h-5 w-5 transition-transform duration-200 ${inputText.trim() ? 'transform rotate-0' : 'rotate-[-45deg] opacity-70'}`} />
-        )}
-      </Button>
+        <Textarea
+          value={inputText}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          placeholder={disabled ? "Select a connection to chat..." : "Message HeartGlow..."}
+          rows={1}
+          className={`
+            w-full resize-none overflow-y-auto z-10
+            bg-transparent border-none text-gray-100 placeholder-gray-400/80
+            focus-visible:ring-0 focus-visible:ring-offset-0
+            min-h-[36px] max-h-[120px] py-1.5 px-3 pr-11
+            ${disabled || isSending ? 'opacity-60 cursor-not-allowed' : ''}
+          `}
+          disabled={disabled || isSending}
+        />
+        
+        {/* Send Button inside the input */}
+        <Button
+          type="submit"
+          size="icon"
+          disabled={disabled || isSending || !inputText.trim()}
+          className={`
+            absolute right-1.5 bottom-1 h-7 w-7 
+            rounded-lg z-10 bg-transparent hover:bg-[#252538]
+            disabled:bg-transparent
+            transition-all duration-200
+          `}
+          aria-label={isSending ? "Sending..." : "Send message"}
+        >
+          {isSending ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin text-gray-400" />
+          ) : (
+            <Send className={`h-3.5 w-3.5 transition-all duration-200 ${inputText.trim() ? 'text-heartglow-pink' : 'text-gray-500'}`} />
+          )}
+        </Button>
+      </div>
     </form>
   );
 };

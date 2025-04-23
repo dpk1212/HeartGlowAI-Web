@@ -1,7 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import Link from 'next/link';
-import Footer from '../ui/Footer';
 import { cn } from "@/lib/utils";
 
 // Import shadcn/ui components & icons
@@ -157,8 +156,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         {children}
       </main>
 
-      {/* Footer */}
-      <Footer />
+      {/* Footer removed to match ChatGPT-inspired design */}
     </div>
   );
 };

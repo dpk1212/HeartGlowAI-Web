@@ -11,13 +11,14 @@ import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
+import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 
 // Define the static HeartGlow AI connection
 const heartglowAIConnection: Connection = {
   id: 'heartglow-ai', // Use a reserved ID
   name: 'HeartGlow AI',
   relationship: 'assistant', // Or 'general', 'reflection', etc.
-  createdAt: new Date(), // Or null/undefined if not needed
+  createdAt: Timestamp.now(), // Use Firestore Timestamp
   // Add other required Connection fields if necessary, potentially with default/null values
   userId: '', // Assuming userId might be part of the type, add it if needed
   imageUrl: '/assets/heartglow-logo.png', // Optional: Add a specific icon/logo

@@ -114,6 +114,14 @@ module.exports = {
             transform: 'translateY(0)'
           }
         },
+        fadeInDelay: {
+          '0%, 70%': {
+            opacity: 0
+          },
+          '100%': {
+            opacity: 1
+          }
+        },
         shimmer: {
           '0%': {
             backgroundPosition: '-200% 0'
@@ -158,6 +166,7 @@ module.exports = {
         'pulse-slow': 'pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'subtle-bounce': 'subtle-bounce 2s ease-in-out infinite',
         fadeIn: 'fadeIn 0.5s ease-out forwards',
+        'fade-in-delay': 'fadeInDelay 2s ease-out forwards',
         shimmer: 'shimmer 3s infinite',
         wiggle: 'wiggle 1.5s ease-in-out infinite',
         'shadow-glow': 'shadow-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',

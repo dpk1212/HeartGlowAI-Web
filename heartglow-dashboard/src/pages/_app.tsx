@@ -10,7 +10,6 @@ import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 import GlowGuideButton from '../components/onboarding/GlowGuideButton';
 import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
 import DashboardTour from '../components/ui/DashboardTour';
-import WelcomePopup from '../components/ui/WelcomePopup';
 
 // Helper function to get route with base path
 export function getRouteWithBasePath(path: string): string {
@@ -24,7 +23,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   const { isPaywallOpen, closePaywall } = usePaywall();
   const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
-  const [isWelcomePopupOpen, setIsWelcomePopupOpen] = useState(false);
 
   // --- START: Theme Handling --- 
   useEffect(() => {
@@ -41,28 +39,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
     //       (e.g., a theme toggle button). If not, it will primarily follow system pref.
   }, []);
   // --- END: Theme Handling ---
-
-  // --- START: Welcome Popup Logic --- 
-  useEffect(() => {
-    // Only run this check on the client-side
-    if (typeof window !== 'undefined') {
-      const hasSeenPopup = localStorage.getItem('hasSeenHeartglowWelcome');
-      // Show if:
-      // 1. Flag is not set
-      // 2. Auth is not loading
-      // 3. We have a user profile (user is logged in)
-      // 4. We are not on the login page itself
-      if (!hasSeenPopup && !loading && userProfile && router.pathname !== '/login') {
-        // Optional delay to ensure page elements are settled
-        const timer = setTimeout(() => {
-            setIsWelcomePopupOpen(true);
-            localStorage.setItem('hasSeenHeartglowWelcome', 'true');
-        }, 500); // 500ms delay
-        return () => clearTimeout(timer); // Cleanup timer on unmount/re-render
-      }
-    }
-  }, [userProfile, loading, router.pathname]); // Depend on userProfile, loading state, and pathname
-  // --- END: Welcome Popup Logic ---
 
   // --- START: Tour Delay Logic ---
   useEffect(() => {
@@ -170,12 +146,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
 
       {/* Render Paywall Modal Conditionally */}
       <PaywallModal isOpen={isPaywallOpen} onClose={closePaywall} />
-
-      {/* Render Welcome Popup Conditionally */}
-      <WelcomePopup 
-        isOpen={isWelcomePopupOpen} 
-        onClose={() => setIsWelcomePopupOpen(false)} 
-      />
     </>
   );
 }

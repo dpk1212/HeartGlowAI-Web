@@ -45,46 +45,49 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({
           <div className="space-y-7 text-center relative z-10">
             {/* HEADLINE - Serif, elegant */}
             <h2 className="text-3xl font-serif text-white/95 leading-tight hover:text-white/100 transition-colors duration-300 py-1">
-              You don't have to figure it all out alone 💬
+              The hardest part of connection is knowing where to start. That's where we come in.
             </h2>
 
             {/* EMOTIONAL COPY - Whisper-like */}
             <p className="text-[#E2E2E2]/80 text-sm italic font-light leading-relaxed">
-              Whether it's a situationship that's confusing, a relationship that feels tense, or a moment that just deserves better words — you're in the right place.
+              Maybe you're in a situationship. Maybe something's been weighing on you. Maybe you just want to express what they really mean to you — but you're not sure how.
+              <br /><br />
+              You're not alone. And you don't have to figure it out alone.
             </p>
 
             {/* CORE VALUE COPY - Clean with breathing space */}
             <div className="text-sm text-[#E2E2E2]/90 space-y-4 leading-relaxed">
               <p>
-                HeartGlow helps you express what you're feeling — with clarity, kindness, and courage.
+                HeartGlow helps you find the right words for the moments that matter. Whether it's reaching out with love, navigating tension, or speaking your truth — we're here to guide you through it.
               </p>
               <p>
-                We don't just give you the right words. We help you understand yourself as you write them.
+                We won't just give you a message.<br />
+                We'll help you feel ready to send it.
               </p>
             </div>
 
-            {/* EMOTION OPTIONS - Pill-like cards instead of bullets */}
+            {/* PROMPT OPTIONS SECTION - Pill-like cards */}
             <div className="flex flex-col gap-3 py-2">
-              <p className="text-sm font-medium text-white/90 text-left mb-1">Start by choosing your path:</p>
+              <p className="text-sm font-medium text-white/90 text-left mb-1">What do you need help with today?</p>
               
               <button className="text-left px-4 py-3 rounded-xl bg-[#1F1F3A]/40 hover:bg-[#1F1F3A]/70 border border-[#3A3A5C]/30 hover:border-[#3A3A5C]/50 transition-all duration-300 group">
                 <span className="flex items-center text-[#E2E2E2]/90 group-hover:text-white/95">
                   <span className="mr-2 text-lg">💭</span>
-                  <span className="text-sm">"What even are we?" <span className="text-xs opacity-70 ml-1">(Decode your situationship)</span></span>
+                  <span className="text-sm font-medium">"What even are we?" <span className="block text-xs opacity-70 ml-6 mt-0.5">Decode your situationship</span></span>
                 </span>
               </button>
               
               <button className="text-left px-4 py-3 rounded-xl bg-[#1F1F3A]/40 hover:bg-[#1F1F3A]/70 border border-[#3A3A5C]/30 hover:border-[#3A3A5C]/50 transition-all duration-300 group">
                 <span className="flex items-center text-[#E2E2E2]/90 group-hover:text-white/95">
                   <span className="mr-2 text-lg">🩺</span>
-                  <span className="text-sm">"I need to say something hard" <span className="text-xs opacity-70 ml-1">(Navigate conflict gently)</span></span>
+                  <span className="text-sm font-medium">"I need to say something hard" <span className="block text-xs opacity-70 ml-6 mt-0.5">Navigate a difficult moment with care</span></span>
                 </span>
               </button>
               
               <button className="text-left px-4 py-3 rounded-xl bg-[#1F1F3A]/40 hover:bg-[#1F1F3A]/70 border border-[#3A3A5C]/30 hover:border-[#3A3A5C]/50 transition-all duration-300 group">
                 <span className="flex items-center text-[#E2E2E2]/90 group-hover:text-white/95">
                   <span className="mr-2 text-lg">❤️</span>
-                  <span className="text-sm">"They deserve to hear this" <span className="text-xs opacity-70 ml-1">(Send love with intention)</span></span>
+                  <span className="text-sm font-medium">"They deserve to hear this" <span className="block text-xs opacity-70 ml-6 mt-0.5">Send love with intention</span></span>
                 </span>
               </button>
             </div>
@@ -101,11 +104,11 @@ const WelcomeDialog: React.FC<WelcomeDialogProps> = ({
                 )}
                 onClick={handleStart}
               >
-                Start My Conversation ✨
+                Let's Begin — I'll help you find the words
               </Button>
               
               {/* Delayed appearance quote */}
-              <p className="text-xs text-[#E2E2E2]/60 italic animate-fade-in-delay">
+              <p className="text-xs text-[#E2E2E2]/60 italic animate-fade-in-delay font-serif">
                 "One message. That's all it takes to shift a connection."  
               </p>
             </div>

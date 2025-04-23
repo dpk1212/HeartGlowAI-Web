@@ -10,6 +10,8 @@ import ConnectionsCarousel from '../components/ui/ConnectionsCarousel';
 import RecentMessagesList from '../components/ui/RecentMessagesList';
 import ComingSoonCard from '../components/ui/ComingSoonCard';
 import CoachingEntryCard from '../components/ui/CoachingEntryCard';
+import WelcomeDialog from '../components/ui/WelcomeDialog';
+import { useWelcomeDialog } from '../hooks/useWelcomeDialog';
 // import ChallengeCard from '../components/ui/ChallengeCard'; // Comment out
 // import GlowScoreSummaryCard from '../components/ui/GlowScoreSummaryCard';
 // import ChallengeSelection from '../components/ui/ChallengeSelection';
@@ -34,6 +36,9 @@ const IndexPage: NextPage = () => {
   // const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Comment out
   const router = useRouter();
   const userId = user?.uid;
+  
+  // Welcome dialog state
+  const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
 
   // --- Chat State ---
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
@@ -149,6 +154,12 @@ const IndexPage: NextPage = () => {
   };
   // --- End Chat Handlers ---
 
+  // Handle start conversation from welcome dialog
+  const handleStartConversation = () => {
+    // Select HeartGlow AI chat
+    setSelectedConnectionId('heartglow-ai');
+  };
+
   // --- Challenge Handlers (COMMENTED OUT) ---
   // const handleSelectChallenge = async (challengeId: string) => { ... };
   // const handleSkipChallenge = async () => { ... };
@@ -168,6 +179,13 @@ const IndexPage: NextPage = () => {
 
       <AuthGuard>
         <DashboardLayout>
+          {/* Welcome Dialog */}
+          <WelcomeDialog 
+            open={showWelcome}
+            onClose={closeWelcomeDialog}
+            onStartConversation={handleStartConversation}
+          />
+
           {/* --- RENDER CHAT INTERFACE --- */}
            <div className="h-[calc(100vh_-_theme(space.16))] -mt-4 -mx-4"> 
              <ChatLayout

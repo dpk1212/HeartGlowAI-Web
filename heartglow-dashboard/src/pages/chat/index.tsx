@@ -97,13 +97,11 @@ const ChatPage = () => {
       // Prepare payload conditionally
       const payload: { messageText: string; connectionId?: string | null } = {
         messageText: textToSend,
+        connectionId: selectedConnectionId, // Explicitly include null if selectedConnectionId is null
       };
-      if (selectedConnectionId !== null && selectedConnectionId !== undefined) {
-        payload.connectionId = selectedConnectionId;
-      }
 
       // Pass the conditional payload
-      // Note: We are now explicitly omitting connectionId when it's null/undefined
+      // Note: We are now explicitly passing null for connectionId when it's the general chat
       console.log("Calling handleChatMessage with payload:", payload); // Add logging
       const result = await callHandleChatMessage(payload);
       

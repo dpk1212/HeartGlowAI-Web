@@ -8,8 +8,6 @@ import { PaywallProvider, usePaywall } from '../context/PaywallContext';
 import PaywallModal from '../components/ui/PaywallModal';
 import onboardingPaywallContent from '../components/ui/OnboardingPaywallContent';
 import AccountLinkBanner from '../components/ui/AccountLinkBanner';
-import GlowGuideButton from '../components/onboarding/GlowGuideButton';
-import GlowGuidePanel from '../components/onboarding/GlowGuidePanel';
 import DashboardTour from '../components/ui/DashboardTour';
 
 // Helper function to get route with base path
@@ -22,7 +20,6 @@ export function getRouteWithBasePath(path: string): string {
 function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProps['router'] }) {
   const { userProfile, loading, updateUserProfile } = useAuth();
   const { isPaywallOpen, closePaywall } = usePaywall();
-  const [isGlowGuideOpen, setIsGlowGuideOpen] = useState(false);
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
   // Track if paywall is shown after welcome
   const [isPostWelcome, setIsPostWelcome] = useState(false);
@@ -166,18 +163,6 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
           onComplete={handleCompleteTour} 
         />
       )}
-
-      {/* Render GlowGuide persistently - remove props related to old onboarding */}
-      <GlowGuideButton 
-        onClick={() => setIsGlowGuideOpen(true)} 
-        // pulse={showOnboarding} // Removed pulse prop
-      />
-      <GlowGuidePanel 
-        isOpen={isGlowGuideOpen} 
-        onClose={() => setIsGlowGuideOpen(false)} 
-        // isOnboarding={showOnboarding} // Removed isOnboarding prop
-        // currentOnboardingStep={showOnboarding ? onboardingStep : undefined} // Removed step prop
-      />
 
       {/* Render Paywall Modal Conditionally */}
       <PaywallModal 

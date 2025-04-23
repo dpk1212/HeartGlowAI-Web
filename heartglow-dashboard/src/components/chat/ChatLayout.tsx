@@ -20,7 +20,6 @@ const heartglowAIConnection: Connection = {
   relationship: 'assistant', // Or 'general', 'reflection', etc.
   createdAt: Timestamp.now(), // Use Firestore Timestamp
   // Add other required Connection fields if necessary, potentially with default/null values
-  userId: '', // Assuming userId might be part of the type, add it if needed
   imageUrl: '/assets/heartglow-logo.png', // Optional: Add a specific icon/logo
 };
 

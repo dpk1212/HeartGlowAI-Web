@@ -29,7 +29,7 @@ interface PaywallContent {
  */
 export const onboardingPaywallContent: PaywallContent = {
   title: 
-    "Great relationships don't just happen. They're built — one message, one moment, one conversation at a time.",
+    "Unlock the Full HeartGlow Experience",
   description: 
     "HeartGlowAI is your unified relationship companion — a powerful, private chat experience that helps you improve how you communicate, resolve tension, build connection, and say the things that matter most.",
   features: [
@@ -49,9 +49,10 @@ export const onboardingPaywallContent: PaywallContent = {
       icon: LightBulbIcon 
     },
   ],
-  ctaText: "Start Free — Begin Your Premium Journey",
+  ctaText: 
+    "Upgrade to Premium ($4.99/month)",
   footerText: 
-    "7-day free trial · Cancel anytime · Privacy guaranteed\nIt's not just what you say. It's how you grow through saying it.",
+    "Unlock powerful features. Cancel anytime. Privacy guaranteed.",
   dismissText: "Continue with free access",
   closingMessage: "You don't have to navigate love, conflict, or connection alone anymore. Let HeartGlow guide the way."
 };

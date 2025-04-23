@@ -121,56 +121,56 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
       className="relative z-50"
     >
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" /> {/* Slightly darker backdrop */}
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm" aria-hidden="true" />
       
       {/* Modal positioning */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        {/* Apply dark theme styles more directly, increase padding, adjust max-width */}
-        <Dialog.Panel className={`mx-auto max-w-lg rounded-xl ${theme === 'dark' ? 'bg-gray-900 border border-gray-700' : 'bg-white shadow-lg'} p-7 sm:p-8 w-full transition-all transform-gpu scale-100 opacity-100 animate-in fade-in zoom-in-95 duration-300`}>
-          {/* Close button - only show if not present on all devices */}
+        {/* Apply dark theme styles: bg-gray-900, border-gray-700 */}
+        <Dialog.Panel className={`mx-auto max-w-lg rounded-xl bg-gray-900 border border-gray-700 p-7 sm:p-8 w-full transition-all transform-gpu scale-100 opacity-100 animate-in fade-in zoom-in-95 duration-300`}>
+          {/* Close button - update dark theme hover */}
           {!isPresentOnAllDevices && (
             <button
               onClick={handleDismiss}
-              className={`absolute top-3 right-3 p-1.5 rounded-full ${theme === 'dark' ? 'text-gray-400 hover:text-white hover:bg-gray-700' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-100'} transition-colors`}
+              className={`absolute top-3 right-3 p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 transition-colors`} 
             >
               <span className="sr-only">Close</span>
               <XMarkIcon className="h-6 w-6" />
             </button>
           )}
           
-          {/* Title - Increase size, add spacing */}
-          <Dialog.Title className={`text-2xl sm:text-3xl font-bold mb-3 text-center ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+          {/* Title - update dark theme text color */}
+          <Dialog.Title className={`text-2xl sm:text-3xl font-bold mb-3 text-center text-white`}>
             {displayContent.title}
           </Dialog.Title>
           
-          {/* Description - Increase size, center, add spacing */}
-          <p className={`mb-7 text-base text-center max-w-md mx-auto ${theme === 'dark' ? 'text-gray-300' : 'text-gray-600'}`}>
+          {/* Description - update dark theme text color */}
+          <p className={`mb-7 text-base text-center max-w-md mx-auto text-gray-300`}>
             {displayContent.description}
           </p>
           
-          {/* Features list - Improve layout and icon display */}
+          {/* Features list - update dark theme colors */}
           <div className="space-y-5 mb-8">
             {displayContent.features.map((feature, index) => (
               <div key={index} className="flex items-start">
-                {/* Use a consistent check icon */}
-                <CheckIcon className={`h-6 w-6 mr-3 mt-0.5 flex-shrink-0 ${theme === 'dark' ? 'text-indigo-400' : 'text-indigo-600'}`} />
+                {/* Use a consistent check icon - update dark theme color */}
+                <CheckIcon className={`h-6 w-6 mr-3 mt-0.5 flex-shrink-0 text-indigo-400`} />
                 <div>
-                  <p className={`font-semibold text-base ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>{feature.name}</p>
+                  <p className={`font-semibold text-base text-white`}>{feature.name}</p>
                   {feature.description && (
-                    <p className={`text-sm mt-1 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>{feature.description}</p>
+                    <p className={`text-sm mt-1 text-gray-400`}>{feature.description}</p>
                   )}
                 </div>
               </div>
             ))}
           </div>
           
-          {/* CTA Button - Increase size and prominence */}
+          {/* CTA Button - already uses appropriate colors, ensure consistency */}
           <button
-            onClick={handleUpgrade} // Functionality will be updated next
+            onClick={handleUpgrade} 
             disabled={isLoading}
             className={`w-full py-3.5 px-5 rounded-lg text-lg font-semibold transition duration-150 ease-in-out flex items-center justify-center
               ${isLoading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-indigo-700 active:bg-indigo-800 transform hover:scale-[1.02]'}
-              ${theme === 'dark' ? 'bg-indigo-600 text-white shadow-md hover:shadow-lg' : 'bg-indigo-600 text-white shadow-md hover:shadow-lg'}`}
+              bg-indigo-600 text-white shadow-md hover:shadow-lg`}
           >
             {isLoading ? (
               <>
@@ -183,17 +183,17 @@ const PaywallModal: React.FC<PaywallModalProps> = ({
             ) : displayContent.ctaText}
           </button>
           
-          {/* Error message - Standard styling */}
+          {/* Error message - update dark theme color */}
           {error && (
-            <p className="mt-3 text-sm text-center text-red-600 dark:text-red-400">
+            <p className={`mt-3 text-sm text-center text-red-400`}>
               {error}
             </p>
           )}
           
-          {/* Footer text - Adjust spacing and size */}
+          {/* Footer text - update dark theme color */}
           {displayContent.footerText && (
-            <p className={`mt-5 text-sm text-center ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`}>
-              {displayContent.footerText.replace('\n', ' ')} {/* Replace newline with space for single line display */}
+            <p className={`mt-5 text-sm text-center text-gray-400`}>
+              {displayContent.footerText.replace('\n', ' ')} 
             </p>
           )}
         </Dialog.Panel>

@@ -73,6 +73,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // Handle clicking a prompt suggestion
   const handlePromptClick = (promptText: string) => {
+    console.log(`[ChatWindow] handlePromptClick called with: "${promptText}"`);
     onSendMessage(promptText);
   };
 

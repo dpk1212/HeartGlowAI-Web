@@ -24,6 +24,9 @@ interface MessageListProps {
 const MessageList: React.FC<MessageListProps> = ({ messages, isLoading, isSendingMessage }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  // <<< Add console log here
+  console.log(`MessageList render - isLoading: ${isLoading}, isSendingMessage: ${isSendingMessage}, messages count: ${messages.length}`);
+
   // Function to scroll to the bottom of the message list
   const scrollToBottom = () => {
     // Use timeout to ensure DOM updates before scrolling, especially for the typing indicator

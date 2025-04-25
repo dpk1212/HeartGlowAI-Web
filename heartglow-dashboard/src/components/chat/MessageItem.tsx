@@ -22,6 +22,10 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
 
   // Typing effect for AI messages
   useEffect(() => {
+    // --- DEBUG: Log the raw message text received by the component ---
+    console.log(`[MessageItem Effect] Received message text for ID ${message.id}:`, JSON.stringify(message.text));
+    // --- END DEBUG ---
+
     if (isUser) {
       setDisplayedText(message.text);
       return; // No typing effect for user messages

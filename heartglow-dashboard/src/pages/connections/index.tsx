@@ -8,8 +8,8 @@ import DashboardLayout from '../../components/layout/DashboardLayout';
 import AuthGuard from '../../components/layout/AuthGuard';
 import NewConnectionModal from '../../components/modals/NewConnectionModal';
 // Import shadcn Dialog components and Button
-import { Dialog, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Assuming Button is already added or add it
+import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Plus } from 'lucide-react'; // For button icon
 
 // Helper to get initials (could be moved to utils)
@@ -80,6 +80,7 @@ export default function AllConnectionsPage() {
   const [connections, setConnections] = useState<DbConnection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const FREE_CONNECTION_LIMIT = 2;
 
   useEffect(() => {
@@ -100,24 +101,25 @@ export default function AllConnectionsPage() {
         loadData();
   }, [currentUser]);
 
-  const handleSaveConnection = async (name: string, relationship: string) => {
+  const handleSaveConnection = async (name: string, relationship: string, specificRelationship?: string, goal?: string, notes?: string) => {
     if (!currentUser) {
       console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error.");
     }
     console.log('Attempting to save connection:', { userId: currentUser.uid, name, relationship });
     try {
-      await addConnection(currentUser, { name, relationship });
+      await addConnection(currentUser, { name, relationship, specificRelationship, relationshipGoal: goal, notes });
       console.log('Connection saved successfully from connections page.');
       // Refetch data after saving
       setLoading(true);
       const userConnections = await fetchUserConnections(currentUser, 1000);
       setConnections(userConnections);
       setLoading(false);
-      // Dialog should close automatically via shadcn mechanisms (DialogClose or state change if controlled)
+      setIsModalOpen(false);
     } catch (error) {
       console.error("Error saving connection from connections page:", error);
-      throw error; // Let modal display the error
+      setIsModalOpen(false);
+      throw error;
     }
   };
 
@@ -131,16 +133,15 @@ export default function AllConnectionsPage() {
           <div className="flex justify-between items-center mb-8">
             <h1 className="text-3xl font-bold text-heartglow-charcoal dark:text-heartglow-offwhite">Your Connections</h1>
             
-            {/* Dialog component now wraps only the trigger and content */}
-            <Dialog>
-              {/* Conditional Button: Trigger or Paywall */} 
+            <div>
               {canAddMore ? (
-                <DialogTrigger asChild>
-                  <Button className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300">
-                    <Plus className="h-5 w-5 mr-2" />
-                    Add Connection
-                  </Button>
-                </DialogTrigger>
+                <Button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
+                >
+                  <Plus className="h-5 w-5 mr-2" />
+                  Add Connection
+                </Button>
               ) : (
                 <Button 
                   onClick={() => {
@@ -148,20 +149,12 @@ export default function AllConnectionsPage() {
                     openPaywall();
                   }}
                   className="bg-gradient-to-r from-heartglow-pink to-heartglow-violet text-white font-medium rounded-full px-5 py-2.5 shadow-md hover:shadow-lg hover:shadow-glow transition-all duration-300"
-                  // Add tooltip or different text for clarity?
                 >
                   <Plus className="h-5 w-5 mr-2" />
                   Add Connection (Upgrade)
                 </Button>
               )}
-              
-              {/* Modal Content - Rendered by Dialog when triggered */}
-              {/* NewConnectionModal should render DialogContent internally */}
-              <NewConnectionModal 
-                 onSave={handleSaveConnection} 
-              />
-            </Dialog> {/* Dialog component ends here */} 
-
+            </div>
           </div>
                         
           {loading && (
@@ -198,6 +191,11 @@ export default function AllConnectionsPage() {
                 </div>
             )}
           </div>
+          <NewConnectionModal 
+                 isOpen={isModalOpen}
+                 onClose={() => setIsModalOpen(false)}
+                 onSave={handleSaveConnection} 
+              />
         </DashboardLayout>
       </AuthGuard>
   );

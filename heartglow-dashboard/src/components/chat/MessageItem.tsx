@@ -36,7 +36,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
       if (index === message.text.length) {
         clearInterval(intervalId);
       }
-    }, 35); // Adjust typing speed (milliseconds per character)
+    }, 25); // Adjust typing speed (milliseconds per character)
 
     // Cleanup function to clear interval if component unmounts or message changes
     return () => clearInterval(intervalId);
@@ -97,7 +97,12 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               : 'bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20'
           )}
         >
-          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{displayedText}</p>
+          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+            {displayedText}
+            {!isUser && displayedText.length < message.text.length && (
+              <span className="blinking-cursor">▋</span>
+            )}
+          </p>
         </div>
         
         {/* Timestamp */}

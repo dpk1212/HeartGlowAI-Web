@@ -13,6 +13,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [infoMessage, setInfoMessage] = useState('');
   const router = useRouter();
   const { login, loginWithGoogle, signup, currentUser, loading } = useAuth();
 
@@ -22,6 +23,17 @@ const Login = () => {
       router.replace('/');
     }
   }, [currentUser, loading, router]);
+
+  useEffect(() => {
+    if (router.isReady) {
+      const { reason } = router.query;
+      if (reason === 'new_connection') {
+        setInfoMessage('Please create a free permanent account or log in to create and save Connections.');
+      } else {
+        setInfoMessage('');
+      }
+    }
+  }, [router.isReady, router.query]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,6 +150,16 @@ const Login = () => {
               {isSigningUp ? 'Create your account' : 'Log in to HeartGlow'}
             </h2>
             
+            {infoMessage && (
+              <motion.div 
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-4 p-3 bg-blue-100 dark:bg-blue-900/40 border border-blue-300 dark:border-blue-700/50 text-blue-700 dark:text-blue-300 rounded-lg text-sm text-center shadow-sm"
+              >
+                {infoMessage}
+              </motion.div> 
+            )}
+
             {error && ( 
               <motion.div 
                 initial={{ opacity: 0, y: -10 }}

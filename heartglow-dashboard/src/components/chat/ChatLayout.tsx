@@ -11,6 +11,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
 import { Timestamp } from 'firebase/firestore'; // Import Timestamp
+// Import useAuth and useRouter
+import { useAuth } from '@/context/AuthContext';
+import { useRouter } from 'next/router';
 
 // Define the static HeartGlow AI connection
 const heartglowAIConnection: Connection = {
@@ -50,8 +53,18 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   const selectedConnection = allConnections.find(c => c.id === selectedConnectionId);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
+  // Import useAuth and useRouter
+  const { currentUser } = useAuth();
+  const router = useRouter();
+  const isAnonymousUser = currentUser?.isAnonymous ?? true; // Default to true if no user
+
   const toggleMobileSidebar = () => setIsMobileSidebarOpen(!isMobileSidebarOpen);
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
+
+  // Add new handler
+  const handleRedirectToLogin = () => {
+    router.push('/login?reason=new_connection');
+  };
 
   return (
     <Dialog>
@@ -99,16 +112,30 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               />
             </ScrollArea>
           )}
-          {/* New Connection Button - Mobile */}
-          <DialogTrigger asChild>
-            <Button 
+          {/* --- MODIFIED: Conditional New Connection Button - Mobile --- */}
+          {isAnonymousUser ? (
+             <Button 
               variant="default"
               className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
-              onClick={closeMobileSidebar}
+              onClick={() => {
+                 handleRedirectToLogin();
+                 closeMobileSidebar(); // Close sidebar on redirect
+              }}
             >
               <PlusIcon className="h-4 w-4 mr-2" /> New Connection
             </Button>
-          </DialogTrigger>
+          ) : (
+            <DialogTrigger asChild>
+              <Button 
+                variant="default"
+                className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
+                onClick={closeMobileSidebar} // Close sidebar when opening modal
+              >
+                <PlusIcon className="h-4 w-4 mr-2" /> New Connection
+              </Button>
+            </DialogTrigger>
+          )}
+          {/* --- END MODIFICATION --- */}
         </div>
 
         {/* Mobile Overlay - closes sidebar on click */}
@@ -122,15 +149,26 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
         <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-[#13131D]/80 backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
-          {/* New Connection Button - Desktop */}
-          <DialogTrigger asChild>
+          {/* --- MODIFIED: Conditional New Connection Button - Desktop --- */}
+          {isAnonymousUser ? (
             <Button 
               variant="outline"
               className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"
+              onClick={handleRedirectToLogin}
             >
               <PlusIcon className="h-4 w-4 mr-2" /> New Connection
             </Button>
-          </DialogTrigger>
+          ) : (
+            <DialogTrigger asChild>
+              <Button 
+                variant="outline"
+                className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"
+              >
+                <PlusIcon className="h-4 w-4 mr-2" /> New Connection
+              </Button>
+            </DialogTrigger>
+          )}
+           {/* --- END MODIFICATION --- */}
           
           <h2 className="text-sm uppercase font-medium tracking-wider text-gray-400 mb-3 px-2">Your Connections</h2>
           
@@ -164,7 +202,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         </div>
 
         {/* --- Render New Connection Modal Content --- */}
-        <NewConnectionModal onSave={onSaveConnection} />
+        {/* Modal content is only relevant if Dialog is triggered (i.e., user is NOT anonymous) */}
+        {!isAnonymousUser && <NewConnectionModal onSave={onSaveConnection} />}
       </div>
     </Dialog>
   );

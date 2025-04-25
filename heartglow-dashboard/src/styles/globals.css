@@ -148,7 +148,17 @@ body {
   display: none;  /* Chrome, Safari, Opera */
 }
 
+/* Add this at the end of the file, or after the @tailwind base/components/utilities directives */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
 
+.blinking-cursor {
+  animation: blink 1s step-end infinite;
+  font-weight: bold; /* Optional: makes cursor more visible */
+  margin-left: 1px; /* Optional: adds slight space */
+}
 
 @layer base {
   :root {
@@ -205,8 +215,6 @@ body {
     --chart-5: 340 75% 55%;
   }
 }
-
-
 
 @layer base {
   * {

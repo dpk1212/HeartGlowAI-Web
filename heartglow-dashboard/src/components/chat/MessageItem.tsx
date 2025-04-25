@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { format } from 'date-fns'; // Using date-fns for timestamp formatting
 import { cn } from "@/lib/utils"; // Import cn
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Import Avatar
@@ -19,33 +19,51 @@ interface MessageItemProps {
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isUser = message.sender === 'user';
   const [displayedText, setDisplayedText] = useState('');
+  const intervalRef = useRef<NodeJS.Timeout | null>(null); // Ref for interval ID
+  const indexRef = useRef<number>(0); // Ref for index
 
-  // Typing effect for AI messages
+  // Typing effect for AI messages - Refactored with useRef
   useEffect(() => {
-    // --- DEBUG: Log the raw message text received by the component ---
-    console.log(`[MessageItem Effect] Received message text for ID ${message.id}:`, JSON.stringify(message.text));
-    // --- END DEBUG ---
+    // --- Clear any existing interval from previous renders/strict mode ---
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
 
     if (isUser) {
       setDisplayedText(message.text);
+      indexRef.current = message.text.length; // Ensure index is correct for user messages
       return; // No typing effect for user messages
     }
 
-    // Reset displayed text when message changes
+    // --- Reset state for new AI message animation ---
     setDisplayedText('');
-    let index = 0;
-    const intervalId = setInterval(() => {
-      setDisplayedText((prev) => prev + message.text.charAt(index));
-      index++;
-      if (index === message.text.length) {
-        clearInterval(intervalId);
+    indexRef.current = 0;
+
+    intervalRef.current = setInterval(() => {
+      // Check if we've reached the end inside the interval
+      if (indexRef.current >= message.text.length) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        intervalRef.current = null;
+        return; // Stop the interval
       }
-    }, 25); // Adjust typing speed (milliseconds per character)
 
-    // Cleanup function to clear interval if component unmounts or message changes
-    return () => clearInterval(intervalId);
+      // Append character and increment index using refs
+      const charToAdd = message.text.charAt(indexRef.current);
+      setDisplayedText((prev) => prev + charToAdd);
+      indexRef.current++;
 
-  }, [message.text, isUser]); // Depend on message text and sender type
+    }, 25); // Typing speed
+
+    // --- Cleanup function --- 
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+    // Add message.id to dependencies for robustness if identical text messages appear rapidly
+  }, [message.text, message.id, isUser]); 
 
   // Basic timestamp formatting (adjust format string as needed)
   let formattedTimestamp = '';
@@ -103,7 +121,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
         >
           <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
             {displayedText}
-            {!isUser && displayedText.length < message.text.length && (
+            {!isUser && intervalRef.current !== null && (
               <span className="blinking-cursor">▋</span>
             )}
           </p>

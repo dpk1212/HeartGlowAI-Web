@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns'; // Using date-fns for timestamp formatting
 import { cn } from "@/lib/utils"; // Import cn
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Import Avatar
@@ -18,6 +18,30 @@ interface MessageItemProps {
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isUser = message.sender === 'user';
+  const [displayedText, setDisplayedText] = useState('');
+
+  // Typing effect for AI messages
+  useEffect(() => {
+    if (isUser) {
+      setDisplayedText(message.text);
+      return; // No typing effect for user messages
+    }
+
+    // Reset displayed text when message changes
+    setDisplayedText('');
+    let index = 0;
+    const intervalId = setInterval(() => {
+      setDisplayedText((prev) => prev + message.text.charAt(index));
+      index++;
+      if (index === message.text.length) {
+        clearInterval(intervalId);
+      }
+    }, 35); // Adjust typing speed (milliseconds per character)
+
+    // Cleanup function to clear interval if component unmounts or message changes
+    return () => clearInterval(intervalId);
+
+  }, [message.text, isUser]); // Depend on message text and sender type
 
   // Basic timestamp formatting (adjust format string as needed)
   let formattedTimestamp = '';
@@ -73,7 +97,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
               : 'bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20'
           )}
         >
-          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.text}</p>
+          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{displayedText}</p>
         </div>
         
         {/* Timestamp */}

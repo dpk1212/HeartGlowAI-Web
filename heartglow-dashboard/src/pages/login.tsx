@@ -18,8 +18,8 @@ const Login = () => {
   const { login, loginWithGoogle, signup, currentUser, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && currentUser) {
-      console.log('Login Page: User already logged in, redirecting to /');
+    if (!loading && currentUser && !currentUser.isAnonymous) {
+      console.log('Login Page: Non-anonymous user already logged in, redirecting to /');
       router.replace('/');
     }
   }, [currentUser, loading, router]);
@@ -81,7 +81,7 @@ const Login = () => {
     setError('');
   };
 
-  if (loading || currentUser) {
+  if (loading || (currentUser && !currentUser.isAnonymous)) {
     return <div className="min-h-screen flex items-center justify-center">Checking authentication...</div>;
   }
 

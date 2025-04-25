@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bars3Icon, XMarkIcon, PlusIcon } from '@heroicons/react/24/outline';
 // Import sub-components
 import ConnectionList from './ConnectionList';
@@ -41,34 +41,54 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   selectedConnectionId,
   onSelectConnection,
   onSendMessage,
-  onSaveConnection, // Pass this to the modal
+  onSaveConnection,
   isLoadingConnections,
   isLoadingMessages,
-  isSendingMessage, // Destructure the new prop
+  isSendingMessage,
 }) => {
-  // Combine the static AI connection with the dynamic ones
   const allConnections = [heartglowAIConnection, ...connections];
-
-  // Find selected connection from the combined list
   const selectedConnection = allConnections.find(c => c.id === selectedConnectionId);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
-  // Import useAuth and useRouter
-  const { currentUser } = useAuth();
+  const { currentUser, loading: authLoading } = useAuth(); // Get loading state
   const router = useRouter();
-  const isAnonymousUser = currentUser?.isAnonymous ?? true; // Default to true if no user
+  // Initialize as true, update when auth is confirmed
+  const [isAnonymousUser, setIsAnonymousUser] = useState(true); 
+  const [authChecked, setAuthChecked] = useState(false); // Track if initial check is done
+
+  useEffect(() => {
+    // Only update once auth is no longer loading
+    if (!authLoading) {
+        const isAnon = currentUser?.isAnonymous ?? true;
+        console.log('[ChatLayout] Auth loaded. currentUser:', currentUser);
+        console.log('[ChatLayout] Calculated isAnonymousUser:', isAnon);
+        setIsAnonymousUser(isAnon);
+        setAuthChecked(true); // Mark that we have checked auth status
+    }
+  }, [currentUser, authLoading]);
 
   const toggleMobileSidebar = () => setIsMobileSidebarOpen(!isMobileSidebarOpen);
   const closeMobileSidebar = () => setIsMobileSidebarOpen(false);
 
-  // Add new handler
   const handleRedirectToLogin = () => {
-    router.push('/login?reason=new_connection');
+    console.log('[ChatLayout] handleRedirectToLogin called. Explicit check currentUser?.isAnonymous:', currentUser?.isAnonymous);
+    // Explicitly check current user status before redirecting
+    if (currentUser?.isAnonymous) {
+      router.push('/login?reason=new_connection');
+    } else {
+      console.warn('[ChatLayout] Redirect attempted but user is not anonymous or currentUser is null/undefined.');
+      // Maybe show a generic error or simply do nothing if state is inconsistent
+    }
   };
 
-  return (
-    <Dialog>
-      <div className="relative flex h-full overflow-hidden bg-gradient-to-b from-[#0E0E1A] to-[#14141F] text-white font-sans">
+  // Render loading state or null until auth status is confirmed
+  if (!authChecked) {
+    return null; // Or a loading spinner if preferred
+  }
+
+  // --- Main Content Rendering --- 
+  const ChatLayoutContent = (
+    <div className="relative flex h-full overflow-hidden bg-gradient-to-b from-[#0E0E1A] to-[#14141F] text-white font-sans">
         {/* --- Mobile Sidebar (Fixed, Sliding) --- */}
         <div
           className={`
@@ -84,6 +104,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           aria-modal="true"
           aria-labelledby="mobile-sidebar-title"
         >
+          {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <h1 id="mobile-sidebar-title" className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">HeartGlow</h1>
             <button
@@ -94,12 +115,13 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               <XMarkIcon className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
+          {/* Connections Section */}
           <h2 className="text-base font-medium mb-4 text-gray-200 flex-shrink-0 px-1">Your Connections</h2>
           {isLoadingConnections ? (
-            <div className="flex-grow flex items-center justify-center">
-              <div className="animate-spin h-6 w-6 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
-              <p className="ml-3 text-gray-400 text-sm">Loading connections...</p>
-            </div>
+             <div className="flex-grow flex items-center justify-center">
+               <div className="animate-spin h-6 w-6 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
+               <p className="ml-3 text-gray-400 text-sm">Loading connections...</p>
+             </div>
           ) : (
             <ScrollArea className="flex-grow overflow-y-auto pr-2">
               <ConnectionList
@@ -112,15 +134,12 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               />
             </ScrollArea>
           )}
-          {/* --- MODIFIED: Conditional New Connection Button - Mobile --- */}
+          {/* Conditional New Connection Button - Mobile */}
           {isAnonymousUser ? (
              <Button 
               variant="default"
               className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
-              onClick={() => {
-                 handleRedirectToLogin();
-                 closeMobileSidebar(); // Close sidebar on redirect
-              }}
+              onClick={() => { handleRedirectToLogin(); closeMobileSidebar(); }}
             >
               <PlusIcon className="h-4 w-4 mr-2" /> New Connection
             </Button>
@@ -129,16 +148,15 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               <Button 
                 variant="default"
                 className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
-                onClick={closeMobileSidebar} // Close sidebar when opening modal
+                onClick={closeMobileSidebar}
               >
                 <PlusIcon className="h-4 w-4 mr-2" /> New Connection
               </Button>
             </DialogTrigger>
           )}
-          {/* --- END MODIFICATION --- */}
         </div>
 
-        {/* Mobile Overlay - closes sidebar on click */}
+        {/* Mobile Overlay */}
         {isMobileSidebarOpen && (
           <div
             className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
@@ -149,7 +167,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
         <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-[#13131D]/80 backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
-          {/* --- MODIFIED: Conditional New Connection Button - Desktop --- */}
+          {/* Conditional New Connection Button - Desktop */}
           {isAnonymousUser ? (
             <Button 
               variant="outline"
@@ -168,11 +186,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
               </Button>
             </DialogTrigger>
           )}
-           {/* --- END MODIFICATION --- */}
-          
+          {/* Connections Section */}
           <h2 className="text-sm uppercase font-medium tracking-wider text-gray-400 mb-3 px-2">Your Connections</h2>
-          
-          {/* Connections List takes the rest of the space */}
           <ScrollArea className="flex-grow overflow-y-auto pr-1">
             {isLoadingConnections ? (
               <div className="flex h-full items-center justify-center py-8">
@@ -197,16 +212,17 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             onSendMessage={onSendMessage}
             isLoadingMessages={isLoadingMessages}
             onToggleMobileSidebar={toggleMobileSidebar}
-            isSendingMessage={isSendingMessage} // Pass down isSendingMessage
+            isSendingMessage={isSendingMessage}
           />
         </div>
 
-        {/* --- Render New Connection Modal Content --- */}
-        {/* Modal content is only relevant if Dialog is triggered (i.e., user is NOT anonymous) */}
+        {/* Modal is only rendered if needed (non-anonymous) inside the Dialog wrapper */}
         {!isAnonymousUser && <NewConnectionModal onSave={onSaveConnection} />}
-      </div>
-    </Dialog>
+    </div>
   );
+
+  // Conditionally wrap content with Dialog only if user is NOT anonymous
+  return isAnonymousUser ? ChatLayoutContent : <Dialog>{ChatLayoutContent}</Dialog>;
 };
 
 export default ChatLayout; 

@@ -203,54 +203,61 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
-        // --- NEW: Redesigned Empty State Layout --- 
-        <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-8 text-center overflow-y-auto">
-          <div className="w-full max-w-xl flex flex-col items-center">
-            {/* Section 1: Header */}
-            <div className="mb-10">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-                Feeling stuck in a tough relationship moment?
-              </h1>
-              <p className="text-lg text-gray-300/80 mb-4">
-                HeartGlow helps you find clarity — and the words to say it.
-              </p>
-              <p className="text-xs text-gray-500">
-                Private, encrypted, and secure — your conversations stay between you and HeartGlow.
-              </p>
-            </div>
-
-            {/* Section 2: Context Buttons */}
-            <div className="mb-8">
-              <p className="text-sm text-gray-400 mb-3">Who is this about? (Optional)</p>
-              <div className="flex flex-wrap justify-center gap-3">
-                {['Partner', 'Colleague', 'Family', 'Myself'].map((ctx) => (
-                  <Button key={ctx} variant="outline" size="sm" className="text-xs bg-white/5 border-white/10 hover:bg-white/10 text-gray-300 hover:text-white px-3 py-1 h-auto" onClick={() => handleContextSelect(ctx)}>{ctx}</Button>
-                ))}
-              </div>
-            </div>
-
-            {/* Section 3 & Input & Section 8 (Hints) - Grouped around input */}
-            <div className="w-full max-w-3xl mb-8 px-4">
-                 <p className="text-xs text-gray-500/80 mb-2 italic h-4">
-                   e.g., {currentExample}
-                 </p>
-                 {/* Input is rendered below this empty state section */}
-                 {/* Trust Hints */}
-                 <div className="text-[11px] text-gray-500/70 mt-14 space-y-1">
-                    <p>Built for emotional privacy — all messages encrypted.</p>
-                 </div>
-            </div>
-            
-            {/* Section 5: Quick Start Buttons */}
-            <div className="w-full max-w-lg grid grid-cols-1 sm:grid-cols-2 gap-3">
-               <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70" /> Help me say something I've been avoiding</Button>
-               <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70" /> Help me navigate tension or conflict</Button>
-               <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70" /> Help me understand what I'm feeling</Button>
-               <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70" /> Help me reconnect with someone important</Button>
+        // --- Enhanced Empty State --- 
+        <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 text-center overflow-y-auto scrollbar-hide">
+          {/* Increased overall padding */} 
+          <div className="w-full max-w-2xl flex flex-col items-center">
+             {/* Section 1: Header - Increased bottom margin */}
+             <div className="mb-12 md:mb-16">
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
+                   Feeling stuck in a tough relationship moment?
+                </h1>
+                <p className="text-lg md:text-xl text-gray-300/80 mb-5">
+                   HeartGlow helps you find clarity — and the words to say it.
+                </p>
+                <p className="text-xs text-gray-500/80">
+                   Private, encrypted, and secure — your conversations stay between you and HeartGlow.
+                </p>
              </div>
+
+             {/* Section 2: Context Buttons - Increased bottom margin, improved button style */}
+             <div className="mb-10 md:mb-12">
+                <p className="text-sm text-gray-400 mb-4">Who is this about? (Optional)</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                   {['Partner', 'Colleague', 'Family', 'Myself'].map((ctx) => (
+                     <Button 
+                        key={ctx} 
+                        variant="outline" 
+                        size="sm" 
+                        className="text-xs bg-[#252538]/50 border-[#3A3A5C]/40 hover:bg-[#252538]/90 hover:border-[#5A5A8C]/60 text-gray-300 hover:text-white px-3 py-1 h-auto transition-colors"
+                        onClick={() => handleContextSelect(ctx)}
+                     >{ctx}</Button>
+                   ))}
+                </div>
+             </div>
+             
+              {/* Section 3 Placeholder Text (Examples moved to Input) & Section 8 Hints - Grouped */}
+             <div className="w-full max-w-lg mb-10 md:mb-12 px-4 text-center">
+                  {/* Placeholder for where example text will appear (now inside input) */}
+                  {/* <p className="text-xs text-gray-500/80 mb-2 italic h-4">
+                    e.g., {currentExample} 
+                  </p> */}
+                  {/* Trust Hints - Slightly reduced top margin */}
+                  <div className="text-[11px] text-gray-500/70 mt-4 space-y-1">
+                     <p>Built for emotional privacy — all messages encrypted.</p>
+                  </div>
+             </div>
+
+             {/* Section 5: Quick Start Buttons - Fixed grid, added hover effects */}
+              <div className="w-full max-w-lg grid grid-cols-1 md:grid-cols-2 gap-3">
+                 {/* --- MODIFICATION: grid-cols-1 base, md:grid-cols-2, better hover --- */}
+                 <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70 flex-shrink-0" /> Help me say something I've been avoiding</Button>
+                 <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70 flex-shrink-0" /> Help me navigate tension or conflict</Button>
+                 <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70 flex-shrink-0" /> Help me understand what I'm feeling</Button>
+                 <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70 flex-shrink-0" /> Help me reconnect with someone important</Button>
+              </div>
           </div>
-           {/* Spacer to push input down */}
-           <div className="flex-grow"></div> 
+          {/* Removed flex-grow spacer, relying on padding and centering */}
         </div>
       ) : (
         // --- Message List Area --- 
@@ -274,14 +281,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </ScrollArea>
       )}
 
-      {/* --- Message Input Area (Common for both states) --- */}
+      {/* --- Message Input Area (Always Visible) --- */}
       <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-[#161624]">
         <MessageInput
           value={inputValue}            
           onChange={handleInputChange}   
           onSend={handleSend}          
           inputRef={inputRef}           
-          placeholder={showPrompts ? "What's something you're struggling to say right now?" : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
+          // Placeholder now includes rotating examples when prompts are shown
+          placeholder={showPrompts ? `e.g., ${currentExample}` : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
           disabled={isLoadingMessages}
           isSending={isSendingMessage}  
         />

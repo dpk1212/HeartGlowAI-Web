@@ -220,22 +220,24 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 </p>
              </div>
 
-             {/* Section 2: Context Buttons - Increased bottom margin, improved button style */}
+             {/* Section 2: Context Buttons - REMOVED */}
+             {/*
              <div className="mb-10 md:mb-12">
                 <p className="text-sm text-gray-400 mb-4">Who is this about? (Optional)</p>
                 <div className="flex flex-wrap justify-center gap-3">
                    {['Partner', 'Colleague', 'Family', 'Myself'].map((ctx) => (
-                     <Button 
-                        key={ctx} 
-                        variant="outline" 
-                        size="sm" 
+                     <Button
+                        key={ctx}
+                        variant="outline"
+                        size="sm"
                         className="text-xs bg-[#252538]/50 border-[#3A3A5C]/40 hover:bg-[#252538]/90 hover:border-[#5A5A8C]/60 text-gray-300 hover:text-white px-3 py-1 h-auto transition-colors"
                         onClick={() => handleContextSelect(ctx)}
                      >{ctx}</Button>
                    ))}
                 </div>
              </div>
-             
+             */}
+
               {/* Section 3 Placeholder Text (Examples moved to Input) & Section 8 Hints - Grouped */}
              <div className="w-full max-w-lg mb-10 md:mb-12 px-4 text-center">
                   {/* Placeholder for where example text will appear (now inside input) */}
@@ -249,13 +251,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
              </div>
 
              {/* Section 5: Quick Start Buttons */}
-              {/* --- MODIFICATION: Add text-sm to buttons --- */}
+              {/* --- MODIFICATION: Add whitespace-normal --- */}
               <div className="w-full max-w-xl grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <Button variant="outline" className="text-sm justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70 flex-shrink-0" /> Help me say something I've been avoiding</Button>
-                  <Button variant="outline" className="text-sm justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70 flex-shrink-0" /> Help me navigate tension or conflict</Button>
-                  <Button variant="outline" className="text-sm justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70 flex-shrink-0" /> Help me understand what I'm feeling</Button>
-                  <Button variant="outline" className="text-sm justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70 flex-shrink-0" /> Help me reconnect with someone important</Button>
+                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70 flex-shrink-0" /> Help me say something I\'ve been avoiding</Button>
+                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70 flex-shrink-0" /> Help me navigate tension or conflict</Button>
+                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70 flex-shrink-0" /> Help me understand what I\'m feeling</Button>
+                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70 flex-shrink-0" /> Help me reconnect with someone important</Button>
                </div>
+               {/* --- ADDED: Value Prompt --- */}
+               <p className="text-xs text-gray-400/90 mt-6 text-center max-w-md">
+                 Turn emotional confusion into clarity. Start typing — we'll guide you.
+               </p>
           </div>
           {/* Removed flex-grow spacer, relying on padding and centering */}
         </div>

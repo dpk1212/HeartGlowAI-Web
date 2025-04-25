@@ -87,7 +87,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // --- ADDED HOOKS/STATE ---
-  const { userProfile, loading: authLoading } = useAuth();
+  const { userProfile, currentUser, loading: authLoading } = useAuth();
   const [ctaShown, setCtaShown] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const messageCountRef = useRef(messages.length); // Track previous message count
@@ -191,13 +191,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
    };
   // --- End State & Logic section ---
 
-  // --- ADDED: Handle upgrade button click ---
+  // --- MODIFIED: Handle upgrade button click (Direct Stripe Redirect) ---
   const handleUpgradeClick = () => {
-    console.log("Upgrade button clicked! Implement navigation/modal logic here.");
-    // Example: router.push('/pricing');
-    // Example: openUpgradeModal(); 
+    if (currentUser?.uid) {
+      // Use the same payment link as settings.tsx
+      const paymentLink = "https://buy.stripe.com/4gw03z8Tf1cW2sw8ww"; 
+      const urlWithRef = `${paymentLink}?client_reference_id=${currentUser.uid}`;
+      console.log('[ChatWindow] Redirecting to Stripe:', urlWithRef);
+      window.location.href = urlWithRef;
+    } else {
+      console.error('[ChatWindow] User not logged in, cannot upgrade.');
+      // Optionally show an error message to the user here
+    }
   };
-  // --- END ADDED ---
+  // --- END MODIFIED ---
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#161624]">

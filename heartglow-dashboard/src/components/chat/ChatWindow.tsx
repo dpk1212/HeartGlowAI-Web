@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, ChangeEvent } from 'react';
 // Import sub-components
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
@@ -9,6 +9,9 @@ import { Timestamp } from 'firebase/firestore'; // Import Timestamp
 // Import Card components
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import ScrollArea
+import MessageItem from './MessageItem'; // Assuming MessageItem is in the same directory
+import { Button } from '@/components/ui/button'; // Import Button
+import { Sparkles, SendHorizonal, Users, Users2, HeartHandshake, Brain } from 'lucide-react'; // Import icons
 
 // Remove HeartGlow AI connection/message constants - welcome state is now a Card
 // const heartglowAIConnection: Connection = { ... };
@@ -34,13 +37,30 @@ const promptSuggestions = [
   }
 ];
 
+// --- Example Prompts (keep outside component) ---
+const examplePrompts = [
+  "Apologizing without making it worse…",
+  "Telling someone I need space…",
+  "Explaining how I feel about us…",
+  "Reaching out after silence…",
+  "Asking for clarity without starting a fight…",
+];
+
+// --- Quick Start Prompts (keep outside component) ---
+const quickStartPrompts = {
+  avoiding: "Help me say something I've been avoiding",
+  tension: "Help me navigate tension or conflict",
+  feeling: "Help me understand what I'm feeling",
+  reconnect: "Help me reconnect with someone important",
+};
+
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
   messages: Message[];
   onSendMessage: (messageText: string) => void;
   isLoadingMessages: boolean;
   onToggleMobileSidebar: () => void; // Receive the toggle function
-  isSendingMessage?: boolean; // Add isSendingMessage prop
+  isSendingMessage?: boolean; // Ensure this is passed down
   // TODO: Add isSending state
 }
 
@@ -50,32 +70,103 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onSendMessage,
   isLoadingMessages,
   onToggleMobileSidebar,
-  isSendingMessage, // Destructure the new prop
+  isSendingMessage, // Received from parent (ChatLayout)
   // isSending, // Add this when state is managed
 }) => {
-  const scrollContainerRef = useRef<HTMLDivElement>(null); // Ref for the viewport
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showPrompts, setShowPrompts] = useState(messages.length === 0);
 
-  // Scroll to bottom when messages change or connection changes
+  // --- State & Logic moved back to ChatWindow scope --- 
+  const [currentExample, setCurrentExample] = useState(examplePrompts[0]);
+  const [inputValue, setInputValue] = useState("");
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // --- Effect for rotating examples ---
   useEffect(() => {
-    if (scrollContainerRef.current) {
-      // Use timeout to ensure DOM update before scrolling
-      setTimeout(() => {
-        if (scrollContainerRef.current) {
-          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-        }
-      }, 0);
+    // Only run if prompts are shown
+    if (!showPrompts) return;
+    let index = 0;
+    const intervalId = setInterval(() => {
+      index = (index + 1) % examplePrompts.length;
+      setCurrentExample(examplePrompts[index]);
+    }, 4000); // Change every 4 seconds
+    return () => clearInterval(intervalId);
+  }, [showPrompts]); // Rerun if showPrompts changes
+
+  // --- Effect for idle fallback prompt ---
+  const resetIdleTimer = useCallback(() => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
     }
-    
-    // Update prompt visibility based on message count
-    setShowPrompts(messages.length === 0);
-  }, [messages, connection]); // Dependencies
+    // Only set timer if prompts are shown (empty chat) and input is empty
+    if (showPrompts && inputValue === "") {
+      idleTimerRef.current = setTimeout(() => {
+        setInputValue("There's something I want to say, but I keep overthinking how to say it.");
+        inputRef.current?.focus();
+      }, 6000); // 6 seconds
+    }
+  }, [showPrompts, inputValue]); // Depend on showPrompts and inputValue
+
+  useEffect(() => {
+    resetIdleTimer(); // Reset timer whenever dependencies change
+    return () => {
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+      }
+    };
+  }, [resetIdleTimer]);
+
+  // Effect to scroll down and manage prompt visibility
+  useEffect(() => {
+    const shouldShow = messages.length === 0 && !isLoadingMessages;
+    if (shouldShow !== showPrompts) {
+       setShowPrompts(shouldShow);
+    }
+
+    if (!shouldShow && scrollContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [messages, isLoadingMessages, showPrompts]); // Added showPrompts dependency
 
   // Handle clicking a prompt suggestion
   const handlePromptClick = (promptText: string) => {
     console.log(`[ChatWindow] handlePromptClick called with: "${promptText}"`);
     onSendMessage(promptText);
   };
+
+  // --- Handle input change ---
+  const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+     setInputValue(event.target.value);
+     // Resetting timer is handled by the effect depending on inputValue
+  };
+
+  // --- Handle message send (calls prop) ---
+  const handleSend = () => {
+     if (inputValue.trim()) {
+        onSendMessage(inputValue.trim()); // Use the prop from parent
+        setInputValue(""); // Clear local input state
+     }
+  };
+
+  // --- Handle quick start click (calls prop) ---
+  const handleQuickStartClick = (promptKey: keyof typeof quickStartPrompts) => {
+    const promptText = quickStartPrompts[promptKey];
+    // Don't set local state, just send the message via parent prop
+    onSendMessage(promptText);
+    setInputValue(""); // Clear local input state
+  };
+
+  // --- Handle context selection (Placeholder) ---
+   const handleContextSelect = (context: string) => {
+     console.log("Selected context:", context);
+     // TODO: Implement logic
+   };
+  // --- End State & Logic section ---
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative">
@@ -122,56 +213,76 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         className="flex-1 py-4 px-2 sm:px-4 md:px-8 relative z-10" 
         ref={scrollContainerRef}
       >
-        {/* Empty State with Prompt Suggestions */}
-        {showPrompts && !isLoadingMessages && (
-          <div className="h-full flex flex-col items-center justify-center py-10 px-4"> 
-            <div className="w-full max-w-xl text-center"> 
-              {/* Static Welcome Message Area */}
-              <div className="mb-8 p-5 rounded-lg bg-[#1E1E2E]/40 border border-[#3A3A5C]/30 text-left shadow-sm">
-                <h3 className="font-semibold text-white mb-2">Welcome to HeartGlow AI! ✨</h3>
-                <p className="text-sm text-gray-300/90 leading-relaxed space-y-2">
-                  <span>I'm here to be your guide in navigating communication challenges and deepening your relationships. Think of me as your personal communication co-pilot.</span>
-                  <span>You can ask me anything about relationships, get help drafting tricky messages, or explore ways to express yourself more authentically.</span>
-                  <span>Chat with me here for general guidance, or create specific **Connections** using the '+' button to get tailored insights.</span>
-                  <span>So, what's on your mind today?</span>
-                </p>
-              </div>
-
-              {/* Prompt Suggestions Area */}
-              <p className="mb-4 text-base text-gray-400/90">Choose a starting point:</p>
-              
-              <div className="space-y-3.5"> 
-                {promptSuggestions.map((prompt, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePromptClick(prompt.text)}
-                    className="w-full text-left p-4 rounded-xl bg-[#1E1E2E]/50 hover:bg-[#28283A]/80 border border-[#3A3A5C]/40 hover:border-[#5A5A8C]/60 transition-all duration-200 relative group shadow-sm hover:shadow-md"
-                  >
-                    <div className="absolute top-4 left-4 text-indigo-400/80 group-hover:text-heartglow-pink/90 transition-colors duration-200"> 
-                      <prompt.icon className="h-5 w-5" />
+        {showPrompts ? (
+          // --- Redesigned Empty State --- 
+          <div className="h-full flex flex-col items-center justify-center py-10 px-4">
+             <div className="w-full max-w-xl text-center">
+                {/* Sections 1, 2, 3, 8 (Trust Hints) */}
+                 <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-white/95 mb-3">Feeling stuck in a tough relationship moment?</h1>
+                    <p className="text-lg text-gray-300/80 mb-4">HeartGlow helps you find clarity — and the words to say it.</p>
+                    <p className="text-xs text-gray-500">Private, encrypted, and secure — your conversations stay between you and HeartGlow.</p>
+                 </div>
+                 <div className="mb-8">
+                    <p className="text-sm text-gray-400 mb-3">Who is this about? (Optional)</p>
+                    <div className="flex justify-center gap-3">
+                       {['Partner', 'Colleague', 'Family', 'Myself'].map((ctx) => (
+                         <Button key={ctx} variant="outline" size="sm" className="text-xs bg-white/5 border-white/10 hover:bg-white/10 text-gray-300 hover:text-white px-3 py-1 h-auto" onClick={() => handleContextSelect(ctx)}>{ctx}</Button>
+                       ))}
                     </div>
-                    <p className="text-sm sm:text-base text-gray-200/90 ml-9">{prompt.text}</p> 
-                  </button>
-                ))}
-              </div>
-            </div>
+                 </div>
+                 <div className="mb-8 relative">
+                     <p className="text-xs text-gray-500/80 mb-2 italic h-4">e.g., {currentExample}</p>
+                     {/* Input field is rendered below, outside the scroll area */}
+                     <div className="text-xs text-gray-500/70 mt-3 space-y-1 text-center max-w-sm mx-auto">
+                        <p>Built for emotional privacy — all messages encrypted.</p>
+                     </div>
+                 </div>
+                {/* Section 5: Quick Start Buttons */}
+                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md mx-auto">
+                   <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70" /> Help me say something I've been avoiding</Button>
+                   <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70" /> Help me navigate tension or conflict</Button>
+                   <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70" /> Help me understand what I'm feeling</Button>
+                   <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#2A2A45] text-gray-200 hover:text-white" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70" /> Help me reconnect with someone important</Button>
+                 </div>
+             </div>
+          </div>
+        ) : (
+          // --- Regular Message List --- 
+          <div className="space-y-5 pb-4">
+            {messages.map((message) => (
+              <MessageItem key={message.id} message={message} />
+            ))}
+            {isSendingMessage && (
+                 <div className="flex justify-start pr-8 sm:pr-16">
+                     {/* ... AI thinking indicator ... */}
+                       <div className="mr-3 flex-shrink-0 mb-1">
+                           <div className="h-8 w-8 rounded-full bg-gradient-to-br from-heartglow-pink to-heartglow-violet flex items-center justify-center text-white">
+                               <Sparkles className="w-4 h-4 animate-pulse" />
+                           </div>
+                       </div>
+                       <div className="flex flex-col max-w-[80%] items-start">
+                           <div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20">
+                               <p className="text-sm italic blinking-cursor">Thinking…</p>
+                           </div>
+                       </div>
+                 </div>
+            )}
           </div>
         )}
-        
-        {/* Regular Message List - Pass isSendingMessage down */}
-        <MessageList 
-            messages={messages} 
-            isLoading={isLoadingMessages} 
-            isSendingMessage={isSendingMessage} // Pass down
-        />
         <ScrollBar />
       </ScrollArea>
 
       {/* Message Input Area - ChatGPT-inspired shorter input */}
-      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4">
-        <MessageInput 
-          onSend={onSendMessage} 
-          disabled={isLoadingMessages}
+      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-[#161624]">
+        <MessageInput
+          value={inputValue}             // Pass state value
+          onChange={handleInputChange}   // Pass change handler
+          onSend={handleSend}           // Pass send handler
+          inputRef={inputRef}           // Pass ref
+          placeholder={showPrompts ? "What's something you're struggling to say right now?" : "Message HeartGlow..."} // Dynamic placeholder
+          disabled={isLoadingMessages}    // Disable if loading messages
+          isSending={isSendingMessage}  // Pass sending status
         />
       </div>
     </div>

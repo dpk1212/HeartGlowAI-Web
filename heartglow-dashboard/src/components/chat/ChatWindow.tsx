@@ -12,6 +12,10 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import S
 import MessageItem from './MessageItem'; // Assuming MessageItem is in the same directory
 import { Button } from '@/components/ui/button'; // Import Button
 import { Sparkles, SendHorizonal, Users, Users2, HeartHandshake, Brain } from 'lucide-react'; // Import icons
+// --- ADDED IMPORTS ---
+import { useAuth } from '@/context/AuthContext';
+import UpgradePrompt from './UpgradePrompt';
+// --- END ADDED IMPORTS ---
 
 // Remove HeartGlow AI connection/message constants - welcome state is now a Card
 // const heartglowAIConnection: Connection = { ... };
@@ -82,6 +86,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
+  // --- ADDED HOOKS/STATE ---
+  const { userProfile, loading: authLoading } = useAuth();
+  const [ctaShown, setCtaShown] = useState(false);
+  const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
+  const messageCountRef = useRef(messages.length); // Track previous message count
+  // --- END ADDED HOOKS/STATE ---
+
   // --- Effect for rotating examples ---
   useEffect(() => {
     if (!showPrompts) return;
@@ -117,19 +128,36 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // --- Effect to scroll message list and manage prompt visibility ---
   useEffect(() => {
-    const shouldShow = messages.length === 0 && !isLoadingMessages;
-    if (shouldShow !== showPrompts) {
-       setShowPrompts(shouldShow);
+    const shouldShowEmptyState = messages.length === 0 && !isLoadingMessages;
+    if (shouldShowEmptyState !== showPrompts) {
+      setShowPrompts(shouldShowEmptyState);
     }
-    // Scroll message list only when prompts are NOT shown
-    if (!shouldShow && scrollContainerRef.current) {
+    
+    // Scroll logic remains the same
+    if (!shouldShowEmptyState && scrollContainerRef.current) {
       requestAnimationFrame(() => {
         if (scrollContainerRef.current) {
           scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
         }
       });
     }
-  }, [messages, isLoadingMessages, showPrompts]);
+
+    // --- ADDED LOGIC: Determine when to show upgrade prompt --- 
+    const currentMessageCount = messages.length;
+    // Trigger exactly once when message count *reaches* 3 (or maybe 4 is better? Let's use 4)
+    const shouldShowUpgrade = 
+      !userProfile?.isPremium && 
+      !ctaShown && 
+      currentMessageCount >= 4; // Trigger at 4 messages
+
+    if (shouldShowUpgrade) {
+      console.log("Triggering upgrade prompt.");
+      setShowUpgradePrompt(true);
+      setCtaShown(true); // Mark as shown so it doesn't reappear
+    }
+    // --- END ADDED LOGIC ---
+
+  }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]);
 
   // Handle clicking a prompt suggestion
   const handlePromptClick = (promptText: string) => {
@@ -162,6 +190,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
      console.log("Selected context:", context);
    };
   // --- End State & Logic section ---
+
+  // --- ADDED: Handle upgrade button click ---
+  const handleUpgradeClick = () => {
+    console.log("Upgrade button clicked! Implement navigation/modal logic here.");
+    // Example: router.push('/pricing');
+    // Example: openUpgradeModal(); 
+  };
+  // --- END ADDED ---
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#161624]">
@@ -282,6 +318,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
                  </div>
             )}
+            {/* --- ADDED: Conditional Upgrade Prompt --- */}
+            {showUpgradePrompt && (
+              <UpgradePrompt onUpgradeClick={handleUpgradeClick} />
+            )}
+            {/* --- END ADDED --- */}
           </div>
           <ScrollBar />
         </ScrollArea>

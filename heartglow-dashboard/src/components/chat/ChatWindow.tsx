@@ -248,9 +248,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   </div>
              </div>
 
-             {/* Section 5: Quick Start Buttons - Fixed grid, added hover effects */}
-              <div className="w-full max-w-lg grid grid-cols-1 md:grid-cols-2 gap-3">
-                 {/* --- MODIFICATION: grid-cols-1 base, md:grid-cols-2, better hover --- */}
+             {/* Section 5: Quick Start Buttons */}
+              {/* --- MODIFICATION: Increase max-width, reduce gap --- */}
+              <div className="w-full max-w-xl grid grid-cols-1 md:grid-cols-2 gap-2">
                  <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70 flex-shrink-0" /> Help me say something I've been avoiding</Button>
                  <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70 flex-shrink-0" /> Help me navigate tension or conflict</Button>
                  <Button variant="outline" className="justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70 flex-shrink-0" /> Help me understand what I'm feeling</Button>

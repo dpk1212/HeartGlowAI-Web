@@ -10,31 +10,39 @@ export function useWelcomeDialog() {
   
   useEffect(() => {
     // Check if this is the first visit
-    const hasSeenWelcome = localStorage.getItem(STORAGE_KEY);
+    // const hasSeenWelcome = localStorage.getItem(STORAGE_KEY);
     
     // Only show welcome dialog if user hasn't seen it before
-    if (!hasSeenWelcome) {
-      setShowWelcome(true);
-      // Set flag to show paywall after welcome is closed
-      localStorage.setItem(PAYWALL_AFTER_WELCOME_KEY, 'true');
-    }
+    // if (!hasSeenWelcome) {
+    //   setShowWelcome(true);
+    //   // Set flag to show paywall after welcome is closed
+    //   localStorage.setItem(PAYWALL_AFTER_WELCOME_KEY, 'true');
+    // }
+
+    // --- MODIFICATION: Prevent welcome dialog from showing --- 
+    // We leave this effect empty or just log for debugging if needed.
+    console.log('[useWelcomeDialog] Welcome dialog display logic bypassed.');
+    // --- END MODIFICATION ---
+
   }, []);
   
   const closeWelcomeDialog = () => {
-    setShowWelcome(false);
-    // Mark as seen for future visits
+    // setShowWelcome(false); // No longer needed as it won't be true
+    // Mark as seen for future visits (can keep this if you might re-enable later)
     localStorage.setItem(STORAGE_KEY, 'true');
     
-    // Check if we should show the paywall
-    const shouldShowPaywall = localStorage.getItem(PAYWALL_AFTER_WELCOME_KEY);
-    if (shouldShowPaywall) {
-      // Short delay to make the transition feel natural
-      setTimeout(() => {
-        openPaywall();
-        // Remove the flag after showing the paywall
-        localStorage.removeItem(PAYWALL_AFTER_WELCOME_KEY);
-      }, 300);
-    }
+    // --- MODIFICATION: Remove post-welcome paywall trigger --- 
+    // const shouldShowPaywall = localStorage.getItem(PAYWALL_AFTER_WELCOME_KEY);
+    // if (shouldShowPaywall) {
+    //   // Short delay to make the transition feel natural
+    //   setTimeout(() => {
+    //     openPaywall();
+    //     // Remove the flag after showing the paywall
+    //     localStorage.removeItem(PAYWALL_AFTER_WELCOME_KEY);
+    //   }, 300);
+    // }
+    // --- END MODIFICATION ---
+
   };
   
   // For testing/debugging - resets the welcome dialog state

@@ -53,15 +53,6 @@ interface ChatMessageRequestData {
   messageText: string;
 }
 
-interface AIPromptContext {
-   recipientName?: string;
-   relationship?: string;
-   specificRelationship?: string;
-   goal?: string;
-   notes?: string;
-   isGeneralChat: boolean;
-}
-
 // Add type for Firestore message documents
 interface ChatMessageData {
   text: string;
@@ -296,7 +287,6 @@ export const stripeWebhook = onRequest(async (request, response) => {
 
 // --- UPDATED handleChatMessage Function ---
 export const handleChatMessage = onCall({
-  secrets: ["OPENAI_API_KEY"],
   timeoutSeconds: 120,
 }, async (request: CallableRequest<ChatMessageRequestData>) => {
   logger.info("handleChatMessage received raw request data:", request.data);

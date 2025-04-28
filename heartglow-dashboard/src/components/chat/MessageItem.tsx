@@ -1,15 +1,18 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { format } from 'date-fns'; // Using date-fns for timestamp formatting
-import { cn } from "@/lib/utils"; // Import cn
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Import Avatar
-import { User, Sparkles } from 'lucide-react'; // Import icons
+import React from 'react';
+import { format } from 'date-fns';
+import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { User, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-// TODO: Define actual Message type (import from types file)
+// Adjusted Message type to match actual usage (role, createdAt?)
+// This should ideally align perfectly with the type used in useMessages/backend
 type Message = { 
   id: string; 
   text: string; 
-  sender: 'user' | 'ai'; 
-  timestamp: any; // Should ideally be Firebase Timestamp or Date object
+  role: 'user' | 'assistant'; // Changed sender to role
+  createdAt: any; // Changed timestamp to createdAt
+  // Add other potential fields if they exist
 };
 
 interface MessageItemProps {
@@ -17,65 +20,17 @@ interface MessageItemProps {
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  const isUser = message.sender === 'user';
-  const [displayedText, setDisplayedText] = useState('');
-  const intervalRef = useRef<NodeJS.Timeout | null>(null); // Ref for interval ID
-  const indexRef = useRef<number>(0); // Ref for index
+  const isUser = message.role === 'user'; // Changed sender to role
 
-  // Typing effect for AI messages - Refactored with useRef
-  useEffect(() => {
-    // --- Clear any existing interval from previous renders/strict mode ---
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-      intervalRef.current = null;
-    }
-
-    if (isUser) {
-      setDisplayedText(message.text);
-      indexRef.current = message.text.length; // Ensure index is correct for user messages
-      return; // No typing effect for user messages
-    }
-
-    // --- Reset state for new AI message animation ---
-    setDisplayedText('');
-    indexRef.current = 0;
-
-    intervalRef.current = setInterval(() => {
-      // Check if we've reached the end inside the interval
-      if (indexRef.current >= message.text.length) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        intervalRef.current = null;
-        return; // Stop the interval
-      }
-
-      // Append character and increment index using refs
-      const charToAdd = message.text.charAt(indexRef.current);
-      setDisplayedText((prev) => prev + charToAdd);
-      indexRef.current++;
-
-    }, 25); // Typing speed
-
-    // --- Cleanup function --- 
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    };
-    // Add message.id to dependencies for robustness if identical text messages appear rapidly
-  }, [message.text, message.id, isUser]); 
-
-  // Basic timestamp formatting (adjust format string as needed)
+  // Timestamp formatting - using createdAt
   let formattedTimestamp = '';
   try {
-    // Check if timestamp is a Firestore Timestamp and convert, otherwise try direct formatting
-    const date = message.timestamp?.toDate ? message.timestamp.toDate() : new Date(message.timestamp);
+    const date = message.createdAt?.toDate ? message.createdAt.toDate() : new Date(message.createdAt);
     if (date instanceof Date && !isNaN(date.getTime())) {
-      formattedTimestamp = format(date, 'p'); // Use shorter time format 'p' (e.g., 1:30 PM)
+      formattedTimestamp = format(date, 'p');
     }
   } catch (e) {
     console.error("Error formatting timestamp:", e);
-    // Keep timestamp empty on error
   }
 
   // Define Avatar components for user and AI
@@ -95,55 +50,66 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
     </Avatar>
   );
 
-  return (
-    <div 
-      className={cn(
-        "flex items-end w-full group transition-opacity duration-200", 
-        isUser ? "justify-end pl-8 sm:pl-16" : "justify-start pr-8 sm:pr-16"
-      )}
-    >
-      {!isUser && (
-        <div className="mr-3 flex-shrink-0 mb-1">
-          <AIAvatar />
-        </div>
-      )}
-      
-      {/* Message Content Column */}
-      <div className={cn("flex flex-col max-w-[80%]", isUser ? 'items-end' : 'items-start')}>
-        {/* Message Bubble */}
-        <div
-          className={cn(
-            "px-4 py-2.5 rounded-2xl shadow-md max-w-full transition-all duration-200",
-            isUser 
-              ? 'bg-gradient-to-br from-[#1C3694]/90 to-[#162970]/90 text-white rounded-br-sm border border-[#3D5BCC]/20' 
-              : 'bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20'
-          )}
-        >
-          <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
-            {displayedText}
-            {!isUser && intervalRef.current !== null && (
-              <span className="blinking-cursor">▋</span>
-            )}
-          </p>
-        </div>
+  const MessageBubble = (
+      <div 
+        className={cn(
+          "flex items-end w-full group transition-opacity duration-200", 
+          isUser ? "justify-end pl-8 sm:pl-16" : "justify-start pr-8 sm:pr-16"
+        )}
+      >
+        {!isUser && (
+          <div className="mr-3 flex-shrink-0 mb-1">
+            <AIAvatar />
+          </div>
+        )}
         
-        {/* Timestamp */}
-        {formattedTimestamp && (
-          <p className={cn(
-            "text-[10px] mt-1.5 opacity-70 transition-opacity duration-200 group-hover:opacity-100",
-            isUser ? 'text-blue-300/70' : 'text-pink-300/70'
-          )}>
-            {formattedTimestamp}
-          </p>
+        {/* Message Content Column */}
+        <div className={cn("flex flex-col max-w-[80%]", isUser ? 'items-end' : 'items-start')}>
+          {/* Message Bubble */}
+          <div
+            className={cn(
+              "px-4 py-2.5 rounded-2xl shadow-md max-w-full transition-all duration-200",
+              isUser 
+                ? 'bg-gradient-to-br from-[#1C3694]/90 to-[#162970]/90 text-white rounded-br-sm border border-[#3D5BCC]/20' 
+                : 'bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20'
+            )}
+          >
+            {/* Render full text directly, remove blinking cursor */}
+            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">
+              {message.text}
+            </p>
+          </div>
+          
+          {/* Timestamp */}
+          {formattedTimestamp && (
+            <p className={cn(
+              "text-[10px] mt-1.5 opacity-70 transition-opacity duration-200 group-hover:opacity-100",
+              isUser ? 'text-blue-300/70' : 'text-pink-300/70'
+            )}>
+              {formattedTimestamp}
+            </p>
+          )}
+        </div>
+
+        {isUser && (
+          <div className="ml-3 flex-shrink-0 mb-1">
+            <UserAvatar />
+          </div>
         )}
       </div>
+  );
 
-      {isUser && (
-        <div className="ml-3 flex-shrink-0 mb-1">
-          <UserAvatar />
-        </div>
-      )}
-    </div>
+  // Conditionally wrap AI messages with motion.div for animation
+  return isUser ? (
+    MessageBubble
+  ) : (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      {MessageBubble}
+    </motion.div>
   );
 };
 

@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { SendHorizonal, Loader2 } from 'lucide-react';
+import { SendHorizonal, Loader2, Sparkles, User } from 'lucide-react';
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // Props definition for ChatPanel
 interface ChatPanelProps {
@@ -88,12 +89,12 @@ const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean; isSen
           key={msg.id} // Use message ID as key
           className={cn(
             "flex items-end gap-2",
-            // Use msg.sender and check against 'user'
-            msg.sender === 'user' ? 'justify-end' : 'justify-start'
+            // Use msg.role instead of msg.sender
+            msg.role === 'user' ? 'justify-end' : 'justify-start'
           )}
         >
-          {/* Use msg.sender and check against 'ai' */}
-          {msg.sender === 'ai' && (
+          {/* Conditional rendering based on role */}
+          {msg.role === 'assistant' && (
             <Avatar className="h-8 w-8 flex-shrink-0">
               <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white text-xs">
                 AI
@@ -103,8 +104,8 @@ const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean; isSen
           <div
             className={cn(
               "max-w-xs md:max-w-md lg:max-w-lg rounded-lg px-4 py-2 text-sm shadow-sm",
-              // Use msg.sender and check against 'user'
-              msg.sender === 'user'
+              // Use msg.role instead of msg.sender for styling
+              msg.role === 'user'
                 ? 'bg-primary text-primary-foreground rounded-br-none'
                 : 'bg-card border border-border/50 rounded-bl-none'
             )}
@@ -112,8 +113,8 @@ const ChatMessageList: React.FC<{ messages: Message[]; isLoading: boolean; isSen
              {/* Use msg.text for content */}
              {msg.text}
           </div>
-          {/* Use msg.sender and check against 'user' */}
-          {msg.sender === 'user' && (
+          {/* Conditional rendering based on role */}
+          {msg.role === 'user' && (
              <Avatar className="h-8 w-8 flex-shrink-0">
                <AvatarFallback className="bg-secondary text-secondary-foreground text-xs">
                  ME

@@ -363,14 +363,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
                  </div>
             )}
-            {/* Conditional Upgrade Prompt (Now triggered by handleGuideClick or potentially other actions) */}
-            {showUpgradePrompt && (
-              <UpgradePrompt onUpgradeClick={handleUpgradeClick} />
-            )}
           </div>
           <ScrollBar />
         </ScrollArea>
       )}
+
+      {/* --- ADDED: Upgrade Prompt (Rendered conditionally, outside main content flow) --- */}
+      {showUpgradePrompt && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+           <UpgradePrompt onUpgradeClick={handleUpgradeClick} />
+        </div>
+      )}
+      {/* --- END ADDED --- */}
 
       {/* --- Message Input Area (Always Visible) --- */}
       <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-[#161624]">

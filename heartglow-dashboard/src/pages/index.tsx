@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { SparklesIcon } from '@heroicons/react/24/outline';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
@@ -225,11 +226,10 @@ const IndexPage: NextPage = () => {
             </a>
           </Link>
 
-          {/* Small Logo Top */}
-          <img
-            className="absolute top-6 left-6 h-8 w-auto z-20 opacity-90" // Adjusted position
-            src="/assets/heartglow-logo-mark-white.svg" // Assuming white logo version
-            alt="HeartGlow AI"
+          {/* Replaced Logo with Icon */}
+          <SparklesIcon 
+            className="absolute top-6 left-6 h-8 w-8 text-white/80 z-20"
+            aria-hidden="true"
           />
 
           {/* Centered Content Area */} 

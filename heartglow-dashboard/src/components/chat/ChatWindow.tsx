@@ -62,77 +62,73 @@ import UpgradePrompt from './UpgradePrompt';
 //   reconnect: "Help me reconnect with someone important",
 // };
 
-// --- Updated Guide Button Data with Correct Tags ---
+// --- Updated Guide Button Data with Tags and Reordered ---
 const guideButtons = [
-  {
-    headline: "4 Messages to Rebuild a Relationship Before It's Too Late",
-    subtext: "Before the distance becomes permanent, try these simple, powerful words.",
-    icon: HeartHandshake,
-    firstLine: "It's never too late to reach for connection. Let's find your opening line together."
-    // No tag
-  },
-  {
-    headline: "5 Things to Say When You Feel Unseen or Misunderstood",
-    subtext: "Be heard — without shouting, overexplaining, or begging.",
-    icon: MessageCircleHeart,
-    firstLine: "You deserve to be understood, not just tolerated. Let's find the words that open hearts, not walls."
-    // No tag
-  },
-  {
-    headline: "How to End a Conversation Without Guilt or Regret",
-    subtext: "Say your truth — and leave with peace, not pieces.",
-    icon: Flag,
-    firstLine: "There's strength in choosing clarity over chaos. I'll help you end this with calm dignity."
-    // No tag
-  },
-  {
-    headline: "3 Steps to Defuse Tension and Reset the Relationship",
-    subtext: "Calm the storm without losing yourself — or the connection.",
-    icon: Waves,
-    firstLine: "Even the strongest storms can pass with the right words. Let's bring calm where there's heat."
-    // No tag
-  },
-  {
-    headline: "Signs It's Not About You — And How to Respond With Grace",
-    subtext: "Release the weight of things that were never yours to carry.",
-    icon: ScanLine,
-    firstLine: "Sometimes we hurt because we care too much. Let's shift that burden off your shoulders."
-    // No tag
-  },
-  {
-    headline: "4 Boundaries That Protect Your Peace Without Pushing People Away",
-    subtext: "Stay open-hearted — while staying deeply protected.",
-    icon: ShieldCheck,
-    firstLine: "Boundaries aren't barriers—they're bridges that save your peace. Let's build yours together."
-    // No tag
-  },
-  {
-    headline: "How to Tell Someone You Miss Them Without Sounding Needy",
-    subtext: "Bridge the distance — with honesty, softness, and strength.",
-    icon: MailQuestion,
-    firstLine: "Missing someone is human. Let's find a way to express it that feels authentic and strong.",
-    tag: 'new' // <<< CORRECT tag
-  },
-  {
-    headline: "3 Boundaries You Must Set Early in Dating",
-    subtext: "Start stronger: protect your heart without building walls.",
-    icon: LockKeyhole,
-    firstLine: "Healthy boundaries are the foundation of healthy connection. Let's define yours clearly."
-    // No tag
-  },
+  // --- Top Choice Guide ---
   {
     headline: "5 Things Emotionally Intelligent People Say After an Argument",
     subtext: "Repair faster. Reconnect deeper. Stay proud of how you handled it.",
     icon: MessagesSquare,
-    firstLine: "Arguments happen. Repairing well is what matters. Let's find the words for true reconnection.",
-    tag: 'top-choice' // <<< CORRECT tag
+    firstLine: "Arguments happen. Repairing well is what matters. Let\'s find the words for true reconnection.",
+    tag: 'top-choice' 
+  },
+  // --- New Guides ---
+  {
+    headline: "How to Tell Someone You Miss Them Without Sounding Needy",
+    subtext: "Bridge the distance — with honesty, softness, and strength.",
+    icon: MailQuestion,
+    firstLine: "Missing someone is human. Let\'s find a way to express it that feels authentic and strong.",
+    tag: 'new' 
   },
   {
     headline: "How to Tell If Someone Actually Values You",
     subtext: "Look past the words — spot the real signals that matter.",
     icon: Gem,
-    firstLine: "Your value isn't up for debate. Let's look for the signs that show others truly see it too.",
-    tag: 'new' // <<< CORRECT tag
+    firstLine: "Your value isn\'t up for debate. Let\'s look for the signs that show others truly see it too.",
+    tag: 'new' 
+  },
+  // --- Regular Guides ---
+  {
+    headline: "4 Messages to Rebuild a Relationship Before It's Too Late",
+    subtext: "Before the distance becomes permanent, try these simple, powerful words.",
+    icon: HeartHandshake,
+    firstLine: "It\'s never too late to reach for connection. Let\'s find your opening line together."
+  },
+  {
+    headline: "5 Things to Say When You Feel Unseen or Misunderstood",
+    subtext: "Be heard — without shouting, overexplaining, or begging.",
+    icon: MessageCircleHeart,
+    firstLine: "You deserve to be understood, not just tolerated. Let\'s find the words that open hearts, not walls."
+  },
+  {
+    headline: "How to End a Conversation Without Guilt or Regret",
+    subtext: "Say your truth — and leave with peace, not pieces.",
+    icon: Flag,
+    firstLine: "There\'s strength in choosing clarity over chaos. I\'ll help you end this with calm dignity."
+  },
+  {
+    headline: "3 Steps to Defuse Tension and Reset the Relationship",
+    subtext: "Calm the storm without losing yourself — or the connection.",
+    icon: Waves,
+    firstLine: "Even the strongest storms can pass with the right words. Let\'s bring calm where there\'s heat."
+  },
+  {
+    headline: "Signs It's Not About You — And How to Respond With Grace",
+    subtext: "Release the weight of things that were never yours to carry.",
+    icon: ScanLine,
+    firstLine: "Sometimes we hurt because we care too much. Let\'s shift that burden off your shoulders."
+  },
+  {
+    headline: "4 Boundaries That Protect Your Peace Without Pushing People Away",
+    subtext: "Stay open-hearted — while staying deeply protected.",
+    icon: ShieldCheck,
+    firstLine: "Boundaries aren\'t barriers—they\'re bridges that save your peace. Let\'s build yours together."
+  },
+  {
+    headline: "3 Boundaries You Must Set Early in Dating",
+    subtext: "Start stronger: protect your heart without building walls.",
+    icon: LockKeyhole,
+    firstLine: "Healthy boundaries are the foundation of healthy connection. Let\'s define yours clearly."
   },
 ];
 
@@ -297,14 +293,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 mb-10 w-full">
               {guideButtons.map((guide, index) => {
                 const IconComponent = guide.icon;
-                // Tooltip logic removed
                 return (
                   <button
-                    key={index} // Use index as key since tags might not be unique
+                    key={index} 
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    // Add relative positioning for badge
                     className={`relative flex flex-col items-center text-center p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-sm hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] ${
-                      guide.tag === 'top-choice' ? 'shadow-violet-glow' : '' // Apply glow class
+                      guide.tag === 'top-choice' ? 'shadow-violet-glow' : '' 
                     }`}
                   >
                     {/* Conditional Badge */}
@@ -313,16 +307,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                         New
                       </span>
                     )}
-                     {/* Conditional Star */}
+                     {/* Conditional Star & Text */}
                     {guide.tag === 'top-choice' && (
-                       <Star className="absolute top-1.5 right-1.5 w-3 h-3 text-yellow-400 fill-yellow-400" />
+                       <div className="absolute top-1.5 right-1.5 flex items-center space-x-1">
+                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                         <span className="text-yellow-400 text-[9px] font-medium">Top Choice</span> 
+                       </div>
                     )}
                     
                     <IconComponent className="w-6 h-6 mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
                     <span className="text-sm font-medium text-white/95 leading-snug">{guide.headline}</span>
                     <span className="text-xs text-gray-400/80 mt-1.5">{guide.subtext}</span>
                   </button>
-                  // TooltipProvider/Tooltip removed
                 );
               })}
             </div>

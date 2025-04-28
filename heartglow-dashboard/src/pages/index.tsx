@@ -244,28 +244,27 @@ const IndexPage: NextPage = () => {
 
                 {/* Headline */}
                 <h1 className="text-4xl md:text-5xl font-medium text-white mb-5 leading-tight font-serif">
-                  You're not lost.<br/>
-                  You just haven't found the right words yet.
+                  Find the Right Words. Reclaim Your Voice. Strengthen Your Heart.
                 </h1>
 
                 {/* Subheadline */}
                 <p className="text-base md:text-lg text-gray-200/80 mb-10 max-w-lg mx-auto font-sans">
-                  When feelings are tangled and moments matter,
-                  HeartGlow helps you find the clarity, courage, and words to move forward — without losing yourself.
+                  When feelings are tangled and words feel stuck, HeartGlow guides you back to <strong>clarity</strong> — with proven conversation <strong>frameworks</strong>, emotional growth guides, and next-step support.
                 </p>
 
                 {/* CTA Button */}
                 <Button
                   onClick={() => setShowPrimer(false)} 
                   size="lg"
-                  className="w-full sm:w-auto px-12 py-4 text-lg font-semibold bg-white text-purple-900 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-900 animate-soft-pulse"
+                  className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-4 text-lg font-semibold bg-white text-purple-900 rounded-full shadow-lg hover:shadow-xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-900"
                 >
-                  Guide Me Forward
+                  <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" />
+                  Get Instant Clarity
                 </Button>
 
                 {/* Micro Text Below Button */}
                 <p className="text-xs text-gray-400/70 mt-5">
-                  Private. Secure. Emotionally intelligent.
+                  Private. Emotionally Intelligent. New Guides Added Weekly.
                 </p>
              </div>
           </motion.div>

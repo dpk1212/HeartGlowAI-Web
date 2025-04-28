@@ -16,8 +16,6 @@ import MessageItem from './MessageItem'; // Assuming MessageItem is in the same 
 import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck, MailQuestion, LockKeyhole, MessagesSquare, Gem, Sparkles, Star } from 'lucide-react'; 
 // REMOVED Tooltip imports - Component not found
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; 
-// --- Firebase Functions Import ---
-import { getFunctions, httpsCallable } from 'firebase/functions'; // <<< Added import
 // --- ADDED IMPORTS ---
 import { useAuth } from '@/context/AuthContext';
 import UpgradePrompt from './UpgradePrompt';
@@ -201,54 +199,31 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]); // Note: ctaShown might be removable if only using guide prompt
 
-  // --- UPDATED: Handle clicking a guide button with Paywall Logic ---
-  const handleGuideClick = async (promptText: string) => {
+  // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
+  const handleGuideClick = (promptText: string) => { // Removed async as function call is removed
     console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
 
-    if (!userProfile || authLoading) { // Ensure profile is loaded
+    if (!userProfile || authLoading) { 
       console.warn("[ChatWindow] User profile not loaded yet.");
-      // Optionally show a loading indicator or disable buttons
       return; 
     }
 
     const isPremium = userProfile.isPremium === true;
-    // Use type assertion to bypass missing property check
-    const hasUsedFreeGuide = (userProfile as any)?.hasUsedFreeGuide === true; 
+    console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}`);
 
-    console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}, hasUsedFreeGuide=${hasUsedFreeGuide}`);
-
-    if (isPremium || !hasUsedFreeGuide) {
-      // User is premium OR is using their first free guide
-      console.log("[ChatWindow] Proceeding with guide message.");
-      
-      // Select HeartGlow AI connection
+    if (isPremium) {
+      // User is premium - proceed as normal
+      console.log("[ChatWindow] Premium user, proceeding with guide message.");
       onSelectConnection('heartglow-ai'); 
-      
-      // Send the guide's first message
       onSendMessage(promptText); 
-
-      // If this was the free guide, mark it as used
-      if (!isPremium && !hasUsedFreeGuide) {
-        console.log("[ChatWindow] Marking free guide as used.");
-        try {
-          const functions = getFunctions();
-          const callMarkFreeGuideUsed = httpsCallable(functions, 'markFreeGuideUsed');
-          await callMarkFreeGuideUsed(); // Call the backend function
-          console.log("[ChatWindow] Successfully called markFreeGuideUsed.");
-          // Optionally: force-refresh userProfile state here if needed, 
-          // though ideally Firestore listeners update it automatically.
-        } catch (error) {
-          console.error("[ChatWindow] Error calling markFreeGuideUsed function:", error);
-          // Handle error - maybe allow the guide anyway? Or show an error message?
-        }
-      }
     } else {
-      // User is NOT premium AND has already used their free guide
-      console.log("[ChatWindow] Free guide already used. Showing upgrade prompt.");
+      // User is NOT premium - show paywall immediately
+      console.log("[ChatWindow] Non-premium user clicked guide. Showing upgrade prompt immediately.");
       setShowUpgradePrompt(true); // Show the paywall
+      // Do NOT send the message or call any backend function
     }
   };
-  // --- END UPDATED handleGuideClick ---
+  // --- END REVISED handleGuideClick ---
 
   // --- Handle input change ---
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {

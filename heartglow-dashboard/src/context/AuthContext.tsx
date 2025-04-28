@@ -56,9 +56,6 @@ export type UserProfile = {
 
   // --- Usage Tracking ---
   coachingSessionsStarted?: number; // Count of coaching sessions initiated
-
-  // New optional field
-  hasUsedFreeGuide?: boolean;
 };
 
 // Define a type for the data passed to updateUserProfile
@@ -182,8 +179,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                stripeCustomerId: profileData.stripeCustomerId ?? '',
                stripeSubscriptionId: profileData.stripeSubscriptionId ?? '',
                subscriptionEndDate: profileData.subscriptionEndDate ?? null,
-               coachingSessionsStarted: profileData.coachingSessionsStarted ?? 0,
-               hasUsedFreeGuide: profileData.hasUsedFreeGuide ?? false
+               coachingSessionsStarted: profileData.coachingSessionsStarted ?? 0
              };
              
              // --- Check for Premium Status Change ---
@@ -225,8 +221,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
                  stripeCustomerId: '',
                  stripeSubscriptionId: '',
                  subscriptionEndDate: null,
-                 coachingSessionsStarted: 0,
-                 hasUsedFreeGuide: false
+                 coachingSessionsStarted: 0
                };
                await setDoc(userRef, initialProfile);
                console.log(`Initial profile created for ${user.uid}`);

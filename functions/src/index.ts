@@ -29,6 +29,7 @@ import {OpenAI} from "openai";
 import Stripe from "stripe";
 import {onRequest} from "firebase-functions/v1/https";
 import {config} from "firebase-functions";
+import {getFirestore, FieldValue, Timestamp} from "firebase-admin/firestore";
 
 // Ensure admin is initialized
 try {
@@ -61,6 +62,59 @@ interface AIPromptContext {
    isGeneralChat: boolean;
 }
 
+// Add type for Firestore message documents
+interface ChatMessageData {
+  text: string;
+  createdAt: Timestamp; // Assuming Timestamp import
+  role: "user" | "assistant" | string; // Be slightly lenient for filtering
+  userId?: string;
+  guideContext?: string;
+  isGuideResponse?: boolean;
+  modelUsed?: string;
+  finishReason?: string;
+}
+
+// --- NEW: Guide Data Structure ---
+interface GuideInfo {
+  acknowledgment: string;
+  miniPrompt: string;
+  systemPromptSnippet: string;
+}
+
+const guideData: Record<string, GuideInfo> = {
+  "It's never too late to reach for connection. Let's find your opening line together.": {
+    acknowledgment: "Reaching out takes courage. It shows you still care.",
+    miniPrompt: "Briefly tell me: who are you feeling distance from, and why does it matter to you?",
+    systemPromptSnippet: "The user is trying to rebuild a connection. Focus on empathy, gentle opening lines, and acknowledging the difficulty of bridging distance.",
+  },
+  "You deserve to be understood, not just tolerated. Let's find the words that open hearts, not walls.": {
+    acknowledgment: "Feeling unseen is incredibly painful. You deserve to be heard.",
+    miniPrompt: "What's one time recently you felt invisible or misunderstood?",
+    systemPromptSnippet: "The user feels unseen/misunderstood. Help them articulate their feelings clearly and calmly, focusing on 'I' statements and expressing needs without blame.",
+  },
+  "There's strength in choosing clarity over chaos. I'll help you end this with calm dignity.": {
+    acknowledgment: "Ending things with grace is hard, but important. Let's find a way.",
+    miniPrompt: "What's the hardest part you're worried about — hurting them, or feeling guilty yourself?",
+    systemPromptSnippet: "The user wants to end a conversation/relationship gracefully. Focus on clear, kind, and firm language. Help them express their decision respectfully, minimizing unnecessary pain or ambiguity.",
+  },
+  "Even the strongest storms can pass with the right words. Let's bring calm where there's heat.": {
+    acknowledgment: "It's smart to pause and find the right words when things get tense.",
+    miniPrompt: "In one sentence: What tension or conflict feels like it's growing right now?",
+    systemPromptSnippet: "The user wants to defuse tension. Focus on de-escalation techniques, active listening prompts, finding common ground, and suggesting ways to pause or reset the conversation.",
+  },
+  "Sometimes we hurt because we care too much. Let's shift that burden off your shoulders.": {
+    acknowledgment: "It's easy to take things personally, especially when you care. Let's untangle this.",
+    miniPrompt: "What's one thing that's been weighing on you — but deep down, you know it's not fully yours?",
+    systemPromptSnippet: "The user is struggling with taking things personally or carrying others' burdens. Help them gain perspective, differentiate their feelings from others', and respond with grace without absorbing negativity.",
+  },
+  "Boundaries aren't barriers—they're bridges that save your peace. Let's build yours together.": {
+    acknowledgment: "Setting boundaries is a sign of self-respect. It's okay to protect your peace.",
+    miniPrompt: "Where in your life are you finding it hard to set healthy limits — without feeling guilty?",
+    systemPromptSnippet: "The user needs help setting boundaries. Focus on clear, kind, and firm statements. Help them articulate their limits and needs without over-explaining or feeling guilty.",
+  },
+};
+// --- End Guide Data ---
+
 // --- Helper Functions ---
 function buildInsightsPrompt(params: InsightsRequestData): string {
   const message = params?.message || "[Message content missing]";
@@ -92,19 +146,19 @@ B-, etc.) and 3 specific insights about its effectiveness.
    - Overall effectiveness
 
 2. Provide your analysis as a JSON object with:
-   - A letter grade (A+, A, A-, B+, B, B-, etc.) as a string in the \"grade\" 
+   - A letter grade (A+, A, A-, B+, B, B-, etc.) as a string in the "grade" 
      field.
    - An array of 3 specific, distinct, and actionable insights about what 
-     makes this message effective (or could improve it) in the \"insights\" 
+     makes this message effective (or could improve it) in the "insights" 
      field. Focus on constructive feedback.
 
 ### Required JSON Response Format
 {
-  "grade": \"A letter grade as a string\",
+  "grade": "A letter grade as a string",
   "insights": [
-    \"First insight about what works well or could be improved\",
-    \"Second insight about emotional intelligence or tone connection\",
-    \"Third insight about relationship-specific effectiveness or authenticity\"
+    "First insight about what works well or could be improved",
+    "Second insight about emotional intelligence or tone connection",
+    "Third insight about relationship-specific effectiveness or authenticity"
   ]
 }`;
 }
@@ -242,6 +296,8 @@ export const stripeWebhook = onRequest(async (request, response) => {
 
 // --- UPDATED handleChatMessage Function ---
 export const handleChatMessage = onCall({
+  secrets: ["OPENAI_API_KEY"],
+  timeoutSeconds: 120,
 }, async (request: CallableRequest<ChatMessageRequestData>) => {
   logger.info("handleChatMessage received raw request data:", request.data);
 
@@ -250,192 +306,177 @@ export const handleChatMessage = onCall({
     throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
   }
   const userId = request.auth.uid;
-  const { connectionId, messageText } = request.data;
+  const {connectionId, messageText} = request.data;
 
-  if (!messageText || typeof messageText !== 'string' || messageText.trim().length === 0) {
-     logger.error("Missing or invalid messageText.", { userId, connectionId });
-     throw new HttpsError("invalid-argument", "Missing or invalid 'messageText'.");
-  }
-  if (connectionId !== null && connectionId !== undefined && typeof connectionId !== 'string') {
-      logger.error("Invalid connectionId type.", { userId, connectionId });
-      throw new HttpsError("invalid-argument", "The 'connectionId' argument must be a string, null, or undefined.");
+  if (!messageText || typeof messageText !== "string" || messageText.trim().length === 0) {
+    logger.error("Invalid messageText received.", {userId, connectionId});
+    throw new HttpsError("invalid-argument", "Message text cannot be empty.");
   }
 
-  const userMessageText = messageText.trim();
-  logger.info(`User ${userId} sending message to ${connectionId || 'General AI Chat'}: \"${userMessageText.substring(0, 50)}...\"`);
+  const trimmedMessage = messageText.trim();
+  const firestore = getFirestore();
+  const isGeneralChat = !connectionId || connectionId === "heartglow-ai";
+  const userMessageRef = isGeneralChat ?
+    firestore.collection("users").doc(userId).collection("messages") :
+    firestore.collection("users").doc(userId).collection("connections").doc(connectionId!).collection("messages");
 
-  const db = admin.firestore();
+  const userMessageData = {
+    text: trimmedMessage,
+    createdAt: FieldValue.serverTimestamp(),
+    role: "user",
+    userId: userId,
+  };
+
+  // --- Step 1 & 2: Check if message matches a Guide's firstLine ---
+  const matchedGuide = guideData[trimmedMessage];
+
+  if (matchedGuide) {
+    logger.info(`Guide click detected for user ${userId}, connection ${connectionId || 'general'}. Guide Ack: ${matchedGuide.acknowledgment}`);
+
+    try {
+      // Save the user's "click" message (the firstLine)
+      await userMessageRef.add(userMessageData);
+
+      // Construct and save the AI's acknowledgment + mini-prompt response
+      const aiResponseData = {
+        text: `${matchedGuide.acknowledgment} ${matchedGuide.miniPrompt}`,
+        createdAt: FieldValue.serverTimestamp(),
+        role: "assistant",
+        guideContext: trimmedMessage,
+        isGuideResponse: true,
+      };
+      await userMessageRef.add(aiResponseData);
+
+      logger.info("Successfully saved user click and AI guide prompt.");
+      return {success: true, messageId: "guide_prompt_sent"};
+    } catch (error) {
+      logger.error("Error saving guide click/prompt to Firestore:", error);
+      throw new HttpsError("internal", "Failed to save initial guide interaction.", (error as Error).message);
+    }
+  }
+
+  // --- Step 3: Proceed with normal message handling (if not a guide click) ---
+  logger.info(`Handling regular message for user ${userId}, connection ${connectionId || 'general'}.`);
 
   try {
-    let messagesCollectionRef: admin.firestore.CollectionReference;
-    let connectionRef: admin.firestore.DocumentReference | null = null;
-    const isGeneralChat = !connectionId || connectionId === 'heartglow-ai';
-    const aiPromptContext: AIPromptContext = { isGeneralChat: isGeneralChat };
-
-    if (isGeneralChat) {
-      messagesCollectionRef = db.collection('users').doc(userId).collection('chats').doc('heartglow-ai').collection('messages');
-      logger.info(`General chat selected for user ${userId}`);
-
-    } else {
-      const connId = connectionId as string;
-      connectionRef = db.collection('users').doc(userId).collection('connections').doc(connId);
-      messagesCollectionRef = connectionRef.collection('messages');
-      logger.info(`Connection chat selected for user ${userId}, connection ${connId}`);
-
-      const connectionSnap = await connectionRef.get();
-      if (!connectionSnap.exists) {
-        logger.error("Connection document not found.", { userId, connectionId: connId });
-        throw new HttpsError("not-found", `Connection ${connId} not found.`);
-      }
-      const connectionData = connectionSnap.data();
-      aiPromptContext.recipientName = connectionData?.name || "the recipient";
-      aiPromptContext.relationship = connectionData?.relationship || "this relationship";
-      aiPromptContext.specificRelationship = connectionData?.specificRelationship;
-      aiPromptContext.goal = connectionData?.goal;
-      aiPromptContext.notes = connectionData?.notes;
-    }
-
-    const userMessageData = {
-      sender: 'user',
-      text: userMessageText,
-      timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    };
-    const userMessageRef = await messagesCollectionRef.add(userMessageData);
-    logger.info(`User message saved with ID: ${userMessageRef.id} to ${isGeneralChat ? 'General Chat' : `Connection ${connectionId}`}`);
-
-    if (connectionRef) {
-        await connectionRef.set({ lastMessageTimestamp: userMessageData.timestamp }, { merge: true });
-    }
-
-    const historyQuery = messagesCollectionRef.orderBy("timestamp", "desc").limit(10);
-    const historySnap = await historyQuery.get();
-    const history = historySnap.docs
-        .map(doc => doc.data() as { sender: string, text: string })
-        .reverse();
-
-    let systemPrompt: string;
-    if (aiPromptContext.isGeneralChat) {
-        systemPrompt = `You are HeartGlow AI, a highly empathetic and insightful relationship support assistant. Your primary goal is to help users understand their relationships and communicate more effectively through **brief, conversational interactions**.
-
-**Core Principles:**
-- **Empathy First:** Always strive to understand and validate the user's feelings.
-- **Active Listening & Inquiry:** Pay close attention to the user's words and the underlying emotions. **Offer a brief reflection or connection** to what the user shared before asking your next question. Ask clarifying questions to understand the situation fully before offering significant advice or solutions.
-- **Conversational Flow:** Engage in a balanced back-and-forth dialogue. Avoid long paragraphs. **Share a brief thought, then ask.**
-- **Build Towards Action:** Once you have gathered enough information through conversation, work towards **constructive & actionable** outputs like summarizing the situation, suggesting communication strategies, helping draft messages, or outlining potential next steps.
-- **Balanced Perspective:** Gently encourage users to consider the perspectives of others involved, fostering understanding.
-- **Safety & Boundaries:** Do not provide medical, legal, or crisis counseling. If a user seems in distress, gently suggest seeking professional help. Avoid definitive judgments or prescriptive solutions; empower the user to find their own answers. Maintain a supportive, non-judgmental, and encouraging tone throughout.
-
-**Interaction Style:**
-- Be warm, gentle, and understanding.
-- **Keep responses concise, like a chat conversation.**
-- Use clear and accessible language.
-- **Ask insightful, open-ended questions** that encourage deeper reflection, not just simple information gathering. Focus on 'how,' 'what if,' or 'tell me more about...' questions.
-- **Check in briefly** ("How does that sound?", "What are your thoughts on that?") rather than asking long rhetorical questions.`;
-    } else {
-        systemPrompt = `You are HeartGlow AI, a highly empathetic and insightful relationship support assistant. Your primary goal is to help the user navigate their specific connection with **${aiPromptContext.recipientName}**, whom they describe as their **${aiPromptContext.relationship}**, through **brief, conversational interactions**.
-
-**Relationship Context:**
-- **Name:** ${aiPromptContext.recipientName}
-- **General Relationship:** ${aiPromptContext.relationship}
-${aiPromptContext.specificRelationship ? `- **Specific Relationship:** ${aiPromptContext.specificRelationship}` : ''}
-${aiPromptContext.goal ? `- **User's Stated Goal:** ${aiPromptContext.goal}` : ''}
-${aiPromptContext.notes ? `- **User's Notes for Context:** ${aiPromptContext.notes}` : ''}
-
-**Focus on this Specific Connection:**
-- **Tailor Insights:** Leverage all the provided context (name, relationship type, specific role, goal, notes) to frame your insights, questions, and advice specifically for this interaction. Reference ${aiPromptContext.recipientName} using their name and specific relationship (if provided).
-- **Utilize Context:** Remember the user is focused on this particular relationship and may have specific goals or notes. Keep the conversation centered around these unless the user explicitly shifts focus. Refer back to the user's goal or notes if relevant to the current discussion.
-- **Goal Alignment:** If the user stated a goal, gently guide the conversation and advice towards helping them achieve it **through dialogue**.
-- **Use Notes for Recall:** Treat the user's notes as important background information or memory aids. Factor them into your understanding of the relationship dynamics.
-
-**Core Principles:**
-- **Empathy First:** Always strive to understand and validate the user's feelings regarding their interactions with ${aiPromptContext.recipientName}.
-- **Active Listening & Inquiry:** Pay close attention to the user's words and the underlying emotions in the context of this relationship. **Offer a brief reflection or connection** to what the user shared before asking your next question. Ask clarifying questions about their interactions or feelings towards ${aiPromptContext.recipientName} before offering significant advice.
-- **Conversational Flow:** Engage in a balanced back-and-forth dialogue. Avoid long paragraphs. **Share a brief thought, then ask.**
-- **Build Towards Action:** Once you have gathered enough information, work towards **constructive & actionable** outputs tailored to this relationship, keeping the user's **goal** in mind. This might involve suggesting communication approaches, drafting message ideas, or outlining next steps related to ${aiPromptContext.recipientName}.
-- **Balanced Perspective:** Gently encourage the user to consider ${aiPromptContext.recipientName}'s perspective in their interactions.
-- **Safety & Boundaries:** Do not provide medical, legal, or crisis counseling. If a user seems in distress regarding this relationship, gently suggest seeking professional help. Avoid definitive judgments or prescriptive solutions; empower the user to find their own answers regarding ${aiPromptContext.recipientName}. Maintain a supportive, non-judgmental, and encouraging tone throughout.
-
-**Interaction Style:**
-- Be warm, gentle, and understanding.
-- **Keep responses concise, like a chat conversation.**
-- Use clear and accessible language.
-- **Ask insightful, open-ended questions** about their relationship with ${aiPromptContext.recipientName} that encourage deeper reflection, not just simple information gathering. Focus on 'how,' 'what if,' or 'tell me more about...' questions.
-- **Check in briefly** ("How does that sound in the context of ${aiPromptContext.recipientName}?", "What are your thoughts?")`;
-    }
-
-    // ---> ADDED: Steering instruction based on history length <---
-    if (history.length >= 6) { // Approx 3+ back-and-forth turns
-        const steeringInstruction = `
-
-**Phase Shift: Define the Goal.** The conversation has explored the initial topic. It's time to guide the user toward a specific outcome for this chat. Based on the discussion, propose 1-2 potential concrete goals for this session (e.g., "It sounds like a key goal for us today might be to identify specific fears around opening up. Does that resonate?" or "Perhaps we could aim to brainstorm ways to express one specific feeling you've been holding back?"). Ask the user to confirm, refine, or suggest a different goal for your conversation *today*. Take the lead in establishing this focus.`;
-        systemPrompt += steeringInstruction;
-        logger.info(`Appending steering instruction as history length is ${history.length}`);
-    }
-    // ---> END ADDED CODE <---
-
-    const promptMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-      { role: "system", content: systemPrompt },
-      ...history.map((msg): OpenAI.Chat.ChatCompletionUserMessageParam | OpenAI.Chat.ChatCompletionAssistantMessageParam => ({
-          role: msg.sender === "user" ? "user" : "assistant",
-          content: msg.text,
-      })),
-    ];
-
-    if (promptMessages[promptMessages.length - 1]?.role !== 'user' || promptMessages[promptMessages.length - 1]?.content !== userMessageText) {
-         const recentMessagesContent = history.slice(-3).map(m => m.text);
-         if (!recentMessagesContent.includes(userMessageText)) {
-            promptMessages.push({ role: "user", content: userMessageText });
-            logger.info("Explicitly added current user message to prompt history as it wasn't the last item.");
-         }
-    }
-
-    logger.info(`Constructing prompt for OpenAI with ${promptMessages.length -1} history messages (excluding system). Context: ${isGeneralChat ? 'General' : 'Connection ' + connectionId}`, { userId });
+    // Save the user's message first
+    const savedUserMessage = await userMessageRef.add(userMessageData);
+    logger.info(`User message saved with ID: ${savedUserMessage.id}`);
 
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-        logger.error("OpenAI API key not configured.");
-        throw new HttpsError("internal", "AI service not configured.");
+      logger.error("OpenAI API key not configured.");
+      throw new HttpsError("internal", "API key not configured.");
     }
-    const openai = new OpenAI({ apiKey });
+    const openai = new OpenAI({apiKey});
 
-    let aiResponseText: string | null = null;
-    try {
-        const completion = await openai.chat.completions.create({
-            model: "gpt-4o-mini",
-            messages: promptMessages,
-            temperature: 0.7,
-            max_tokens: 500,
-        });
-        aiResponseText = completion.choices[0]?.message?.content?.trim() || null;
-    } catch (aiError) {
-         logger.error("Error calling OpenAI API:", aiError, { userId, connectionId });
+    // Fetch connection details if applicable
+    let connectionData: admin.firestore.DocumentData | null = null;
+    if (!isGeneralChat) {
+      const connectionRef = firestore.collection("users").doc(userId).collection("connections").doc(connectionId!);
+      const connectionSnap = await connectionRef.get();
+      if (connectionSnap.exists) {
+        connectionData = connectionSnap.data() || {};
+        logger.info("Fetched connection details.", {connectionId});
+      } else {
+        logger.warn("Connection ID provided but document not found.", {connectionId});
+      }
     }
+
+    // Fetch recent messages for context
+    const messagesQuery = userMessageRef.orderBy("createdAt", "desc").limit(15); // Increased limit slightly
+    const messagesSnap = await messagesQuery.get();
+    const recentMessages = messagesSnap.docs
+      .map((doc) => {
+          const data = doc.data() as ChatMessageData;
+          return { id: doc.id, ...data };
+      })
+      .reverse() // Ensure chronological order for OpenAI
+      // Filter using the asserted type, and use a type guard that includes the 'id'
+      .filter((msg): msg is {id: string} & ChatMessageData & { role: 'user' | 'assistant' } =>
+          msg.role === "user" || msg.role === "assistant"
+      )
+      .map((msg) => ({
+        // Types are now correctly inferred here
+        role: msg.role,
+        content: msg.text || "", // Ensure content is string
+      }));
+
+    // --- Step 4: Build Enhanced System Prompt ---
+    let systemPrompt = `You are HeartGlow AI, a supportive assistant helping users navigate difficult relationship moments and find the right words. Be empathetic, constructive, and focused on clarity and emotional intelligence. Prioritize warmth, calm confidence, and emotional privacy. Keep responses concise and actionable, often offering 3-4 short sentences or prompts the user could realistically say or think. Avoid giving definitive advice, instead help the user explore their own feelings and options. Do not act like a therapist.`;
+
+    // Check the last AI message to see if we need to add guide context
+    let activeGuideSystemPrompt = "";
+    // Check history based on the fetched and typed message documents
+    if (messagesSnap.docs.length >= 1) { // Need at least one message to check
+        const lastDocSnap = messagesSnap.docs[0]; // Last message by createdAt desc
+        const lastMessageData = lastDocSnap.data() as ChatMessageData; // Assert type
+
+        // Check if the *actual last message* in DB was an AI guide response
+        if (lastMessageData.role === 'assistant' && lastMessageData.isGuideResponse && lastMessageData.guideContext) {
+             const triggeredGuide = guideData[lastMessageData.guideContext];
+             if (triggeredGuide) {
+                 activeGuideSystemPrompt = triggeredGuide.systemPromptSnippet;
+                 logger.info(`Adding system prompt snippet for guide: ${lastMessageData.guideContext}`);
+             }
+        }
+    }
+
+    if (!isGeneralChat && connectionData) {
+      systemPrompt += `\n\n## Conversation Context:`;
+      if (connectionData.name) systemPrompt += `\n- Talking about: ${connectionData.name}`;
+      if (connectionData.relationship) systemPrompt += `\n- Relationship: ${connectionData.relationship}`;
+      if (connectionData.specificRelationship) systemPrompt += ` (${connectionData.specificRelationship})`;
+      if (connectionData.goal) systemPrompt += `\n- Goal: ${connectionData.goal}`;
+      if (connectionData.notes) systemPrompt += `\n- Notes: ${connectionData.notes}`;
+    }
+
+    if (activeGuideSystemPrompt) {
+        systemPrompt += `\n\n## Current Focus:\n${activeGuideSystemPrompt}`;
+    }
+
+    // Prepare messages for OpenAI API
+    const messagesForApi: OpenAI.Chat.ChatCompletionMessageParam[] = [
+      {role: "system", content: systemPrompt},
+      // Map recent messages explicitly to User/Assistant message param types
+      ...recentMessages.map((msg): OpenAI.Chat.ChatCompletionUserMessageParam | OpenAI.Chat.ChatCompletionAssistantMessageParam => ({
+        role: msg.role, // msg.role is already narrowed to 'user' | 'assistant'
+        content: msg.content,
+      })),
+    ];
+
+    logger.info("Calling OpenAI API...");
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: messagesForApi,
+      temperature: 0.7,
+      max_tokens: 450,
+      user: userId,
+    });
+
+    const aiResponseText = completion.choices[0]?.message?.content?.trim();
 
     if (!aiResponseText) {
-        logger.warn("OpenAI response content was empty or null. No AI reply will be saved.", { userId, connectionId });
-        return { success: true, messageId: userMessageRef.id, warning: "AI response was empty." };
-    } else {
-         logger.info(`Received OpenAI response: \"${aiResponseText.substring(0, 50)}...\"`, { userId, connectionId: connectionId || 'General' });
-        const aiMessageData = {
-            text: aiResponseText,
-            sender: "ai",
-            timestamp: admin.firestore.FieldValue.serverTimestamp(),
-        };
-        const aiMessageRef = await messagesCollectionRef.add(aiMessageData);
-        logger.info(`AI message saved with ID: ${aiMessageRef.id} to ${isGeneralChat ? 'General Chat' : `Connection ${connectionId}`}`);
-
-         if (connectionRef) {
-             await connectionRef.set({ lastMessageTimestamp: aiMessageData.timestamp }, { merge: true });
-         }
-         return { success: true, messageId: userMessageRef.id };
+      logger.error("OpenAI response content was empty or null.");
+      throw new HttpsError("internal", "AI failed to generate a response.");
     }
 
-  } catch (error: any) {
-    logger.error("Error processing chat message:", error, { userId, connectionId: connectionId || 'General' });
+    const aiResponseData = {
+      text: aiResponseText,
+      createdAt: FieldValue.serverTimestamp(),
+      role: "assistant",
+      modelUsed: completion.model,
+      finishReason: completion.choices[0]?.finish_reason,
+    };
+    const savedAiMessage = await userMessageRef.add(aiResponseData);
+    logger.info(`AI response saved with ID: ${savedAiMessage.id}`);
+
+    return {success: true, messageId: savedAiMessage.id};
+  } catch (error) {
+    logger.error("Error in handleChatMessage main block:", error);
     if (error instanceof HttpsError) {
       throw error;
-    } else {
-      throw new HttpsError("internal", "Failed to handle chat message.", error.message);
     }
+    throw new HttpsError("internal", "Failed to process chat message.", (error as Error).message);
   }
 });

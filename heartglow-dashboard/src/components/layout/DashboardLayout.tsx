@@ -61,11 +61,11 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateT
               <div className="flex flex-shrink-0 items-center">
                  <Link href="/" legacyBehavior>
                    <a className="flex items-center space-x-2">
-                     <img
+                     {/* <img
                        className="h-8 w-auto"
                        src="/assets/heartglow-logo-mark-pink.svg" 
                        alt="HeartGlow AI"
-                     />
+                     /> */}
                      <span className="text-xl font-bold text-white hidden sm:inline">HeartGlow</span>
                    </a>
                  </Link>

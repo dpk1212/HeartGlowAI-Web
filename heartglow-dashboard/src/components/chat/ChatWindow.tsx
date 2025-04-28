@@ -107,6 +107,7 @@ interface ChatWindowProps {
   isLoadingMessages: boolean;
   onToggleMobileSidebar: () => void; // Receive the toggle function
   isSendingMessage?: boolean; // Ensure this is passed down
+  onSelectConnection: (connectionId: string) => void; // Add prop
   // TODO: Add isSending state
 }
 
@@ -117,6 +118,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   isLoadingMessages,
   onToggleMobileSidebar,
   isSendingMessage, // Received from parent (ChatLayout)
+  onSelectConnection, // Destructure prop
   // isSending, // Add this when state is managed
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -166,10 +168,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]);
 
-  // Handle clicking a guide button (renamed from handlePromptClick)
+  // Handle clicking a guide button
   const handleGuideClick = (promptText: string) => {
-    console.log(`[ChatWindow] handleGuideClick called with: \"${promptText}\"`);
-    onSendMessage(promptText);
+    console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
+    // FIRST: Select the HeartGlow AI connection to ensure the chat view updates
+    onSelectConnection('heartglow-ai'); 
+    // THEN: Send the message (which will trigger the backend logic)
+    onSendMessage(promptText); 
   };
 
   // --- Handle input change ---

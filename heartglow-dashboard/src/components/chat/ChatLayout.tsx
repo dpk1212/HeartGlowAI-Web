@@ -183,6 +183,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             isLoadingMessages={isLoadingMessages}
             onToggleMobileSidebar={toggleMobileSidebar}
             isSendingMessage={isSendingMessage}
+            onSelectConnection={onSelectConnection}
           />
         </div>
 

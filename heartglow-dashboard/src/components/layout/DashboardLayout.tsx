@@ -18,9 +18,10 @@ import { cn } from "@/lib/utils";
 interface DashboardLayoutProps {
   children: ReactNode;
   onNavigateToGuides?: () => void; // Add new prop
+  onSelectGeneralChat?: () => void; // Add prop for selecting general chat
 }
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateToGuides }) => {
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateToGuides, onSelectGeneralChat }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { currentUser, logout, userProfile } = useAuth();
   const router = useRouter();
@@ -29,7 +30,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateT
   const navigation = [
     // { name: 'Dashboard', href: '/', icon: HomeIcon, current: router.pathname === '/' },
     { name: 'Guides', onClick: onNavigateToGuides, icon: HomeIcon, current: false }, // New Guides item
-    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: router.pathname.startsWith('/chat') },
+    { name: 'Chat', onClick: onSelectGeneralChat, icon: ChatBubbleLeftRightIcon, current: false }, // Use onClick
     { name: 'Connections', href: '/connections', icon: UserCircleIcon, current: router.pathname.startsWith('/connections') },
     // Add other main navigation items here if needed
   ];
@@ -92,7 +93,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateT
                   <Button
                     key={item.name}
                     variant="ghost"
-                    onClick={item.onClick} // Use onClick for non-href items
+                    onClick={item.onClick} 
                     className={cn(
                       'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150',
                       item.current // Note: 'current' might not make sense for onClick actions

@@ -94,10 +94,15 @@ const IndexPage: NextPage = () => {
     setSelectedConnectionId(connectionId);
   };
 
-  // NEW: Handler to navigate back to Guides view
   const handleNavigateToGuides = () => {
     console.log('Navigating to Guides view (setting connectionId to null)');
     setSelectedConnectionId(null);
+  };
+
+  // NEW: Handler to select the general AI chat
+  const handleSelectGeneralChat = () => {
+    console.log('Selecting General AI Chat view (setting connectionId to heartglow-ai)');
+    setSelectedConnectionId('heartglow-ai'); 
   };
 
   const handleSaveConnection = async (
@@ -203,7 +208,10 @@ const IndexPage: NextPage = () => {
       </Head>
 
       <AuthGuard>
-        <DashboardLayout onNavigateToGuides={handleNavigateToGuides}>
+        <DashboardLayout 
+          onNavigateToGuides={handleNavigateToGuides}
+          onSelectGeneralChat={handleSelectGeneralChat}
+        >
           {/* Welcome Dialog */}
           <WelcomeDialog 
             open={showWelcome}

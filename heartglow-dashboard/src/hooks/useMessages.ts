@@ -30,12 +30,20 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    // Fetch only if userId is available
     if (!userId) {
       setMessages([]);
       setIsLoading(false);
       setError(null);
       return;
+    }
+
+    // NEW: Handle explicit navigation to Guides (connectionId is null)
+    if (connectionId === null) {
+      console.log('Navigation to Guides detected (connectionId is null), returning empty messages.');
+      setMessages([]);
+      setIsLoading(false);
+      setError(null);
+      return; // Stop here, don't set up listener
     }
 
     setIsLoading(true);
@@ -51,23 +59,19 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
         // Path for a specific user connection
         messagesCollectionRef = collection(db, 'users', userId, 'connections', connectionId, 'messages');
         console.log(`Setting up listener for connection messages: users/${userId}/connections/${connectionId}/messages`);
-      } else {
-        // CORRECTED Path for the general HeartGlow AI chat
-        messagesCollectionRef = collection(db, 'users', userId, 'messages'); // Use the direct messages collection
-        console.log(`Setting up listener for general AI chat: users/${userId}/messages`); // Updated log
+      } else { // This now only handles connectionId === 'heartglow-ai' or potentially undefined start state
+        // Path for the general HeartGlow AI chat
+        messagesCollectionRef = collection(db, 'users', userId, 'messages'); 
+        console.log(`Setting up listener for general AI chat (heartglow-ai): users/${userId}/messages`); // Clarified log
       }
       
-      // MODIFIED orderBy field from 'timestamp' to 'createdAt' to match backend
       const q = query(messagesCollectionRef, orderBy('createdAt', 'asc'));
 
       unsubscribe = onSnapshot(q, 
         (querySnapshot) => {
           const fetchedMessages = querySnapshot.docs.map(doc => ({
             id: doc.id,
-            // Ensure data mapping matches the Message type, especially the timestamp field name
             ...(doc.data() as Omit<Message, 'id'>),
-            // Make sure the timestamp is correctly converted if needed (e.g., from Firestore Timestamp to Date)
-            // Assuming the Message type expects a compatible format or this is handled
           }));
           setMessages(fetchedMessages);
           setIsLoading(false);

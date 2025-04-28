@@ -41,7 +41,7 @@ const IndexPage: NextPage = () => {
   const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
 
   // --- Chat State ---
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>('heartglow-ai'); // Default to general AI
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   // --- End Chat State ---
 
@@ -92,6 +92,12 @@ const IndexPage: NextPage = () => {
   const handleSelectConnection = (connectionId: string) => {
     console.log(`Selected connection: ${connectionId}`);
     setSelectedConnectionId(connectionId);
+  };
+
+  // NEW: Handler to navigate back to Guides view
+  const handleNavigateToGuides = () => {
+    console.log('Navigating to Guides view (setting connectionId to null)');
+    setSelectedConnectionId(null);
   };
 
   const handleSaveConnection = async (
@@ -197,7 +203,7 @@ const IndexPage: NextPage = () => {
       </Head>
 
       <AuthGuard>
-        <DashboardLayout>
+        <DashboardLayout onNavigateToGuides={handleNavigateToGuides}>
           {/* Welcome Dialog */}
           <WelcomeDialog 
             open={showWelcome}
@@ -216,12 +222,9 @@ const IndexPage: NextPage = () => {
                isLoadingConnections={isLoadingConnections}
                isLoadingMessages={isLoadingMessages}
                onSaveConnection={handleSaveConnection}
-               // TODO: Pass isSendingMessage down
              />
            </div>
           {/* --- END CHAT INTERFACE --- */}
-
-          {/* --- Other Sections Commented Out --- */}
         </DashboardLayout>
       </AuthGuard>
     </>

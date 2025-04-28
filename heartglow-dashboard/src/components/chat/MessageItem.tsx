@@ -4,23 +4,14 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Adjusted Message type to match actual usage (role, createdAt?)
-// This should ideally align perfectly with the type used in useMessages/backend
-type Message = { 
-  id: string; 
-  text: string; 
-  role: 'user' | 'assistant'; // Changed sender to role
-  createdAt: any; // Changed timestamp to createdAt
-  // Add other potential fields if they exist
-};
+import { Message } from '@/types';
 
 interface MessageItemProps {
   message: Message;
 }
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
-  const isUser = message.role === 'user'; // Changed sender to role
+  const isUser = message.role === 'user';
 
   // Timestamp formatting - using createdAt
   let formattedTimestamp = '';

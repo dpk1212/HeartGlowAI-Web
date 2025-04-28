@@ -1,16 +1,9 @@
-import React from 'react';
-import { useAuth } from '../../context/AuthContext';
+import React, { useState, ReactNode } from 'react';
 import Link from 'next/link';
-import { cn } from "@/lib/utils";
-
-// Import shadcn/ui components & icons
-import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-  // navigationMenuTriggerStyle, // Removed for simpler link style
-} from "@/components/ui/navigation-menu";
+import { useRouter } from 'next/router';
+import { Bars3Icon, XMarkIcon, ArrowLeftOnRectangleIcon, UserCircleIcon, Cog6ToothIcon, QuestionMarkCircleIcon, ChatBubbleLeftRightIcon, HomeIcon } from '@heroicons/react/24/outline'; // Added HomeIcon
+import { useAuth } from '@/context/AuthContext';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,145 +11,156 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { User, Settings, LogOut, BrainCircuit, Users } from 'lucide-react'; // Update icons
+} from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils";
 
-// Helper function to get initials - simplified
-const getInitials = (email: string): string => {
-  if (!email) return '?';
-  return email.substring(0, 2).toUpperCase() || '?';
-};
+interface DashboardLayoutProps {
+  children: ReactNode;
+  onNavigateToGuides?: () => void; // Add new prop
+}
 
-type DashboardLayoutProps = {
-  children: React.ReactNode;
-};
+const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children, onNavigateToGuides }) => {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { currentUser, logout, userProfile } = useAuth();
+  const router = useRouter();
 
-const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const { currentUser, logout } = useAuth();
+  // --- Navigation items ---
+  const navigation = [
+    // { name: 'Dashboard', href: '/', icon: HomeIcon, current: router.pathname === '/' },
+    { name: 'Guides', onClick: onNavigateToGuides, icon: HomeIcon, current: false }, // New Guides item
+    { name: 'Chat', href: '/chat', icon: ChatBubbleLeftRightIcon, current: router.pathname.startsWith('/chat') },
+    { name: 'Connections', href: '/connections', icon: UserCircleIcon, current: router.pathname.startsWith('/connections') },
+    // Add other main navigation items here if needed
+  ];
 
-  const handleSignOut = async () => {
+  // --- Handle Logout ---
+  const handleLogout = async () => {
     try {
       await logout();
+      router.push('/login');
     } catch (error) {
-      console.error('Error signing out:', error);
+      console.error("Failed to log out:", error);
+      // Optionally show an error message to the user
     }
   };
 
-  // Simplified name logic for label
-  const getUserLabel = (): string => {
-    if (!currentUser?.email) return 'User';
-    return currentUser.email;
+  // --- Determine User Initial for Fallback ---
+  const getUserInitial = (name?: string | null) => {
+    return name ? name.charAt(0).toUpperCase() : '?';
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground">
-      {/* Header */}
-      {/* Apply subtle background/blur to header */}
-      <header className="bg-card/80 backdrop-blur-sm text-card-foreground border-b border-border/50 py-3 px-6 sticky top-0 z-30">
-        <div className="container mx-auto flex justify-between items-center">
-          <Link 
-            href="/" // Link to main chat/dashboard
-            className="flex items-center gap-2 group" // Added group for potential hover effects
-            aria-label="HeartGlow Dashboard Home"
-          >
-            {/* Add subtle pulse animation to logo text */}
-            <span className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent animate-pulse-subtle">
-              HeartGlow
-            </span>
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-[#0E0E1A] to-[#14141F] flex flex-col">
+      {/* Static header */}
+      <header className="sticky top-0 z-30 bg-[#13131D]/80 backdrop-blur-md border-b border-[#2A2A40]/30 shadow-sm">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 justify-between">
+            <div className="flex">
+              <div className="flex flex-shrink-0 items-center">
+                 <Link href="/" legacyBehavior>
+                   <a className="flex items-center space-x-2">
+                     <img
+                       className="h-8 w-auto"
+                       src="/assets/heartglow-logo-mark-pink.svg" 
+                       alt="HeartGlow AI"
+                     />
+                     <span className="text-xl font-bold text-white hidden sm:inline">HeartGlow</span>
+                   </a>
+                 </Link>
+              </div>
+            </div>
+            {/* Centered Navigation Links */}
+            <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
+              {navigation.map((item) => (
+                item.href ? (
+                  <Link key={item.name} href={item.href} legacyBehavior>
+                    <a
+                      className={cn(
+                        'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150',
+                        item.current
+                          ? 'bg-heartglow-pink/10 text-heartglow-pink'
+                          : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      )}
+                      aria-current={item.current ? 'page' : undefined}
+                    >
+                      <item.icon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                      {item.name}
+                    </a>
+                  </Link>
+                ) : (
+                  <Button
+                    key={item.name}
+                    variant="ghost"
+                    onClick={item.onClick} // Use onClick for non-href items
+                    className={cn(
+                      'inline-flex items-center rounded-md px-3 py-2 text-sm font-medium transition-colors duration-150',
+                      item.current // Note: 'current' might not make sense for onClick actions
+                        ? 'bg-heartglow-pink/10 text-heartglow-pink' 
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                    )}
+                  >
+                    <item.icon className="-ml-0.5 mr-1.5 h-5 w-5" aria-hidden="true" />
+                    {item.name}
+                  </Button>
+                )
+              ))}
+            </div>
+            <div className="ml-6 flex items-center">
+              {/* Help Icon */}
+              <Link href="/support" legacyBehavior>
+                 <Button variant="ghost" size="icon" className="rounded-full text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#13131D] mr-3">
+                  <span className="sr-only">Help & Support</span>
+                  <QuestionMarkCircleIcon className="h-6 w-6" aria-hidden="true" />
+                </Button>
+              </Link>
 
-          {/* Updated Navigation Menu */}
-          <NavigationMenu className="hidden md:block">
-            <NavigationMenuList className="gap-2"> {/* Added gap */} 
-              {/* Chat Link */}
-              <NavigationMenuItem>
-                <Link href="/" legacyBehavior passHref>
-                  {/* Use simple link style, add padding/hover manually */}
-                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
-                    <BrainCircuit className="h-4 w-4" />
-                    Chat
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-              {/* Connections Link */}
-              <NavigationMenuItem>
-                <Link href="/connections" legacyBehavior passHref>
-                  <NavigationMenuLink className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-md hover:bg-muted/50">
-                    <Users className="h-4 w-4" />
-                    Connections
-                  </NavigationMenuLink>
-                </Link>
-              </NavigationMenuItem>
-            </NavigationMenuList>
-          </NavigationMenu>
-
-          <div className="flex items-center gap-4">
-            {currentUser && (
+              {/* Profile dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  {/* Add hover glow and transition to button */}
-                  <Button 
-                    variant="ghost" 
-                    className="relative h-10 w-10 rounded-full p-0 transition-shadow hover:shadow-glow focus-visible:ring-1 focus-visible:ring-ring"
-                  >
-                    <Avatar className="h-10 w-10 border-2 border-transparent">
-                      <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet text-white font-medium">
-                        {getInitials(currentUser.email || '')}
-                      </AvatarFallback>
-                      {/* TODO: Add AvatarImage here if user profile pics are available */}
-                      {/* <AvatarImage src={userProfile?.avatarUrl} alt="User avatar" /> */} 
+                   <Button variant="ghost" size="icon" className="rounded-full focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#13131D]">
+                    <span className="sr-only">Open user menu</span>
+                    <Avatar className="h-8 w-8 border border-white/10">
+                       <AvatarImage src={currentUser?.photoURL || undefined} alt={userProfile?.displayName || 'User'} />
+                       <AvatarFallback className="bg-gradient-to-br from-heartglow-pink to-heartglow-violet font-semibold text-white">
+                         {getUserInitial(userProfile?.displayName)}
+                       </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                {/* Dropdown content remains the same */}
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{getUserLabel()}</p>
-                    </div>
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/profile" className="flex items-center cursor-pointer">
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                <DropdownMenuContent align="end" className="w-48 bg-[#1A1A2E] border-[#2A2A40] text-gray-200 shadow-xl">
+                  <DropdownMenuLabel className="text-sm font-medium text-white px-2 py-1.5">{userProfile?.displayName || 'My Account'}</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[#2A2A40]/50" />
+                  <DropdownMenuItem asChild className="cursor-pointer focus:bg-heartglow-pink/10 focus:text-heartglow-pink">
+                    <Link href="/profile">
+                       <UserCircleIcon className="mr-2 h-4 w-4" />
+                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings" className="flex items-center cursor-pointer">
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
+                  <DropdownMenuItem asChild className="cursor-pointer focus:bg-heartglow-pink/10 focus:text-heartglow-pink">
+                     <Link href="/settings">
+                       <Cog6ToothIcon className="mr-2 h-4 w-4" />
+                       <span>Settings</span>
                     </Link>
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer text-red-500 focus:bg-red-500/10 focus:text-red-600">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Sign Out</span>
+                  <DropdownMenuSeparator className="bg-[#2A2A40]/50"/>
+                  <DropdownMenuItem onClick={handleLogout} className="cursor-pointer focus:bg-red-500/20 focus:text-red-400">
+                    <ArrowLeftOnRectangleIcon className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Welcome Banner - Consider removing or integrating elsewhere if redundant */}
-      {/* <div className="bg-white dark:bg-heartglow-deepgray py-4 px-6 border-b border-gray-200 dark:border-gray-800">
-        <div className="container mx-auto">
-          <h1 className="text-xl font-medium text-heartglow-charcoal dark:text-heartglow-offwhite">
-            Hi {getFirstName()} — <span className="text-heartglow-pink">welcome to HeartGlow AI! Ready to reach out today?</span>
-          </h1>
+      {/* Main content */} 
+      <main className="flex-1 py-4 md:py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          {children}
         </div>
-      </div> */}
-
-      {/* Main content */}
-      <main className="flex-grow container mx-auto py-8 px-4">
-        {children}
       </main>
-
-      {/* Footer removed to match ChatGPT-inspired design */}
     </div>
   );
 };

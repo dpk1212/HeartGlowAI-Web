@@ -18,7 +18,13 @@ export interface Connection {
 export interface Message {
   id: string; // Firestore document ID
   text: string; // Content of the message
-  sender: 'user' | 'ai'; // Who sent the message
-  timestamp: Timestamp; // When the message was sent
+  role: 'user' | 'assistant'; // Who sent the message
+  createdAt: Timestamp; // When the message was sent
+  // Keep other potential fields from cloud function
+  userId?: string;
+  guideContext?: string;
+  isGuideResponse?: boolean;
+  modelUsed?: string;
+  finishReason?: string;
   // Add other relevant fields if needed (e.g., analysis results, reactions)
 } 

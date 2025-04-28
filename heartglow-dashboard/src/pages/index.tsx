@@ -207,7 +207,7 @@ const IndexPage: NextPage = () => {
   if (messagesError) { console.error("Error loading messages:", messagesError); }
   // --- End Error Handling ---
 
-  // --- NEW: Render Primer Screen --- 
+  // --- NEW: Render Enhanced Primer Screen --- 
   if (showPrimer) {
     return (
       <>
@@ -215,55 +215,59 @@ const IndexPage: NextPage = () => {
           <title>HeartGlow AI | Find Your Words</title>
           <meta name="description" content="HeartGlow helps you find clarity and the words to say it." />
         </Head>
-        <div className="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-[#0A0A14] via-[#100C1C] to-[#1A0F2A] text-white relative overflow-hidden">
-          {/* Subtle Particle Effect Placeholder */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            {/* Add particle effect component or CSS background here */} 
-            {/* Example: simple CSS radial gradients */}
-            <div className="absolute top-0 left-0 w-96 h-96 bg-radial-gradient from-heartglow-pink/10 via-transparent to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute bottom-0 right-0 w-96 h-96 bg-radial-gradient from-heartglow-violet/10 via-transparent to-transparent rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
-          </div>
+        {/* Main container with new gradient and animation placeholder */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-purple-800 to-rose-700 text-white relative overflow-hidden animate-breathing-gradient">
           
-          {/* Login Link */}
+          {/* Login Link - Kept */}
           <Link href="/login" legacyBehavior>
-            <a className="absolute top-5 right-6 text-sm text-gray-400 hover:text-white transition-colors z-10">
+            <a className="absolute top-5 right-6 text-sm text-gray-300 hover:text-white transition-colors z-20">
               Login
             </a>
           </Link>
 
-          {/* Content Area */} 
+          {/* Small Logo Top */}
+          <img
+            className="absolute top-6 left-6 h-8 w-auto z-20 opacity-90" // Adjusted position
+            src="/assets/heartglow-logo-mark-white.svg" // Assuming white logo version
+            alt="HeartGlow AI"
+          />
+
+          {/* Centered Content Area */} 
           <motion.div 
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.8, ease: "easeOut" }}
-             className="z-10 flex flex-col items-center max-w-2xl"
+             initial={{ opacity: 0, scale: 0.95 }}
+             animate={{ opacity: 1, scale: 1 }}
+             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} // Smoother ease
+             className="z-10 flex flex-col items-center w-full max-w-2xl"
           >
-            {/* Logo */} 
-            <img
-              className="h-10 w-auto mb-8 opacity-90"
-              src="/assets/heartglow-logo-mark-pink.svg" 
-              alt="HeartGlow AI"
-            />
+             {/* Frosted Glass Card */}
+             <div className="bg-black/10 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-8 md:p-12 w-full text-center">
 
-            {/* Headline */}
-            <h1 className="text-3xl md:text-4xl font-medium text-white/95 mb-4 leading-tight font-serif shadow-text-glow">
-              Some moments don't need louder words. They just need the right ones.
-            </h1>
+                {/* Headline */}
+                <h1 className="text-4xl md:text-5xl font-medium text-white mb-5 leading-tight font-serif">
+                  You're not lost.<br/>
+                  You just haven't found the right words yet.
+                </h1>
 
-            {/* Subtext */}
-            <p className="text-base md:text-lg text-gray-300/80 mb-10 max-w-xl">
-              If you're here, it's because something matters enough to say — but hard enough to need help finding the words.
-              We'll meet you there, with clarity, calm, and care.
-            </p>
+                {/* Subheadline */}
+                <p className="text-base md:text-lg text-gray-200/80 mb-10 max-w-lg mx-auto font-sans">
+                  When feelings are tangled and moments matter,
+                  HeartGlow helps you find the clarity, courage, and words to move forward — without losing yourself.
+                </p>
 
-            {/* CTA Button */}
-            <Button
-              onClick={() => setShowPrimer(false)} // Dismiss primer on click
-              size="lg"
-              className="px-10 py-6 text-lg font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
-            >
-              Find My Words
-            </Button>
+                {/* CTA Button */}
+                <Button
+                  onClick={() => setShowPrimer(false)} 
+                  size="lg"
+                  className="w-full sm:w-auto px-12 py-4 text-lg font-semibold bg-white text-purple-900 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-900 animate-soft-pulse"
+                >
+                  Guide Me Forward
+                </Button>
+
+                {/* Micro Text Below Button */}
+                <p className="text-xs text-gray-400/70 mt-5">
+                  Private. Secure. Emotionally intelligent.
+                </p>
+             </div>
           </motion.div>
         </div>
       </>

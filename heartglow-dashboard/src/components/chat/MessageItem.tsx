@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Message } from '@/types';
+import { Timestamp } from 'firebase/firestore';
 
 interface MessageItemProps {
   message: Message;
@@ -16,12 +17,20 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   // Timestamp formatting - using createdAt
   let formattedTimestamp = '';
   try {
-    const date = message.createdAt?.toDate ? message.createdAt.toDate() : new Date(message.createdAt);
+    let date: Date | null = null; 
+    // Check if createdAt exists and has the toDate method (indicating Firestore Timestamp)
+    if (message.createdAt && typeof message.createdAt.toDate === 'function') {
+      date = (message.createdAt as Timestamp).toDate(); // Cast to Timestamp and call toDate()
+    }
+    // Optionally handle if createdAt might already be a Date or a different format
+    // else if (message.createdAt instanceof Date) { date = message.createdAt; }
+    
+    // Format only if we successfully got a valid Date object
     if (date instanceof Date && !isNaN(date.getTime())) {
       formattedTimestamp = format(date, 'p');
     }
   } catch (e) {
-    console.error("Error formatting timestamp:", e);
+    console.error("Error formatting timestamp:", message.createdAt, e);
   }
 
   // Define Avatar components for user and AI

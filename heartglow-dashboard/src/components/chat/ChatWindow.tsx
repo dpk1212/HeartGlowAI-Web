@@ -16,6 +16,8 @@ import MessageItem from './MessageItem'; // Assuming MessageItem is in the same 
 import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck, MailQuestion, LockKeyhole, MessagesSquare, Gem, Sparkles, Star } from 'lucide-react'; 
 // REMOVED Tooltip imports - Component not found
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; 
+// --- Firebase Functions Import ---
+import { getFunctions, httpsCallable } from 'firebase/functions'; // <<< Added import
 // --- ADDED IMPORTS ---
 import { useAuth } from '@/context/AuthContext';
 import UpgradePrompt from './UpgradePrompt';
@@ -183,31 +185,70 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       });
     }
 
-    // --- ADDED LOGIC: Determine when to show upgrade prompt --- 
+    /* --- COMMENTED OUT: 4-message prompt logic (replaced by guide-based paywall) ---
     const currentMessageCount = messages.length;
-    // Trigger exactly once when message count *reaches* 3 (or maybe 4 is better? Let's use 4)
     const shouldShowUpgrade = 
       !userProfile?.isPremium && 
       !ctaShown && 
-      currentMessageCount >= 4; // Trigger at 4 messages
+      currentMessageCount >= 4; 
 
     if (shouldShowUpgrade) {
       console.log("Triggering upgrade prompt.");
       setShowUpgradePrompt(true);
-      setCtaShown(true); // Mark as shown so it doesn't reappear
+      setCtaShown(true); 
     }
-    // --- END ADDED LOGIC ---
+    --- END COMMENTED OUT --- */
 
-  }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]);
+  }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]); // Note: ctaShown might be removable if only using guide prompt
 
-  // Handle clicking a guide button
-  const handleGuideClick = (promptText: string) => {
+  // --- UPDATED: Handle clicking a guide button with Paywall Logic ---
+  const handleGuideClick = async (promptText: string) => {
     console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
-    // FIRST: Select the HeartGlow AI connection to ensure the chat view updates
-    onSelectConnection('heartglow-ai'); 
-    // THEN: Send the message (which will trigger the backend logic)
-    onSendMessage(promptText); 
+
+    if (!userProfile || authLoading) { // Ensure profile is loaded
+      console.warn("[ChatWindow] User profile not loaded yet.");
+      // Optionally show a loading indicator or disable buttons
+      return; 
+    }
+
+    const isPremium = userProfile.isPremium === true;
+    // Use type assertion to bypass missing property check
+    const hasUsedFreeGuide = (userProfile as any)?.hasUsedFreeGuide === true; 
+
+    console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}, hasUsedFreeGuide=${hasUsedFreeGuide}`);
+
+    if (isPremium || !hasUsedFreeGuide) {
+      // User is premium OR is using their first free guide
+      console.log("[ChatWindow] Proceeding with guide message.");
+      
+      // Select HeartGlow AI connection
+      onSelectConnection('heartglow-ai'); 
+      
+      // Send the guide's first message
+      onSendMessage(promptText); 
+
+      // If this was the free guide, mark it as used
+      if (!isPremium && !hasUsedFreeGuide) {
+        console.log("[ChatWindow] Marking free guide as used.");
+        try {
+          const functions = getFunctions();
+          const callMarkFreeGuideUsed = httpsCallable(functions, 'markFreeGuideUsed');
+          await callMarkFreeGuideUsed(); // Call the backend function
+          console.log("[ChatWindow] Successfully called markFreeGuideUsed.");
+          // Optionally: force-refresh userProfile state here if needed, 
+          // though ideally Firestore listeners update it automatically.
+        } catch (error) {
+          console.error("[ChatWindow] Error calling markFreeGuideUsed function:", error);
+          // Handle error - maybe allow the guide anyway? Or show an error message?
+        }
+      }
+    } else {
+      // User is NOT premium AND has already used their free guide
+      console.log("[ChatWindow] Free guide already used. Showing upgrade prompt.");
+      setShowUpgradePrompt(true); // Show the paywall
+    }
   };
+  // --- END UPDATED handleGuideClick ---
 
   // --- Handle input change ---
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -347,11 +388,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                       <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
                  </div>
             )}
-            {/* --- ADDED: Conditional Upgrade Prompt --- */}
+            {/* Conditional Upgrade Prompt (Now triggered by handleGuideClick or potentially other actions) */}
             {showUpgradePrompt && (
               <UpgradePrompt onUpgradeClick={handleUpgradeClick} />
             )}
-            {/* --- END ADDED --- */}
           </div>
           <ScrollBar />
         </ScrollArea>

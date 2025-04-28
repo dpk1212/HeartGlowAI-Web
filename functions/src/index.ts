@@ -30,6 +30,7 @@ import Stripe from "stripe";
 import {onRequest} from "firebase-functions/v1/https";
 import {config} from "firebase-functions";
 import {getFirestore, FieldValue, Timestamp} from "firebase-admin/firestore";
+import { initializeApp } from "firebase-admin/app";
 
 // Ensure admin is initialized
 try {
@@ -476,10 +477,10 @@ You are warm, intuitive, empathetic, and strategic — never cold, robotic, or o
     ];
 
     logger.info("Calling OpenAI API with updated 2-step interaction system prompt...");
-    const completion = await openai.chat.completions.create({
+        const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       messages: messagesForApi,
-      temperature: 0.7,
+            temperature: 0.7,
       max_tokens: 450,
       user: userId,
     });
@@ -510,3 +511,34 @@ You are warm, intuitive, empathetic, and strategic — never cold, robotic, or o
     throw new HttpsError("internal", "Failed to process chat message.", (error as Error).message);
   }
 });
+
+// --- NEW FUNCTION: Mark Free Guide Used ---
+export const markFreeGuideUsed = onCall(async (request) => {
+  logger.info("markFreeGuideUsed function triggered");
+
+  // 1. Check Authentication
+  if (!request.auth) {
+    logger.error("Authentication check failed: User is not authenticated.");
+    throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
+  }
+  const uid = request.auth.uid;
+  logger.info(`Authenticated user UID: ${uid}`);
+
+  // 2. Get User Profile Reference
+  const userProfileRef = getFirestore().collection("users").doc(uid);
+
+  // 3. Update User Profile
+  try {
+    await userProfileRef.update({
+      hasUsedFreeGuide: true,
+      // Optionally update a timestamp field if you want to track *when* it was used
+      // freeGuideUsedAt: FieldValue.serverTimestamp(), 
+    });
+    logger.info(`Successfully marked hasUsedFreeGuide=true for user ${uid}`);
+    return { success: true, message: "Free guide marked as used." };
+  } catch (error) {
+    logger.error(`Failed to update profile for user ${uid}:`, error);
+    throw new HttpsError("internal", "Failed to update user profile.", error);
+  }
+});
+// --- END NEW FUNCTION ---

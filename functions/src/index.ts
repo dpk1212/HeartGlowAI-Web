@@ -324,23 +324,22 @@ export const handleChatMessage = onCall({
     logger.info(`Guide click detected for user ${userId}, connection ${connectionId || 'general'}. Guide Ack: ${matchedGuide.acknowledgment}`);
 
     try {
-      // Save the user's "click" message (the firstLine)
-      await userMessageRef.add(userMessageData);
-
-      // Construct and save the AI's acknowledgment + mini-prompt response
+      // Construct and save ONLY the AI's acknowledgment + mini-prompt response
       const aiResponseData = {
         text: `${matchedGuide.acknowledgment} ${matchedGuide.miniPrompt}`,
         createdAt: FieldValue.serverTimestamp(),
         role: "assistant",
-        guideContext: trimmedMessage,
-        isGuideResponse: true,
+        guideContext: trimmedMessage, 
+        isGuideResponse: true, 
       };
-      await userMessageRef.add(aiResponseData);
+      // Save the AI response
+      const savedAiMessage = await userMessageRef.add(aiResponseData);
 
-      logger.info("Successfully saved user click and AI guide prompt.");
-      return {success: true, messageId: "guide_prompt_sent"};
+      logger.info(`Successfully saved AI guide prompt with ID: ${savedAiMessage.id}`);
+      // Return the ID of the AI message saved
+      return {success: true, messageId: savedAiMessage.id}; 
     } catch (error) {
-      logger.error("Error saving guide click/prompt to Firestore:", error);
+      logger.error("Error saving guide prompt to Firestore:", error);
       throw new HttpsError("internal", "Failed to save initial guide interaction.", (error as Error).message);
     }
   }

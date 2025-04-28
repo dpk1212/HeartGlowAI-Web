@@ -223,4 +223,36 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Add custom animations and utilities */
+@layer utilities {
+  @keyframes breathing-gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+  .animate-breathing-gradient {
+    background-size: 300% 300%; /* Increased size for smoother effect */
+    animation: breathing-gradient 20s ease infinite; /* Slower duration */
+  }
+
+  @keyframes soft-pulse {
+    0%, 100% { box-shadow: 0 0 0 0px rgba(255, 255, 255, 0.2); }
+    50% { box-shadow: 0 0 0 12px rgba(255, 255, 255, 0); }
+  }
+  .animate-soft-pulse {
+     /* Apply animation with custom cubic-bezier for breathing feel */
+     animation: soft-pulse 3s infinite cubic-bezier(0.45, 0, 0.55, 1);
+  }
+
+  /* Optional: Text glow utility if needed */
+  .shadow-text-glow {
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.15);
+  }
+
+  /* Optional: Radial gradient utility if CSS backgrounds are preferred */
+  .bg-radial-gradient {
+    background-image: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
+  }
 } 

@@ -2,16 +2,18 @@ import React, { useEffect, useRef, useState, useCallback, ChangeEvent } from 're
 // Import sub-components
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
-import { Bars3Icon, LightBulbIcon, SparklesIcon } from '@heroicons/react/24/outline';
+import { Bars3Icon } from '@heroicons/react/24/outline'; // Removed unused icons
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
-import { Timestamp } from 'firebase/firestore'; // Import Timestamp
+// Removed unused Timestamp import (likely used elsewhere, but not in visible scope)
+// import { Timestamp } from 'firebase/firestore'; 
 // Import Card components
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import ScrollArea
 import MessageItem from './MessageItem'; // Assuming MessageItem is in the same directory
-import { Button } from '@/components/ui/button'; // Import Button
-import { Sparkles, SendHorizonal, Users, Users2, HeartHandshake, Brain } from 'lucide-react'; // Import icons
+// Removed unused Button import
+// Removed unused Sparkles, SendHorizonal, Users, Users2, Brain imports
+import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck, Sparkles } from 'lucide-react'; 
 // --- ADDED IMPORTS ---
 import { useAuth } from '@/context/AuthContext';
 import UpgradePrompt from './UpgradePrompt';
@@ -22,41 +24,81 @@ import UpgradePrompt from './UpgradePrompt';
 // const welcomeMessages: Message[] = [ ... ];
 
 // Updated prompt suggestions for empty states - more action-oriented, removed shortText
-const promptSuggestions = [
-  {
-    text: "Analyze my current relationship dynamics", // Updated
-    icon: SparklesIcon
-  },
-  {
-    text: "Help me draft a message for a specific situation", // Updated
-    icon: LightBulbIcon
-  },
-  {
-    text: "Suggest ways to build deeper connection", // Updated
-    icon: SparklesIcon
-  },
-  {
-    text: "Help me think through a difficult situation", // Updated
-    icon: LightBulbIcon
-  }
-];
+// const promptSuggestions = [
+//   {
+//     text: "Analyze my current relationship dynamics", // Updated
+//     icon: SparklesIcon
+//   },
+//   {
+//     text: "Help me draft a message for a specific situation", // Updated
+//     icon: LightBulbIcon
+//   },
+//   {
+//     text: "Suggest ways to build deeper connection", // Updated
+//     icon: SparklesIcon
+//   },
+//   {
+//     text: "Help me think through a difficult situation", // Updated
+//     icon: LightBulbIcon
+//   }
+// ];
 
 // --- Example Prompts (keep outside component) ---
-const examplePrompts = [
-  "Apologizing without making it worse…",
-  "Telling someone I need space…",
-  "Explaining how I feel about us…",
-  "Reaching out after silence…",
-  "Asking for clarity without starting a fight…",
-];
+// const examplePrompts = [
+//   "Apologizing without making it worse…",
+//   "Telling someone I need space…",
+//   "Explaining how I feel about us…",
+//   "Reaching out after silence…",
+//   "Asking for clarity without starting a fight…",
+// ];
 
 // --- Quick Start Prompts (keep outside component) ---
-const quickStartPrompts = {
-  avoiding: "Help me say something I've been avoiding",
-  tension: "Help me navigate tension or conflict",
-  feeling: "Help me understand what I'm feeling",
-  reconnect: "Help me reconnect with someone important",
-};
+// const quickStartPrompts = {
+//   avoiding: "Help me say something I've been avoiding",
+//   tension: "Help me navigate tension or conflict",
+//   feeling: "Help me understand what I'm feeling",
+//   reconnect: "Help me reconnect with someone important",
+// };
+
+// --- New Guide Button Data ---
+const guideButtons = [
+  {
+    headline: "4 Messages to Rebuild a Relationship Before It's Too Late",
+    subtext: "Before the distance becomes permanent.",
+    icon: HeartHandshake,
+    firstLine: "It's never too late to reach for connection. Let's find your opening line together."
+  },
+  {
+    headline: "5 Things to Say When You Feel Unseen or Misunderstood",
+    subtext: "Be heard without needing to shout.",
+    icon: MessageCircleHeart, // Approximation
+    firstLine: "You deserve to be understood, not just tolerated. Let's find the words that open hearts, not walls."
+  },
+  {
+    headline: "How to End a Conversation Without Guilt or Regret",
+    subtext: "Say your truth — leave with peace.",
+    icon: Flag,
+    firstLine: "There's strength in choosing clarity over chaos. I'll help you end this with calm dignity."
+  },
+  {
+    headline: "3 Steps to Defuse Tension and Reset the Relationship",
+    subtext: "Calm the storm without losing yourself.",
+    icon: Waves,
+    firstLine: "Even the strongest storms can pass with the right words. Let's bring calm where there's heat."
+  },
+  {
+    headline: "Signs It's Not About You — And How to Respond With Grace",
+    subtext: "Stop carrying weight that isn't yours.",
+    icon: ScanLine,
+    firstLine: "Sometimes we hurt because we care too much. Let's shift that burden off your shoulders."
+  },
+  {
+    headline: "4 Boundaries That Protect Your Peace Without Pushing People Away",
+    subtext: "Keep your heart open, but guarded.",
+    icon: ShieldCheck,
+    firstLine: "Boundaries aren't barriers—they're bridges that save your peace. Let's build yours together."
+  },
+];
 
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
@@ -81,9 +123,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [showPrompts, setShowPrompts] = useState(true); // Initial state assumption
 
   // --- State & Logic moved back to ChatWindow scope --- 
-  const [currentExample, setCurrentExample] = useState(examplePrompts[0]);
   const [inputValue, setInputValue] = useState("");
-  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputRef = useRef<HTMLTextAreaElement | null>(null);
 
   // --- ADDED HOOKS/STATE ---
@@ -92,39 +132,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const messageCountRef = useRef(messages.length); // Track previous message count
   // --- END ADDED HOOKS/STATE ---
-
-  // --- Effect for rotating examples ---
-  useEffect(() => {
-    if (!showPrompts) return;
-    let index = 0;
-    const intervalId = setInterval(() => {
-      index = (index + 1) % examplePrompts.length;
-      setCurrentExample(examplePrompts[index]);
-    }, 4000);
-    return () => clearInterval(intervalId);
-  }, [showPrompts]);
-
-  // --- Effect for idle fallback prompt ---
-  const resetIdleTimer = useCallback(() => {
-    if (idleTimerRef.current) {
-      clearTimeout(idleTimerRef.current);
-    }
-    if (showPrompts && inputValue === "") {
-      idleTimerRef.current = setTimeout(() => {
-        setInputValue("There's something I want to say, but I keep overthinking how to say it.");
-        inputRef.current?.focus();
-      }, 6000);
-    }
-  }, [showPrompts, inputValue]);
-
-  useEffect(() => {
-    resetIdleTimer();
-    return () => {
-      if (idleTimerRef.current) {
-        clearTimeout(idleTimerRef.current);
-      }
-    };
-  }, [resetIdleTimer]);
 
   // --- Effect to scroll message list and manage prompt visibility ---
   useEffect(() => {
@@ -159,9 +166,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]);
 
-  // Handle clicking a prompt suggestion
-  const handlePromptClick = (promptText: string) => {
-    console.log(`[ChatWindow] handlePromptClick called with: "${promptText}"`);
+  // Handle clicking a guide button (renamed from handlePromptClick)
+  const handleGuideClick = (promptText: string) => {
+    console.log(`[ChatWindow] handleGuideClick called with: \"${promptText}\"`);
     onSendMessage(promptText);
   };
 
@@ -177,19 +184,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         setInputValue("");
      }
   };
-
-  // --- Handle quick start click (calls prop) ---
-  const handleQuickStartClick = (promptKey: keyof typeof quickStartPrompts) => {
-    const promptText = quickStartPrompts[promptKey];
-    onSendMessage(promptText);
-    setInputValue("");
-  };
-
-  // --- Handle context selection (Placeholder) ---
-   const handleContextSelect = (context: string) => {
-     console.log("Selected context:", context);
-   };
-  // --- End State & Logic section ---
 
   // --- MODIFIED: Handle upgrade button click (Direct Stripe Redirect) ---
   const handleUpgradeClick = () => {
@@ -246,68 +240,43 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
-        // --- Enhanced Empty State --- 
-        <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 text-center overflow-y-auto scrollbar-hide">
-          {/* Increased overall padding */} 
-          <div className="w-full max-w-2xl flex flex-col items-center">
-             {/* Section 1: Header - Increased bottom margin */}
-             <div className="mb-12 md:mb-16">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight">
-                   Feeling stuck in a tough relationship moment?
-                </h1>
-                <p className="text-lg md:text-xl text-gray-300/80 mb-5">
-                   HeartGlow helps you find clarity — and the words to say it.
-                </p>
-                <p className="text-xs text-gray-500/80">
-                   Private, encrypted, and secure — your conversations stay between you and HeartGlow.
-                </p>
-             </div>
+        // --- NEW Empty State UI ---
+        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 text-center overflow-y-auto">
+          <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
+            {/* Main Headline */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl">
+              When your emotions feel tangled, we help you find the words—and the way forward.
+            </h1>
+            {/* Subheadline */}
+            <p className="mt-4 text-base sm:text-lg text-gray-400/90 max-w-xl">
+              Private, encrypted, and emotionally intelligent — HeartGlow turns emotional confusion into clear, confident action.
+            </p>
 
-             {/* Section 2: Context Buttons - REMOVED */}
-             {/*
-             <div className="mb-10 md:mb-12">
-                <p className="text-sm text-gray-400 mb-4">Who is this about? (Optional)</p>
-                <div className="flex flex-wrap justify-center gap-3">
-                   {['Partner', 'Colleague', 'Family', 'Myself'].map((ctx) => (
-                     <Button
-                        key={ctx}
-                        variant="outline"
-                        size="sm"
-                        className="text-xs bg-[#252538]/50 border-[#3A3A5C]/40 hover:bg-[#252538]/90 hover:border-[#5A5A8C]/60 text-gray-300 hover:text-white px-3 py-1 h-auto transition-colors"
-                        onClick={() => handleContextSelect(ctx)}
-                     >{ctx}</Button>
-                   ))}
-                </div>
-             </div>
-             */}
+            {/* New Button Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 mb-10 w-full">
+              {guideButtons.map((guide, index) => {
+                const IconComponent = guide.icon;
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleGuideClick(guide.firstLine)}
+                    className="flex flex-col items-center text-center p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-sm hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624]"
+                  >
+                    <IconComponent className="w-6 h-6 mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
+                    <span className="text-sm font-medium text-white/95 leading-snug">{guide.headline}</span>
+                    <span className="text-xs text-gray-400/80 mt-1.5">{guide.subtext}</span>
+                  </button>
+                );
+              })}
+            </div>
 
-              {/* Section 3 Placeholder Text (Examples moved to Input) & Section 8 Hints - Grouped */}
-             <div className="w-full max-w-lg mb-10 md:mb-12 px-4 text-center">
-                  {/* Placeholder for where example text will appear (now inside input) */}
-                  {/* <p className="text-xs text-gray-500/80 mb-2 italic h-4">
-                    e.g., {currentExample} 
-                  </p> */}
-                  {/* Trust Hints - Slightly reduced top margin */}
-                  <div className="text-[11px] text-gray-500/70 mt-4 space-y-1">
-                     <p>Built for emotional privacy — all messages encrypted.</p>
-                  </div>
-             </div>
-
-             {/* Section 5: Quick Start Buttons */}
-              {/* --- MODIFICATION: Add whitespace-normal --- */}
-              <div className="w-full max-w-xl grid grid-cols-1 md:grid-cols-2 gap-2">
-                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('avoiding')}><HeartHandshake className="w-4 h-4 mr-2.5 text-pink-400/70 flex-shrink-0" /> Help me say something I've been avoiding</Button>
-                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('tension')}><Sparkles className="w-4 h-4 mr-2.5 text-purple-400/70 flex-shrink-0" /> Help me navigate tension or conflict</Button>
-                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('feeling')}><Brain className="w-4 h-4 mr-2.5 text-blue-400/70 flex-shrink-0" /> Help me understand what I'm feeling</Button>
-                  <Button variant="outline" className="text-sm whitespace-normal justify-start text-left h-auto py-3 px-4 bg-[#2A2A45]/80 border-[#3A3A5C]/50 hover:bg-[#303050] hover:border-[#4F4F7A] text-gray-200 hover:text-white transition-all duration-200 transform hover:scale-[1.02]" onClick={() => handleQuickStartClick('reconnect')}><Users2 className="w-4 h-4 mr-2.5 text-teal-400/70 flex-shrink-0" /> Help me reconnect with someone important</Button>
-               </div>
-               {/* --- ADDED: Value Prompt --- */}
-               <p className="text-xs text-gray-400/90 mt-6 text-center max-w-md">
-                 Turn emotional confusion into clarity. Start typing — we'll guide you.
-               </p>
+            {/* Footer Line */}
+            <p className="text-xs text-gray-500 mt-6">
+              Not sure where to start? Just begin typing. HeartGlow will guide you step-by-step.
+            </p>
           </div>
-          {/* Removed flex-grow spacer, relying on padding and centering */}
-        </div>
+          <ScrollBar orientation="vertical" />
+        </ScrollArea>
       ) : (
         // --- Message List Area --- 
         <ScrollArea 
@@ -342,8 +311,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           onChange={handleInputChange}   
           onSend={handleSend}          
           inputRef={inputRef}           
-          // Placeholder now includes rotating examples when prompts are shown
-          placeholder={showPrompts ? `e.g., ${currentExample}` : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
+          // Placeholder now uses a generic message when prompts are shown
+          placeholder={showPrompts ? "Start typing here, or choose a guide above..." : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
           disabled={isLoadingMessages}
           isSending={isSendingMessage}  
         />

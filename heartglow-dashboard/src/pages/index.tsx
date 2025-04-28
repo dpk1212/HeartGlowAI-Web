@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { NextPage } from 'next';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import AuthGuard from '../components/layout/AuthGuard';
@@ -28,6 +30,7 @@ import { Connection, Message } from '@/types';
 import { useConnections } from '@/hooks/useConnections';
 import { useMessages } from '@/hooks/useMessages';
 import { addConnection } from '@/firebase/db'; // Change import path
+import { Button } from '@/components/ui/button';
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
@@ -45,15 +48,19 @@ const IndexPage: NextPage = () => {
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   // --- End Chat State ---
 
+  // --- NEW State for Primer Screen ---
+  const [showPrimer, setShowPrimer] = useState(true);
+  // --- End NEW State ---
+
   // Combined loading state: ONLY auth matters now
   const isLoading = authLoading;
 
   // Early return for loading state
   if (isLoading) {
     return (
-      <DashboardLayout>
-        <div className="flex justify-center items-center h-screen">Authenticating...</div>
-      </DashboardLayout>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0E0E1A] to-[#14141F]">
+         <p className="text-white/70">Loading HeartGlow...</p>
+      </div>
     );
   }
 
@@ -71,13 +78,13 @@ const IndexPage: NextPage = () => {
     connections: chatConnections, 
     isLoading: isLoadingConnections, 
     error: connectionsError 
-  } = useConnections(userId);
+  } = useConnections(!showPrimer ? userId : undefined);
   
   const { 
     messages: chatMessages, 
     isLoading: isLoadingMessages, 
     error: messagesError 
-  } = useMessages(userId, selectedConnectionId);
+  } = useMessages(!showPrimer ? userId : undefined, !showPrimer ? selectedConnectionId : 'disabled'); // Pass 'disabled' or similar if primer shown
   // --- End Chat Hooks ---
 
   // --- Existing Dashboard Logic (COMMENTED OUT) ---
@@ -200,39 +207,100 @@ const IndexPage: NextPage = () => {
   if (messagesError) { console.error("Error loading messages:", messagesError); }
   // --- End Error Handling ---
 
+  // --- NEW: Render Primer Screen --- 
+  if (showPrimer) {
+    return (
+      <>
+        <Head>
+          <title>HeartGlow AI | Find Your Words</title>
+          <meta name="description" content="HeartGlow helps you find clarity and the words to say it." />
+        </Head>
+        <div className="min-h-screen flex flex-col items-center justify-center text-center p-6 bg-gradient-to-br from-[#0A0A14] via-[#100C1C] to-[#1A0F2A] text-white relative overflow-hidden">
+          {/* Subtle Particle Effect Placeholder */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            {/* Add particle effect component or CSS background here */} 
+            {/* Example: simple CSS radial gradients */}
+            <div className="absolute top-0 left-0 w-96 h-96 bg-radial-gradient from-heartglow-pink/10 via-transparent to-transparent rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-0 right-0 w-96 h-96 bg-radial-gradient from-heartglow-violet/10 via-transparent to-transparent rounded-full blur-3xl translate-x-1/2 translate-y-1/2"></div>
+          </div>
+          
+          {/* Login Link */}
+          <Link href="/login" legacyBehavior>
+            <a className="absolute top-5 right-6 text-sm text-gray-400 hover:text-white transition-colors z-10">
+              Login
+            </a>
+          </Link>
+
+          {/* Content Area */} 
+          <motion.div 
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.8, ease: "easeOut" }}
+             className="z-10 flex flex-col items-center max-w-2xl"
+          >
+            {/* Logo */} 
+            <img
+              className="h-10 w-auto mb-8 opacity-90"
+              src="/assets/heartglow-logo-mark-pink.svg" 
+              alt="HeartGlow AI"
+            />
+
+            {/* Headline */}
+            <h1 className="text-3xl md:text-4xl font-medium text-white/95 mb-4 leading-tight font-serif shadow-text-glow">
+              Some moments don't need louder words. They just need the right ones.
+            </h1>
+
+            {/* Subtext */}
+            <p className="text-base md:text-lg text-gray-300/80 mb-10 max-w-xl">
+              If you're here, it's because something matters enough to say — but hard enough to need help finding the words.
+              We'll meet you there, with clarity, calm, and care.
+            </p>
+
+            {/* CTA Button */}
+            <Button
+              onClick={() => setShowPrimer(false)} // Dismiss primer on click
+              size="lg"
+              className="px-10 py-6 text-lg font-medium bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-full backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+            >
+              Find My Words
+            </Button>
+          </motion.div>
+        </div>
+      </>
+    );
+  }
+  // --- End Primer Screen --- 
+
+  // --- Render Main Dashboard (only if primer is dismissed) ---
+  // AuthGuard will handle redirecting if user is somehow still null here
   return (
     <>
       <Head>
         <title>HeartGlow AI | Dashboard</title>
         <meta name="description" content="HeartGlow AI Dashboard" />
       </Head>
-
       <AuthGuard>
         <DashboardLayout 
           onNavigateToGuides={handleNavigateToGuides}
           onSelectGeneralChat={handleSelectGeneralChat}
         >
-          {/* Welcome Dialog */}
           <WelcomeDialog 
             open={showWelcome}
             onClose={closeWelcomeDialog}
-            onStartConversation={handleStartConversation}
+            onStartConversation={handleStartConversation} // Ensure this selects 'heartglow-ai' connection
           />
-
-          {/* --- RENDER CHAT INTERFACE --- */}
-           <div className="h-[calc(100vh-64px)] -mt-4 -mx-4"> 
-             <ChatLayout
-               connections={chatConnections}
-               messages={chatMessages}
-               selectedConnectionId={selectedConnectionId}
-               onSelectConnection={handleSelectConnection}
-               onSendMessage={handleSendMessage}
-               isLoadingConnections={isLoadingConnections}
-               isLoadingMessages={isLoadingMessages}
-               onSaveConnection={handleSaveConnection}
-             />
-           </div>
-          {/* --- END CHAT INTERFACE --- */}
+          <div className="h-[calc(100vh-64px)] -mt-4 -mx-4"> 
+            <ChatLayout
+              connections={chatConnections}
+              messages={chatMessages}
+              selectedConnectionId={selectedConnectionId}
+              onSelectConnection={handleSelectConnection}
+              onSendMessage={handleSendMessage}
+              isLoadingConnections={isLoadingConnections}
+              isLoadingMessages={isLoadingMessages}
+              onSaveConnection={handleSaveConnection}
+            />
+          </div>
         </DashboardLayout>
       </AuthGuard>
     </>

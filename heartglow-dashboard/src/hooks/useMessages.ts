@@ -47,28 +47,31 @@ export const useMessages = (userId: string | null | undefined, connectionId: str
       let messagesCollectionRef: CollectionReference<DocumentData>;
 
       // Determine the correct collection path
-      // Explicitly check for 'heartglow-ai' or null/undefined for general chat
       if (connectionId && connectionId !== 'heartglow-ai') {
         // Path for a specific user connection
         messagesCollectionRef = collection(db, 'users', userId, 'connections', connectionId, 'messages');
-        console.log(`Setting up listener for connection messages: users/${userId}/connections/${connectionId}/messages`); // Debug log
+        console.log(`Setting up listener for connection messages: users/${userId}/connections/${connectionId}/messages`);
       } else {
-        // Path for the general HeartGlow AI chat (connectionId is null, undefined, or 'heartglow-ai')
-        messagesCollectionRef = collection(db, 'users', userId, 'chats', 'heartglow-ai', 'messages');
-        console.log(`Setting up listener for general AI chat: users/${userId}/chats/heartglow-ai/messages`); // Debug log
+        // CORRECTED Path for the general HeartGlow AI chat
+        messagesCollectionRef = collection(db, 'users', userId, 'messages'); // Use the direct messages collection
+        console.log(`Setting up listener for general AI chat: users/${userId}/messages`); // Updated log
       }
       
-      const q = query(messagesCollectionRef, orderBy('timestamp', 'asc'));
+      // MODIFIED orderBy field from 'timestamp' to 'createdAt' to match backend
+      const q = query(messagesCollectionRef, orderBy('createdAt', 'asc'));
 
       unsubscribe = onSnapshot(q, 
         (querySnapshot) => {
           const fetchedMessages = querySnapshot.docs.map(doc => ({
             id: doc.id,
+            // Ensure data mapping matches the Message type, especially the timestamp field name
             ...(doc.data() as Omit<Message, 'id'>),
+            // Make sure the timestamp is correctly converted if needed (e.g., from Firestore Timestamp to Date)
+            // Assuming the Message type expects a compatible format or this is handled
           }));
           setMessages(fetchedMessages);
           setIsLoading(false);
-          console.log(`Fetched ${fetchedMessages.length} messages for ${connectionId || 'general chat'}`); // Debug log
+          console.log(`Fetched ${fetchedMessages.length} messages for ${connectionId || 'general chat'}`);
         },
         (err) => {
           console.error(`Error fetching messages for ${connectionId || 'general chat'}: `, err);

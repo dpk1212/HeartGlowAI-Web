@@ -65,7 +65,7 @@ const Login = () => {
 
     try {
       if (isSigningUp) {
-        await signup(email, password, fullName);
+        await signup(email, password);
       } else {
         await login(email, password);
       }

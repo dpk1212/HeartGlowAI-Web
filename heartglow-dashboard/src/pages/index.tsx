@@ -80,73 +80,87 @@ const IndexPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>HeartGlow AI | Emotional Clarity & Connection</title>
-          <meta name="description" content="Turn relationship confusion into connection. HeartGlow helps you find the perfect words, even when emotions run high." />
+          <title>Never Overthink a Message Again | HeartGlow AI</title>
+          <meta name="description" content="HeartGlow AI gives you instant emotional scripts, clarity guides, and coaching tools for your hardest conversations. Speak your truth and reconnect with confidence." />
         </Head>
-        {/* Main container - Dark sophisticated background */}
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-900 via-purple-950 to-black text-white relative overflow-hidden font-sans">
-          {/* --- Placeholder: Compelling Background Visual --- */}
-          {/* Consider a subtle, abstract background video or high-quality image related to connection/clarity */}
-          {/* <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-10 z-0"> <source src="/path/to/background.mp4" type="video/mp4" /> </video> */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-0"></div> {/* Subtle bottom fade for contrast */}
-
+        {/* Main container - Focused, cleaner background */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-950 via-black to-gray-900 text-white relative overflow-hidden font-sans">
+          {/* Optional Subtle Background Pattern/Texture */}
+          {/* <div className="absolute inset-0 bg-[url('/path/to/subtle-pattern.svg')] opacity-[0.03] z-0"></div> */}
+          
           {/* Login & Logo Row */}
           <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">
-            {/* Logo Placeholder */} 
+            {/* Logo */} 
             <div className="flex items-center space-x-2">
               <SparklesIcon className="h-6 w-6 text-purple-300" />
               <span className="font-medium text-lg text-white">HeartGlow</span>
             </div>
             {/* Login Link */} 
-            <Link href="/login" legacyBehavior>
+            <Link href="/login?mode=login" legacyBehavior>
               <a className="px-4 py-1.5 text-sm font-medium text-purple-200 bg-white/5 rounded-md border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-200">
                 Login
               </a>
             </Link>
           </div>
 
-          {/* Centered Content Area */}
+          {/* Centered Content Area */} 
           <motion.div
              initial={{ opacity: 0, y: 30 }}
              animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }} // Smoother ease-out
-             className="z-10 flex flex-col items-center w-full max-w-3xl text-center px-4 relative mt-16 sm:mt-0" // Adjusted max-width and margin-top
+             transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+             className="z-10 flex flex-col items-center w-full max-w-4xl text-center px-4 relative mt-16 sm:mt-0"
           >
-             {/* 1. Headline - Punchy & Clear */}
-             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-5 leading-tight tracking-tight">
-               Stop Guessing, Start Connecting.
-             </h1>
-
-             {/* 2. Subheadline - Elaborate on Problem/Solution */}
-             <p className="text-lg md:text-xl text-purple-200/90 mb-10 font-normal max-w-2xl mx-auto leading-relaxed">
-               Find emotional clarity when it matters most. HeartGlow's AI guides you to express yourself effectively, turning confusion and conflict into understanding and connection.
+             {/* --- HERO IMAGE (Replaces Headline/Subheadline Text) --- */}
+             <motion.img 
+                src="/assets/primer-hero.png" 
+                alt="HeartGlow - Stop Guessing, Start Connecting. AI guides for emotional clarity." 
+                className="w-full max-w-xl md:max-w-2xl mb-10 rounded-lg shadow-xl"
+                initial={{ opacity: 0, scale: 0.9 }} 
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
+              />
+             {/* --- END HERO IMAGE --- */}
+             
+             {/* Product Description (Moved from removed subheadline) */}
+             <p className="text-lg md:text-xl text-purple-200/80 mb-12 font-normal max-w-3xl mx-auto leading-relaxed">
+               HeartGlow provides instant <strong className="text-white">emotional scripts, clarity guides,</strong> and <strong className="text-white">coaching tools</strong> — so you can speak your truth, reconnect, and move forward with confidence.
              </p>
 
-             {/* 3. Benefits Section - Enhanced Styling */}
-             <div className="mb-12 w-full max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-purple-100/90 text-center">
-                <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
-                   <p className="text-base font-medium">Craft Clear Messages</p>
+             {/* --- VISUAL PLACEHOLDER REMOVED --- */}
+
+             {/* 3. Benefit Blocks (Rewritten) */}
+             <div className="mb-12 w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-purple-100/90 text-left">
+                 {/* Benefit 1 - Updated Icon? Maybe check lucide-react for better ones */}
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3 min-h-[80px]">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                   <p className="text-base font-medium">Get real scripts for <strong className="text-white">real conversations</strong></p>
+                 </div>
+                 {/* Benefit 2 */} 
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                   <p className="text-base font-medium">Reconnect <strong className="text-white">without overthinking</strong></p>
                 </div>
-                 <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                   <p className="text-base font-medium">Reduce Conflict</p>
+                 {/* Benefit 3 */} 
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                   <p className="text-base font-medium">Track <strong className="text-white">emotional growth</strong> with AI insights</p>
                 </div>
-                 <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
-                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-                   <p className="text-base font-medium">Build Stronger Bonds</p>
+                 {/* Benefit 4 */} 
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                   <p className="text-base font-medium">New frameworks & guides <strong className="text-white">added weekly</strong></p>
                 </div>
              </div>
 
-             {/* 4. Social Proof / Trust Section (Placeholder Refined) */}
-             <div className="mb-12 w-full max-w-lg mx-auto p-5 bg-white/5 rounded-lg border border-white/10">
-                <p className="text-base text-purple-200/80 italic leading-relaxed">"This actually works. I was skeptical, but HeartGlow helped me say what I needed to say without starting a fight. Game changer for my relationship."</p>
-                <p className="mt-3 text-sm font-medium text-white text-right">- Real User Review</p>
-                {/* --- Placeholder: Add more testimonials (carousel?) or logos below --- */}
+             {/* 4. Ethical Social Proof (Placeholder - Replaces Quote) */}
+             <div className="mb-12 w-full max-w-2xl mx-auto">
+                 <p className="text-sm text-purple-200/70 italic">
+                    Guides crafted for real-life challenges: apologies, boundaries, reconnections, expressing needs, and more.
+                 </p>
              </div>
 
-             {/* 5. Focused CTA Button - More Polish */}
-             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+             {/* 5. Focused CTA Button & Conversion Booster */}
+             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }} className="flex flex-col items-center">
                <Button
                  onClick={() => router.push('/login?cta=primer')}
                  size="lg"
@@ -154,14 +168,13 @@ const IndexPage: NextPage = () => {
                             bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 
                             hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 
                             focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-black 
-                            text-white"
+                            text-white mb-3"
                >
                  Unlock Emotional Clarity
                </Button>
-              </motion.div>
-
-              {/* Optional: Add subtle note about free/no card needed? */} 
-              <p className="mt-4 text-xs text-purple-300/60">Free to start. No credit card required.</p>
+              {/* Conversion Booster - More Prominent */}
+              <p className="text-sm text-purple-300/80 font-medium">Free to start. No credit card required.</p>
+             </motion.div>
 
           </motion.div>
         </div>

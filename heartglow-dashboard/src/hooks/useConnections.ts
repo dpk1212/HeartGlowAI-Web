@@ -16,7 +16,7 @@ import { Connection } from '@/types'; // Import the shared type
 export const useConnections = (userId: string | null | undefined) => {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) {
@@ -48,17 +48,18 @@ export const useConnections = (userId: string | null | undefined) => {
           }));
           setConnections(fetchedConnections);
           setIsLoading(false);
+          setError(null);
         },
         (err) => {
           console.error("Error fetching connections: ", err);
-          setError(err);
+          setError(err.message || 'Failed to fetch connections');
           setIsLoading(false);
         }
       );
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error setting up connection listener: ", err);
-      setError(err instanceof Error ? err : new Error('Failed to setup listener'));
+      setError(err.message || 'Failed to setup listener');
       setIsLoading(false);
     }
 

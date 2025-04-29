@@ -82,10 +82,9 @@ const IndexPage: NextPage = () => {
           <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
         </Head>
         {/* Main container with updated gradient and layout */}
-        {/* Refined Gradient: Deeper blues/purples, maybe slightly radial? */}
         <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-[#4C1D95] via-[#2E1065] to-[#1C1917] text-white relative overflow-hidden">
-          {/* Subtle Grain/Noise Overlay - Placeholder path, ensure noise.png exists and is suitable */}
-          <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-[0.04] pointer-events-none mix-blend-soft-light"></div>
+          {/* Subtle Grain/Noise Overlay - Removed as asset is missing */}
+          {/* <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-[0.04] pointer-events-none mix-blend-soft-light"></div> */}
           {/* Optional: Add a subtle radial glow from center */}
           <div className="absolute inset-0 radial-gradient-glow opacity-30 pointer-events-none"></div> 
 
@@ -278,9 +277,26 @@ const IndexPage: NextPage = () => {
   // const handleSkipChallenge = async () => { ... };
   // --- End Challenge Handlers ---
   
-  // --- Error Handling for Data Hooks ---
-  if (connectionsError) { console.error("Error loading connections:", connectionsError); }
-  if (messagesError) { console.error("Error loading messages:", messagesError); }
+  // --- Explicit Error Handling --- 
+  if (connectionsError) {
+    console.error("Error loading connections:", connectionsError);
+    // Render an error message UI instead of the dashboard
+    return (
+      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> {/* Provide dummy handlers or adjust Layout */} 
+         <div className="flex flex-col items-center justify-center h-full text-center p-4">
+            <h2 className="text-xl font-semibold text-red-500 mb-2">Failed to Load Connections</h2>
+            <p className="text-gray-400 mb-4">There was an error loading your connections. Please try refreshing the page.</p>
+            <p className="text-xs text-gray-500">Error: {connectionsError}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">Refresh Page</Button>
+         </div>
+      </DashboardLayout>
+    );
+  }
+  if (messagesError) {
+     console.error("Error loading messages:", messagesError);
+     // Optionally render a similar error state for message errors
+     // For now, we might let the ChatLayout/ChatWindow handle this specific error
+  }
   // --- End Error Handling ---
 
   // --- Render Main Dashboard (only if primer is dismissed) ---

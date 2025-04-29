@@ -110,49 +110,44 @@ const IndexPage: NextPage = () => {
              transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
              className="z-10 flex flex-col items-center w-full max-w-4xl text-center px-4 relative mt-16 sm:mt-0"
           >
-             {/* --- HERO IMAGE (Replaces Headline/Subheadline Text) --- */}
-             <motion.img 
-                src="/assets/primer-hero.png"
-                alt="HeartGlow - Stop Guessing, Start Connecting. AI guides for emotional clarity." 
-                className="w-full max-w-xl md:max-w-2xl mb-10 rounded-lg shadow-xl"
-                initial={{ opacity: 0, scale: 0.9 }} 
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.1, ease: "easeOut" }}
-              />
-             {/* --- END HERO IMAGE --- */}
-             
-             {/* Product Description (Moved from removed subheadline) */}
+             {/* 1. Headline (Pain + Outcome) - Text Version */}
+             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-purple-300 to-pink-300 mb-4 leading-tight tracking-tight">
+               Never Overthink a Message Again.
+             </h1>
+             <p className="text-2xl sm:text-3xl lg:text-4xl font-medium text-purple-200/90 mb-8">
+                AI-crafted words for your hardest conversations.
+              </p>
+
+             {/* 2. Product Description */}
              <p className="text-lg md:text-xl text-purple-200/80 mb-12 font-normal max-w-3xl mx-auto leading-relaxed">
                HeartGlow provides instant <strong className="text-white">emotional scripts, clarity guides,</strong> and <strong className="text-white">coaching tools</strong> — so you can speak your truth, reconnect, and move forward with confidence.
              </p>
 
-             {/* --- VISUAL PLACEHOLDER REMOVED --- */}
-
-             {/* 3. Benefit Blocks (Rewritten) */}
+             {/* 3. Benefit Blocks */}
              <div className="mb-12 w-full max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-purple-100/90 text-left">
-                 {/* Benefit 1 - Updated Icon? Maybe check lucide-react for better ones */}
+                 {/* Benefit 1 */}
                  <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3 min-h-[80px]">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
                    <p className="text-base font-medium">Get real scripts for <strong className="text-white">real conversations</strong></p>
-                 </div>
+                </div>
                  {/* Benefit 2 */} 
-                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3 min-h-[80px]">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                    <p className="text-base font-medium">Reconnect <strong className="text-white">without overthinking</strong></p>
                 </div>
                  {/* Benefit 3 */} 
-                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3 min-h-[80px]">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
                    <p className="text-base font-medium">Track <strong className="text-white">emotional growth</strong> with AI insights</p>
                 </div>
                  {/* Benefit 4 */} 
-                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3">
+                 <div className="flex items-start p-4 bg-white/5 rounded-lg border border-white/10 space-x-3 min-h-[80px]">
                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-green-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                    <p className="text-base font-medium">New frameworks & guides <strong className="text-white">added weekly</strong></p>
                 </div>
              </div>
 
-             {/* 4. Ethical Social Proof (Placeholder - Replaces Quote) */}
+             {/* 4. Ethical Social Proof */}
              <div className="mb-12 w-full max-w-2xl mx-auto">
                  <p className="text-sm text-purple-200/70 italic">
                     Guides crafted for real-life challenges: apologies, boundaries, reconnections, expressing needs, and more.

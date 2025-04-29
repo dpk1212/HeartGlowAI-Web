@@ -61,10 +61,10 @@ const IndexPage: NextPage = () => {
     // If user is anonymous or null after loading, showPrimer remains true (or its current state)
   }, [authLoading, currentUser]);
 
-  // Combined loading state: ONLY auth matters now
-  const isLoading = authLoading;
+  // Combined loading state: Includes auth and potentially challenge loading
+  const isLoading = authLoading; // || challengesLoading; // Keep challenges commented out
 
-  // Early return for loading state
+  // Render loading state FIRST if still loading
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0E0E1A] to-[#14141F]">
@@ -73,7 +73,7 @@ const IndexPage: NextPage = () => {
     );
   }
 
-  // --- Render Primer Screen if applicable ---
+  // --- Render Primer Screen if applicable (after loading is false) ---
   if (showPrimer) {
     return (
       <>
@@ -139,14 +139,19 @@ const IndexPage: NextPage = () => {
   }
   // --- End Primer Screen ---
 
-  // --- User is Authenticated (Non-Anonymous) and Primer should be hidden --- 
-  if (!userId) { 
-     // This case might become unreachable if primer logic above is robust
-     // Or could redirect to login
-     console.warn("IndexPage: Rendered dashboard part but userId is missing after auth checks.");
-     router.push('/login'); // Redirect to login if something went wrong
-     return null; // Or a loading indicator
+  // --- NEW: Check for userId AFTER loading and primer logic ---
+  // If we are past loading and not showing the primer, but still don't have a userId, redirect.
+  if (!showPrimer && !userId) {
+      console.warn("IndexPage: Past loading/primer but userId is missing. Redirecting to login.");
+      router.push('/login'); 
+      return ( // Return a minimal loading/redirect indicator
+          <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0E0E1A] to-[#14141F]">
+              <p className="text-white/70">Redirecting...</p>
+          </div>
+      ); 
   }
+
+  // --- If we reach here, isLoading is false, showPrimer is false, and userId MUST be valid ---
 
   // --- Chat Hooks ---
   const { 

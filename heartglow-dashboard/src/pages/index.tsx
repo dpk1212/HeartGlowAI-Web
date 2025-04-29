@@ -112,7 +112,7 @@ const IndexPage: NextPage = () => {
           >
              {/* --- HERO IMAGE (Replaces Headline/Subheadline Text) --- */}
              <motion.img 
-                src="/assets/primer-hero.png" 
+                src="/assets/ChatGPT Image Apr 29, 2025, 09_21_01 AM.png" 
                 alt="HeartGlow - Stop Guessing, Start Connecting. AI guides for emotional clarity." 
                 className="w-full max-w-xl md:max-w-2xl mb-10 rounded-lg shadow-xl"
                 initial={{ opacity: 0, scale: 0.9 }} 

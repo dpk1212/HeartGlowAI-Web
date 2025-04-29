@@ -291,8 +291,19 @@ const IndexPage: NextPage = () => {
          <div className="flex flex-col items-center justify-center h-full text-center p-4">
             <h2 className="text-xl font-semibold text-red-500 mb-2">Failed to Load Connections</h2>
             <p className="text-gray-400 mb-4">There was an error loading your connections. Please try refreshing the page.</p>
-            <p className="text-xs text-gray-500">Error: {connectionsError}</p>
+            <p className="text-xs text-gray-500">Error: {typeof connectionsError === 'string' ? connectionsError : (connectionsError as Error)?.message || 'Unknown error'}</p>
             <Button onClick={() => window.location.reload()} className="mt-4">Refresh Page</Button>
+         </div>
+      </DashboardLayout>
+    );
+  }
+  // NEW: Add loading state check for connections *after* error check
+  if (isLoadingConnections) {
+    return (
+      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> 
+         <div className="flex flex-col items-center justify-center h-full text-center p-4">
+            <p className="text-gray-400">Loading your connections...</p>
+            {/* Optionally add a spinner here */}
          </div>
       </DashboardLayout>
     );

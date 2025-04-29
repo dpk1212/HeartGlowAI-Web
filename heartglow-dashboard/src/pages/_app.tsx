@@ -7,7 +7,6 @@ import { AuthProvider, useAuth } from '../context/AuthContext';
 import { PaywallProvider, usePaywall } from '../context/PaywallContext';
 import PaywallModal from '../components/ui/PaywallModal';
 import onboardingPaywallContent from '../components/ui/OnboardingPaywallContent';
-import AccountLinkBanner from '../components/ui/AccountLinkBanner';
 import DashboardTour from '../components/ui/DashboardTour';
 
 // Helper function to get route with base path
@@ -18,7 +17,7 @@ export function getRouteWithBasePath(path: string): string {
 
 // --- Add InnerApp component to use hooks ---
 function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProps['router'] }) {
-  const { userProfile, loading, updateUserProfile } = useAuth();
+  const { currentUser, userProfile, loading, updateUserProfile } = useAuth();
   const { isPaywallOpen, closePaywall } = usePaywall();
   const [isTourActiveDelayed, setIsTourActiveDelayed] = useState(false);
   // Track if paywall is shown after welcome
@@ -151,8 +150,10 @@ function InnerApp({ Component, pageProps, router }: AppProps & { router: AppProp
   return (
     <>
       {/* Apply gradient, min-height, and default text color to this main wrapper div */}
-      <div className="min-h-screen bg-gradient-to-tr from-gradientFrom to-gradientTo text-foreground"> 
-        <AccountLinkBanner />
+      <div className="min-h-screen bg-gradient-to-tr from-gradientFrom to-gradientTo text-foreground">
+        {/* Conditionally render banner only for anonymous users */}
+        {/* Banner removed as requested */}
+        {/* {currentUser?.isAnonymous && <AccountLinkBanner />} */}
         <Component {...pageProps} />
       </div>
 

@@ -73,36 +73,32 @@ const IndexPage: NextPage = () => {
     );
   }
 
-  // --- Render Primer Screen if applicable --- 
-  // This will now only show if:
-  // 1. Still loading (handled above)
-  // 2. Loading finished, user is null
-  // 3. Loading finished, user is anonymous
-  // 4. Loading finished, user is logged in, but useEffect hasn't run/set state yet (briefly)
+  // --- Render Primer Screen if applicable ---
   if (showPrimer) {
-    // NOTE: We might want to explicitly check !currentUser || currentUser.isAnonymous here
-    // instead of relying solely on the showPrimer state, for robustness.
-    // But for now, this relies on the useEffect correctly setting showPrimer=false for logged-in users.
     return (
       <>
         <Head>
           <title>HeartGlow AI | Emotional Clarity</title>
           <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
         </Head>
-        {/* Main container with new gradient and layout */}
-        {/* NOTE: Using placeholder gradient, replace with exact styles from screenshot 1 if possible */}
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 via-indigo-700 to-blue-800 text-white relative overflow-hidden">
+        {/* Main container with updated gradient and layout */}
+        {/* Refined Gradient: Deeper blues/purples, maybe slightly radial? */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-[#4C1D95] via-[#2E1065] to-[#1C1917] text-white relative overflow-hidden">
+          {/* Subtle Grain/Noise Overlay - Placeholder path, ensure noise.png exists and is suitable */}
+          <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-[0.04] pointer-events-none mix-blend-soft-light"></div>
+          {/* Optional: Add a subtle radial glow from center */}
+          <div className="absolute inset-0 radial-gradient-glow opacity-30 pointer-events-none"></div> 
 
-          {/* Login Link - Kept but maybe styled differently? */}
+          {/* Login Link */}
           <Link href="/login" legacyBehavior>
-            <a className="absolute top-5 right-6 text-sm text-gray-200 hover:text-white transition-colors z-20">
+            <a className="absolute top-6 right-8 text-sm text-indigo-200 hover:text-white transition-colors z-20">
               Login
             </a>
           </Link>
 
-          {/* Replaced Logo with Icon - Kept, maybe repositioned/styled? */}
+          {/* Icon */}
           <SparklesIcon
-            className="absolute top-6 left-6 h-8 w-8 text-white/60 z-20"
+            className="absolute top-6 left-8 h-7 w-7 text-indigo-200/80 z-20" /* Adjusted size/color */
             aria-hidden="true"
           />
 
@@ -113,32 +109,31 @@ const IndexPage: NextPage = () => {
              transition={{ duration: 0.7, ease: "easeOut" }}
              className="z-10 flex flex-col items-center w-full max-w-md text-center px-4"
           >
-             {/* Removed Frosted Glass Card - content directly on gradient */}
-
-             {/* Headline - Updated Text & Style */}
-             <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4 leading-tight">
+             {/* Headline - Enhanced Typography */}
+             <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-white/90 to-indigo-300 mb-5 leading-tight tracking-tight shadow-sm">
                Emotional clarity when it matters most.
              </h1>
 
-             {/* Subheadline - Updated Text & Style */}
-             <p className="text-lg md:text-xl text-gray-100/90 mb-10 font-light max-w-sm mx-auto">
+             {/* Subheadline - Enhanced Typography */}
+             <p className="text-lg md:text-xl text-indigo-200/90 mb-10 font-light max-w-lg mx-auto leading-relaxed"> {/* Increased max-width, adjusted color/leading */}
                Turn confusion into connection. Find the perfect words, even when your heart is racing.
              </p>
 
-             {/* CTA Button - Updated Text, Style & onClick */}
+             {/* CTA Button - Enhanced Style */}
              <Button
                onClick={() => router.push('/login')}
                size="lg"
-               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium bg-white text-indigo-700 rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700"
+               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1C1917] 
+                          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 
+                          hover:from-pink-400 hover:via-purple-400 hover:to-indigo-400 
+                          focus:ring-purple-400 
+                          text-white 
+                          animate-pulse-slow" /* Added gradient, refined hover/focus, added pulse animation */
              >
-               {/* Consider adding an icon? <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" /> */}
+               {/* Optional: Add icon back? <SparklesIcon className="w-5 h-5 mr-2 -ml-1" /> */}
                Get Clarity Now
              </Button>
-
-             {/* Removed Micro Text Below Button */}
-
           </motion.div>
-          {/* Download/Rating elements from screenshot 1 are not included as they might be app-specific */}
         </div>
       </>
     );
@@ -146,8 +141,6 @@ const IndexPage: NextPage = () => {
   // --- End Primer Screen ---
 
   // --- User is Authenticated (Non-Anonymous) and Primer should be hidden --- 
-  // Handle case where user is somehow null/anonymous despite checks (shouldn't happen ideally)
-  // Or use AuthGuard which might handle this
   if (!userId) { 
      // This case might become unreachable if primer logic above is robust
      // Or could redirect to login
@@ -161,13 +154,13 @@ const IndexPage: NextPage = () => {
     connections: chatConnections, 
     isLoading: isLoadingConnections, 
     error: connectionsError 
-  } = useConnections(!showPrimer ? userId : undefined);
+  } = useConnections(userId);
   
   const { 
     messages: chatMessages, 
     isLoading: isLoadingMessages, 
     error: messagesError 
-  } = useMessages(!showPrimer ? userId : undefined, !showPrimer ? selectedConnectionId : 'disabled'); // Pass 'disabled' or similar if primer shown
+  } = useMessages(userId, selectedConnectionId);
   // --- End Chat Hooks ---
 
   // --- Existing Dashboard Logic (COMMENTED OUT) ---

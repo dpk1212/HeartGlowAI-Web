@@ -39,10 +39,12 @@ body {
 /* Slower pulse for decorative elements */
 @keyframes pulse-slow {
   0%, 100% {
-    opacity: 0.6;
+    opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: 0.2;
+    opacity: 0.9;
+    transform: scale(1.02);
   }
 }
 
@@ -106,7 +108,7 @@ body {
 
 /* Custom animation utilities */
 .animate-pulse-slow {
-  animation: pulse-slow 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: pulse-slow 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 .animate-subtle-bounce {
@@ -254,5 +256,11 @@ body {
   /* Optional: Radial gradient utility if CSS backgrounds are preferred */
   .bg-radial-gradient {
     background-image: radial-gradient(circle, var(--tw-gradient-from), var(--tw-gradient-to));
+  }
+
+  /* Placeholder for radial glow effect */
+  /* Ensure this doesn't conflict with existing gradients */
+  .radial-gradient-glow {
+     background-image: radial-gradient(circle at center, rgba(124, 58, 237, 0.3) 0%, transparent 70%);
   }
 } 

@@ -148,7 +148,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         )}
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
-        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-[#13131D]/80 backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
+        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-gradient-to-b from-[#181828] to-[#10101A] backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
           <Button 
             variant="outline"
             className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"

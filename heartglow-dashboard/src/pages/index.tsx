@@ -35,23 +35,31 @@ import { Button } from '@/components/ui/button';
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
-  const { currentUser: user, userProfile, loading: authLoading } = useAuth();
+  const { currentUser, userProfile, loading: authLoading } = useAuth();
   // const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges(); // Comment out
   // const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Comment out
   const router = useRouter();
-  const userId = user?.uid;
+  const userId = currentUser?.uid;
   
   // Welcome dialog state
   const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
 
   // --- Chat State ---
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>('heartglow-ai'); // Default to general AI
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>('heartglow-ai');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
   // --- End Chat State ---
 
   // --- NEW State for Primer Screen ---
   const [showPrimer, setShowPrimer] = useState(true);
-  // --- End NEW State ---
+
+  // --- Effect to hide primer for logged-in (non-anonymous) users ---
+  useEffect(() => {
+    if (!authLoading && currentUser && !currentUser.isAnonymous) {
+      // If loading is done and we have a real logged-in user
+      setShowPrimer(false); 
+    }
+    // If user is anonymous or null after loading, showPrimer remains true (or its current state)
+  }, [authLoading, currentUser]);
 
   // Combined loading state: ONLY auth matters now
   const isLoading = authLoading;
@@ -65,13 +73,87 @@ const IndexPage: NextPage = () => {
     );
   }
 
-  // Handle case where user is not logged in after loading
-  if (!userId) {
-     return (
-      <DashboardLayout>
-         <div className="flex justify-center items-center h-screen">Please log in.</div>
-      </DashboardLayout>
-     );
+  // --- Render Primer Screen if applicable --- 
+  // This will now only show if:
+  // 1. Still loading (handled above)
+  // 2. Loading finished, user is null
+  // 3. Loading finished, user is anonymous
+  // 4. Loading finished, user is logged in, but useEffect hasn't run/set state yet (briefly)
+  if (showPrimer) {
+    // NOTE: We might want to explicitly check !currentUser || currentUser.isAnonymous here
+    // instead of relying solely on the showPrimer state, for robustness.
+    // But for now, this relies on the useEffect correctly setting showPrimer=false for logged-in users.
+    return (
+      <>
+        <Head>
+          <title>HeartGlow AI | Emotional Clarity</title>
+          <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
+        </Head>
+        {/* Main container with new gradient and layout */}
+        {/* NOTE: Using placeholder gradient, replace with exact styles from screenshot 1 if possible */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 via-indigo-700 to-blue-800 text-white relative overflow-hidden">
+
+          {/* Login Link - Kept but maybe styled differently? */}
+          <Link href="/login" legacyBehavior>
+            <a className="absolute top-5 right-6 text-sm text-gray-200 hover:text-white transition-colors z-20">
+              Login
+            </a>
+          </Link>
+
+          {/* Replaced Logo with Icon - Kept, maybe repositioned/styled? */}
+          <SparklesIcon
+            className="absolute top-6 left-6 h-8 w-8 text-white/60 z-20"
+            aria-hidden="true"
+          />
+
+          {/* Centered Content Area */}
+          <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.7, ease: "easeOut" }}
+             className="z-10 flex flex-col items-center w-full max-w-md text-center px-4"
+          >
+             {/* Removed Frosted Glass Card - content directly on gradient */}
+
+             {/* Headline - Updated Text & Style */}
+             <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4 leading-tight">
+               Emotional clarity when it matters most.
+             </h1>
+
+             {/* Subheadline - Updated Text & Style */}
+             <p className="text-lg md:text-xl text-gray-100/90 mb-10 font-light max-w-sm mx-auto">
+               Turn confusion into connection. Find the perfect words, even when your heart is racing.
+             </p>
+
+             {/* CTA Button - Updated Text, Style & onClick */}
+             <Button
+               onClick={() => router.push('/login')}
+               size="lg"
+               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium bg-white text-indigo-700 rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700"
+             >
+               {/* Consider adding an icon? <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" /> */}
+               Get Clarity Now
+             </Button>
+
+             {/* Removed Micro Text Below Button */}
+
+          </motion.div>
+          {/* Download/Rating elements from screenshot 1 are not included as they might be app-specific */}
+        </div>
+      </>
+    );
+  }
+  // --- End Primer Screen ---
+
+  // --- User is Authenticated (Non-Anonymous) and Primer should be hidden --- 
+  // Handle case where user is somehow null/anonymous despite checks (shouldn't happen ideally)
+  // Or use AuthGuard which might handle this
+  if (!userId) { 
+     // This case might become unreachable if primer logic above is robust
+     // Or could redirect to login
+     console.warn("IndexPage: Rendered dashboard part but userId is missing after auth checks.");
+     router.push('/login'); // Redirect to login if something went wrong
+     return null; // Or a loading indicator
   }
 
   // --- Chat Hooks ---
@@ -120,12 +202,12 @@ const IndexPage: NextPage = () => {
     goal?: string, 
     notes?: string
   ) => {
-    if (!user) {
+    if (!currentUser) {
       console.error("User object not available, cannot save connection.");
       throw new Error("Authentication error."); // Throw error to be caught in modal
     }
     console.log('Attempting to save connection:', { 
-      userId: user.uid, 
+      userId: currentUser.uid, 
       name, 
       relationship,
       specificRelationship,
@@ -139,7 +221,7 @@ const IndexPage: NextPage = () => {
       // await callCreateConnection({ name, relationship });
       
       // Option 2: Use a client-side utility function (more direct)
-      await addConnection(user, { 
+      await addConnection(currentUser, { 
         name, 
         relationship,
         specificRelationship,
@@ -207,70 +289,6 @@ const IndexPage: NextPage = () => {
   if (connectionsError) { console.error("Error loading connections:", connectionsError); }
   if (messagesError) { console.error("Error loading messages:", messagesError); }
   // --- End Error Handling ---
-
-  // --- NEW: Render Enhanced Primer Screen ---
-  if (showPrimer) {
-    return (
-      <>
-        <Head>
-          <title>HeartGlow AI | Emotional Clarity</title>
-          <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
-        </Head>
-        {/* Main container with new gradient and layout */}
-        {/* NOTE: Using placeholder gradient, replace with exact styles from screenshot 1 if possible */}
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 via-indigo-700 to-blue-800 text-white relative overflow-hidden">
-
-          {/* Login Link - Kept but maybe styled differently? */}
-          <Link href="/login" legacyBehavior>
-            <a className="absolute top-5 right-6 text-sm text-gray-200 hover:text-white transition-colors z-20">
-              Login
-            </a>
-          </Link>
-
-          {/* Replaced Logo with Icon - Kept, maybe repositioned/styled? */}
-          <SparklesIcon
-            className="absolute top-6 left-6 h-8 w-8 text-white/60 z-20"
-            aria-hidden="true"
-          />
-
-          {/* Centered Content Area */}
-          <motion.div
-             initial={{ opacity: 0, y: 20 }}
-             animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.7, ease: "easeOut" }}
-             className="z-10 flex flex-col items-center w-full max-w-md text-center px-4"
-          >
-             {/* Removed Frosted Glass Card - content directly on gradient */}
-
-             {/* Headline - Updated Text & Style */}
-             <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4 leading-tight">
-               Emotional clarity when it matters most.
-             </h1>
-
-             {/* Subheadline - Updated Text & Style */}
-             <p className="text-lg md:text-xl text-gray-100/90 mb-10 font-light max-w-sm mx-auto">
-               Turn confusion into connection. Find the perfect words, even when your heart is racing.
-             </p>
-
-             {/* CTA Button - Updated Text, Style & onClick */}
-             <Button
-               onClick={() => router.push('/login')}
-               size="lg"
-               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium bg-white text-indigo-700 rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700"
-             >
-               {/* Consider adding an icon? <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" /> */}
-               Get Clarity Now
-             </Button>
-
-             {/* Removed Micro Text Below Button */}
-
-          </motion.div>
-          {/* Download/Rating elements from screenshot 1 are not included as they might be app-specific */}
-        </div>
-      </>
-    );
-  }
-  // --- End Primer Screen ---
 
   // --- Render Main Dashboard (only if primer is dismissed) ---
   // AuthGuard will handle redirecting if user is somehow still null here

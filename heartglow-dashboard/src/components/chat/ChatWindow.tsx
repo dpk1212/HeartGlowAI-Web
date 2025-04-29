@@ -259,8 +259,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="absolute inset-0 bg-[url('/assets/subtle-pattern.png')] opacity-[0.02] pointer-events-none z-0"></div>
       
       {/* Subtle Corner Gradients */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-heartglow-pink/5 blur-[100px] rounded-full opacity-40 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-heartglow-violet/5 blur-[100px] rounded-full opacity-40 pointer-events-none"></div>
+      <div className="absolute top-0 right-0 w-64 h-64 bg-heartglow-pink/5 blur-[100px] rounded-full opacity-50 pointer-events-none"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-heartglow-violet/5 blur-[100px] rounded-full opacity-50 pointer-events-none"></div>
       
       {/* Chat Header */}
       <div className="sticky top-0 z-20 backdrop-blur-md bg-[#111120]/90 border-b border-[#2A2A40]/30 shadow-sm">
@@ -313,7 +313,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <button
                     key={index} 
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`relative flex flex-col items-center text-center p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-sm hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] ${
+                    className={`relative flex flex-col items-center text-center p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-sm hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.02] ${
                       guide.tag === 'top-choice' ? 'shadow-violet-glow' : '' 
                     }`}
                   >
@@ -377,7 +377,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* --- END ADDED --- */}
 
       {/* --- Message Input Area (Always Visible) --- */}
-      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-[#161624]">
+      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-gradient-to-t from-[#101018] to-[#161624] border-t border-[#2A2A40]/50">
         <MessageInput
           value={inputValue}            
           onChange={handleInputChange}   

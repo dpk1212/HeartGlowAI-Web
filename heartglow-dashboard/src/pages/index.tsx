@@ -80,60 +80,89 @@ const IndexPage: NextPage = () => {
     return (
       <>
         <Head>
-          <title>HeartGlow AI | Emotional Clarity</title>
-          <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
+          <title>HeartGlow AI | Emotional Clarity & Connection</title>
+          <meta name="description" content="Turn relationship confusion into connection. HeartGlow helps you find the perfect words, even when emotions run high." />
         </Head>
-        {/* Main container with updated gradient and layout */}
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-[#4C1D95] via-[#2E1065] to-[#1C1917] text-white relative overflow-hidden">
-          {/* Subtle Grain/Noise Overlay - Removed as asset is missing */}
-          {/* <div className="absolute inset-0 bg-[url('/assets/noise.png')] opacity-[0.04] pointer-events-none mix-blend-soft-light"></div> */}
-          {/* Optional: Add a subtle radial glow from center */}
-          <div className="absolute inset-0 radial-gradient-glow opacity-30 pointer-events-none"></div> 
+        {/* Main container - Dark sophisticated background */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-gray-900 via-purple-950 to-black text-white relative overflow-hidden font-sans">
+          {/* --- Placeholder: Compelling Background Visual --- */}
+          {/* Consider a subtle, abstract background video or high-quality image related to connection/clarity */}
+          {/* <video autoPlay loop muted playsInline className="absolute inset-0 w-full h-full object-cover opacity-10 z-0"> <source src="/path/to/background.mp4" type="video/mp4" /> </video> */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent z-0"></div> {/* Subtle bottom fade for contrast */}
 
-          {/* Login Link */}
-          <Link href="/login" legacyBehavior>
-            <a className="absolute top-6 right-8 text-sm text-indigo-200 hover:text-white transition-colors z-20">
-              Login
-            </a>
-          </Link>
-
-          {/* Icon */}
-          <SparklesIcon
-            className="absolute top-6 left-8 h-7 w-7 text-indigo-200/80 z-20" /* Adjusted size/color */
-            aria-hidden="true"
-          />
+          {/* Login & Logo Row */}
+          <div className="absolute top-0 left-0 right-0 p-4 sm:p-6 flex justify-between items-center z-20">
+            {/* Logo Placeholder */} 
+            <div className="flex items-center space-x-2">
+              <SparklesIcon className="h-6 w-6 text-purple-300" />
+              <span className="font-medium text-lg text-white">HeartGlow</span>
+            </div>
+            {/* Login Link */} 
+            <Link href="/login" legacyBehavior>
+              <a className="px-4 py-1.5 text-sm font-medium text-purple-200 bg-white/5 rounded-md border border-white/10 hover:bg-white/10 hover:text-white transition-all duration-200">
+                Login
+              </a>
+            </Link>
+          </div>
 
           {/* Centered Content Area */}
           <motion.div
-             initial={{ opacity: 0, y: 20 }}
+             initial={{ opacity: 0, y: 30 }}
              animate={{ opacity: 1, y: 0 }}
-             transition={{ duration: 0.7, ease: "easeOut" }}
-             className="z-10 flex flex-col items-center w-full max-w-md text-center px-4"
+             transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }} // Smoother ease-out
+             className="z-10 flex flex-col items-center w-full max-w-3xl text-center px-4 relative mt-16 sm:mt-0" // Adjusted max-width and margin-top
           >
-             {/* Headline - Enhanced Typography */}
-             <h1 className="text-4xl sm:text-5xl md:text-6xl font-medium text-transparent bg-clip-text bg-gradient-to-r from-white/90 to-indigo-300 mb-5 leading-tight tracking-tight shadow-sm">
-               Emotional clarity when it matters most.
+             {/* 1. Headline - Punchy & Clear */}
+             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-5 leading-tight tracking-tight">
+               Stop Guessing, Start Connecting.
              </h1>
 
-             {/* Subheadline - Enhanced Typography */}
-             <p className="text-lg md:text-xl text-indigo-200/90 mb-10 font-light max-w-lg mx-auto leading-relaxed"> {/* Increased max-width, adjusted color/leading */}
-               Turn confusion into connection. Find the perfect words, even when your heart is racing.
+             {/* 2. Subheadline - Elaborate on Problem/Solution */}
+             <p className="text-lg md:text-xl text-purple-200/90 mb-10 font-normal max-w-2xl mx-auto leading-relaxed">
+               Find emotional clarity when it matters most. HeartGlow's AI guides you to express yourself effectively, turning confusion and conflict into understanding and connection.
              </p>
 
-             {/* CTA Button - Enhanced Style */}
-             <Button
-               onClick={() => router.push('/login')}
-               size="lg"
-               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium rounded-lg shadow-lg transition-all duration-300 ease-in-out transform hover:scale-[1.03] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1C1917] 
-                          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 
-                          hover:from-pink-400 hover:via-purple-400 hover:to-indigo-400 
-                          focus:ring-purple-400 
-                          text-white 
-                          animate-pulse-slow" /* Added gradient, refined hover/focus, added pulse animation */
-             >
-               {/* Optional: Add icon back? <SparklesIcon className="w-5 h-5 mr-2 -ml-1" /> */}
-               Get Clarity Now
-             </Button>
+             {/* 3. Benefits Section - Enhanced Styling */}
+             <div className="mb-12 w-full max-w-xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6 text-purple-100/90 text-center">
+                <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                   <p className="text-base font-medium">Craft Clear Messages</p>
+                </div>
+                 <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                   <p className="text-base font-medium">Reduce Conflict</p>
+                </div>
+                 <div className="flex flex-col items-center p-4 bg-white/5 rounded-lg border border-white/10">
+                   <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7 mb-2 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+                   <p className="text-base font-medium">Build Stronger Bonds</p>
+                </div>
+             </div>
+
+             {/* 4. Social Proof / Trust Section (Placeholder Refined) */}
+             <div className="mb-12 w-full max-w-lg mx-auto p-5 bg-white/5 rounded-lg border border-white/10">
+                <p className="text-base text-purple-200/80 italic leading-relaxed">"This actually works. I was skeptical, but HeartGlow helped me say what I needed to say without starting a fight. Game changer for my relationship."</p>
+                <p className="mt-3 text-sm font-medium text-white text-right">- Real User Review</p>
+                {/* --- Placeholder: Add more testimonials (carousel?) or logos below --- */}
+             </div>
+
+             {/* 5. Focused CTA Button - More Polish */}
+             <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.98 }}>
+               <Button
+                 onClick={() => router.push('/login?cta=primer')}
+                 size="lg"
+                 className="px-12 py-4 text-lg font-semibold rounded-lg shadow-xl transition-colors duration-300 
+                            bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 
+                            hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 
+                            focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2 focus:ring-offset-black 
+                            text-white"
+               >
+                 Unlock Emotional Clarity
+               </Button>
+              </motion.div>
+
+              {/* Optional: Add subtle note about free/no card needed? */} 
+              <p className="mt-4 text-xs text-purple-300/60">Free to start. No credit card required.</p>
+
           </motion.div>
         </div>
       </>

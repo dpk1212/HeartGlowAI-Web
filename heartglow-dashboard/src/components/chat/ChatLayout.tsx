@@ -75,10 +75,6 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     }
   };
 
-  if (authLoading) {
-      return null;
-  }
-
   return (
     <div className="relative flex h-full overflow-hidden bg-gradient-to-b from-[#0E0E1A] to-[#14141F] text-white font-sans">
         {/* --- Mobile Sidebar (Fixed, Sliding) --- */}

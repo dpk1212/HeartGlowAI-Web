@@ -157,7 +157,9 @@ const ChatPage = () => {
   }
 
   if (connectionsError) {
-    return <div className="text-red-500 p-4">Error loading connections: {connectionsError.message}</div>;
+    // Check if error is a string or an object with a message property
+    const errorMessage = typeof connectionsError === 'string' ? connectionsError : (connectionsError as Error)?.message || 'Unknown error';
+    return <div className="text-red-500 p-4">Error loading connections: {errorMessage}</div>;
   }
   // TODO: Handle messagesError appropriately (e.g., toast within ChatWindow)
   if (messagesError) {

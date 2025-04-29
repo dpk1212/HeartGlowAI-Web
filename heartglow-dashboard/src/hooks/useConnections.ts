@@ -15,19 +15,24 @@ import { Connection } from '@/types'; // Import the shared type
  */
 export const useConnections = (userId: string | null | undefined) => {
   const [connections, setConnections] = useState<Connection[]>([]);
+  // Start loading initially, regardless of initial userId status, as a fetch will occur.
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // If userId becomes null/undefined later (e.g., logout), clear state and stop loading.
     if (!userId) {
-      // If no user ID, clear connections and stop loading
       setConnections([]);
-      setIsLoading(false);
+      if (isLoading) setIsLoading(false);
       setError(null);
-      return;
+      return; // Stop the effect here
     }
 
-    setIsLoading(true);
+    // When userId is present (or changes), we are effectively initiating a new fetch.
+    // Do NOT set loading to true here synchronously, as it causes instability during ID transitions.
+    // The initial state `useState(true)` covers the initial load, and the parent component's
+    // check `if (isLoadingConnections)` handles showing loading during transitions.
+    // setIsLoading(true); // <--- REMOVE THIS LINE
     setError(null);
     let unsubscribe: Unsubscribe | null = null;
 

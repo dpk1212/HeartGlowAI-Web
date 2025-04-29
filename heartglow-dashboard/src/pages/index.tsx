@@ -35,37 +35,39 @@ import { Button } from '@/components/ui/button';
 
 // This is now the main dashboard page, served at /dashboard/ due to basePath
 const IndexPage: NextPage = () => {
+  // --- ALL HOOKS MUST BE CALLED UNCONDITIONALLY AT THE TOP --- 
   const { currentUser, userProfile, loading: authLoading } = useAuth();
-  // const { challenges: challengeDefs, loading: challengesLoading, error: challengesError } = useChallenges(); // Comment out
-  // const [isChallengeActionLoading, setIsChallengeActionLoading] = useState(false); // Comment out
   const router = useRouter();
   const userId = currentUser?.uid;
-  
-  // Welcome dialog state
   const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
-
-  // --- Chat State ---
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>('heartglow-ai');
   const [isSendingMessage, setIsSendingMessage] = useState(false);
-  // --- End Chat State ---
-
-  // --- NEW State for Primer Screen ---
   const [showPrimer, setShowPrimer] = useState(true);
+
+  // Call useConnections and useMessages unconditionally here
+  const { 
+    connections: chatConnections, 
+    isLoading: isLoadingConnections, 
+    error: connectionsError 
+  } = useConnections(userId);
+  
+  const { 
+    messages: chatMessages, 
+    isLoading: isLoadingMessages, 
+    error: messagesError 
+  } = useMessages(userId, selectedConnectionId);
 
   // --- Effect to hide primer for logged-in (non-anonymous) users ---
   useEffect(() => {
     if (!authLoading && currentUser && !currentUser.isAnonymous) {
-      // If loading is done and we have a real logged-in user
       setShowPrimer(false); 
     }
-    // If user is anonymous or null after loading, showPrimer remains true (or its current state)
   }, [authLoading, currentUser]);
 
-  // Combined loading state: Includes auth and potentially challenge loading
-  const isLoading = authLoading; // || challengesLoading; // Keep challenges commented out
+  // --- RENDER LOGIC using state from hooks --- 
 
-  // Render loading state FIRST if still loading
-  if (isLoading) {
+  // 1. Auth Loading State
+  if (authLoading) { // Check auth loading FIRST
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0E0E1A] to-[#14141F]">
          <p className="text-white/70">Loading HeartGlow...</p>
@@ -73,7 +75,7 @@ const IndexPage: NextPage = () => {
     );
   }
 
-  // --- Render Primer Screen if applicable (after loading is false) ---
+  // 2. Primer Screen State (Only show if auth is done AND showPrimer is true)
   if (showPrimer) {
     return (
       <>
@@ -139,10 +141,9 @@ const IndexPage: NextPage = () => {
   }
   // --- End Primer Screen ---
 
-  // --- NEW: Check for userId AFTER loading and primer logic ---
-  // If we are past loading and not showing the primer, but still don't have a userId, redirect.
-  if (!showPrimer && !userId) {
-      console.warn("IndexPage: Past loading/primer but userId is missing. Redirecting to login.");
+  // 3. Redirect Logic (Only if NOT showing primer AND userId is missing - defensive check)
+  if (!userId) { // Should ideally not be reached if AuthGuard works, but safe check
+      console.warn("IndexPage: Render attempted without userId after auth/primer checks. Redirecting.");
       router.push('/login'); 
       return ( // Return a minimal loading/redirect indicator
           <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#0E0E1A] to-[#14141F]">
@@ -151,31 +152,41 @@ const IndexPage: NextPage = () => {
       ); 
   }
 
-  // --- If we reach here, isLoading is false, showPrimer is false, and userId MUST be valid ---
+  // --- If we reach here, authLoading is false, showPrimer is false, and userId MUST be valid ---
 
-  // --- Chat Hooks ---
-  const { 
-    connections: chatConnections, 
-    isLoading: isLoadingConnections, 
-    error: connectionsError 
-  } = useConnections(userId);
-  
-  const { 
-    messages: chatMessages, 
-    isLoading: isLoadingMessages, 
-    error: messagesError 
-  } = useMessages(userId, selectedConnectionId);
-  // --- End Chat Hooks ---
+  // 4. Connection Error State
+  if (connectionsError) {
+    console.error("Error loading connections:", connectionsError);
+    return (
+      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> 
+         <div className="flex flex-col items-center justify-center h-full text-center p-4">
+            <h2 className="text-xl font-semibold text-red-500 mb-2">Failed to Load Connections</h2>
+            <p className="text-gray-400 mb-4">There was an error loading your connections. Please try refreshing the page.</p>
+            <p className="text-xs text-gray-500">Error: {typeof connectionsError === 'string' ? connectionsError : (connectionsError as Error)?.message || 'Unknown error'}</p>
+            <Button onClick={() => window.location.reload()} className="mt-4">Refresh Page</Button>
+         </div>
+      </DashboardLayout>
+    );
+  }
 
-  // --- Existing Dashboard Logic (COMMENTED OUT) ---
-  // const activeUserChallenge = userProfile?.activeChallenge;
-  // let challengeCardProps = null; 
-  // if (activeUserChallenge) { ... }
-  // const glowScoreData = { ... };
-  // const availableChallengesForSelection = challengeDefs.filter(...);
-  // --- End Existing Dashboard Logic ---
+  // 5. Connections Loading State
+  if (isLoadingConnections) {
+    return (
+      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> 
+         <div className="flex flex-col items-center justify-center h-full text-center p-4">
+            <p className="text-gray-400">Loading your connections...</p>
+         </div>
+      </DashboardLayout>
+    );
+  }
 
-  // --- Chat Handlers ---
+  // 6. Messages Error State (Currently only console logging)
+  if (messagesError) {
+     console.error("Error loading messages:", messagesError);
+     // Consider adding UI feedback here later if needed
+  }
+
+  // --- Handler Functions --- (These can stay below hooks)
   const handleSelectConnection = (connectionId: string) => {
     console.log(`Selected connection: ${connectionId}`);
     setSelectedConnectionId(connectionId);
@@ -269,7 +280,6 @@ const IndexPage: NextPage = () => {
       setIsSendingMessage(false);
     }
   };
-  // --- End Chat Handlers ---
 
   // Handle start conversation from welcome dialog
   const handleStartConversation = () => {
@@ -277,46 +287,8 @@ const IndexPage: NextPage = () => {
     setSelectedConnectionId('heartglow-ai');
   };
 
-  // --- Challenge Handlers (COMMENTED OUT) ---
-  // const handleSelectChallenge = async (challengeId: string) => { ... };
-  // const handleSkipChallenge = async () => { ... };
-  // --- End Challenge Handlers ---
-  
-  // --- Explicit Error Handling --- 
-  if (connectionsError) {
-    console.error("Error loading connections:", connectionsError);
-    // Render an error message UI instead of the dashboard
-    return (
-      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> {/* Provide dummy handlers or adjust Layout */} 
-         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-            <h2 className="text-xl font-semibold text-red-500 mb-2">Failed to Load Connections</h2>
-            <p className="text-gray-400 mb-4">There was an error loading your connections. Please try refreshing the page.</p>
-            <p className="text-xs text-gray-500">Error: {typeof connectionsError === 'string' ? connectionsError : (connectionsError as Error)?.message || 'Unknown error'}</p>
-            <Button onClick={() => window.location.reload()} className="mt-4">Refresh Page</Button>
-         </div>
-      </DashboardLayout>
-    );
-  }
-  // NEW: Add loading state check for connections *after* error check
-  if (isLoadingConnections) {
-    return (
-      <DashboardLayout onNavigateToGuides={() => {}} onSelectGeneralChat={() => {}}> 
-         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-            <p className="text-gray-400">Loading your connections...</p>
-            {/* Optionally add a spinner here */}
-         </div>
-      </DashboardLayout>
-    );
-  }
-  if (messagesError) {
-     console.error("Error loading messages:", messagesError);
-     // Optionally render a similar error state for message errors
-     // For now, we might let the ChatLayout/ChatWindow handle this specific error
-  }
-  // --- End Error Handling ---
-
-  // --- Render Main Dashboard (only if primer is dismissed) ---
-  // AuthGuard will handle redirecting if user is somehow still null here
+  // --- FINAL RENDER: Main Dashboard --- 
+  // All checks passed, render the main layout
   return (
     <>
       <Head>

@@ -208,71 +208,69 @@ const IndexPage: NextPage = () => {
   if (messagesError) { console.error("Error loading messages:", messagesError); }
   // --- End Error Handling ---
 
-  // --- NEW: Render Enhanced Primer Screen --- 
+  // --- NEW: Render Enhanced Primer Screen ---
   if (showPrimer) {
     return (
       <>
         <Head>
-          <title>HeartGlow AI | Find Your Words</title>
-          <meta name="description" content="HeartGlow helps you find clarity and the words to say it." />
+          <title>HeartGlow AI | Emotional Clarity</title>
+          <meta name="description" content="Turn confusion into connection. Find the perfect words, even when your heart is racing." />
         </Head>
-        {/* Main container with new gradient and animation placeholder */}
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-900 via-purple-800 to-rose-700 text-white relative overflow-hidden animate-breathing-gradient">
-          
-          {/* Login Link - Kept */}
+        {/* Main container with new gradient and layout */}
+        {/* NOTE: Using placeholder gradient, replace with exact styles from screenshot 1 if possible */}
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-gradient-to-br from-purple-600 via-indigo-700 to-blue-800 text-white relative overflow-hidden">
+
+          {/* Login Link - Kept but maybe styled differently? */}
           <Link href="/login" legacyBehavior>
-            <a className="absolute top-5 right-6 text-sm text-gray-300 hover:text-white transition-colors z-20">
+            <a className="absolute top-5 right-6 text-sm text-gray-200 hover:text-white transition-colors z-20">
               Login
             </a>
           </Link>
 
-          {/* Replaced Logo with Icon */}
-          <SparklesIcon 
-            className="absolute top-6 left-6 h-8 w-8 text-white/80 z-20"
+          {/* Replaced Logo with Icon - Kept, maybe repositioned/styled? */}
+          <SparklesIcon
+            className="absolute top-6 left-6 h-8 w-8 text-white/60 z-20"
             aria-hidden="true"
           />
 
-          {/* Centered Content Area */} 
-          <motion.div 
-             initial={{ opacity: 0, scale: 0.95 }}
-             animate={{ opacity: 1, scale: 1 }}
-             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }} // Smoother ease
-             className="z-10 flex flex-col items-center w-full max-w-2xl"
+          {/* Centered Content Area */}
+          <motion.div
+             initial={{ opacity: 0, y: 20 }}
+             animate={{ opacity: 1, y: 0 }}
+             transition={{ duration: 0.7, ease: "easeOut" }}
+             className="z-10 flex flex-col items-center w-full max-w-md text-center px-4"
           >
-             {/* Frosted Glass Card */}
-             <div className="bg-black/10 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-8 md:p-12 w-full text-center">
+             {/* Removed Frosted Glass Card - content directly on gradient */}
 
-                {/* Headline */}
-                <h1 className="text-4xl md:text-5xl font-medium text-white mb-5 leading-tight font-serif">
-                  Find the Right Words. Reclaim Your Voice. Strengthen Your Heart.
-                </h1>
+             {/* Headline - Updated Text & Style */}
+             <h1 className="text-4xl md:text-5xl font-semibold text-white mb-4 leading-tight">
+               Emotional clarity when it matters most.
+             </h1>
 
-                {/* Subheadline */}
-                <p className="text-base md:text-lg text-gray-200/80 mb-10 max-w-lg mx-auto font-sans">
-                  When feelings are tangled and words feel stuck, HeartGlow guides you back to <strong>clarity</strong> — with proven conversation <strong>frameworks</strong>, emotional growth guides, and next-step support.
-                </p>
+             {/* Subheadline - Updated Text & Style */}
+             <p className="text-lg md:text-xl text-gray-100/90 mb-10 font-light max-w-sm mx-auto">
+               Turn confusion into connection. Find the perfect words, even when your heart is racing.
+             </p>
 
-                {/* CTA Button */}
-                <Button
-                  onClick={() => setShowPrimer(false)} 
-                  size="lg"
-                  className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-4 text-lg font-semibold bg-white text-purple-900 rounded-full shadow-lg hover:shadow-xl hover:shadow-white/20 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-purple-900"
-                >
-                  <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" />
-                  Get Instant Clarity
-                </Button>
+             {/* CTA Button - Updated Text, Style & onClick */}
+             <Button
+               onClick={() => router.push('/login')}
+               size="lg"
+               className="inline-flex items-center justify-center w-full sm:w-auto px-10 py-3 text-lg font-medium bg-white text-indigo-700 rounded-lg shadow-lg hover:bg-gray-100 transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-2 focus:ring-offset-indigo-700"
+             >
+               {/* Consider adding an icon? <SparklesIcon className="w-5 h-5 mr-2 -ml-1 opacity-70" /> */}
+               Get Clarity Now
+             </Button>
 
-                {/* Micro Text Below Button */}
-                <p className="text-xs text-gray-400/70 mt-5">
-                  Private. Emotionally Intelligent. New Guides Added Weekly.
-                </p>
-             </div>
+             {/* Removed Micro Text Below Button */}
+
           </motion.div>
+          {/* Download/Rating elements from screenshot 1 are not included as they might be app-specific */}
         </div>
       </>
     );
   }
-  // --- End Primer Screen --- 
+  // --- End Primer Screen ---
 
   // --- Render Main Dashboard (only if primer is dismissed) ---
   // AuthGuard will handle redirecting if user is somehow still null here

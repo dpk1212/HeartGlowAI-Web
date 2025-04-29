@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, CheckCircle, Users, HeartPulse, LogIn, ExternalLink, ArrowRight } from 'lucide-react';
+import { User, Mail, Lock, CheckCircle, Users, HeartPulse, LogIn, ExternalLink, ArrowRight, SparklesIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { GoogleIcon } from '../components/icons/GoogleIcon';
 

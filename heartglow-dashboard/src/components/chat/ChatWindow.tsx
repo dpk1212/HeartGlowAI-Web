@@ -19,6 +19,7 @@ import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck,
 // --- ADDED IMPORTS ---
 import { useAuth } from '@/context/AuthContext';
 import UpgradePrompt from './UpgradePrompt';
+import { useRouter } from 'next/router'; // ADDED: For redirection
 // --- END ADDED IMPORTS ---
 
 // Remove HeartGlow AI connection/message constants - welcome state is now a Card
@@ -162,6 +163,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // --- ADDED HOOKS/STATE ---
   const { userProfile, currentUser, loading: authLoading } = useAuth();
+  const router = useRouter(); // ADDED: Initialize router
   const [ctaShown, setCtaShown] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const messageCountRef = useRef(messages.length); // Track previous message count
@@ -204,24 +206,41 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
 
     if (!userProfile || authLoading) { 
-      console.warn("[ChatWindow] User profile not loaded yet.");
+      console.warn("[ChatWindow] User profile not loaded yet or auth still loading.");
       return; 
     }
 
-    const isPremium = userProfile.isPremium === true;
-    console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}`);
-
-    if (isPremium) {
-      // User is premium - proceed as normal
-      console.log("[ChatWindow] Premium user, proceeding with guide message.");
-      onSelectConnection('heartglow-ai'); 
-      onSendMessage(promptText); 
-    } else {
-      // User is NOT premium - show paywall immediately
-      console.log("[ChatWindow] Non-premium user clicked guide. Showing upgrade prompt immediately.");
-      setShowUpgradePrompt(true); // Show the paywall
-      // Do NOT send the message or call any backend function
+    // ADDED: Check for anonymous user first
+    if (currentUser?.isAnonymous) {
+      console.log("[ChatWindow] Anonymous user clicked guide. Redirecting to login/signup.");
+      router.push('/login?reason=guide_access&mode=signup'); // Redirect to login/signup, suggest signup
+      return; // Prevent further execution
     }
+
+    // User has a full account, proceed to use the guide
+    console.log("[ChatWindow] Authenticated user, proceeding with guide message.");
+    onSelectConnection('heartglow-ai'); 
+    onSendMessage(promptText);
+    
+    // The hard paywall (setShowUpgradePrompt(true)) for non-premium users is removed here.
+    // If you want to re-introduce a paywall for specific guides or after certain usage 
+    // for non-premium full accounts, that logic would go here.
+    // For now, all full accounts can use guides.
+
+    // const isPremium = userProfile.isPremium === true;
+    // console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}`);
+
+    // if (isPremium) {
+    //   // User is premium - proceed as normal
+    //   console.log("[ChatWindow] Premium user, proceeding with guide message.");
+    //   onSelectConnection('heartglow-ai'); 
+    //   onSendMessage(promptText); 
+    // } else {
+    //   // User is NOT premium - THIS IS WHERE THE HARD PAYWALL WAS
+    //   // console.log("[ChatWindow] Non-premium user clicked guide. Showing upgrade prompt immediately.");
+    //   // setShowUpgradePrompt(true); // Show the paywall -- THIS LINE IS REMOVED/COMMENTED
+    //   // Do NOT send the message or call any backend function
+    // }
   };
   // --- END REVISED handleGuideClick ---
 

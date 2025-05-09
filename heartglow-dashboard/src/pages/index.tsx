@@ -40,9 +40,9 @@ const IndexPage: NextPage = () => {
   const router = useRouter();
   const userId = currentUser?.uid;
   const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>('heartglow-ai');
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
-  const [showPrimer, setShowPrimer] = useState(true);
+  const [showPrimer, setShowPrimer] = useState(false);
 
   // Call useConnections and useMessages unconditionally here
   const { 
@@ -58,11 +58,11 @@ const IndexPage: NextPage = () => {
   } = useMessages(userId, selectedConnectionId);
 
   // --- Effect to hide primer for logged-in (non-anonymous) users ---
-  useEffect(() => {
-    if (!authLoading && currentUser && !currentUser.isAnonymous) {
-      setShowPrimer(false); 
-    }
-  }, [authLoading, currentUser]);
+  // useEffect(() => {
+  //   if (!authLoading && currentUser && !currentUser.isAnonymous) {
+  //     setShowPrimer(false); 
+  //   }
+  // }, [authLoading, currentUser]);
 
   // --- RENDER LOGIC using state from hooks --- 
 

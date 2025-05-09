@@ -145,26 +145,32 @@ const Login = () => {
             className="text-center md:text-left max-w-lg mx-auto md:mx-0"
           >
             <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-5 leading-tight tracking-tight">
-              Unlock Healthier Communication
+              {isSigningUp ? "Find the Right Words, Instantly. Unlock HeartGlow." : "Welcome Back to HeartGlow"}
             </h1>
             <p className="text-lg text-purple-200/80 mb-8">
-              Get AI-powered guidance to express yourself clearly and build stronger connections.
+              {isSigningUp ? "Struggling with tough conversations? HeartGlow offers private, AI-powered emotional scripts, clarity guides, and coaching tools. Get clear, confident, and connect deeper—free." : "Log in to continue your journey to clearer communication."}
             </p>
             
-            <div className="space-y-3 text-purple-200/70 text-sm">
-              <p className="flex items-center justify-center md:justify-start gap-2.5">
-                <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
-                <span>Free to Start & Use</span>
-              </p>
-              <p className="flex items-center justify-center md:justify-start gap-2.5">
-                <Lock className="w-4 h-4 text-indigo-300 flex-shrink-0" />
-                <span>Private & Secure Conversations</span>
-              </p>
-               <p className="flex items-center justify-center md:justify-start gap-2.5">
-                 <Users className="w-4 h-4 text-pink-300 flex-shrink-0" />
-                <span>For All Your Relationships</span>
-              </p>
-            </div>
+            {isSigningUp && (
+              <div className="space-y-3 text-purple-200/70 text-sm mb-8">
+                <p className="flex items-center justify-center md:justify-start gap-2.5">
+                  <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
+                  <span>Start Free: Access essential AI guides & core features. No credit card needed.</span>
+                </p>
+                <p className="flex items-center justify-center md:justify-start gap-2.5">
+                  <Lock className="w-4 h-4 text-indigo-300 flex-shrink-0" />
+                  <span>Private & Encrypted: Your thoughts and conversations are confidential, always.</span>
+                </p>
+                <p className="flex items-center justify-center md:justify-start gap-2.5">
+                  <HeartPulse className="w-4 h-4 text-pink-400 flex-shrink-0" />
+                  <span>AI Coaching for Real Life: Get instant scripts for apologies, boundaries, expressing needs & more.</span>
+                </p>
+                 <p className="flex items-center justify-center md:justify-start gap-2.5">
+                   <SparklesIcon className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                  <span>Turn Confusion into Clarity: Understand your emotions and express yourself with confidence.</span>
+                </p>
+              </div>
+            )}
           </motion.div>
 
           <motion.div 
@@ -174,7 +180,7 @@ const Login = () => {
             className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl shadow-xl p-8 sm:p-10 max-w-md mx-auto w-full"
           >
             <h2 className="text-2xl font-semibold text-white mb-6 text-center">
-              {isSigningUp ? 'Create Your Free Account' : 'Welcome Back'}
+              {isSigningUp ? 'Unlock Your Free HeartGlow Account' : 'Log In to Your Account'}
             </h2>
             
             {infoMessage && (
@@ -249,73 +255,71 @@ const Login = () => {
                
               <div>
                 <button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 focus:ring-offset-black transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
+                  type="submit"
+                  disabled={isLoading || isLoadingGoogle}
+                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 focus:ring-offset-gray-950 transition duration-150 ease-in-out disabled:opacity-60"
                 >
-                  {isLoading ? (
-                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <> 
-                     {isSigningUp ? 'Create Account' : 'Log In'}
-                     <ArrowRight className="w-4 h-4 ml-2" />
-                    </> 
-                  )}
+                  {isLoading && !isLoadingGoogle ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (isSigningUp ? 'Create My Free Account & Get Clarity' : 'Log In')}
                 </button>
               </div>
             </form>
 
-            <div className="mt-6 relative">
-              <div className="absolute inset-0 flex items-center" aria-hidden="true">
-                <div className="w-full border-t border-white/10"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-3 bg-white/5 backdrop-blur-lg text-gray-400">Or</span>
-              </div>
-            </div>
-
             <div className="mt-6">
-              <button
-                onClick={handleGoogleSignIn}
-                disabled={isLoadingGoogle}
-                className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-white/10 rounded-md shadow-sm bg-white/10 hover:bg-white/20 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-black transition duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {isLoadingGoogle ? (
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  <>
-                    <GoogleIcon className="h-5 w-5 mr-3" /> 
-                    Continue with Google
-                  </>
-                )}
-              </button>
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-gray-900/0 text-gray-400 backdrop-blur-sm">Or</span>
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <button
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading || isLoadingGoogle}
+                  className="w-full flex items-center justify-center py-2.5 px-4 border border-white/20 rounded-md shadow-sm bg-white/10 hover:bg-white/20 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 focus:ring-offset-gray-950 transition duration-150 ease-in-out disabled:opacity-60"
+                >
+                  {isLoadingGoogle ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                      <GoogleIcon className="h-5 w-5 mr-3" />
+                      {isSigningUp ? "Sign Up Free with Google (Fastest Way)" : "Continue with Google"}
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
 
-            <div className="mt-6 text-center">
+            <div className="mt-8 text-center">
               <p className="text-sm text-gray-400">
                 {isSigningUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-                <button onClick={toggleMode} className="font-medium text-purple-300 hover:text-pink-300 focus:outline-none focus:underline transition">
+                <button onClick={toggleMode} className="font-medium text-pink-400 hover:text-pink-300 focus:outline-none focus:underline transition ease-in-out duration-150">
                   {isSigningUp ? 'Log In' : 'Sign Up Free'}
                 </button>
               </p>
             </div>
 
-            <div className="mt-8 text-center text-xs text-gray-500 space-y-1">
-                <p className="flex items-center justify-center gap-1.5">
-                  <Lock size={12} />
-                  <span>Your information is secure & encrypted.</span>
-                </p>
-                <p className="flex items-center justify-center gap-1.5">
-                  <CheckCircle size={12} />
-                  <span>No credit card required for free tier.</span>
-                </p>
-            </div>
+            {isSigningUp && (
+              <p className="mt-8 text-xs text-gray-500 text-center">
+                Your privacy is paramount: all data is encrypted. <br/>Full access to core guides is 100% free – no credit card ever required for the free tier.
+              </p>
+            )}
           </motion.div>
         </div>
       </div>

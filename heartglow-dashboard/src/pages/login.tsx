@@ -143,13 +143,21 @@ const Login = () => {
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
             className="text-center md:text-left max-w-lg mx-auto md:mx-0 flex flex-col items-center md:items-start"
           >
-            <div className="mb-8 md:mb-10 w-32 h-32 md:w-40 md:h-40 flex-shrink-0 mx-auto md:mx-0">
-              <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <circle cx="80" cy="80" r="80" fill="#F3E8FF" />
-                <ellipse cx="80" cy="110" rx="40" ry="18" fill="#E9D5FF" />
-                <circle cx="80" cy="70" r="32" fill="#C4B5FD" />
-                <ellipse cx="80" cy="70" rx="18" ry="24" fill="#A78BFA" />
-                <rect x="70" y="90" width="20" height="30" rx="10" fill="#F472B6" />
+            <div className="mb-8 md:mb-10 w-40 h-40 md:w-56 md:h-56 flex-shrink-0 mx-auto md:mx-0">
+              <svg viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <rect width="800" height="600" fill="none"/>
+                <ellipse cx="400" cy="500" rx="320" ry="60" fill="#F3E8FF"/>
+                <path d="M250 400c0-60 50-110 110-110s110 50 110 110-50 110-110 110-110-50-110-110z" fill="#A78BFA"/>
+                <ellipse cx="320" cy="390" rx="30" ry="40" fill="#C4B5FD"/>
+                <ellipse cx="480" cy="390" rx="30" ry="40" fill="#C4B5FD"/>
+                <rect x="370" y="420" width="60" height="80" rx="30" fill="#F472B6"/>
+                <ellipse cx="400" cy="390" rx="20" ry="25" fill="#fff"/>
+                <ellipse cx="400" cy="390" rx="10" ry="12" fill="#F472B6"/>
+                <ellipse cx="320" cy="390" rx="10" ry="12" fill="#fff"/>
+                <ellipse cx="480" cy="390" rx="10" ry="12" fill="#fff"/>
+                <ellipse cx="320" cy="390" rx="5" ry="6" fill="#A78BFA"/>
+                <ellipse cx="480" cy="390" rx="5" ry="6" fill="#A78BFA"/>
+                <ellipse cx="400" cy="500" rx="60" ry="10" fill="#E9D5FF"/>
               </svg>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-3 leading-tight tracking-tight">

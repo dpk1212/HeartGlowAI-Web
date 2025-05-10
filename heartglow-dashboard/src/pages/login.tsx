@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useAuth } from '../context/AuthContext';
 import { User, Mail, Lock, CheckCircle, Users, HeartPulse, LogIn, ExternalLink, ArrowRight, SparklesIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { GoogleIcon } from '../components/icons/GoogleIcon';
 
 const Login = () => {
   const [isSigningUp, setIsSigningUp] = useState(true);
@@ -298,7 +297,16 @@ const Login = () => {
                     </>
                   ) : (
                     <>
-                      <GoogleIcon className="h-5 w-5 mr-3" />
+                      <span className="mr-3 flex items-center">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                          <g>
+                            <path fill="#4285F4" d="M19.6 10.23c0-.68-.06-1.36-.17-2H10v3.77h5.48a4.68 4.68 0 01-2.03 3.07v2.55h3.28c1.92-1.77 3.03-4.38 3.03-7.39z"/>
+                            <path fill="#34A853" d="M10 20c2.7 0 4.96-.9 6.61-2.44l-3.28-2.55c-.91.61-2.07.97-3.33.97-2.56 0-4.73-1.73-5.5-4.07H1.1v2.56A9.99 9.99 0 0010 20z"/>
+                            <path fill="#FBBC05" d="M4.5 12.91A5.99 5.99 0 014 10c0-.5.07-.99.18-1.46V5.98H1.1A9.99 9.99 0 000 10c0 1.64.39 3.19 1.1 4.56l3.4-2.65z"/>
+                            <path fill="#EA4335" d="M10 4.04c1.47 0 2.78.51 3.81 1.51l2.86-2.86C14.96 1.09 12.7 0 10 0A9.99 9.99 0 001.1 5.98l3.4 2.56C5.27 5.77 7.44 4.04 10 4.04z"/>
+                          </g>
+                        </svg>
+                      </span>
                       {isSigningUp ? "Sign Up Free with Google (Fastest Way)" : "Continue with Google"}
                     </>
                   )}

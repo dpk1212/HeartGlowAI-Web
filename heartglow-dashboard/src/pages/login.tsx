@@ -143,31 +143,24 @@ const Login = () => {
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
             className="text-center md:text-left max-w-lg mx-auto md:mx-0 flex flex-col items-center md:items-start"
           >
-            <div className="mb-8 md:mb-10 w-56 h-56 md:w-72 md:h-72 flex-shrink-0 mx-auto md:mx-0">
-              <svg viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <ellipse cx="400" cy="520" rx="320" ry="60" fill="#F3E8FF"/>
-                <path d="M320 400c0-60 50-110 110-110s110 50 110 110-50 110-110 110-110-50-110-110z" fill="#A78BFA"/>
-                <ellipse cx="370" cy="390" rx="30" ry="40" fill="#C4B5FD"/>
-                <ellipse cx="430" cy="390" rx="30" ry="40" fill="#C4B5FD"/>
-                <rect x="390" y="420" width="60" height="80" rx="30" fill="#F472B6"/>
-                <ellipse cx="400" cy="390" rx="20" ry="25" fill="#fff"/>
-                <ellipse cx="400" cy="390" rx="10" ry="12" fill="#F472B6"/>
-                <ellipse cx="370" cy="390" rx="10" ry="12" fill="#fff"/>
-                <ellipse cx="430" cy="390" rx="10" ry="12" fill="#fff"/>
-                <ellipse cx="370" cy="390" rx="5" ry="6" fill="#A78BFA"/>
-                <ellipse cx="430" cy="390" rx="5" ry="6" fill="#A78BFA"/>
-                <ellipse cx="400" cy="520" rx="60" ry="10" fill="#E9D5FF"/>
-                <circle cx="350" cy="350" r="30" fill="#fff"/>
-                <circle cx="450" cy="350" r="30" fill="#fff"/>
-                <rect x="340" y="370" width="20" height="40" rx="10" fill="#A78BFA"/>
-                <rect x="440" y="370" width="20" height="40" rx="10" fill="#A78BFA"/>
-                <rect x="370" y="370" width="60" height="20" rx="10" fill="#F472B6"/>
+            <div className="mb-8 md:mb-10 w-28 h-28 md:w-36 md:h-36 flex-shrink-0 mx-auto md:mx-0 flex items-center justify-center">
+              <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <defs>
+                  <linearGradient id="heartglow-gradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#A78BFA" />
+                    <stop offset="1" stop-color="#F472B6" />
+                  </linearGradient>
+                </defs>
+                <path d="M60 102s-34-22.5-34-46.5C26 41.5 41.5 34 52 44.5c4.5 4.5 8 8.5 8 8.5s3.5-4 8-8.5C78.5 34 94 41.5 94 55.5c0 24-34 46.5-34 46.5z" fill="url(#heartglow-gradient)" stroke="#fff" stroke-width="3"/>
+                <g>
+                  <circle cx="30" cy="30" r="3" fill="#F472B6"/>
+                  <circle cx="90" cy="32" r="2.5" fill="#A78BFA"/>
+                  <rect x="60" y="18" width="2.5" height="8" rx="1.25" fill="#F472B6"/>
+                  <rect x="60" y="18" width="8" height="2.5" rx="1.25" fill="#F472B6"/>
+                  <rect x="25" y="60" width="2" height="6" rx="1" fill="#A78BFA"/>
+                  <rect x="25" y="60" width="6" height="2" rx="1" fill="#A78BFA"/>
+                </g>
               </svg>
-              <div className="mt-2 text-xs text-gray-400 text-center">
-                <a href="https://storyset.com/" target="_blank" rel="noopener noreferrer">
-                  Illustrations by Storyset
-                </a>
-              </div>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-3 leading-tight tracking-tight">
               Unlock Clarity. Free.

@@ -136,36 +136,49 @@ const Login = () => {
        </header>
 
       <div className="container mx-auto px-4 py-16 md:py-20 min-h-screen flex items-center">
-        <div className="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center">
+        <div className="grid md:grid-cols-2 gap-12 md:gap-16 lg:gap-24 items-center w-full">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1] }}
-            className="text-center md:text-left max-w-lg mx-auto md:mx-0"
+            className="text-center md:text-left max-w-lg mx-auto md:mx-0 flex flex-col items-center md:items-start"
           >
-            <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-5 leading-tight tracking-tight">
+            <div className="mb-6 md:mb-8 w-32 h-32 md:w-40 md:h-40 flex-shrink-0 mx-auto md:mx-0">
+              <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <circle cx="80" cy="80" r="80" fill="#F3E8FF" />
+                <ellipse cx="80" cy="110" rx="40" ry="18" fill="#E9D5FF" />
+                <circle cx="80" cy="70" r="32" fill="#C4B5FD" />
+                <ellipse cx="80" cy="70" rx="18" ry="24" fill="#A78BFA" />
+                <rect x="70" y="90" width="20" height="30" rx="10" fill="#F472B6" />
+              </svg>
+            </div>
+            <div className="mb-4 w-full flex justify-center md:justify-start">
+              <span className="inline-block bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-md">
+                Free to start. No credit card required. Cancel anytime.
+              </span>
+            </div>
+            <h1 className="text-4xl sm:text-5xl lg:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-white mb-4 leading-tight tracking-tight">
               {isSigningUp ? "Find the Right Words, Instantly. Unlock HeartGlow." : "Welcome Back to HeartGlow"}
             </h1>
-            <p className="text-lg text-purple-200/80 mb-8">
+            <p className="text-lg text-purple-200/80 mb-6">
               {isSigningUp ? "Struggling with tough conversations? HeartGlow offers private, AI-powered emotional scripts, clarity guides, and coaching tools. Get clear, confident, and connect deeper—free." : "Log in to continue your journey to clearer communication."}
             </p>
-            
             {isSigningUp && (
-              <div className="space-y-3 text-purple-200/70 text-sm mb-8">
-                <p className="flex items-center justify-center md:justify-start gap-2.5">
+              <div className="w-full max-w-md mx-auto md:mx-0 bg-white/10 border border-white/10 rounded-2xl shadow-lg p-6 space-y-3 mb-8">
+                <p className="flex items-center gap-2.5 text-purple-100 text-sm">
                   <CheckCircle className="w-4 h-4 text-green-400 flex-shrink-0" />
                   <span>Start Free: Access essential AI guides & core features. No credit card needed.</span>
                 </p>
-                <p className="flex items-center justify-center md:justify-start gap-2.5">
+                <p className="flex items-center gap-2.5 text-purple-100 text-sm">
                   <Lock className="w-4 h-4 text-indigo-300 flex-shrink-0" />
                   <span>Private & Encrypted: Your thoughts and conversations are confidential, always.</span>
                 </p>
-                <p className="flex items-center justify-center md:justify-start gap-2.5">
+                <p className="flex items-center gap-2.5 text-purple-100 text-sm">
                   <HeartPulse className="w-4 h-4 text-pink-400 flex-shrink-0" />
                   <span>AI Coaching for Real Life: Get instant scripts for apologies, boundaries, expressing needs & more.</span>
                 </p>
-                 <p className="flex items-center justify-center md:justify-start gap-2.5">
-                   <SparklesIcon className="w-4 h-4 text-yellow-400 flex-shrink-0" />
+                <p className="flex items-center gap-2.5 text-purple-100 text-sm">
+                  <SparklesIcon className="w-4 h-4 text-yellow-400 flex-shrink-0" />
                   <span>Turn Confusion into Clarity: Understand your emotions and express yourself with confidence.</span>
                 </p>
               </div>
@@ -176,7 +189,7 @@ const Login = () => {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, ease: [0.25, 1, 0.5, 1], delay: 0.1 }}
-            className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-xl shadow-xl p-8 sm:p-10 max-w-md mx-auto w-full"
+            className="bg-white/5 backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-8 sm:p-10 max-w-md mx-auto w-full flex flex-col"
           >
             <h2 className="text-2xl font-semibold text-white mb-6 text-center">
               {isSigningUp ? 'Unlock Your Free HeartGlow Account' : 'Log In to Your Account'}
@@ -256,7 +269,7 @@ const Login = () => {
                 <button 
                   type="submit"
                   disabled={isLoading || isLoadingGoogle}
-                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 focus:ring-offset-gray-950 transition duration-150 ease-in-out disabled:opacity-60"
+                  className="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-base font-semibold text-white bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 hover:from-pink-600 hover:via-purple-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 focus:ring-offset-gray-950 transition duration-150 ease-in-out disabled:opacity-60 text-lg mb-1"
                 >
                   {isLoading && !isLoadingGoogle ? (
                     <>
@@ -268,6 +281,9 @@ const Login = () => {
                     </>
                   ) : (isSigningUp ? 'Create My Free Account & Get Clarity' : 'Log In')}
                 </button>
+                {isSigningUp && (
+                  <div className="text-xs text-purple-200/80 text-center mt-1 mb-2">No payment required. Cancel anytime.</div>
+                )}
               </div>
             </form>
 
@@ -323,11 +339,9 @@ const Login = () => {
               </p>
             </div>
 
-            {isSigningUp && (
-              <p className="mt-8 text-xs text-gray-500 text-center">
-                Your privacy is paramount: all data is encrypted. <br/>Full access to core guides is 100% free – no credit card ever required for the free tier.
-              </p>
-            )}
+            <div className="mt-6 text-xs text-purple-200/70 text-center">
+              Your privacy is paramount: all data is encrypted. <br/>Full access to core guides is 100% free – no credit card ever required for the free tier.
+            </div>
           </motion.div>
         </div>
       </div>

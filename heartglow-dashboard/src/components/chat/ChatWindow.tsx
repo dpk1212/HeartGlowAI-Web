@@ -233,21 +233,18 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
   // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
   const handleGuideClick = (promptText: string) => {
-    console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
+    // Only trigger AI guide, never send a user message!
     if (!userProfile || authLoading) { 
       console.warn("[ChatWindow] User profile not loaded yet or auth still loading.");
       return; 
     }
     if (currentUser?.isAnonymous) {
-      console.log("[ChatWindow] Anonymous user clicked guide. Redirecting to login/signup.");
       router.push('/login?reason=guide_access&mode=signup');
       return;
     }
-    // User has a full account, proceed to use the guide
-    console.log("[ChatWindow] Authenticated user, starting guide (AI should respond first).");
     onSelectConnection('heartglow-ai');
-    onStartGuide(promptText); // NEW: Only trigger AI response, do not send user message
-    guideClickedRef.current = true; // Mark that a guide was clicked
+    onStartGuide(promptText); // Only trigger AI response
+    guideClickedRef.current = true;
   };
   // --- END REVISED handleGuideClick ---
 
@@ -351,7 +348,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
         // --- NEW Empty State UI ---
-        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto">
+        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full max-w-full overflow-x-hidden">
           <div className="w-full max-w-4xl mx-auto flex flex-col items-center px-2 sm:px-0">
             {/* Main Headline */}
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl mb-2 sm:mb-4">
@@ -393,15 +390,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-full px-2">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
                   <button
                     key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.03] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full`}
-                    style={{ minWidth: 0, maxWidth: '100%' }}
+                    className={`relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.03] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full max-w-full`}
+                    style={{ maxWidth: '100%' }}
                   >
                     {/* Conditional Badge */}
                     {guide.tag === 'new' && (

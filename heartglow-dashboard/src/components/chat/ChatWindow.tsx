@@ -348,21 +348,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
         // --- NEW Empty State UI ---
-        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full max-w-screen overflow-x-hidden">
-          <div className="w-full mx-auto flex flex-col items-center sm:px-0 overflow-x-hidden">
+        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full">
+          <div className="w-full mx-auto flex flex-col items-center sm:px-0">
             {/* Main Headline */}
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl mb-2 sm:mb-4">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-xs sm:max-w-md md:max-w-2xl mb-2 sm:mb-4 break-words">
               When your emotions feel tangled, we help you find the words—and the way forward.
             </h1>
             {/* Subheadline */}
-            <p className="mb-4 sm:mb-6 text-base sm:text-lg text-gray-400/90 max-w-xl">
+            <p className="mb-4 sm:mb-6 text-base sm:text-lg text-gray-400/90 max-w-xs sm:max-w-md md:max-w-xl break-words">
               Private, encrypted, and emotionally intelligent — HeartGlow turns emotional confusion into clear, confident action.
             </p>
 
             {/* Toggle Menus - Improved Styling & Mobile */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-2xl items-center justify-center overflow-x-hidden">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-md md:max-w-2xl items-center justify-center">
               {/* Free/Premium Toggle */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-hidden">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto">
                 {premiumOptions.map(option => (
                   <button
                     key={option}
@@ -376,7 +376,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 ))}
               </div>
               {/* Category Toggle - Horizontal scroll on mobile */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x overflow-x-hidden">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x">
                 {categoryOptions.map(option => (
                   <button
                     key={option}
@@ -390,7 +390,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-screen overflow-x-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
@@ -413,8 +413,12 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                        </div>
                     )}
                     <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
-                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1">{guide.headline}</span>
-                    <span className="text-xs sm:text-sm text-white/70">{guide.subtext}</span>
+                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto">
+                      {guide.headline}
+                    </span>
+                    <span className="text-xs sm:text-sm text-white/70 break-words hyphens-auto">
+                      {guide.subtext}
+                    </span>
                   </button>
                 );
               })}

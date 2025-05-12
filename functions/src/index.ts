@@ -311,14 +311,7 @@ export const handleChatMessage = onCall({
     firestore.collection("users").doc(userId).collection("messages") :
     firestore.collection("users").doc(userId).collection("connections").doc(connectionId!).collection("messages");
 
-  const userMessageData = {
-    text: trimmedMessage,
-    createdAt: FieldValue.serverTimestamp(),
-    role: "user",
-    userId: userId,
-  };
-
-  // --- Step 1 & 2: Check if message matches a Guide's firstLine ---
+  // --- Step 1: Check if message matches a Guide's firstLine ---
   const matchedGuide = guideData[trimmedMessage];
 
   if (matchedGuide) {
@@ -345,11 +338,17 @@ export const handleChatMessage = onCall({
     }
   }
 
-  // --- Step 3: Proceed with normal message handling (if not a guide click) ---
+  // --- Step 2: Proceed with normal message handling (if not a guide click) ---
   logger.info(`Handling regular message for user ${userId}, connection ${connectionId || 'general'}.`);
 
   try {
     // Save the user's message first
+    const userMessageData = {
+      text: trimmedMessage,
+      createdAt: FieldValue.serverTimestamp(),
+      role: "user",
+      userId: userId,
+    };
     const savedUserMessage = await userMessageRef.add(userMessageData);
     logger.info(`User message saved with ID: ${savedUserMessage.id}`);
 
@@ -374,73 +373,27 @@ export const handleChatMessage = onCall({
     }
 
     // Fetch recent messages for context
-    const messagesQuery = userMessageRef.orderBy("createdAt", "desc").limit(15); // Increased limit slightly
+    const messagesQuery = userMessageRef.orderBy("createdAt", "desc").limit(15);
     const messagesSnap = await messagesQuery.get();
     const recentMessages = messagesSnap.docs
       .map((doc) => {
           const data = doc.data() as ChatMessageData;
           return { id: doc.id, ...data };
       })
-      .reverse() // Ensure chronological order for OpenAI
-      // Filter using the asserted type, and use a type guard that includes the 'id'
+      .reverse()
       .filter((msg): msg is {id: string} & ChatMessageData & { role: 'user' | 'assistant' } =>
           msg.role === "user" || msg.role === "assistant"
       )
       .map((msg) => ({
-        // Types are now correctly inferred here
         role: msg.role,
-        content: msg.text || "", // Ensure content is string
+        content: msg.text || "",
       }));
-
-    // --- Step 4: Build Enhanced System Prompt ---
-    let systemPrompt = `
-# System Identity:
-You are HeartGlow AI — an emotionally intelligent, calming, relationship-guidance assistant.
-You specialize in turning emotional confusion into clarity and confident action.
-You are warm, intuitive, empathetic, and strategic — never cold, robotic, or overly verbose.
-
-# Primary HeartGlow Objectives:
-- Help users express difficult emotions with calmness and clarity.
-- Guide users through emotionally high-stakes situations (relationships, work, friendships, self-talk).
-- Make users feel safe, supported, and gently empowered.
-- Move users from feeling stuck ➔ to feeling emotionally confident and ready to act.
-
-# Core Interaction Flow:
-1.  **Analyze Initial User Response:** When you receive the user's first message *after* the initial AI prompt (which included an acknowledgment and mini-prompt based on their guide selection), your primary task is to ANALYZE their response in the context of the ## Current Focus section (the original guide's goal).
-2.  **Identify Knowledge Gaps:** Determine the 1 or 2 *most critical* pieces of information *still needed* to create a genuinely personalized and actionable comprehensive guide/framework/message draft relevant to the ## Current Focus. Do NOT ask generic questions about tone/goal unless absolutely necessary and un-inferrable from the context.
-3.  **Ask Clarifying Questions with Transparency:** Before asking the 1-2 essential questions, briefly explain *why* this specific information is needed to personalize the final guide. Frame it transparently and reassure the user about the goal. For example: "Thanks for sharing that. To make sure the guide I create is really tailored to your situation, could you tell me...? [Ask Question 1]" or "Okay, that clarifies things. Just one more question so I can build the best framework for you: [Ask Question 2]". Then, ask ONLY the 1-2 essential clarifying questions identified in step 2. Frame them concisely and warmly.
-4.  **Synthesize and Generate Final Output:** Once you receive the user's answer(s) to your clarifying questions, acknowledge them briefly. Then, synthesize ALL the information gathered (the original guide context from ## Current Focus, the user's response to the initial mini-prompt, and their answers to your clarifying questions) to generate the **full, comprehensive, personalized guide/framework/message draft**. Follow the ## Final Output Structure guidelines.
-5.  **Deliver with Insight:** Conclude the final output with the required 1-sentence emotional framing insight.
-
-# Conversation Behavior Rules:
-- Always validate the user's feelings briefly before asking questions (e.g., "Thanks for sharing that, it helps me understand...").
-- Prioritize asking the *minimal* number of clarifying questions needed for effective personalization (usually 1, max 2).
-- Once clarifying questions are answered, proceed *directly* to generating the final comprehensive output. Do not engage in further open-ended chat unless the user explicitly initiates it after receiving the guide.
-- Ensure the final output directly addresses the user's situation and the original guide's intent, personalized with the gathered details.
-- Every final guide/framework/message must feel like it was crafted for them, not a generic template.
-- Adhere strictly to the Tone and Language Rules.
-- Before asking clarifying questions, briefly state the purpose (personalization for the final guide) to keep the user engaged and informed of the process.
-
-# Final Output Structure:
-- Use Markdown formatting (headings \`## Like This\`, lists \`* Item\`, bolding \`**Key Point**\`) for clarity and structure.
-- Start the final output with a brief connecting sentence acknowledging the gathered context (e.g., "Okay, based on [user's situation snippet] and wanting to [achieve goal/tone], here's a [guide/framework/message draft] tailored for you:").
-- Present the guide/framework/message clearly and logically. Use numbered lists for steps, bullet points for options, or distinct blocks for message drafts.
-- Ensure the output is comprehensive and directly usable by the user.
-- Conclude *only* with the 1-sentence emotional framing insight (e.g., "This structure provides clarity while respecting [relevant emotional need].").
-
-# Tone and Language Rules:
-- **Warm** > Clinical
-- **Brief** > Wordy
-- **Empowering** > Preachy
-- **Reflective** > Directive
-- **Compassionate** > Casual
-    `;
 
     // Check the last AI message to see if we need to add guide context
     let activeGuideSystemPrompt = "";
     if (messagesSnap.docs.length >= 1) {
-        const lastDocSnap = messagesSnap.docs[0]; // Last message by createdAt desc
-        const lastMessageData = lastDocSnap.data() as ChatMessageData; // Assert type
+        const lastDocSnap = messagesSnap.docs[0];
+        const lastMessageData = lastDocSnap.data() as ChatMessageData;
 
         // Check if the *actual last message* in DB was an AI guide response
         if (lastMessageData.role === 'assistant' && lastMessageData.isGuideResponse && lastMessageData.guideContext) {
@@ -453,6 +406,7 @@ You are warm, intuitive, empathetic, and strategic — never cold, robotic, or o
     }
 
     // Append CONVERSATION context (if applicable)
+    let systemPrompt = "You are HeartGlow AI, an empathetic relationship coach. Your responses should be warm, supportive, and focused on emotional intelligence.";
     if (!isGeneralChat && connectionData) {
       systemPrompt += `\n\n## Conversation Context:`;
       if (connectionData.name) systemPrompt += `\n- Talking about: ${connectionData.name}`;
@@ -477,10 +431,10 @@ You are warm, intuitive, empathetic, and strategic — never cold, robotic, or o
     ];
 
     logger.info("Calling OpenAI API with updated 2-step interaction system prompt...");
-        const completion = await openai.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       messages: messagesForApi,
-            temperature: 0.7,
+      temperature: 0.7,
       max_tokens: 450,
       user: userId,
     });

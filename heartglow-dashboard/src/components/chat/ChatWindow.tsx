@@ -397,8 +397,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <button
                     key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.03] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full max-w-full`}
-                    style={{ maxWidth: '100%' }}
+                    className={`relative flex flex-col items-center text-center p-4 sm:p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.02] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full`}
                   >
                     {/* Conditional Badge */}
                     {guide.tag === 'new' && (
@@ -414,9 +413,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                        </div>
                     )}
                     
-                    <IconComponent className="w-7 h-7 mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
-                    <span className="text-base font-semibold text-white/95 leading-snug mb-1">{guide.headline}</span>
-                    <span className="text-sm text-gray-400/80 mt-1.5">{guide.subtext}</span>
+                    <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
+                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1">{guide.headline}</span>
+                    <span className="text-xs sm:text-sm text-white/70">{guide.subtext}</span>
                   </button>
                 );
               })}

@@ -169,6 +169,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const [ctaShown, setCtaShown] = useState(false);
   const [showUpgradePrompt, setShowUpgradePrompt] = useState(false);
   const messageCountRef = useRef(messages.length); // Track previous message count
+  // Track previous value of showPrompts to detect transition
+  const prevShowPromptsRef = useRef(showPrompts);
   // --- END ADDED HOOKS/STATE ---
 
   // --- Effect to scroll message list and manage prompt visibility ---
@@ -202,6 +204,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     --- END COMMENTED OUT --- */
 
   }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]); // Note: ctaShown might be removable if only using guide prompt
+
+  // Track previous value of showPrompts to detect transition
+  useEffect(() => {
+    // If showPrompts just transitioned from true to false, scroll to bottom
+    if (prevShowPromptsRef.current && !showPrompts && scrollContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+        }
+      });
+    }
+    prevShowPromptsRef.current = showPrompts;
+  }, [showPrompts]);
 
   // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
   const handleGuideClick = (promptText: string) => {

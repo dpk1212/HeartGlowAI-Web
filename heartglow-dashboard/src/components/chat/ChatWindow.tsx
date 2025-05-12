@@ -182,6 +182,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // Move toggles state inside component
   const [selectedPremium, setSelectedPremium] = useState("Free");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  // Track if a guide was just clicked
+  const guideClickedRef = useRef(false);
   // --- END ADDED HOOKS/STATE ---
 
   // --- Effect to scroll message list and manage prompt visibility ---
@@ -232,24 +234,37 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
   const handleGuideClick = (promptText: string) => {
     console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
-
     if (!userProfile || authLoading) { 
       console.warn("[ChatWindow] User profile not loaded yet or auth still loading.");
       return; 
     }
-
     if (currentUser?.isAnonymous) {
       console.log("[ChatWindow] Anonymous user clicked guide. Redirecting to login/signup.");
       router.push('/login?reason=guide_access&mode=signup');
       return;
     }
-
     // User has a full account, proceed to use the guide
     console.log("[ChatWindow] Authenticated user, starting guide (AI should respond first).");
     onSelectConnection('heartglow-ai');
     onStartGuide(promptText); // NEW: Only trigger AI response, do not send user message
+    guideClickedRef.current = true; // Mark that a guide was clicked
   };
   // --- END REVISED handleGuideClick ---
+
+  // Scroll to bottom after guide click and new message
+  const prevMessagesLength = useRef(messages.length);
+  useEffect(() => {
+    if (guideClickedRef.current && messages.length > prevMessagesLength.current) {
+      // New message after guide click
+      if (scrollContainerRef.current) {
+        requestAnimationFrame(() => {
+          scrollContainerRef.current!.scrollTop = scrollContainerRef.current!.scrollHeight;
+        });
+      }
+      guideClickedRef.current = false; // Reset
+    }
+    prevMessagesLength.current = messages.length;
+  }, [messages.length]);
 
   // --- Handle input change ---
   const handleInputChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
@@ -328,40 +343,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
         // --- NEW Empty State UI ---
-        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 text-center overflow-y-auto">
+        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto">
           <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
             {/* Main Headline */}
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl mb-2 sm:mb-4">
               When your emotions feel tangled, we help you find the words—and the way forward.
             </h1>
             {/* Subheadline */}
-            <p className="mt-4 text-base sm:text-lg text-gray-400/90 max-w-xl">
+            <p className="mb-4 sm:mb-6 text-base sm:text-lg text-gray-400/90 max-w-xl">
               Private, encrypted, and emotionally intelligent — HeartGlow turns emotional confusion into clear, confident action.
             </p>
 
-            {/* Toggle Menus */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8 mb-8 w-full max-w-2xl items-center justify-center">
+            {/* Toggle Menus - Improved Styling & Mobile */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-2xl items-center justify-center">
               {/* Free/Premium Toggle */}
-              <div className="flex gap-2 bg-[#23233a] rounded-xl p-1 shadow-inner">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto">
                 {premiumOptions.map(option => (
                   <button
                     key={option}
                     onClick={() => setSelectedPremium(option)}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
-                    disabled={option === 'Premium'} // Optionally disable Premium for now
+                    className={`flex-1 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl font-semibold text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
+                    disabled={option === 'Premium'}
                   >
                     {option}
                     {option === 'Premium' && <span className="ml-2 text-xs">🔒</span>}
                   </button>
                 ))}
               </div>
-              {/* Category Toggle */}
-              <div className="flex gap-2 bg-[#23233a] rounded-xl p-1 shadow-inner overflow-x-auto">
+              {/* Category Toggle - Horizontal scroll on mobile */}
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x">
                 {categoryOptions.map(option => (
                   <button
                     key={option}
                     onClick={() => setSelectedCategory(option)}
-                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
+                    className={`flex-shrink-0 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl font-semibold text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'} snap-center`}
                   >
                     {option}
                   </button>
@@ -370,41 +385,40 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 mb-10 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-10 w-full">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
                   <button
-                    key={index} 
+                    key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`relative flex flex-col items-center text-center p-5 rounded-xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-sm hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.02] ${
-                      guide.tag === 'top-choice' ? 'shadow-violet-glow' : '' 
-                    }`}
+                    className={`relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.03] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full`}
+                    style={{ minWidth: 0 }}
                   >
                     {/* Conditional Badge */}
                     {guide.tag === 'new' && (
-                      <span className="absolute top-1.5 left-1.5 bg-purple-500/20 text-purple-300 text-[9px] font-medium px-1.5 py-0.5 rounded-full">
+                      <span className="absolute top-2 left-2 bg-purple-500/20 text-purple-300 text-[10px] font-semibold px-2 py-0.5 rounded-full">
                         New
                       </span>
                     )}
                      {/* Conditional Star & Text */}
                     {guide.tag === 'top-choice' && (
-                       <div className="absolute top-1.5 right-1.5 flex items-center space-x-1">
-                         <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-                         <span className="text-yellow-400 text-[9px] font-medium">Top Choice</span> 
+                       <div className="absolute top-2 right-2 flex items-center space-x-1">
+                         <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                         <span className="text-yellow-400 text-[10px] font-semibold">Top Choice</span> 
                        </div>
                     )}
                     
-                    <IconComponent className="w-6 h-6 mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
-                    <span className="text-sm font-medium text-white/95 leading-snug">{guide.headline}</span>
-                    <span className="text-xs text-gray-400/80 mt-1.5">{guide.subtext}</span>
+                    <IconComponent className="w-7 h-7 mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
+                    <span className="text-base font-semibold text-white/95 leading-snug mb-1">{guide.headline}</span>
+                    <span className="text-sm text-gray-400/80 mt-1.5">{guide.subtext}</span>
                   </button>
                 );
               })}
             </div>
 
             {/* Footer Line */}
-            <p className="text-xs text-gray-500 mt-6">
+            <p className="text-xs text-gray-500 mt-6 mb-2">
               Not sure where to start? Just begin typing. HeartGlow will guide you step-by-step.
             </p>
           </div>

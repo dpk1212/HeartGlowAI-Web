@@ -416,8 +416,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto min-w-0">
                       {guide.headline}
                     </span>
-                    {/* Applied line-clamp to subtext */}
-                    <span className="text-xs sm:text-sm text-white/70 min-w-0 line-clamp-2 text-left">
+                    {/* Applied manual CSS truncation */}
+                    <span className="text-xs sm:text-sm text-white/70 min-w-0 text-left h-8 overflow-hidden">
                       {guide.subtext}
                     </span>
                   </button>

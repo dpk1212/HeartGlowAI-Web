@@ -30,7 +30,6 @@ import Stripe from "stripe";
 import {onRequest} from "firebase-functions/v1/https";
 import {config} from "firebase-functions";
 import {getFirestore, FieldValue, Timestamp} from "firebase-admin/firestore";
-import { initializeApp } from "firebase-admin/app";
 
 // Ensure admin is initialized
 try {
@@ -314,11 +313,11 @@ export const handleChatMessage = onCall({
   // --- Step 1: Check if message matches a Guide's firstLine ---
   const matchedGuide = guideData[trimmedMessage];
 
+  // BULLETPROOF: Always treat any guide firstLine as a guide trigger, every time, even if repeated
   if (matchedGuide) {
     logger.info(`Guide click detected for user ${userId}, connection ${connectionId || 'general'}. Guide Ack: ${matchedGuide.acknowledgment}`);
-
     try {
-      // Construct and save ONLY the AI's acknowledgment + mini-prompt response
+      // Never save a user message for a guide trigger, no matter what
       const aiResponseData = {
         text: `${matchedGuide.acknowledgment} ${matchedGuide.miniPrompt}`,
         createdAt: FieldValue.serverTimestamp(),
@@ -328,7 +327,6 @@ export const handleChatMessage = onCall({
       };
       // Save the AI response
       const savedAiMessage = await userMessageRef.add(aiResponseData);
-
       logger.info(`Successfully saved AI guide prompt with ID: ${savedAiMessage.id}`);
       // Return the ID of the AI message saved
       return {success: true, messageId: savedAiMessage.id}; 

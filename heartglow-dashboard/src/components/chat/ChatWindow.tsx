@@ -348,8 +348,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
         // --- NEW Empty State UI ---
-        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full max-w-full overflow-x-hidden">
-          <div className="w-full max-w-4xl mx-auto flex flex-col items-center px-2 sm:px-0">
+        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full max-w-[100vw] overflow-x-hidden">
+          <div className="w-full mx-auto flex flex-col items-center sm:px-0 overflow-x-hidden">
             {/* Main Headline */}
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl mb-2 sm:mb-4">
               When your emotions feel tangled, we help you find the words—and the way forward.
@@ -360,9 +360,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </p>
 
             {/* Toggle Menus - Improved Styling & Mobile */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-2xl items-center justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-2xl items-center justify-center overflow-x-hidden">
               {/* Free/Premium Toggle */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-hidden">
                 {premiumOptions.map(option => (
                   <button
                     key={option}
@@ -376,7 +376,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 ))}
               </div>
               {/* Category Toggle - Horizontal scroll on mobile */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x overflow-x-hidden">
                 {categoryOptions.map(option => (
                   <button
                     key={option}
@@ -390,7 +390,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-screen overflow-x-hidden">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-[100vw] overflow-x-hidden">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (

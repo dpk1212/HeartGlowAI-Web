@@ -367,21 +367,21 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <button
                     key={option}
                     onClick={() => setSelectedPremium(option)}
-                    className={`flex-1 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl font-semibold text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
+                    className={`flex-1 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
                     disabled={option === 'Premium'}
                   >
                     {option}
-                    {option === 'Premium' && <span className="ml-2 text-xs">🔒</span>}
+                    {option === 'Premium' && <span className="ml-1 sm:ml-2 text-xs">🔒</span>}
                   </button>
                 ))}
               </div>
               {/* Category Toggle - Horizontal scroll on mobile */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x">
+              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x pr-3 sm:pr-2">
                 {categoryOptions.map(option => (
                   <button
                     key={option}
                     onClick={() => setSelectedCategory(option)}
-                    className={`flex-shrink-0 px-4 py-2 sm:px-6 sm:py-2.5 rounded-xl font-semibold text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'} snap-center`}
+                    className={`flex-shrink-0 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'} snap-center`}
                   >
                     {option}
                   </button>
@@ -413,10 +413,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                        </div>
                     )}
                     <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
-                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto">
+                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto min-w-0">
                       {guide.headline}
                     </span>
-                    <span className="text-xs sm:text-sm text-white/70 break-words hyphens-auto">
+                    <span className="text-xs sm:text-sm text-white/70 break-words hyphens-auto min-w-0">
                       {guide.subtext}
                     </span>
                   </button>

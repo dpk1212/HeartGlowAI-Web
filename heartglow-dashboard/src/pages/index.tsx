@@ -324,6 +324,31 @@ const IndexPage: NextPage = () => {
     setSelectedConnectionId('heartglow-ai');
   };
 
+  // Handler for starting a guide: only trigger the backend, do NOT show as user message
+  const handleStartGuide = async (guideFirstLine: string) => {
+    if (!userId) {
+      console.error("User not authenticated, cannot start guide.");
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      const functions = getFunctions();
+      const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
+      // Pass selectedConnectionId as 'heartglow-ai' for guides
+      const result = await callHandleChatMessage({ connectionId: 'heartglow-ai', messageText: guideFirstLine });
+      const resultData = result.data as { success?: boolean; error?: string; messageId?: string };
+      if (!resultData?.success) {
+        throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
+      }
+      // No need to add a user message locally; the AI response will be picked up by the messages hook
+      console.log('Guide started, AI response will appear.');
+    } catch (error) {
+      console.error("Error starting guide:", error);
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   // --- FINAL RENDER: Main Dashboard --- 
   // All checks passed, render the main layout
   return (
@@ -352,6 +377,8 @@ const IndexPage: NextPage = () => {
               isLoadingConnections={isLoadingConnections}
               isLoadingMessages={isLoadingMessages}
               onSaveConnection={handleSaveConnection}
+              isSendingMessage={isSendingMessage}
+              onStartGuide={handleStartGuide} // NEW: Only AI should respond to guide start
             />
           </div>
         </DashboardLayout>

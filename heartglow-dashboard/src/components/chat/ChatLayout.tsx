@@ -33,6 +33,7 @@ interface ChatLayoutProps {
   isLoadingConnections: boolean;
   isLoadingMessages: boolean;
   isSendingMessage?: boolean; // Add isSendingMessage prop
+  onStartGuide?: (guideFirstLine: string) => void; // NEW: Optional prop for guide start
 }
 
 const ChatLayout: React.FC<ChatLayoutProps> = ({
@@ -45,6 +46,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   isLoadingConnections,
   isLoadingMessages,
   isSendingMessage,
+  onStartGuide, // NEW
 }) => {
   const allConnections = [heartglowAIConnection, ...connections];
   const selectedConnection = allConnections.find(c => c.id === selectedConnectionId);
@@ -72,6 +74,16 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
     } else {
         console.warn('[ChatLayout] currentUser is null/undefined when New Connection clicked. Redirecting to login.');
         handleRedirectToLogin(); 
+    }
+  };
+
+  // Handler for starting a guide (calls parent if provided, else fallback)
+  const handleStartGuide = (guideFirstLine: string) => {
+    if (onStartGuide) {
+      onStartGuide(guideFirstLine);
+    } else {
+      // Fallback: just send as a message (legacy behavior)
+      onSendMessage(guideFirstLine);
     }
   };
 
@@ -144,7 +156,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
         )}
 
         {/* --- Desktop Sidebar (Static/Relative) --- */}
-        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-gradient-to-b from-[#181828] to-[#10101A] backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
+        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink0 bg-gradient-to-b from-[#181828] to-[#10101A] backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
           <Button 
             variant="outline"
             className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"
@@ -180,6 +192,7 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
             onToggleMobileSidebar={toggleMobileSidebar}
             isSendingMessage={isSendingMessage}
             onSelectConnection={onSelectConnection}
+            onStartGuide={handleStartGuide}
           />
         </div>
 

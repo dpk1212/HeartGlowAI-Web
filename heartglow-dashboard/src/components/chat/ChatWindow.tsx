@@ -141,6 +141,7 @@ interface ChatWindowProps {
   onToggleMobileSidebar: () => void; // Receive the toggle function
   isSendingMessage?: boolean; // Ensure this is passed down
   onSelectConnection: (connectionId: string) => void; // Add prop
+  onStartGuide: (guideFirstLine: string) => void; // NEW: Trigger guide start
   // TODO: Add isSending state
 }
 
@@ -152,6 +153,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   onToggleMobileSidebar,
   isSendingMessage, // Received from parent (ChatLayout)
   onSelectConnection, // Destructure prop
+  onStartGuide, // NEW: Destructure prop
   // isSending, // Add this when state is managed
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -202,7 +204,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages, isLoadingMessages, showPrompts, userProfile, ctaShown]); // Note: ctaShown might be removable if only using guide prompt
 
   // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
-  const handleGuideClick = (promptText: string) => { // Removed async as function call is removed
+  const handleGuideClick = (promptText: string) => {
     console.log(`[ChatWindow] handleGuideClick called with: "${promptText}"`);
 
     if (!userProfile || authLoading) { 
@@ -210,37 +212,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       return; 
     }
 
-    // ADDED: Check for anonymous user first
     if (currentUser?.isAnonymous) {
       console.log("[ChatWindow] Anonymous user clicked guide. Redirecting to login/signup.");
-      router.push('/login?reason=guide_access&mode=signup'); // Redirect to login/signup, suggest signup
-      return; // Prevent further execution
+      router.push('/login?reason=guide_access&mode=signup');
+      return;
     }
 
     // User has a full account, proceed to use the guide
-    console.log("[ChatWindow] Authenticated user, proceeding with guide message.");
-    onSelectConnection('heartglow-ai'); 
-    onSendMessage(promptText);
-    
-    // The hard paywall (setShowUpgradePrompt(true)) for non-premium users is removed here.
-    // If you want to re-introduce a paywall for specific guides or after certain usage 
-    // for non-premium full accounts, that logic would go here.
-    // For now, all full accounts can use guides.
-
-    // const isPremium = userProfile.isPremium === true;
-    // console.log(`[ChatWindow] Guide Click Check: isPremium=${isPremium}`);
-
-    // if (isPremium) {
-    //   // User is premium - proceed as normal
-    //   console.log("[ChatWindow] Premium user, proceeding with guide message.");
-    //   onSelectConnection('heartglow-ai'); 
-    //   onSendMessage(promptText); 
-    // } else {
-    //   // User is NOT premium - THIS IS WHERE THE HARD PAYWALL WAS
-    //   // console.log("[ChatWindow] Non-premium user clicked guide. Showing upgrade prompt immediately.");
-    //   // setShowUpgradePrompt(true); // Show the paywall -- THIS LINE IS REMOVED/COMMENTED
-    //   // Do NOT send the message or call any backend function
-    // }
+    console.log("[ChatWindow] Authenticated user, starting guide (AI should respond first).");
+    onSelectConnection('heartglow-ai');
+    onStartGuide(promptText); // NEW: Only trigger AI response, do not send user message
   };
   // --- END REVISED handleGuideClick ---
 

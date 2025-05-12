@@ -302,6 +302,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     return true;
   });
 
+  // --- Scroll anchor for robust scroll-to-bottom ---
+  const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    if (scrollAnchorRef.current) {
+      scrollAnchorRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages.length]);
+
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#161624]">
       {/* Subtle Background Pattern */}
@@ -344,7 +352,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       {showPrompts ? (
         // --- NEW Empty State UI ---
         <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto">
-          <div className="w-full max-w-4xl mx-auto flex flex-col items-center">
+          <div className="w-full max-w-4xl mx-auto flex flex-col items-center px-2 sm:px-0">
             {/* Main Headline */}
             <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-2xl mb-2 sm:mb-4">
               When your emotions feel tangled, we help you find the words—and the way forward.
@@ -385,7 +393,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-10 w-full">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
@@ -393,7 +401,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
                     className={`relative flex flex-col items-center text-center p-5 sm:p-6 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.03] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full`}
-                    style={{ minWidth: 0 }}
+                    style={{ minWidth: 0, maxWidth: '100%' }}
                   >
                     {/* Conditional Badge */}
                     {guide.tag === 'new' && (
@@ -426,7 +434,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
         </ScrollArea>
       ) : (
         // --- Message List Area --- 
-        <ScrollArea 
+        <ScrollArea
           className="flex-1 py-4 px-2 sm:px-4 md:px-8 relative z-10"
           ref={scrollContainerRef}
         >
@@ -435,12 +443,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               <MessageItem key={message.id} message={message} />
             ))}
             {isSendingMessage && (
-                 <div className="flex justify-start pr-8 sm:pr-16">
-                      {/* AI thinking indicator */}
-                      <div className="mr-3 flex-shrink-0 mb-1"><div className="h-8 w-8 rounded-full bg-gradient-to-br from-heartglow-pink to-heartglow-violet flex items-center justify-center text-white"><Sparkles className="w-4 h-4 animate-pulse" /></div></div>
-                      <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
-                 </div>
+              <div className="flex justify-start pr-8 sm:pr-16">
+                {/* AI thinking indicator */}
+                <div className="mr-3 flex-shrink-0 mb-1"><div className="h-8 w-8 rounded-full bg-gradient-to-br from-heartglow-pink to-heartglow-violet flex items-center justify-center text-white"><Sparkles className="w-4 h-4 animate-pulse" /></div></div>
+                <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
+              </div>
             )}
+            {/* Scroll anchor for auto-scroll */}
+            <div ref={el => { if (el) scrollAnchorRef.current = el; }} />
           </div>
           <ScrollBar />
         </ScrollArea>

@@ -140,16 +140,6 @@ const guideButtons = [
 // --- Add toggles for Free/Premium and Category ---
 const premiumOptions = ["Free", "Premium"];
 const categoryOptions = ["All", "Get Them Back", "Argument", "Attachment Style", "Apologies"];
-const [selectedPremium, setSelectedPremium] = useState("Free");
-const [selectedCategory, setSelectedCategory] = useState("All");
-
-// Filter guides based on toggles
-const filteredGuides = guideButtons.filter(guide => {
-  if (selectedPremium === "Free" && guide.isPremium) return false;
-  if (selectedPremium === "Premium" && !guide.isPremium) return false;
-  if (selectedCategory !== "All" && !guide.categories.includes(selectedCategory)) return false;
-  return true;
-});
 
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
@@ -189,6 +179,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const messageCountRef = useRef(messages.length); // Track previous message count
   // Track previous value of showPrompts to detect transition
   const prevShowPromptsRef = useRef(showPrompts);
+  // Move toggles state inside component
+  const [selectedPremium, setSelectedPremium] = useState("Free");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   // --- END ADDED HOOKS/STATE ---
 
   // --- Effect to scroll message list and manage prompt visibility ---
@@ -285,6 +278,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     }
   };
   // --- END MODIFIED ---
+
+  // Filter guides based on toggles
+  const filteredGuides = guideButtons.filter(guide => {
+    if (selectedPremium === "Free" && guide.isPremium) return false;
+    if (selectedPremium === "Premium" && !guide.isPremium) return false;
+    if (selectedCategory !== "All" && !guide.categories.includes(selectedCategory)) return false;
+    return true;
+  });
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#161624]">

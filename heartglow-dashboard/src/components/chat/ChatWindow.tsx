@@ -71,7 +71,9 @@ const guideButtons = [
     subtext: "Repair faster. Reconnect deeper. Stay proud of how you handled it.",
     icon: MessagesSquare,
     firstLine: "Arguments happen. Repairing well is what matters. Let\'s find the words for true reconnection.",
-    tag: 'top-choice' 
+    tag: 'top-choice',
+    isPremium: false,
+    categories: ["Argument", "Apologies"]
   },
   // --- New Guides ---
   {
@@ -79,59 +81,75 @@ const guideButtons = [
     subtext: "Bridge the distance — with honesty, softness, and strength.",
     icon: MailQuestion,
     firstLine: "Missing someone is human. Let\'s find a way to express it that feels authentic and strong.",
-    tag: 'new' 
+    tag: 'new',
+    isPremium: false,
+    categories: ["Attachment Style"]
   },
   {
     headline: "How to Tell If Someone Actually Values You",
     subtext: "Look past the words — spot the real signals that matter.",
     icon: Gem,
     firstLine: "Your value isn\'t up for debate. Let\'s look for the signs that show others truly see it too.",
-    tag: 'new' 
+    tag: 'new',
+    isPremium: true,
+    categories: ["Get Them Back"]
   },
   // --- Regular Guides ---
   {
     headline: "4 Messages to Rebuild a Relationship Before It's Too Late",
     subtext: "Before the distance becomes permanent, try these simple, powerful words.",
     icon: HeartHandshake,
-    firstLine: "It\'s never too late to reach for connection. Let\'s find your opening line together."
+    firstLine: "It\'s never too late to reach for connection. Let\'s find your opening line together.",
+    isPremium: false,
+    categories: ["Get Them Back"]
   },
   {
     headline: "5 Things to Say When You Feel Unseen or Misunderstood",
     subtext: "Be heard — without shouting, overexplaining, or begging.",
     icon: MessageCircleHeart,
-    firstLine: "You deserve to be understood, not just tolerated. Let\'s find the words that open hearts, not walls."
+    firstLine: "You deserve to be understood, not just tolerated. Let\'s find the words that open hearts, not walls.",
+    isPremium: false,
+    categories: ["Argument"]
   },
   {
     headline: "How to End a Conversation Without Guilt or Regret",
     subtext: "Say your truth — and leave with peace, not pieces.",
     icon: Flag,
-    firstLine: "There\'s strength in choosing clarity over chaos. I\'ll help you end this with calm dignity."
+    firstLine: "There\'s strength in choosing clarity over chaos. I\'ll help you end this with calm dignity.",
+    isPremium: true,
+    categories: ["Apologies"]
   },
   {
     headline: "3 Steps to Defuse Tension and Reset the Relationship",
     subtext: "Calm the storm without losing yourself — or the connection.",
     icon: Waves,
-    firstLine: "Even the strongest storms can pass with the right words. Let\'s bring calm where there\'s heat."
+    firstLine: "Even the strongest storms can pass with the right words. Let\'s bring calm where there\'s heat.",
+    isPremium: false,
+    categories: ["Argument"]
   },
   {
     headline: "Signs It's Not About You — And How to Respond With Grace",
     subtext: "Release the weight of things that were never yours to carry.",
     icon: ScanLine,
-    firstLine: "Sometimes we hurt because we care too much. Let\'s shift that burden off your shoulders."
-  },
-  {
-    headline: "4 Boundaries That Protect Your Peace Without Pushing People Away",
-    subtext: "Stay open-hearted — while staying deeply protected.",
-    icon: ShieldCheck,
-    firstLine: "Boundaries aren\'t barriers—they\'re bridges that save your peace. Let\'s build yours together."
-  },
-  {
-    headline: "3 Boundaries You Must Set Early in Dating",
-    subtext: "Start stronger: protect your heart without building walls.",
-    icon: LockKeyhole,
-    firstLine: "Healthy boundaries are the foundation of healthy connection. Let\'s define yours clearly."
+    firstLine: "Sometimes we hurt because we care too much. Let\'s shift that burden off your shoulders.",
+    isPremium: false,
+    categories: ["Attachment Style"]
   },
 ];
+
+// --- Add toggles for Free/Premium and Category ---
+const premiumOptions = ["Free", "Premium"];
+const categoryOptions = ["All", "Get Them Back", "Argument", "Attachment Style", "Apologies"];
+const [selectedPremium, setSelectedPremium] = useState("Free");
+const [selectedCategory, setSelectedCategory] = useState("All");
+
+// Filter guides based on toggles
+const filteredGuides = guideButtons.filter(guide => {
+  if (selectedPremium === "Free" && guide.isPremium) return false;
+  if (selectedPremium === "Premium" && !guide.isPremium) return false;
+  if (selectedCategory !== "All" && !guide.categories.includes(selectedCategory)) return false;
+  return true;
+});
 
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
@@ -320,9 +338,39 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               Private, encrypted, and emotionally intelligent — HeartGlow turns emotional confusion into clear, confident action.
             </p>
 
+            {/* Toggle Menus */}
+            <div className="flex flex-col sm:flex-row gap-4 mt-8 mb-8 w-full max-w-2xl items-center justify-center">
+              {/* Free/Premium Toggle */}
+              <div className="flex gap-2 bg-[#23233a] rounded-xl p-1 shadow-inner">
+                {premiumOptions.map(option => (
+                  <button
+                    key={option}
+                    onClick={() => setSelectedPremium(option)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
+                    disabled={option === 'Premium'} // Optionally disable Premium for now
+                  >
+                    {option}
+                    {option === 'Premium' && <span className="ml-2 text-xs">🔒</span>}
+                  </button>
+                ))}
+              </div>
+              {/* Category Toggle */}
+              <div className="flex gap-2 bg-[#23233a] rounded-xl p-1 shadow-inner overflow-x-auto">
+                {categoryOptions.map(option => (
+                  <button
+                    key={option}
+                    onClick={() => setSelectedCategory(option)}
+                    className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-10 mb-10 w-full">
-              {guideButtons.map((guide, index) => {
+              {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
                   <button

@@ -397,27 +397,32 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   <button
                     key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`relative flex flex-col items-start text-left p-4 sm:p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.02] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full`}
+                    className={`relative flex flex-col items-start text-left p-4 sm:p-5 rounded-2xl bg-white/5 hover:bg-white/10 transition-all duration-200 cursor-pointer border border-transparent hover:border-heartglow-pink/20 shadow-md hover:shadow-[0_0_20px_rgba(238,104,150,0.15)] focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 focus:ring-offset-2 focus:ring-offset-[#161624] hover:scale-[1.02] ${guide.tag === 'top-choice' ? 'shadow-violet-glow' : ''} w-full overflow-hidden`}
                   >
-                    {/* Conditional Badge */}
-                    {guide.tag === 'new' && (
-                      <span className="absolute top-2 left-2 bg-purple-500/20 text-purple-300 text-[10px] font-semibold px-2 py-0.5 rounded-full">
-                        New
-                      </span>
-                    )}
-                     {/* Conditional Star & Text - Adjusted positioning/padding */}
-                    {guide.tag === 'top-choice' && (
-                       <div className="absolute top-2 right-3 flex items-center space-x-1">
-                         <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 flex-shrink-0" />
-                         <span className="text-yellow-400 text-[10px] font-semibold truncate">Top Choice</span>
-                       </div>
-                    )}
+                    {/* --- Card Top Row (Badges) --- */}
+                    <div className="w-full flex justify-between items-center mb-2">
+                      <div>
+                        {guide.tag === 'new' && (
+                          <span className="bg-purple-500/20 text-purple-300 text-[10px] font-semibold px-2 py-0.5 rounded-full">
+                            New
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        {guide.tag === 'top-choice' && (
+                           <div className="flex items-center space-x-1"> 
+                             <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 flex-shrink-0" /> 
+                             <span className="text-yellow-400 text-[10px] font-semibold">Top Choice</span>
+                           </div>
+                        )}
+                      </div>
+                    </div>
+                    {/* --- Card Main Content --- */}
                     <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
-                    <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto min-w-0">
+                    <span className="w-full text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1 break-words hyphens-auto min-w-0">
                       {guide.headline}
                     </span>
-                    {/* Applied manual CSS truncation */}
-                    <span className="text-xs sm:text-sm text-white/70 min-w-0 text-left h-8 overflow-hidden">
+                    <span className="w-full text-xs sm:text-sm text-white/70 min-w-0 break-words">
                       {guide.subtext}
                     </span>
                   </button>

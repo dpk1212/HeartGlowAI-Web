@@ -390,7 +390,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
 
             {/* New Button Grid with Enhancements (Tooltip Removed) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-full px-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full max-w-screen overflow-x-hidden">
               {filteredGuides.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
@@ -412,7 +412,6 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                          <span className="text-yellow-400 text-[10px] font-semibold">Top Choice</span> 
                        </div>
                     )}
-                    
                     <IconComponent className="w-6 h-6 sm:w-7 sm:h-7 mb-2 sm:mb-3 text-heartglow-pink/80" strokeWidth={1.5} />
                     <span className="text-sm sm:text-base font-semibold text-white/95 leading-snug mb-1">{guide.headline}</span>
                     <span className="text-xs sm:text-sm text-white/70">{guide.subtext}</span>

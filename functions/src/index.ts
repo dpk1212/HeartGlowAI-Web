@@ -127,7 +127,7 @@ const guideData: Record<string, GuideInfo> = {
   "Give me 5 texts that make them smile when they're having a bad day.": {
     acknowledgment: "When someone you care about is struggling, the right words can be like a warm hug through the phone. You want to lift their spirits without being overwhelming.",
     miniPrompt: "What's their situation - work stress, family drama, general rough patch? And what's your relationship like - are you dating, friends, or something in between? I'll give you perfect messages for their specific situation.",
-    systemPromptSnippet: "SPECIALIZED FOCUS: Copy-Paste Supportive Text Messages. Use the structured format: IMMEDIATE SOLUTION (provide 5 exact, copy-paste texts tailored to their relationship), WHY THIS WORKS (explain the psychology of supportive messaging - validation vs. solutions, timing, emotional impact), NEXT STEPS (when to send, how to follow up, reading their response). Include specific messages like: 'Thinking of you today ❤️ You're stronger than whatever you're facing' and explain why acknowledgment + strength reminder works better than trying to fix their problems.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: ONLY provide 5 exact, copy-paste text messages. Number them 1-5. NO explanations, NO timing advice, NO psychology - just the exact texts they can send. Example format: '1. Hey love, just wanted to remind you...' Keep each message to 1-2 sentences max. The interactive bubbles will handle why they work and when to send them.",
   },
   "What's the perfect good morning text that doesn't sound clingy?": {
     acknowledgment: "Good morning texts are such a sweet gesture, but there's definitely an art to hitting the right tone - warm and caring without being too intense.",
@@ -647,23 +647,28 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - Understanding patterns helps, but action creates results
 - Provide exact words and phrases people can actually say
 
-## Response Structure:
-Deliver responses that are SCANNABLE, ACTIONABLE, and MOBILE-OPTIMIZED.
+## CRITICAL: Response Structure for Interactive Experience
 
-**CORE RESPONSE FORMAT:**
-- **Maximum 3-4 sentences** for the main solution
-- **Bullet points or numbered lists** for multiple items
-- **Bold key phrases** for easy scanning
-- **NO walls of text** - break everything up
-- **Focus on IMMEDIATE value** they can use right now
+**YOUR MAIN RESPONSE SHOULD ONLY CONTAIN:**
+- The core solution (exact texts, specific ideas, copy-paste content)
+- Maximum 4-5 bullet points or short sentences
+- NO explanations of why it works (that goes in bubbles)
+- NO timing tips or implementation advice (that goes in bubbles) 
+- NO follow-up suggestions (system handles that)
 
-**MOBILE-FIRST FORMATTING:**
-- Short paragraphs (2-3 lines max)
-- Clear section breaks
-- Scannable layout
-- Quick, punchy insights
+**WHAT TO EXCLUDE FROM MAIN RESPONSE:**
+- ❌ NO "Why this works" explanations
+- ❌ NO "When to send" or timing advice  
+- ❌ NO psychological insights
+- ❌ NO detailed next steps or action plans
+- ❌ NO background theory or context
 
-The system automatically creates interactive bubbles for deeper content - keep your main response SHORT and ACTIONABLE.
+**FORMAT:**
+- Just the direct answer to their question
+- Actionable content they can immediately use
+- Leave them wanting to know more (curiosity gap)
+
+The interactive bubbles will provide the insights and action plans - your job is to give the solution and create anticipation for the deeper content.
 
 ## MANDATORY: ALWAYS END WITH FOLLOW-UP PROMPTS
 After delivering your core response, ALWAYS end with 2-3 specific follow-up prompts to keep the user engaged. Format as:
@@ -769,7 +774,7 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       
       // Interactive insights bubble
       const insightsBubbleData = {
-        text: "🧠 Click to reveal why this works",
+        text: "🧠 ✨ Why this actually works (the psychology behind it)",
         createdAt: FieldValue.serverTimestamp(),
         role: "assistant",
         isInteractiveBubble: true,
@@ -784,7 +789,7 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       
       // Interactive action bubble  
       const actionBubbleData = {
-        text: "🎯 Click to reveal your best path forward",
+        text: "🎯 ⚡ Your step-by-step game plan (exactly what to do next)",
         createdAt: FieldValue.serverTimestamp(),
         role: "assistant",
         isInteractiveBubble: true,

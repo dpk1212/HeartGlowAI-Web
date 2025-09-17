@@ -151,6 +151,73 @@ const guideButtons = [
     isPremium: false,
     categories: ["Vulnerability", "Confession"]
   },
+  // --- MESSAGE GUIDES (Exact Scripts) ---
+  {
+    headline: "5 texts that make them smile when they're having a bad day",
+    subtext: "Copy-paste messages that lift their mood without being cheesy.",
+    icon: MessagesSquare,
+    firstLine: "Give me 5 texts that make them smile when they're having a bad day.",
+    isPremium: false,
+    categories: ["Texting", "Support"]
+  },
+  {
+    headline: "The perfect good morning text that doesn't sound clingy",
+    subtext: "Sweet but not overwhelming — the exact formula that works.",
+    icon: MailQuestion,
+    firstLine: "What's the perfect good morning text that doesn't sound clingy?",
+    isPremium: false,
+    categories: ["Texting", "Morning"]
+  },
+  {
+    headline: "How to slide into DMs without being creepy",
+    subtext: "Smooth conversation starters that actually get responses.",
+    icon: MessageCircleHeart,
+    firstLine: "How do I slide into their DMs without being creepy? Give me the exact opener.",
+    isPremium: true,
+    categories: ["DMs", "First Contact"]
+  },
+  // --- ACTIVITY GUIDES (Things To Do) ---
+  {
+    headline: "7 activities that create deep connection in under 2 hours",
+    subtext: "Skip small talk forever — activities that build real intimacy.",
+    icon: HeartHandshake,
+    firstLine: "Show me 7 activities that create deep connection in under 2 hours.",
+    isPremium: false,
+    categories: ["Activities", "Connection"]
+  },
+  {
+    headline: "How to turn a boring hangout into emotional intimacy",
+    subtext: "Transform any ordinary moment into something meaningful.",
+    icon: Sparkles,
+    firstLine: "How do I turn a boring hangout into emotional intimacy? Give me the playbook.",
+    isPremium: false,
+    categories: ["Activities", "Intimacy"]
+  },
+  {
+    headline: "3 conversation games that reveal everything about someone",
+    subtext: "Go deeper than 'how was your day' — questions that matter.",
+    icon: MessageCircle,
+    firstLine: "What are 3 conversation games that reveal everything about someone?",
+    isPremium: true,
+    categories: ["Conversation", "Games"]
+  },
+  // --- DATE GUIDES (Date Planning) ---
+  {
+    headline: "First date ideas that guarantee a second date",
+    subtext: "Proven date concepts that create chemistry and excitement.",
+    icon: Heart,
+    firstLine: "Give me first date ideas that guarantee a second date.",
+    isPremium: false,
+    categories: ["Dating", "First Date"]
+  },
+  {
+    headline: "How to plan the perfect romantic surprise on any budget",
+    subtext: "Thoughtful gestures that show effort, not just money.",
+    icon: Gem,
+    firstLine: "How do I plan the perfect romantic surprise on any budget?",
+    isPremium: true,
+    categories: ["Romance", "Surprises"]
+  },
 ];
 
 // Removed filter options since we simplified the layout
@@ -347,11 +414,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                 <h3 className="text-base sm:text-lg font-semibold text-white/95 tracking-tight">
                   {connection ? (connection.name || 'Chat') : 'HeartGlow AI'}
                 </h3>
-                {connection?.relationship && (
+            {connection?.relationship && (
                   <p className="text-xs text-white/60 hidden sm:block mt-0.5 font-medium">
-                    {connection.relationship}
-                  </p>
-                )}
+                {connection.relationship}
+              </p>
+            )}
               </div>
             </div>
           </div>
@@ -365,7 +432,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             </div>
             
             {/* Mobile spacer for visual balance */}
-            <div className="w-8 h-8 md:hidden"></div>
+          <div className="w-8 h-8 md:hidden"></div>
           </div>
         </div>
       </div>

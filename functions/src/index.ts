@@ -103,6 +103,16 @@ const guideData: Record<string, GuideInfo> = {
     miniPrompt: "Where in your life are you finding it hard to set healthy limits — without feeling guilty?",
     systemPromptSnippet: "The user needs help setting boundaries. Focus on clear, kind, and firm statements. Help them articulate their limits and needs without over-explaining or feeling guilty.",
   },
+  "Arguments happen. Repairing well is what matters. Let's find the words for true reconnection.": {
+    acknowledgment: "Arguments happen to everyone. The real skill is in how we repair and reconnect.",
+    miniPrompt: "Tell me about the argument you want to repair — what happened, and what's your biggest worry about reaching out?",
+    systemPromptSnippet: "The user wants to repair after an argument. Focus on empathy, taking responsibility without self-blame, and finding words that acknowledge both perspectives while moving toward reconnection.",
+  },
+  "Missing someone is human. Let's find a way to express it that feels authentic and strong.": {
+    acknowledgment: "Missing someone shows depth of feeling. Let's express it in a way that honors both you and them.",
+    miniPrompt: "Who do you miss, and what's making it hard to reach out — fear of seeming needy, or something else?",
+    systemPromptSnippet: "The user wants to express missing someone without appearing needy. Focus on confident vulnerability, expressing feelings clearly while maintaining dignity and not putting pressure on the other person.",
+  },
 };
 // --- End Guide Data ---
 

@@ -13,7 +13,7 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"; // Import S
 import MessageItem from './MessageItem'; // Assuming MessageItem is in the same directory
 // Removed unused Button import
 // Removed unused Sparkles, SendHorizonal, Users, Users2, Brain imports
-import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck, MailQuestion, LockKeyhole, MessagesSquare, Gem, Sparkles, Star } from 'lucide-react'; 
+import { HeartHandshake, MessageCircleHeart, Flag, Waves, ScanLine, ShieldCheck, MailQuestion, LockKeyhole, MessagesSquare, Gem, Sparkles, Star, Heart, MessageCircle } from 'lucide-react'; 
 // REMOVED Tooltip imports - Component not found
 // import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"; 
 // --- ADDED IMPORTS ---
@@ -63,77 +63,93 @@ import { useRouter } from 'next/router'; // ADDED: For redirection
 //   reconnect: "Help me reconnect with someone important",
 // };
 
-// --- Updated Guide Button Data with Tags and Reordered ---
+// --- VIRAL GUIDE BUTTON DATA - Updated for Maximum Impact ---
 const guideButtons = [
   // --- Top Choice Guide ---
   {
-    headline: "5 Things Emotionally Intelligent People Say After an Argument",
-    subtext: "Repair faster. Reconnect deeper. Stay proud of how you handled it.",
+    headline: "They left me on read and my brain is spiraling",
+    subtext: "Get the exact response that shows confidence, not desperation.",
     icon: MessagesSquare,
-    firstLine: "Arguments happen. Repairing well is what matters. Let\'s find the words for true reconnection.",
+    firstLine: "They left me on read and my brain is spiraling. Give me the exact response that wins.",
     tag: 'top-choice',
     isPremium: false,
-    categories: ["Argument", "Apologies"]
+    categories: ["Texting", "Anxiety"]
   },
-  // --- New Guides ---
+  // --- New Viral Guides ---
   {
-    headline: "How to Tell Someone You Miss Them Without Sounding Needy",
-    subtext: "Bridge the distance — with honesty, softness, and strength.",
+    headline: "I can't tell if they're actually into me or just being nice",
+    subtext: "Decode the signs — stop the guessing games forever.",
     icon: MailQuestion,
-    firstLine: "Missing someone is human. Let\'s find a way to express it that feels authentic and strong.",
+    firstLine: "I can't tell if they're actually into me or just being nice. Show me the signs.",
     tag: 'new',
     isPremium: false,
-    categories: ["Attachment Style"]
+    categories: ["Mixed Signals", "Dating"]
   },
   {
-    headline: "How to Tell If Someone Actually Values You",
-    subtext: "Look past the words — spot the real signals that matter.",
+    headline: "They're pulling away and I don't know what to do",
+    subtext: "Should you chase or give space? Here's exactly what works.",
     icon: Gem,
-    firstLine: "Your value isn\'t up for debate. Let\'s look for the signs that show others truly see it too.",
+    firstLine: "They're pulling away and I don't know if I should chase or give space. What's the move?",
     tag: 'new',
-    isPremium: true,
-    categories: ["Get Them Back"]
+    isPremium: false,
+    categories: ["Distance", "Strategy"]
   },
-  // --- Regular Guides ---
+  // --- High-Impact Guides ---
   {
-    headline: "4 Messages to Rebuild a Relationship Before It's Too Late",
-    subtext: "Before the distance becomes permanent, try these simple, powerful words.",
+    headline: "I said something that made things weird",
+    subtext: "Fix this before it's too late — exact recovery scripts inside.",
     icon: HeartHandshake,
-    firstLine: "It\'s never too late to reach for connection. Let\'s find your opening line together.",
+    firstLine: "I said something that made things weird. How do I fix this before it's too late?",
     isPremium: false,
-    categories: ["Get Them Back"]
+    categories: ["Damage Control", "Communication"]
   },
   {
-    headline: "5 Things to Say When You Feel Unseen or Misunderstood",
-    subtext: "Be heard — without shouting, overexplaining, or begging.",
+    headline: "I want them to miss me",
+    subtext: "The psychology behind making someone realize your worth.",
     icon: MessageCircleHeart,
-    firstLine: "You deserve to be understood, not just tolerated. Let\'s find the words that open hearts, not walls.",
-    isPremium: false,
-    categories: ["Argument"]
-  },
-  {
-    headline: "How to End a Conversation Without Guilt or Regret",
-    subtext: "Say your truth — and leave with peace, not pieces.",
-    icon: Flag,
-    firstLine: "There\'s strength in choosing clarity over chaos. I\'ll help you end this with calm dignity.",
+    firstLine: "I want them to miss me. Give me the psychology behind making someone realize your worth.",
     isPremium: true,
-    categories: ["Apologies"]
+    categories: ["Power Dynamics", "Psychology"]
   },
   {
-    headline: "3 Steps to Defuse Tension and Reset the Relationship",
-    subtext: "Calm the storm without losing yourself — or the connection.",
+    headline: "I think I ruined everything",
+    subtext: "Can this be saved or should you walk away? Clear decision framework.",
+    icon: Flag,
+    firstLine: "I think I ruined everything. Can this relationship be saved or should I walk away?",
+    isPremium: false,
+    categories: ["Crisis", "Decision"]
+  },
+  {
+    headline: "They're being weird lately and I'm overthinking everything",
+    subtext: "Stop the mental detective work — here's what's actually happening.",
     icon: Waves,
-    firstLine: "Even the strongest storms can pass with the right words. Let\'s bring calm where there\'s heat.",
+    firstLine: "They're being weird lately and I'm overthinking everything. Help me figure out what's actually happening.",
     isPremium: false,
-    categories: ["Argument"]
+    categories: ["Anxiety", "Behavior Analysis"]
   },
   {
-    headline: "Signs It's Not About You — And How to Respond With Grace",
-    subtext: "Release the weight of things that were never yours to carry.",
+    headline: "I'm tired of being the backup option",
+    subtext: "Know your worth and demand better — here's exactly how.",
     icon: ScanLine,
-    firstLine: "Sometimes we hurt because we care too much. Let\'s shift that burden off your shoulders.",
+    firstLine: "I'm tired of being the backup option. How do I know my worth and demand better?",
     isPremium: false,
-    categories: ["Attachment Style"]
+    categories: ["Self Worth", "Standards"]
+  },
+  {
+    headline: "I can't get over them and it's been way too long",
+    subtext: "The real strategy for moving on when you're stuck in the past.",
+    icon: Heart,
+    firstLine: "I can't get over them and it's been way too long. Give me the real strategy for moving on.",
+    isPremium: true,
+    categories: ["Moving On", "Healing"]
+  },
+  {
+    headline: "I want to tell them how I feel but I'm terrified",
+    subtext: "Get the script for vulnerable confession without ruining everything.",
+    icon: MessageCircle,
+    firstLine: "I want to tell them how I feel but I'm terrified of ruining everything. Give me the script.",
+    isPremium: false,
+    categories: ["Vulnerability", "Confession"]
   },
 ];
 

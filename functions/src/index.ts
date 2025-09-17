@@ -172,7 +172,7 @@ B-, etc.) and 3 specific insights about its effectiveness.
 // --- Exported Cloud Functions ---
 
 export const generateMessageInsights = onCall({
-  secrets: ["openaikey"],
+  secrets: ["OPENAI_API_KEY"],
 }, async (request: any) => {
   if (!request.auth) {
     logger.warn("Function called without authentication.");
@@ -189,7 +189,7 @@ export const generateMessageInsights = onCall({
     throw new HttpsError("invalid-argument", errorMsg);
   }
   try {
-    const apiKey = process.env.openaikey;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       logger.error("OpenAI API key not configured.");
       throw new HttpsError("internal", "API key not configured.");
@@ -305,7 +305,7 @@ export const stripeWebhook = onRequest(async (request, response) => {
 // --- UPDATED handleChatMessage Function ---
 export const handleChatMessage = onCall({
   timeoutSeconds: 120,
-  secrets: ["openaikey"],
+  secrets: ["OPENAI_API_KEY"],
 }, async (request: CallableRequest<ChatMessageRequestData>) => {
   logger.info("handleChatMessage received raw request data:", request.data);
 
@@ -368,7 +368,7 @@ export const handleChatMessage = onCall({
     const savedUserMessage = await userMessageRef.add(userMessageData);
     logger.info(`User message saved with ID: ${savedUserMessage.id}`);
 
-    const apiKey = process.env.openaikey;
+    const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
       logger.error("OpenAI API key not configured.");
       throw new HttpsError("internal", "API key not configured.");

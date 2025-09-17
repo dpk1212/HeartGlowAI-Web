@@ -590,19 +590,19 @@ export const handleChatMessage = onCall({
         content: msg.text || "",
       }));
 
-    // Check the last AI message to see if we need to add guide context
+    // Check recent messages to see if we need to add guide context
     let activeGuideSystemPrompt = "";
-    if (messagesSnap.docs.length >= 1) {
-        const lastDocSnap = messagesSnap.docs[0];
-        const lastMessageData = lastDocSnap.data() as ChatMessageData;
-
-        // Check if the *actual last message* in DB was an AI guide response
-        if (lastMessageData.role === 'assistant' && lastMessageData.isGuideResponse && lastMessageData.guideContext) {
-             const triggeredGuide = guideData[lastMessageData.guideContext];
-             if (triggeredGuide) {
-                 activeGuideSystemPrompt = triggeredGuide.systemPromptSnippet;
-                 logger.info(`Adding system prompt snippet for guide: ${lastMessageData.guideContext}`);
-             }
+    
+    // Look through recent message docs for any guide context (more robust than just last message)
+    for (const doc of messagesSnap.docs.slice(-3)) {
+        const msgData = doc.data() as ChatMessageData;
+        if (msgData.role === 'assistant' && msgData.isGuideResponse && msgData.guideContext) {
+            const triggeredGuide = guideData[msgData.guideContext];
+            if (triggeredGuide) {
+                activeGuideSystemPrompt = triggeredGuide.systemPromptSnippet;
+                logger.info(`Adding system prompt snippet for guide: ${msgData.guideContext}`);
+                break; // Use the most recent guide context
+            }
         }
     }
 
@@ -711,25 +711,43 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       throw new HttpsError("internal", "AI failed to generate a response.");
     }
 
+    // Check if this is a follow-up to a recent guide
+    let recentGuideContext: string | null = null;
+    let isGuideFollowUp = false;
+    
+    // Look through recent message docs to see if there was a recent guide interaction
+    for (const doc of messagesSnap.docs.slice(-5)) {
+      const msgData = doc.data() as ChatMessageData;
+      if (msgData.role === 'assistant' && msgData.isGuideResponse && msgData.guideContext) {
+        recentGuideContext = msgData.guideContext;
+        isGuideFollowUp = true;
+        logger.info(`Detected guide follow-up for: ${recentGuideContext}`);
+        break;
+      }
+    }
+
     const aiResponseData: any = {
       text: aiResponseText,
       createdAt: FieldValue.serverTimestamp(),
       role: "assistant",
       modelUsed: completion.model,
       finishReason: completion.choices[0]?.finish_reason,
-      isGuideResponse: !!matchedGuide,
+      isGuideResponse: !!matchedGuide || isGuideFollowUp,
     };
     
-    // Only add guideContext if it exists (avoid undefined values in Firestore)
+    // Add guideContext for both initial guides and follow-ups
     if (matchedGuide) {
       aiResponseData.guideContext = trimmedMessage;
+    } else if (isGuideFollowUp && recentGuideContext) {
+      aiResponseData.guideContext = recentGuideContext;
     }
+    
     const savedAiMessage = await userMessageRef.add(aiResponseData);
     logger.info(`AI response saved with ID: ${savedAiMessage.id}`);
 
-    // Create interactive follow-up bubbles for guide responses
-    if (matchedGuide) {
-      logger.info(`Creating interactive bubbles for guide: ${trimmedMessage}`);
+    // Create interactive follow-up bubbles for guide follow-up responses (NOT initial guide clicks)
+    if (isGuideFollowUp && recentGuideContext) {
+      logger.info(`Creating interactive bubbles for guide follow-up: ${recentGuideContext}`);
       
       // Add slight delay for better UX
       await new Promise(resolve => setTimeout(resolve, 1000));
@@ -741,7 +759,7 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
         role: "assistant",
         isInteractiveBubble: true,
         bubbleType: "insights",
-        guideContext: trimmedMessage,
+        guideContext: recentGuideContext,
       };
       const savedInsightsBubble = await userMessageRef.add(insightsBubbleData);
       logger.info(`Insights bubble created with ID: ${savedInsightsBubble.id}`);
@@ -756,7 +774,7 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
         role: "assistant",
         isInteractiveBubble: true,
         bubbleType: "actions",
-        guideContext: trimmedMessage,
+        guideContext: recentGuideContext,
       };
       const savedActionBubble = await userMessageRef.add(actionBubbleData);
       logger.info(`Action bubble created with ID: ${savedActionBubble.id}`);

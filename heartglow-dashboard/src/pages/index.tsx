@@ -358,8 +358,17 @@ const IndexPage: NextPage = () => {
       }
       // No need to add a user message locally; the AI response will be picked up by the messages hook
       console.log('Guide started, AI response will appear.');
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error starting guide:", error);
+      
+      // Check if it's a usage limit error
+      if (error?.code === 'functions/resource-exhausted' || error?.message?.includes('free guide') || error?.message?.includes('free messages')) {
+        setUsageLimitMessage(error.message || "You've reached your daily limit. Create an account to get unlimited access!");
+        setShowUsageLimitModal(true);
+      } else {
+        // TODO: Show other error types via toast
+        console.error("Non-usage limit error:", error);
+      }
     } finally {
       setIsSendingMessage(false);
     }

@@ -44,6 +44,40 @@ const ChatPage = () => {
     window.location.href = '/login?reason=usage_limit&mode=signup';
   };
 
+  // Handler for starting a guide: only trigger the backend, do NOT show as user message
+  const handleStartGuide = async (guideFirstLine: string) => {
+    if (!userId) {
+      console.error("User not authenticated, cannot start guide.");
+      return;
+    }
+    setIsSendingMessage(true);
+    try {
+      const functions = getFunctions();
+      const callHandleChatMessage = httpsCallable(functions, 'handleChatMessage');
+      // Pass selectedConnectionId as 'heartglow-ai' for guides
+      const result = await callHandleChatMessage({ connectionId: 'heartglow-ai', messageText: guideFirstLine });
+      const resultData = result.data as { success?: boolean; error?: string; messageId?: string };
+      if (!resultData?.success) {
+        throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
+      }
+      // No need to add a user message locally; the AI response will be picked up by the messages hook
+      console.log('Guide started, AI response will appear.');
+    } catch (error: any) {
+      console.error("Error starting guide:", error);
+      
+      // Check if it's a usage limit error
+      if (error?.code === 'functions/resource-exhausted' || error?.message?.includes('free guide') || error?.message?.includes('free messages')) {
+        setUsageLimitMessage(error.message || "You've reached your daily limit. Create an account to get unlimited access!");
+        setShowUsageLimitModal(true);
+      } else {
+        // TODO: Show other error types via toast
+        console.error("Non-usage limit error:", error);
+      }
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
   // --- Data Fetching Hooks ---
   const { 
     connections, 
@@ -199,6 +233,7 @@ const ChatPage = () => {
         isLoadingConnections={isLoadingConnections} // Pass down loading states
         isLoadingMessages={isLoadingMessages}
         isSendingMessage={isSendingMessage} // Pass down isSendingMessage state
+        onStartGuide={handleStartGuide} // Pass guide handler
       />
       
       {/* Usage Limit Modal */}

@@ -147,8 +147,8 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 }}
               />
             </ScrollArea>
-          </div>
           )}
+          </div>
           <div className="p-6 pt-0">
             <Button 
               variant="default"

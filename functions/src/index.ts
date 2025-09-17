@@ -716,15 +716,19 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       throw new HttpsError("internal", "AI failed to generate a response.");
     }
 
-    const aiResponseData = {
+    const aiResponseData: any = {
       text: aiResponseText,
       createdAt: FieldValue.serverTimestamp(),
       role: "assistant",
       modelUsed: completion.model,
       finishReason: completion.choices[0]?.finish_reason,
-      guideContext: matchedGuide ? trimmedMessage : undefined,
       isGuideResponse: !!matchedGuide,
     };
+    
+    // Only add guideContext if it exists (avoid undefined values in Firestore)
+    if (matchedGuide) {
+      aiResponseData.guideContext = trimmedMessage;
+    }
     const savedAiMessage = await userMessageRef.add(aiResponseData);
     logger.info(`AI response saved with ID: ${savedAiMessage.id}`);
 

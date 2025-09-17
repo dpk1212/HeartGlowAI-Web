@@ -140,11 +140,6 @@ const guideData: Record<string, GuideInfo> = {
     systemPromptSnippet: "SPECIALIZED FOCUS: Copy-Paste DM Opener Templates. This person wants EXACT DM messages they can send. Provide 3-4 specific opener templates based on context. Start with 'Here are DM openers you can copy and customize:' then format clearly: **For Social Media:** 'Hey! I saw your post about [specific thing] - that's actually something I'm really into too. What got you started with it?' **For Mutual Friends:** 'Hey! I think we have some mutual friends - you seem really cool and I'd love to get to know you better' **For Professional/Hobby:** 'Hi! I noticed we both [shared interest/work in same field] - would love to connect!' Emphasize personalizing with specific details from their profile. Give the formula: specific observation + genuine interest + question. Provide exactly what to type.",
   },
   // --- ACTIVITY GUIDES (Things To Do) ---
-  "Show me 7 activities that create deep connection in under 2 hours.": {
-    acknowledgment: "Building real intimacy doesn't have to take months - the right activities can create profound connection in just one afternoon. You're smart to focus on experiences that matter.",
-    miniPrompt: "Are you looking for activities for a romantic partner, close friend, or someone you're just getting to know? And do you prefer conversation-based bonding or shared experiences? I'll tailor the perfect list.",
-    systemPromptSnippet: "SPECIALIZED FOCUS: Specific Connection Activities List. This person wants a clear, actionable list of 7 activities they can do today. Format as 'Here are 7 activities that create deep connection in under 2 hours:' then list clearly: **1. The 36 Questions** - Ask the scientifically-proven questions that make strangers fall in love **2. Cook Something Together** - Make a meal or dessert from scratch **3. Share Childhood Stories** - Take turns telling formative memories **4. Teach Each Other Something** - Exchange skills or knowledge **5. Explore Somewhere New** - Visit a place neither of you has been **6. Create Art Together** - Draw, write, or make something side by side **7. Plan a Future Adventure** - Dream and plan a trip you'd take together. For each, give 1-2 sentence instructions on how to do it. Focus on giving them ready-to-implement activities.",
-  },
   "How do I turn a boring hangout into emotional intimacy? Give me the playbook.": {
     acknowledgment: "The best connections often happen when you transform ordinary moments into something meaningful. You have the power to shift any interaction from surface-level to soul-level.",
     miniPrompt: "What kind of hangout are you in - watching TV, driving somewhere, just sitting around? And what's your relationship dynamic like currently? I'll give you specific moves to deepen things.",
@@ -165,6 +160,11 @@ const guideData: Record<string, GuideInfo> = {
     acknowledgment: "The most romantic gestures aren't about money - they're about thoughtfulness, effort, and showing that you truly know and care about someone. Your heart is in the right place.",
     miniPrompt: "What's your budget range, and what does your partner love most - experiences, personal touches, quality time, or thoughtful gifts? Also, what's the occasion? I'll create something they'll never forget.",
     systemPromptSnippet: "SPECIALIZED FOCUS: Quick, Actionable Romantic Surprise Ideas. Format as a SHORT bulleted list by budget tier. Keep each suggestion to 1 line with brief explanation. Use this EXACT format: **Budget Tier ($X-$Y):** • Idea 1 - why it works • Idea 2 - why it works. Maximum 4 sentences total for the entire response. Focus on immediate actionable ideas they can execute this week. NO long explanations, NO psychology lectures - just practical surprise ideas they can copy-paste into action.",
+  },
+  "Show me 7 activities that create deep connection in under 2 hours.": {
+    acknowledgment: "Building real intimacy doesn't have to take months - the right activities can create profound connection in just one afternoon. You're smart to focus on experiences that matter.",
+    miniPrompt: "Are you looking for activities for a romantic partner, close friend, or someone you're just getting to know? And do you prefer conversation-based bonding or shared experiences? I'll tailor the perfect list.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: ONLY provide 7 numbered activities. Use clean format: '1. Activity Name - Brief description' NO bold text, NO asterisks, NO explanations. Keep each to 1 line. Example format: '1. The 36 Questions - Ask scientifically-proven questions that make strangers fall in love' Maximum 7 lines total. The interactive bubbles will handle psychology and implementation.",
   },
 };
 // --- End Guide Data ---
@@ -667,12 +667,23 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - ❌ NO detailed next steps or action plans
 - ❌ NO background theory or context
 
-**FORMATTING RULES:**
-- Use clean, numbered lists (1. 2. 3.) not bullet points
-- NO excessive bold text with asterisks
-- NO markdown formatting in your responses
-- Keep it simple and scannable
+**CRITICAL FORMATTING RULES - FOLLOW EXACTLY:**
+- ABSOLUTELY NO bold text using **asterisks**
+- ABSOLUTELY NO bullet points with asterisks (•)
+- Use simple numbered lists: 1. 2. 3.
+- Use clean text only - NO markdown formatting
 - Professional, sophisticated appearance
+- If you use ANY asterisks or bold formatting, you are FAILING
+
+**EXAMPLES OF WHAT NOT TO DO:**
+❌ **Activity:** Description
+❌ • **Point:** Explanation  
+❌ **Cook Something Together** - Make a meal
+
+**EXAMPLES OF CORRECT FORMAT:**
+✅ 1. Cook Something Together - Make a meal
+✅ Activity Name - Brief description
+✅ Simple, clean text only
 
 The interactive bubbles will provide the insights and action plans - your job is to give the solution and create anticipation for the deeper content.
 

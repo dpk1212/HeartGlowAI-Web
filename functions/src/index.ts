@@ -127,7 +127,7 @@ const guideData: Record<string, GuideInfo> = {
   "Give me 5 texts that make them smile when they're having a bad day.": {
     acknowledgment: "When someone you care about is struggling, the right words can be like a warm hug through the phone. You want to lift their spirits without being overwhelming.",
     miniPrompt: "What's their situation - work stress, family drama, general rough patch? And what's your relationship like - are you dating, friends, or something in between? I'll give you perfect messages for their specific situation.",
-    systemPromptSnippet: "SPECIALIZED FOCUS: ONLY provide 5 exact, copy-paste text messages. Number them 1-5. NO explanations, NO timing advice, NO psychology - just the exact texts they can send. Example format: '1. Hey love, just wanted to remind you...' Keep each message to 1-2 sentences max. The interactive bubbles will handle why they work and when to send them.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: ONLY provide 5 exact, copy-paste text messages. Number them 1-5 using clean formatting. NO explanations, NO timing advice, NO psychology, NO bold text or asterisks - just the exact texts they can send. Keep each message to 1-2 sentences max. Use simple numbered format like: 1. Hey love, just wanted to remind you... The interactive bubbles will handle why they work and when to send them.",
   },
   "What's the perfect good morning text that doesn't sound clingy?": {
     acknowledgment: "Good morning texts are such a sweet gesture, but there's definitely an art to hitting the right tone - warm and caring without being too intense.",
@@ -392,17 +392,21 @@ export const revealBubbleContent = onCall({
     
     let contentPrompt = "";
     if (bubbleType === "insights") {
-      contentPrompt = `Based on the guide "${guideContext}", provide 2-3 SHORT psychological insights about why this works. Use bullet points. Keep each insight to 1-2 sentences. Focus on the "aha moments" that make people think "that makes so much sense!" Maximum 100 words total. Example format:
-      
-• **Insight 1:** Brief explanation
-• **Insight 2:** Brief explanation  
-• **Insight 3:** Brief explanation`;
-    } else if (bubbleType === "actions") {
-      contentPrompt = `Based on the guide "${guideContext}", provide 3 SPECIFIC next steps they can take immediately. Use numbered list. Each step should be 1 sentence with clear action. Maximum 75 words total. Example format:
+      contentPrompt = `Based on the guide "${guideContext}", provide 3 SHORT psychological insights about why this works. Use clean, modern formatting without excessive bold or asterisks. Keep each insight to 1-2 sentences. Maximum 100 words total. Format like this:
 
-1. **Do this first:** Specific action
-2. **Then do this:** Specific action
-3. **Finally:** Specific action`;
+🧠 Positive messages trigger dopamine and serotonin release, naturally boosting mood and well-being.
+
+💭 Personalized support signals that they're valued and not alone in their struggles, reducing stress and anxiety.
+
+✨ Thoughtful texts provide momentary distraction from negative thoughts, helping reset mental state.`;
+    } else if (bubbleType === "actions") {
+      contentPrompt = `Based on the guide "${guideContext}", provide 3 SPECIFIC next steps they can take immediately. Use clean numbered format without excessive bold or asterisks. Each step should be 1 sentence with clear action. Maximum 75 words total. Format like this:
+
+1. Choose the message that fits their personality and current situation best
+
+2. Add a personal touch or inside reference to make it feel more genuine and tailored
+
+3. Send with a smile emoji or GIF to enhance the cheerful intent`;
     }
     
     const completion = await openai.chat.completions.create({
@@ -606,8 +610,8 @@ export const handleChatMessage = onCall({
         const msgData = doc.data() as ChatMessageData;
         if (msgData.role === 'assistant' && msgData.isGuideResponse && msgData.guideContext) {
             const triggeredGuide = guideData[msgData.guideContext];
-            if (triggeredGuide) {
-                activeGuideSystemPrompt = triggeredGuide.systemPromptSnippet;
+             if (triggeredGuide) {
+                 activeGuideSystemPrompt = triggeredGuide.systemPromptSnippet;
                 logger.info(`Adding system prompt snippet for guide: ${msgData.guideContext}`);
                 break; // Use the most recent guide context
             }
@@ -663,10 +667,12 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - ❌ NO detailed next steps or action plans
 - ❌ NO background theory or context
 
-**FORMAT:**
-- Just the direct answer to their question
-- Actionable content they can immediately use
-- Leave them wanting to know more (curiosity gap)
+**FORMATTING RULES:**
+- Use clean, numbered lists (1. 2. 3.) not bullet points
+- NO excessive bold text with asterisks
+- NO markdown formatting in your responses
+- Keep it simple and scannable
+- Professional, sophisticated appearance
 
 The interactive bubbles will provide the insights and action plans - your job is to give the solution and create anticipation for the deeper content.
 

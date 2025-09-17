@@ -31,11 +31,16 @@ const Login = () => {
       if (reason === 'new_connection') {
         setInfoMessage('Please create a free account or log in to save connections.');
         setIsSigningUp(true);
+      } else if (reason === 'usage_limit') {
+        setInfoMessage('🎉 Ready to unlock unlimited access? Create your free account and continue your relationship journey!');
+        setIsSigningUp(true);
       } else {
         setInfoMessage('');
       }
       if (mode === 'login') {
           setIsSigningUp(false);
+      } else if (mode === 'signup') {
+          setIsSigningUp(true);
       }
     }
   }, [router.isReady, router.query]);

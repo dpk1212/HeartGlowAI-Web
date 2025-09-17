@@ -42,6 +42,14 @@ const IndexPage: NextPage = () => {
   const { showWelcome, closeWelcomeDialog } = useWelcomeDialog();
   const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
   const [isSendingMessage, setIsSendingMessage] = useState(false);
+  const [showUsageLimitModal, setShowUsageLimitModal] = useState(false);
+  const [usageLimitMessage, setUsageLimitMessage] = useState("");
+
+  // Handle account creation redirect for usage limits
+  const handleCreateAccount = () => {
+    setShowUsageLimitModal(false);
+    router.push('/login?reason=usage_limit&mode=signup');
+  };
   const [showPrimer, setShowPrimer] = useState(false);
 
   // Call useConnections and useMessages unconditionally here
@@ -310,9 +318,17 @@ const IndexPage: NextPage = () => {
         throw new Error("Cloud function reported failure: " + (resultData?.error || 'Unknown error'));
       }
       console.log('Cloud function processed message successfully.');
-    } catch (error) { 
+    } catch (error: any) { 
       console.error("Error calling handleChatMessage function:", error);
-      // TODO: Show error toast to user
+      
+      // Check if it's a usage limit error
+      if (error?.code === 'functions/resource-exhausted' || error?.message?.includes('free guide') || error?.message?.includes('free messages')) {
+        setUsageLimitMessage(error.message || "You've reached your daily limit. Create an account to get unlimited access!");
+        setShowUsageLimitModal(true);
+      } else {
+        // TODO: Show other error types via toast
+        console.error("Non-usage limit error:", error);
+      }
     } finally {
       setIsSendingMessage(false);
     }
@@ -383,6 +399,67 @@ const IndexPage: NextPage = () => {
           </div>
         </DashboardLayout>
       </AuthGuard>
+      
+      {/* Usage Limit Modal */}
+      {showUsageLimitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setShowUsageLimitModal(false)}
+          />
+          
+          {/* Modal */}
+          <div className="relative bg-gradient-to-br from-[#1A1A2E] to-[#16213E] border border-purple-500/20 rounded-2xl p-8 max-w-md mx-4 shadow-2xl">
+            {/* Close button */}
+            <button 
+              onClick={() => setShowUsageLimitModal(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+            
+            {/* Content */}
+            <div className="text-center">
+              <div className="text-4xl mb-4">💕</div>
+              <h2 className="text-2xl font-bold text-white mb-3">
+                You're on the right track!
+              </h2>
+              <p className="text-gray-300 mb-6 leading-relaxed">
+                You've experienced what thousands of couples are discovering - HeartGlow actually works. Research shows couples who work on their relationship together report <span className="text-pink-400 font-semibold">67% higher satisfaction</span>. Ready to unlock your full potential?
+              </p>
+              
+              {/* Features */}
+              <div className="space-y-3 mb-8 text-left">
+                {[
+                  "💬 Unlimited AI Guidance & Expert Advice",
+                  "🎯 Personalized Relationship Coaching", 
+                  "📚 Save Your Progress & Conversations",
+                  "🛠️ Advanced Communication Tools",
+                  "❤️ Join 10,000+ Couples Building Stronger Bonds"
+                ].map((feature, index) => (
+                  <div key={index} className="flex items-center text-sm text-gray-300">
+                    <span className="mr-2">{feature.split(' ')[0]}</span>
+                    <span>{feature.substring(feature.indexOf(' ') + 1)}</span>
+                  </div>
+                ))}
+              </div>
+              
+              {/* CTA Button */}
+              <button
+                onClick={handleCreateAccount}
+                className="w-full bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white font-bold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl"
+              >
+                Create Your Free Account
+              </button>
+              
+              <p className="text-xs text-gray-400 mt-4">
+                Start your journey to a deeper connection • Free forever
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

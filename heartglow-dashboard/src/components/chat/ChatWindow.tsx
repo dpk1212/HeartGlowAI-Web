@@ -63,6 +63,78 @@ import { useRouter } from 'next/router'; // ADDED: For redirection
 //   reconnect: "Help me reconnect with someone important",
 // };
 
+// --- THEME CONFIGURATIONS ---
+const themeConfigs = {
+  "Crisis & Recovery": {
+    color: "red",
+    bgClass: "bg-red-500/15",
+    textClass: "text-red-300",
+    borderClass: "border-red-500/30",
+    icon: "🚨"
+  },
+  "Communication": {
+    color: "blue", 
+    bgClass: "bg-blue-500/15",
+    textClass: "text-blue-300",
+    borderClass: "border-blue-500/30",
+    icon: "💬"
+  },
+  "Dating & Romance": {
+    color: "pink",
+    bgClass: "bg-pink-500/15", 
+    textClass: "text-pink-300",
+    borderClass: "border-pink-500/30",
+    icon: "💕"
+  },
+  "Psychology & Strategy": {
+    color: "purple",
+    bgClass: "bg-purple-500/15",
+    textClass: "text-purple-300", 
+    borderClass: "border-purple-500/30",
+    icon: "🧠"
+  },
+  "Messages & Texts": {
+    color: "green",
+    bgClass: "bg-emerald-500/15",
+    textClass: "text-emerald-300",
+    borderClass: "border-emerald-500/30", 
+    icon: "📱"
+  },
+  "Activities & Planning": {
+    color: "orange",
+    bgClass: "bg-orange-500/15",
+    textClass: "text-orange-300",
+    borderClass: "border-orange-500/30",
+    icon: "📅"
+  }
+};
+
+// Helper function to determine theme based on categories
+const getThemeForGuide = (categories: string[]) => {
+  // Crisis & Recovery
+  if (categories.some(cat => ['Crisis', 'Damage Control', 'Decision'].includes(cat))) {
+    return "Crisis & Recovery";
+  }
+  // Dating & Romance  
+  if (categories.some(cat => ['Dating', 'Romance', 'First Date', 'Surprises', 'Moving On', 'Confession'].includes(cat))) {
+    return "Dating & Romance";
+  }
+  // Psychology & Strategy
+  if (categories.some(cat => ['Psychology', 'Power Dynamics', 'Strategy', 'Self Worth', 'Standards', 'Behavior Analysis'].includes(cat))) {
+    return "Psychology & Strategy";
+  }
+  // Messages & Texts
+  if (categories.some(cat => ['Texting', 'DMs', 'Morning', 'Support', 'First Contact'].includes(cat))) {
+    return "Messages & Texts";
+  }
+  // Activities & Planning
+  if (categories.some(cat => ['Activities', 'Connection', 'Intimacy', 'Conversation', 'Games'].includes(cat))) {
+    return "Activities & Planning";
+  }
+  // Default to Communication
+  return "Communication";
+};
+
 // --- VIRAL GUIDE BUTTON DATA - Updated for Maximum Impact ---
 const guideButtons = [
   // --- Top Choice Guide ---
@@ -532,6 +604,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-24">
               {guideButtons.map((guide, index) => {
                 const IconComponent = guide.icon;
+                const theme = getThemeForGuide(guide.categories);
+                const themeConfig = themeConfigs[theme];
                 
                 return (
                   <button
@@ -541,6 +615,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                   >
                     {/* Subtle shine effect */}
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
+                    
+                    {/* Theme Label */}
+                    <div className="mb-4">
+                      <span className={`inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-medium ${themeConfig.bgClass} ${themeConfig.textClass} ${themeConfig.borderClass} border backdrop-blur-sm`}>
+                        <span className="mr-1.5">{themeConfig.icon}</span>
+                        {theme}
+                      </span>
+                    </div>
                     
                     {/* Badge System */}
                     <div className="flex justify-between items-start mb-6">

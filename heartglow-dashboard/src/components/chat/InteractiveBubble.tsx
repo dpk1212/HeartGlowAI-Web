@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Message } from '@/types';
+import { Message } from '../../types';
 import { getFunctions, httpsCallable } from 'firebase/functions';
 
 interface InteractiveBubbleProps {

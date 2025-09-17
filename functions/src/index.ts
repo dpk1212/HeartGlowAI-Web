@@ -640,20 +640,15 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - Provide exact words and phrases people can actually say
 
 ## Response Structure:
-Deliver responses in this EXACT interactive format:
+For guide responses, deliver ONLY the core value message. DO NOT include any "click to reveal" text in your response - the system automatically creates interactive bubbles.
 
-**PART 1: Core Value Message**
-Deliver the main solution (exact texts, strategies, actions) in a conversational way. Keep this focused and actionable.
+**Your Response Should Contain:**
+- The main solution (exact texts, strategies, actions) 
+- Keep it focused and actionable
+- Include your follow-up prompts at the end
+- DO NOT mention clicking to reveal anything - this is handled automatically
 
-**PART 2: Interactive Insights Bubble** 
-After the core message, you MUST send this EXACT text as a separate response:
-🧠 Click to reveal why this works
-
-**PART 3: Interactive Action Bubble**
-After the insights bubble, you MUST send this EXACT text as a separate response:
-🎯 Click to reveal your best path forward
-
-This creates an engaging, interactive experience that stands out from other platforms. Users get immediate value, then can dive deeper if they want.
+The system will automatically add interactive bubbles after your response for deeper insights and action plans.
 
 ## MANDATORY: ALWAYS END WITH FOLLOW-UP PROMPTS
 After delivering your core response, ALWAYS end with 2-3 specific follow-up prompts to keep the user engaged. Format as:
@@ -734,6 +729,8 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
 
     // Create interactive follow-up bubbles for guide responses
     if (matchedGuide) {
+      logger.info(`Creating interactive bubbles for guide: ${trimmedMessage}`);
+      
       // Add slight delay for better UX
       await new Promise(resolve => setTimeout(resolve, 1000));
       
@@ -742,13 +739,12 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
         text: "🧠 Click to reveal why this works",
         createdAt: FieldValue.serverTimestamp(),
         role: "assistant",
-        userId: userId,
         isInteractiveBubble: true,
         bubbleType: "insights",
         guideContext: trimmedMessage,
       };
       const savedInsightsBubble = await userMessageRef.add(insightsBubbleData);
-      logger.info(`Insights bubble saved with ID: ${savedInsightsBubble.id}`);
+      logger.info(`Insights bubble created with ID: ${savedInsightsBubble.id}`);
 
       // Add another slight delay
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -757,14 +753,13 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       const actionBubbleData = {
         text: "🎯 Click to reveal your best path forward",
         createdAt: FieldValue.serverTimestamp(),
-        role: "assistant", 
-        userId: userId,
+        role: "assistant",
         isInteractiveBubble: true,
         bubbleType: "actions",
         guideContext: trimmedMessage,
       };
       const savedActionBubble = await userMessageRef.add(actionBubbleData);
-      logger.info(`Action bubble saved with ID: ${savedActionBubble.id}`);
+      logger.info(`Action bubble created with ID: ${savedActionBubble.id}`);
     }
 
     return {success: true, messageId: savedAiMessage.id};

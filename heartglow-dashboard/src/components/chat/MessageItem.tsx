@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { User, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { Message } from '@/types';
+import { Message } from '../../types';
 import { Timestamp } from 'firebase/firestore';
 import InteractiveBubble from './InteractiveBubble';
 

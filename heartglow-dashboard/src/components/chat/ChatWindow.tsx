@@ -295,22 +295,23 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages.length]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-[#161624]">
-      {/* Subtle Background Pattern */}
-      <div className="absolute inset-0 bg-[url('/assets/subtle-pattern.png')] opacity-[0.02] pointer-events-none z-0"></div>
+    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* Premium Background Elements */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02)_0%,transparent_50%)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,rgba(255,255,255,0.01)_180deg,transparent_360deg)] pointer-events-none"></div>
       
-      {/* Subtle Corner Gradients */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-heartglow-pink/5 blur-[100px] rounded-full opacity-50 pointer-events-none"></div>
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-heartglow-violet/5 blur-[100px] rounded-full opacity-50 pointer-events-none"></div>
+      {/* Refined ambient lighting */}
+      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-500/5 via-purple-500/3 to-pink-500/5 rounded-full blur-3xl pointer-events-none"></div>
+      <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-gradient-to-tl from-violet-500/4 via-blue-500/5 to-cyan-500/4 rounded-full blur-3xl pointer-events-none"></div>
       
-      {/* Chat Header */}
-      <div className="sticky top-0 z-20 backdrop-blur-md bg-[#111120]/90 border-b border-[#2A2A40]/30 shadow-sm">
+      {/* Premium Header */}
+      <div className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/80 border-b border-white/10">
         <div className="flex items-center justify-between p-4 relative">
           {/* Mobile Burger Button */}
           <div className="md:hidden">
             <button
               onClick={onToggleMobileSidebar}
-              className="p-2 rounded-full text-gray-400 hover:text-white hover:bg-[#1A1A2E]/70 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 transition-all duration-200"
+              className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
               aria-label="Open sidebar"
             >
               <Bars3Icon className="h-5 w-5" aria-hidden="true" />
@@ -319,9 +320,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           
           {/* Connection Name */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <h3 className="text-base sm:text-lg font-semibold text-white/95">{connection ? (connection.name || 'Chat') : 'HeartGlow AI'}</h3>
+            <h3 className="text-base sm:text-lg font-medium text-white/95">{connection ? (connection.name || 'Chat') : 'HeartGlow AI'}</h3>
             {connection?.relationship && (
-              <p className="text-xs text-gray-400/90 hidden sm:block mt-0.5">
+              <p className="text-xs text-white/50 hidden sm:block mt-0.5">
                 {connection.relationship}
               </p>
             )}
@@ -334,143 +335,90 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
-        // --- Emotionally Rich & Visually Stunning UI ---
-        <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 lg:p-12 text-center overflow-y-auto w-full relative">
-          {/* Dynamic Emotional Background */}
+        // --- Premium Sophisticated Interface ---
+        <ScrollArea className="flex-1 flex flex-col items-center p-6 sm:p-12 lg:p-16 overflow-y-auto w-full relative">
+          {/* Subtle Premium Background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Warm Heart Glow */}
-            <div className="absolute top-1/6 left-1/5 w-[500px] h-[500px] bg-gradient-radial from-rose-500/20 via-pink-500/15 to-transparent rounded-full blur-3xl animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/6 w-[400px] h-[400px] bg-gradient-radial from-violet-500/25 via-purple-500/20 to-transparent rounded-full blur-3xl animate-pulse delay-1000"></div>
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-amber-500/10 via-orange-500/8 to-transparent rounded-full blur-3xl animate-pulse delay-500"></div>
+            {/* Refined gradient orbs */}
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-indigo-500/8 via-purple-500/6 to-pink-500/8 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-to-tl from-violet-500/6 via-blue-500/8 to-cyan-500/6 rounded-full blur-3xl"></div>
             
-            {/* Floating Hearts */}
-            <div className="absolute top-1/4 right-1/3 text-pink-500/20 text-4xl animate-bounce delay-300">💝</div>
-            <div className="absolute bottom-1/3 left-1/4 text-rose-500/20 text-3xl animate-bounce delay-700">💕</div>
-            <div className="absolute top-2/3 right-1/4 text-purple-500/20 text-2xl animate-bounce delay-1000">✨</div>
+            {/* Subtle geometric elements */}
+            <div className="absolute top-1/3 right-1/5 w-px h-32 bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
+            <div className="absolute bottom-1/3 left-1/5 w-px h-24 bg-gradient-to-b from-transparent via-white/8 to-transparent"></div>
           </div>
 
-          {/* Inspiring Headline Section */}
-          <div className="relative z-10 mb-12 max-w-4xl">
-            <div className="relative">
-              {/* Soft glow behind text */}
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-rose-500/20 blur-2xl rounded-full"></div>
-              <h1 className="relative text-3xl sm:text-5xl lg:text-6xl font-black bg-gradient-to-r from-rose-400 via-pink-300 to-purple-400 bg-clip-text text-transparent leading-tight mb-4">
-                Your Heart Knows
-                <br />
-                <span className="text-2xl sm:text-4xl lg:text-5xl font-light italic">We'll Help You Find the Words</span>
+          <div className="w-full max-w-7xl mx-auto relative z-10">
+            {/* Refined Header Section */}
+            <div className="text-center mb-16">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-[1.1] mb-6 tracking-tight">
+                Find the Right Words
+                <span className="block text-3xl sm:text-4xl lg:text-5xl font-light text-white/70 mt-2">
+                  for Every Moment
+                </span>
               </h1>
-              <p className="text-lg sm:text-xl text-slate-300 max-w-2xl mx-auto leading-relaxed opacity-90">
-                Every relationship deserves the perfect words. Choose your path to deeper connection.
+              <p className="text-xl text-white/60 max-w-2xl mx-auto leading-relaxed font-light">
+                Transform difficult conversations into meaningful connections with AI-powered guidance.
               </p>
             </div>
-          </div>
-
-          <div className="w-full mx-auto flex flex-col items-center sm:px-0 relative z-10">
             
-            {/* Emotionally Captivating Guide Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-0 mb-20 w-full max-w-7xl">
+            {/* Premium Guide Cards */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-24">
               {guideButtons.map((guide, index) => {
                 const IconComponent = guide.icon;
-                // Define emotional color schemes for each card
-                const cardStyles = guide.tag === 'top-choice' ? {
-                  gradient: 'from-amber-500/30 via-orange-500/20 to-rose-500/30',
-                  border: 'border-amber-400/50',
-                  shadow: 'shadow-[0_25px_50px_rgba(251,191,36,0.25)]',
-                  iconBg: 'from-amber-400/40 to-orange-500/40',
-                  iconColor: 'text-amber-200',
-                  badge: 'bg-gradient-to-r from-amber-400/30 to-orange-400/30 text-amber-200 border-amber-300/50'
-                } : guide.tag === 'new' ? {
-                  gradient: 'from-emerald-500/30 via-teal-500/20 to-cyan-500/30',
-                  border: 'border-emerald-400/50',
-                  shadow: 'shadow-[0_25px_50px_rgba(16,185,129,0.25)]',
-                  iconBg: 'from-emerald-400/40 to-teal-500/40',
-                  iconColor: 'text-emerald-200',
-                  badge: 'bg-gradient-to-r from-emerald-400/30 to-teal-400/30 text-emerald-200 border-emerald-300/50'
-                } : {
-                  gradient: 'from-rose-500/30 via-pink-500/20 to-purple-500/30',
-                  border: 'border-rose-400/50',
-                  shadow: 'shadow-[0_25px_50px_rgba(244,63,94,0.25)]',
-                  iconBg: 'from-rose-400/40 to-pink-500/40',
-                  iconColor: 'text-rose-200',
-                  badge: ''
-                };
-
+                
                 return (
                   <button
                     key={index}
                     onClick={() => handleGuideClick(guide.firstLine)}
-                    className={`group relative flex flex-col items-center text-center p-8 sm:p-10 rounded-[2rem] 
-                      bg-gradient-to-br ${cardStyles.gradient} backdrop-blur-2xl 
-                      border-2 ${cardStyles.border} ${cardStyles.shadow}
-                      hover:shadow-[0_35px_70px_rgba(0,0,0,0.3)] hover:scale-[1.03] 
-                      hover:-translate-y-2 active:scale-[0.97]
-                      transition-all duration-700 ease-out cursor-pointer 
-                      focus:outline-none focus:ring-4 focus:ring-pink-400/30 focus:ring-offset-2 focus:ring-offset-transparent
-                      transform-gpu will-change-transform overflow-hidden
-                      hover:border-opacity-80 hover:backdrop-blur-3xl`}
-                    style={{
-                      background: `linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 100%), ${guide.tag === 'top-choice' ? 'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(249,115,22,0.1))' : guide.tag === 'new' ? 'linear-gradient(135deg, rgba(16,185,129,0.1), rgba(6,182,212,0.1))' : 'linear-gradient(135deg, rgba(244,63,94,0.1), rgba(168,85,247,0.1))'}`
-                    }}
+                    className="group relative flex flex-col text-left p-8 rounded-2xl bg-white/[0.03] backdrop-blur-xl border border-white/10 hover:border-white/20 hover:bg-white/[0.06] transition-all duration-300 ease-out cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/20 focus:ring-offset-2 focus:ring-offset-transparent hover:shadow-[0_20px_40px_rgba(0,0,0,0.1)] hover:-translate-y-1 transform-gpu will-change-transform overflow-hidden"
                   >
-                    {/* Magical Shimmer Effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1500 ease-out"></div>
+                    {/* Subtle shine effect */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.02] to-transparent -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></div>
                     
-                    {/* Floating Particles Effect */}
-                    <div className="absolute top-6 right-6 w-3 h-3 bg-white/30 rounded-full opacity-0 group-hover:opacity-100 animate-ping"></div>
-                    <div className="absolute bottom-8 left-8 w-2 h-2 bg-pink-400/40 rounded-full opacity-0 group-hover:opacity-100 animate-ping delay-300"></div>
-                    
-                    {/* --- Emotional Badge System --- */}
-                    <div className="w-full flex justify-between items-start mb-6 relative z-10">
+                    {/* Badge System */}
+                    <div className="flex justify-between items-start mb-6">
                       <div>
                         {guide.tag === 'new' && (
-                          <span className={`inline-flex items-center px-4 py-2 rounded-full text-xs font-bold ${cardStyles.badge} backdrop-blur-sm shadow-lg`}>
-                            ✨ New
+                          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            New
                           </span>
                         )}
                       </div>
                       <div>
                         {guide.tag === 'top-choice' && (
-                           <div className={`inline-flex items-center px-4 py-2 rounded-full ${cardStyles.badge} backdrop-blur-sm shadow-lg space-x-2`}> 
-                             <Star className="w-4 h-4 text-amber-300 fill-amber-300 flex-shrink-0" /> 
-                             <span className="text-xs font-bold">Top Choice</span>
+                           <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 space-x-1.5"> 
+                             <Star className="w-3 h-3 text-amber-300 fill-amber-300" /> 
+                             <span className="text-xs font-medium">Popular</span>
                            </div>
                         )}
                       </div>
                     </div>
                     
-                    {/* --- Beautiful Icon Design --- */}
-                    <div className="relative mb-6 group-hover:scale-125 group-hover:rotate-3 transition-all duration-500 ease-out">
-                      <div className={`absolute inset-0 bg-gradient-to-br ${cardStyles.iconBg} rounded-3xl blur-lg opacity-60 group-hover:opacity-100 group-hover:blur-xl transition-all duration-500`}></div>
-                      <div className={`relative w-20 h-20 flex items-center justify-center rounded-3xl bg-gradient-to-br ${cardStyles.iconBg} border border-white/20 backdrop-blur-sm shadow-2xl`}>
-                        <IconComponent className={`w-10 h-10 ${cardStyles.iconColor} group-hover:scale-110 transition-transform duration-300`} strokeWidth={1.5} />
+                    {/* Icon */}
+                    <div className="relative mb-6">
+                      <div className="w-12 h-12 flex items-center justify-center rounded-xl bg-white/10 border border-white/20 backdrop-blur-sm group-hover:bg-white/15 group-hover:scale-105 transition-all duration-300">
+                        <IconComponent className="w-6 h-6 text-white/80 group-hover:text-white transition-colors duration-300" strokeWidth={1.5} />
                       </div>
                     </div>
                     
-                    {/* --- Expressive Typography --- */}
-                    <h3 className="w-full text-lg sm:text-xl font-bold text-white leading-tight mb-4 break-words min-w-0 group-hover:text-white/95 transition-colors duration-300 px-2">
+                    {/* Content */}
+                    <h3 className="text-lg font-semibold text-white/95 leading-tight mb-3 group-hover:text-white transition-colors duration-300">
                       {guide.headline}
                     </h3>
-                    <p className="w-full text-sm sm:text-base text-white/80 break-words min-w-0 group-hover:text-white/90 transition-colors duration-300 leading-relaxed px-2">
+                    <p className="text-sm text-white/60 leading-relaxed group-hover:text-white/70 transition-colors duration-300">
                       {guide.subtext}
                     </p>
-                    
-                    {/* Heartbeat Pulse on Hover */}
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-16 h-1 bg-gradient-to-r from-transparent via-white/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-full"></div>
                   </button>
                 );
               })}
             </div>
 
-            {/* Heartfelt Call to Action */}
-            <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 via-purple-500/20 to-rose-500/20 blur-xl rounded-full group-hover:blur-2xl transition-all duration-500"></div>
-              <div className="relative flex items-center space-x-3 px-8 py-4 rounded-full bg-gradient-to-r from-rose-500/20 via-pink-500/20 to-purple-500/20 backdrop-blur-lg border border-pink-400/30 shadow-lg">
-                <span className="text-2xl animate-pulse">💝</span>
-                <p className="text-lg text-white/90 font-medium">
-                  Ready to find the perfect words? Choose a guide above or start typing below
-                </p>
-                <span className="text-xl animate-bounce delay-500">✨</span>
-              </div>
+            {/* Elegant Call to Action */}
+            <div className="text-center">
+              <p className="text-lg text-white/50 font-light">
+                Choose a guide above or start typing below to begin
+              </p>
             </div>
           </div>
           <ScrollBar orientation="vertical" />
@@ -507,15 +455,14 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       )}
       {/* --- END ADDED --- */}
 
-      {/* --- Message Input Area (Always Visible) --- */}
-      <div className="sticky bottom-0 z-10 pb-3 pt-2 px-3 sm:px-4 bg-gradient-to-t from-[#101018] to-[#161624] border-t border-[#2A2A40]/50">
+      {/* --- Premium Message Input Area --- */}
+      <div className="sticky bottom-0 z-10 p-6 bg-gradient-to-t from-slate-900/95 to-slate-900/80 backdrop-blur-xl border-t border-white/10">
         <MessageInput
           value={inputValue}            
           onChange={handleInputChange}   
           onSend={handleSend}          
           inputRef={inputRef}           
-          // Placeholder now uses a generic message when prompts are shown
-          placeholder={showPrompts ? "Start typing here, or choose a guide above..." : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
+          placeholder={showPrompts ? "Ask me anything or choose a guide above..." : (connection ? `Message ${connection.name}...` : "Message HeartGlow...")}
           disabled={isLoadingMessages}
           isSending={isSendingMessage}  
         />

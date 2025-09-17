@@ -488,17 +488,65 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               })}
             </div>
 
-              {/* Sophisticated Call-to-Action */}
-              <div className="text-center pt-8">
+              {/* Enhanced Engagement Section */}
+              <div className="text-center pt-12">
+                {/* Conversation starters */}
+                <div className="mb-8">
+                  <h3 className="text-lg font-semibold text-white/90 mb-4">
+                    💬 Quick Start Conversations
+                  </h3>
+                  <div className="flex flex-wrap justify-center gap-3 max-w-4xl mx-auto">
+                    {[
+                      "I need help saying something difficult",
+                      "How can I improve my relationship?",
+                      "I'm feeling confused about someone",
+                      "Help me understand my emotions",
+                      "I want to reconnect with someone"
+                    ].map((starter, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          onSelectConnection('heartglow-ai');
+                          onStartGuide(starter);
+                        }}
+                        className="group px-4 py-2.5 rounded-xl bg-white/[0.03] hover:bg-white/[0.08] border border-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                      >
+                        <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors duration-200">
+                          {starter}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Sophisticated Call-to-Action */}
                 <div className="relative inline-block">
                   <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-purple-500/20 blur-xl rounded-full"></div>
                   <div className="relative px-8 py-4 rounded-full bg-gradient-to-r from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-white/10">
                     <p className="text-lg text-white/80 font-medium">
-                      Ready to transform your conversations?
+                      ✨ Ready to transform your conversations?
                     </p>
                     <p className="text-sm text-white/50 mt-1">
-                      Choose a guide above or start typing below
+                      Choose a guide above, try a quick starter, or type anything below
                     </p>
+                  </div>
+                </div>
+                
+                {/* Trust indicators */}
+                <div className="flex items-center justify-center space-x-6 mt-8 text-white/40 text-xs">
+                  <div className="flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full"></div>
+                    <span>Private & Secure</span>
+                  </div>
+                  <div className="w-px h-3 bg-white/20"></div>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 bg-violet-400 rounded-full"></div>
+                    <span>AI-Powered Insights</span>
+                  </div>
+                  <div className="w-px h-3 bg-white/20"></div>
+                  <div className="flex items-center space-x-1">
+                    <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full"></div>
+                    <span>Always Here to Help</span>
                   </div>
                 </div>
               </div>
@@ -517,10 +565,38 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               <MessageItem key={message.id} message={message} />
             ))}
             {isSendingMessage && (
-              <div className="flex justify-start pr-8 sm:pr-16">
-                {/* AI thinking indicator */}
-                <div className="mr-3 flex-shrink-0 mb-1"><div className="h-8 w-8 rounded-full bg-gradient-to-br from-heartglow-pink to-heartglow-violet flex items-center justify-center text-white"><Sparkles className="w-4 h-4 animate-pulse" /></div></div>
-                <div className="flex flex-col max-w-[80%] items-start"><div className="px-4 py-2.5 rounded-2xl shadow-md bg-gradient-to-br from-[#2A2A45]/95 to-[#1F1F35]/95 text-gray-100 rounded-bl-sm border border-[#3A3A5C]/20"><p className="text-sm italic blinking-cursor">Thinking…</p></div></div>
+              <div className="flex justify-start pr-4 sm:pr-8">
+                {/* Enhanced AI thinking indicator */}
+                <div className="mr-3 flex-shrink-0 mb-1">
+                  <div className="relative">
+                    <div className="h-10 w-10 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center text-white shadow-lg ring-2 ring-emerald-400/30">
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12 animate-pulse rounded-full"></div>
+                      <Sparkles className="w-5 h-5 animate-pulse relative z-10" />
+                    </div>
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-slate-900 animate-pulse"></div>
+                  </div>
+                </div>
+                <div className="flex flex-col max-w-[85%] items-start">
+                  <div className="relative px-5 py-4 rounded-2xl shadow-lg bg-gradient-to-br from-slate-800/90 via-slate-700/90 to-slate-800/90 text-white rounded-bl-md border border-white/10 backdrop-blur-xl overflow-hidden">
+                    {/* Animated thinking gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 via-teal-500/20 to-cyan-500/10 animate-pulse"></div>
+                    
+                    <div className="relative z-10 flex items-center space-x-3">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-emerald-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-teal-400 rounded-full animate-bounce delay-100"></div>
+                        <div className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce delay-200"></div>
+                      </div>
+                      <p className="text-sm font-medium text-emerald-200">HeartGlow is thinking deeply...</p>
+                    </div>
+                  </div>
+                  
+                  {/* Status indicator */}
+                  <div className="flex items-center mt-2 opacity-80">
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-400"></div>
+                    <p className="text-xs font-medium text-white/60 ml-1.5">Analyzing your situation</p>
+                  </div>
+                </div>
               </div>
             )}
             {/* Scroll anchor for auto-scroll */}

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState, useCallback, ChangeEvent } from 're
 // Import sub-components
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
+import GuideTransition from '../ui/GuideTransition';
 import { Bars3Icon } from '@heroicons/react/24/outline'; // Removed unused icons
 // Assuming types are defined in a central place, adjust path if needed
 import type { Connection, Message } from '@/types';
@@ -319,6 +320,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 }) => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showPrompts, setShowPrompts] = useState(true); // Initial state assumption
+  const [showGuideTransition, setShowGuideTransition] = useState(false);
+  const [transitionGuideTitle, setTransitionGuideTitle] = useState('');
+  const [pendingGuideText, setPendingGuideText] = useState('');
 
   // --- State & Logic moved back to ChatWindow scope --- 
   const [inputValue, setInputValue] = useState("");
@@ -382,16 +386,29 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
     prevShowPromptsRef.current = showPrompts;
   }, [showPrompts]);
 
-  // --- REVISED: Handle clicking a guide button with IMMEDIATE Paywall Logic ---
+  // --- REVISED: Handle clicking a guide button with transition animation ---
   const handleGuideClick = (promptText: string) => {
     // Only trigger AI guide, never send a user message!
     if (!userProfile || authLoading) { 
       console.warn("[ChatWindow] User profile not loaded yet or auth still loading.");
       return; 
     }
-    // Removed anonymous user redirect - allow all users to click guides
+
+    // Find the guide title for the transition
+    const clickedGuide = guideButtons.find(guide => guide.firstLine === promptText);
+    const guideTitle = clickedGuide ? clickedGuide.headline : 'Your Guide';
+
+    // Start transition animation
+    setTransitionGuideTitle(guideTitle);
+    setPendingGuideText(promptText);
+    setShowGuideTransition(true);
+  };
+
+  // Handle transition completion
+  const handleTransitionComplete = () => {
+    setShowGuideTransition(false);
     onSelectConnection('heartglow-ai');
-    onStartGuide(promptText); // Only trigger AI response
+    onStartGuide(pendingGuideText); // Only trigger AI response
     guideClickedRef.current = true;
   };
   // --- END REVISED handleGuideClick ---
@@ -800,6 +817,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           isSending={isSendingMessage}  
         />
       </div>
+
+      {/* Guide Transition Animation */}
+      <GuideTransition
+        isVisible={showGuideTransition}
+        guideTitle={transitionGuideTitle}
+        onComplete={handleTransitionComplete}
+      />
     </div>
   );
 };

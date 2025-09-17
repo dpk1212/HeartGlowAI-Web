@@ -217,6 +217,12 @@ B-, etc.) and 3 specific insights about its effectiveness.
 }`;
 }
 
+interface RevealBubbleRequestData {
+  bubbleType: 'insights' | 'actions';
+  guideContext: string;
+  messageId: string;
+}
+
 // --- Exported Cloud Functions ---
 
 export const generateMessageInsights = onCall({
@@ -348,6 +354,84 @@ export const stripeWebhook = onRequest(async (request, response) => {
     }
   }
   response.status(200).send("Received");
+});
+
+// --- NEW: Handle Interactive Bubble Clicks ---
+export const revealBubbleContent = onCall({
+  timeoutSeconds: 60,
+  secrets: ["OPENAI_API_KEY"],
+}, async (request: CallableRequest<RevealBubbleRequestData>) => {
+  if (!request.auth) {
+    throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
+  }
+  
+  const userId = request.auth.uid;
+  const { bubbleType, guideContext, messageId } = request.data;
+  
+  logger.info(`revealBubbleContent called - userId: ${userId}, bubbleType: ${bubbleType}, guideContext: ${guideContext}`);
+  
+  if (!bubbleType || !guideContext || !messageId) {
+    throw new HttpsError("invalid-argument", "Missing required parameters.");
+  }
+  
+  const firestore = getFirestore();
+  const userMessageRef = firestore.collection("users").doc(userId).collection("messages");
+  
+  try {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new HttpsError("internal", "API key not configured.");
+    }
+    const openai = new OpenAI({ apiKey });
+    
+    // Get the guide info for context
+    const guideInfo = guideData[guideContext];
+    if (!guideInfo) {
+      throw new HttpsError("not-found", "Guide context not found.");
+    }
+    
+    let contentPrompt = "";
+    if (bubbleType === "insights") {
+      contentPrompt = `Based on the guide "${guideContext}", provide detailed psychological insights about why the solution works. Explain the relationship dynamics, communication principles, and psychology behind the advice. Keep it engaging and educational. 2-3 paragraphs max.`;
+    } else if (bubbleType === "actions") {
+      contentPrompt = `Based on the guide "${guideContext}", provide a clear action plan with 3-4 specific next steps they can take. Include timing, context, and implementation details. Make it practical and actionable. 2-3 paragraphs max.`;
+    }
+    
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4-turbo",
+      messages: [
+        {
+          role: "system", 
+          content: "You are Dr. Elena Vasquez. Provide clear, insightful content that adds value beyond the initial solution. Be conversational and helpful."
+        },
+        {
+          role: "user",
+          content: contentPrompt
+        }
+      ],
+      temperature: 0.7,
+      max_tokens: 400,
+    });
+    
+    const revealedContent = completion.choices[0]?.message?.content?.trim();
+    if (!revealedContent) {
+      throw new HttpsError("internal", "Failed to generate content.");
+    }
+    
+    // Update the original bubble message with the revealed content
+    await userMessageRef.doc(messageId).update({
+      text: revealedContent,
+      isRevealed: true,
+      revealedAt: FieldValue.serverTimestamp(),
+    });
+    
+    logger.info(`Bubble content revealed for message ID: ${messageId}`);
+    return { success: true, content: revealedContent };
+    
+  } catch (error) {
+    logger.error("Error in revealBubbleContent:", error);
+    throw new HttpsError("internal", "Failed to reveal content.");
+  }
 });
 
 // --- UPDATED handleChatMessage Function ---
@@ -556,18 +640,20 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - Provide exact words and phrases people can actually say
 
 ## Response Structure:
-Deliver maximum impact with this exact format:
+Deliver responses in this EXACT interactive format:
 
-### IMMEDIATE SOLUTION
-Start with the exact solution they need - copy-paste texts, step-by-step actions, or specific strategies they can use right now.
+**PART 1: Core Value Message**
+Deliver the main solution (exact texts, strategies, actions) in a conversational way. Keep this focused and actionable.
 
-### WHY THIS WORKS
-Explain the psychology, relationship dynamics, or communication principles that make this solution effective. Give them the insights that back up your advice.
+**PART 2: Interactive Insights Bubble** 
+After the core message, you MUST send this EXACT text as a separate response:
+🧠 Click to reveal why this works
 
-### NEXT STEPS
-Provide 2-3 specific actions they can take to implement this immediately.
+**PART 3: Interactive Action Bubble**
+After the insights bubble, you MUST send this EXACT text as a separate response:
+🎯 Click to reveal your best path forward
 
-CRITICAL: Lead with the solution first, then explain why it works. This keeps users engaged and provides maximum value upfront.
+This creates an engaging, interactive experience that stands out from other platforms. Users get immediate value, then can dive deeper if they want.
 
 ## MANDATORY: ALWAYS END WITH FOLLOW-UP PROMPTS
 After delivering your core response, ALWAYS end with 2-3 specific follow-up prompts to keep the user engaged. Format as:
@@ -636,9 +722,46 @@ NEVER use generic prompts like "anything else?" Always make them contextual and 
       role: "assistant",
       modelUsed: completion.model,
       finishReason: completion.choices[0]?.finish_reason,
+      guideContext: matchedGuide ? trimmedMessage : undefined,
+      isGuideResponse: !!matchedGuide,
     };
     const savedAiMessage = await userMessageRef.add(aiResponseData);
     logger.info(`AI response saved with ID: ${savedAiMessage.id}`);
+
+    // Create interactive follow-up bubbles for guide responses
+    if (matchedGuide) {
+      // Add slight delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Interactive insights bubble
+      const insightsBubbleData = {
+        text: "🧠 Click to reveal why this works",
+        createdAt: FieldValue.serverTimestamp(),
+        role: "assistant",
+        userId: userId,
+        isInteractiveBubble: true,
+        bubbleType: "insights",
+        guideContext: trimmedMessage,
+      };
+      const savedInsightsBubble = await userMessageRef.add(insightsBubbleData);
+      logger.info(`Insights bubble saved with ID: ${savedInsightsBubble.id}`);
+
+      // Add another slight delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Interactive action bubble  
+      const actionBubbleData = {
+        text: "🎯 Click to reveal your best path forward",
+        createdAt: FieldValue.serverTimestamp(),
+        role: "assistant", 
+        userId: userId,
+        isInteractiveBubble: true,
+        bubbleType: "actions",
+        guideContext: trimmedMessage,
+      };
+      const savedActionBubble = await userMessageRef.add(actionBubbleData);
+      logger.info(`Action bubble saved with ID: ${savedActionBubble.id}`);
+    }
 
     return {success: true, messageId: savedAiMessage.id};
   } catch (error) {

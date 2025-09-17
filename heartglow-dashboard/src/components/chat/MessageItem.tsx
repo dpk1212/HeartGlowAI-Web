@@ -6,6 +6,7 @@ import { User, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Message } from '@/types';
 import { Timestamp } from 'firebase/firestore';
+import InteractiveBubble from './InteractiveBubble';
 
 interface MessageItemProps {
   message: Message;
@@ -13,6 +14,30 @@ interface MessageItemProps {
 
 const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
   const isUser = message.role === 'user';
+  
+  // Handle interactive bubbles
+  if (message.isInteractiveBubble && !isUser) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="flex justify-start pr-4 sm:pr-8"
+      >
+        <div className="mr-3 flex-shrink-0 mb-1">
+          <div className="relative">
+            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-500 via-purple-500 to-pink-500 flex items-center justify-center text-white shadow-lg ring-2 ring-violet-400/30">
+              <Sparkles className="w-5 h-5 relative z-10" />
+            </div>
+            <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-purple-400 rounded-full border-2 border-slate-900"></div>
+          </div>
+        </div>
+        <div className="flex flex-col max-w-[85%] items-start">
+          <InteractiveBubble message={message} />
+        </div>
+      </motion.div>
+    );
+  }
 
   // Timestamp formatting - using createdAt
   let formattedTimestamp = '';

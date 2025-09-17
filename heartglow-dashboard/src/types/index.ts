@@ -26,5 +26,10 @@ export interface Message {
   isGuideResponse?: boolean;
   modelUsed?: string;
   finishReason?: string;
+  // Interactive bubble properties
+  isInteractiveBubble?: boolean;
+  bubbleType?: 'insights' | 'actions';
+  isRevealed?: boolean;
+  revealedAt?: Timestamp;
   // Add other relevant fields if needed (e.g., analysis results, reactions)
 } 

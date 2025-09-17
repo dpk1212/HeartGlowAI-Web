@@ -301,31 +301,56 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_100%,rgba(147,51,234,0.03),transparent)] pointer-events-none"></div>
       
       {/* Premium Header */}
-      <div className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/80 border-b border-white/10">
-        <div className="flex items-center justify-between p-4 relative">
+      <div className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/90 border-b border-white/10 relative">
+        {/* Subtle header glow */}
+        <div className="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-transparent to-purple-500/5 pointer-events-none"></div>
+        
+        <div className="flex items-center justify-between p-4 relative z-10">
           {/* Mobile Burger Button */}
           <div className="md:hidden">
             <button
               onClick={onToggleMobileSidebar}
-              className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
+              className="group p-2.5 rounded-xl text-white/60 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-violet-400/30 transition-all duration-200 border border-white/5 hover:border-white/20"
               aria-label="Open sidebar"
             >
-              <Bars3Icon className="h-5 w-5" aria-hidden="true" />
+              <Bars3Icon className="h-5 w-5 group-hover:scale-110 transition-transform duration-200" aria-hidden="true" />
             </button>
           </div>
           
-          {/* Connection Name */}
+          {/* Enhanced Connection Info */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <h3 className="text-base sm:text-lg font-medium text-white/95">{connection ? (connection.name || 'Chat') : 'HeartGlow AI'}</h3>
-            {connection?.relationship && (
-              <p className="text-xs text-white/50 hidden sm:block mt-0.5">
-                {connection.relationship}
-              </p>
-            )}
+            <div className="flex items-center justify-center space-x-3">
+              {/* Connection Avatar/Icon */}
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
+                <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center">
+                  <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
+                </div>
+              </div>
+              
+              <div>
+                <h3 className="text-base sm:text-lg font-semibold text-white/95 tracking-tight">
+                  {connection ? (connection.name || 'Chat') : 'HeartGlow AI'}
+                </h3>
+                {connection?.relationship && (
+                  <p className="text-xs text-white/60 hidden sm:block mt-0.5 font-medium">
+                    {connection.relationship}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
           
-          {/* Right Spacer */}
-          <div className="w-8 h-8 md:hidden"></div>
+          {/* Status Indicator / Right Content */}
+          <div className="flex items-center space-x-2">
+            {/* Online status indicator */}
+            <div className="hidden sm:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-white/5 border border-white/10">
+              <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+              <span className="text-xs text-white/70 font-medium">Online</span>
+            </div>
+            
+            {/* Mobile spacer for visual balance */}
+            <div className="w-8 h-8 md:hidden"></div>
+          </div>
         </div>
       </div>
 

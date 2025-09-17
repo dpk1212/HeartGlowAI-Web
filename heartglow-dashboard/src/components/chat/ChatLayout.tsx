@@ -88,35 +88,49 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
   };
 
   return (
-    <div className="relative flex h-full overflow-hidden bg-gradient-to-b from-[#0E0E1A] to-[#14141F] text-white font-sans">
-        {/* --- Mobile Sidebar (Fixed, Sliding) --- */}
+    <div className="relative flex h-full overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-white font-sans">
+        {/* --- Premium Mobile Sidebar (Fixed, Sliding) --- */}
         <div
           className={`
             fixed inset-y-0 left-0 z-40
-            flex flex-col w-72 max-w-[85%] flex-shrink-0
-            bg-gradient-to-b from-[#1A1A2E]/95 to-[#12121E]/95 backdrop-blur-md
-            rounded-r-xl shadow-2xl border-r border-[#2A2A40]/30
+            flex flex-col w-80 max-w-[85%] flex-shrink-0
+            bg-gradient-to-b from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl
+            border-r border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)]
             transition-all duration-300 ease-out transform
             ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            md:hidden p-5
+            md:hidden
           `}
           role="dialog"
           aria-modal="true"
           aria-labelledby="mobile-sidebar-title"
         >
-          {/* Header */}
-          <div className="flex items-center justify-between mb-6">
-            <h1 id="mobile-sidebar-title" className="text-2xl font-bold bg-gradient-to-r from-heartglow-pink to-heartglow-violet bg-clip-text text-transparent">HeartGlow</h1>
+          {/* Premium Header */}
+          <div className="flex items-center justify-between p-6 border-b border-white/10">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="w-6 h-6 rounded-lg bg-white/20 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-white rounded-full"></div>
+                </div>
+              </div>
+              <div>
+                <h1 id="mobile-sidebar-title" className="text-xl font-bold bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">HeartGlow</h1>
+                <p className="text-xs text-white/60">Relationship Intelligence</p>
+              </div>
+            </div>
             <button
               onClick={closeMobileSidebar}
-              className="p-1.5 rounded-full text-gray-400 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 transition-all duration-200"
+              className="p-2 rounded-lg text-white/60 hover:text-white hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200"
               aria-label="Close sidebar"
             >
               <XMarkIcon className="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
           {/* Connections Section */}
-          <h2 className="text-base font-medium mb-4 text-gray-200 flex-shrink-0 px-1">Your Connections</h2>
+          <div className="p-6 pb-4">
+            <h2 className="text-sm font-semibold text-white/90 mb-6 tracking-wide flex items-center">
+              <div className="w-2 h-2 bg-violet-400 rounded-full mr-3"></div>
+              Your Connections
+            </h2>
           {isLoadingConnections ? (
              <div className="flex-grow flex items-center justify-center">
                <div className="animate-spin h-6 w-6 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
@@ -133,17 +147,20 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
                 }}
               />
             </ScrollArea>
+          </div>
           )}
-          <Button 
-            variant="default"
-            className="mt-5 w-full flex-shrink-0 bg-gradient-to-r from-heartglow-pink to-heartglow-violet hover:opacity-90 shadow-md hover:shadow-lg transition-all duration-200 border border-white/5"
-            onClick={() => {
-              handleNewConnectionClick(); 
-              closeMobileSidebar();
-            }}
-          >
-            <PlusIcon className="h-4 w-4 mr-2" /> New Connection
-          </Button>
+          <div className="p-6 pt-0">
+            <Button 
+              variant="default"
+              className="w-full flex-shrink-0 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-12 rounded-xl font-medium"
+              onClick={() => {
+                handleNewConnectionClick(); 
+                closeMobileSidebar();
+              }}
+            >
+              <PlusIcon className="h-5 w-5 mr-2" /> New Connection
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Overlay */}
@@ -155,31 +172,57 @@ const ChatLayout: React.FC<ChatLayoutProps> = ({
           />
         )}
 
-        {/* --- Desktop Sidebar (Static/Relative) --- */}
-        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink0 bg-gradient-to-b from-[#181828] to-[#10101A] backdrop-blur-md p-4 border-r border-[#2A2A40]/30">
-          <Button 
-            variant="outline"
-            className="mb-5 w-full font-medium border-[#2A2A40] bg-[#1A1A2E]/70 hover:bg-[#1A1A2E] hover:border-heartglow-pink/30 text-gray-200 transition-all duration-200"
-            onClick={handleNewConnectionClick}
-          >
-            <PlusIcon className="h-4 w-4 mr-2" /> New Connection
-          </Button>
-          {/* Connections Section */}
-          <h2 className="text-sm uppercase font-medium tracking-wider text-gray-400 mb-3 px-2">Your Connections</h2>
-          <ScrollArea className="flex-grow overflow-y-auto pr-1">
-            {isLoadingConnections ? (
-              <div className="flex h-full items-center justify-center py-8">
-                <div className="animate-spin h-5 w-5 border-2 border-heartglow-pink border-t-transparent rounded-full"></div>
-                <p className="ml-3 text-gray-400 text-sm">Loading connections...</p>
+        {/* --- Premium Desktop Sidebar --- */}
+        <div className="hidden md:flex md:flex-col md:w-80 md:flex-shrink-0 bg-gradient-to-b from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-xl border-r border-white/10 relative">
+          {/* Sophisticated Background Elements */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(120,119,198,0.05),transparent_50%)] pointer-events-none"></div>
+          <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.02)_0%,transparent_50%)] pointer-events-none"></div>
+          
+          {/* Premium Header */}
+          <div className="relative z-10 p-6 border-b border-white/10">
+            <div className="flex items-center space-x-3 mb-6">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
+                  <div className="w-4 h-4 bg-white rounded-full"></div>
+                </div>
               </div>
-            ) : (
-              <ConnectionList
-                connections={allConnections}
-                selectedConnectionId={selectedConnectionId}
-                onSelect={onSelectConnection}
-              />
-            )}
-          </ScrollArea>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">HeartGlow</h1>
+                <p className="text-xs text-white/60">Relationship Intelligence</p>
+              </div>
+            </div>
+            
+            <Button 
+              variant="default"
+              className="w-full bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white shadow-lg hover:shadow-xl transition-all duration-200 border-0 h-12 rounded-xl font-medium"
+              onClick={handleNewConnectionClick}
+            >
+              <PlusIcon className="h-5 w-5 mr-2" /> New Connection
+            </Button>
+          </div>
+          
+          {/* Connections Section */}
+          <div className="relative z-10 flex-1 p-6">
+            <h2 className="text-sm font-semibold text-white/90 mb-6 tracking-wide flex items-center">
+              <div className="w-2 h-2 bg-violet-400 rounded-full mr-3"></div>
+              Your Connections
+            </h2>
+            
+            <ScrollArea className="flex-grow overflow-y-auto pr-1">
+              {isLoadingConnections ? (
+                <div className="flex h-full items-center justify-center py-8">
+                  <div className="animate-spin h-5 w-5 border-2 border-violet-400 border-t-transparent rounded-full"></div>
+                  <p className="ml-3 text-white/60 text-sm">Loading connections...</p>
+                </div>
+              ) : (
+                <ConnectionList
+                  connections={allConnections}
+                  selectedConnectionId={selectedConnectionId}
+                  onSelect={onSelectConnection}
+                />
+              )}
+            </ScrollArea>
+          </div>
         </div>
 
         {/* --- Main Content Area (ChatWindow) --- */}

@@ -113,6 +113,11 @@ const guideData: Record<string, GuideInfo> = {
     miniPrompt: "Who do you miss, and what's making it hard to reach out — fear of seeming needy, or something else?",
     systemPromptSnippet: "The user wants to express missing someone without appearing needy. Focus on confident vulnerability, expressing feelings clearly while maintaining dignity and not putting pressure on the other person.",
   },
+  "Your value isn't up for debate. Let's look for the signs that show others truly see it too.": {
+    acknowledgment: "Your worth is inherent. Let's help you recognize the real signs of appreciation and value.",
+    miniPrompt: "Tell me about a relationship where you're unsure if you're truly valued — what makes you question it?",
+    systemPromptSnippet: "The user wants to understand if someone values them. Focus on helping them identify genuine signs of appreciation versus superficial gestures, and building their confidence in recognizing their worth.",
+  },
 };
 // --- End Guide Data ---
 

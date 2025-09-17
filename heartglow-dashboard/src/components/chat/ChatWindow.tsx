@@ -137,9 +137,7 @@ const guideButtons = [
   },
 ];
 
-// --- Add toggles for Free/Premium and Category ---
-const premiumOptions = ["Free", "Premium"];
-const categoryOptions = ["All", "Get Them Back", "Argument", "Attachment Style", "Apologies"];
+// Removed filter options since we simplified the layout
 
 interface ChatWindowProps {
   connection: Connection | undefined; // The currently selected connection
@@ -179,9 +177,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   const messageCountRef = useRef(messages.length); // Track previous message count
   // Track previous value of showPrompts to detect transition
   const prevShowPromptsRef = useRef(showPrompts);
-  // Move toggles state inside component
-  const [selectedPremium, setSelectedPremium] = useState("Free");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  // Removed toggle state variables since we removed the filter buttons
   // Track if a guide was just clicked
   const guideClickedRef = useRef(false);
   // --- END ADDED HOOKS/STATE ---
@@ -238,10 +234,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
       console.warn("[ChatWindow] User profile not loaded yet or auth still loading.");
       return; 
     }
-    if (currentUser?.isAnonymous) {
-      router.push('/login?reason=guide_access&mode=signup');
-      return;
-    }
+    // Removed anonymous user redirect - allow all users to click guides
     onSelectConnection('heartglow-ai');
     onStartGuide(promptText); // Only trigger AI response
     guideClickedRef.current = true;
@@ -291,13 +284,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   };
   // --- END MODIFIED ---
 
-  // Filter guides based on toggles
-  const filteredGuides = guideButtons.filter(guide => {
-    if (selectedPremium === "Free" && guide.isPremium) return false;
-    if (selectedPremium === "Premium" && !guide.isPremium) return false;
-    if (selectedCategory !== "All" && !guide.categories.includes(selectedCategory)) return false;
-    return true;
-  });
+  // Show all guides since we removed filters
 
   // --- Scroll anchor for robust scroll-to-bottom ---
   const scrollAnchorRef = useRef<HTMLDivElement | null>(null);
@@ -347,51 +334,15 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
-        // --- NEW Empty State UI ---
+        // --- Simplified Empty State UI - Just Cards ---
         <ScrollArea className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 lg:p-12 text-center overflow-y-auto w-full">
           <div className="w-full mx-auto flex flex-col items-center sm:px-0">
-            {/* Main Headline */}
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold text-white/95 leading-tight max-w-xs sm:max-w-md md:max-w-2xl mb-2 sm:mb-4 break-words">
-              When your emotions feel tangled, we help you find the words—and the way forward.
-            </h1>
-            {/* Subheadline */}
-            <p className="mb-4 sm:mb-6 text-base sm:text-lg text-gray-400/90 max-w-xs sm:max-w-md md:max-w-xl break-words">
-              Private, encrypted, and emotionally intelligent — HeartGlow turns emotional confusion into clear, confident action.
-            </p>
+            
+            {/* Removed: Main Headline, Subheadline, and Toggle Menus */}
 
-            {/* Toggle Menus - Improved Styling & Mobile */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-6 mb-6 w-full max-w-md md:max-w-2xl items-center justify-center">
-              {/* Free/Premium Toggle */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto">
-                {premiumOptions.map(option => (
-                  <button
-                    key={option}
-                    onClick={() => setSelectedPremium(option)}
-                    className={`flex-1 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedPremium === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'}`}
-                    disabled={option === 'Premium'}
-                  >
-                    {option}
-                    {option === 'Premium' && <span className="ml-1 sm:ml-2 text-xs">🔒</span>}
-                  </button>
-                ))}
-              </div>
-              {/* Category Toggle - Horizontal scroll on mobile */}
-              <div className="flex gap-1 bg-[#23233a] rounded-2xl p-1 shadow-inner w-full sm:w-auto overflow-x-auto scrollbar-hide snap-x pr-3 sm:pr-2">
-                {categoryOptions.map(option => (
-                  <button
-                    key={option}
-                    onClick={() => setSelectedCategory(option)}
-                    className={`flex-shrink-0 px-3 py-2 sm:px-5 sm:py-2.5 rounded-xl font-semibold text-sm sm:text-base transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-heartglow-pink/40 ${selectedCategory === option ? 'bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-transparent text-purple-200/80 hover:bg-white/10'} snap-center`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* New Button Grid with Enhancements (Tooltip Removed) */}
+            {/* Guide Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 mb-16 w-full">
-              {filteredGuides.map((guide, index) => {
+              {guideButtons.map((guide, index) => {
                 const IconComponent = guide.icon;
                 return (
                   <button

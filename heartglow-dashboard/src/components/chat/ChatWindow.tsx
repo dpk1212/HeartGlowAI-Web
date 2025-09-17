@@ -402,7 +402,16 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
           
           {/* Enhanced Connection Info */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
-            <div className="flex items-center justify-center space-x-3">
+            <div 
+              className={`flex items-center justify-center space-x-3 ${
+                !connection ? 'cursor-pointer hover:opacity-80 transition-opacity duration-200' : ''
+              }`}
+              onClick={() => {
+                if (!connection) {
+                  window.location.href = '/';
+                }
+              }}
+            >
               {/* Connection Avatar/Icon */}
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-md">
                 <div className="w-5 h-5 rounded-md bg-white/20 flex items-center justify-center">
@@ -475,17 +484,17 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               {/* Hero Headlines */}
               <div className="text-center mb-12">
                 <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[0.9] mb-8 tracking-tight">
-                  Find the
+                  Never wonder
                   <span className="block bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-                    Perfect Words
+                    what to say
                   </span>
                   <span className="block text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal text-white/80 mt-4">
-                    for Any Moment
+                    ever again
                   </span>
                 </h1>
                 
                 <p className="text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed font-light mb-8">
-                  Transform difficult conversations into meaningful connections. Get personalized guidance for every relationship challenge.
+                  Get instant, copy-paste solutions for every relationship challenge. From awkward texts to perfect first date ideas — we've got the exact words you need.
                 </p>
 
                 {/* Social Proof */}

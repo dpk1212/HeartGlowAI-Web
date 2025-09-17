@@ -31,7 +31,7 @@ const HeroSection = () => {
           transition={{ delay: 0.1, duration: 0.5 }}
           className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4 text-heartglow-charcoal dark:text-heartglow-offwhite leading-tight"
         >
-          Say what matters. <span className="text-heartglow-pink">Gently.</span>
+          Get the <span className="text-heartglow-pink">exact words</span> for any relationship moment
         </motion.h1>
         
         <motion.p 
@@ -40,8 +40,7 @@ const HeroSection = () => {
           transition={{ delay: 0.2, duration: 0.5 }}
           className="text-gray-600 dark:text-gray-300 mb-8 text-lg max-w-xl mx-auto"
         >
-          Craft AI-powered messages for tough conversations. Reconnect, apologize, or open up
-          — without overthinking it.
+          From "they left me on read" to planning the perfect date — get instant, copy-paste solutions that actually work. No more staring at your phone wondering what to say.
         </motion.p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -82,9 +81,20 @@ const HeroSection = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3, duration: 0.5 }}
-          className="mt-6 text-sm text-gray-500 dark:text-gray-400"
+          className="mt-6 text-sm text-gray-500 dark:text-gray-400 flex items-center justify-center space-x-6"
         >
-          Be authentic. Be thoughtful. Be yourself.
+          <span className="flex items-center">
+            <span className="text-emerald-500 mr-1">✓</span>
+            Copy-paste ready
+          </span>
+          <span className="flex items-center">
+            <span className="text-emerald-500 mr-1">✓</span>
+            Instant results
+          </span>
+          <span className="flex items-center">
+            <span className="text-emerald-500 mr-1">✓</span>
+            Actually works
+          </span>
         </motion.div>
         
         <motion.div
@@ -93,7 +103,7 @@ const HeroSection = () => {
           transition={{ delay: 0.4, duration: 0.5 }}
           className="mt-4 text-sm text-gray-500 dark:text-gray-400 font-light"
         >
-          Not sure what to say? Try a message template below ⬇️
+          Choose your situation below and get the perfect response in seconds ⬇️
         </motion.div>
       </div>
     </motion.div>

@@ -561,7 +561,27 @@ Write naturally in paragraphs following this flow:
 3. **Action**: Give 2-3 specific, actionable steps they can take immediately
 4. **Empower**: Explain why this approach works and encourage them to try it
 
-CRITICAL: Focus on giving concrete, actionable advice over asking questions. Users want solutions they can implement today, not more questions to think about.`;
+CRITICAL: Focus on giving concrete, actionable advice over asking questions. Users want solutions they can implement today, not more questions to think about.
+
+## MANDATORY: ALWAYS END WITH FOLLOW-UP PROMPTS
+After delivering your core response, ALWAYS end with 2-3 specific follow-up prompts to keep the user engaged. Format as:
+
+---
+
+**What's next? I can help you:**
+• [Specific action 1 based on their situation]
+• [Specific action 2 based on their situation] 
+• [Specific action 3 based on their situation]
+
+Make follow-ups SPECIFIC to their exact situation, not generic. Examples:
+- "Want me to help you practice this conversation?"
+- "Need me to draft a follow-up message for tomorrow?"
+- "Should we brainstorm what to do if they respond differently?"
+- "Want to work on your confidence before sending this?"
+- "Need help timing when to send this message?"
+- "Should we plan what to say if they ask follow-up questions?"
+
+NEVER use generic prompts like "anything else?" Always make them contextual and actionable.`;
     if (!isGeneralChat && connectionData) {
       systemPrompt += `\n\n## Conversation Context:`;
       if (connectionData.name) systemPrompt += `\n- Talking about: ${connectionData.name}`;

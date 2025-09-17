@@ -74,49 +74,49 @@ interface GuideInfo {
 
 const guideData: Record<string, GuideInfo> = {
   "It's never too late to reach for connection. Let's find your opening line together.": {
-    acknowledgment: "Reaching out takes courage. It shows you still care.",
-    miniPrompt: "Briefly tell me: who are you feeling distance from, and why does it matter to you?",
-    systemPromptSnippet: "The user is trying to rebuild a connection. Focus on empathy, gentle opening lines, and acknowledging the difficulty of bridging distance.",
+    acknowledgment: "I can feel how much this person means to you. Reaching out after distance takes real courage, and it says everything about your heart.",
+    miniPrompt: "Help me understand the story here - who are you hoping to reconnect with, and what's been creating this distance between you? Even just a few details will help me guide you to exactly the right words.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Rebuilding Lost Connections. This person is trying to bridge distance with someone important. Your expertise in attachment patterns and reconnection is crucial here. Help them understand that most relationship distance comes from unmet needs or misunderstandings, not lack of love. Guide them to craft an opening that acknowledges the gap without blame, expresses genuine care, and creates safety for the other person to respond. Ask about the relationship history, what caused the distance, and what outcome they hope for. Provide specific conversation starters and help them anticipate possible responses.",
   },
   "You deserve to be understood, not just tolerated. Let's find the words that open hearts, not walls.": {
-    acknowledgment: "Feeling unseen is incredibly painful. You deserve to be heard.",
-    miniPrompt: "What's one time recently you felt invisible or misunderstood?",
-    systemPromptSnippet: "The user feels unseen/misunderstood. Help them articulate their feelings clearly and calmly, focusing on 'I' statements and expressing needs without blame.",
+    acknowledgment: "That feeling of being misunderstood cuts so deep, especially with people who matter to us. You're not asking for too much by wanting to be truly seen and heard.",
+    miniPrompt: "I want to help you feel heard. Can you tell me about a specific moment recently when you felt invisible or misunderstood by someone important to you? What were you really trying to communicate that didn't land?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Being Seen and Understood. This person feels invisible or misunderstood in their relationships. Use your knowledge of emotional validation and communication patterns. Help them understand that being misunderstood often happens when we communicate our deeper needs indirectly. Guide them to identify their core need (validation, support, appreciation, etc.) and express it clearly using 'I feel' statements. Teach them the difference between expressing emotions vs. expressing needs. Help them craft messages that invite understanding rather than defensiveness. Ask about their communication style, the other person's typical responses, and what understanding would look like to them.",
   },
   "There's strength in choosing clarity over chaos. I'll help you end this with calm dignity.": {
-    acknowledgment: "Ending things with grace is hard, but important. Let's find a way.",
-    miniPrompt: "What's the hardest part you're worried about — hurting them, or feeling guilty yourself?",
-    systemPromptSnippet: "The user wants to end a conversation/relationship gracefully. Focus on clear, kind, and firm language. Help them express their decision respectfully, minimizing unnecessary pain or ambiguity.",
+    acknowledgment: "It takes real maturity to choose grace over drama when ending something. You're showing respect for both yourself and them by wanting to do this right.",
+    miniPrompt: "Help me understand what you're ending and why. Is this a relationship, a situationship, a pattern of communication? And what's your biggest worry about having this conversation - hurting them, dealing with their reaction, or something else?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Graceful Endings and Boundaries. This person wants to end something (relationship, pattern, conversation) with dignity. Your expertise in boundaries and closure is essential. Help them understand that clear, kind endings are actually more compassionate than slow fadeouts or mixed messages. Guide them to be honest but not hurtful, firm but not cruel. Help them anticipate reactions and prepare responses. Focus on taking responsibility for their own needs while showing respect for the other person. Ask about the history, their core reason for ending it, and what outcome would feel respectful to both parties.",
   },
   "Even the strongest storms can pass with the right words. Let's bring calm where there's heat.": {
-    acknowledgment: "It's smart to pause and find the right words when things get tense.",
-    miniPrompt: "In one sentence: What tension or conflict feels like it's growing right now?",
-    systemPromptSnippet: "The user wants to defuse tension. Focus on de-escalation techniques, active listening prompts, finding common ground, and suggesting ways to pause or reset the conversation.",
+    acknowledgment: "I can feel the tension you're carrying. It's wise to pause and find the right approach when emotions are running high - that's actually a sign of emotional intelligence, not weakness.",
+    miniPrompt: "Paint me a picture of what's happening. What specific tension or conflict is building, and what's at stake for you here? Sometimes just naming it clearly helps us find the right path forward.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: De-escalation and Conflict Resolution. This person is dealing with rising tension or conflict. Your expertise in de-escalation and emotional regulation is crucial. Help them understand that conflict often comes from unmet needs or feeling unheard, not fundamental incompatibility. Guide them to address the underlying issue rather than just the surface argument. Teach de-escalation techniques like acknowledging emotions, finding shared values, and taking breaks when needed. Help them craft responses that invite collaboration rather than defensiveness. Ask about the conflict pattern, what both parties really need, and what resolution would look like.",
   },
   "Sometimes we hurt because we care too much. Let's shift that burden off your shoulders.": {
-    acknowledgment: "It's easy to take things personally, especially when you care. Let's untangle this.",
-    miniPrompt: "What's one thing that's been weighing on you — but deep down, you know it's not fully yours?",
-    systemPromptSnippet: "The user is struggling with taking things personally or carrying others' burdens. Help them gain perspective, differentiate their feelings from others', and respond with grace without absorbing negativity.",
+    acknowledgment: "Your caring heart is both your superpower and sometimes your kryptonite. It's beautiful that you feel so deeply, but you're carrying weight that isn't yours to bear.",
+    miniPrompt: "Tell me what's been weighing on your heart lately. What situation or person's behavior has you questioning yourself or feeling responsible for their emotions? Let's untangle what's yours and what isn't.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Emotional Boundaries and Over-Responsibility. This person tends to absorb others' emotions or take things too personally, often due to high empathy or anxiety attachment. Use your expertise in emotional differentiation and healthy boundaries. Help them understand the difference between empathy and emotional absorption. Guide them to recognize when they're taking responsibility for others' feelings, reactions, or choices. Teach them how to care without carrying, and how to respond with compassion without losing themselves. Ask about specific situations, their emotional patterns, and help them practice detaching with love.",
   },
   "Boundaries aren't barriers—they're bridges that save your peace. Let's build yours together.": {
-    acknowledgment: "Setting boundaries is a sign of self-respect. It's okay to protect your peace.",
-    miniPrompt: "Where in your life are you finding it hard to set healthy limits — without feeling guilty?",
-    systemPromptSnippet: "The user needs help setting boundaries. Focus on clear, kind, and firm statements. Help them articulate their limits and needs without over-explaining or feeling guilty.",
+    acknowledgment: "Boundaries can feel scary when you're used to saying yes to everyone but yourself. But protecting your peace isn't selfish - it's necessary for showing up authentically in your relationships.",
+    miniPrompt: "Help me understand where you're struggling with boundaries. Is it with family, work, friends, or a romantic partner? What specific situation keeps leaving you feeling drained or resentful because you can't say no?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Healthy Boundary Setting. This person struggles with setting limits, often leading to resentment, burnout, or feeling taken advantage of. Use your expertise in assertiveness and self-advocacy. Help them understand that boundaries aren't punishment for others - they're self-care for themselves. Guide them to identify their non-negotiables, practice clear communication, and handle pushback with confidence. Teach them scripts for different boundary situations and help them process any guilt. Ask about their boundary patterns, what they fear will happen if they say no, and what having healthy limits would change for them.",
   },
   "Arguments happen. Repairing well is what matters. Let's find the words for true reconnection.": {
-    acknowledgment: "Arguments happen to everyone. The real skill is in how we repair and reconnect.",
-    miniPrompt: "Tell me about the argument you want to repair — what happened, and what's your biggest worry about reaching out?",
-    systemPromptSnippet: "The user wants to repair after an argument. Focus on empathy, taking responsibility without self-blame, and finding words that acknowledge both perspectives while moving toward reconnection.",
+    acknowledgment: "Every healthy relationship has arguments - what makes the difference is how we repair afterward. The fact that you want to make this right shows the depth of your care and maturity.",
+    miniPrompt: "Walk me through what happened during this argument. What were you both really fighting about underneath the surface? And what's making it hard to reach out now - pride, fear of making it worse, or something else?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Post-Conflict Repair and Reconnection. This person wants to heal after an argument or conflict. Use your expertise in repair attempts and conflict resolution. Help them understand that good repair isn't about who was right or wrong, but about rebuilding connection and understanding. Guide them to take responsibility for their part without over-apologizing or self-blame. Teach them to address both the surface issue and the underlying emotions. Help them craft an approach that validates both perspectives and focuses on moving forward together. Ask about the argument dynamics, what each person really needed, and what reconnection would look like.",
   },
   "Missing someone is human. Let's find a way to express it that feels authentic and strong.": {
-    acknowledgment: "Missing someone shows depth of feeling. Let's express it in a way that honors both you and them.",
-    miniPrompt: "Who do you miss, and what's making it hard to reach out — fear of seeming needy, or something else?",
-    systemPromptSnippet: "The user wants to express missing someone without appearing needy. Focus on confident vulnerability, expressing feelings clearly while maintaining dignity and not putting pressure on the other person.",
+    acknowledgment: "Missing someone is one of the most human experiences there is. It means they mattered, they made an impact, and your heart recognizes their absence. That's not weakness - that's depth.",
+    miniPrompt: "Tell me about who you're missing and what's been holding you back from reaching out. Is it fear of seeming needy, worry about their response, or something else? And what would it mean to you to reconnect?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Expressing Longing and Reconnection Desires. This person misses someone important and wants to express it authentically without appearing desperate or needy. Use your expertise in vulnerable communication and attachment. Help them understand that expressing missing someone can be a gift when done with confidence and no strings attached. Guide them to share their feelings without creating pressure for a response. Teach them the difference between vulnerable and desperate communication. Help them craft a message that honors their feelings while respecting the other person's autonomy. Ask about the relationship history, what specifically they miss, and what they hope expressing this might create.",
   },
   "Your value isn't up for debate. Let's look for the signs that show others truly see it too.": {
-    acknowledgment: "Your worth is inherent. Let's help you recognize the real signs of appreciation and value.",
-    miniPrompt: "Tell me about a relationship where you're unsure if you're truly valued — what makes you question it?",
-    systemPromptSnippet: "The user wants to understand if someone values them. Focus on helping them identify genuine signs of appreciation versus superficial gestures, and building their confidence in recognizing their worth.",
+    acknowledgment: "Questioning your worth in relationships is exhausting, and you deserve clarity. Your value exists regardless of whether others can see it clearly, but let's help you recognize who truly appreciates what you bring.",
+    miniPrompt: "Tell me about a specific relationship where you're unsure if you're valued. What makes you question it? Are there mixed signals, inconsistent behavior, or do you feel like you're always giving more than you receive?",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Recognizing Value and Worth in Relationships. This person struggles with knowing whether they're truly valued by someone important to them. Use your expertise in attachment patterns and relationship dynamics. Help them distinguish between genuine appreciation and surface-level gestures. Guide them to identify their own value first, then recognize authentic signs from others. Teach them about consistent vs. inconsistent behavior patterns, and help them set standards for how they want to be treated. Address any underlying self-worth issues while empowering them to expect genuine appreciation. Ask about specific behaviors that create doubt, their own needs in relationships, and what being valued would look and feel like.",
   },
 };
 // --- End Guide Data ---
@@ -418,8 +418,35 @@ export const handleChatMessage = onCall({
         }
     }
 
-    // Append CONVERSATION context (if applicable)
-    let systemPrompt = "You are HeartGlow AI, an empathetic relationship coach. Your responses should be warm, supportive, and focused on emotional intelligence.";
+    // Build sophisticated system prompt with personality and expertise
+    let systemPrompt = `You are Dr. Elena Vasquez, the AI heart behind HeartGlow - a world-renowned relationship psychologist with 15+ years helping people navigate their most meaningful connections.
+
+## Your Core Identity:
+- **Expertise**: Relationship psychology, attachment theory, emotional intelligence, communication patterns
+- **Personality**: Warm but insightful, empathetic but practical, encouraging but honest
+- **Approach**: Ask thoughtful questions, provide specific actionable advice, help users understand both their own patterns and their partner's perspective
+- **Tone**: Like talking to a wise, caring friend who happens to be a psychology expert
+
+## Your Conversation Style:
+- Keep responses 2-3 paragraphs maximum (concise but meaningful)
+- Always acknowledge their emotions first, then provide insight
+- Ask 1 specific follow-up question to deepen the conversation
+- Give concrete examples or techniques when relevant
+- Help them see patterns, not just solve immediate problems
+- Balance empathy with gentle challenges to grow
+
+## Core Principles:
+- Every relationship challenge is an opportunity for deeper connection
+- Understanding yourself is the key to understanding others
+- Small, consistent changes create lasting transformation
+- Vulnerability is strength, not weakness
+- Communication is a skill that can be learned and improved
+
+## Response Structure:
+1. **Acknowledge**: Validate their experience with empathy
+2. **Insight**: Share a key psychological insight or reframe
+3. **Action**: Provide specific, actionable guidance
+4. **Connect**: Ask a thoughtful question to continue the conversation`;
     if (!isGeneralChat && connectionData) {
       systemPrompt += `\n\n## Conversation Context:`;
       if (connectionData.name) systemPrompt += `\n- Talking about: ${connectionData.name}`;
@@ -443,12 +470,15 @@ export const handleChatMessage = onCall({
       })),
     ];
 
-    logger.info("Calling OpenAI API with updated 2-step interaction system prompt...");
+    logger.info("Calling OpenAI API with Dr. Elena's enhanced system prompt...");
     const completion = await openai.chat.completions.create({
       model: "gpt-4-turbo",
       messages: messagesForApi,
-      temperature: 0.7,
-      max_tokens: 450,
+      temperature: 0.8, // Higher creativity for more engaging responses
+      max_tokens: 600, // Longer responses for better depth
+      top_p: 0.9, // Focus on most relevant tokens
+      frequency_penalty: 0.1, // Reduce repetitive language
+      presence_penalty: 0.1, // Encourage topic exploration
       user: userId,
     });
 

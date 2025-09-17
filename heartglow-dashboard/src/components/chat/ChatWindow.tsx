@@ -295,14 +295,10 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   }, [messages.length]);
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Premium Background Elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.02)_0%,transparent_50%)] pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[conic-gradient(from_0deg_at_50%_50%,transparent_0deg,rgba(255,255,255,0.01)_180deg,transparent_360deg)] pointer-events-none"></div>
-      
-      {/* Refined ambient lighting */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-indigo-500/5 via-purple-500/3 to-pink-500/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute bottom-1/4 left-1/4 w-80 h-80 bg-gradient-to-tl from-violet-500/4 via-blue-500/5 to-cyan-500/4 rounded-full blur-3xl pointer-events-none"></div>
+    <div className="flex-1 flex flex-col h-full overflow-hidden relative bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+      {/* Premium Base Layer */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.05),transparent)] pointer-events-none"></div>
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_100%,rgba(147,51,234,0.03),transparent)] pointer-events-none"></div>
       
       {/* Premium Header */}
       <div className="sticky top-0 z-20 backdrop-blur-xl bg-slate-900/80 border-b border-white/10">
@@ -335,33 +331,86 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
 
       {/* --- Conditional Rendering: Empty State vs Message List --- */}
       {showPrompts ? (
-        // --- Premium Sophisticated Interface ---
-        <ScrollArea className="flex-1 flex flex-col items-center p-6 sm:p-12 lg:p-16 overflow-y-auto w-full relative">
-          {/* Subtle Premium Background */}
+        // --- World-Class Hero Interface ---
+        <ScrollArea className="flex-1 flex flex-col overflow-y-auto w-full relative">
+          {/* Stunning Background Composition */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            {/* Refined gradient orbs */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-indigo-500/8 via-purple-500/6 to-pink-500/8 rounded-full blur-3xl"></div>
-            <div className="absolute bottom-1/3 right-1/4 w-80 h-80 bg-gradient-to-tl from-violet-500/6 via-blue-500/8 to-cyan-500/6 rounded-full blur-3xl"></div>
+            {/* Premium gradient mesh */}
+            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-indigo-900/20 via-slate-900 to-purple-900/20"></div>
+            <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-bl from-violet-500/10 via-transparent to-transparent"></div>
+            <div className="absolute bottom-0 left-0 w-1/2 h-full bg-gradient-to-tr from-blue-500/8 via-transparent to-transparent"></div>
             
-            {/* Subtle geometric elements */}
-            <div className="absolute top-1/3 right-1/5 w-px h-32 bg-gradient-to-b from-transparent via-white/10 to-transparent"></div>
-            <div className="absolute bottom-1/3 left-1/5 w-px h-24 bg-gradient-to-b from-transparent via-white/8 to-transparent"></div>
+            {/* Sophisticated light rays */}
+            <div className="absolute top-1/4 left-1/2 w-[800px] h-[400px] bg-gradient-conic from-violet-500/5 via-purple-500/8 to-pink-500/5 rounded-full blur-3xl transform -translate-x-1/2 -translate-y-1/2"></div>
+            <div className="absolute bottom-1/3 right-1/3 w-[600px] h-[300px] bg-gradient-radial from-indigo-500/10 via-blue-500/5 to-transparent rounded-full blur-2xl"></div>
+            
+            {/* Elegant geometric grid */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,black_70%,transparent_110%)]"></div>
+            
+            {/* Floating elements */}
+            <div className="absolute top-1/6 right-1/4 w-2 h-2 bg-violet-400/40 rounded-full animate-pulse"></div>
+            <div className="absolute top-1/3 left-1/5 w-1 h-1 bg-blue-400/30 rounded-full animate-pulse delay-1000"></div>
+            <div className="absolute bottom-1/4 right-1/5 w-1.5 h-1.5 bg-purple-400/35 rounded-full animate-pulse delay-500"></div>
           </div>
 
-          <div className="w-full max-w-7xl mx-auto relative z-10">
-            {/* Refined Header Section */}
-            <div className="text-center mb-16">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-[1.1] mb-6 tracking-tight">
-                Find the Right Words
-                <span className="block text-3xl sm:text-4xl lg:text-5xl font-light text-white/70 mt-2">
-                  for Every Moment
-                </span>
-              </h1>
-              <p className="text-xl text-white/60 max-w-2xl mx-auto leading-relaxed font-light">
-                Transform difficult conversations into meaningful connections with AI-powered guidance.
-              </p>
+          {/* Hero Section */}
+          <div className="relative z-10 pt-16 sm:pt-24 lg:pt-32 pb-12 px-6 sm:px-12 lg:px-16">
+            <div className="max-w-6xl mx-auto">
+              {/* Premium Badge */}
+              <div className="flex justify-center mb-8">
+                <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-violet-500/20 to-purple-500/20 border border-violet-400/30 backdrop-blur-sm">
+                  <div className="w-2 h-2 bg-violet-400 rounded-full mr-2 animate-pulse"></div>
+                  <span className="text-sm font-medium text-violet-200">AI-Powered Relationship Intelligence</span>
+                </div>
+              </div>
+
+              {/* Hero Headlines */}
+              <div className="text-center mb-12">
+                <h1 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-bold text-white leading-[0.9] mb-8 tracking-tight">
+                  Find the
+                  <span className="block bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                    Perfect Words
+                  </span>
+                  <span className="block text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-normal text-white/80 mt-4">
+                    for Any Moment
+                  </span>
+                </h1>
+                
+                <p className="text-xl sm:text-2xl text-white/70 max-w-3xl mx-auto leading-relaxed font-light mb-8">
+                  Transform difficult conversations into meaningful connections. Get personalized guidance for every relationship challenge.
+                </p>
+
+                {/* Social Proof */}
+                <div className="flex items-center justify-center space-x-6 text-white/50 text-sm">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex -space-x-1">
+                      <div className="w-6 h-6 bg-gradient-to-br from-violet-400 to-purple-500 rounded-full border-2 border-slate-900"></div>
+                      <div className="w-6 h-6 bg-gradient-to-br from-blue-400 to-indigo-500 rounded-full border-2 border-slate-900"></div>
+                      <div className="w-6 h-6 bg-gradient-to-br from-pink-400 to-rose-500 rounded-full border-2 border-slate-900"></div>
+                    </div>
+                    <span>Trusted by thousands</span>
+                  </div>
+                  <div className="w-px h-4 bg-white/20"></div>
+                  <div>⭐ 4.9/5 rating</div>
+                  <div className="w-px h-4 bg-white/20"></div>
+                  <div>🔒 Private & secure</div>
+                </div>
+              </div>
             </div>
-            
+          </div>
+
+          <div className="relative z-10 px-6 sm:px-12 lg:px-16 pb-24">
+            <div className="max-w-7xl mx-auto">
+              {/* Section Header */}
+              <div className="text-center mb-16">
+                <h2 className="text-2xl sm:text-3xl font-semibold text-white/95 mb-4">
+                  Choose Your Conversation Guide
+                </h2>
+                <p className="text-lg text-white/60 max-w-2xl mx-auto">
+                  Select a personalized guide below, or start a conversation to get instant help.
+                </p>
+            </div>
+
             {/* Premium Guide Cards */}
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-24">
               {guideButtons.map((guide, index) => {
@@ -379,19 +428,19 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
                     {/* Badge System */}
                     <div className="flex justify-between items-start mb-6">
                       <div>
-                        {guide.tag === 'new' && (
+                    {guide.tag === 'new' && (
                           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                            New
-                          </span>
-                        )}
+                        New
+                      </span>
+                    )}
                       </div>
                       <div>
-                        {guide.tag === 'top-choice' && (
+                    {guide.tag === 'top-choice' && (
                            <div className="inline-flex items-center px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 space-x-1.5"> 
                              <Star className="w-3 h-3 text-amber-300 fill-amber-300" /> 
                              <span className="text-xs font-medium">Popular</span>
-                           </div>
-                        )}
+                       </div>
+                    )}
                       </div>
                     </div>
                     
@@ -414,11 +463,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
               })}
             </div>
 
-            {/* Elegant Call to Action */}
-            <div className="text-center">
-              <p className="text-lg text-white/50 font-light">
-                Choose a guide above or start typing below to begin
-              </p>
+              {/* Sophisticated Call-to-Action */}
+              <div className="text-center pt-8">
+                <div className="relative inline-block">
+                  <div className="absolute inset-0 bg-gradient-to-r from-violet-500/20 to-purple-500/20 blur-xl rounded-full"></div>
+                  <div className="relative px-8 py-4 rounded-full bg-gradient-to-r from-slate-800/60 to-slate-700/60 backdrop-blur-xl border border-white/10">
+                    <p className="text-lg text-white/80 font-medium">
+                      Ready to transform your conversations?
+                    </p>
+                    <p className="text-sm text-white/50 mt-1">
+                      Choose a guide above or start typing below
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <ScrollBar orientation="vertical" />

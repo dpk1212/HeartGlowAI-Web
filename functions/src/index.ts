@@ -362,6 +362,7 @@ export const handleChatMessage = onCall({
     throw new HttpsError("unauthenticated", "The function must be called while authenticated.");
   }
   const userId = request.auth.uid;
+  const isAnonymous = request.auth.token.firebase?.sign_in_provider === 'anonymous';
   const {connectionId, messageText} = request.data;
 
   if (!messageText || typeof messageText !== "string" || messageText.trim().length === 0) {
@@ -375,6 +376,44 @@ export const handleChatMessage = onCall({
   const userMessageRef = isGeneralChat ?
     firestore.collection("users").doc(userId).collection("messages") :
     firestore.collection("users").doc(userId).collection("connections").doc(connectionId!).collection("messages");
+
+  // --- USAGE LIMITS FOR ANONYMOUS USERS ---
+  if (isAnonymous) {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+    const usageRef = firestore.collection("users").doc(userId).collection("usage").doc(today);
+    const usageSnap = await usageRef.get();
+    const usageData = usageSnap.exists ? usageSnap.data() || {} : { messageCount: 0, guideCount: 0 };
+    
+    // Check if message matches a guide
+    const isGuideMessage = !!guideData[trimmedMessage];
+    
+    if (isGuideMessage && (usageData.guideCount || 0) >= 1) {
+      logger.warn(`Anonymous user ${userId} exceeded guide limit for ${today}`);
+      throw new HttpsError("resource-exhausted", "You've used your free guide for today. Create an account to get unlimited access!");
+    }
+    
+    if (!isGuideMessage && (usageData.messageCount || 0) >= 5) {
+      logger.warn(`Anonymous user ${userId} exceeded message limit for ${today}`);
+      throw new HttpsError("resource-exhausted", "You've used your 5 free messages for today. Create an account to get unlimited access!");
+    }
+    
+    // Update usage count
+    if (isGuideMessage) {
+      await usageRef.set({ 
+        ...usageData, 
+        guideCount: (usageData.guideCount || 0) + 1,
+        lastUsed: FieldValue.serverTimestamp()
+      }, { merge: true });
+      logger.info(`Updated guide usage for anonymous user ${userId}: ${(usageData.guideCount || 0) + 1}/1`);
+    } else {
+      await usageRef.set({ 
+        ...usageData, 
+        messageCount: (usageData.messageCount || 0) + 1,
+        lastUsed: FieldValue.serverTimestamp()
+      }, { merge: true });
+      logger.info(`Updated message usage for anonymous user ${userId}: ${(usageData.messageCount || 0) + 1}/5`);
+    }
+  }
 
   // --- Step 1: Check if message matches a Guide's firstLine ---
   const matchedGuide = guideData[trimmedMessage];

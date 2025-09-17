@@ -164,7 +164,7 @@ const guideData: Record<string, GuideInfo> = {
   "How do I plan the perfect romantic surprise on any budget?": {
     acknowledgment: "The most romantic gestures aren't about money - they're about thoughtfulness, effort, and showing that you truly know and care about someone. Your heart is in the right place.",
     miniPrompt: "What's your budget range, and what does your partner love most - experiences, personal touches, quality time, or thoughtful gifts? Also, what's the occasion? I'll create something they'll never forget.",
-    systemPromptSnippet: "SPECIALIZED FOCUS: Budget-Friendly Romantic Surprises. This person wants meaningful gestures that show effort over expense. Provide tiered surprise ideas: 1) Free/Low-cost ($0-25): Handwritten letter treasure hunt, picnic in a special spot, recreating your first date, playlist with personal meanings 2) Moderate ($25-100): Custom photo book, subscription box for their hobby, experience day 3) Higher-end ($100+): Weekend getaway, professional couple's photoshoot. For each tier, explain the psychological impact and provide step-by-step execution. Teach them that great surprises are: personal (show you know them), effort-based (show you care), and memorable (create lasting positive associations). Include tips for execution, timing, and handling their reaction.",
+    systemPromptSnippet: "SPECIALIZED FOCUS: Quick, Actionable Romantic Surprise Ideas. Format as a SHORT bulleted list by budget tier. Keep each suggestion to 1 line with brief explanation. Use this EXACT format: **Budget Tier ($X-$Y):** • Idea 1 - why it works • Idea 2 - why it works. Maximum 4 sentences total for the entire response. Focus on immediate actionable ideas they can execute this week. NO long explanations, NO psychology lectures - just practical surprise ideas they can copy-paste into action.",
   },
 };
 // --- End Guide Data ---
@@ -392,9 +392,17 @@ export const revealBubbleContent = onCall({
     
     let contentPrompt = "";
     if (bubbleType === "insights") {
-      contentPrompt = `Based on the guide "${guideContext}", provide detailed psychological insights about why the solution works. Explain the relationship dynamics, communication principles, and psychology behind the advice. Keep it engaging and educational. 2-3 paragraphs max.`;
+      contentPrompt = `Based on the guide "${guideContext}", provide 2-3 SHORT psychological insights about why this works. Use bullet points. Keep each insight to 1-2 sentences. Focus on the "aha moments" that make people think "that makes so much sense!" Maximum 100 words total. Example format:
+      
+• **Insight 1:** Brief explanation
+• **Insight 2:** Brief explanation  
+• **Insight 3:** Brief explanation`;
     } else if (bubbleType === "actions") {
-      contentPrompt = `Based on the guide "${guideContext}", provide a clear action plan with 3-4 specific next steps they can take. Include timing, context, and implementation details. Make it practical and actionable. 2-3 paragraphs max.`;
+      contentPrompt = `Based on the guide "${guideContext}", provide 3 SPECIFIC next steps they can take immediately. Use numbered list. Each step should be 1 sentence with clear action. Maximum 75 words total. Example format:
+
+1. **Do this first:** Specific action
+2. **Then do this:** Specific action
+3. **Finally:** Specific action`;
     }
     
     const completion = await openai.chat.completions.create({
@@ -640,15 +648,22 @@ Your primary goal is to give people specific, copy-paste solutions they can use 
 - Provide exact words and phrases people can actually say
 
 ## Response Structure:
-For guide responses, deliver ONLY the core value message. DO NOT include any "click to reveal" text in your response - the system automatically creates interactive bubbles.
+Deliver responses that are SCANNABLE, ACTIONABLE, and MOBILE-OPTIMIZED.
 
-**Your Response Should Contain:**
-- The main solution (exact texts, strategies, actions) 
-- Keep it focused and actionable
-- Include your follow-up prompts at the end
-- DO NOT mention clicking to reveal anything - this is handled automatically
+**CORE RESPONSE FORMAT:**
+- **Maximum 3-4 sentences** for the main solution
+- **Bullet points or numbered lists** for multiple items
+- **Bold key phrases** for easy scanning
+- **NO walls of text** - break everything up
+- **Focus on IMMEDIATE value** they can use right now
 
-The system will automatically add interactive bubbles after your response for deeper insights and action plans.
+**MOBILE-FIRST FORMATTING:**
+- Short paragraphs (2-3 lines max)
+- Clear section breaks
+- Scannable layout
+- Quick, punchy insights
+
+The system automatically creates interactive bubbles for deeper content - keep your main response SHORT and ACTIONABLE.
 
 ## MANDATORY: ALWAYS END WITH FOLLOW-UP PROMPTS
 After delivering your core response, ALWAYS end with 2-3 specific follow-up prompts to keep the user engaged. Format as:

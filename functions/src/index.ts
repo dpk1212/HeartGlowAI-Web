@@ -364,6 +364,9 @@ export const handleChatMessage = onCall({
   const userId = request.auth.uid;
   const isAnonymous = request.auth.token.firebase?.sign_in_provider === 'anonymous';
   const {connectionId, messageText} = request.data;
+  
+  // Debug logging for anonymous detection
+  logger.info(`handleChatMessage - userId: ${userId}, isAnonymous: ${isAnonymous}, sign_in_provider: ${request.auth.token.firebase?.sign_in_provider}, auth_time: ${request.auth.token.auth_time}`);
 
   if (!messageText || typeof messageText !== "string" || messageText.trim().length === 0) {
     logger.error("Invalid messageText received.", {userId, connectionId});
@@ -378,7 +381,14 @@ export const handleChatMessage = onCall({
     firestore.collection("users").doc(userId).collection("connections").doc(connectionId!).collection("messages");
 
   // --- USAGE LIMITS FOR ANONYMOUS USERS ---
-  if (isAnonymous) {
+  // Check multiple ways to detect anonymous users
+  const isAnonymousAlt = request.auth.token.firebase?.identities === undefined || 
+                        Object.keys(request.auth.token.firebase?.identities || {}).length === 0;
+  const shouldApplyLimits = isAnonymous || isAnonymousAlt;
+  
+  logger.info(`Usage limit check - isAnonymous: ${isAnonymous}, isAnonymousAlt: ${isAnonymousAlt}, shouldApplyLimits: ${shouldApplyLimits}`);
+  
+  if (shouldApplyLimits) {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
     const usageRef = firestore.collection("users").doc(userId).collection("usage").doc(today);
     const usageSnap = await usageRef.get();
@@ -391,6 +401,8 @@ export const handleChatMessage = onCall({
       logger.warn(`Anonymous user ${userId} exceeded guide limit for ${today}`);
       throw new HttpsError("resource-exhausted", "You've used your free guide for today. Create an account to get unlimited access!");
     }
+    
+    logger.info(`Message limit check - isGuideMessage: ${isGuideMessage}, messageCount: ${usageData.messageCount || 0}, limit check: ${(usageData.messageCount || 0) >= 5}`);
     
     if (!isGuideMessage && (usageData.messageCount || 0) >= 5) {
       logger.warn(`Anonymous user ${userId} exceeded message limit for ${today}`);
@@ -413,6 +425,8 @@ export const handleChatMessage = onCall({
       }, { merge: true });
       logger.info(`Updated message usage for anonymous user ${userId}: ${(usageData.messageCount || 0) + 1}/5`);
     }
+  } else {
+    logger.info(`Skipping usage limits for authenticated user ${userId}`);
   }
 
   // --- Step 1: Check if message matches a Guide's firstLine ---

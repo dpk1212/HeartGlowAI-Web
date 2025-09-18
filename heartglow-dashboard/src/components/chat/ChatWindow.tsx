@@ -407,9 +407,20 @@ const ChatWindow: React.FC<ChatWindowProps> = ({
   // Handle transition completion
   const handleTransitionComplete = () => {
     setShowGuideTransition(false);
-    onSelectConnection('heartglow-ai');
-    onStartGuide(pendingGuideText); // Only trigger AI response
-    guideClickedRef.current = true;
+    
+    // Ensure we switch to chat mode first
+    setShowPrompts(false);
+    
+    // Then trigger the guide
+    setTimeout(() => {
+      onSelectConnection('heartglow-ai');
+      onStartGuide(pendingGuideText);
+      guideClickedRef.current = true;
+      
+      // Reset transition state
+      setTransitionGuideTitle('');
+      setPendingGuideText('');
+    }, 100);
   };
   // --- END REVISED handleGuideClick ---
 
